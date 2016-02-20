@@ -23,6 +23,7 @@
 
 #include <string>
 #include "OPSObject.h"
+#include "Reservable.h"
 #include "ArchiverInOut.h"
 
 namespace ops

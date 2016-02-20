@@ -22,7 +22,7 @@
 
 namespace ops
 {
-	OPSObject::OPSObject() : /*Reservable(),*/ Serializable()
+	OPSObject::OPSObject() : Serializable()
     {
         key = "k";
 		typesString = "";
@@ -30,7 +30,6 @@ namespace ops
     }
 	OPSObject* OPSObject::clone()
 	{
-		//Does nothing.
 		OPSObject* obj = new OPSObject();
 		fillClone(obj);
 		return obj;
@@ -40,11 +39,6 @@ namespace ops
 		obj->key = key;
 		obj->typesString = typesString;
 	}
-    /*
-    std::string OPSObject::getPublisherName()
-    {
-        return publisherName;
-    }*/
     std::string OPSObject::getKey()
     {
          return key;
@@ -63,16 +57,6 @@ namespace ops
 		archive->inout(std::string("key"), key);
 	}
 	
-
-    //int OPSObject::getPublicationID()
-    //{
-    //    return publicationID;
-    //}
-    //char OPSObject::getPublicationPriority()
-    //{
-    //    return publicationPriority;
-    //}
-    //
     OPSObject::~OPSObject()
     {
     }

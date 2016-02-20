@@ -24,7 +24,6 @@
 #include <string>
 #include "Serializable.h"
 #include "ArchiverInOut.h"
-#include "Reservable.h"
 
 
 namespace ops
@@ -32,7 +31,7 @@ namespace ops
     
     ///Base class for object that can be serialized with OPSArchivers
 	///LA Moved inheritance of Reservable to OPSMessage
-	class OPSObject :  /*public Reservable,*/ public Serializable
+	class OPSObject :  public Serializable
     {
         
         friend class ByteBuffer;
@@ -41,10 +40,7 @@ namespace ops
         
     protected:
         //Should only be set by the Publisher at publication time and by ByteBuffer at deserialization time.
-        //std::string publisherName;
         std::string key;
-        //int publicationID;
-        //char publicationPriority;
         std::string typesString;
 
 		void appendType(const std::string& type)
@@ -52,12 +48,9 @@ namespace ops
 			typesString = type + " " + typesString;
 		}
     public:
-        //std::string getPublisherName();
         std::string getKey();
 		const std::string& getTypeString();
 		void setKey(std::string k);
-        //int getPublicationID();
-        //char getPublicationPriority();
 		virtual void serialize(ArchiverInOut* archive);
 
 		///Bytes that hold unserialized data for this object.

@@ -24,6 +24,7 @@
 #include "ByteBuffer.h"
 #include "Serializable.h"
 #include "ArchiverInOut.h"
+#include "OPSTypeDefs.h"
 #include <vector>
 
 namespace ops
@@ -45,6 +46,7 @@ namespace ops
 
         void inout(const std::string& name, bool& value)
         {
+            UNUSED(name)
             char ch = 0;
             value ? ch = 1 : ch = 0;
             buf->WriteChar(ch);
@@ -52,48 +54,57 @@ namespace ops
 
         void inout(const std::string& name, char& value)
         {
+            UNUSED(name)
             buf->WriteChar(value);
         }
 
         void inout(const std::string& name, int& value)
         {
+            UNUSED(name)
             buf->WriteInt(value);
         }
 
         void inout(const std::string& name, __int16& value)
         {
+            UNUSED(name)
             buf->WriteShort(value);
         }
 
         void inout(const std::string& name, __int64& value)
         {
+            UNUSED(name)
             buf->WriteLong(value);
         }
 
         void inout(const std::string& name, float& value)
         {
+            UNUSED(name)
             buf->WriteFloat(value);
         }
 
         void inout(const std::string& name, double& value)
         {
+            UNUSED(name)
             buf->WriteDouble(value);
         }
 
         void inout(const std::string& name, std::string& value)
         {
+            UNUSED(name)
             buf->WriteString(value);
         }
 
 ///LA
 		void inout(const std::string& name, char* buffer, int bufferSize)
 		{
+            UNUSED(name)
 			buf->WriteChars(buffer, bufferSize);
 		}
 ///LA
 
         void inout(const std::string& name, Serializable& value)
         {
+            UNUSED(name)
             std::string typeS = ((OPSObject&) value).getTypeString();
             buf->WriteString(typeS);
             value.serialize(this);
@@ -101,6 +112,9 @@ namespace ops
 
         Serializable* inout(const std::string& name, Serializable* value, int element)
         {
+            UNUSED(name)
+            UNUSED(value)
+            UNUSED(element)
             std::string typeS = ((OPSObject*) value)->getTypeString();
             buf->WriteString(typeS);
             value->serialize(this);
@@ -109,6 +123,7 @@ namespace ops
 
         Serializable* inout(const std::string& name, Serializable* value)
         {
+            UNUSED(name)
             std::string typeS = ((OPSObject*) value)->getTypeString();
             buf->WriteString(typeS);
             value->serialize(this);
@@ -117,54 +132,57 @@ namespace ops
 
         void inout(const std::string& name, std::vector<bool>& value)
         {
+            UNUSED(name)
             buf->WriteBooleans(value);
-
         }
 
         void inout(const std::string& name, std::vector<char>& value)
         {
+            UNUSED(name)
             buf->WriteBytes(value);
-
         }
 
         void inout(const std::string& name, std::vector<int>& value)
         {
+            UNUSED(name)
+            UNUSED(value)
             buf->WriteInts(value);
-
         }
 
         void inout(const std::string& name, std::vector<__int16>& value)
         {
             //Not implemented
-
+            UNUSED(name)
+            UNUSED(value)
         }
 
         void inout(const std::string& name, std::vector<__int64>& value)
         {
+            UNUSED(name)
             buf->WriteLongs(value);
-
         }
 
         void inout(const std::string& name, std::vector<float>& value)
         {
+            UNUSED(name)
             buf->WriteFloats(value);
-
         }
 
         void inout(const std::string& name, std::vector<double>& value)
         {
+            UNUSED(name)
             buf->WriteDoubles(value);
-
         }
 
         void inout(const std::string& name, std::vector<std::string>& value)
         {
+            UNUSED(name)
             buf->WriteStrings(value);
-
         }
 
         int beginList(const std::string& name, int size)
         {
+            UNUSED(name)
             buf->WriteInt(size);
             return size;
         }
@@ -172,6 +190,7 @@ namespace ops
         void endList(const std::string& name)
         {
             //Nothing to do in this implementation
+            UNUSED(name)
         }
     private:
         ByteBuffer* buf;
