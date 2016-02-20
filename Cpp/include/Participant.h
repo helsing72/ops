@@ -70,6 +70,7 @@ namespace ops
 		ops::Topic createParticipantInfoTopic();
 
 		//Add a SerializableFactory which has support for data types (i.e. OPSObject derivatives you want this Participant to understand)
+		//Takes over ownership of the object and it will be deleted with the participant
 		void addTypeSupport(ops::SerializableFactory* typeSupport);
 
 		//Create a From the ops config. See config below.
