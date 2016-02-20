@@ -13,6 +13,8 @@
 //#define USE_C11           // Enables use of std::mutex, std::thread in some places
                             // instead of boost or WIN32/Linux specific calls
 
+//#define OPSSLIM_NORESERVE // Removes Reservable from OPSMessage
+
 // Macro used to remove compiler warnings about non used variables/parameters
 #define UNUSED(expr) (void)(expr);
 

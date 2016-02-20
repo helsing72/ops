@@ -22,25 +22,35 @@
 #define OPSMessageH
 
 #include <string>
+
+#include "OPSTypeDefs.h"
 #include "OPSObject.h"
-#include "Reservable.h"
+#ifndef OPSSLIM_NORESERVE
+  #include "Reservable.h"
+#endif
 #include "ArchiverInOut.h"
 
 namespace ops
 {
 
-    class OPSMessage : public OPSObject, public Reservable
+    class OPSMessage : public OPSObject
+#ifndef OPSSLIM_NORESERVE
+	, public Reservable
+#endif
     {
     public:
 
-        OPSMessage() : Reservable(),
+        OPSMessage() : 
+#ifndef OPSSLIM_NORESERVE
+        Reservable(),
+#endif
         messageType(0),
         endianness(0),
         publisherPriority(),
+        dataOwner(true),
         sourcePort(0),
         qosMask(0),
-        publicationID(0),
-        dataOwner(true)
+        publicationID(0)
         {
             std::string typeName("ops.protocol.OPSMessage");
             OPSObject::appendType(typeName);
@@ -68,9 +78,9 @@ namespace ops
         }
 
     private:
-        char messageType;			// Serialized
-        char endianness;
-        char publisherPriority;		// Serialized
+        char messageType;			// Serialized (not used, always 0)
+        char endianness;			//            (not used)
+        char publisherPriority;		// Serialized (not used, always 0)
         bool dataOwner;
         int sourcePort;
 		std::string sourceIP;
@@ -78,8 +88,8 @@ namespace ops
         __int64 publicationID;		// Serialized
         std::string publisherName;	// Serialized
         std::string topicName;		// Serialized
-        std::string topLevelKey;	// Serialized
-        std::string address;		// Serialized
+        std::string topLevelKey;	// Serialized (not used, empty string)
+        std::string address;		// Serialized (not used, empty string)
         OPSObject* data;			// Serialized
 
     public:
