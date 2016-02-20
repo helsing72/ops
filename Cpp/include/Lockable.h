@@ -21,12 +21,16 @@
 #ifndef ops_LockableH
 #define ops_LockableH
 
+#include "OPSTypeDefs.h"
 
+#ifdef USE_C11
+  #include <mutex>
+#else
 namespace boost
 {
-    ///LA class mutex;
     class recursive_mutex;
 }
+#endif
 
 namespace ops
 {
@@ -40,8 +44,11 @@ class Lockable
 
 private:
 
-	///LA boost::mutex* mutex;
+#ifdef USE_C11
+	std::recursive_mutex* mutex;
+#else
 	boost::recursive_mutex* mutex;
+#endif
 
 public:
 

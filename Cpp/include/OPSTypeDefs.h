@@ -8,6 +8,11 @@
 #ifndef _OPSTYPEDEFS_H
 #define _OPSTYPEDEFS_H
 
+//
+// Some OPS configurations
+//#define USE_C11           // Enables use of std::mutex, std::thread in some places
+                            // instead of boost or WIN32/Linux specific calls
+
 // Macro used to remove compiler warnings about non used variables/parameters
 #define UNUSED(expr) (void)(expr);
 

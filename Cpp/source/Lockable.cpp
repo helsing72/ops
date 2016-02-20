@@ -1,26 +1,38 @@
+
 #include "OPSTypeDefs.h"
-///LA #include <boost/thread/mutex.hpp>
-#include <boost/thread/recursive_mutex.hpp>
+#ifndef USE_C11
+  #include <boost/thread/recursive_mutex.hpp>
+#endif
 #include "Lockable.h"
+
 namespace ops
 {
 
     Lockable::Lockable()
     {
-        ///LA mutex = new boost::mutex();
+#ifdef USE_C11
+        mutex = new std::recursive_mutex();
+#else
         mutex = new boost::recursive_mutex();
+#endif
     }
 
     Lockable::Lockable(const Lockable& l)
     {
-        ///LA mutex = new boost::mutex();
+#ifdef USE_C11
+        mutex = new std::recursive_mutex();
+#else
         mutex = new boost::recursive_mutex();
+#endif
     }
 
     Lockable & Lockable::operator =(const Lockable& l)
     {
-        ///LA mutex = new boost::mutex();
+#ifdef USE_C11
+        mutex = new std::recursive_mutex();
+#else
         mutex = new boost::recursive_mutex();
+#endif
         return *this;
     }
 
@@ -32,13 +44,8 @@ namespace ops
 
     bool Lockable::lock()
     {
-		mutex->lock();
-		return true;
-        /*if (mutex->lock())
-        {
-            return true;
-        }
-        return false;*/
+        mutex->lock();
+        return true;
     }
 
     void Lockable::unlock()
