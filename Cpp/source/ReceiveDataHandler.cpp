@@ -17,8 +17,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <sstream>
 #include "OPSTypeDefs.h"
 #include "ReceiveDataHandler.h"
+#include "OPSArchiverIn.h"
 #include "BasicError.h" 
 #include "Domain.h"
 #include "Participant.h"
@@ -29,11 +31,11 @@ namespace ops
     ///Constructor.
 
     ReceiveDataHandler::ReceiveDataHandler(Topic top, Participant* part) :
-    expectedSegment(0),
-	sampleMaxSize(top.getSampleMaxSize()),
     memMap(top.getSampleMaxSize() / OPSConstants::PACKET_MAX_SIZE + 1, OPSConstants::PACKET_MAX_SIZE),
-    firstReceived(false),
-    currentMessageSize(0)
+	sampleMaxSize(top.getSampleMaxSize()),
+    currentMessageSize(0),
+    expectedSegment(0),
+    firstReceived(false)
     {
         message = NULL;
         participant = part;
@@ -77,9 +79,17 @@ namespace ops
 		if (getNrOfListeners() == 0) receiver->stop();
 	}
 
+	void ReportError(Participant* participant, std::string message, std::string addr, int port)
+	{
+		std::ostringstream errPort;
+		errPort << port;
+		message += " [" + addr + "::" + errPort.str() + "]";
+		BasicError err("ReceiveDataHandler", "onNewEvent", message);
+		participant->reportError(&err);
+	}
+
     ///Override from Listener
     ///Called whenever the receiver has new data.
-
     void ReceiveDataHandler::onNewEvent(Notifier<BytesSizePair>* sender, BytesSizePair byteSizePair)
     {
         if (byteSizePair.size <= 0)
@@ -122,8 +132,7 @@ namespace ops
 
             if (currentFragment != (nrOfFragments - 1) && byteSizePair.size != OPSConstants::PACKET_MAX_SIZE)
             {
-                BasicError err("ReceiveDataHandler", "onNewEvent", "Debug: Received broken package.");
-                participant->reportError(&err);
+				ReportError(participant, "Debug: Received broken package.", addr, port);
             }
 
             currentMessageSize += byteSizePair.size; // - tBuf.GetSize();
@@ -132,8 +141,7 @@ namespace ops
             {//For testing only...
                 if (firstReceived)
                 {
-                    BasicError err("ReceiveDataHandler", "onNewEvent", "Segment Error, sample will be lost.");
-                    participant->reportError(&err);
+					ReportError(participant, "Segment Error, sample will be lost.", addr, port);
                     firstReceived = false;
                 }
                 expectedSegment = 0;
@@ -151,7 +159,8 @@ namespace ops
                 buf.checkProtocol();
                 int i1 = buf.ReadInt();
                 int i2 = buf.ReadInt();
-
+                UNUSED(i1)
+                UNUSED(i2)
                 int segmentPaddingSize = buf.GetSize();
 
                 //Read of the actual OPSMessage
@@ -185,8 +194,7 @@ namespace ops
 					}
 					else
 					{
-	                    BasicError err("ReceiveDataHandler", "onNewEvent", "Failed to deserialize message. Check added Factories.");
-		                participant->reportError(&err);
+						ReportError(participant, "Failed to deserialize message. Check added Factories.", addr, port);
 						delete message;
 	                    message = oldMessage;
 					}
@@ -194,8 +202,7 @@ namespace ops
                 else
                 {
                     //Inform participant that invalid data is on the network.
-                    BasicError err("ReceiveDataHandler", "onNewEvent", "Unexpected type received. Type creation failed.");
-                    participant->reportError(&err);
+					ReportError(participant, "Unexpected type received. Type creation failed.", addr, port);
                     message = oldMessage;
                 }
             }
@@ -204,8 +211,7 @@ namespace ops
                 expectedSegment++;
 
 				if (expectedSegment >= memMap.getNrOfSegments()) {
-					BasicError err("ReceiveDataHandler", "onNewEvent", "Buffer too small for received message.");
-					participant->reportError(&err);
+					ReportError(participant, "Buffer too small for received message.", addr, port);
 					expectedSegment = 0;
 					currentMessageSize = 0;
 				}
@@ -216,8 +222,7 @@ namespace ops
         else
         {
             //Inform participant that invalid data is on the network.
-            BasicError err("ReceiveDataHandler", "onNewEvent", "Protocol ERROR.");
-            participant->reportError(&err);
+			ReportError(participant, "Protocol ERROR.", addr, port);
             receiver->asynchWait(memMap.getSegment(expectedSegment), memMap.getSegmentSize());
         }
 

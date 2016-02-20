@@ -25,7 +25,6 @@
 #include <map>
 #include "Topic.h"
 #include "ByteBuffer.h"
-#include "OPSArchiverIn.h"
 #include "OPSConstants.h"
 #include "Receiver.h"
 #include "OPSMessage.h"
