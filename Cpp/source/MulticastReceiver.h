@@ -41,8 +41,8 @@ namespace ops
 	{
 	public:
 		MulticastReceiver(std::string mcAddress, int bindPort, IOService* ioServ, std::string localInterface = "0.0.0.0", __int64 inSocketBufferSizent = 16000000): 
-		  max_length(65535), m_asyncCallActive(false), m_working(false),
-		  cancelled(false), localEndpoint(NULL), sock(NULL)
+		  sock(NULL), localEndpoint(NULL), max_length(65535), 
+		  cancelled(false), m_asyncCallActive(false), m_working(false)
 		{
 			ipaddress = mcAddress;
 			this->localInterface = localInterface;

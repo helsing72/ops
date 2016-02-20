@@ -43,8 +43,8 @@ namespace ops
     public:
 
         TCPClient(std::string serverIP, int serverPort, IOService* ioServ, __int64 inSocketBufferSizent = 16000000) : 
-			connected(false), tryToConnect(false), accumulatedSize(0),
-			endpoint(NULL), sock(NULL),
+			sock(NULL), endpoint(NULL), connected(false), 
+			tryToConnect(false), accumulatedSize(0),
 			m_asyncCallActive(false), m_working(false)
         {
             boost::asio::io_service* ioService = ((BoostIOServiceImpl*) ioServ)->boostIOService; //((BoostIOServiceImpl*)Participant::getIOService())->boostIOService;

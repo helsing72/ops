@@ -18,8 +18,8 @@ namespace ops
 		sampleMaxSize(OPSConstants::PACKET_MAX_SIZE),
 		deadline(OPSConstants::MAX_DEADLINE_TIMEOUT),
 		minSeparation(0),
-		inSocketBufferSize(-1),
-		outSocketBufferSize(-1)
+		outSocketBufferSize(-1),
+		inSocketBufferSize(-1)
 	{
 		appendType(std::string("Topic"));
 
@@ -34,8 +34,8 @@ namespace ops
 		sampleMaxSize(OPSConstants::PACKET_MAX_SIZE),
 		deadline(OPSConstants::MAX_DEADLINE_TIMEOUT),
 		minSeparation(0),
-		inSocketBufferSize(-1),
-		outSocketBufferSize(-1)
+		outSocketBufferSize(-1),
+		inSocketBufferSize(-1)
 	{
 		appendType(std::string("Topic"));
 

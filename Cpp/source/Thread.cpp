@@ -22,7 +22,7 @@
 #include <boost/thread.hpp>
 namespace ops
 {
-    Thread::Thread() : thread(NULL), threadRunning(false)
+    Thread::Thread() : threadRunning(false), thread(NULL)
     {
     }
     

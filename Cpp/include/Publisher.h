@@ -66,6 +66,8 @@ private:
 
 	//char bytes[Participant::MESSAGE_MAX_SIZE / Participant::PACKET_MAX_SIZE][Participant::PACKET_MAX_SIZE];
 
+    Topic topic;
+
 	MemoryMap memMap;
 
 	SendDataHandler* sendDataHandler;
@@ -73,8 +75,6 @@ private:
 
 	OPSMessage message;
  
-    Topic topic;
-
 	Participant* participant;
 
     __int64 currentPublicationID;

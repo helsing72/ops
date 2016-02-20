@@ -27,13 +27,13 @@ namespace ops
 
     Publisher::Publisher(Topic t) :
     topic(t),
+    memMap(t.getSampleMaxSize() / OPSConstants::PACKET_MAX_SIZE + 1, OPSConstants::PACKET_MAX_SIZE),
+    currentPublicationID(0),
     name(""),
     key(""),
     priority(0),
-    currentPublicationID(0),
-    memMap(t.getSampleMaxSize() / OPSConstants::PACKET_MAX_SIZE + 1, OPSConstants::PACKET_MAX_SIZE),
-    sleepEverySendPacket(100000),
     sendSleepTime(1),
+    sleepEverySendPacket(100000),
     sleepOnSendFailed(true)
     {
         participant = Participant::getInstance(topic.getDomainID(), topic.getParticipantID());

@@ -27,8 +27,8 @@ namespace ops
 	{
 	public:
 		BytesSizePair(char* b, int s) :
-		  size(s),
-		  bytes(b)
+		  bytes(b),
+		  size(s)
 		{
 			
 		}

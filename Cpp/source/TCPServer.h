@@ -50,7 +50,7 @@ namespace ops
     {
     public:
 		TCPServer(std::string serverIP, int serverPort, IOService* ioServ, __int64 outSocketBufferSize = 16000000) : 
-			acceptor(NULL), endpoint(NULL), sock(NULL), connected(false), canceled(false),
+			endpoint(NULL), sock(NULL), acceptor(NULL), connected(false), canceled(false),
 			m_asyncCallActive(false), m_working(false)
 		{
 			this->outSocketBufferSize = outSocketBufferSize;

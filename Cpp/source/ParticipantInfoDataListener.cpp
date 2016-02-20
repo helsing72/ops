@@ -9,8 +9,8 @@ namespace ops
 
 	ParticipantInfoDataListener::ParticipantInfoDataListener(Participant* part):
 		participant(part),
-		sendDataHandler(NULL),
 		partInfoSub(NULL),
+		sendDataHandler(NULL),
 		numUdpTopics(0)
     {
     }

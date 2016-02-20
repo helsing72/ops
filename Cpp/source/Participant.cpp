@@ -106,21 +106,21 @@ namespace ops
 
 
 	Participant::Participant(std::string domainID_, std::string participantID_, std::string configFile_):
+		ioService(NULL),
+		config(NULL),
+		errorService(NULL), 
+		threadPool(NULL),
+		aliveDeadlineTimer(NULL),
+		partInfoPub(NULL),
+		domain(NULL), 
+		partInfoListener(NULL),
+		receiveDataHandlerFactory(NULL),
+		sendDataHandlerFactory(NULL),
 		domainID(domainID_), 
 		participantID(participantID_),
 		keepRunning(true),
 		aliveTimeout(1000),
-		config(NULL),
-		ioService(NULL),
-		domain(NULL), 
-		objectFactory(NULL),
-		errorService(NULL), 
-		partInfoPub(NULL),
-		partInfoListener(NULL),
-		receiveDataHandlerFactory(NULL),
-		sendDataHandlerFactory(NULL),
-		aliveDeadlineTimer(NULL),
-		threadPool(NULL)
+		objectFactory(NULL)
 	{
 		
 		ioService = IOService::create();

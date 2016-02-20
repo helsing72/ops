@@ -30,14 +30,14 @@ namespace ops
 {
 
     Subscriber::Subscriber(Topic t) :
-    topic(t),
+    firstDataReceived(false),
     hasUnreadData(false),
-    deadlineTimeout(TimeHelper::infinite),
+    topic(t),
+    messageBufferMaxSize(1),
     timeBaseMinSeparationTime(0),
+    deadlineTimeout(TimeHelper::infinite),
     threadPolicy(SHARED_THREAD),
     deadlineMissed(false),
-    firstDataReceived(false),
-    messageBufferMaxSize(1),
     started(false)
     //deadlineTimer(*Participant::getIOService())
     {
