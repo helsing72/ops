@@ -1,0 +1,20 @@
+
+# Configuration
+# -------------
+BUILDDIR=build-arm
+LIBDIR=lib-arm
+
+# BOOST version if another than default
+# -------------------------------------
+BOOSTINC=-I../../../boost/1.55
+#BOOSTLIBS=
+
+# Tools
+# -----
+COMPILER=arm-xilinx-linux-gnueabi-g++
+ARCHIVER=arm-xilinx-linux-gnueabi-ar
+
+# --------------------------------------------------
+
+include makefile_linux.include
+
