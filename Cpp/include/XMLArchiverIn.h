@@ -22,7 +22,7 @@
 #define XMLArchiverInH
 
 #include "ArchiverInOut.h"
-#include "OPSObjectFactory.h"
+#include "SerializableInheritingTypeFactory.h"
 #include <iostream>
 #include <sstream>
 #include "xml/xmlParser.h"
@@ -71,9 +71,9 @@ namespace ops
         std::stringstream ss;
     public:
 
-        XMLArchiverIn(std::istream& is_, std::string topNode_) : is(is_)
+        XMLArchiverIn(std::istream& is_, std::string topNode_, SerializableInheritingTypeFactory* factory) : is(is_)
         {
-            factory = OPSObjectFactory::getInstance();
+            this->factory = factory;
 
             std::string tmp;
             is >> tmp;
@@ -83,7 +83,7 @@ namespace ops
                 is >> tmp;
             }
             currentNode = opsXML::XMLNode::parseString(xmlString.c_str(), topNode_.c_str());
-            int i = currentNode.nChildNode();
+//            int i = currentNode.nChildNode();
 
         }
 
@@ -485,7 +485,7 @@ namespace ops
             //Nothing to do in this implementation
         }
     private:
-        OPSObjectFactory* factory;
+        SerializableInheritingTypeFactory* factory;
 
 
         //   virtual void getDeserializable(std::string name, Deserializable* deserializable)

@@ -22,6 +22,7 @@
 #include "OPSConfig.h"
 #include "DefaultOPSConfigImpl.h"
 #include "XMLArchiverIn.h"
+#include "OPSObjectFactory.h"
 #include <fstream>
 
 namespace ops
@@ -33,7 +34,7 @@ namespace ops
 
 		std::ifstream inStream(configFile.c_str());
 		if (inStream.is_open()) {
-			XMLArchiverIn archiver(inStream, "root");
+			XMLArchiverIn archiver(inStream, "root", OPSObjectFactory::getInstance());
 			theConfig = (OPSConfig*)archiver.inout(std::string("ops_config"), theConfig);
 		}
 

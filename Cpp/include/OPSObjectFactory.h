@@ -21,14 +21,13 @@
 #ifndef ops_OPSObjectFactoryH
 #define ops_OPSObjectFactoryH
 
-#include "SerializableCompositeFactory.h"
-#include "OPSMessage.h"
+#include "SerializableInheritingTypeFactory.h"
 #include <string>
 
 namespace ops
 {
 
-class OPSObjectFactory : public SerializableCompositeFactory
+class OPSObjectFactory : public SerializableInheritingTypeFactory
 {
     
 public:
@@ -38,13 +37,6 @@ public:
      */
     static OPSObjectFactory* getInstance();
     
-    /**
-     * Tries to construct the most specialized version of the given typeString
-     */
-	virtual Serializable* create(std::string& typeString) = 0;
-    
-	virtual ~OPSObjectFactory(){}
-
 };
 	
 

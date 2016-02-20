@@ -29,7 +29,7 @@ namespace ops
 class SerializableFactory
 {
 public:
-	~SerializableFactory(){}
+	virtual ~SerializableFactory(){}
 	virtual Serializable* create(std::string& type) = 0;
 };
 }

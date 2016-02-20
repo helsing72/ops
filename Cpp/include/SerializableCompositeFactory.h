@@ -27,14 +27,15 @@
 namespace ops
 {
 
-class SerializableCompositeFactory : SerializableFactory
+class SerializableCompositeFactory : public SerializableFactory
 {
 
 	std::vector<SerializableFactory*> childFactories;
 
 public:
+	// Removes the given object from the factory and ownership are returned to the caller.
 	bool remove(SerializableFactory* o)
-    {
+	{
 		std::vector<SerializableFactory*>::iterator it = childFactories.begin();
 		for(unsigned int i = 0; i < childFactories.size(); i++ )
 		{
@@ -46,15 +47,16 @@ public:
 			}
 		}
 		return false;
-    }
+	}
 
-    void add(SerializableFactory* o)
-    {
-		return childFactories.push_back(o);
-    }
+	// Adds the given object and takes ownership over it.
+	void add(SerializableFactory* o)
+	{
+		if (o) childFactories.push_back(o);
+	}
 
-	Serializable* create(std::string& type)
-    {
+	virtual Serializable* create(std::string& type)
+	{
         Serializable* obj = NULL;
 
 		for(unsigned int i = 0; i < childFactories.size(); i++ )
@@ -66,7 +68,16 @@ public:
 			}
 		}
 		return obj;
-    }
+	}
+
+	virtual ~SerializableCompositeFactory()
+	{
+		// Delete all objects that we still owns
+		for(unsigned int i = 0; i < childFactories.size(); i++ )
+		{
+			delete childFactories[i];
+		}
+	}
 };
 
 }

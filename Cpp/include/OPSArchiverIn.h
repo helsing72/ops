@@ -25,7 +25,7 @@
 #define ops_OPSArchiverInH
 
 #include "ByteBuffer.h"
-#include "OPSObjectFactory.h"
+#include "SerializableInheritingTypeFactory.h"
 #include "Serializable.h"
 #include "ArchiverInOut.h"
 #include <vector>
@@ -37,13 +37,7 @@ namespace ops
     {
     public:
 
-        OPSArchiverIn(ByteBuffer* _buf)
-        {
-            buf = _buf;
-            factory = OPSObjectFactory::getInstance();
-        }
-
-        OPSArchiverIn(ByteBuffer* _buf, OPSObjectFactory* factory)
+        OPSArchiverIn(ByteBuffer* _buf, SerializableInheritingTypeFactory* factory)
         {
             buf = _buf;
             this->factory = factory;
@@ -55,60 +49,73 @@ namespace ops
 
         void inout(const std::string& name, bool& value)
         {
+            UNUSED(name)
             value = buf->ReadChar() > 0;
         }
 
         void inout(const std::string& name, char& value)
         {
+            UNUSED(name)
             value = buf->ReadChar();
         }
 
         void inout(const std::string& name, int& value)
         {
+            UNUSED(name)
             value = buf->ReadInt();
         }
 
         void inout(const std::string& name, __int16& value)
         {
+            UNUSED(name)
             //Not implemented
             value = buf->ReadShort();
         }
 
         void inout(const std::string& name, __int64& value)
         {
+            UNUSED(name)
             value = buf->ReadLong();
         }
 
         void inout(const std::string& name, float& value)
         {
+            UNUSED(name)
             value = buf->ReadFloat();
         }
 
         void inout(const std::string& name, double& value)
         {
+            UNUSED(name)
             value = buf->ReadDouble();
         }
 
         void inout(const std::string& name, std::string& value)
         {
+            UNUSED(name)
             value = buf->ReadString();
         }
 
 ///LA
 		void inout(const std::string& name, char* buffer, int bufferSize)
 		{
+            UNUSED(name)
 			buf->ReadChars(buffer, bufferSize);
 		}
 ///LA
 
 		void inout(const std::string& name, Serializable& value)
         {
+            UNUSED(name)
             std::string types = buf->ReadString();
             value.serialize(this);
         }
 
         Serializable* inout(const std::string& name, Serializable* value, int element)
         {
+            UNUSED(name)
+            UNUSED(value)
+            UNUSED(element)
             std::string types = buf->ReadString();
             Serializable* newSer = factory->create(types);
             if (newSer != NULL)
@@ -121,7 +128,7 @@ namespace ops
 
         Serializable* inout(const std::string& name, Serializable* value)
         {
-
+            UNUSED(name)
             if (value != NULL)//Either we do this or we initiialize object to NULL in generated code.
             {
                 delete value;
@@ -141,52 +148,64 @@ namespace ops
 
         void inout(const std::string& name, std::vector<bool>& value)
         {
+            UNUSED(name)
             buf->ReadBooleans(value);
         }
 
         void inout(const std::string& name, std::vector<char>& value)
         {
+            UNUSED(name)
             buf->ReadBytes(value);
         }
 
         void inout(const std::string& name, std::vector<int>& value)
         {
+            UNUSED(name)
             buf->ReadInts(value);
         }
 
         void inout(const std::string& name, std::vector<__int16>& value)
         {
+            UNUSED(name)
+            UNUSED(value)
             //Not implemented
             //return value;
         }
 
         void inout(const std::string& name, std::vector<__int64>& value)
         {
+            UNUSED(name)
             buf->ReadLongs(value);
         }
 
         void inout(const std::string& name, std::vector<float>& value)
         {
+            UNUSED(name)
             buf->ReadFloats(value);
         }
 
         void inout(const std::string& name, std::vector<double>& value)
         {
+            UNUSED(name)
             buf->ReadDoubles(value);
         }
 
         void inout(const std::string& name, std::vector<std::string>& value)
         {
+            UNUSED(name)
             buf->ReadStrings(value);
         }
 
         int beginList(const std::string& name, int size)
         {
+            UNUSED(name)
+            UNUSED(size)
             return buf->ReadInt();
         }
 
         void endList(const std::string& name)
         {
+            UNUSED(name)
             //Nothing to do in this implementation
         }
 
@@ -204,7 +223,7 @@ namespace ops
 
     private:
         ByteBuffer* buf;
-        OPSObjectFactory* factory;
+        SerializableInheritingTypeFactory* factory;
     };
 
 

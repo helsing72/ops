@@ -21,13 +21,11 @@
 #ifndef ops_OPSObjectFactoryImpl_h
 #define ops_OPSObjectFactoryImpl_h
 
+#include "OPSMessage.h"
 #include "Topic.h"
 #include "DefaultOPSConfigImpl.h"
 #include "Domain.h"
 #include "ParticipantInfoData.h"
-
-#include <boost/algorithm/string/split.hpp> 
-#include <boost/algorithm/string/classification.hpp>
 
 namespace ops
 {
@@ -73,31 +71,6 @@ namespace ops
         OPSObjectFactoryImpl()
         {
             add(new BuiltInFactory());
-        }
-
-        /**
-         * Tries to construct the most specialized version of the given typeString
-         */
-        Serializable* create(std::string& typeString)
-        {
-            std::vector<std::string> types;
-            boost::algorithm::split(types, typeString, boost::algorithm::is_any_of(" "));
-
-            for (unsigned int i = 0; i < types.size(); i++)
-            {
-                Serializable* serializable = SerializableCompositeFactory::create(types[i]);
-                if (serializable != NULL)
-                {
-                    return serializable;
-                }
-            }
-
-            return NULL;
-        }
-
-        ~OPSObjectFactoryImpl()
-        {
-
         }
 
     };
