@@ -6,7 +6,10 @@
  */
 
 #ifndef _OPSTYPEDEFS_H
-#define	_OPSTYPEDEFS_H
+#define _OPSTYPEDEFS_H
+
+// Macro used to remove compiler warnings about non used variables/parameters
+#define UNUSED(expr) (void)(expr);
 
 #ifndef WIN32
 

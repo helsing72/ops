@@ -34,6 +34,15 @@ namespace ops
         nextSegmentAt = memMap->getSegmentSize();
     }
 
+	///Resets the whole buffer to creation state
+	void ByteBuffer::Reset()
+	{
+        totalSize = 0;
+        index = 0;
+        currentSegment = 0;
+        nextSegmentAt = memMap->getSegmentSize();
+	}
+
     int ByteBuffer::getNrOfSegments()
     {
         return currentSegment + 1;
@@ -114,6 +123,9 @@ namespace ops
         bool ok = checkProtocol();
         int i1 = ReadInt();
         int i2 = ReadInt();
+        UNUSED(ok)
+        UNUSED(i1)
+        UNUSED(i2)
     }
 
     void ByteBuffer::ReadChars(char* chars, int length)
@@ -222,17 +234,6 @@ namespace ops
     //      //delete oh;
     //  }
 
-    /*void ByteBuffer::WriteOPSObjectFields(OPSObject* o)
-    {
-        
-        WriteString(o->publisherName);
-        WriteString(o->key);
-        WriteInt(o->publicationID);
-        WriteChar(o->publicationPriority);
-        WriteString(o->typesString);
-    }*/
-
-
     //Readers
 
     //  OPSObject* ByteBuffer::ReadOPSObject(OPSObjectHelper* oh)
@@ -324,16 +325,6 @@ namespace ops
     }
 
 	// -----------------------------------------------------------------
-
-    /*void ByteBuffer::ReadOPSObjectFields(ops::OPSObject* o)
-    {
-
-            o->publisherName = ReadString();
-            o->key = ReadString();
-            o->publicationID = ReadInt();
-            o->publicationPriority = ReadChar();
-		    o->typesString = ReadString();
-    }*/
 
 
     void ByteBuffer::ReadBooleans(std::vector<bool>& out)

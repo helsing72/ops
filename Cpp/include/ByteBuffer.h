@@ -45,7 +45,6 @@ namespace ops
 
 		int nextSegmentAt;
 		int currentSegment;
-		int nrOfSegments;
 	public:
         ///Writes the length first chars from chars to the buffer and increments index by length.
         void WriteChars(char* chars, int length);
@@ -68,6 +67,9 @@ namespace ops
         ///Only valid for a ByteBuffer instance used to write data.
         ///Returns the number of bytes containing valid data in the buffer so far.
         int GetSize();
+
+		///Resets the whole buffer to creation state
+		void Reset();
 
 		///Resets the internal offset pointer to 0 (zero)
 		void ResetIndex();
