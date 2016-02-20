@@ -1,3 +1,4 @@
+#ifdef NOT_USED_ANYMORE
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
@@ -48,4 +49,5 @@ public:
 };
 
 }
+#endif
 #endif
