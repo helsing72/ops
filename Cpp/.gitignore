@@ -1,1 +1,4 @@
-lib-*
+build/debug
+build/opt
+lib*
+*~
