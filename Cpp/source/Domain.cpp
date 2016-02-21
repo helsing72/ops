@@ -125,6 +125,7 @@ Domain::~Domain()
 }
 
 // If argument contains a "/" we assume it is on the form:  subnet-address/subnet-mask
+// e.g "192.168.10.0/255.255.255.0" or "192.168.10.0/24"
 // In that case we loop over all interfaces and take the first one that matches
 // i.e. the one whos interface address is on the subnet
 std::string Domain::doSubnetTranslation(std::string addr, IOService* ioServ)
@@ -140,23 +141,33 @@ std::string Domain::doSubnetTranslation(std::string addr, IOService* ioServ)
 	std::string mask = addr.substr(index+1);
 
 	unsigned long subnetIp = boost::asio::ip::address_v4::from_string(subnet).to_ulong();
-	unsigned long subnetMask = boost::asio::ip::address_v4::from_string(mask).to_ulong();
+	unsigned long subnetMask;
+	if (mask.length() <= 2) {
+		// Expand to the number of bits given
+		subnetMask = atoi(mask.c_str());
+		subnetMask = (((1 << subnetMask)-1) << (32 - subnetMask)) & 0xFFFFFFFF;
+	} else {
+		subnetMask = boost::asio::ip::address_v4::from_string(mask).to_ulong();
+	}
 
 	boost::asio::io_service* ioService = ((BoostIOServiceImpl*) ioServ)->boostIOService;
 
+	// Note: The resolver requires that the hostname can be used to resolve to an ip
+	// e.g due to the hostname beeing listed with an ipv4 address in /etc/hosts.
+	// On linux this can be tested by using the command "hostname -i"
 	udp::resolver resolver(*ioService);
-    udp::resolver::query query(boost::asio::ip::host_name(), "");
-    udp::resolver::iterator it = resolver.resolve(query);
-    udp::resolver::iterator end;
-    while (it != end) {
+	udp::resolver::query query(boost::asio::ip::host_name(), "");
+	udp::resolver::iterator it = resolver.resolve(query);
+	udp::resolver::iterator end;
+	while (it != end) {
 		boost::asio::ip::address ipaddr = it->endpoint().address();
-	    if (ipaddr.is_v4())	{
+		if (ipaddr.is_v4()) {
 			unsigned long Ip = ipaddr.to_v4().to_ulong();
 			if ((Ip & subnetMask) == subnetIp) 
 				return ipaddr.to_string();
-        }
-        it++;
-    }
+		}
+		it++;
+	}
 
 	return subnet;
 }
