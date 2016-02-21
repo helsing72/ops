@@ -4,9 +4,7 @@
 OPSDIR=../../Cpp
 
 OPSINCDIR=-I$(OPSDIR)/include
-OPSBUILDDIR=$(OPSDIR)/build
-OPSDEBUGOBJECTS=$(wildcard $(OPSBUILDDIR)/debug/*.o) $(wildcard $(OPSBUILDDIR)/debug/xml/*.o)
-OPSOPTOBJECTS=$(wildcard $(OPSBUILDDIR)/opt/*.o) $(wildcard $(OPSBUILDDIR)/opt/xml/*.o)
+OPSLIBS=$(OPSDIR)/lib64/libOPSopt.a
 
 # ----------------------
 # Generated files
@@ -26,11 +24,15 @@ BOOSTLIBS=-lboost_system-mt -lboost_thread-mt
 all: PizzaTest 
 
 
-PizzaTest: ../VC++Apps/PizzaTest/PizzaTest.cpp $(OPSOPTOBJECTS)
-	gcc -O2 $(OPSINCDIR) $(GENINCDIR) $(BOOSTLIBS) -o $@ $^
+PizzaTest.o: ../VC++Apps/PizzaTest/PizzaTest.cpp
+	g++ -std=c++11 -O2 $(OPSINCDIR) $(GENINCDIR)-c -c $< -o $@
+
+PizzaTest: PizzaTest.o $(OPSLIBS)
+	g++ -std=c++11 -O2 $^ $(OPSLIBS) $(BOOSTLIBS) -o $@ 
 
 
 clean:
+	rm -f PizzaTest.o
 	rm -f PizzaTest
 
 
