@@ -20,8 +20,6 @@
 #include "OPSTypeDefs.h"
 #include "ByteBuffer.h"
 
-#undef ON_BIG_ENDIAN_MACHINE
-
 namespace ops
 {
 
