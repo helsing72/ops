@@ -48,7 +48,7 @@ public class Domain extends OPSObject
     {
         appendType("Domain");
     }
-    
+
 
     public Topic getTopic(String name)
     {
@@ -157,6 +157,7 @@ public class Domain extends OPSObject
     }
 
     // If argument contains a "/" we assume it is on the form:  subnet-address/subnet-mask
+    // e.g "192.168.10.0/255.255.255.0" or "192.168.10.0/24"
     // In that case we loop over all interfaces and take the first one that matches
     // i.e. the one whos interface address is on the subnet
     public static String DoSubnetTranslation(String ip)
@@ -169,8 +170,20 @@ public class Domain extends OPSObject
 
         try
         {
-            InetAddress ipAddress = InetAddress.getByName(subnetMask);
-            byte[] mask = ipAddress.getAddress();
+            byte[] mask;
+            if (subnetMask.length() <= 2) {
+		            // Expand to the number of bits given
+                long bitmask = Integer.parseInt(subnetMask);
+		            bitmask = (((1 << bitmask)-1) << (32 - bitmask)) & 0xFFFFFFFF;
+                mask = new byte[] {
+                  (byte)(bitmask >>> 24),
+                  (byte)(bitmask >>> 16),
+                  (byte)(bitmask >>> 8),
+                  (byte)bitmask};
+            } else {
+                InetAddress ipAddress = InetAddress.getByName(subnetMask);
+                mask = ipAddress.getAddress();
+            }
 
             Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
             for (NetworkInterface netint : java.util.Collections.list(nets))
