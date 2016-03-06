@@ -35,8 +35,14 @@ namespace ops
 	class ByteBuffer
 	{
     private:
+        ///The Write Policy is default to preserve all written data.
+        ///For Big Endian machines, performance can be gained if data isn't preserved,
+        ///but it means that data in vectors may be garbled after writing.
+        ///For Little Endian machines, the data is always preserved.
+        bool preserveWrittenData;
+
         ///Buffer used to store data to be written or read.
-		MemoryMap* memMap;
+        MemoryMap* memMap;
         ///index pointing out where in the buffer to do the next read or write.
         ///This variable is automatically incremented by the read and write operations.
         int index;
@@ -61,8 +67,9 @@ namespace ops
 		void ReadBytes(std::vector<char>& out, int offset, int length);
      
     public:
-        
-		ByteBuffer(MemoryMap* mMap);
+
+        ///The Write Policy is default to preserve all written data (see description above).
+        ByteBuffer(MemoryMap* mMap, bool _preserveWrittenData = true);
         
         ///Only valid for a ByteBuffer instance used to write data.
         ///Returns the number of bytes containing valid data in the buffer so far.
