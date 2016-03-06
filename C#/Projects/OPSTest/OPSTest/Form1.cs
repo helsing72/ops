@@ -547,8 +547,11 @@ namespace OPSTest
 
             test("0.0.0.0");
             test("127.0.0.1");
+            test("192.168.1.0/255.255.255.0");
+            test("192.168.117.0/24");
             test("192.168.0.0/255.255.255.0");
-            test("192.168.0.34");
+            test("192.168.0.0/24");
+            test("192.168.0.24");
 
 
             System.Net.NetworkInformation.IPGlobalProperties computerProperties = System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties();

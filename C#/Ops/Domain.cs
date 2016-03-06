@@ -143,6 +143,7 @@ namespace Ops
         }
 
         // If argument contains a "/" we assume it is on the form:  subnet-address/subnet-mask
+        // e.g "192.168.10.0/255.255.255.0" or "192.168.10.0/24"
         // In that case we loop over all interfaces and take the first one that matches
         // i.e. the one whos interface address is on the subnet
         public static string DoSubnetTranslation(string ip)
@@ -153,7 +154,24 @@ namespace Ops
             string subnetIp = ip.Substring(0, index);
             string subnetMask = ip.Substring(index + 1);
 
-            byte[] mask = System.Net.IPAddress.Parse(subnetMask).GetAddressBytes();
+            byte[] mask;
+
+            if (subnetMask.Length <= 2)
+            {
+                // Expand to the number of bits given
+                int numBits = int.Parse(subnetMask);
+                long binMask = (((1 << numBits) - 1) << (32 - numBits)) & 0xFFFFFFFF;
+
+                mask = new byte[4];
+                mask[0] = (byte)((binMask >> 24) & 0xFF);
+                mask[1] = (byte)((binMask >> 16) & 0xFF);
+                mask[2] = (byte)((binMask >>  8) & 0xFF);
+                mask[3] = (byte)((binMask      ) & 0xFF);
+            }
+            else
+            {
+                mask = System.Net.IPAddress.Parse(subnetMask).GetAddressBytes();
+            }
 
             System.Net.NetworkInformation.IPGlobalProperties computerProperties = System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties();
             System.Net.NetworkInformation.NetworkInterface[] nics = System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces();
