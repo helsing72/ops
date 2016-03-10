@@ -8,16 +8,16 @@ OPTOBJECTS=$(patsubst source/%.cpp, $(BUILDDIR)/opt/%.o, $(wildcard source/*.cpp
 OPTOBJECTS2=$(patsubst source/xml/%.cpp, $(BUILDDIR)/opt/xml/%.o, $(wildcard source/xml/*.cpp))
 
 $(BUILDDIR)/debug/%.o: source/%.cpp
-	$(COMPILER) -std=c++11 -Wall -g $(INCDIR) $(BOOSTINC) $(BOOSTLIBS) -c $< -o $@
+	$(COMPILER) -g -fprofile-arcs -ftest-coverage -O0 -fPIC $(INCDIR) $(BOOSTINC) $(BOOSTLIBS) -c $< -o $@
 
 $(BUILDDIR)/debug/xml/%.o: source/xml/%.cpp
-	$(COMPILER) -std=c++11 -Wall -g $(INCDIR) $(BOOSTINC) $(BOOSTLIBS) -c $< -o $@
+	$(COMPILER) -g -fprofile-arcs -ftest-coverage -O0 -fPIC $(INCDIR) $(BOOSTINC) $(BOOSTLIBS) -c $< -o $@
 
 $(BUILDDIR)/opt/%.o: source/%.cpp
-	$(COMPILER) -std=c++11 -Wall -O2 $(INCDIR) $(BOOSTINC) $(BOOSTLIBS) -c $< -o $@
+	$(COMPILER) -O2 -fprofile-arcs -ftest-coverage -O0 -fPIC $(INCDIR) $(BOOSTINC) $(BOOSTLIBS) -c $< -o $@
 
 $(BUILDDIR)/opt/xml/%.o: source/xml/%.cpp
-	$(COMPILER) -std=c++11 -Wall -O2 $(INCDIR) $(BOOSTINC) $(BOOSTLIBS) -c $< -o $@
+	$(COMPILER) -O2 -fprofile-arcs -ftest-coverage -O0 -fPIC $(INCDIR) $(BOOSTINC) $(BOOSTLIBS) -c $< -o $@
 
 
 all: dbgcompile optcompile

@@ -9,6 +9,12 @@ LIBDIR=lib64
 #BOOSTINC=-I../../../boost/1.55
 #BOOSTLIBS=-L../../../boost/1.55/lib64/lib -lboost_system -lboost_thread
 
+#BOOSTINC=-I/lkp/nlt/dev/sw/3pp/work/boost/1.55/
+#BOOSTLIBS=-L/lkp/nlt/dev/sw/3pp/work/boost/1.55/lib64/lib -lboost_system -lboost_thread
+
+BOOSTINC=-I/sw/tools/boost/1.55/
+BOOSTLIBS=-L/I/sw/tools/boost/1.55/lib64/lib -lboost_system -lboost_thread
+
 # Tools
 # -----
 COMPILER=g++
