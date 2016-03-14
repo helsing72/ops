@@ -242,7 +242,7 @@ public class CppCompiler extends opsc.Compiler
         String packageName = idlClass.getPackageName();
 
         String packageFilePart = packageName.replace(".", "/");
-        setOutputFileName(_outputDir + File.separator + packageFilePart + "/" + className + "Publisher.h");
+        setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + className + "Publisher.h");
         //String resource = "/ops/netbeansmodules/idlsupport/templates/cpppublishertemplate.tpl";
         String resource = findTemplateFile("cpppublishertemplate.tpl");
 
@@ -270,7 +270,7 @@ public class CppCompiler extends opsc.Compiler
         String packageName = idlClass.getPackageName();
 
         String packageFilePart = packageName.replace(".", "/");
-        setOutputFileName(_outputDir + File.separator + packageFilePart + "/" + className + "Subscriber.h");
+        setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + className + "Subscriber.h");
         //String resource = "/ops/netbeansmodules/idlsupport/templates/cppsubscribertemplate.tpl";
         String resource = findTemplateFile("cppsubscribertemplate.tpl");
 
@@ -299,7 +299,7 @@ public class CppCompiler extends opsc.Compiler
         String packageName = projectName;
 
         String packageFilePart = packageName.replace(".", "/");
-        setOutputFileName(_outputDir + File.separator + projectName + "/" + className + ".h");
+        setOutputFileName(_outputDir + File.separator + projectName + File.separator + className + ".h");
         //String resource = "/ops/netbeansmodules/idlsupport/templates/cpptypefactorytemplate.tpl";
         String resource = findTemplateFile("cpptypefactorytemplate.tpl");
 
