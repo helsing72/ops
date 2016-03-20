@@ -47,3 +47,10 @@ source_group("Template Files" FILES ${OPS_TEMPLATE_FILES})
 install(FILES ${OPS_TEMPLATE_FILES}
   DESTINATION share/ops/templates
 )
+
+add_jar(IDLTemplates ${OPS_TEMPLATE_FILES}
+  VERSION ${OPS_VERSION}
+  OUTPUT_DIR ${CMAKE_BINARY_DIR}/bin
+)
+
+install_jar(IDLTemplates ${OPS_JAR_REL_INSTALL_PATH})

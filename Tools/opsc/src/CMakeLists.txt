@@ -13,7 +13,7 @@ set(OPSC_SRC
 )
 
 add_jar(opsc ${OPSC_SRC}
-  INCLUDE_JARS OPSCompilerLib OPSJLib IDLParser ConfigurationLib
+  INCLUDE_JARS OPSCompilerLib OPSJLib IDLParser ConfigurationLib IDLTemplates
   ENTRY_POINT opsc/OpsCompiler
   MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/MANIFEST.MF
   VERSION ${PROJECT_VERSION}
