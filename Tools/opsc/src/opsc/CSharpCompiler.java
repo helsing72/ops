@@ -70,7 +70,7 @@ public class CSharpCompiler extends opsc.Compiler
                 //compilePublisher(iDLClass);
                 }
             }
-            
+
             compileTypeSupport(idlClasses, _projectName);
         } catch (IOException iOException)  {
             //JOptionPane.showMessageDialog(null, "Generating C# failed with the following exception: " + iOException.getMessage());
@@ -96,10 +96,8 @@ public class CSharpCompiler extends opsc.Compiler
         //setOutputFileName(projectDirectory + CS_DIR + "/" + packageFilePart + "/" + className + ".cs");
         setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + className + ".cs");
 
-        //String resource = "/ops/netbeansmodules/idlsupport/templates/csenumtemplate.tpl";
-        String resource = findTemplateFile("csenumtemplate.tpl");
-
-        setTemplateTextFromResource(resource);
+        java.io.InputStream stream = findTemplateFile("csenumtemplate.tpl");
+        setTemplateTextFromResource(stream);
 
         //Get the template file as a String
         String templateText = getTemplateText();
@@ -127,10 +125,8 @@ public class CSharpCompiler extends opsc.Compiler
         //setOutputFileName(projectDirectory + CS_DIR + "/" + packageFilePart + "/" + className + ".cs");
         setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + className + ".cs");
 
-        //String resource = "/ops/netbeansmodules/idlsupport/templates/cstemplate.tpl";
-        String resource = findTemplateFile("cstemplate.tpl");
-
-        setTemplateTextFromResource(resource);
+        java.io.InputStream stream = findTemplateFile("cstemplate.tpl");
+        setTemplateTextFromResource(stream);
 
         //Get the template file as a String
         String templateText = getTemplateText();
@@ -214,10 +210,8 @@ public class CSharpCompiler extends opsc.Compiler
         //setOutputFileName(projectDirectory + CS_DIR + "/" + projectName + "/" + className + ".cs");
         setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + className + ".cs");
 
-        //String resource = "/ops/netbeansmodules/idlsupport/templates/cstypefactorytemplate.tpl";        
-        String resource = findTemplateFile("cstypefactorytemplate.tpl");
-
-        setTemplateTextFromResource(resource);
+        java.io.InputStream stream = findTemplateFile("cstypefactorytemplate.tpl");
+        setTemplateTextFromResource(stream);
 
         //Get the template file as a String
         String templateText = getTemplateText();
@@ -311,7 +305,7 @@ public class CSharpCompiler extends opsc.Compiler
     protected String getDeclareVector(IDLField field) {
         return "";
     }
-    
+
     protected String getDeclarations(IDLClass idlClass)
     {
         String ret = "";
@@ -525,7 +519,7 @@ public class CSharpCompiler extends opsc.Compiler
             System.out.println("Info: C# compiler \"" + cscPath + "\" used (from env. symbol OPS_CSC_PATH)");
         }
 
-        String  execString = "\"" + cscPath + "\" /target:library " + 
+        String  execString = "\"" + cscPath + "\" /target:library " +
                 "/out:\"" + projectDirectory + CS_DIR + "\\" + projectName + ".dll\" " +
                 dllDepString + " /recurse:\"" + projectDirectory + CS_DIR + "\\*.cs\"";
         String  batFileText = "echo Building C#..."  + "\r\n";

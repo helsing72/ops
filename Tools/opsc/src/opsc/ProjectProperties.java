@@ -43,9 +43,9 @@ public class ProjectProperties implements Serializable
     {
         generateCpp = archiver.inout("generateCpp", generateCpp);
         generateJava = archiver.inout("generateJava", generateJava);
-        System.out.println("buildJava is " + buildJava);
+        //System.out.println("buildJava is " + buildJava);
         buildJava = archiver.inout("buildJava", buildJava);
-        System.out.println("buildJava is " + buildJava);
+        //System.out.println("buildJava is " + buildJava);
         generateCS = archiver.inout("generateCS", generateCS);
         buildCS = archiver.inout("buildCS", buildCS);
         buildDebugProject = archiver.inout("buildDebugProject", buildDebugProject);
@@ -124,15 +124,18 @@ public class ProjectProperties implements Serializable
 
         public Serializable create(String type)
         {
+            //System.out.println(">>>>: Factory() type = " + type);
             if (type.equals("opsc.ProjectProperties"))
             {
                 return new ProjectProperties();
             }
-            if (type.equals("opsc.JarDependency"))
+            if (type.equals("opsc.JarDependency") ||
+                type.equals("ops.netbeansmodules.idlsupport.projectproperties.JarDependency"))  // Backward compatibility
             {
                 return new JarDependency();
             }
-            if (type.equals("opsc.Property"))
+            if (type.equals("opsc.Property") ||
+                type.equals("ops.netbeansmodules.idlsupport.projectproperties.Property"))  // Backward compatibility
             {
                 return new Property();
             }

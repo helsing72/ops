@@ -123,11 +123,9 @@ public class CppCompiler extends opsc.Compiler
 
         String packageFilePart = packageName.replace(".", "/");
         setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + className + ".h");
-        //String resource = "/ops/netbeansmodules/idlsupport/templates/cpptemplate.tpl";
-        String resource = findTemplateFile("cpptemplate.tpl");
 
-        setTemplateTextFromResource(resource);
-        //setTemplateFileName("templates/cpptemplate.tpl");
+        java.io.InputStream stream = findTemplateFile("cpptemplate.tpl");
+        setTemplateTextFromResource(stream);
 
         //Get the template file as a String
         String templateText = getTemplateText();
@@ -164,13 +162,13 @@ public class CppCompiler extends opsc.Compiler
         FileOutputStream fos = null;
         try
         {
-            System.out.println(">>>>: " + outputFileName);
+            //System.out.println(">>>>: " + outputFileName);
 
             File outFile = new File(outputFileName);
-            System.out.println(">>>>: " + outFile.getAbsolutePath());
+            //System.out.println(">>>>: " + outFile.getAbsolutePath());
             File outFilePath = new File(outputFileName.substring(0, outputFileName.lastIndexOf(File.separator)));
 
-            System.out.println(">>>>: " + outFilePath.getAbsolutePath());
+            //System.out.println(">>>>: " + outFilePath.getAbsolutePath());
 
             outFilePath.mkdirs();
             outFile.createNewFile();
@@ -179,7 +177,7 @@ public class CppCompiler extends opsc.Compiler
             fos = new FileOutputStream(outFile);
             fos.write(templateText.getBytes());
         } catch (IOException ex) {
-            System.out.println(">>>>: IOException");
+            //System.out.println(">>>>: IOException");
             Logger.getLogger(AbstractTemplateBasedIDLCompiler.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
@@ -197,11 +195,8 @@ public class CppCompiler extends opsc.Compiler
         String packageFilePart = packageName.replace(".", "/");
         setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + className + ".h");
 
-        //String resource = "/ops/netbeansmodules/idlsupport/templates/cppenumtemplate.tpl";
-        String resource = findTemplateFile("cppenumtemplate.tpl");
-
-        setTemplateTextFromResource(resource);
-        //setTemplateFileName("templates/javatemplate.tpl");
+        java.io.InputStream stream = findTemplateFile("cppenumtemplate.tpl");
+        setTemplateTextFromResource(stream);
 
         //Get the template file as a String
         String templateText = getTemplateText();
@@ -243,11 +238,9 @@ public class CppCompiler extends opsc.Compiler
 
         String packageFilePart = packageName.replace(".", "/");
         setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + className + "Publisher.h");
-        //String resource = "/ops/netbeansmodules/idlsupport/templates/cpppublishertemplate.tpl";
-        String resource = findTemplateFile("cpppublishertemplate.tpl");
 
-        setTemplateTextFromResource(resource);
-        //setTemplateFileName("templates/cpppublishertemplate.tpl");
+        java.io.InputStream stream = findTemplateFile("cpppublishertemplate.tpl");
+        setTemplateTextFromResource(stream);
 
         //Get the template file as a String
         String templateText = getTemplateText();
@@ -271,11 +264,9 @@ public class CppCompiler extends opsc.Compiler
 
         String packageFilePart = packageName.replace(".", "/");
         setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + className + "Subscriber.h");
-        //String resource = "/ops/netbeansmodules/idlsupport/templates/cppsubscribertemplate.tpl";
-        String resource = findTemplateFile("cppsubscribertemplate.tpl");
 
-        setTemplateTextFromResource(resource);
-        //setTemplateFileName("templates/cppsubscribertemplate.tpl");
+        java.io.InputStream stream = findTemplateFile("cppsubscribertemplate.tpl");
+        setTemplateTextFromResource(stream);
 
         //Get the template file as a String
         String templateText = getTemplateText();
@@ -300,11 +291,9 @@ public class CppCompiler extends opsc.Compiler
 
         String packageFilePart = packageName.replace(".", "/");
         setOutputFileName(_outputDir + File.separator + projectName + File.separator + className + ".h");
-        //String resource = "/ops/netbeansmodules/idlsupport/templates/cpptypefactorytemplate.tpl";
-        String resource = findTemplateFile("cpptypefactorytemplate.tpl");
 
-        setTemplateTextFromResource(resource);
-        //setTemplateFileName("templates/cpptypefactorytemplate.tpl");
+        java.io.InputStream stream = findTemplateFile("cpptypefactorytemplate.tpl");
+        setTemplateTextFromResource(stream);
 
         //Get the template file as a String
         String templateText = getTemplateText();

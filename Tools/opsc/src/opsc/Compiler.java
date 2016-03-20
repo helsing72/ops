@@ -29,12 +29,19 @@ import parsing.TopicInfo;
  */
 public abstract class Compiler extends AbstractTemplateBasedIDLCompiler
 {
-    /** Where to find templates */
+    /** Where to find templates. Default is in directory /templates in jar file IDLTemplates.jar */
     private String _templateDir = "templates";
     protected String _outputDir = ".";
     protected String _projectName = "";
     Vector<IDLClass> _idlClasses = new Vector<IDLClass>();
     protected Vector<String> _generatedFiles;
+
+    /** A verbosity flag. Currently supports 0 or not 0 */
+    protected int _verbose = 0;
+
+    public void setVerbose(int value) {
+      _verbose = value;
+    }
 
     public Compiler(String projectName) {
         // set projectname
@@ -155,11 +162,10 @@ public abstract class Compiler extends AbstractTemplateBasedIDLCompiler
     {
     }
 
-    protected void setTemplateTextFromResource(String resource) throws IOException
+    protected void setTemplateTextFromResource(java.io.InputStream stream) throws IOException
     {
-        java.io.FileInputStream fis = new java.io.FileInputStream(resource);
-        byte[] templateBytes = new byte[fis.available()];
-        fis.read(templateBytes);
+        byte[] templateBytes = new byte[stream.available()];
+        stream.read(templateBytes);
         setTemplateText(new String(templateBytes));
     }
 
@@ -178,45 +184,52 @@ public abstract class Compiler extends AbstractTemplateBasedIDLCompiler
         fos.close();
     }
 
-    protected String findTemplateFile(String templateName) throws IOException {
+    protected java.io.InputStream findTemplateFile(String templateName) throws IOException {
         // search for a file called templateName
         File thefile = new File( templateName );
 
+        //System.out.println("Looking for template: " + templateName);
+
         // if the path is absolute - use as is - no fallbacks
-        if(thefile.isAbsolute()) {
+        if (thefile.isAbsolute()) {
             if (thefile.isFile()) {
                 //System.out.println("found... " + thefile.getCanonicalPath());
-                return thefile.getCanonicalPath();
+                return new java.io.FileInputStream(thefile.getCanonicalPath());
             }
             throw new IOException("No such file " + templateName);
         }
 
         // try using _templateDir member
         thefile = new File( _templateDir + File.separator + templateName );
-        if(thefile.isFile()) {
+        if (thefile.isFile()) {
             //System.out.println("found... " + thefile.getCanonicalPath());
-            return thefile.getCanonicalPath();
+            return new java.io.FileInputStream(thefile.getCanonicalPath());
         }
 
-        String resource = "Tools/NBOPSIDLSupport/src/ops/netbeansmodules/idlsupport/templates";
+        String resource = "/usr/share/ops/templates";
         thefile = new File( resource + File.separator + templateName );
-        if(thefile.isFile()) {
-            System.out.println("found... " + thefile.getCanonicalPath());
-            return thefile.getCanonicalPath();
-        }
-
-        resource = "/usr/share/ops/templates";
-        thefile = new File( resource + File.separator + templateName );
-        if(thefile.isFile()) {
+        if (thefile.isFile()) {
             //System.out.println("found... " + thefile.getCanonicalPath());
-            return thefile.getCanonicalPath();
+            return new java.io.FileInputStream(thefile.getCanonicalPath());
         }
 
         resource = "../../share/ops/templates";
         thefile = new File( resource + File.separator + templateName );
-        if(thefile.isFile()) {
-            System.out.println("found... " + thefile.getCanonicalPath());
-            return thefile.getCanonicalPath();
+        if (thefile.isFile()) {
+            //System.out.println("found... " + thefile.getCanonicalPath());
+            return new java.io.FileInputStream(thefile.getCanonicalPath());
+        }
+
+        resource = "/templates/" + templateName;
+        if (this.getClass().getResource( resource ) != null) {
+          //System.out.println("found... " + resource);
+          return this.getClass().getResourceAsStream(resource);
+        }
+
+        resource = "/NBOPSIDLSupport/src/ops/netbeansmodules/idlsupport/templates/" + templateName;
+        if (this.getClass().getResource( resource ) != null) {
+          //System.out.println("found... " + resource);
+          return this.getClass().getResourceAsStream(resource);
         }
 
         throw new IOException("No such template " + templateName);

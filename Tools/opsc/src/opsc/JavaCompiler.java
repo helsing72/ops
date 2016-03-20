@@ -4,7 +4,7 @@
  * Created on den 12 november 2007, 15:39
  *
  * To change this template, choose Tools | Template Manager
- * and open the template in the editor. 
+ * and open the template in the editor.
  */
 package opsc;
 
@@ -44,7 +44,7 @@ public class JavaCompiler extends opsc.Compiler
     public JavaCompiler(String projname) {
         super(projname);
     }
-    
+
     public void compileDataClasses(Vector<IDLClass> idlClasses, String projectDirectory)
     {
         createdFiles = "";
@@ -88,9 +88,8 @@ public class JavaCompiler extends opsc.Compiler
         //setOutputFileName(projectDirectory + JAVA_DIR + "/" + packageFilePart + "/" + className + ".java");
         setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + className + ".java");
 
-        //String resource = "/ops/netbeansmodules/idlsupport/templates/javaenumtemplate.tpl";
-        String resource = findTemplateFile("javaenumtemplate.tpl");
-        setTemplateTextFromResource(resource);
+        java.io.InputStream stream = findTemplateFile("javaenumtemplate.tpl");
+        setTemplateTextFromResource(stream);
 
         //Get the template file as a String
         String templateText = getTemplateText();
@@ -118,9 +117,8 @@ public class JavaCompiler extends opsc.Compiler
 
         setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + className + ".java");
 
-        String resource = findTemplateFile("javatemplate.tpl");
-
-        setTemplateTextFromResource(resource);
+        java.io.InputStream stream = findTemplateFile("javatemplate.tpl");
+        setTemplateTextFromResource(stream);
 
         //Get the template file as a String
         String templateText = getTemplateText();
@@ -153,9 +151,8 @@ public class JavaCompiler extends opsc.Compiler
 
         setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + className + "Publisher.java");
 
-        String resource = findTemplateFile("javapublishertemplate.tpl");
-
-        setTemplateTextFromResource(resource);
+        java.io.InputStream stream = findTemplateFile("javapublishertemplate.tpl");
+        setTemplateTextFromResource(stream);
 
         //Get the template file as a String
         String templateText = getTemplateText();
@@ -179,8 +176,8 @@ public class JavaCompiler extends opsc.Compiler
 
         setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + className + "Subscriber.java");
 
-        String resource = findTemplateFile("javasubscribertemplate.tpl");
-        setTemplateTextFromResource(resource);
+        java.io.InputStream stream = findTemplateFile("javasubscribertemplate.tpl");
+        setTemplateTextFromResource(stream);
 
         //Get the template file as a String
         String templateText = getTemplateText();
@@ -204,8 +201,8 @@ public class JavaCompiler extends opsc.Compiler
 
         setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + className + ".java");
 
-        String resource = findTemplateFile("javatypefactorytemplate.tpl");
-        setTemplateTextFromResource(resource);
+        java.io.InputStream stream = findTemplateFile("javatypefactorytemplate.tpl");
+        setTemplateTextFromResource(stream);
 
         //Get the template file as a String
         String templateText = getTemplateText();
@@ -238,7 +235,7 @@ public class JavaCompiler extends opsc.Compiler
         String ret = "";
         return ret;
     }
-    
+
     protected String getCloneBody(IDLClass idlClass)
     {
         String ret = "";
@@ -271,7 +268,7 @@ public class JavaCompiler extends opsc.Compiler
 
         }
         return ret;
-        
+
     }
 
 
@@ -460,47 +457,54 @@ public class JavaCompiler extends opsc.Compiler
     public void setJarDependencies(Vector<JarDependency> jarDeps)
     {
         this.jarDependencies = jarDeps;
-
     }
 
     public void buildAndJar(String projectDir) throws IOException, InterruptedException
     {
         // don't want to build bat scripts on linux...
         final boolean isLinux = System.getProperty("os.name").equals("Linux");
-        
-        String jarPackString = null;
 
         String jarDepString = "";
         String manifestJarDepString = "Class-Path: ";
+        Vector<String> jarCopyList = new Vector<String>();
 
-        if(jarDependencies != null) {
-            for (JarDependency jarDep : jarDependencies)
-            {
+        //System.out.println(">>>>: projectDir = " +  projectDir);
+        //System.out.println(">>>>: _outputDir = " +  _outputDir);
+
+        if (jarDependencies != null) {
+            for (JarDependency jarDep : jarDependencies) {
                 File jarToBeCopied = new File(jarDep.path + "");
                 if (!jarToBeCopied.isAbsolute()) {
-                    jarToBeCopied = new File(projectDir + "/" + jarDep.path + "");
-                    jarDepString += "\"" + projectDir + "/" + jarDep.path + "\";";
-                } else {
-                    jarDepString += "\"" + jarDep.path + "\";";
+                    jarToBeCopied = new File(projectDir + File.separator + jarDep.path + "");
                 }
-                File jarCopy = new File(projectDir + "/" + "Generated" + "/" + jarToBeCopied.getName());
-                jarCopy.createNewFile();
+                jarDepString += "\"" + jarToBeCopied.getName() + "\"" + File.pathSeparator;
 
-                System.out.println("HELM remove cp " + jarToBeCopied + " -> " + jarCopy);
-                //FileHelper.copyFile(jarToBeCopied, jarCopy);
+                // Backward compatibility with HMI-based IDL compiler.
+                // We now have moved the compiled jars to the Java subdirectory
+                // So if files don't exist try in the 'Java' directory
+                if (!jarToBeCopied.exists()) {
+                  jarToBeCopied = new File(jarToBeCopied.getParent() + File.separator + JAVA_DIR + File.separator + jarToBeCopied.getName());
+                }
 
-                manifestJarDepString += jarCopy.getName() + " ";
+                jarCopyList.add(jarToBeCopied.getAbsolutePath());
+
+                manifestJarDepString += jarToBeCopied.getName() + " ";
             }
 //        manifestJarDepString += "\nTopic-config: " + theProject.getTopicConfigPackage() + "." + theProject.getName() + "TopicConfig";
             manifestJarDepString += endl();
         } else {
             System.out.println("WARN: no jar dependencies");
         }
-        
-        String dinfoPath = _outputDir + File.separator + "debugger_buildinfo.ops_tmp";
-        createAndWriteFile(dinfoPath, createdFiles);
 
-        String manFilePath = _outputDir + File.separator + "/manifest_adds.ops_tmp";
+        String dinfoFile = "debugger_buildinfo.ops_tmp";
+        String dinfoPath = _outputDir + File.separator + dinfoFile;
+        // Remove the '_outputDir + File.separator' part from the filelist since we compile from the _outputDir
+        String tmp = createdFiles.replace('\\', '/');
+        tmp = tmp.replaceAll("\"" + _outputDir.replace('\\', '/') + "/", "\"");
+        createAndWriteFile(dinfoPath, tmp);
+
+        String manFile = "manifest_adds.ops_tmp";
+        String manFilePath = _outputDir + File.separator + manFile;
         createAndWriteFile(manFilePath, manifestJarDepString);
 
         /// Try to find out the full path for the included OPS Jar files
@@ -508,174 +512,158 @@ public class JavaCompiler extends opsc.Compiler
         String SubPath = "";
         try {
           ExePath = JavaCompiler.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+          //System.out.println("Debug: ExePath: " + ExePath);
           ExePath = java.net.URLDecoder.decode(ExePath, "UTF-8");
-          SubPath = "build/cluster/modules";       // When ran from source tree
-          int idx = ExePath.indexOf(SubPath);
-          if (idx < 0) {
-              SubPath = "ops_idl_builder_nb/modules";    // When ran from deploy tree/install directory
-              idx = ExePath.indexOf(SubPath);
-              if (idx < 0) {
-                  SubPath = "";
-                  ExePath = "";
-              } else {
-                  ExePath = ExePath.substring(0, idx);
-              }
-          } else {
-              ExePath = ExePath.substring(0, idx);
-          }
           ExePath = ExePath.replaceFirst("file:/", "");
+          // On windows the ExePath can be like "/D:/OPS/OPS4/Tools/opsc/dist/opsc.jar"
+          // So we need to remove the first '/' in this case
+          int idx = ExePath.indexOf(":");
+          if (idx > 0) {
+            ExePath = ExePath.substring(1);
+          }
         }
         catch (Exception e) {
             SubPath = "";
             ExePath = "";
         }
-        System.out.println("Debug: ExePath: " + ExePath);
-        //io.getOut().println("Debug: ExePath: " + ExePath);
+        if (_verbose > 0) System.out.println("Debug: ExePath: " + ExePath);
 
         // resolve path to OPSJLib. Not required for this app but for generated java code
         String OPSJLibpath = ops.OPSObject.class.getProtectionDomain().getCodeSource().getLocation().getPath();
         try {
             String decodedPath = java.net.URLDecoder.decode(OPSJLibpath, "UTF-8");
+            // On windows the ExePath can be like "/D:/OPS/OPS4/Tools/opsc/dist/OPSJLib.jar"
+            // So we need to remove the first '/' in this case
+            int idx = decodedPath.indexOf(":");
+            if (idx > 0) {
+              decodedPath = decodedPath.substring(1);
+            }
             OPSJLibpath = decodedPath;
         } catch(java.io.UnsupportedEncodingException uee) {
-            System.out.println("Failed to decode path to " + OPSJLibpath);
+            System.out.println("Error: Failed to decode path to " + OPSJLibpath);
         }
-        System.out.println("Path to OPSJLib: " + OPSJLibpath);
+        if (_verbose > 0) System.out.println("Debug: Path to OPSJLib: " + OPSJLibpath);
 
         // resolve path to ConfigurationLib
         String ConfigurationLibpath = configlib.Serializable.class.getProtectionDomain().getCodeSource().getLocation().getPath();
         try {
             String decodedPath = java.net.URLDecoder.decode(ConfigurationLibpath, "UTF-8");
+            // On windows the ExePath can be like "/D:/OPS/OPS4/Tools/opsc/dist/ConfigurationLib.jar"
+            // So we need to remove the first '/' in this case
+            int idx = decodedPath.indexOf(":");
+            if (idx > 0) {
+              decodedPath = decodedPath.substring(1);
+            }
             ConfigurationLibpath = decodedPath;
         } catch(java.io.UnsupportedEncodingException uee) {
-            System.out.println("Failed to decode path to " + ConfigurationLibpath);
+            System.out.println("Error: Failed to decode path to " + ConfigurationLibpath);
         }
-        System.out.println("Path to configlib: " + ConfigurationLibpath);
+        if (_verbose > 0) System.out.println("Debug: Path to ConfigurationLib: " + ConfigurationLibpath);
 
-        jarDepString += "\"" + OPSJLibpath + "\"" + File.pathSeparator;
-        
         // Add OPS libs to jarDepString
-        if (!SubPath.isEmpty()) {
-            jarDepString += "\"" + ExePath + SubPath + "/ext/OPSJLib.jar\";";
-            jarDepString += "\"" + ExePath + SubPath + "/ext/ConfigurationLib.jar\"";
-        } else {
-            System.out.println("ERROR: Can't find OPS files: 'OPSJLib.jar' & 'ConfigurationLib.jar'");
-            //io.getOut().println("ERROR: Can't find OPS files: 'OPSJLib.jar' & 'ConfigurationLib.jar'");
-        }
+        jarDepString += "\"" + OPSJLibpath + "\"" + File.pathSeparator;
+        jarDepString += "\"" + ConfigurationLibpath + "\"" + File.pathSeparator;
 
-        String classOutputDir = "\"" + _outputDir + File.separator + "Generated" + File.separator + "tmp\"";
-        //classOutputDir = classOutputDir.replace("/", "\\");
-        
-        String execString = "javac -cp " + jarDepString +
-///                "\"" + ExePath + "build/cluster/modules/ext/OPSJLib.jar\";" +
-///                "\"" + ExePath + "ops_idl_builder_nb/modules/ext/OPSJLib.jar\";" +
-///                "\"" + ExePath + "build/cluster/modules/ext/ConfigurationLib.jar\";" +
-///                "\"" + ExePath + "ops_idl_builder_nb/modules/ext/ConfigurationLib.jar\"" +
-                " @" + "\"" + dinfoPath + "\"";
+        // -----------------------------------------
+        // Create batch / bash file for compiling of the generated java files
+        // The batch / bash file will be running  in the _output dir
+        String classOutputDir = ".obj";
 
-        String batFileText;
-        if(isLinux) {
-            batFileText = "#!/bin/sh" + endl();
+        String execString =
+                "javac -cp " + jarDepString +
+                " -d " + classOutputDir +
+                " @" + "\"" + dinfoFile + "\"";
+
+        String batFileText = "";
+        if (isLinux) {
+            batFileText += "#!/bin/sh" + endl();
             batFileText += "set -e # exit on err" + endl() + endl();
+
+            batFileText += "# find out where this script is" + endl();
+            batFileText += "SCRIPT_PATH=`readlink -f \"$0\"`; SCRIPT_PATH=`dirname \"$SCRIPT_PATH\"`; SCRIPT_PATH=`eval \"cd \\\"$SCRIPT_PATH\\\" && pwd\"`" + endl();
+            batFileText += "echo \"invoking script at: $SCRIPT_PATH\"" + endl();
+            batFileText += "cd $SCRIPT_PATH" + endl();
+
         } else {
-            batFileText = ";";//"@echo off" + endl();
+            //batFileText += "@echo off" + endl();
+            batFileText += "@pushd %~dp0" + endl();   // cd to bat-file directory
         }
-        batFileText += "echo Building Java..." + endl();
+        batFileText += "echo Compiling Java..." + endl();
         batFileText += "javac -version" + endl();
-        if(isLinux) {
+        if (isLinux) {
             batFileText += "mkdir -p " + classOutputDir + endl();
         } else {
             // on windows, mkdir works like posix mkdir -p IF commandline extensions are enabled
             batFileText += "mkdir " + classOutputDir + endl();
         }
-        batFileText += "cd " + classOutputDir + endl();
+
+        // Add commands for copying all dependency jars
+        String copyCmd = "copy";
+        if (isLinux) {
+          copyCmd = "cp";
+        }
+        for (String jarSrc : jarCopyList) {
+          batFileText += copyCmd + " \"" + jarSrc + "\" ." + endl();
+        }
+
         batFileText += execString + endl();
 
-        //String projDirUp = projectDirectory.substring(0, projectDirectory.lastIndexOf("/Generated"));
-        //String projectName = projectDirectory.substring(projDirUp.lastIndexOf("/"), projDirUp.length());
-
-
-        jarPackString = "jar cfm \"" + _outputDir + File.separator + 
-            _projectName + ".jar\" \"" + manFilePath + "\" -C \"" +
-            _outputDir + "Java" + "\" . ";
+        String jarPackString = "jar cfm \"" + _projectName + ".jar\" \"" +
+            manFile + "\" -C " + classOutputDir + " . ";
         batFileText += jarPackString + endl();
-        batFileText += "echo done." + endl();
-        if(!isLinux) {
-            batFileText += "pause" + endl();
-            batFileText += "exit" + endl();
+        batFileText += "echo Compiling done." + endl();
+        if (!isLinux) {
+            batFileText += "@popd" + endl();
         }
-//        batFileText += "del \"" + projectDirectory + "manifest_adds.ops_tmp\"\n";
 
-        //Process p = Runtime.getRuntime().exec(jarPackString);
-        //projDirUp = projDirUp.replace('/', '\\');
+        String script = "";
 
-        if(isLinux) {
-            String script = _outputDir + File.separator + "java_build_script.sh";
+        if (isLinux) {
+            script = _outputDir + File.separator + "java_build_script.sh";
             java.io.Writer output = new java.io.BufferedWriter(new java.io.FileWriter(script));
             output.write(batFileText);
             output.close();
-            //createAndWriteFile(_outputDir + File.separator + "java_build_script.sh", batFileText);
 
             Runtime rTime = Runtime.getRuntime();
             // make script executable
-            rTime.exec("chmod u+x " + script);
-            
-            System.out.println("Info: cmd /c start /D \"" + _outputDir + "\" java_build_script.bat");
-
-            Process process = rTime.exec("sh " + script);
+            Process process = rTime.exec("chmod u+x " + script);
 
             process.waitFor();
         } else {
-        createAndWriteFile(_outputDir + File.separator + "java_build_script.bat", batFileText);
-        //System.out.println("HELM removed: " + projDirUp + "/java_build_script.bat");
-        //FileHelper.createAndWriteFile(projDirUp + "/java_build_script.bat", batFileText);
-
-        //Process p = Runtime.getRuntime().exec("java_build_script.bat");
-        //Thread.sleep((1000));
-        //p.waitFor();
-        Runtime rTime = Runtime.getRuntime();
-        System.out.println("Info: cmd /c start /D \"" + _outputDir + "\" java_build_script.bat");
-        //io.getOut().println("Info: cmd /c start /D \"" + projDirUp + "\" java_build_script.bat");
-        Process process = rTime.exec("cmd /c start /D \"" + _outputDir + "\" java_build_script.bat");
-
-//            InputStream p_in = process.getInputStream();
-//            OutputStream p_out = process.getOutputStream();
-//            InputStream p_err = process.getErrorStream();
-        process.waitFor();
-//            p_in.close();
-//            p_out.close();
-//            p_err.close();
+            script = _outputDir + File.separator + "java_build_script.bat";
+            createAndWriteFile(script, batFileText);
         }
 
         // --------------------------------------------------------------------
-        // Test code
-        // Write javac version number in output window
+        // Run the batch / shell script and redirct output to standard out
         try {
-          ProcessBuilder pb = new ProcessBuilder("javac", "-version");
+          ProcessBuilder pb;
+          System.out.println("Info: running \"" + script + "\"");
+          if (isLinux) {
+            pb = new ProcessBuilder("sh", script);
+          } else {
+            pb = new ProcessBuilder(script, "");
+          }
           pb.redirectErrorStream(true);
           Process p = pb.start();
           InputStream inp = p.getInputStream();
 
           int c;
           while ((c = inp.read()) != -1) {
-              //io.getOut().write(c);
-              System.out.write(c);
+            System.out.write(c);
           }
         }
         catch (IOException e) {
           System.out.println("Error: " + e.getMessage());
-          //io.getOut().println("Error: " + e.getMessage());
         }
-        // --------------------------------------------------------------------
-
     }
 
     public void appendFileToBuild(List<String> file)
     {
         for (String string : file)
         {
-            createdFiles += "\"" + string + "\"\n";
+          createdFiles += "\"" + string + "\"\n";
         }
-        
+
     }
 }
