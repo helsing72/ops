@@ -1,3 +1,4 @@
+@pushd %~dp0
 @echo Building OPSCompilerLib ...
 @javac -version
 @IF NOT EXIST "build/classes" (
@@ -10,3 +11,4 @@
 @javac @"src/files.txt" -d "build/classes"
 
 @jar cf "dist/OPSCompilerLib.jar" -C "build/classes/" .
+@popd

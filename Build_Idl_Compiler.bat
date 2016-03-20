@@ -1,17 +1,9 @@
 @echo Building needed libraries ...
-@pushd Libs\ConfigurationLib
-@call Build_Lib.bat
-@popd
-@pushd Java\OPSJLib
-@call Build_Lib.bat
-@popd
-@pushd Tools\OPSCompilerLib
-@call Build_Lib.bat
-@popd
-@pushd Tools\IDLParser
-@call Build_Lib.bat
-@popd
+@call Libs\ConfigurationLib\Build_Lib.bat
+@call Java\OPSJLib\Build_Lib.bat
+@call Tools\OPSCompilerLib\Build_Lib.bat
+@call Tools\IDLParser\Build_Lib.bat
+@call Tools\NBOPSIDLSupport\Build_Lib.bat
+
 @echo Building IDL Command-Line Compiler ...
-@pushd Tools\opsc
-@call Build_opsc.bat
-@popd
+@call Tools\opsc\Build_opsc.bat

@@ -1,3 +1,4 @@
+@pushd %~dp0
 @echo Building IDLParser ...
 @javac -version
 @IF NOT EXIST "build/classes" (
@@ -10,3 +11,4 @@
 @javac -cp "../OPSCompilerLib/dist/OPSCompilerLib.jar" @"src/files.txt" -d "build/classes"
 
 @jar cf "dist/IDLParser.jar" -C "build/classes/" .
+@popd
