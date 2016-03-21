@@ -48,6 +48,7 @@ public class OpsCompiler
 
     /** The java generator instance */
     protected opsc.JavaCompiler _javaCompiler;
+    protected opsc.CSharpCompiler _CSharpCompiler;
 
     public OpsCompiler() {
         // create a parser to generate IDLClasses for us
@@ -320,17 +321,30 @@ public class OpsCompiler
 
     protected boolean compileCs() {
         // create the compiler and set parameters
-        opsc.Compiler compiler = new opsc.CSharpCompiler(_strProjectName);
+        _CSharpCompiler = new opsc.CSharpCompiler(_strProjectName);
         Property propTemplatePath = _props.getProperty("templatePath");
         if(propTemplatePath != null)
-            compiler.setTemplateDir(propTemplatePath.value);
+            _CSharpCompiler.setTemplateDir(propTemplatePath.value);
         Property propOutPath = _props.getProperty("outputPath");
         if(propOutPath != null)
-            compiler.setOutputDir(propOutPath.value + File.separator + "CSharp");
+            _CSharpCompiler.setOutputDir(propOutPath.value + File.separator + "CSharp");
 
-        compiler.compileDataClasses(_parser._idlClasses, "baba");
-        compiler.compileTypeSupport();
+        _CSharpCompiler.compileDataClasses(_parser._idlClasses, "baba");
+        _CSharpCompiler.compileTypeSupport();
 
+        return true;
+    }
+
+    protected boolean buildCs() {
+        try {
+            _CSharpCompiler.setDllDependencies(_props.csBuildDllDependencies);
+            if (_strProjectDir.equals("")) _strProjectDir = _strProjectName;
+            _CSharpCompiler.buildDll(_strProjectDir);
+        } catch(java.io.IOException ioe) {
+            System.out.println("Error: Failed to buildDll " + _strProjectName);
+        } catch(java.lang.InterruptedException inte) {
+            System.out.println("Error: Failed to buildDll (Interrupted) " + _strProjectName);
+        }
         return true;
     }
 
@@ -377,8 +391,9 @@ public class OpsCompiler
         }
 
         // generate c++ if requested
-        if(opsc._props.generateCpp)
+        if(opsc._props.generateCpp) {
             opsc.compileCpp();
+        }
 
         // generate java if so requested
         if(opsc._props.generateJava) {
@@ -389,7 +404,11 @@ public class OpsCompiler
         }
 
         // generate cs if so requested
-        if(opsc._props.generateCS)
-            opsc.compileCs();
+        if(opsc._props.generateCS) {
+            // if compile is successful and user opted to build C#
+            if(opsc.compileCs() && opsc._props.buildCS) {
+                opsc.buildCs();
+            }
+        }
     }
 };

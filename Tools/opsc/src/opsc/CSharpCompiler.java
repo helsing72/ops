@@ -35,7 +35,7 @@ public class CSharpCompiler extends opsc.Compiler
     final static String DESERIALIZE_REGEX = "__deserialize";
     final static String CLONE_BODY_REGEX = "__cloneBody";
     final static String SIZE_REGEX = "__size";
-    final static String CS_DIR = "C#";
+    final static String CS_DIR = "CSharp";
     private String projectDirectory;
     private static String BASE_CLASS_NAME_REGEX = "__baseClassName";
     private static String CREATE_OBJECT_BODY_REGEX = "__createObjectBody";
@@ -59,7 +59,7 @@ public class CSharpCompiler extends opsc.Compiler
             {
                 if (iDLClass.getType() == IDLClass.ENUM_TYPE)
                 {
-                    System.out.println("Compile enum");
+                    //System.out.println("Compile enum");
                     compileEnum(iDLClass);
                 }
                 else
@@ -74,7 +74,7 @@ public class CSharpCompiler extends opsc.Compiler
             compileTypeSupport(idlClasses, _projectName);
         } catch (IOException iOException)  {
             //JOptionPane.showMessageDialog(null, "Generating C# failed with the following exception: " + iOException.getMessage());
-            System.out.println( "Generating C# failed with the following exception: " + iOException.getMessage());
+            System.out.println( "Error: Generating C# failed with the following exception: " + iOException.getMessage());
         }
 
     }
@@ -493,61 +493,77 @@ public class CSharpCompiler extends opsc.Compiler
 
     public void buildDll(String projectDir) throws IOException, InterruptedException
     {
-        String projDirUp = projectDirectory.substring(0, projectDirectory.lastIndexOf("/Generated"));
-        String projectName = projectDirectory.substring(projDirUp.lastIndexOf("/")+1, projDirUp.length());
+      // don't want to build bat scripts on linux...
+      final boolean isLinux = System.getProperty("os.name").equals("Linux");
 
-        String dllDepString = ""; ///"/r:\"" + projDirUp + "\\OpsLibrary.dll\" ";
+      if (isLinux) {
+        System.out.println("Info: Building C# on Linux is not supported");
+        return;
+      }
 
-        if (dllDependencies != null) {
-            for (JarDependency dllDep : dllDependencies)
-            {
-                dllDepString += "/r:\"" + dllDep.path + "\" ";
+      //System.out.println(">>>>: projectDir = " +  projectDir);
+      //System.out.println(">>>>: _outputDir = " +  _outputDir);
 
-//            File jarToBeCopied = new File(projectDir + "/" + jarDep.path + "");
-//            File jarCopy = new File(projectDir + "/" + "Generated" + "/" + jarToBeCopied.getName());
-//            jarCopy.createNewFile();
-//            FileHelper.copyFile(jarToBeCopied, jarCopy);
-            }
+//        String projDirUp = projectDirectory.substring(0, projectDirectory.lastIndexOf("/Generated"));
+//        String projectName = projectDirectory.substring(projDirUp.lastIndexOf("/")+1, projDirUp.length());
+
+      String dllDepString = "";
+
+      if (dllDependencies != null) {
+        for (JarDependency dllDep : dllDependencies) {
+          File dllToBeCopied = new File(dllDep.path + "");
+          if (!dllToBeCopied.isAbsolute()) {
+            dllToBeCopied = new File(projectDir + File.separator + dllDep.path + "");
+          }
+          // Backward compatibility with HMI-based IDL compiler (i.e. old project files).
+          if (!dllToBeCopied.exists()) {
+            // try changing C# (in old project files) to CSharp
+            dllToBeCopied = new File(dllToBeCopied.getAbsolutePath().replaceAll("C#","CSharp"));
+          }
+
+          dllDepString += "/r:\"" + dllToBeCopied.getAbsolutePath() + "\" ";
         }
+      }
 
-        String cscPath = System.getenv("OPS_CSC_PATH");
-        if (cscPath == null) {
-            System.out.println("Info: Path to C# compiler \"csc.exe\" can be set using env. symbol OPS_CSC_PATH");
-            cscPath = "csc.exe";
-        } else {
-            cscPath += "\\csc.exe";
-            System.out.println("Info: C# compiler \"" + cscPath + "\" used (from env. symbol OPS_CSC_PATH)");
+      String cscPath = System.getenv("OPS_CSC_PATH");
+      if (cscPath == null) {
+        System.out.println("Info: Path to C# compiler \"csc.exe\" can be set using env. symbol OPS_CSC_PATH");
+        cscPath = "csc.exe";
+      } else {
+        cscPath += File.separator + "csc.exe";
+        System.out.println("Info: C# compiler \"" + cscPath + "\" used (from env. symbol OPS_CSC_PATH)");
+      }
+
+      String execString = "\"" + cscPath + "\" /target:library " +
+                "/out:\"" + _outputDir + File.separator + _projectName + ".dll\" " +
+                dllDepString + " /recurse:\"" + _outputDir + File.separator + "*.cs\"";
+      String  batFileText = "";
+      batFileText += "@pushd %~dp0" + endl();   // cd to bat-file directory
+      batFileText += "echo Building C#..."  + endl();
+      batFileText += execString + endl();
+      batFileText += "@popd" + endl();
+      batFileText += "echo done."  + endl();
+
+      String script = _outputDir + File.separator + "cs_build_script.bat";
+      createAndWriteFile(script, batFileText);
+
+      // --------------------------------------------------------------------
+      // Run the batch / shell script and redirct output to standard out
+      try {
+        System.out.println("Info: running \"" + script + "\"");
+        ProcessBuilder pb = new ProcessBuilder(script, "");
+        pb.redirectErrorStream(true);
+        Process p = pb.start();
+        InputStream inp = p.getInputStream();
+
+        int c;
+        while ((c = inp.read()) != -1) {
+          System.out.write(c);
         }
-
-        String  execString = "\"" + cscPath + "\" /target:library " +
-                "/out:\"" + projectDirectory + CS_DIR + "\\" + projectName + ".dll\" " +
-                dllDepString + " /recurse:\"" + projectDirectory + CS_DIR + "\\*.cs\"";
-        String  batFileText = "echo Building C#..."  + "\r\n";
-        batFileText += execString + "\r\n";
-        batFileText += "echo done."  + "\r\n";
-        batFileText += "pause\r\n";
-        batFileText += "exit\r\n";
-
-        projDirUp = projDirUp.replace('/', '\\');
-
-        //FileHelper.createAndWriteFile(projDirUp + "/cs_build_script.bat", batFileText);
-        System.out.println("HELM remove call to FileHelper.createAndWriteFile(" + projDirUp + "/cs_build_script.bat");
-
-//        //Process p = Runtime.getRuntime().exec(jarPackString);
-//        //Process p = Runtime.getRuntime().exec("java_build_script.bat");
-//        //Thread.sleep((1000));
-//        //p.waitFor();
-        Runtime rTime = Runtime.getRuntime();
-        System.out.println("Info: cmd /c start /D \"" + projDirUp + "\" cs_build_script.bat");
-        Process process = rTime.exec("cmd /c start /D \"" + projDirUp + "\" cs_build_script.bat");
-
-//            InputStream p_in = process.getInputStream();
-//            OutputStream p_out = process.getOutputStream();
-//            InputStream p_err = process.getErrorStream();
-        process.waitFor();
-//            p_in.close();
-//            p_out.close();
-//            p_err.close();
+      }
+      catch (IOException e) {
+        System.out.println("Error: " + e.getMessage());
+      }
     }
 
 }
