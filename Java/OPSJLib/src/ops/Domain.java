@@ -39,8 +39,8 @@ public class Domain extends OPSObject
     private String localInterface = "0.0.0.0";
     protected Vector<Topic> topics = new Vector<Topic>();
     private int timeToLive = 1;
-    private int inSocketBufferSize = 16000000;
-    private int outSocketBufferSize = 16000000;
+    private int inSocketBufferSize = -1;    // Use OS default
+    private int outSocketBufferSize = -1;   // Use OS default
     private int metaDataMcPort = 9494;
 
 
@@ -49,6 +49,21 @@ public class Domain extends OPSObject
         appendType("Domain");
     }
 
+    private void checkTopicValues(Topic top)
+    {
+      if (top.getDomainAddress().equals(""))
+      {
+        top.setDomainAddress(domainAddress);
+      }
+      if (top.getInSocketBufferSize() < 0)
+      {
+        top.setInSocketBufferSize(inSocketBufferSize);
+      }
+      if (top.getOutSocketBufferSize() < 0)
+      {
+        top.setOutSocketBufferSize(outSocketBufferSize);
+      }
+    }
 
     public Topic getTopic(String name)
     {
@@ -56,10 +71,7 @@ public class Domain extends OPSObject
         {
             if(topic.getName().equals(name))
             {
-                if(topic.getDomainAddress().equals(""))
-                {
-                    topic.setDomainAddress(domainAddress);
-                }
+                checkTopicValues(topic);
                 return topic;
             }
         }
@@ -88,17 +100,14 @@ public class Domain extends OPSObject
         //archiver->inout(std::string("outSocketBufferSize"), outSocketBufferSize);
         //archiver->inout(std::string("metaDataMcPort"), metaDataMcPort);
         timeToLive = archive.inout("timeToLive", timeToLive);
-	inSocketBufferSize = archive.inout("inSocketBufferSize", inSocketBufferSize);
-    	outSocketBufferSize = archive.inout("outSocketBufferSize", outSocketBufferSize);
+        inSocketBufferSize = archive.inout("inSocketBufferSize", inSocketBufferSize);
+        outSocketBufferSize = archive.inout("outSocketBufferSize", outSocketBufferSize);
         metaDataMcPort = archive.inout("metaDataMcPort", metaDataMcPort);
     }
 
-
     public Vector<Topic> getTopics() {
         for (Topic topic : topics) {
-            if (topic.getDomainAddress().equals("")) {
-                topic.setDomainAddress(domainAddress);
-            }
+            checkTopicValues(topic);
         }
         return topics;
     }

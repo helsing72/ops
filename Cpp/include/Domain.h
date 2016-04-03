@@ -38,6 +38,9 @@ namespace ops
 		std::vector<Topic* > topics;
 		std::string domainID;
 		int metaDataMcPort;
+
+		void checkTopicValues(Topic* top);
+
 	public:
 		Domain();
 		std::string getDomainAddress();
@@ -58,11 +61,7 @@ namespace ops
 		virtual ~Domain();
 
 		static std::string doSubnetTranslation(std::string addr, IOService* ioServ);
-		
 	};
-
-
 }
-
 
 #endif

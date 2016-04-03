@@ -16,15 +16,30 @@ namespace Ops
 		private string localInterface = "0.0.0.0";
 		protected List<Topic> topics = new List<Topic>();
         private int timeToLive = 1;
-        private int inSocketBufferSize = 16000000;
-        private int outSocketBufferSize = 16000000;
+        private int inSocketBufferSize = -1;    // Use OS default
+        private int outSocketBufferSize = -1;   // Use OS default
 		private int metaDataMcPort = 9494;
 
         public Domain()
         {
             AppendType("Domain");
         }
-        
+
+        void checkTopicValues(Topic top)
+        {
+            if (top.GetDomainAddress().Equals(""))
+            {
+                top.SetDomainAddress(domainAddress);
+            }
+            if (top.GetInSocketBufferSize() < 0)
+            {
+                top.SetInSocketBufferSize(inSocketBufferSize);
+            }
+            if (top.GetOutSocketBufferSize() < 0)
+            {
+                top.SetOutSocketBufferSize(outSocketBufferSize);
+            }
+        }
 
         public Topic GetTopic(string name)
         {
@@ -32,10 +47,7 @@ namespace Ops
             {
                 if (topic.GetName().Equals(name))
                 {
-                    if (topic.GetDomainAddress().Equals(""))
-                    {
-                        topic.SetDomainAddress(domainAddress);
-                    }
+                    checkTopicValues(topic);
                     return topic;
                 }
             }
@@ -72,10 +84,7 @@ namespace Ops
         {
             foreach (Topic topic in topics) 
             {
-                if (topic.GetDomainAddress().Equals("")) 
-                {
-                    topic.SetDomainAddress(domainAddress);
-                }
+                checkTopicValues(topic);
             }
             return topics;
         }

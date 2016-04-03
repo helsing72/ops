@@ -11,9 +11,9 @@ namespace Ops
     {
 		private string domainAddress = "";
 		private string domainID;
-		private int inSocketBufferSize;
+		private int inSocketBufferSize = -1;
 		private string name = "";
-		private int outSocketBufferSize;
+		private int outSocketBufferSize = -1;
 		private string participantID;
 		private int port = -1;
 		private int replyPort = 0;

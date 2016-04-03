@@ -32,7 +32,7 @@ public class Topic<T> extends OPSObject
     public static final String TRANSPORT_MC = "multicast";
     public static final String TRANSPORT_TCP = "tcp";
     public static final String TRANSPORT_UDP = "udp";
-    
+
     private String name = "";
     private int port = -1;
     private int replyPort = 0;
@@ -41,8 +41,8 @@ public class Topic<T> extends OPSObject
     private int sampleMaxSize = StaticManager.MAX_SIZE;
     private String participantID;
     private String domainID;
-    private int outSocketBufferSize;
-    private int inSocketBufferSize;
+    private int outSocketBufferSize = -1;
+    private int inSocketBufferSize = -1;
     private String transport;
 
     /** Creates a new instance of Topic */
