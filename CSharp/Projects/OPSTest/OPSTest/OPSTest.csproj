@@ -69,26 +69,26 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\..\..\Examples\OPSIdls\PizzaProject\Generated\C#\PizzaProject\PizzaProjectTypeFactory.cs">
-      <Link>pizza\PizzaProjectTypeFactory.cs</Link>
+    <Compile Include="..\..\..\..\Examples\OPSIdls\PizzaProject\Generated\CSharp\PizzaProject\PizzaProjectTypeFactory.cs">
+      <Link>GenIDLs\PizzaProjectTypeFactory.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\Examples\OPSIdls\PizzaProject\Generated\C#\pizza\CapricosaData.cs">
-      <Link>pizza\CapricosaData.cs</Link>
+    <Compile Include="..\..\..\..\Examples\OPSIdls\PizzaProject\Generated\CSharp\pizza\CapricosaData.cs">
+      <Link>GenIDLs\CapricosaData.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\Examples\OPSIdls\PizzaProject\Generated\C#\pizza\PizzaData.cs">
-      <Link>pizza\PizzaData.cs</Link>
+    <Compile Include="..\..\..\..\Examples\OPSIdls\PizzaProject\Generated\CSharp\pizza\PizzaData.cs">
+      <Link>GenIDLs\PizzaData.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\Examples\OPSIdls\PizzaProject\Generated\C#\pizza\special\Cheese.cs">
-      <Link>pizza\Cheese.cs</Link>
+    <Compile Include="..\..\..\..\Examples\OPSIdls\PizzaProject\Generated\CSharp\pizza\special\Cheese.cs">
+      <Link>GenIDLs\Cheese.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\Examples\OPSIdls\PizzaProject\Generated\C#\pizza\special\ExtraAllt.cs">
-      <Link>pizza\ExtraAllt.cs</Link>
+    <Compile Include="..\..\..\..\Examples\OPSIdls\PizzaProject\Generated\CSharp\pizza\special\ExtraAllt.cs">
+      <Link>GenIDLs\ExtraAllt.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\Examples\OPSIdls\PizzaProject\Generated\C#\pizza\special\LHCData.cs">
-      <Link>pizza\LHCData.cs</Link>
+    <Compile Include="..\..\..\..\Examples\OPSIdls\PizzaProject\Generated\CSharp\pizza\special\LHCData.cs">
+      <Link>GenIDLs\LHCData.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\Examples\OPSIdls\PizzaProject\Generated\C#\pizza\VessuvioData.cs">
-      <Link>pizza\VessuvioData.cs</Link>
+    <Compile Include="..\..\..\..\Examples\OPSIdls\PizzaProject\Generated\CSharp\pizza\VessuvioData.cs">
+      <Link>GenIDLs\VessuvioData.cs</Link>
     </Compile>
     <Compile Include="..\..\..\ops\AckData.cs">
       <Link>ops\AckData.cs</Link>
@@ -382,6 +382,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

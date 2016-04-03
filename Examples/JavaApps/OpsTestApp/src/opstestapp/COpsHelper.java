@@ -55,8 +55,10 @@ public class COpsHelper implements IOpsHelper
             " [ " + t.getTransport() +
             "::" + t.getDomainAddress() +
             "::" + t.getPort() +
-            " ]\n"
-            );
+            " ]");
+        Log("  InSocketBufferSize: " + t.getInSocketBufferSize() + "\n" +
+            "  OutSocketBufferSize: " + t.getOutSocketBufferSize() + "\n" +
+            "  SampleMaxSize: " + t.getSampleMaxSize() + "\n");
     }
 
     public void CreateSubscriber(Participant part, String topName)

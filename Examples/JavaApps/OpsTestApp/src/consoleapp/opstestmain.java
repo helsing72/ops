@@ -90,7 +90,23 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
       otherParticipant = Participant.getInstance(OtherDomain, OtherDomain);
       otherParticipant.addTypeSupport(new PizzaProjectTypeFactory());
       otherParticipant.addListener(this);
-      OnLog("Created Participant\n");
+      OnLog("Created Participants\n");
+
+      OnLog("DomainID: " + participant.getDomain().getDomainID());
+      OnLog("DomainAddress: " + participant.getDomain().getDomainAddress());
+      OnLog("InSocketBufferSize: " + participant.getDomain().GetInSocketBufferSize());
+      OnLog("OutSocketBufferSize: " + participant.getDomain().GetOutSocketBufferSize());
+      OnLog("MetaDataMcPort: " + participant.getDomain().GetMetaDataMcPort());
+      OnLog("LocalInterface: " + participant.getDomain().getLocalInterface());
+      OnLog("TimeToLive: " + participant.getDomain().getTimeToLive() + "\n");
+
+      OnLog("DomainID: " + otherParticipant.getDomain().getDomainID());
+      OnLog("DomainAddress: " + otherParticipant.getDomain().getDomainAddress());
+      OnLog("InSocketBufferSize: " + otherParticipant.getDomain().GetInSocketBufferSize());
+      OnLog("OutSocketBufferSize: " + otherParticipant.getDomain().GetOutSocketBufferSize());
+      OnLog("MetaDataMcPort: " + otherParticipant.getDomain().GetMetaDataMcPort());
+      OnLog("LocalInterface: " + otherParticipant.getDomain().getLocalInterface());
+      OnLog("TimeToLive: " + otherParticipant.getDomain().getTimeToLive() + "\n");
 
       for(int i = 0; i < MyTopicInfoList.size(); i++) {
         MyTopicInfo info = MyTopicInfoList.elementAt(i);
