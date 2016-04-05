@@ -19,9 +19,9 @@ public class McSendDataHandler extends SendDataHandlerBase
 {
     private final InetAddress sinkIP;
 
-    public McSendDataHandler(Topic t, String localInterface) throws IOException
+    public McSendDataHandler(Topic t, String localInterface, int ttl) throws IOException
     {
-        sender = new MulticastSender(0, localInterface, 1, t.getOutSocketBufferSize());
+        sender = new MulticastSender(0, localInterface, ttl, t.getOutSocketBufferSize());
         sinkIP = InetAddress.getByName(t.getDomainAddress());
     }
 

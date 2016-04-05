@@ -46,7 +46,7 @@ namespace Ops
                 ISendDataHandler sender = null;
                 if (t.GetTransport().Equals(Topic.TRANSPORT_MC))
                 {
-                    sender = new McSendDataHandler(t, localIF);
+                    sender = new McSendDataHandler(t, localIF, participant.getDomain().getTimeToLive());
                 }
                 else if (t.GetTransport().Equals(Topic.TRANSPORT_TCP))
                 {

@@ -37,7 +37,9 @@ namespace Ops
                 {
                     multicastSocket.Client.SendBufferSize = outSocketBufferSize;
                 }
-                multicastSocket.Ttl = (short)ttl;
+
+                multicastSocket.Client.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastTimeToLive, ttl);
+
                 opened = true;
             }
         }

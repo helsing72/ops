@@ -39,7 +39,7 @@ class SendDataHandlerFactory
 
             if(t.getTransport().equals(Topic.TRANSPORT_MC))
             {
-                sender = new McSendDataHandler(t, localIf);
+                sender = new McSendDataHandler(t, localIf, participant.getDomain().getTimeToLive());
             }
             if(t.getTransport().equals(Topic.TRANSPORT_TCP))
             {

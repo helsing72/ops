@@ -14,9 +14,9 @@ namespace Ops
     {
         private readonly InetAddress sinkIP;
 
-        public McSendDataHandler(Topic t, string localInterface) 
+        public McSendDataHandler(Topic t, string localInterface, int ttl) 
         {
-            sender = new MulticastSender(0, localInterface, 1, t.GetOutSocketBufferSize());     // Make ttl configurable
+            sender = new MulticastSender(0, localInterface, ttl, t.GetOutSocketBufferSize());
             sinkIP = InetAddress.GetByName(t.GetDomainAddress());
         }
 

@@ -43,9 +43,11 @@ namespace ops
 
 		std::string localIf = Domain::doSubnetTranslation(participant->getDomain()->getLocalInterface(), participant->getIOService());
 
+		int ttl = participant->getDomain()->getTimeToLive();
+
 		if(top.getTransport() == Topic::TRANSPORT_MC)
 		{
-			SendDataHandler* newSendDataHandler = new McSendDataHandler(top, localIf, 1); //TODO: make ttl configurable.
+			SendDataHandler* newSendDataHandler = new McSendDataHandler(top, localIf, ttl); 
 			sendDataHandlers[key] = newSendDataHandler;
 			return newSendDataHandler;
 		}
@@ -55,7 +57,7 @@ namespace ops
 			{
 				// We have only one sender for all topics, so use the domain value for buffer size
 				udpSendDataHandler = new McUdpSendDataHandler(localIf, 
-															  1,								//TODO: make ttl configurable.
+															  ttl,
 															  participant->getDomain()->getOutSocketBufferSize()); 
 			}
 
