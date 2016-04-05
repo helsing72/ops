@@ -34,6 +34,16 @@ public class COpsHelper implements IOpsHelper
         this.client = client;
     }
 
+    public boolean HasPublisher()
+    {
+      return pub != null;
+    }
+
+    public boolean HasSubscriber()
+    {
+      return sub != null;
+    }
+
     private void Log(String str)
     {
         if (client != null) client.OnLog(str);
@@ -142,7 +152,7 @@ public class COpsHelper implements IOpsHelper
             Log("Publisher for topic " + pub.getTopic().getName() + " already exist!!!\n");
         }
     }
-    
+
     public void DeletePublisher()
     {
         if (pub != null) {

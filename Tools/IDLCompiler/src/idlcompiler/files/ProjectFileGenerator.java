@@ -41,7 +41,7 @@ public class ProjectFileGenerator
  
         text += "</OPSProject>\n";
         
-        FileHelper.createAndWriteFile(theProject.getRunDirectory() + "\\" + FileHelper.cropExtension(theProject.getName()) + ".prj", text);
+        FileHelper.createAndWriteFile(theProject.getRunDirectory() + File.separator + FileHelper.cropExtension(theProject.getName()) + ".prj", text);
         
         
         

@@ -100,7 +100,7 @@ public abstract class AbstractTemplateBasedIDLCompiler implements IDLCompiler
         String ret = "";
         for (int j = 0; j < i; j++)
         {
-            ret += "\t";
+            ret += tabString;
         }
         return ret;
     }

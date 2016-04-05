@@ -1,7 +1,7 @@
 // PizzaTest.cpp : Defines the entry point for the console application.
 //
 #include "PublishData.h"
-#include "../UnitTests/TestSerializeAndDeserialize.h"
+//#include "../UnitTests/TestSerializeAndDeserialize.h"
 
 #undef USE_MESSAGE_HEADER
 
@@ -235,7 +235,7 @@ int main(int argc, char**argv)
 	// --------------------------------------------------------------------
 	MyListener myListener;
 
-	ItemInfoList.push_back(new ItemInfo("PizzaDomain", "ExtraAlltTopic", "pizza.special.ExtraAllt"));
+	ItemInfoList.push_back(new ItemInfo("PizzaDomain", "ExtraAlltTopic"	  , "pizza.special.ExtraAllt"));
 	ItemInfoList.push_back(new ItemInfo("PizzaDomain", "TcpExtraAlltTopic", "pizza.special.ExtraAllt"));
 	ItemInfoList.push_back(new ItemInfo("PizzaDomain", "UdpExtraAlltTopic", "pizza.special.ExtraAllt"));
 
@@ -306,9 +306,9 @@ int main(int argc, char**argv)
 		itemInfo->helper->StartPublisher();
 
 
-		if(		i == 0) std::cout << "skickar extra allt" << std::endl;
-		else if(i == 1) std::cout << "skickar extra allt TCP" << std::endl;
-		else if(i == 2) std::cout << "skickar extra allt UDP" << std::endl;
+		if		(i == 0) std::cout << "skickar extra allt" << std::endl;
+		else if	(i == 1) std::cout << "skickar extra allt TCP" << std::endl;
+		else if	(i == 2) std::cout << "skickar extra allt UDP" << std::endl;
 
 
 		hlpExtra = (TExtraAlltHelper*)itemInfo->helper;
@@ -353,10 +353,7 @@ int main(int argc, char**argv)
 			itemInfo->helper->Write();
 			ops::TimeHelper::sleep(100);
 		}
-
 	}
-
-
 
 	for (unsigned int idx = 0; idx < ItemInfoList.size(); ++idx) {
 		ItemInfo* ii = ItemInfoList[idx];

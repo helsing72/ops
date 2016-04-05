@@ -1,7 +1,5 @@
-#include <gtest/gtest.h>
-#include "TestSerializeAndDeserialize.h"
-#include "TestPizza.cpp"
-#include "Init_Data.h"
+#include "SubscribeDataAndTest.h"
+#include "../lib/Init_Data.h"
 
 
 using namespace std;
@@ -10,10 +8,10 @@ pizza::VessuvioData vessuvio;
 pizza::special::ExtraAllt extraAllt;
 
 
-class Test_OPSSerialization : public testing::Test
+class Test_OPS_Serialization_And_Deserialization : public testing::Test
 {
 public:
-	Test_OPSSerialization() {
+	Test_OPS_Serialization_And_Deserialization() {
     	vessuvioObject 		= NULL;
      	vessuvioMessage 	= NULL;
      	recreatedVessuvio 	= NULL;
@@ -22,7 +20,7 @@ public:
     	recreatedExtraAllt 	= NULL;
 	}
 
-    ~Test_OPSSerialization() {}
+    ~Test_OPS_Serialization_And_Deserialization() {}
 
     ops::OPSObject* vessuvioObject;
     ops::OPSMessage* vessuvioMessage;
@@ -34,7 +32,7 @@ public:
 
 };
 
-TEST_F(Test_OPSSerialization, test_Vesuvio_OPSObject) {
+TEST_F(Test_OPS_Serialization_And_Deserialization, test_Vesuvio_OPSObject) {
 	ops::MemoryMap map(1, 10000);
 	ops::ByteBuffer buf(&map);
 
@@ -61,7 +59,7 @@ TEST_F(Test_OPSSerialization, test_Vesuvio_OPSObject) {
 	EXPECT_EQ((int) buf.GetSize(), 89);
 }
 
-TEST_F(Test_OPSSerialization, test_Vesuvio_OPSMessage) {
+TEST_F(Test_OPS_Serialization_And_Deserialization, test_Vesuvio_OPSMessage) {
 	ops::MemoryMap map(1, 10000);
 	ops::ByteBuffer buf(&map);
 
@@ -103,7 +101,7 @@ TEST_F(Test_OPSSerialization, test_Vesuvio_OPSMessage) {
 
 }
 
-TEST_F(Test_OPSSerialization, test_ExtraAllt_OPSObject) {
+TEST_F(Test_OPS_Serialization_And_Deserialization, test_ExtraAllt_OPSObject) {
 	ops::MemoryMap map(1, 10000);
 	ops::ByteBuffer buf(&map);
 
@@ -112,7 +110,6 @@ TEST_F(Test_OPSSerialization, test_ExtraAllt_OPSObject) {
 	fact.add(new PizzaProject::PizzaProjectTypeFactory());
 
 	// Setup archivers
-	// I can use the same buffer since I know that they aren't used at the same time
 	ops::OPSArchiverOut out(&buf);
 	ops::OPSArchiverIn  in(&buf, &fact);
 
@@ -121,7 +118,7 @@ TEST_F(Test_OPSSerialization, test_ExtraAllt_OPSObject) {
 
 	out.inout(std::string("data"), &extraAllt);
 
-	EXPECT_EQ(buf.GetSize(), 797);
+	EXPECT_EQ(buf.GetSize(), 799);
 
 	// Create object from buffer (using type info in buffer)
 	buf.Reset();
@@ -134,10 +131,10 @@ TEST_F(Test_OPSSerialization, test_ExtraAllt_OPSObject) {
 
 	test::testExtraAlltNormal(*recreatedExtraAllt);
 
-	EXPECT_EQ((int) buf.GetSize(), 797);
+	EXPECT_EQ((int) buf.GetSize(), 799);
 }
 
-TEST_F(Test_OPSSerialization, test_ExtraAllt_OPSMessage) {
+TEST_F(Test_OPS_Serialization_And_Deserialization, test_ExtraAllt_OPSMessage) {
 	ops::MemoryMap map(1, 10000);
 	ops::ByteBuffer buf(&map);
 
@@ -161,7 +158,7 @@ TEST_F(Test_OPSSerialization, test_ExtraAllt_OPSMessage) {
 
 	out.inout(std::string("data"), &mess);
 
-	EXPECT_EQ(buf.GetSize(), 856);
+	EXPECT_EQ(buf.GetSize(), 858);
 
 	// Create object from buffer (using type info in buffer)
 	buf.Reset();
@@ -176,9 +173,10 @@ TEST_F(Test_OPSSerialization, test_ExtraAllt_OPSMessage) {
 	EXPECT_TRUE(extraAlltMessage) 	<< "Failed to create object as OPSMessage";
 	EXPECT_TRUE(recreatedExtraAllt)	<< "Failed to create ExtraAllt object";
 
+	//testing values of extra allt
 	test::testExtraAlltNormal(*recreatedExtraAllt);
 
-	EXPECT_EQ(buf.GetSize(), 856);
+	EXPECT_EQ(buf.GetSize(), 858);
 
 }
 

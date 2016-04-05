@@ -1,0 +1,2 @@
+add_subdirectory(OPStest)
+add_dependencies(UnitTests opsdbg)

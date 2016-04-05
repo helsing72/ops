@@ -1,1 +1,0 @@
-/usr/bin/c++   -fprofile-arcs -ftest-coverage -fPIC -O0   CMakeFiles/test-subscribeUDP.dir/SubscribeUDPDataAndTest.cpp.o  -o test-subscribeUDP  -L/sw/tools/boost/1.55/lib64 -rdynamic -lboost_system -lboost_thread -lpthread /sw/tools/google-test/1.7/google-build/googlemock/gtest/libgtest.a /home/pane/OPS4/ops4/Cpp/lib64/libOPSopt.a -Wl,-rpath,/sw/tools/boost/1.55/lib64 

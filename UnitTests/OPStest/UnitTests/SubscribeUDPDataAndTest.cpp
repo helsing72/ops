@@ -1,9 +1,4 @@
-// PizzaTest.cpp : Defines the entry point for the console application.
-//
 #include "SubscribeDataAndTest.h"
-#include "gtest/gtest.h"
-#include "TestPizza.cpp"
-
 
 #undef USE_MESSAGE_HEADER
 
@@ -268,8 +263,8 @@ int main(int argc, char**argv)
 	itemInfo->selected = true;
 	itemInfo->helper->CreateSubscriber(itemInfo->part, itemInfo->TopicName);
 	itemInfo->helper->StartSubscriber();
-
-	ops::TimeHelper::sleep(24000); //listen on data 24 seconds
+	std::cout << "start linstening on udp" << std::endl;
+	ops::TimeHelper::sleep(25000); //listen on data 25 seconds
 
 	//delete objects
 

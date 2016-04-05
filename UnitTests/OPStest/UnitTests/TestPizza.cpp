@@ -1,10 +1,7 @@
-#include "ExtraAllt.h"
-#include "VessuvioData.h"
-#include "SubscribeDataAndTest.h"
 #include "gtest/gtest.h"
+#include "Types.h"
 
 namespace test {
-
 
 const int int_max 			= std::numeric_limits<int>::max();
 const int int_min 			= std::numeric_limits<int>::min();
@@ -12,6 +9,8 @@ const float float_max 		= std::numeric_limits<float>::max();
 const float float_min	 	= std::numeric_limits<float>::min();
 const double double_max 	= std::numeric_limits<double>::max();
 const double double_min 	= std::numeric_limits<double>::min();
+//const short short_max 	= std::numeric_limits<short>::max(); not used
+//const short short_min	 	= std::numeric_limits<short>::min(); not used
 const __int64 int64_max 	= std::numeric_limits<__int64>::max();
 const __int64 int64_min 	= std::numeric_limits<__int64>::min();
 double delta 				= 0.0001;
@@ -28,6 +27,7 @@ void testExtraAlltNormal(pizza::special::ExtraAllt &extraAllt) {
 	EXPECT_EQ(extraAllt.description, "Pizza with extra allt");
 	EXPECT_EQ(extraAllt.cheese_->age, 5);
 	EXPECT_EQ(extraAllt.cheese_->name, "chilli cheese");
+//	EXPECT_EQ(extraAllt.testingShort, 256);
 
 
 	//test bools
@@ -56,6 +56,15 @@ void testExtraAlltNormal(pizza::special::ExtraAllt &extraAllt) {
 	EXPECT_EQ((extraAllt.ints).at(3), 62860);
 	EXPECT_EQ((extraAllt.ints).at(4), int_min);
 	EXPECT_EQ((extraAllt.ints).at(5), int_max);
+
+	//test shorts, doesn't work at the moment
+//	EXPECT_EQ((extraAllt.shorts).size(), 6) << "size of the shorts vector are not correct";
+//	EXPECT_EQ((extraAllt.shorts).at(0), 0);
+//	EXPECT_EQ((extraAllt.shorts).at(1), 123);
+//	EXPECT_EQ((extraAllt.shorts).at(2), -523);
+//	EXPECT_EQ((extraAllt.shorts).at(3), 62860);
+//	EXPECT_EQ((extraAllt.shorts).at(4), short_min);
+//	EXPECT_EQ((extraAllt.shorts).at(5), short_max);
 
 	//test floats
 	EXPECT_EQ((extraAllt.floats).size(), 6) << "size of the floats vector are not correct";
@@ -146,6 +155,8 @@ void testExtraAlltLarge(pizza::special::ExtraAllt &extraAllt, SendType sendType)
 	EXPECT_EQ(extraAllt.description, "");
 	EXPECT_EQ(extraAllt.cheese_->age, 0);
 	EXPECT_EQ(extraAllt.cheese_->name, "");
+	//EXPECT_EQ(extraAllt.testingShort, 0); doesn't work
+
 
 	EXPECT_EQ(extraAllt.bools.size(), exptectVecSize);
 	EXPECT_EQ(extraAllt.bytes.size(), exptectVecSize);
@@ -155,6 +166,8 @@ void testExtraAlltLarge(pizza::special::ExtraAllt &extraAllt, SendType sendType)
 	EXPECT_EQ(extraAllt.longs.size(), exptectVecSize);
 	EXPECT_EQ(extraAllt.strings.size(), exptectVecSize);
 	EXPECT_EQ(extraAllt.cheeses.size(), exptectVecSize);
+	//EXPECT_EQ(extraAllt.shorts.size(), exptectVecSize); doesn't work
+
 
 	for(int i = 0; i < exptectVecSize; ++i) {
 
@@ -171,21 +184,25 @@ void testExtraAlltLarge(pizza::special::ExtraAllt &extraAllt, SendType sendType)
 			EXPECT_EQ((extraAllt.bools).at(i),true);
 			EXPECT_EQ(extraAllt.bytes.at(i), 'a');
 			EXPECT_EQ(extraAllt.ints.at(i), 5);
-			EXPECT_EQ(extraAllt.floats.at(i), 15.0f);
+			EXPECT_NEAR(extraAllt.floats.at(i), 15.0f, delta);
 			EXPECT_NEAR(extraAllt.doubles.at(i), 25.0, delta);
-			EXPECT_NEAR(extraAllt.longs.at(i), 35, delta);
+			EXPECT_EQ(extraAllt.longs.at(i), 35);
+			//EXPECT_EQ(extraAllt.shorts.at(i), 45); doesn't work
 
 			if(sendType == NORMAL) EXPECT_EQ(extraAllt.strings.at(i), "hejsan");
 
 			EXPECT_EQ(extraAllt.cheeses.at(i).age, 3);
 			EXPECT_EQ(extraAllt.cheeses.at(i).name, "ecklig ost");
+
 		} else {
 			EXPECT_EQ(extraAllt.bools.at(i), false);
 			EXPECT_EQ(extraAllt.bytes.at(i), 'b');
 			EXPECT_EQ(extraAllt.ints.at(i), 10);
-			EXPECT_EQ(extraAllt.floats.at(i), 20.0f);
+			EXPECT_NEAR(extraAllt.floats.at(i), 20.0f, delta);
 			EXPECT_NEAR(extraAllt.doubles.at(i), 30.0, delta);
-			EXPECT_NEAR(extraAllt.longs.at(i), 40, delta);
+			EXPECT_EQ(extraAllt.longs.at(i), 40);
+			//EXPECT_EQ(extraAllt.shorts.at(i), 50); doesn't work
+
 
 			if(sendType == NORMAL) EXPECT_EQ(extraAllt.strings.at(i), "hoppsan");
 
@@ -195,12 +212,10 @@ void testExtraAlltLarge(pizza::special::ExtraAllt &extraAllt, SendType sendType)
 	}
 }
 
-
-void testVessuvio(pizza::VessuvioData &vessuvio){
-	EXPECT_EQ(vessuvio.ham, "smoked ham");
-	EXPECT_EQ(vessuvio.cheese, "cheddar");
-	EXPECT_EQ(vessuvio.tomatoSauce, "Hot tomato sauce");
+void testVessuvio(pizza::VessuvioData &vessuvioData) {
+	EXPECT_EQ(vessuvioData.cheese , 	"cheddar");
+	EXPECT_EQ(vessuvioData.tomatoSauce, "Hot tomato sauce");
+	EXPECT_EQ(vessuvioData.ham, 		"smoked ham");
 }
-
 
 }

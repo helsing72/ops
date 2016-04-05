@@ -1,47 +1,55 @@
-set(_ECLIPSE_VERSION "4.4.2")
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 
+set(LIB_NAME UnitTests)
+set(_ECLIPSE_VERSION "4.4.2")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR})
 
 if(NOT DEFINED ENV{GOOGLETEST_HOME})
-	message(FATAL_ERROR "google-test module must be added, do it by typing module add google-test/1.7")
+	message(FATAL_ERROR "GOOGLETEST_HOME is undefined")
 endif()
 
 if(NOT DEFINED ENV{GCOVR_HOME})
-	message(FATAL_ERROR "gcovr module must be added, do it by typing module add gcovr/3.2")
+	message(FATAL_ERROR "GCOVR_HOME is undefined")
 endif()
 
 if(NOT DEFINED ENV{BOOST_HOME})
-	message(FATAL_ERROR "boost module must be added, do it by typing module add boost/1.55")
+	message(FATAL_ERROR "BOOST_HOME is undefined")
 endif()
 
+if(NOT DEFINED ENV{CPPCHECK})
+	message(FATAL_ERROR "CPPCHECK is undefined")
+endif()
 
+if(CMAKE_BUILD_TYPE MATCHES "Debug")
+	add_custom_target(UnitTests DEPENDS 
+	publishBin
+	test-subscribeTCP
+	test-subscribeUDP
+	test-subscribe
+	test-serialize-and-deserialize
+	)
+endif()
 
 #set OPS variables
-set(OPS_INCLUDE_DIR ../../Cpp/include)
-set(OPS_LIBRARY 	../../Cpp/lib64/libOPSopt.a)
+set(OPS_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../Cpp/include)
+set(OPS_LIBRARY 	${CMAKE_CURRENT_SOURCE_DIR}/../../build.debug/Cpp/source/libopsdbg.so)
 
 #set google-test variables
-set(GTEST_LIBRARIES $ENV{GOOGLETEST_HOME}/google-build/googlemock/gtest/libgtest.a)
-set(GTEST_INCLUDE_DIR ${TOOLS}/$ENV{GOOGLETEST_HOME}/googletest/include)
-
-#set boost variables
-set(Boost_INCLUDE_DIRS $ENV{BOOST_HOME}/boost)
-set(Boost_LIBRARIES $ENV{BOOST_HOME}/lib64)
-link_directories($ENV{BOOST_HOME}/lib64)
-#set(BOOST_ROOT $ENV{BOOST_HOME}) #need this?
+set(GTEST_LIBRARIES $ENV{GOOGLETEST_LIB}/libgtest.a)
+set(GTEST_INCLUDE_DIR $ENV{GOOGLETEST_INCLUDE})
 
 
-#set compiler flags
-set(CMAKE_CXX_FLAGS "-fprofile-arcs -ftest-coverage -fPIC -O0")
+message("GTEST_INCLUDE_DIR is ${GTEST_INCLUDE_DIR}")
+message("GTEST_LIBRARIES is ${GTEST_LIBRARIES}")
 
 
 project (OPStest)
 
 
-find_package(OPS)
+#find_package(OPS)
 
 include_directories(lib)
 add_subdirectory(src)
 add_subdirectory(lib)
 add_subdirectory(UnitTests)
+

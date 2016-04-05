@@ -1,3 +1,5 @@
+#pragma once
+
 #ifdef _WIN32
 #include "stdafx.h"
 #include <windows.h>
@@ -7,31 +9,28 @@
 #include <unistd.h>
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <sstream>
-
-#include <ops.h>
-
-#include "Init_Data.h"
-#include "PizzaData.h"
-#include "PizzaDataSubscriber.h"
-#include "PizzaDataPublisher.h"
-#include "VessuvioData.h"
-#include "VessuvioDataSubscriber.h"
-#include "VessuvioDataPublisher.h"
 #include "ExtraAllt.h"
 #include "ExtraAlltSubscriber.h"
 #include "ExtraAlltPublisher.h"
-//#include "TestSerializeAndDeseialize.h"
-#include <typeinfo>
+#include "Init_Data.h"
 #include <iostream>
 #include <limits>
+#include <ops.h>
 #include "OPSArchiverOut.h"
 #include "OPSArchiverIn.h"
 #include "OPSMessage.h"
-
+#include "PizzaData.h"
+#include "PizzaDataSubscriber.h"
+#include "PizzaDataPublisher.h"
 #include "PizzaProjectTypeFactory.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <sstream>
+#include <typeinfo>
+#include "VessuvioData.h"
+#include "VessuvioDataSubscriber.h"
+#include "VessuvioDataPublisher.h"
+
 
 #ifdef _WIN32
 #include "SdsSystemTime.h"
@@ -47,10 +46,6 @@
 #else
 #include <unistd.h>
 #endif
-
-
-
-
 
 #ifdef _WIN32
 #include "SdsSystemTime.h"

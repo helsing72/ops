@@ -1,10 +1,3 @@
-
-
-
-
-
-
-
 #include "PizzaProjectTypeFactory.h"
 #include <string>
 #include <typeinfo>
@@ -28,6 +21,8 @@ namespace init {
 
 const int int_max 			= std::numeric_limits<int>::max();
 const int int_min 			= std::numeric_limits<int>::min();
+//const int short_max			= std::numeric_limits<short>::max();
+//const int short_min			= std::numeric_limits<short>::min();
 const float float_max 		= std::numeric_limits<float>::max();
 const float float_min	 	= std::numeric_limits<float>::min();
 const double double_max 	= std::numeric_limits<double>::max();
@@ -45,9 +40,12 @@ void ClearExtraAllt(pizza::special::ExtraAllt &extraAllt) {
 	extraAllt.description		= "";
 	extraAllt.cheese_->age		= 0;
 	extraAllt.cheese_->name		= "";
+//	extraAllt.testingShort		= 0;
+
 
 	(extraAllt.bools).clear();
 	(extraAllt.bytes).clear();
+//	(extraAllt.shorts).clear();
 	(extraAllt.ints).clear();
 	(extraAllt.floats).clear();
 	(extraAllt.doubles).clear();
@@ -69,6 +67,7 @@ void initExtraAlltNormal(pizza::special::ExtraAllt &extraAllt) {
 	extraAllt.description		= "Pizza with extra allt";
 	extraAllt.cheese_->age		= 5;
 	extraAllt.cheese_->name		= "chilli cheese";
+//	extraAllt.testingShort		= 256;
 
 	(extraAllt.bools).push_back(true);
 	(extraAllt.bools).push_back(false);
@@ -119,6 +118,13 @@ void initExtraAlltNormal(pizza::special::ExtraAllt &extraAllt) {
 	(extraAllt.strings).push_back(string("pizzan"));
 	(extraAllt.strings).push_back(string("!!!!!!!!!!!!!!!!!!"));
 
+//	(extraAllt.shorts).push_back(0);
+//	(extraAllt.shorts).push_back(123);
+//	(extraAllt.shorts).push_back(-523);
+//	(extraAllt.shorts).push_back(62860);
+//	(extraAllt.shorts).push_back(short_min);
+//	(extraAllt.shorts).push_back(short_max);
+
 	pizza::special::Cheese testCheese;
 
 	testCheese.age = 1;
@@ -158,12 +164,12 @@ void initExtraAlltLarge(pizza::special::ExtraAllt &extraAllt){
 	float floatVal = 15.0f;
 	double doubleVal = 25.0;
 	long longVal = 35;
+//	short shortVal = 45;
 	string stringVal = "hejsan";
 	pizza::special::Cheese cheeseVal;
 	cheeseVal.age = 3;
 	cheeseVal.name = "ecklig ost";
 
-	//bools
 	for(int i = 0; i < vecSize; ++i) {
 		(extraAllt.bools).push_back(boolVal);
 		(extraAllt.bytes).push_back(byteVal);
@@ -173,17 +179,18 @@ void initExtraAlltLarge(pizza::special::ExtraAllt &extraAllt){
 		(extraAllt.longs).push_back(longVal);
 		(extraAllt.strings).push_back(stringVal);
 		(extraAllt.cheeses).push_back(cheeseVal);
-
+//		(extraAllt.shorts).push_back(shortVal); don't work
 		if(i == halfVecsize){
-			boolVal = false;
-			byteVal ='b';
-			intVal = 10;
-			floatVal = 20.0f;
-			doubleVal = 30.0;
-			longVal = 40;
-			stringVal = "hoppsan";
-			cheeseVal.age = 6;
-			cheeseVal.name = "god ost";
+			boolVal 		= false;
+			byteVal 		= 'b';
+			intVal 			= 10;
+			floatVal 		= 20.0f;
+			doubleVal 		= 30.0;
+			longVal 		= 40;
+			stringVal 		= "hoppsan";
+			cheeseVal.age 	= 6;
+			cheeseVal.name 	= "god ost";
+//			shortVal		= 50;
 		}
 	}
 }

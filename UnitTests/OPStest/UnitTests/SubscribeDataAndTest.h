@@ -1,5 +1,4 @@
-#ifndef TESTSUBSCRIBEANDTEST_H
-#define TESTSUBSCRIBEANDTEST_H
+#pragma once
 
 #ifdef _WIN32
 #include "stdafx.h"
@@ -14,26 +13,26 @@
 #include <stdlib.h>
 #include <sstream>
 
-#include <ops.h>
 
-#include "PizzaData.h"
-#include "PizzaDataSubscriber.h"
-#include "PizzaDataPublisher.h"
-#include "VessuvioData.h"
-#include "VessuvioDataSubscriber.h"
-#include "VessuvioDataPublisher.h"
 #include "ExtraAllt.h"
 #include "ExtraAlltSubscriber.h"
 #include "ExtraAlltPublisher.h"
-//#include "TestSerializeAndDeseialize.h"
-#include <typeinfo>
 #include <iostream>
 #include <limits>
+#include <ops.h>
 #include "OPSArchiverOut.h"
 #include "OPSArchiverIn.h"
 #include "OPSMessage.h"
-
+#include "PizzaData.h"
 #include "PizzaProjectTypeFactory.h"
+#include "PizzaDataSubscriber.h"
+#include "PizzaDataPublisher.h"
+#include <typeinfo>
+#include "Types.h"
+#include "TestPizza.cpp"
+#include "VessuvioData.h"
+#include "VessuvioDataSubscriber.h"
+#include "VessuvioDataPublisher.h"
 
 #ifdef _WIN32
 #include "SdsSystemTime.h"
@@ -50,17 +49,6 @@
 #include <unistd.h>
 #endif
 
-
 #ifdef _WIN32
 #include "SdsSystemTime.h"
 #endif
-
-enum SendType {
-	NORMAL = 0,
-	TCP,
-	UDP
-};
-
-SendType sendType;
-
-#endif // TESTSUBSCRIBEANDTEST_H

@@ -1,0 +1,9 @@
+src/opsc/OpsCompiler.java
+src/opsc/Compiler.java
+src/opsc/CSharpCompiler.java
+src/opsc/CppCompiler.java
+src/opsc/JavaCompiler.java
+src/opsc/IDLParser.java
+src/opsc/ProjectProperties.java
+src/opsc/Property.java
+src/opsc/JarDependency.java

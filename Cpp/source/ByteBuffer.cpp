@@ -20,12 +20,11 @@
 #include "OPSTypeDefs.h"
 #include "ByteBuffer.h"
 
-#undef ON_BIG_ENDIAN_MACHINE
-
 namespace ops
 {
 
-    ByteBuffer::ByteBuffer(MemoryMap* mMap)
+    ByteBuffer::ByteBuffer(MemoryMap* mMap, bool _preserveWrittenData):
+        preserveWrittenData(_preserveWrittenData)
     {
         totalSize = 0;
         index = 0;
@@ -454,9 +453,11 @@ namespace ops
 #endif
             WriteChars((char*) & out[0], size * 8);
 #ifdef ON_BIG_ENDIAN_MACHINE
-            for(unsigned int i = 0; i < out.size() ; i++)
-            {
-                ByteSwap((unsigned char*) &out[i], 8);
+            if (preserveWrittenData) {
+                for(unsigned int i = 0; i < out.size() ; i++)
+                {
+                    ByteSwap((unsigned char*) &out[i], 8);
+                }
             }
 #endif
         }
@@ -493,9 +494,11 @@ namespace ops
 #endif
             WriteChars((char*) & out[0], size * 4);
 #ifdef ON_BIG_ENDIAN_MACHINE
-            for(unsigned int i = 0; i < out.size() ; i++)
-            {
-                ByteSwap((unsigned char*) &out[i], 4);
+            if (preserveWrittenData) {
+                for(unsigned int i = 0; i < out.size() ; i++)
+                {
+                    ByteSwap((unsigned char*) &out[i], 4);
+                }
             }
 #endif
         }
@@ -532,9 +535,11 @@ namespace ops
 #endif
             WriteChars((char*) & out[0], size * 2);
 #ifdef ON_BIG_ENDIAN_MACHINE
-            for(unsigned int i = 0; i < out.size() ; i++)
-            {
-                ByteSwap((unsigned char*) &out[i], 2);
+            if (preserveWrittenData) {
+                for(unsigned int i = 0; i < out.size() ; i++)
+                {
+                    ByteSwap((unsigned char*) &out[i], 2);
+                }
             }
 #endif
         }
@@ -571,9 +576,11 @@ namespace ops
 #endif
             WriteChars((char*) & out[0], size * 4);
 #ifdef ON_BIG_ENDIAN_MACHINE
-            for(unsigned int i = 0; i < out.size() ; i++)
-            {
-                ByteSwap((unsigned char*) &out[i], 4);
+            if (preserveWrittenData) {
+                for(unsigned int i = 0; i < out.size() ; i++)
+                {
+                    ByteSwap((unsigned char*) &out[i], 4);
+                }
             }
 #endif
         }
@@ -610,9 +617,11 @@ namespace ops
 #endif
             WriteChars((char*) & out[0], size * 8);
 #ifdef ON_BIG_ENDIAN_MACHINE
-            for(unsigned int i = 0; i < out.size() ; i++)
-            {
-                ByteSwap((unsigned char*) &out[i], 8);
+            if (preserveWrittenData) {
+                for(unsigned int i = 0; i < out.size() ; i++)
+                {
+                    ByteSwap((unsigned char*) &out[i], 8);
+                }
             }
 #endif
         }
