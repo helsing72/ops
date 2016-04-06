@@ -1,3 +1,4 @@
+
 cmake_minimum_required(VERSION 3.0.0 FATAL_ERROR)
 
 # The main project name
@@ -36,11 +37,14 @@ elseif(CMAKE_BUILD_TYPE MATCHES "Debug")
 	string(REPLACE "-g" "" CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG} )
 endif()	
 
+
 # find Boost. If not found we can't build c++ libs
 set(Boost_NO_BOOST_CMAKE ON)
 if(MSVC)
   set(Boost_USE_STATIC_LIBS ON)
-  find_package(Boost MODULE COMPONENTS system thread date_time regex chrono) #remove?
+  find_package(Boost MODULE COMPONENTS system thread date_time regex chrono)
+else()
+  find_package(Boost MODULE COMPONENTS system thread)
 endif()
 
 
@@ -98,14 +102,11 @@ if(Java_JAVAC_EXECUTABLE)
   add_subdirectory(Tools)
 endif()
 
+
 #add_subdirectory(CSharp)
 
 # add the C++ source, only if Boost is loaded
 if(DEFINED ENV{BOOST_HOME})
-  #set(Boost_INCLUDE_DIRS "/lkp/nlt/dev/sw/3pp/work/boost/1.60") #testing 1.60
-  #set(Boost_LIBRARIES "/lkp/nlt/dev/sw/3pp/work/boost/1.60/lib64-gcc-4.4.7/lib") #testing 1.60
-  #link_directories(/lkp/nlt/dev/sw/3pp/work/boost/1.60/lib64-gcc-4.4.7/lib) #testing 1.60
-  
   
   set(Boost_INCLUDE_DIRS $ENV{BOOST_HOME}) 
   set(Boost_LIBRARIES $ENV{BOOST_LIB})

@@ -142,6 +142,11 @@ public:
 					"::" << topic.getPort() << 
 					"] " << std::endl;
 
+				std::cout << 
+					"  InSocketBufferSize: " << topic.getInSocketBufferSize() << std::endl <<
+					"  OutSocketBufferSize: " << topic.getOutSocketBufferSize() << std::endl <<
+					"  SampleMaxSize: " << topic.getSampleMaxSize() << std::endl;
+
 				//Create a publisher on that topic
 				pub = new DataTypePublisher(topic);
 
@@ -212,6 +217,11 @@ public:
 					"::" << topic.getDomainAddress() <<
 					"::" << topic.getPort() << 
 					"] " << std::endl;
+
+				std::cout << 
+					"  InSocketBufferSize: " << topic.getInSocketBufferSize() << std::endl <<
+					"  OutSocketBufferSize: " << topic.getOutSocketBufferSize() << std::endl <<
+					"  SampleMaxSize: " << topic.getSampleMaxSize() << std::endl;
 
 				//Create a subscriber on that topic.
 				sub = new DataTypeSubscriber(topic);
@@ -422,6 +432,19 @@ void WriteToAllSelected()
 	}
 }
 
+void printDomainInfo(ops::Participant* part)
+{
+	ops::Domain* dom = part->getDomain();
+	std::cout << std::endl << 
+		"  DomainID: " << dom->getDomainID() << std::endl <<
+		"  DomainAddress: " << dom->getDomainAddress() << std::endl << 
+		"  InSocketBufferSize: " << dom->getInSocketBufferSize() << std::endl <<
+		"  OutSocketBufferSize: " << dom->getOutSocketBufferSize() << std::endl <<
+		"  MetaDataMcPort: " << dom->getMetaDataMcPort() << std::endl <<
+		"  LocalInterface: " << dom->getLocalInterface() << std::endl <<
+		"  TimeToLive: " <<	dom->getTimeToLive() << std::endl;
+}
+
 void menu()
 {
 	std::cout << "" << std::endl;
@@ -508,6 +531,7 @@ int main(int argc, char**argv)
 		exit(-1);
     }
 	participant->addTypeSupport(new PizzaProject::PizzaProjectTypeFactory());
+	printDomainInfo(participant);
 	
 	ops::Participant* otherParticipant = ops::Participant::getInstance("OtherPizzaDomain", "OtherPizzaDomain");
 	if (otherParticipant == NULL) {
@@ -515,6 +539,7 @@ int main(int argc, char**argv)
         exit(-1);
 	}
 	otherParticipant->addTypeSupport(new PizzaProject::PizzaProjectTypeFactory());
+	printDomainInfo(otherParticipant);
 
 	// Add error writers to catch internal ops errors
 	ops::ErrorWriter* errorWriter = new ops::ErrorWriter(std::cout);

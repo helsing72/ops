@@ -162,6 +162,24 @@ namespace OPSTest
                     myParticipant.AddTypeSupport(new PizzaProject.PizzaProjectTypeFactory());
                     OtherParticipant.AddTypeSupport(new PizzaProject.PizzaProjectTypeFactory());
 
+                    Log("");
+                    Log("DomainID : " + myParticipant.getDomain().GetDomainID());
+                    Log("DomainAddress: " + myParticipant.getDomain().GetDomainAddress());
+                    Log("InSocketBufferSize: " + myParticipant.getDomain().GetInSocketBufferSize());
+		            Log("OutSocketBufferSize: " + myParticipant.getDomain().GetOutSocketBufferSize());
+            		Log("MetaDataMcPort: " + myParticipant.getDomain().GetMetaDataMcPort());
+                    Log("LocalInterface: " + myParticipant.getDomain().GetLocalInterface());
+            		Log("TimeToLive: " + myParticipant.getDomain().getTimeToLive());
+
+                    Log("");
+                    Log("DomainID : " + OtherParticipant.getDomain().GetDomainID());
+                    Log("DomainAddress: " + OtherParticipant.getDomain().GetDomainAddress());
+                    Log("InSocketBufferSize: " + OtherParticipant.getDomain().GetInSocketBufferSize());
+                    Log("OutSocketBufferSize: " + OtherParticipant.getDomain().GetOutSocketBufferSize());
+                    Log("MetaDataMcPort: " + OtherParticipant.getDomain().GetMetaDataMcPort());
+                    Log("LocalInterface: " + OtherParticipant.getDomain().GetLocalInterface());
+                    Log("TimeToLive: " + OtherParticipant.getDomain().getTimeToLive());
+
                     // Setup the correct participant for each topic in our helper list
                     foreach (MyTopicInfo info in MyTopicInfoList)
                     {
@@ -810,6 +828,9 @@ namespace OPSTest
                 else
                 {
                     Log("[Topic: " + topic.GetName() + "] Subscriber on Transport: " + topic.GetTransport() + ", " + topic.GetDomainAddress() + "::" + topic.GetPort());
+                    Log("  InSocketBufferSize: " + topic.GetInSocketBufferSize());
+                    Log("  OutSocketBufferSize: " + topic.GetOutSocketBufferSize());
+                    Log("  SampleMaxSize: " + topic.GetSampleMaxSize());
                 }
                 mySub = new Subscriber(topic);
                 mySub.newDataDefault += new NewDataDefaultEventHandler(SubscriberNewData);
@@ -851,6 +872,9 @@ namespace OPSTest
                 else
                 {
                     Log("[Topic: " + topic.GetName() + "] Publisher on Transport: " + topic.GetTransport() + ", " + topic.GetDomainAddress() + "::" + topic.GetPort());
+                    Log("  InSocketBufferSize: " + topic.GetInSocketBufferSize());
+                    Log("  OutSocketBufferSize: " + topic.GetOutSocketBufferSize());
+                    Log("  SampleMaxSize: " + topic.GetSampleMaxSize());
                 }
                 myPub = new Publisher(topic);
                 myPub.SetName("This is a publisher");

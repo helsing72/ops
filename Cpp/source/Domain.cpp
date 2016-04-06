@@ -28,46 +28,56 @@ namespace ops
 Domain::Domain() : 
 	timeToLive(1), 
 	localInterface("0.0.0.0"),
-	inSocketBufferSize(16000000),
-	outSocketBufferSize(16000000),
+	inSocketBufferSize(-1),		// Use OS default, Topics may override
+	outSocketBufferSize(-1),	// Use OS default, Topics may override
 	metaDataMcPort(9494)		// Default port 
 {
 	appendType(std::string("Domain"));
-
-	//For backward compability.
-	//appendType(std::string("MulticastDomain"));
 }
+
 std::string Domain::getDomainAddress()
 {
 	return domainAddress;
 }
+
+void Domain::checkTopicValues(Topic* top)
+{
+	if (top->getDomainAddress() == "") 
+	{
+		top->setDomainAddress(domainAddress);
+	}
+	if (top->getInSocketBufferSize() < 0) 
+	{
+		top->setInSocketBufferSize(inSocketBufferSize);
+	}
+	if (top->getOutSocketBufferSize() < 0) 
+	{
+		top->setOutSocketBufferSize(outSocketBufferSize);
+	}
+}
+
 std::vector<Topic* > Domain::getTopics()
 {
-	for(unsigned int i = 0 ; i < topics.size(); i++)
+	for(unsigned int i = 0 ; i < topics.size(); i++) 
 	{
-		if(topics[i]->getDomainAddress() == "")
-		{
-			topics[i]->setDomainAddress(domainAddress);
-		}
+		checkTopicValues(topics[i]);
 	}
 	return topics;
 }
+
 Topic Domain::getTopic(std::string name)
 {
 	for(unsigned int i = 0 ; i < topics.size(); i++)
 	{
-		if(topics[i]->getDomainAddress() == "")
+		if(topics[i]->getName() == name) 
 		{
-			topics[i]->setDomainAddress(domainAddress);
-		}
-		if(topics[i]->getName() == name)
-		{
+			checkTopicValues(topics[i]);
 			return *topics[i];
 		}
 	}
 	throw NoSuchTopicException("Topic " + name + " does not exist in ops config file.");
-
 }
+
 bool Domain::existsTopic(std::string name)
 {
 	for(unsigned int i = 0 ; i < topics.size(); i++)
@@ -79,11 +89,11 @@ bool Domain::existsTopic(std::string name)
 	}
 	return false;
 }
+
 std::string Domain::getDomainID()
 {
 	return domainID;
 }
-
 
 void Domain::serialize(ArchiverInOut* archiver)
 {
@@ -97,6 +107,7 @@ void Domain::serialize(ArchiverInOut* archiver)
 	archiver->inout(std::string("outSocketBufferSize"), outSocketBufferSize);
 	archiver->inout(std::string("metaDataMcPort"), metaDataMcPort);
 }
+
 int Domain::getTimeToLive()
 {
 	return timeToLive;
@@ -111,10 +122,12 @@ int Domain::getInSocketBufferSize()
 {
 	return inSocketBufferSize;
 }
+
 int Domain::getOutSocketBufferSize()
 {
 	return outSocketBufferSize;
 }
+
 int Domain::getMetaDataMcPort()
 {
 	return metaDataMcPort;

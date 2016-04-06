@@ -1,3 +1,4 @@
+
 # the library name
 if(CMAKE_BUILD_TYPE MATCHES "Release")
 	set(LIB_NAME opsopt)
@@ -5,9 +6,6 @@ elseif(CMAKE_BUILD_TYPE MATCHES "Debug")
 	set(LIB_NAME opsdbg)
 endif()	
 
-#message("CMAKE_CXX_FLAGS_OPS is ${CMAKE_CXX_FLAGS}")
-#message("CMAKE_CXX_FLAGS_RELEASE_OPS is ${CMAKE_CXX_FLAGS_RELEASE}")
-#message("CMAKE_CXX_FLAGS_DEBUG_OPS is ${CMAKE_CXX_FLAGS_DEBUG}")
 
 # where are the headers
 set(HEADER_PATH ${PROJECT_SOURCE_DIR}/Cpp/include)
@@ -148,6 +146,9 @@ add_library(${LIB_NAME}
     ${LIB_SRCS}
     ${LIB_PUBLIC_HEADERS}
 )
+
+
+set_target_properties(${LIB_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
 
 target_link_libraries(${LIB_NAME} ${Boost_LIBRARIES})
 

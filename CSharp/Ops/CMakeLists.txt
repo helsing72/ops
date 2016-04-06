@@ -85,8 +85,8 @@ set(OPS_DBG_TARGET ${CMAKE_BINARY_DIR}/bin/${OPS_LIB_NAME}-${OPS_VERSION}-dbg.dl
 set(OPS_OPT_TARGET ${CMAKE_BINARY_DIR}/bin/${OPS_LIB_NAME}-${OPS_VERSION}-opt.dll)
 
 
-set(OPS_TARGET ${OPS_OPT_TARGET}) #pane, added to OPS_OPT_TARGET ...
 
+set(OPS_TARGET ${OPS_OPT_TARGET}) #pane, added to OPS_OPT_TARGET ...
 
 if(MSVC)
   # message("CSCOMPILER ${CSCOMPILER}")
@@ -114,6 +114,7 @@ if(MSVC)
     )
 else()
   # removed System.Net.dll for Microsoft.Net v2.0.xyz
+
   add_custom_command(OUTPUT ${OPS_TARGET}  
 	COMMAND ${CSCOMPILER} -reference:System.dll,System.Drawing.dll,System.Windows.Forms.dll,System.Web.dll,System.Web.Services.dll -target:library -out:${OPS_TARGET} ${OPS_CS_SOURCE}
     DEPENDS ${OPS_CS_SOURCE}

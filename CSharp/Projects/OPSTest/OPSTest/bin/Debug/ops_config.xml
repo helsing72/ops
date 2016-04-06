@@ -21,9 +21,6 @@
             <name>PizzaTopic</name>
             <port>6689</port>
             <dataType>pizza.PizzaData</dataType>
-            <sampleMaxSize>2100000</sampleMaxSize>
-            <inSocketBufferSize>16000000</inSocketBufferSize>
-            <outSocketBufferSize>16000000</outSocketBufferSize>
           </element>
 		  <element type = "Topic">
             <name>VessuvioTopic</name>

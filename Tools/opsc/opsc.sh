@@ -14,4 +14,4 @@ echo "invoking script at: $SCRIPT_PATH"
 CWD=$(pwd)
 echo "current working directory $CWD"
 
-java -jar  $SCRIPT_PATH $@
+java -jar ${SCRIPT_PATH}/opsc.jar $@
