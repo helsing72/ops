@@ -44,7 +44,7 @@ $(BUILD_DEBUG)/Makefile : %/Makefile :
 UnitTests : debug
 	@echo "Running Unit tests!!!"
 	cd UnitTests/OPStest && \
-	pizzatest.sh
+	./pizzatest.sh
 	
 
 
