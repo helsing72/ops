@@ -40,9 +40,9 @@ $(BUILD_DEBUG)/Makefile : %/Makefile :
 	cmake -DCMAKE_BUILD_TYPE=Debug ..
 
 
-.PHONY : UnitTests
-UnitTests : debug
-	@echo "Running Unit tests!!!"
+.PHONY : unittest
+unittest : debug
+	@echo "Running unit tests!!!"
 	cd UnitTests/OPStest && \
 	./pizzatest.sh
 	
@@ -54,7 +54,7 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... opt (optimized/release)"
 	@echo "... debug"
-	@echo "... UnitTests"
+	@echo "... unittest"
 	@echo "... clean"
 	@echo "... clean_debug"
 	@echo "... clean_opt"
