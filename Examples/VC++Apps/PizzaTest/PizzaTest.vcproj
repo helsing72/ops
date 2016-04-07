@@ -196,7 +196,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="&quot;..\..\OPSIdls\PizzaProject\Generated\C++&quot;;..\..\..\Cpp\include;&quot;C:\proj\SDSTest\OPSData\SDSIDL\Generated\C++&quot;"
+				AdditionalIncludeDirectories="&quot;..\..\OPSIdls\PizzaProject\Generated\Cpp&quot;;..\..\..\Cpp\include;&quot;C:\proj\SDSTest\OPSData\SDSIDL\Generated\C++&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
