@@ -36,7 +36,7 @@ namespace ops
     messageBufferMaxSize(1),
     timeBaseMinSeparationTime(0),
     deadlineTimeout(TimeHelper::infinite),
-    threadPolicy(SHARED_THREAD),
+    //threadPolicy(SHARED_THREAD),
     deadlineMissed(false),
     started(false)
     //deadlineTimer(*Participant::getIOService())
@@ -48,11 +48,8 @@ namespace ops
         deadlineTimer = DeadlineTimer::create(participant->getIOService());
         
         newDataMutex = new boost::mutex();
-        newDataEvent = new boost::condition_variable;//CreateEvent(NULL, true, false, NULL);
+        newDataEvent = new boost::condition_variable;
         timeLastData = TimeHelper::currentTimeMillis();
-
-
-
     }
 
     Subscriber::~Subscriber()
@@ -121,7 +118,6 @@ namespace ops
             {
                 firstDataReceived = true;
                 
-                //saveCopy(o);
                 addToBuffer(message);
                 this->message = message;
                 data = o;
@@ -141,7 +137,6 @@ namespace ops
 
                 //cancelDeadlineTimeouts();
                 //registerForDeadlineTimeouts();
-
             }
         }
     }
@@ -160,7 +155,6 @@ namespace ops
     void Subscriber::setHistoryMaxSize(int s)
     {
         messageBufferMaxSize = s;
-
     }
 
     std::deque<OPSMessage*> Subscriber::getHistory()
@@ -174,11 +168,11 @@ namespace ops
         return data;
     }
 
-    void Subscriber::setData(OPSObject* data)
+    /*void Subscriber::setData(OPSObject* data)
     {
         SafeLock lock(this);
         this->data = data;
-    }
+    }*/
 
     Topic Subscriber::getTopic()
     {
@@ -187,17 +181,14 @@ namespace ops
 
     void Subscriber::addFilterQoSPolicy(FilterQoSPolicy* fqos)
     {
-        //WaitForSingleObject(filterQoSPolicyMutex, INFINITE);
         SafeLock lock(&filterQoSPolicyMutex);
         filterQoSPolicies.push_back(fqos);
-        
     }
 
     void Subscriber::removeFilterQoSPolicy(FilterQoSPolicy* fqos)
     {
         SafeLock lock(&filterQoSPolicyMutex);
         filterQoSPolicies.remove(fqos);
-        
     }
 
     bool Subscriber::applyFilterQoSPolicies(OPSObject* obj)
@@ -217,7 +208,6 @@ namespace ops
         }
        
         return ret;
-
     }
 
     void Subscriber::setDeadlineQoS(__int64 millis)
@@ -243,7 +233,6 @@ namespace ops
             deadlineMissedEvent.notifyDeadlineMissed();
             timeLastData = TimeHelper::currentTimeMillis();
         }
-
     }
 
     __int64 Subscriber::getTimeBasedFilterQoS()
@@ -273,26 +262,17 @@ namespace ops
             return true;
         }
         return false;
-//        else if (WaitForSingleObject(newDataEvent, timeout) != WAIT_TIMEOUT)
-//        {
-//            ResetEvent(newDataEvent);
-//            return true;
-//        }
-//        else
-//        {
-//            return false;
-//        }
     }
 
-    int Subscriber::getThreadPolicy()
+    /*int Subscriber::getThreadPolicy()
     {
         return threadPolicy;
-    }
+    }*/
 
-    void Subscriber::setThreadPolicy(int threadPolicy)
+    /*void Subscriber::setThreadPolicy(int threadPolicy)
     {
         this->threadPolicy = threadPolicy;
-    }
+    }*/
 
     std::string Subscriber::getName()
     {
@@ -330,7 +310,6 @@ namespace ops
         {*/
         //deadlineTimer.async_wait(boost::bind(&Subscriber::asynchHandleDeadlineTimeout, this, boost::asio::placeholders::error));
         //}
-
     }
 
     void Subscriber::cancelDeadlineTimeouts()
@@ -346,8 +325,8 @@ namespace ops
         //	deadlineTimer = newTimer;
         //	deadlineTimer.expires_from_now(boost::posix_time::milliseconds(deadlineTimeout));*/
         //}
-
     }
+
     //void Subscriber::asynchHandleDeadlineTimeout(const boost::system::error_code& e)
     //{
     //	if (e != boost::asio::error::operation_aborted)
@@ -382,8 +361,8 @@ namespace ops
 
     OPSMessage* Subscriber::getMessage()
     {
+        hasUnreadData = false;
         return message;
     }
-
 
 }

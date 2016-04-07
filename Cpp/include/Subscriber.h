@@ -76,56 +76,69 @@ namespace ops
         ///Returns a copy of this subscribers Topic.
         Topic getTopic();
 
+        ///Waits for new data to arrive or timeout.
+        ///Returns: true if new data (i.e. unread data) exist.
         bool waitForNewData(int timeout);
 
-        ///Depricated since OPS4
-        int getThreadPolicy();
-        ///Depricated since OPS4
-        void setThreadPolicy(int threadPolicy);
+        ///Checks if new data exist (same as 'waitForNewData(0)' but faster) 
+        ///Returns: true if new data (i.e. unread data) exist.
+        bool newDataExist() {
+            return hasUnreadData;
+        }
 
+        ///Depricated since OPS4
+        //int getThreadPolicy();
+        ///Depricated since OPS4
+        //void setThreadPolicy(int threadPolicy);
+
+		///
         bool aquireMessageLock();
         void releaseMessageLock();
+
+        ///Returns a reference to the latest received OPSMessage (including the latest data object).
+        ///Clears the "new data" flag.
+        ///NOTE: MessageLock should be hold while working with the message, to prevent a
+        ///new incomming message to delete the current one while in use.
         OPSMessage* getMessage();
 
-        ///LA
         ///Returns the number of reserved messages in the underlying ReceiveDataHandler
         ///This value is the total nr for this topic on this participant not only
         ///for this subscriber.
-
         int numReservedMessages()
         {
             return receiveDataHandler->numReservedMessages();
         }
-        ///LA
 
         std::string getName();
         void setName(std::string name);
 
-        const static int SHARED_THREAD = 0;
-        const static int EXCLUSIVE_THREAD = 1;
+        //const static int SHARED_THREAD = 0;
+        //const static int EXCLUSIVE_THREAD = 1;
 
 
         bool isDeadlineMissed();
 
         void setHistoryMaxSize(int s);
         std::deque<OPSMessage*> getHistory();
-        //OPSMessage* getHistoricMessage(int i);
 
+        ///Returns a reference the latest received data object.
+        ///Clears the "new data" flag.
+        ///NOTE: MessageLock should be hold while working with the data object, to prevent a 
+        ///new incomming message to delete the current one while in use. 
         virtual OPSObject* getDataReference()
         {
             hasUnreadData = false;
             return data;
         }
+
         //Message listener callback
         void onNewEvent(Notifier<OPSMessage*>* sender, OPSMessage* message);
+
         //Deadline listener callback
         void onNewEvent(Notifier<int>* sender, int message);
 
-
     protected:
-        //virtual void saveCopy(OPSObject* o) = 0;
         void checkAndNotifyDeadlineMissed();
-        //void onNewOPSObject(OPSObject* o);
 
         OPSMessage* message;
 
@@ -133,7 +146,6 @@ namespace ops
         OPSObject* getData();
         bool firstDataReceived;
         bool hasUnreadData;
-
 
     private:
 
@@ -164,12 +176,12 @@ namespace ops
         __int64 timeLastDataForTimeBase;
         __int64 timeBaseMinSeparationTime;
         __int64 deadlineTimeout;
-        int threadPolicy;
-        bool reliable;
+        //int threadPolicy;
+        //bool reliable;
 
         bool applyFilterQoSPolicies(OPSObject* o);
         bool applyKeyFilter(OPSObject* o);
-        void setData(OPSObject* data);
+        //void setData(OPSObject* data);
 
         void registerForDeadlineTimeouts();
         void cancelDeadlineTimeouts();
@@ -179,12 +191,9 @@ namespace ops
 
         bool started;
 
-
         __int64 currentPulicationID;
 
         DeadlineTimer* deadlineTimer;
-
-
     };
 
 }
