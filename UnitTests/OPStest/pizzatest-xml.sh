@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [0 == 1]
+if [[ 0 -eq 1 ]]
 then
 	echo "kommer in hit?"
 	if [[ $GOOGLETEST_HOME != /sw/tools/google-test/1.7 ]] 
@@ -31,9 +31,10 @@ fi
 echo "echoing PAATH $PATH "
 
 #cd /lkp/nlt/dev/users/pane/nlt/OPS4/ops4
-#cd /home/pane/OPS/ops4
-JENK_DIR="/var/lib/jenkins/workspace/OPS_PizzaTest"
-
+cd ../..
+JENK_DIR="/tmp/jenkins/workspace/OPS_PizzaTest"
+echo "jag ar i mapp"
+pwd
 build.debug/UnitTests/OPStest/UnitTests/test-serialize-and-deserialize --gtest_output="xml:$JENK_DIR/Unittest-serialize-and-deserialize_result.xml"
 
 build.debug/UnitTests/OPStest/UnitTests/test-subscribe  	--gtest_output="xml:$JENK_DIR/Unittest-publish-and-subscribe_result.xml"     &
