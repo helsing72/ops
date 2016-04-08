@@ -7,4 +7,4 @@ GCOVR_HOME
 
 
 To compile and run the Unit test code, go to ops4 root directory  and run the command
-make UnitTests
+make unittest

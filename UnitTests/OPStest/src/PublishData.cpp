@@ -1,7 +1,6 @@
 // PizzaTest.cpp : Defines the entry point for the console application.
 //
 #include "PublishData.h"
-//#include "../UnitTests/TestSerializeAndDeserialize.h"
 
 #undef USE_MESSAGE_HEADER
 
@@ -245,14 +244,14 @@ int main(int argc, char**argv)
 
 	// Create participants
 	// NOTE that the second parameter (participantID) must be different for the two participant instances
-	ops::Participant* participant = ops::Participant::getInstance("PizzaDomain", "PizzaDomain");
+	ops::Participant* participant = ops::Participant::getInstance("PizzaDomain", "PizzaDomain", "UnitTests/OPStest/ops_config.xml");
 	if (participant == NULL) {
 	    std::cout << "Failed to create Participant. Missing ops_config.xml ??" << std::endl;
 		exit(-1);
 	}
 	participant->addTypeSupport(new PizzaProject::PizzaProjectTypeFactory());
 
-	ops::Participant* otherParticipant = ops::Participant::getInstance("OtherPizzaDomain", "OtherPizzaDomain");
+	ops::Participant* otherParticipant = ops::Participant::getInstance("OtherPizzaDomain", "OtherPizzaDomain", "UnitTests/OPStest/ops_config.xml");
 	if (otherParticipant == NULL) {
 		std::cout << "Failed to create Participant. Missing ops_config.xml ??" << std::endl;
         exit(-1);
