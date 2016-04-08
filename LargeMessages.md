@@ -25,20 +25,20 @@ This is how to configure a topic on which you wish to send data samples larger t
 <root>
     <ops_config type = "DefaultOPSConfigImpl">
         <domains>
-            <element type = "MulticastDomain">
+            <element type = "Domain">
                 <domainID>FooDomain</domainID>
                 <domainAddress>234.5.6.8</domainAddress>
                 <localInterface>127.0.0.1</localInterface>
                 <topics>
-                    
+
                     <element type = "Topic">
                         <name>LargeSampleTopic</name>
                         <port>6686</port>
                         <dataType>foopackage.FooData</dataType>
                         <sampleMaxSize>5000000</sampleMaxSize>
                         <inSocketBufferSize>10000000</inSocketBufferSize>
-                        <outSocketBufferSize > 10000000</outSocketBufferSize>
-                        
+                        <outSocketBufferSize>10000000</outSocketBufferSize>
+
                     </element>
                     <!-- TODO: Add more topics here... -->
                 </topics>

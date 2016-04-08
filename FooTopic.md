@@ -8,7 +8,7 @@ A sample configuration file that defines one Domain (FooDomain) and one Topic (F
     <ops_config type = "DefaultOPSConfigImpl">
         <domains>
             <!-- Define a domain called FooDomain.-->
-            <element type = "MulticastDomain">
+            <element type = "Domain">
                 <domainID>FooDomain</domainID>
                 <domainAddress>234.5.6.8</domainAddress>
                 <topics>

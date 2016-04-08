@@ -1,1 +1,1 @@
-http://ops.googlecode.com/svn/wiki/Pizza.JPG
+![Pizza.JPG](Pizza.JPG)

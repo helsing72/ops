@@ -8,8 +8,8 @@ public:
 	void onNewEvent(ops::Notifier<ops::Error*>* notifier, ops::Error* error)
 	{
 		// do something with error
-                error->getErrorCode();
-                error->getMessage();
+		error->getErrorCode();
+		error->getMessage();
 	}
 
 };
@@ -19,10 +19,9 @@ public:
 MyErrorListener listener;
 participant->addListener(&listener);
 
-
 ```
 
-For the purpose of only logging errors, OPS' C++ imlementation comes with a predefined class called `ops::ErrorWriter` which can be used to print to any `std::o_stream`. This is how you use it:
+For the purpose of only logging errors, OPS' C++ implementation comes with a predefined class called `ops::ErrorWriter` which can be used to print to any `std::o_stream`. This is how you use it:
 
 ```
 ops::ErrorWriter errorWriter(std::cout);

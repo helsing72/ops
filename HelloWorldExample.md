@@ -12,15 +12,14 @@ package hello;
 
 class HelloData
 {
-    /*This string holds hello messages.*/
+    /* This string holds hello messages */
     string helloString;
 }
 ```
-http://code.google.com/p/ops/source/browse/trunk/Deploy%20Scripts/Examples/HelloWorld/src/hello/HelloData.idl
 
 OK, so now we have a Data class to carry a string where we can put our Hello World message.
 
-Now we also need a Topic to publish our Data class on. We define the Topic in a XML file that we call ops\_config.xml like this (See also [OPS Config](OpsConfig.md)):
+Now we also need a Topic to publish our Data class on. We define the Topic in a XML file that we call ops\_config.xml like this (see also [OPS Config](OpsConfig.md)):
 
 ```
 <?xml version="1.0" encoding="UTF-8"?>
@@ -31,9 +30,8 @@ Now we also need a Topic to publish our Data class on. We define the Topic in a 
 <root>
     <ops_config type = "DefaultOPSConfigImpl">
         <domains>
-
             <!-- The one and only domain in our Hello World example -->
-            <element type = "MulticastDomain">
+            <element type = "Domain">
                 <domainID>HelloDomain</domainID>
                 <domainAddress>234.5.6.8</domainAddress>
                 <topics>
@@ -43,15 +41,12 @@ Now we also need a Topic to publish our Data class on. We define the Topic in a 
                         <port>12000</port>
                         <dataType>hello.HelloData</dataType>
                     </element>
-                    
                 </topics>
             </element>
-
         </domains>
     </ops_config>
 </root>
 ```
-http://code.google.com/p/ops/source/browse/trunk/Deploy%20Scripts/Examples/HelloWorld/src/ops_config.xml
 
 As you can see we specify one Topic called HelloTopic and attach this Topic to a Domain that we call HelloDomain. We choose a port (12000) and a domainAddress (234.5.6.8) to communicate on.
 
@@ -86,7 +81,7 @@ public class MainPublish
                 publisher.write(data);
                 Thread.sleep(1000);
             }
-            
+
         } catch (InterruptedException ex)
         {
             Logger.getLogger(MainPublish.class.getName()).log(Level.SEVERE, null, ex);
@@ -98,8 +93,6 @@ public class MainPublish
     }
 }
 ```
-http://code.google.com/p/ops/source/browse/trunk/Deploy%20Scripts/Examples/HelloWorldJavaImpl/src/helloworldjavaimpl/MainPublish.java
-
 And in C++
 ```
 
@@ -137,14 +130,12 @@ int main(int argc, const char* args[])
 		pub.write(&data);
 		std::cout << "Writing data"  <<  std::endl;
 		Sleep(mainSleep);
-		
+
 	}
 
 	return 0;
 }
 ```
-http://code.google.com/p/ops/source/browse/trunk/Deploy%20Scripts/Examples/HelloWorldWithKeyCppImpl/HelloTopic_pub.cpp
-
 
 Note that this is ALL the code you need to create a simple Publisher. To deeper understand whats going on on each line, have a look at [Publishing On Topics](PublishingOnTopic.md).
 
@@ -209,7 +200,7 @@ And in C++:
 #include <iostream>
 #include <vector>
 
-//Create a class to act as a listener for OPS data 
+//Create a class to act as a listener for OPS data
 class Main : ops::DataListener
 {
 public:
@@ -220,7 +211,7 @@ public:
 
 	Main()
 	{
-		
+
 		ops::Participant* participant = ops::Participant::getInstance("HelloDomain");
 		if(!participant)
 		{
@@ -274,4 +265,4 @@ int main(int argc, char* args)
 
 Once again if you are not following have a look at [Subscribing To Topics](SubscribingToTopic.md)
 
-Thats all code needed to publish and subscribe to Hello World messages to and from C++ and Java. To build and run this example, check out [Installation](Installation.md) and download the Examples.
+Thats all code needed to publish and subscribe to Hello World messages to and from C++ and Java. To build and run this example, check out [Installation](Installation.md) and build the examples.

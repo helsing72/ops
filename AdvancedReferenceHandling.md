@@ -9,20 +9,18 @@ void onNewData(DataNotifier* notifier)
 {
    OPSMessage* mess = sub->getMessage();
 
-   //Save the reference in a collection to be used later.
-   myVector.push_back(mess);
-
+   //Save the reference in a thread safe collection to be used later.
+   myQ.push_back(mess);
 }
-///Method called from application thread that prints all messages in myVector
-///and clears the vector.
-void messagePrinter()
+
+///Method called from application thread that prints all messages in myQ
+void printMessages()
 {
-   for(unsigned int i = 0; i < myVector.size(); i++)
-   {
+   OPSMessage* mess;
+   while ((mess = myQ.get()) != NULL) {
       //NOTE: This will cause errors, references might no longer be valid
-      print(myVector[i]); 
+      print(mess);
    }
-   myVector.clear();
 }
 ```
 
@@ -36,21 +34,21 @@ void onNewData(DataNotifier* notifier)
 {
    OPSMessage* mess = sub->getMessage();
    mess->reserve();
-   myVector.push_back(mess);
 
+   //Save the reference in a thread safe collection to be used later.
+   myQ.push_back(mess);
 }
-///Method called from application thread that prints all messages in myVector
-///and clears the vector.
-void messagePrinter()
-{
-   for(unsigned int i = 0; i < myVector.size(); i++)
-   {
-      print(myVector[i]);
 
-      //This will state that you no longer have use for this messages, and it will be 
+///Method called from application thread that prints all messages in myQ
+void printMessages()
+{
+  OPSMessage* mess;
+  while ((mess = myQ.get()) != NULL) {
+      print(mess);
+
+      //This will state that you no longer have use for this messages, and it will be
       //deleted as soon as no one else has it reserved.
-      myVector[i]->unreserve();
+      mess->unreserve();
    }
-   myVector.clear();
 }
 ```

@@ -31,7 +31,7 @@ class ExtendedUserData extends UserData
 }
 ```
 
-The made up problem now is that you have a very complicated relay infrastructure for passing UserData on UserTopic around in your system, e.g. you may have domain relays and a storage mechinsim for all data being published. Consequently, you do not want to update, or even recompile, your relay infrastructure but rather just the producers of the UserData and the clients that display it in some way.
+The made up problem now is that you have a very complicated relay infrastructure for passing UserData on UserTopic around in your system, e.g. you may have domain relays and a storage mechanism for all data being published. Consequently, you do not want to update, or even recompile, your relay infrastructure but rather just the producers of the UserData and the clients that display it in some way.
 
 Here the question arise again, is this possible, or will the relays that did not know about ExtendedUserData at the time of compilation "slice" away the telephoneNumber before republishing the message?
 

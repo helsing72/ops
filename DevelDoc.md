@@ -1,6 +1,6 @@
-# Publish Subscribe Domain Model Used by OPS) #
+# Publish Subscribe Domain Model Used by OPS #
 
-http://ops.googlecode.com/svn/wiki/domain_model_overview.JPG
+![domain_model_overview.JPG](domain_model_overview.JPG)
 
 The UML diagram should be read as: Data types are communicated on Topics. Publishers publish (or write) on Topics, Subscribers subscribes to (or reads from) Topics. A Topic belongs to a Domain. Participants connects to and is the entry point for an application to a Domain. A Participant use Transports to send data to other Participants on the same Domain.
 
