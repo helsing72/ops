@@ -233,7 +233,6 @@ int main(int argc, char**argv)
 	MyListener myListener;
 
 	itemInfo = new ItemInfo("PizzaDomain", "TcpExtraAlltTopic", "pizza.special.ExtraAllt");
-
 	// Setup the OPS static error service (common for all participants, reports errors during participant creation)
 	ops::ErrorWriter* errorWriterStatic = new ops::ErrorWriter(std::cout);
 	ops::Participant::getStaticErrorService()->addListener(errorWriterStatic);
