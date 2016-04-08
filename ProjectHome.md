@@ -3,7 +3,7 @@
 
 ---
 
-See [Installation](Installation.md) or [User Guide](UserGuide.md) to get started!**
+See [Installation](Doc/Installation.md) or [User Guide](Doc/UserGuide.md) to get started!**
 
 ---
 
@@ -29,6 +29,6 @@ Presently OPS is available in Java (Windows, Linux, Unix, Mac), C++ (Win32, Linu
   * Networking and protocol complexity is hidden from application developers.
 
 
-![pub_sub_overview.jpg](pub_sub_overview.jpg)
+![pub_sub_overview.jpg](Doc/pub_sub_overview.jpg)
 
-Head on to the [User Guide](UserGuide.md) to learn more...
+Head on to the [User Guide](Doc/UserGuide.md) to learn more...
