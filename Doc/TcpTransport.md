@@ -1,14 +1,7 @@
 # TCP Transport #
 
 
----
-
-Note, this transport only exist for C++ in an experimental implementation and is under development.
-
----
-
-
-The TCP Transport of OPS is based on TCP/IP as opposed to Muticast Transport which use UDP as the basis for communication. When you use TCP as the transport for a topic, OPS setts up a server on the publisher side of a topic which accpets connections from subscribers and sends data to the subscribers one by one over TCP when a write operation i called on the publisher.
+The TCP Transport of OPS is based on TCP/IP as opposed to Multicast Transport which use UDP as the basis for communication. When you use TCP as the transport for a topic, OPS sets up a server on the publisher side of a topic which accepts connections from subscribers and sends data to the subscribers one by one over TCP when a write operation is called on the publisher.
 
 The TCP transport can be useful in network environments with high IP package losses and/or for communicating over the Internet.
 
@@ -25,14 +18,12 @@ To use the TCP transport for a topic, this is how to setup your [Topic Config](O
 <root>
     <ops_config type = "DefaultOPSConfigImpl">
         <domains>
-            <element type = "MulticastDomain">
+            <element type = "Domain">
                 <domainID>FooDomain</domainID>
                 <domainAddress>234.5.6.8</domainAddress>
                 <localInterface>127.0.0.1</localInterface>
                 <topics>
-                    
                     <element type = "Topic">
-
                         <!-- Required for TCP Transport-->
                         <name>FooTopic</name>
                         <port>6686</port>
@@ -44,12 +35,10 @@ To use the TCP transport for a topic, this is how to setup your [Topic Config](O
                         <sampleMaxSize>60000</sampleMaxSize>
                         <inSocketBufferSize>1000000</inSocketBufferSize>
                         <outSocketBufferSize>1000000</outSocketBufferSize>
-   
                     </element>
                     <!-- TODO: Add more topics here... -->
                 </topics>
             </element>
-
         </domains>
     </ops_config>
 </root>

@@ -1,3 +1,5 @@
+# Handling Errors #
+
 It is possible to be notified if an error occurs in any of the OPS core threads.
 the `ops::Participant` class accepts `ops::Listener<ops::Error*>` interfaces which will be notified with an `ops::Error` when an error occurs. The following shows how to implement such a listener and add it to the participant. Example given in C++:
 

@@ -18,7 +18,7 @@ To be able to debug your own OPS IDL Builder projects (i.e. Data classes and Top
 
 The OPS Debugger can be useful but it also has some shortcomings. It may be heavy on your CPU depending on your Java runtime and the rate at which you publish data. If you experience such problems, you might want to use the Time Based Filter to make it repaint less often. And if you have large arrays with chunk data that your not interested in, you can check suppress arrays to improve performance.
 
-The Plotter and Watches tabs are really experimental and are know to not work well on Vista and Windows 7 operating systems. Use them if you like, but you might run in to problems.
+The Plotter and Watches tabs are really experimental and are known to not work well on Vista and Windows 7 operating systems. Use them if you like, but you might run in to problems.
 
 When publishing data from the Publishers tab there are a few nice features to know about.
 
@@ -30,4 +30,4 @@ Yet another way to manipulate what is sent with the debugger is to use Java scri
 
 For example to have a publisher publish a double value so that it oscillates around 0 you could type y = 1.0\*Math.sin(i\*0.01) in a cell and hit enter.
 
-![http://ops.googlecode.com/svn/wiki/debugger_java_script.jpg](http://ops.googlecode.com/svn/wiki/debugger_java_script.jpg)
+![debugger_java_script.jpg](debugger_java_script.jpg)

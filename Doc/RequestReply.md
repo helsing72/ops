@@ -1,6 +1,6 @@
 # Request Reply #
 
-OPS is primarily a publish subscribe based middleware which is a specialization of the more general Message Oritented Middleware (MOM) class of middlewares. This class of middlewares (including OPS) focus on passing asynchronous messages from producers to consumers in an event manner, i.e. a consumer registers an interest in getting data once, and then receive data continiously without requesting each data sample.
+OPS is primarily a publish subscribe based middleware which is a specialization of the more general Message Oriented Middleware (MOM) class of middlewares. This class of middlewares (including OPS) focus on passing asynchronous messages from producers to consumers in an event manner, i.e. a consumer registers an interest in getting data once, and then receive data continuously without requesting each data sample.
 
 Most systems however have needs for some kind of request/reply communication in some parts. Middlewares that deals with this kind of communication include Remote Method Invocation (RMI) middlewares and Object Oriented Middlewares (or Object Request Brokers), e.g. CORBA, Java RMI and the Internet Communications Engine (ICE).
 
@@ -11,7 +11,7 @@ You create two topics, one request topic (this can be seen as the parameters for
 
 This is what you need to do to create a simple request/reply case where a requester can request a Hello message:
 
-Create two Data classes in IDL, one for the request and one for the reply, notice that to mark an IDL class as a request or a reply, you extend the OPS core classes ops.Request and ops.Reply directly from your IDL
+Create two Data classes in IDL, one for the request and one for the reply, notice that to mark an IDL class as a request or a reply, you extend the OPS core classes ops.Request and ops.Reply directly from your IDL.
 
 ```
 package hello;
@@ -46,12 +46,10 @@ Also, define two topics to send our data on:
 <root>
     <ops_config type = "DefaultOPSConfigImpl">
         <domains>
-
-            <element type = "MulticastDomain">
+            <element type = "Domain">
                 <domainID>HelloDomain</domainID>
                 <domainAddress>234.5.6.8</domainAddress>
                 <topics>
-                    
                     <element type = "Topic">
                         <name>RequestHelloTopic</name>
                         <port>6686</port>
@@ -64,7 +62,6 @@ Also, define two topics to send our data on:
                     </element>
                 </topics>
             </element>
-
         </domains>
     </ops_config>
 </root>
@@ -109,26 +106,26 @@ ops::RequestReply<hello::RequestHelloData, hello::HelloData> requestReplyHelper(
 
 while(true)
 {
-	hello::HelloData* reply = NULL;
-	hello::RequestHelloData request;
-	request.requestersName = "C++ Requester";
+  hello::HelloData* reply = NULL;
+  hello::RequestHelloData request;
+  request.requestersName = "C++ Requester";
 
-        //Send the request and wait for reply 1000 milliseconds.
-        //Notice that the reply is a copy of the underlying data 
-        //and you need to delete it when you no longer want to use it.
+  //Send the request and wait for reply 1000 milliseconds.
+  //Notice that the reply is a copy of the underlying data
+  //and you need to delete it when you no longer want to use it.
 	reply = requestReplyHelper.request(&request, 1000);
 
-	if(reply != NULL)
+  if(reply != NULL)
 	{
-            if(reply->requestAccepted)
-	        std::cout << "Reply received and request was accepted: " << reply->helloString  <<  std::endl;
-            else
-                std::cout << "Request was not accepted." <<  std::endl;
+    if(reply->requestAccepted)
+    {
+      std::cout << "Reply received and request was accepted: " << reply->helloString  <<  std::endl;
+    } else {
+      std::cout << "Request was not accepted." <<  std::endl;
+    }
 
-	    delete reply;
-	}
-	else
-	{
+    delete reply;
+	} else {
 	    std::cout << "No reply." << std::endl;
 	}
 	Sleep(1000);
@@ -139,29 +136,27 @@ On the reply side, all we need to do is to implement a subscriber which subscrib
 
 ```
 Participant participant = Participant.getInstance("HelloDomain");
-            participant.addTypeSupport(new HelloRequestReplyTypeFactory());
-            final RequestHelloDataSubscriber subscriber = new hello.RequestHelloDataSubscriber(participant.createTopic("RequestHelloTopic"));
-            final HelloDataPublisher helloDataPublisher = new HelloDataPublisher(participant.createTopic("HelloTopic"));
-            subscriber.addObserver(new Observer()
-            {
+participant.addTypeSupport(new HelloRequestReplyTypeFactory());
 
-                public void update(Observable sub, Object o)
-                {
-                    RequestHelloData request = subscriber.getData();
-                    System.out.println("Request received from " + request.requestersName + ".");
-                    
-                    //Create a reply
-                    HelloData helloData = new HelloData();
-                    //Set the requestId of the reply to the requstId of the reply
-                    helloData.requestId = request.requestId;
-                    helloData.requestAccepted = true;
-                    helloData.helloString = "Hello " + request.requestersName + "!!";
-
-                    //Set the key of this publication to the key of the request
-                    helloDataPublisher.setKey(request.getKey());
-                    helloDataPublisher.write(helloData);
-                }
-            });
+final RequestHelloDataSubscriber subscriber = new hello.RequestHelloDataSubscriber(participant.createTopic("RequestHelloTopic"));
+final HelloDataPublisher helloDataPublisher = new HelloDataPublisher(participant.createTopic("HelloTopic"));
+subscriber.addObserver(new Observer()
+{
+  public void update(Observable sub, Object o)
+  {
+    RequestHelloData request = subscriber.getData();
+    System.out.println("Request received from " + request.requestersName + ".");
+    //Create a reply
+    HelloData helloData = new HelloData();
+    //Set the requestId of the reply to the requstId of the reply
+    helloData.requestId = request.requestId;
+    helloData.requestAccepted = true;
+    helloData.helloString = "Hello " + request.requestersName + "!!";
+    //Set the key of this publication to the key of the request
+    helloDataPublisher.setKey(request.getKey());
+    helloDataPublisher.write(helloData);
+  }
+});
 ```
 
-Thats all thats needed to create request/reply over OPS, and what is nice about it is that because it uses normal OPS topics under the hood, you can debug and use them just as normal topics whenever you want.
+That's all that's needed to create request/reply over OPS, and what is nice about it is that because it uses normal OPS topics under the hood, you can debug and use them just as normal topics whenever you want.

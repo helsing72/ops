@@ -1,8 +1,8 @@
 # Subscribing To Topics #
 
-Given a IDL project FooProject with a data type FooData used by a topic FooTopic on a domain FooDomain this is how you set up a subscrption and receive data:
+Given an IDL project FooProject with a data type FooData used by a topic FooTopic on a domain FooDomain this is how you set up a subscription and receive data:
 
-There are two basic ways of subscribing to data in OPS, by regestering a listener that will be notified when new data arrives, or by polling the subscriber for data.
+There are two basic ways of subscribing to data in OPS, by registering a listener that will be notified when new data arrives, or by polling the subscriber for data.
 
 ## Java ##
 
@@ -16,7 +16,7 @@ if(participant == null)
     //Report error
     return;
 }
-//Add support for serializing/unserialazing our data types
+//Add support for serializing/deserializing our data types
 participant.addTypeSupport(new FooProject.FooProjectTypeFactory());
 
 Topic topic = participant.createTopic("FooTopic");
@@ -43,18 +43,18 @@ Data will be null until we receive any data.
 If we want to use a listener approach we can use Java's Observer classes in the following way (in this example the Observer is implemented inline):
 
 ```
-sub.addObserver(new Observer() 
-{ 
+sub.addObserver(new Observer()
+{
     public void update(Observable o, Object arg)
     {
         FooData data = (FooData)arg;
         //Do something with the data...
-    } 
+    }
 });
 
 ```
 
-It is also possible to have an application thread wait for incomming data and poll it as soon as data is available, the following lines will wait for data for 1000 milliseconds and return a data (!null) only if a new sample arrives within the timeout:
+It is also possible to have an application thread wait for incoming data and poll it as soon as data is available, the following lines will wait for data for 1000 milliseconds and return a data (!null) only if a new sample arrives within the timeout:
 
 ```
 FooData data = null;
@@ -79,7 +79,8 @@ if(participant == NULL)
     //Report error
     return;
 }
-//Add suppoert for serializing/unserialazing our data types
+
+//Add support for serializing/deserializing our data types
 participant->addTypeSupport(new FooProject::FooProjectTypeFactory());
 
 Topic topic = participant->createTopic("FooTopic");
@@ -94,15 +95,18 @@ If we want to poll the subscriber for data the most simple approach we can have 
 
 ```
 FooData data;
-if(sub.getData(&data)
+if(sub.newDataExist())
 {
+  if(sub.getData(&data))
+  {
     //Do something with the data...
+  }
 }
 ```
 
-getData will return false until we receive any data.
+newDataExist() will return false until we receive new data.
 
-If we want to use a listener approach we can use OPS' DataListener and DataNotifier classes by creating a listener class in the following way:
+If we want to use a listener approach we can use OPS DataListener and DataNotifier classes by creating a listener class in the following way:
 
 ```
 
@@ -113,16 +117,16 @@ class MyListener : public ops::DataListener
    {
        fooSub = s;
        fooSub->addDataListener(this);
-   } 
+   }
    ///Override from ops::DataListener
    void onNewData(ops::DataNotifier*)
    {
       FooData data;
-      if(fooSub->getData(&data)
+      if(fooSub->getData(&data))
       {
           //Do something with the data...
       }    
-   } 
+   }
 
 }
 ```
@@ -134,16 +138,16 @@ MyListener listener(&sub);
 
 ```
 
-It is also possible to have an application thread wait for incomming data and poll it as soon as data is available, the following lines will wait for data for 1000 milliseconds and return true only if a new sample arrives within the timeout:
+It is also possible to have an application thread wait for incoming data and poll it as soon as data is available, the following lines will wait for data for 1000 milliseconds and return true only if a new sample arrives within the timeout:
 
 ```
 
 FooData data;
-if(sub.waitForNewData(1000);)
+if(sub.waitForNewData(1000))
 {
       sub.getData(&data);
       //Do something with the data...
-      
+
 }
 
 ```

@@ -1,3 +1,4 @@
+# Weather station example #
 
 ```
 
@@ -5,7 +6,7 @@ package weatherstation;
 
 class BasicWeatherData
 {
-    double temprature;
+    double temperature;
 }
 
 ```
@@ -15,9 +16,8 @@ package weatherstation;
 
 class ExtendedWeatherData extends BasicWeatherData
 {
-    virtual WindData windData;
+    virtual ExtendedWindData windData;
     double humidity;
-
 }
 ```
 
@@ -27,7 +27,6 @@ package weatherstation;
 class BasicWindData
 {
     double speed;
-
 }
 ```
 
@@ -38,7 +37,6 @@ class ExtendedWindData extends BasicWindData
 {
     double direction;
 }
-
 ```
 
 ```
@@ -50,13 +48,10 @@ class ExtendedWindData extends BasicWindData
 <root>
     <ops_config type = "DefaultOPSConfigImpl">
         <domains>
-
-            
-            <element type = "MulticastDomain">
+            <element type = "Domain">
                 <domainID>WeatherDomain</domainID>
                 <domainAddress>234.5.6.8</domainAddress>
                 <topics>
-                    
                     <element type = "Topic">
                         <name>WeatherTopic</name>
                         <port>6686</port>
@@ -65,10 +60,7 @@ class ExtendedWindData extends BasicWindData
                     <!-- TODO: Add more topics here... -->
                 </topics>
             </element>
-
         </domains>
     </ops_config>
 </root>
-
-
 ```

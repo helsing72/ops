@@ -6,7 +6,7 @@ OPS aims to offer asynchronous, efficient and type secure publish-subscribe comm
 
 The communication model of OPS is a typed topic publish-subscribe model. That means that processes that take part in the OPS communication can act as publishers or subscribers to different topics. Data published on a certain topic will be delivered to all subscribers to that topic in a way that hides the publishers from the subscribers and vice versa. By ensuring this anonymity the middleware allows for low coupling between different system participants which enables software reuse, modularity and redundancy among other desirable properties.
 
-As mentioned above, OPS offers typed topics, which in addition to connecting publishers and subscribers also dictates the format of the data that is sent between them. The messages sent in OPS are Data classes that are defined by the system developers in a data definition language called OPS IDL. These data classes may be complex constructs, with inheritence, dynamic arrays, strings, classes of classes and arrays of classes. These Data classes are used to auto generate source code, for different target programming languages, that allows for communicating this data in a simple and secure way. The complexity of serializing and deserializing these classes and to be able to send them across the network is completely hidden from the participants, and the classes can be used in an object oriented and type safe way in the application layer of the participants.
+As mentioned above, OPS offers typed topics, which in addition to connecting publishers and subscribers also dictates the format of the data that is sent between them. The messages sent in OPS are Data classes that are defined by the system developers in a data definition language called OPS IDL. These data classes may be complex constructs, with inheritance, dynamic arrays, strings, classes of classes and arrays of classes. These Data classes are used to auto generate source code, for different target programming languages, that allows for communicating this data in a simple and secure way. The complexity of serializing and deserializing these classes and to be able to send them across the network is completely hidden from the participants, and the classes can be used in an object oriented and type safe way in the application layer of the participants.
 
 Presently OPS is available in Java (Windows, Linux, Unix, Mac), C++ (Windows, Linux) and C# (Windows) programming languages. OPS can also be used under Matlab through the Java Matlab bridge available with Matlab.
 
@@ -40,7 +40,7 @@ Presently OPS is available in Java (Windows, Linux, Unix, Mac), C++ (Windows, Li
 
   * **Data classes** – Data classes is what is communicated between publishers and subscribers. Notice the difference between Data classes and Topics. Each Topic can have only one Data class associated with it, but a Data class can be used by many Topics.
 
-  * **Transport** is the communication implementation that sends data as chunks of bytes over a IP network or other cummunication infrastraucture. Examples of Transports include Multicast Transport or a TCP Transport.
+  * **Transport** is the communication implementation that sends data as chunks of bytes over a IP network or other communication infrastructure. Examples of Transports include Multicast Transport or a TCP Transport.
 
 
 

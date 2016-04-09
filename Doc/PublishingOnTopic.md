@@ -1,6 +1,6 @@
 # Publishing On Topics #
 
-Given a IDL project FooProject with a data type FooData used by a topic FooTopic on a domain FooDomain this is how you set up publishers and write data:
+Given an IDL project FooProject with a data type FooData used by a topic FooTopic on a domain FooDomain this is how you set up publishers and write data:
 
 
 ## Java ##
@@ -15,7 +15,7 @@ if(participant == null)
     //Report error
     return;
 }
-//Add suppoert for serializing/unserialazing our data types
+//Add support for serializing/deserializing our data types
 participant.addTypeSupport(new FooProject.FooProjectTypeFactory());
 
 Topic topic = participant.createTopic("FooTopic");
@@ -43,9 +43,8 @@ if(participant == NULL)
     //Report error
     return;
 }
-//Add suppoert for serializing/unserialazing our data types
+//Add support for serializing/deserializing our data types
 participant->addTypeSupport(new FooProject::FooProjectTypeFactory());
-
 
 Topic topic = participant->createTopic("FooTopic");
 
