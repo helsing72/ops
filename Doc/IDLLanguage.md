@@ -20,20 +20,20 @@ The class definition is the word class followed by a single word for the class n
 
 The following table shows a listing of all available OPS IDL types and their corresponding  representations in common programming languages:
 
-|OPS IDL|C++|Java|C#|Serialized on the network|
-|:------|:--|:---|:-|:------------------------|
-|class  |class|class|class|-                        |
-|package|namespace|package|namespace|-                        |
-|boolean|bool|boolean|bool|1 byte                   |
-|byte   |char|byte|byte|1  byte                  |
-|short  |int16|short|short|2 bytes                  |
-|int    |int32|int |int|4 bytes                  |
-|long   |int64|long|long|8 bytes                  |
-|float  |float|float|float|4 byte                   |
-|double |double|double|double|8 bytes                  |
-|string |std::string|String|string|4 bytes (size) + 1 byte per character (8-bit)|
-|T      |T  |T   |T |sizeof( T )              |
-|T`[``]`|std::vector< T >|java.util.Vector< T >|List< T >|4 bytes (size) + sizeof( T ) per element|
+| OPS IDL | C++ | Java | C#  | Serialized on the network |
+| ------- | --- | ---- | --- | ------------------------- |
+| class   | class | class | class | -                    |
+| package | namespace | package | namespace | -          |
+| boolean | bool | boolean | bool | 1 byte                   |
+| byte    | char | byte | byte | 1  byte                  |
+| short   | int16 | short | short | 2 bytes                  |
+| int     | int32 | int | int | 4 bytes                  |
+| long    | int64 | long| long | 8 bytes                  |
+| float   | float | float| float | 4 byte                   |
+| double  | double | double | double | 8 bytes                  |
+| string  | std::string | String | string | 4 bytes (size) + 1 byte per character (8-bit) |
+| T       | T  | T  | T | sizeof( T )              |
+| T`[``]` | std::vector< T > | java.util.Vector< T > | List< T > | 4 bytes (size) + sizeof( T ) per element |
 
 Or as IDL code example:
 
