@@ -128,4 +128,4 @@ and
 
 More than just beeing two ways of accomplishing the same thing, comment as in 1. stays in IDL and will not be visible in the generated code while comments like in 2. will be.
 
-Se also, [Tools - IDL Builder](IDLCompilerTutorial.md) to se how to edit and compile OPS IDL files.
+See also, [Tools - IDL Builder](IDLCompilerTutorial.md) to see how to edit and compile OPS IDL files.
