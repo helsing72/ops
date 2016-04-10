@@ -125,7 +125,7 @@ namespace ops
             {
 	            if (!error && nrBytesReceived > 0)
 		        {
-			        handleReadOK(data, nrBytesReceived);
+			        handleReadOK(data, (int)nrBytesReceived);
 				}
 	            else
 		        {
@@ -192,8 +192,8 @@ namespace ops
         {
             try
             {
-                int nReceived = sock->receive_from(boost::asio::buffer(buf, size), lastEndpoint);
-                return nReceived;
+                size_t nReceived = sock->receive_from(boost::asio::buffer(buf, size), lastEndpoint);
+                return (int)nReceived;
             }
             catch (...)
             {
@@ -205,7 +205,7 @@ namespace ops
 
         int available()
         {
-            return sock->available();
+            return (int)sock->available();
         }
 
         bool sendReply(char* buf, int size)

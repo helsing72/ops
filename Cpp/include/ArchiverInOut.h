@@ -70,7 +70,7 @@ namespace ops
 
         template <class SerializableType> void inout(const std::string& name, std::vector<SerializableType>& vec, SerializableType prototype)
         {
-            int size = beginList(name, vec.size());
+            int size = beginList(name, (int)vec.size());
             if ((int) vec.size() < size)
             {
                 vec.clear();
@@ -96,7 +96,7 @@ namespace ops
 
         template <class SerializableType> void inout(const std::string& name, std::vector<SerializableType*>& vec)
         {
-            int size = beginList(name, vec.size());
+            int size = beginList(name, (int)vec.size());
             if ((int) vec.size() < size)
             {
                 vec.clear();

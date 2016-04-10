@@ -114,7 +114,7 @@ namespace ops
     {
         SafeLock lock(&garbageLock);
         
-        for (int i = garbageReceiveDataHandlers.size() - 1; i >= 0; i--)
+        for (int i = (int)garbageReceiveDataHandlers.size() - 1; i >= 0; i--)
         {
             if (garbageReceiveDataHandlers[i]->numReservedMessages() == 0)
             {

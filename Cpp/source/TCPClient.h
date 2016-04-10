@@ -180,7 +180,7 @@ namespace ops
 				bool errorDetected = false;
 
 				if (!error) {
-					accumulatedSize += nrBytesReceived;
+					accumulatedSize += (int)nrBytesReceived;
 					if (accumulatedSize < 22)// we have not gotten the size pack yet
 					{
 						m_asyncCallActive = true;
@@ -239,7 +239,7 @@ namespace ops
 
 			} else {
 				if (!error && nrBytesReceived > 0) {
-					accumulatedSize += nrBytesReceived;
+					accumulatedSize += (int)nrBytesReceived;
 					if (accumulatedSize < max_length)// we have not gotten all bytes yet
 					{
 						m_asyncCallActive = true;

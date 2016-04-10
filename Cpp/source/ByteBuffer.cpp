@@ -214,7 +214,7 @@ namespace ops
     {
         int siz = (int) s.size();
         WriteInt(siz);
-        WriteChars((char*) s.c_str(), s.size());
+        WriteChars((char*) s.c_str(), siz);
     }
 
 	// -----------------------------------------------------------------
@@ -339,7 +339,7 @@ namespace ops
 
     void ByteBuffer::WriteBooleans(std::vector<bool>& out)
     {
-        int size = out.size();
+        int size = (int)out.size();
         WriteInt(size);
         for (int i = 0; i < size; i++)
         {
@@ -392,7 +392,7 @@ namespace ops
 
     void ByteBuffer::WriteBytes(std::vector<char>& out)
     {
-        int size = out.size();
+        int size = (int)out.size();
         WriteInt(size);
         WriteBytes(out, 0, size);
     }
@@ -441,7 +441,7 @@ namespace ops
 
     void ByteBuffer::WriteDoubles(std::vector<double>& out)
     {
-        int size = out.size();
+        int size = (int)out.size();
         WriteInt(size);
         if (size > 0)
         {
@@ -482,7 +482,7 @@ namespace ops
 
     void ByteBuffer::WriteInts(std::vector<int>& out)
     {
-        int size = out.size();
+        int size = (int)out.size();
         WriteInt(size);
         if (size > 0)
         {
@@ -523,7 +523,7 @@ namespace ops
 
     void ByteBuffer::WriteShorts(std::vector<__int16>& out)
     {
-        int size = out.size();
+        int size = (int)out.size();
         WriteInt(size);
         if (size > 0)
         {
@@ -564,7 +564,7 @@ namespace ops
 
     void ByteBuffer::WriteFloats(std::vector<float>& out)
     {
-        int size = out.size();
+        int size = (int)out.size();
         WriteInt(size);
         if (size > 0)
         {
@@ -605,7 +605,7 @@ namespace ops
 
     void ByteBuffer::WriteLongs(std::vector<__int64>& out)
     {
-        int size = out.size();
+        int size = (int)out.size();
         WriteInt(size);
         if (size > 0)
         {
@@ -640,7 +640,7 @@ namespace ops
 
     void ByteBuffer::WriteStrings(std::vector<std::string>& out)
     {
-        int size = out.size();
+        int size = (int)out.size();
         WriteInt(size);
         for (int i = 0; i < size; i++)
         {

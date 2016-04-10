@@ -76,7 +76,7 @@ namespace ops
         virtual bool sendTo(char* buf, int size, const std::string& ip, int port)
 		{
 			//Send to anyone connected. Loop backwards to avoid problems when removing broken sockets
-			for(int i = connectedSockets.size() - 1; i >= 0 ; i--)
+			for(int i = (int)connectedSockets.size() - 1; i >= 0 ; i--)
 			{
 				try
 				{
@@ -141,7 +141,7 @@ namespace ops
 		{
 			canceled = true;
 			if (acceptor) acceptor->close();
-			for(int i = connectedSockets.size() - 1; i >= 0 ; i--)
+			for(int i = (int)connectedSockets.size() - 1; i >= 0 ; i--)
 			{
 				connectedSockets[i]->close();
 				delete connectedSockets[i];
