@@ -36,33 +36,42 @@
 
 namespace ops
 {
-    //Forward declaration//////
-    class OPSObject;///////////
-    ///////////////////////////
-    
+    //Forward declaration
+    class OPSObject;
+
     class KeyFilterQoSPolicy
 		: public FilterQoSPolicy, public Lockable
 	{
-        
     public:
-		KeyFilterQoSPolicy(std::string keyString);
-		KeyFilterQoSPolicy(std::vector<std::string> keyStrings);
-		void setKeys(std::vector<std::string> keyStrings);
-		void setKey(std::string key);
-		std::vector<std::string> getKeys();
+        // Creates an empty filter that lets all objects thru
+        KeyFilterQoSPolicy();
 
-		virtual ~KeyFilterQoSPolicy();
+        // Creates a filter with one key, that must match for objects to come thru
+        KeyFilterQoSPolicy(std::string keyString);
 
+        // Creates a filter with N keys, if any matches the object come thru
+        // If the provided vector is empty, all objects come thru
+        KeyFilterQoSPolicy(std::vector<std::string> keyStrings);
 
-        //Overides applyFilterQoSPolicy(OPSObject* o) in FilterQoSPolicy
+        // Replaces current key[s] with the new keys provided
+        // If the provided vector is empty, all objects come thru
+        void setKeys(std::vector<std::string> keyStrings);
+
+        // Replaces current key[s] with the new single key provided
+        void setKey(std::string key);
+
+        // Returns the current keys
+        std::vector<std::string> getKeys();
+
+        virtual ~KeyFilterQoSPolicy();
+
+        //Overides applyFilter(OPSObject* o) in FilterQoSPolicy
         bool applyFilter(OPSObject* o);
-	private:
-		std::vector<std::string> keyStrings;
-		std::string keyString;
-        
+
+    private:
+        std::vector<std::string> keyStrings;
     };
     
 }
 
 #endif	/* _KEYFILTERQOSPOLICY_H */
-
