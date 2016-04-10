@@ -3,10 +3,12 @@
 #include "OPSObject.h"
 namespace ops
 {
+	KeyFilterQoSPolicy::KeyFilterQoSPolicy()
+	{
+	}
 	KeyFilterQoSPolicy::KeyFilterQoSPolicy(std::string keyString)
 	{
 		keyStrings.push_back(keyString);
-        
 	}
 	KeyFilterQoSPolicy::KeyFilterQoSPolicy(std::vector<std::string> keyStrings)
 	{
@@ -17,7 +19,6 @@ namespace ops
 		SafeLock lock(this);
 
 		this->keyStrings = keyStrings;
-
 	}
 	void KeyFilterQoSPolicy::setKey(std::string key)
 	{
@@ -25,7 +26,6 @@ namespace ops
 
 		this->keyStrings.clear();
 		this->keyStrings.push_back(key);
-
 	}
 	std::vector<std::string> KeyFilterQoSPolicy::getKeys()
 	{
@@ -40,18 +40,18 @@ namespace ops
     
     bool KeyFilterQoSPolicy::applyFilter(OPSObject* o)
 	{
-		bool ret = false;
 		SafeLock lock(this);
+
+		// An empty key filter is the same as no filter
+		if (keyStrings.size() == 0) return true;
 
 		for (unsigned int i = 0; i < keyStrings.size(); i++)
 		{
 			if(o->getKey() == keyStrings[i])
 			{
-				ret = true;
+				return true;	// match, so keep this object
 			}
-
 		}
-		return ret;
-        
+		return false;	// no match, skip this object
     }
 }
