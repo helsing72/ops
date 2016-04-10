@@ -106,6 +106,16 @@ class CHelper(IHelper):
 			print "Created topic " + topic.name + " [" + topic.transport + "." + topic.domainAddress +"." + str(topic.port) + "]"
 			self.sub = Subscriber.Subscriber(topic)
 			self.sub.addListener(self.listener)
+			self.sub.start()
+	def DeleteSubscriber(self):
+		if (self.sub) {
+			print "Deleting subscriber for topic " + self.sub.getTopic().getName()
+			self.sub.stop();
+			self.sub = None;
+		else
+			print "Subscriber must be created first!!"
+
+
 	def StartSubscriber(self):
 		if self.sub is not None:
 			print "Starting subscriber for topic " + self.sub.getTopic().getName()
@@ -237,6 +247,7 @@ while not doExit:
 			ItemInfoList[index].selected = not ItemInfoList[index].selected
 		else:
 			print "ERROR: Index to large. Max = %s" % (len(ItemInfoList)-1)
+
 	elif (commands[0]=="?"):
 		menu()
 	elif (commands[0]=="X"):
@@ -264,10 +275,18 @@ while not doExit:
 		for info in ItemInfoList:
 			if info.selected:
 				info.helper.CreateSubscriber(info.part, info.TopicName)
+	elif (commands[0]=="SD"):
+		for info in ItemInfoList:
+			if info.selected:
+				info.helper.DeletePublisher()
 	elif (commands[0]=="SS"):
 		for info in ItemInfoList:
 			if info.selected:
 				info.helper.StartSubscriber()
+	elif (commands[0]=="PT"):
+		for info in ItemInfoList:
+			if info.selected:
+				info.helper.StopSubscriber()
 
 
 
