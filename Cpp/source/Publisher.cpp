@@ -138,7 +138,7 @@ namespace ops
         //If data has spare bytes, write them to the end of the buf
         if (message.getData()->spareBytes.size() > 0)
         {
-            buf.WriteChars(&(message.getData()->spareBytes[0]), message.getData()->spareBytes.size());
+            buf.WriteChars(&(message.getData()->spareBytes[0]), (int)message.getData()->spareBytes.size());
         }
 
         buf.finish();

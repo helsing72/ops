@@ -49,12 +49,12 @@ namespace ops
 			}
 
 		}
-///LA
+
 		int size()
 		{
-			return references.size();
+			return (int)references.size();
 		}
-///LA
+
 	private:
 		std::vector<Reservable*> references;
 		void removeReference(Reservable* reservable)

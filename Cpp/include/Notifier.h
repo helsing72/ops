@@ -81,7 +81,7 @@ namespace ops
         int getNrOfListeners()
         {
             SafeLock lock(&mutex);
-            return listeners.size();
+            return (int)listeners.size();
         }
 
         //Destructor:
