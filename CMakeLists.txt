@@ -24,8 +24,19 @@ endif()
 
 if(NOT Java_JAVAC_EXECUTABLE)
   message(WARNING "Could not find a Java compiler")
-  #message(FATAL " Need java to build OPS")
 endif()
+
+
+
+# add compiler flags for release or debug
+if(CMAKE_BUILD_TYPE MATCHES "Release")
+	set(CMAKE_CXX_FLAGS "-O2")
+	string(REPLACE "-O3 -DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE} )
+elseif(CMAKE_BUILD_TYPE MATCHES "Debug")
+	set(CMAKE_CXX_FLAGS "-g -fprofile-arcs -ftest-coverage -O0") #fPIC is set
+	string(REPLACE "-g" "" CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG} )
+endif()	
+
 
 # find Boost. If not found we can't build c++ libs
 set(Boost_NO_BOOST_CMAKE ON)
@@ -91,11 +102,21 @@ if(Java_JAVAC_EXECUTABLE)
   add_subdirectory(Tools)
 endif()
 
-add_subdirectory(CSharp)
 
-# add the C++ source
-if(Boost_FOUND)
+#add_subdirectory(CSharp)
+
+# add the C++ source, only if Boost is loaded
+if(DEFINED ENV{BOOST_HOME})
+  
+  set(Boost_INCLUDE_DIRS $ENV{BOOST_HOME}) 
+  set(Boost_LIBRARIES $ENV{BOOST_LIB})
+  link_directories($ENV{BOOST_LIB})
   add_subdirectory(Cpp)
+  
+  if(CMAKE_BUILD_TYPE MATCHES "Debug")
+    add_subdirectory(UnitTests) #pane added
+  endif()
+  
 else()
   message(WARNING "install Boost to build OPS C++ libraries")
 endif()

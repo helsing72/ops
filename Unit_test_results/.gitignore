@@ -1,0 +1,5 @@
+#ignore generated html files
+*.html
+SA_ERRORS.txt
+UnitTests-result.txt
+

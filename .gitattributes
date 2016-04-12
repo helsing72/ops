@@ -1,0 +1,27 @@
+#* text=auto
+* -text
+
+*.xtuml -merge
+
+# *.so.* -diff
+*.dll -merge
+# *.so -diff
+    
+# CMake*.txt text
+# *.cmake text
+# *.sln text
+# *.mat text
+# *.pfx text
+# *.fp text
+# *.vp text
+# *.fx text
+
+# *.attr binary
+# *.rgba binary
+# *.pak binary
+# *.ttf binary
+*.pdf binary
+*.jpg binary
+*.png binary
+# *.tga binary
+# *.dds binary

@@ -1,6 +1,11 @@
 
 # the library name
-set(LIB_NAME ops)
+if(CMAKE_BUILD_TYPE MATCHES "Release")
+	set(LIB_NAME opsopt)
+elseif(CMAKE_BUILD_TYPE MATCHES "Debug")
+	set(LIB_NAME opsdbg)
+endif()	
+
 
 # where are the headers
 set(HEADER_PATH ${PROJECT_SOURCE_DIR}/Cpp/include)
@@ -142,10 +147,10 @@ add_library(${LIB_NAME}
     ${LIB_PUBLIC_HEADERS}
 )
 
+
 set_target_properties(${LIB_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
 
 target_link_libraries(${LIB_NAME} ${Boost_LIBRARIES})
-#message("link ${LIB_NAME} to ${Boost_LIBRARIES}")
 
 # library and headers installation
 set(INSTALL_INCDIR include)
@@ -163,6 +168,7 @@ install(TARGETS ${LIB_NAME}
   LIBRARY DESTINATION ${INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${INSTALL_ARCHIVEDIR}
   )
+
 
 # install headers separately to keep the include file hierarchy
 install(DIRECTORY ${HEADER_PATH}/ DESTINATION ${INSTALL_INCDIR}/${LIB_NAME})
