@@ -107,14 +107,15 @@ class CHelper(IHelper):
 			self.sub = Subscriber.Subscriber(topic)
 			self.sub.addListener(self.listener)
 			self.sub.start()
-	def DeleteSubscriber(self):
-		if (self.sub) {
+			
+	def DeleteSubscriber(self,doLog = True):
+		if self.sub
 			print "Deleting subscriber for topic " + self.sub.getTopic().getName()
 			self.sub.stop();
 			self.sub = None;
-		else
-			print "Subscriber must be created first!!"
-
+		else:
+			if doLog:
+				print "Subscriber must be created first!!"
 
 	def StartSubscriber(self):
 		if self.sub is not None:
@@ -122,6 +123,16 @@ class CHelper(IHelper):
 			self.sub.start();
 		else:
 			print "Subscriber must be created first!!"
+	
+	def StopSubscriber(self):
+		if sub:
+			print "Stoping subscriber for topic " + self.sub.getTopic().getName()
+			self.sub.stop()
+		else:
+			print "Subscriber must be created first!!"
+
+
+
 
 
 
