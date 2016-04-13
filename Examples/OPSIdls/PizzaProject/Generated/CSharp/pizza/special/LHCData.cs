@@ -12,12 +12,12 @@ namespace pizza.special
     [Serializable]
     public class LHCData : pizza.CapricosaData
     {
-		public string bearnaise { get; set; }
+        public string bearnaise { get; set; }
 
-		public string beef { get; set; }
+        public string beef { get; set; }
 
-		private List<pizza.PizzaData> _p = new List<pizza.PizzaData>();
-		public List<pizza.PizzaData> p { get { return  _p; } set { _p = value; } } 
+        private List<pizza.PizzaData> _p = new List<pizza.PizzaData>();
+        public List<pizza.PizzaData> p { get { return  _p; } set { _p = value; } } 
 
 
 
@@ -32,9 +32,9 @@ namespace pizza.special
         public override void Serialize(IArchiverInOut archive)
         {
             base.Serialize(archive);
-			bearnaise = archive.Inout("bearnaise", bearnaise);
-			beef = archive.Inout("beef", beef);
-			_p = (List<pizza.PizzaData>) archive.InoutSerializableList("p", _p);
+            bearnaise = archive.Inout("bearnaise", bearnaise);
+            beef = archive.Inout("beef", beef);
+            _p = (List<pizza.PizzaData>) archive.InoutSerializableList("p", _p);
 
         }
     
@@ -49,10 +49,10 @@ namespace pizza.special
         {
             base.FillClone(cloneO);
             LHCData cloneResult = (LHCData)cloneO;
-			cloneResult.bearnaise = this.bearnaise;
-			cloneResult.beef = this.beef;
-			cloneResult.p = new List<pizza.PizzaData>(this.p.Count);
-			this.p.ForEach((item) => { cloneResult.p.Add((pizza.PizzaData)item.Clone()); });
+            cloneResult.bearnaise = this.bearnaise;
+            cloneResult.beef = this.beef;
+            cloneResult.p = new List<pizza.PizzaData>(this.p.Count);
+            this.p.ForEach((item) => { cloneResult.p.Add((pizza.PizzaData)item.Clone()); });
 
         }
     }

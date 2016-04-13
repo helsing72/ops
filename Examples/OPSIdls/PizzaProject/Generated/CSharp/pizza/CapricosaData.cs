@@ -12,7 +12,7 @@ namespace pizza
     [Serializable]
     public class CapricosaData : VessuvioData
     {
-		public string mushrooms { get; set; }
+        public string mushrooms { get; set; }
 
 
 
@@ -27,7 +27,7 @@ namespace pizza
         public override void Serialize(IArchiverInOut archive)
         {
             base.Serialize(archive);
-			mushrooms = archive.Inout("mushrooms", mushrooms);
+            mushrooms = archive.Inout("mushrooms", mushrooms);
 
         }
     
@@ -42,7 +42,7 @@ namespace pizza
         {
             base.FillClone(cloneO);
             CapricosaData cloneResult = (CapricosaData)cloneO;
-			cloneResult.mushrooms = this.mushrooms;
+            cloneResult.mushrooms = this.mushrooms;
 
         }
     }

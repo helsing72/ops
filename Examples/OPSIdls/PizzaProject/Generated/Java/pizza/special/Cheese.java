@@ -10,8 +10,8 @@ import java.io.IOException;
 
 public class Cheese extends OPSObject
 {
-	public String name = "";
-	public double age;
+    public String name = "";
+    public double age;
 
 
     private static SerializableFactory factory = new TypeFactory();
@@ -32,8 +32,8 @@ public class Cheese extends OPSObject
     public void serialize(ArchiverInOut archive) throws IOException
     {
         super.serialize(archive);
-		name = archive.inout("name", name);
-		age = archive.inout("age", age);
+        name = archive.inout("name", name);
+        age = archive.inout("age", age);
 
     }
     @Override
@@ -49,8 +49,8 @@ public class Cheese extends OPSObject
     {
         super.fillClone(cloneO);
         Cheese cloneResult = (Cheese)cloneO;
-        		cloneResult.name = this.name;
-		cloneResult.age = this.age;
+                cloneResult.name = this.name;
+        cloneResult.age = this.age;
 
     }
 

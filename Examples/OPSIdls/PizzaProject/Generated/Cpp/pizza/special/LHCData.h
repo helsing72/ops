@@ -8,8 +8,8 @@
 #include <string>
 #include <vector>
 
-#include "pizza/PizzaData.h"
 #include "pizza/CapricosaData.h"
+#include "pizza/PizzaData.h"
 
 
 namespace pizza { namespace special {
@@ -21,14 +21,14 @@ class LHCData :
 public:
    static std::string getTypeName(){return std::string("pizza.special.LHCData");}
 	
-	std::string bearnaise;
-	std::string beef;
-	std::vector<pizza::PizzaData> p;
+    std::string bearnaise;
+    std::string beef;
+    std::vector<pizza::PizzaData> p;
 
     ///Default constructor.
     LHCData()
         : pizza::CapricosaData()
-		
+        
     {
         OPSObject::appendType(std::string("pizza.special.LHCData"));
 
@@ -37,7 +37,7 @@ public:
     ///Copy-constructor making full deep copy of a(n) LHCData object.
     LHCData(const LHCData& __c)
        : pizza::CapricosaData()
-		
+        
     {
         OPSObject::appendType(std::string("pizza.special.LHCData"));
 
@@ -55,28 +55,28 @@ public:
     ///instance of this class to a format dictated by the implementation of the ArchiverInout.
     void serialize(ops::ArchiverInOut* archive)
     {
-		pizza::CapricosaData::serialize(archive);
-		archive->inout(std::string("bearnaise"), bearnaise);
-		archive->inout(std::string("beef"), beef);
-		archive->inout<pizza::PizzaData>(std::string("p"), p, pizza::PizzaData());
+        pizza::CapricosaData::serialize(archive);
+        archive->inout(std::string("bearnaise"), bearnaise);
+        archive->inout(std::string("beef"), beef);
+        archive->inout<pizza::PizzaData>(std::string("p"), p, pizza::PizzaData());
 
     }
     //Returns a deep copy of this object.
     virtual ops::OPSObject* clone()
     {
-		LHCData* ret = new LHCData;
-		this->fillClone(ret);
-		return ret;
+        LHCData* ret = new LHCData;
+        this->fillClone(ret);
+        return ret;
 
     }
 
     virtual void fillClone(ops::OPSObject* obj) const
     {
-		LHCData* narrRet = (LHCData*)obj;
-		pizza::CapricosaData::fillClone(narrRet);
-		narrRet->bearnaise = bearnaise;
-		narrRet->beef = beef;
-		narrRet->p = p;
+        LHCData* narrRet = (LHCData*)obj;
+        pizza::CapricosaData::fillClone(narrRet);
+        narrRet->bearnaise = bearnaise;
+        narrRet->beef = beef;
+        narrRet->p = p;
 
     }
 

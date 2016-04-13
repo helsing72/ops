@@ -10,7 +10,7 @@ import java.io.IOException;
 
 public class CapricosaData extends VessuvioData
 {
-	public String mushrooms = "";
+    public String mushrooms = "";
 
 
     private static SerializableFactory factory = new TypeFactory();
@@ -31,7 +31,7 @@ public class CapricosaData extends VessuvioData
     public void serialize(ArchiverInOut archive) throws IOException
     {
         super.serialize(archive);
-		mushrooms = archive.inout("mushrooms", mushrooms);
+        mushrooms = archive.inout("mushrooms", mushrooms);
 
     }
     @Override
@@ -47,7 +47,7 @@ public class CapricosaData extends VessuvioData
     {
         super.fillClone(cloneO);
         CapricosaData cloneResult = (CapricosaData)cloneO;
-        		cloneResult.mushrooms = this.mushrooms;
+                cloneResult.mushrooms = this.mushrooms;
 
     }
 

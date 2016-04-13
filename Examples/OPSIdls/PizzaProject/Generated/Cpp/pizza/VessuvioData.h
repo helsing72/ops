@@ -20,12 +20,12 @@ class VessuvioData :
 public:
    static std::string getTypeName(){return std::string("pizza.VessuvioData");}
 	
-	std::string ham;
+    std::string ham;
 
     ///Default constructor.
     VessuvioData()
         : PizzaData()
-		
+        
     {
         OPSObject::appendType(std::string("pizza.VessuvioData"));
 
@@ -34,7 +34,7 @@ public:
     ///Copy-constructor making full deep copy of a(n) VessuvioData object.
     VessuvioData(const VessuvioData& __c)
        : PizzaData()
-		
+        
     {
         OPSObject::appendType(std::string("pizza.VessuvioData"));
 
@@ -52,24 +52,24 @@ public:
     ///instance of this class to a format dictated by the implementation of the ArchiverInout.
     void serialize(ops::ArchiverInOut* archive)
     {
-		PizzaData::serialize(archive);
-		archive->inout(std::string("ham"), ham);
+        PizzaData::serialize(archive);
+        archive->inout(std::string("ham"), ham);
 
     }
     //Returns a deep copy of this object.
     virtual ops::OPSObject* clone()
     {
-		VessuvioData* ret = new VessuvioData;
-		this->fillClone(ret);
-		return ret;
+        VessuvioData* ret = new VessuvioData;
+        this->fillClone(ret);
+        return ret;
 
     }
 
     virtual void fillClone(ops::OPSObject* obj) const
     {
-		VessuvioData* narrRet = (VessuvioData*)obj;
-		PizzaData::fillClone(narrRet);
-		narrRet->ham = ham;
+        VessuvioData* narrRet = (VessuvioData*)obj;
+        PizzaData::fillClone(narrRet);
+        narrRet->ham = ham;
 
     }
 

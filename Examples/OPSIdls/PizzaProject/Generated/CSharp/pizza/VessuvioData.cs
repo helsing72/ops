@@ -12,7 +12,7 @@ namespace pizza
     [Serializable]
     public class VessuvioData : PizzaData
     {
-		public string ham { get; set; }
+        public string ham { get; set; }
 
 
 
@@ -27,7 +27,7 @@ namespace pizza
         public override void Serialize(IArchiverInOut archive)
         {
             base.Serialize(archive);
-			ham = archive.Inout("ham", ham);
+            ham = archive.Inout("ham", ham);
 
         }
     
@@ -42,7 +42,7 @@ namespace pizza
         {
             base.FillClone(cloneO);
             VessuvioData cloneResult = (VessuvioData)cloneO;
-			cloneResult.ham = this.ham;
+            cloneResult.ham = this.ham;
 
         }
     }

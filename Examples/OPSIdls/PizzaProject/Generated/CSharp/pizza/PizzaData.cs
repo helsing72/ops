@@ -12,9 +12,9 @@ namespace pizza
     [Serializable]
     public class PizzaData : OPSObject
     {
-		public string cheese { get; set; }
+        public string cheese { get; set; }
 
-		public string tomatoSauce { get; set; }
+        public string tomatoSauce { get; set; }
 
 
 
@@ -29,8 +29,8 @@ namespace pizza
         public override void Serialize(IArchiverInOut archive)
         {
             base.Serialize(archive);
-			cheese = archive.Inout("cheese", cheese);
-			tomatoSauce = archive.Inout("tomatoSauce", tomatoSauce);
+            cheese = archive.Inout("cheese", cheese);
+            tomatoSauce = archive.Inout("tomatoSauce", tomatoSauce);
 
         }
     
@@ -45,8 +45,8 @@ namespace pizza
         {
             base.FillClone(cloneO);
             PizzaData cloneResult = (PizzaData)cloneO;
-			cloneResult.cheese = this.cheese;
-			cloneResult.tomatoSauce = this.tomatoSauce;
+            cloneResult.cheese = this.cheese;
+            cloneResult.tomatoSauce = this.tomatoSauce;
 
         }
     }

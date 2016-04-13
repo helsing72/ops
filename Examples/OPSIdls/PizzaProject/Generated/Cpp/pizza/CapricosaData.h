@@ -20,12 +20,12 @@ class CapricosaData :
 public:
    static std::string getTypeName(){return std::string("pizza.CapricosaData");}
 	
-	std::string mushrooms;
+    std::string mushrooms;
 
     ///Default constructor.
     CapricosaData()
         : VessuvioData()
-		
+        
     {
         OPSObject::appendType(std::string("pizza.CapricosaData"));
 
@@ -34,7 +34,7 @@ public:
     ///Copy-constructor making full deep copy of a(n) CapricosaData object.
     CapricosaData(const CapricosaData& __c)
        : VessuvioData()
-		
+        
     {
         OPSObject::appendType(std::string("pizza.CapricosaData"));
 
@@ -52,24 +52,24 @@ public:
     ///instance of this class to a format dictated by the implementation of the ArchiverInout.
     void serialize(ops::ArchiverInOut* archive)
     {
-		VessuvioData::serialize(archive);
-		archive->inout(std::string("mushrooms"), mushrooms);
+        VessuvioData::serialize(archive);
+        archive->inout(std::string("mushrooms"), mushrooms);
 
     }
     //Returns a deep copy of this object.
     virtual ops::OPSObject* clone()
     {
-		CapricosaData* ret = new CapricosaData;
-		this->fillClone(ret);
-		return ret;
+        CapricosaData* ret = new CapricosaData;
+        this->fillClone(ret);
+        return ret;
 
     }
 
     virtual void fillClone(ops::OPSObject* obj) const
     {
-		CapricosaData* narrRet = (CapricosaData*)obj;
-		VessuvioData::fillClone(narrRet);
-		narrRet->mushrooms = mushrooms;
+        CapricosaData* narrRet = (CapricosaData*)obj;
+        VessuvioData::fillClone(narrRet);
+        narrRet->mushrooms = mushrooms;
 
     }
 

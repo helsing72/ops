@@ -12,9 +12,9 @@ namespace pizza.special
     [Serializable]
     public class Cheese : OPSObject
     {
-		public string name { get; set; }
+        public string name { get; set; }
 
-		public double age { get; set; }
+        public double age { get; set; }
 
 
 
@@ -29,8 +29,8 @@ namespace pizza.special
         public override void Serialize(IArchiverInOut archive)
         {
             base.Serialize(archive);
-			name = archive.Inout("name", name);
-			age = archive.Inout("age", age);
+            name = archive.Inout("name", name);
+            age = archive.Inout("age", age);
 
         }
     
@@ -45,8 +45,8 @@ namespace pizza.special
         {
             base.FillClone(cloneO);
             Cheese cloneResult = (Cheese)cloneO;
-			cloneResult.name = this.name;
-			cloneResult.age = this.age;
+            cloneResult.name = this.name;
+            cloneResult.age = this.age;
 
         }
     }

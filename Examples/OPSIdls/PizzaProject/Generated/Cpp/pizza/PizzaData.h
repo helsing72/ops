@@ -19,13 +19,13 @@ class PizzaData :
 public:
    static std::string getTypeName(){return std::string("pizza.PizzaData");}
 	
-	std::string cheese;
-	std::string tomatoSauce;
+    std::string cheese;
+    std::string tomatoSauce;
 
     ///Default constructor.
     PizzaData()
         : ops::OPSObject()
-		
+        
     {
         OPSObject::appendType(std::string("pizza.PizzaData"));
 
@@ -34,7 +34,7 @@ public:
     ///Copy-constructor making full deep copy of a(n) PizzaData object.
     PizzaData(const PizzaData& __c)
        : ops::OPSObject()
-		
+        
     {
         OPSObject::appendType(std::string("pizza.PizzaData"));
 
@@ -52,26 +52,26 @@ public:
     ///instance of this class to a format dictated by the implementation of the ArchiverInout.
     void serialize(ops::ArchiverInOut* archive)
     {
-		ops::OPSObject::serialize(archive);
-		archive->inout(std::string("cheese"), cheese);
-		archive->inout(std::string("tomatoSauce"), tomatoSauce);
+        ops::OPSObject::serialize(archive);
+        archive->inout(std::string("cheese"), cheese);
+        archive->inout(std::string("tomatoSauce"), tomatoSauce);
 
     }
     //Returns a deep copy of this object.
     virtual ops::OPSObject* clone()
     {
-		PizzaData* ret = new PizzaData;
-		this->fillClone(ret);
-		return ret;
+        PizzaData* ret = new PizzaData;
+        this->fillClone(ret);
+        return ret;
 
     }
 
     virtual void fillClone(ops::OPSObject* obj) const
     {
-		PizzaData* narrRet = (PizzaData*)obj;
-		ops::OPSObject::fillClone(narrRet);
-		narrRet->cheese = cheese;
-		narrRet->tomatoSauce = tomatoSauce;
+        PizzaData* narrRet = (PizzaData*)obj;
+        ops::OPSObject::fillClone(narrRet);
+        narrRet->cheese = cheese;
+        narrRet->tomatoSauce = tomatoSauce;
 
     }
 

@@ -25,8 +25,8 @@ public:
     {
         if(!data) return false;
         aquireMessageLock();
-		data->fillClone(d);
-		releaseMessageLock();
+        ops::Subscriber::getData()->fillClone(d);
+        releaseMessageLock();
         return true;
     }
 
@@ -39,8 +39,9 @@ public:
     {
 
     }
+
 private:
-    CapricosaData narrowedData;
+    //CapricosaData narrowedData;
 
 };
 
