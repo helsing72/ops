@@ -19,6 +19,7 @@ import java.util.Vector;
  */
 public class ProjectProperties implements Serializable
 {
+    public boolean generatePython = true;
     public boolean generateCpp = true;
     public boolean generateJava = true;
     public boolean buildJava = false;

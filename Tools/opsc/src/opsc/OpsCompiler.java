@@ -272,6 +272,22 @@ public class OpsCompiler
         return true;
     }
 
+    protected boolean compilePython() {
+        // create the compiler and set parameters
+        opsc.PythonCompiler compiler = new opsc.PythonCompiler(_strProjectName);
+        Property propTemplatePath = _props.getProperty("templatePath");
+        if(propTemplatePath != null)
+            compiler.setTemplateDir(propTemplatePath.value);
+        Property propOutPath = _props.getProperty("outputPath");
+        if(propOutPath != null)
+            compiler.setOutputDir(propOutPath.value + File.separator + "Python");
+
+        compiler.compileDataClasses(_parser._idlClasses, "baba");
+        //compiler.compileTypeSupport();
+
+        return true;
+    }
+
     protected boolean compileCpp() {
         // create the compiler and set parameters
         opsc.CppCompiler compiler = new opsc.CppCompiler(_strProjectName);
@@ -388,6 +404,11 @@ public class OpsCompiler
             } else {
                 System.out.println("Error: " + input + " unknown input type");
             }
+        }
+
+        // generate python if requested
+        if(opsc._props.generatePython) {
+            opsc.compilePython();
         }
 
         // generate c++ if requested
