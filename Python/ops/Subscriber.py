@@ -12,7 +12,7 @@ class Subscriber(object):
 
 		self.filters = []
 		self.listeners = set()
-		self.callbacks = set()
+		self.messageCallbacks = set()
 		self.started = False
 
 	def __del__(self):
@@ -51,9 +51,10 @@ class Subscriber(object):
 		if message.topicName == self.topic.name:
 			if self.topic.typeID in message.data.typesString:
 				if self.applyFilters(message.data):
-					for l in self.listeners:
-						l.onNewData(message)
-					for c in self.callbacks:
+# switch to callback
+#					for l in self.listeners:
+#						l.onNewData(message)
+					for c in self.messageCallbacks:
 						c(message)
 
 
@@ -64,7 +65,7 @@ class Subscriber(object):
 
 
 	def addCallback(self,callback):
-		self.callbacks.add(callback)
+		self.messageCallbacks.add(callback)
 	def removeCallback(self,callback):
-		self.callbacks.remove(callback)
+		self.messageCallbacks.remove(callback)
 
