@@ -4,18 +4,44 @@ import sys
 import os
 import platform
 
-import PizzaData
+#import PizzaData
+import pizza
+import pizza_special
+import PizzaProjectTypeFactory
 from ops import Participant,Publisher,Subscriber,Print_Archiver
 
-class Listener(object):
-	def __init__(self):
-		super(Listener,self).__init__()
 
-	def onNewData(self,obj):
-		pa = Print_Archiver.Print_Archiver_Out()
-		pa.printObject("Test",obj.data)
+beQuite = False
 
+def onPizzaData(sub,mess):
+	if not beQuite:
+		addr,port = map(str,mess.getSource())
+		data=mess.data
+		tempStr = "[Topic: " + sub.getTopic().getName()
+		tempStr +="] (From " + addr + ":" + port
+		tempStr +=") Pizza:: Cheese: " + data.cheese
+		tempStr +=",  Tomato sauce: " + data.tomatoSauce
+		print tempStr
 
+def onVessuvioData(sub,mess):
+	if not beQuite:
+		addr,port = map(str,mess.getSource())
+		data=mess.data
+		tempStr = "[Topic: " + sub.getTopic().getName()
+		tempStr +="] (From " + addr + ":" + port
+		tempStr +=") Vessuvio:: Cheese: " + data.cheese
+		tempStr +=",  Tomato sauce: " + data.tomatoSauce
+		tempStr +=", Ham length: " + str(len(data.ham))
+
+def onExtraAllt(sub,mess):
+	if not beQuite:
+		addr,port = map(str,mess.getSource())
+		data=mess.data
+		tempStr = "[Topic: " + sub.getTopic().getName() 
+		tempStr +="] (From " + addr + ":" + port
+		tempStr +=") Pizza:: Cheese: " + data.cheese 
+		tempStr +=",  Tomato sauce: " + data.tomatoSauce 
+		tempStr +=", Num strings: " + str(len(data.strings))
 
 class IHelper(object):
 	def __init__(self):
@@ -50,7 +76,7 @@ class IHelper(object):
 class CHelper(IHelper):
 	def __init__(self):
 		super(CHelper,self).__init__()
-		self.listener = Listener()
+		self.callback = None
 		self.pub = None
 		self.sub = None
 		self.expectedPubId = -1
@@ -105,11 +131,14 @@ class CHelper(IHelper):
 			topic = part.createTopic(topicName);
 			print "Created topic " + topic.name + " [" + topic.transport + "." + topic.domainAddress +"." + str(topic.port) + "]"
 			self.sub = Subscriber.Subscriber(topic)
-			self.sub.addListener(self.listener)
+			#self.sub.addCallback(self.listener.onNewData)
+			if self.callback is not None:
+				self.sub.addCallback(self.callback)
+
 			self.sub.start()
 			
 	def DeleteSubscriber(self,doLog = True):
-		if self.sub
+		if self.sub:
 			print "Deleting subscriber for topic " + self.sub.getTopic().getName()
 			self.sub.stop();
 			self.sub = None;
@@ -158,12 +187,19 @@ def WriteToAllSelected():
 		if not info.selected:
 			continue
 		
-		if info.TypeName == PizzaData.PizzaData.TypeName:
+		if info.TypeName == pizza.PizzaData.TypeName:
 			info.helper.data.cheese = "Pizza from Python: " + str(WriteToAllSelected.Counter)
 
-		if info.TypeName == PizzaData.VessuvioData.TypeName:
+		if info.TypeName == pizza.VessuvioData.TypeName:
 			info.helper.data.cheese = "Vessuvio from Python: " + str(WriteToAllSelected.Counter)
 			info.helper.data.ham = FillerStr
+
+		if info.TypeName == pizza_special.ExtraAllt.TypeName:
+			info.helper.data.cheese = "ExtraAllt from Python: " + str(WriteToAllSelected.Counter)
+			if (len(info.helper.data.strings) == 0):
+				for k in range(1000):
+					info.helper.data.strings.append("hej")
+
 
 		info.helper.Write()
 		WriteToAllSelected.Counter+=1
@@ -210,7 +246,7 @@ ItemInfoList.append(ItemInfo("PizzaDomain", "UdpVessuvioTopic", "pizza.VessuvioD
 ItemInfoList.append(ItemInfo("OtherPizzaDomain", "OtherPizzaTopic", "pizza.PizzaData"))
 ItemInfoList.append(ItemInfo("OtherPizzaDomain", "OtherVessuvioTopic", "pizza.VessuvioData"))
 
-#ItemInfoList.append(ItemInfo("PizzaDomain", "ExtraAlltTopic", "pizza.special.ExtraAllt"))
+ItemInfoList.append(ItemInfo("PizzaDomain", "ExtraAlltTopic", "pizza.special.ExtraAllt"))
 
 ItemInfoList[0].selected = True
 
@@ -218,24 +254,30 @@ participant = Participant.Participant.getInstance("PizzaDomain", "PizzaDomain")
 if participant == None:
 	print "Failed to create Participant. Missing ops_config.xml ??"
 	sys.exit(-1)
-participant.addTypeSupport(PizzaData.pizza_factory())
+participant.addTypeSupport(PizzaProjectTypeFactory.PizzaProjectTypeFactory())
 
 otherParticipant = Participant.Participant.getInstance("OtherPizzaDomain", "OtherPizzaDomain")
 if otherParticipant == None:
 	print "Failed to create Participant. Missing ops_config.xml ??"
 	sys.exit(-1)
-otherParticipant.addTypeSupport(PizzaData.pizza_factory())
+otherParticipant.addTypeSupport(PizzaProjectTypeFactory.PizzaProjectTypeFactory())
 
 
 
 
 for info in ItemInfoList:
-	if info.TypeName == PizzaData.PizzaData.TypeName:
+	if info.TypeName == pizza.PizzaData.TypeName:
 		info.helper = CHelper()
-		info.helper.data = PizzaData.PizzaData()
-	elif info.TypeName == PizzaData.VessuvioData.TypeName:
+		info.helper.data = pizza.PizzaData()
+		info.helper.callback = onPizzaData
+	elif info.TypeName == pizza.VessuvioData.TypeName:
 		info.helper = CHelper()
-		info.helper.data = PizzaData.VessuvioData()
+		info.helper.data = pizza.VessuvioData()
+		info.helper.callback = onVessuvioData
+	elif info.TypeName == pizza_special.ExtraAllt.TypeName:
+		info.helper = CHelper()
+		info.helper.data = pizza_special.ExtraAllt()
+		info.helper.callback = onExtraAllt
 	else:
 		print "no matching typename for " + info.TypeName
 
@@ -251,67 +293,88 @@ menu()
 
 while not doExit:
 	commands = re.split(" |\t", raw_input(" (? = menu) > ").upper())
+	
+	while len(commands)>0:
 
-	if commands[0].isdigit():
-		index = int(commands[0])
-		if 0 <= index < len(ItemInfoList):
-			ItemInfoList[index].selected = not ItemInfoList[index].selected
+		if commands[0].isdigit():
+			index = int(commands[0])
+			if 0 <= index < len(ItemInfoList):
+				ItemInfoList[index].selected = not ItemInfoList[index].selected
+			else:
+				print "ERROR: Index to large. Max = %s" % (len(ItemInfoList)-1)
+			del commands[0]
+
+		elif (commands[0]=="?"):
+			menu()
+			del commands[0]
+
+		elif (commands[0]=="X"):
+			doExit = True
+			del commands[0]
+
+		elif (commands[0]=="PC"):
+			for info in ItemInfoList:
+				if info.selected:
+					info.helper.CreatePublisher(info.part, info.TopicName)
+			del commands[0]
+
+		elif (commands[0]=="PD"):
+			for info in ItemInfoList:
+				if info.selected:
+					info.helper.DeletePublisher()
+			del commands[0]
+
+		elif (commands[0]=="PS"):
+			for info in ItemInfoList:
+				if info.selected:
+					info.helper.StartPublisher()
+			del commands[0]
+
+		elif (commands[0]=="PT"):
+			for info in ItemInfoList:
+				if info.selected:
+					info.helper.StopPublisher()
+			del commands[0]
+
+		elif (commands[0]=="SC"):
+			for info in ItemInfoList:
+				if info.selected:
+					info.helper.CreateSubscriber(info.part, info.TopicName)
+			del commands[0]
+
+		elif (commands[0]=="SD"):
+			for info in ItemInfoList:
+				if info.selected:
+					info.helper.DeletePublisher()
+			del commands[0]
+
+		elif (commands[0]=="SS"):
+			for info in ItemInfoList:
+				if info.selected:
+					info.helper.StartSubscriber()
+			del commands[0]
+
+		elif (commands[0]=="PT"):
+			for info in ItemInfoList:
+				if info.selected:
+					info.helper.StopSubscriber()
+			del commands[0]
+
+		elif (commands[0]=="W"):
+			WriteToAllSelected()
+			del commands[0]
+
+		elif (commands[0]=="L"):
+			if commands[1].isdigit():
+				num = int(commands[1])
+				if num>=0:
+					FillerStr=" "*num
+					NumVessuvioBytes = num
+			del commands[0:1]
+
 		else:
-			print "ERROR: Index to large. Max = %s" % (len(ItemInfoList)-1)
+			print "unknown command: " + commands[0]
+			del commands[0]
 
-	elif (commands[0]=="?"):
-		menu()
-	elif (commands[0]=="X"):
-		doExit = True
-
-
-	elif (commands[0]=="PC"):
-		for info in ItemInfoList:
-			if info.selected:
-				info.helper.CreatePublisher(info.part, info.TopicName)
-	elif (commands[0]=="PD"):
-		for info in ItemInfoList:
-			if info.selected:
-				info.helper.DeletePublisher()
-	elif (commands[0]=="PS"):
-		for info in ItemInfoList:
-			if info.selected:
-				info.helper.StartPublisher()
-	elif (commands[0]=="PT"):
-		for info in ItemInfoList:
-			if info.selected:
-				info.helper.StopPublisher()
-
-	elif (commands[0]=="SC"):
-		for info in ItemInfoList:
-			if info.selected:
-				info.helper.CreateSubscriber(info.part, info.TopicName)
-	elif (commands[0]=="SD"):
-		for info in ItemInfoList:
-			if info.selected:
-				info.helper.DeletePublisher()
-	elif (commands[0]=="SS"):
-		for info in ItemInfoList:
-			if info.selected:
-				info.helper.StartSubscriber()
-	elif (commands[0]=="PT"):
-		for info in ItemInfoList:
-			if info.selected:
-				info.helper.StopSubscriber()
-
-
-
-
-	elif (commands[0]=="W"):
-		WriteToAllSelected()
-	elif (commands[0]=="L"):
-		if commands[1].isdigit():
-			num = int(commands[1])
-			if num>=0:
-				FillerStr=" "*num
-				NumVessuvioBytes = num
-
-	else:
-		print "unknown command: " + commands[0]
 
 

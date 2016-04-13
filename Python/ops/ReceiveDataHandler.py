@@ -15,7 +15,7 @@ class AbstractReceiveDataHandler(object):
 		self.assembler = None
 		self.subscrubers = set()
 
-	def segmentReceived(self,data):
+	def segmentReceived(self,data,addr):
 		segment = DataAssembly.Segment(data)
 		if segment.isValid():
 			if (self.assembler==None):
@@ -26,6 +26,7 @@ class AbstractReceiveDataHandler(object):
 			else:
 				if (self.assembler.isFull()):
 					obj = self.assembler.createOPS(self.topic.participant.objectFactory)
+					obj.setSource(addr)
 					self.distributeMessage(obj)
 					self.assembler = None
 
@@ -75,7 +76,8 @@ class McReceiveDataHandler(AbstractReceiveDataHandler):
 
 		while self.shouldRun:
 			try:
-				self.segmentReceived(sock.recv(PACKET_MAX_SIZE))
+				data, addr = sock.recvfrom(PACKET_MAX_SIZE);
+				self.segmentReceived(data,addr)
 			except socket.timeout:
 				pass
 

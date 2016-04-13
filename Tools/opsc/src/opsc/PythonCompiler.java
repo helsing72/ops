@@ -42,17 +42,43 @@ public class PythonCompiler extends opsc.CompilerSupport
     private final static String IMPORTS_REGEX = "__imports";
     private final static String CLASSES_REGEX = "__classes";
 
+/*
 
+            for (IDLField field : idlClass.getFields())
+            {
+                if (field.isIdlType())
+                {
+                    String type = field.getType();
+                    if (field.isArray())
+                    {
+                        type = type.substring(0, type.length() - 2);
+                    }
+
+                    int splitIndex = type.lastIndexOf(".");
+                    String packageStr = type.substring(0,splitIndex);
+                    String classStr   = type.substring(splitIndex+1);
+
+                    importString.add("*from " + packageStr.replace(".","_") + " import " + classStr + endl());
+                    System.out.println("Adding import");
+                    System.out.println(" for: " + idlClass.getClassName());
+                    System.out.println(" packageStr: " + packageStr);
+                    System.out.println(" classStr: " + classStr);
+
+
+                }
+            }
+*/
 
     protected class PythonHelper
     {
 
         private String packageName;
         private String className;
-        private String baseClassName = "ops.opsTypes.OPS_Object";
+        private String baseClassName = "opsTypes.OPS_Object";
         private PythonHelper baseClass = null;
         
         private String classDeclaration;
+        private HashSet<String> imports;
 
         private boolean inherited = false;
         private boolean saved = false;
@@ -61,6 +87,7 @@ public class PythonCompiler extends opsc.CompilerSupport
         {
             this.packageName = packageName;
             this.className = className;
+            imports = new HashSet<String>();
         }
         public String getPackageName()
         {
@@ -86,12 +113,14 @@ public class PythonCompiler extends opsc.CompilerSupport
             {
                 if (this.baseClassName.equals(other.className))
                 {
-                    this.baseClass = other;                    
+                    this.baseClass = other;  
+                    System.out.println(other.className + " is base for " + this.className);
                     return true;
                 }
                 if (other.baseClassName.equals(this.className))
                 {
                     other.baseClass = this;
+                    System.out.println(this.className + " is base for " + other.className);
                     return true;
                 }
             }
@@ -116,23 +145,57 @@ public class PythonCompiler extends opsc.CompilerSupport
 
             return packageName.equals(baseClass.packageName);
         }
-        public String createImport()
+        private void createBaseImport()
         {
-            if (isParentInPackage()) return "";
-            
-            int splitIndex = baseClassName.lastIndexOf(".");
+            if (inherited)
+            {
+                if (isParentInPackage()) return;
+                int splitIndex = baseClassName.lastIndexOf(".");
+                String packageStr = baseClassName.substring(0,splitIndex);
+                String classStr   = baseClassName.substring(splitIndex+1);
 
-            String packageStr = baseClassName.substring(0,splitIndex);
-            String classStr   = baseClassName.substring(splitIndex+1);
+                if (inherited)
+                    packageStr.replace(".","_");
 
-            System.out.println("createImport");
-            System.out.println("  packageStr: "+packageStr);
-            System.out.println("  classStr: "+classStr);
-
-            return "from " + packageStr + " import " + classStr + endl();
+                addImport(packageStr,classStr);
+            }   
+            else
+            {
+                addImport("ops.opsTypes","OPS_Object");
+            }
+        }
+        public void addImport(String packageStr,String classStr)
+        {
+            imports.add("from " + packageStr + " import " + classStr + endl());   
+        }
+        public void getImports(HashSet<String> imports)
+        {
+            imports.addAll(this.imports);
         }
 
     }
+    private class ClassesAndImports
+    {
+        public String classes="";
+        public HashSet<String> imports;
+        public ClassesAndImports()
+        {
+            imports = new HashSet<String>();
+        }
+        public void append(String str)
+        {
+            classes = classes+str;
+        }
+        public String createImport()
+        {
+            ArrayList<String> temp = new ArrayList<String>(imports);
+            Collections.sort(temp);
+            return String.join("", temp);
+        }
+    }
+
+
+
 
 
     //private HashMap<String,Vector<PythonHelper>> packagesMap;
@@ -149,7 +212,6 @@ public class PythonCompiler extends opsc.CompilerSupport
         setTabString("\t");
         helpers = new ArrayList<PythonHelper>();
     }
-
 
     public void compileDataClasses(Vector<IDLClass> idlClasses, String projectDirectory)
     {
@@ -174,104 +236,6 @@ public class PythonCompiler extends opsc.CompilerSupport
         System.out.println("PYTHON END");
     }
 
-    public void connectHelpers()
-    {
-        for (int i=0;i<helpers.size();i++)
-        {
-            boolean done = false;
-            int j = i+1;
-            while (!done)
-            {
-                if (j>=helpers.size())
-                {
-                    done = true;
-                }
-                else
-                {
-                    done = helpers.get(i).setParentage(helpers.get(j));
-                }
-                j++;
-            }
-        }
-    }
-
-    private class ClassesAndImports
-    {
-        public String classes="";
-        public HashSet<String> imports;
-        public ClassesAndImports()
-        {
-            imports = new HashSet<String>();
-        }
-        public void append(String str)
-        {
-            classes = classes+str;
-        }
-        public String createImport()
-        {
-            String ret = "";
-            for (String s : imports) {
-                ret += s;
-            }
-            return ret;
-        }
-    }
-
-    public void saveAll() throws IOException
-    {
-        HashMap<String,ClassesAndImports> packages = new HashMap<String,ClassesAndImports>();
-
-        int lastNumSaved = 0;
-        int numSaved = 0;
-        do
-        {
-            Iterator<PythonHelper> i = helpers.iterator();
-            lastNumSaved = numSaved;
-            numSaved = 0;
-            while (i.hasNext())
-            {
-                PythonHelper helper = i.next();
-                if (helper.isSaved()==false)
-                {
-                    if (helper.canBeSaved())
-                    {
-                        String packageName = helper.getPackageName();
-
-                        if (packages.containsKey(packageName)==false)
-                        {
-                            ClassesAndImports cai = new ClassesAndImports();
-                            packages.put(packageName,cai);
-                        }
-
-                        packages.get(packageName).append(helper.getClassDeclaration());
-                        packages.get(packageName).imports.add(helper.createImport());
-
-                        helper.setSaved(true);
-                        numSaved++;
-                    }
-                }
-                else
-                {
-                    numSaved++;
-                }
-            }
-        } while (lastNumSaved != numSaved);
-
-        java.io.InputStream stream = findTemplateFile("pythonpackagetemplate.tpl");
-        setTemplateTextFromResource(stream);
-        
-
-        for(String key: packages.keySet())
-        {
-            setOutputFileName(_outputDir + File.separator + key + ".py");
-            String templateText = getTemplateText();
-            
-            templateText = templateText.replace(CLASSES_REGEX, packages.get(key).classes);
-            templateText = templateText.replace(IMPORTS_REGEX, packages.get(key).createImport());
-
-            saveOutputText(templateText);
-        }
-    }
 
     public void compileIDLClass(IDLClass idlClass)
     {
@@ -312,6 +276,9 @@ public class PythonCompiler extends opsc.CompilerSupport
         {
             baseClassName = idlClass.getBaseClassName();
             helper.setBaseClassName(baseClassName);
+
+            int splitIndex = baseClassName.lastIndexOf(".");
+            baseClassName  = baseClassName.substring(splitIndex+1);
         }
 
         java.io.InputStream stream = findTemplateFile("pythonclasstemplate.tpl");
@@ -326,6 +293,117 @@ public class PythonCompiler extends opsc.CompilerSupport
         templateText = templateText.replace(SERIALIZE_REGEX, getSerialize(idlClass));
 
         helper.setClassDeclaration(templateText);
+        checkForImports(helper,idlClass);
+    }
+
+    public void connectHelpers()
+    {
+        for (int i=0;i<helpers.size();i++)
+        {
+            boolean done = false;
+            int j = i+1;
+            while (!done)
+            {
+                if (j>=helpers.size())
+                {
+                    done = true;
+                }
+                else
+                {
+                    done = helpers.get(i).setParentage(helpers.get(j));
+                }
+                j++;
+            }
+        }
+    }
+
+    public void saveAll() throws IOException
+    {
+        HashMap<String,ClassesAndImports> packages = new HashMap<String,ClassesAndImports>();
+
+        int lastNumSaved = 0;
+        int numSaved = 0;
+        do
+        {
+            Iterator<PythonHelper> i = helpers.iterator();
+            lastNumSaved = numSaved;
+            numSaved = 0;
+            while (i.hasNext())
+            {
+                PythonHelper helper = i.next();
+                if (helper.isSaved()==false)
+                {
+                    if (helper.canBeSaved())
+                    {
+                        helper.createBaseImport();
+
+                        String packageName = helper.getPackageName();
+
+                        if (packages.containsKey(packageName)==false)
+                        {
+                            ClassesAndImports cai = new ClassesAndImports();
+                            packages.put(packageName,cai);
+                        }
+
+                        packages.get(packageName).append(helper.getClassDeclaration());
+                        helper.getImports(packages.get(packageName).imports);
+
+                        helper.setSaved(true);
+                        numSaved++;
+                    }
+                }
+                else
+                {
+                    numSaved++;
+                }
+            }
+        } while (lastNumSaved != numSaved);
+
+        java.io.InputStream stream = findTemplateFile("pythonpackagetemplate.tpl");
+        setTemplateTextFromResource(stream);
+        
+
+        for(String key: packages.keySet())
+        {
+            setOutputFileName(_outputDir + File.separator + key.replace(".","_") + ".py");
+            String templateText = getTemplateText();
+            
+            templateText = templateText.replace(CLASSES_REGEX, packages.get(key).classes);
+            templateText = templateText.replace(IMPORTS_REGEX, packages.get(key).createImport());
+
+            saveOutputText(templateText);
+        }
+    }
+
+    private void checkForImports(PythonHelper helper,IDLClass idlClass)
+    {
+        String packageName = idlClass.getPackageName();
+        for (IDLField field : idlClass.getFields())
+        {
+            if (field.isIdlType())
+            {
+                String typeName = field.getType();
+                if (field.isArray())
+                {
+                    typeName = typeName.substring(0,typeName.length() - 2);
+                }
+
+                int splitIndex = typeName.lastIndexOf(".");
+                String packageStr = typeName.substring(0,splitIndex);
+                String classStr   = typeName.substring(splitIndex+1);
+
+                if (packageStr.equals(packageName)) continue;
+
+
+/*
+                if (typeName.startsWith(packageName))
+                {
+                    typeName = typeName.substring(packageName.length());
+                }
+*/
+                helper.addImport(packageStr,classStr);
+            }
+        }
     }
 
 
@@ -363,10 +441,10 @@ public class PythonCompiler extends opsc.CompilerSupport
         ArrayList<String> importString = new ArrayList<String>();
         ArrayList<String> createBodyText = new ArrayList<String>();
 
-        for (IDLClass iDLClass : idlClasses)
+        for (IDLClass idlClass : idlClasses)
         {
-            importString.add("from " + iDLClass.getPackageName() + " import " + iDLClass.getClassName() + endl());
-            createBodyText.add(tab(2)+"self.addType(\"" + iDLClass.getPackageName() + "." + iDLClass.getClassName() + "\"," + iDLClass.getClassName() + ")" + endl());
+            importString.add("from " + idlClass.getPackageName().replace(".","_") + " import " + idlClass.getClassName() + endl());
+            createBodyText.add(tab(2)+"self.addType(\"" + idlClass.getPackageName() + "." + idlClass.getClassName() + "\"," + idlClass.getClassName() + ")" + endl());
         }
 
         Collections.sort(importString);
@@ -381,13 +459,6 @@ public class PythonCompiler extends opsc.CompilerSupport
         saveOutputText(templateText);
     }
 
-/*
-    protected String getConstructorBody(IDLClass idlClass)
-    {
-        System.out.println("PythonCompiler::getConstructorBody");
-        return "PythonCompiler::getConstructorBody";
-    }
-    */
     public void compileTopicConfig(Vector<TopicInfo> topics, String name, String packageString, String projectDirectory)
     {
         System.out.println("PythonCompiler::compileTopicConfig NOT IMPLEMENTED");
@@ -462,20 +533,24 @@ public class PythonCompiler extends opsc.CompilerSupport
             {
                 String typeName = field.getType();
                 seralizerString += "Ops";
-
                 if (field.isArray())
                 {
                     seralizerString +="Vector";
                     typeName = typeName.substring(0,typeName.length() - 2);
                 }
+                seralizerString += "(\"" + field.getName() + "\", self." + field.getName();
 
-                if (typeName.startsWith(packageName))
                 {
-                    typeName = typeName.substring(packageName.length());
+                    int splitIndex = typeName.lastIndexOf(".");
+                    typeName  = typeName.substring(splitIndex+1);
                 }
 
+                if (field.isAbstract()==false)
+                {
+                    seralizerString += ", " + typeName;
+                }
 
-                seralizerString += "(\"" + field.getName() + "\", self." + field.getName() +", " + typeName + ")";
+                seralizerString += ")";
             }
             else
             {

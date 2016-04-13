@@ -1,6 +1,7 @@
 #Auto generated OPS-code. DO NOT MODIFY!
 from ops.opsTypes import OPS_Object
 from pizza import CapricosaData
+from pizza import PizzaData
 
 class Cheese(OPS_Object):
 	TypeName = "pizza.special.Cheese"
@@ -16,7 +17,7 @@ class Cheese(OPS_Object):
 		self.age = archiver.Float64("age", self.age)
 
 
-class LHCData(pizza.CapricosaData):
+class LHCData(CapricosaData):
 	TypeName = "pizza.special.LHCData"
 	def __init__(self):
 		super(LHCData,self).__init__()
@@ -29,7 +30,7 @@ class LHCData(pizza.CapricosaData):
 		super(LHCData,self).serialize(archiver)
 		self.bearnaise = archiver.String("bearnaise", self.bearnaise)
 		self.beef = archiver.String("beef", self.beef)
-		self.p = archiver.OpsVector("p", self.p, pizza.PizzaData)
+		self.p = archiver.OpsVector("p", self.p, PizzaData)
 
 
 class ExtraAllt(LHCData):
@@ -65,7 +66,7 @@ class ExtraAllt(LHCData):
 		self.timeBakedHours = archiver.Float32("timeBakedHours", self.timeBakedHours)
 		self.timeBakedSeconds = archiver.Float64("timeBakedSeconds", self.timeBakedSeconds)
 		self.description = archiver.String("description", self.description)
-		self.cheese_ = archiver.Ops("cheese_", self.cheese_, Cheese)
+		self.cheese_ = archiver.Ops("cheese_", self.cheese_)
 		self.bools = archiver.BoolVector("bools", self.bools)
 		self.bytes = archiver.Int8Vector("bytes", self.bytes)
 		self.ints = archiver.Int32Vector("ints", self.ints)

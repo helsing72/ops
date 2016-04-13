@@ -34,7 +34,7 @@ class Message(OPS_Object):
 		self.topLevelKey=""
 		self.address=""
 		self.data=data
-		self.printable = False
+		self.sourceAddr=("",0)
 
 	def __str__(self):
 		temp = ""
@@ -56,6 +56,13 @@ class Message(OPS_Object):
 		self.topLevelKey = dataBuffer.String("topLevelKey",self.topLevelKey)
 		self.address = dataBuffer.String("address",self.address)
 		self.data = dataBuffer.Ops("data",self.data)
+
+	def setSource(self,addr):
+		self.sourceAddr = addr
+
+	def getSource(self):
+		return self.sourceAddr
+
 
 class Topic(OPS_Object):
 	"""docstring for Topic"""

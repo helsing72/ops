@@ -55,13 +55,13 @@ class Subscriber(object):
 #					for l in self.listeners:
 #						l.onNewData(message)
 					for c in self.messageCallbacks:
-						c(message)
+						c(self,message)
 
-
-	def addListener(self,listener):
-		self.listeners.add(listener)
-	def removeListener(self,listener):
-		self.listeners.remove(listener)
+# switch to callback
+#	def addListener(self,listener):
+#		self.listeners.add(listener)
+#	def removeListener(self,listener):
+#		self.listeners.remove(listener)
 
 
 	def addCallback(self,callback):

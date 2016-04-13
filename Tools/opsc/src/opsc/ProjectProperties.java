@@ -42,6 +42,7 @@ public class ProjectProperties implements Serializable
 
     public void serialize(ArchiverInOut archiver) throws IOException
     {
+        generatePython = archiver.inout("generatePython", generatePython);
         generateCpp = archiver.inout("generateCpp", generateCpp);
         generateJava = archiver.inout("generateJava", generateJava);
         //System.out.println("buildJava is " + buildJava);
