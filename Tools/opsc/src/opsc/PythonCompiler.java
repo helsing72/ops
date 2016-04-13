@@ -19,11 +19,12 @@ import java.io.InputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.HashSet;
-import java.util.Vector;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Vector;
 import parsing.IDLClass;
 import parsing.IDLField;
@@ -135,7 +136,7 @@ public class PythonCompiler extends opsc.CompilerSupport
 
 
     //private HashMap<String,Vector<PythonHelper>> packagesMap;
-    private Vector<PythonHelper> helpers;
+    private ArrayList<PythonHelper> helpers;
 
     public String getName()
     {
@@ -146,7 +147,7 @@ public class PythonCompiler extends opsc.CompilerSupport
     {
         super(projectName);
         setTabString("\t");
-        helpers = new Vector<PythonHelper>();
+        helpers = new ArrayList<PythonHelper>();
     }
 
 
@@ -187,7 +188,7 @@ public class PythonCompiler extends opsc.CompilerSupport
                 }
                 else
                 {
-                    done = helpers.elementAt(i).setParentage(helpers.elementAt(j));
+                    done = helpers.get(i).setParentage(helpers.get(j));
                 }
                 j++;
             }
@@ -304,7 +305,7 @@ public class PythonCompiler extends opsc.CompilerSupport
         String className = idlClass.getClassName();
 
         PythonHelper helper = new PythonHelper(packageName,className);
-        helpers.addElement(helper);
+        helpers.add(helper);
 
         String baseClassName = "OPS_Object";
         if (idlClass.getBaseClassName() != null)
@@ -358,20 +359,22 @@ public class PythonCompiler extends opsc.CompilerSupport
         //Get the template file as a String
         String templateText = getTemplateText();
 
-        String importString = "";
-        String createBodyText = "";
 
+        ArrayList<String> importString = new ArrayList<String>();
+        ArrayList<String> createBodyText = new ArrayList<String>();
 
         for (IDLClass iDLClass : idlClasses)
         {
-            importString += "from  " + iDLClass.getPackageName() + " import " + iDLClass.getClassName() + endl();
-            createBodyText += tab(2)+"self.addType(\"" + iDLClass.getPackageName() + "." + iDLClass.getClassName() + "\"," + iDLClass.getClassName() + ")" + endl();
+            importString.add("from " + iDLClass.getPackageName() + " import " + iDLClass.getClassName() + endl());
+            createBodyText.add(tab(2)+"self.addType(\"" + iDLClass.getPackageName() + "." + iDLClass.getClassName() + "\"," + iDLClass.getClassName() + ")" + endl());
         }
-        
 
-        templateText = templateText.replace(IMPORTS_REGEX, importString);
+        Collections.sort(importString);
+        Collections.sort(createBodyText);
+        
+        templateText = templateText.replace(IMPORTS_REGEX, String.join("", importString));
         templateText = templateText.replace(CLASS_NAME_REGEX, className);
-        templateText = templateText.replace(CREATE_BODY_REGEX, createBodyText);
+        templateText = templateText.replace(CREATE_BODY_REGEX, String.join("", createBodyText));
 
 
 

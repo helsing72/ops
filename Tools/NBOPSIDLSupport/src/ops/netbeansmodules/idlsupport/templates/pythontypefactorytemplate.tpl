@@ -1,4 +1,5 @@
 #Auto generated OPS-code. DO NOT MODIFY!
+from ops.Factory import BasicFactory
 __imports
 
 class __className(BasicFactory):
