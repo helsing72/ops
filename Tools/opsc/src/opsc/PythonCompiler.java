@@ -160,12 +160,10 @@ public class PythonCompiler extends opsc.CompilerSupport
             {
                 compileIDLClass(iDLClass);
             }
-            //compileTypeSupport(_idlClasses, _projectName);
-
-
-
             connectHelpers();
             saveAll();
+
+            compileTypeSupport(_idlClasses, _projectName);
 
         } catch (IOException iOException)
         {
@@ -352,9 +350,6 @@ public class PythonCompiler extends opsc.CompilerSupport
     {
 
         String className = projectName + "TypeFactory";
-        String packageName = projectName;
-
-        String packageFilePart = packageName.replace(".", "/");
         setOutputFileName(_outputDir + File.separator + projectName + File.separator + className + ".py");
 
         java.io.InputStream stream = findTemplateFile("pythontypefactorytemplate.tpl");
@@ -363,17 +358,18 @@ public class PythonCompiler extends opsc.CompilerSupport
         //Get the template file as a String
         String templateText = getTemplateText();
 
-
+        String importString = "";
         String createBodyText = "";
-
 
 
         for (IDLClass iDLClass : idlClasses)
         {
+            importString += "from  " + iDLClass.getPackageName() + " import " + iDLClass.getClassName() + endl();
             createBodyText += tab(2)+"self.addType(\"" + iDLClass.getPackageName() + "." + iDLClass.getClassName() + "\"," + iDLClass.getClassName() + ")" + endl();
         }
         
 
+        templateText = templateText.replace(IMPORTS_REGEX, importString);
         templateText = templateText.replace(CLASS_NAME_REGEX, className);
         templateText = templateText.replace(CREATE_BODY_REGEX, createBodyText);
 
