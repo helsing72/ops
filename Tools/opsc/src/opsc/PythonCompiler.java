@@ -396,6 +396,7 @@ public class PythonCompiler extends opsc.CompilerSupport
 
     protected String getDeclarations(IDLClass idlClass)
     {
+        String packageName = idlClass.getPackageName() + ".";
         String ret = "";
         for (IDLField field : idlClass.getFields())
         {
@@ -414,11 +415,24 @@ public class PythonCompiler extends opsc.CompilerSupport
             if (field.isArray())
             {
                 //ret += tab(1) + "" + getDeclareVector(field);
-                ret += "#### VECTOR ####" + endl();
+                //ret += "#### VECTOR ####" + endl();
+                ret += tab(2) + "self." + field.getName() + " = []"+endl();
             }
             else
             {
-                ret += tab(2) + "self." + field.getName() + " = " +getTypeInitialization(field.getType()) +endl();
+                if (field.isIdlType())
+                {
+                    String typeName = field.getType();
+                    if (typeName.startsWith(packageName))
+                    {
+                        typeName = typeName.substring(packageName.length());
+                    }
+                    ret += tab(2) + "self." + field.getName() + " = " + typeName + "()" + endl();
+                }
+                else
+                {
+                    ret += tab(2) + "self." + field.getName() + " = " +getTypeInitialization(field.getType()) +endl();
+                }
             }
 
         }
@@ -439,98 +453,75 @@ public class PythonCompiler extends opsc.CompilerSupport
 */
     protected String getSerialize(IDLClass idlClass)
     {
+        String packageName = idlClass.getPackageName() + ".";
         String ret = "";
         for (IDLField field : idlClass.getFields())
         {
-            ret += tab(2) + "self." + field.getName() + " = archiver." + getArchiverCall(field.getType()) + "(\"" + field.getName() + "\", self." + field.getName();
+            String seralizerString = "self." + field.getName() + " = archiver.";
 
-            ret += ")" + endl();
+            if (field.isIdlType())
+            {
+                String typeName = field.getType();
+                seralizerString += "Ops";
+
+                if (field.isArray())
+                {
+                    seralizerString +="Vector";
+                    typeName = typeName.substring(0,typeName.length() - 2);
+                }
+
+                if (typeName.startsWith(packageName))
+                {
+                    typeName = typeName.substring(packageName.length());
+                }
+
+
+                seralizerString += "(\"" + field.getName() + "\", self." + field.getName() +", " + typeName + ")";
+            }
+            else
+            {
+                seralizerString += getArchiverCall(field) + "(\"" + field.getName() + "\", self." + field.getName() + ")";    
+            }
+            ret += tab(2) + seralizerString + endl();
         }
         return ret;
     }
 
-
-        protected String getTypeInitialization(String s)
+    protected String getTypeInitialization(String s)
     {
-        if (s.equals("string"))
-        {
-            return "\"\"";
-        }
-        else if (s.equals("boolean"))
-        {
-            return "False";
-        }
-        else if (s.equals("int"))
-        {
-            return "0";
-        }
-        else if (s.equals("long"))
-        {
-            return "0";
-        }
-        else if (s.equals("double"))
-        {
-            return "0.0";
-        }
-        else if (s.equals("float"))
-        {
-            return "0.0";
-        }
-        else if (s.equals("byte"))
-        {
-            return "0";
-        }
-        else if (s.endsWith("[]"))
-        {
-            return "[]";
-        }
-        else
-            return "##### ERROR";
+        if (s.equals("string"))       return "\"\"";
+        else if (s.equals("boolean")) return "False";
+        else if (s.equals("int"))     return "0";
+        else if (s.equals("long"))    return "0";
+        else if (s.equals("double"))  return "0.0";
+        else if (s.equals("float"))   return "0.0";
+        else if (s.equals("byte"))    return "0";
+        else                          return "##### ERROR (" + s + ")";
     }
 
+    protected String getArchiverCall(IDLField field)
+    {
+        String s = field.getType();
+        if (field.isArray())
+        {
+            return getArchiverCall(s.substring(0, s.length() - 2)) + "Vector";
+        }
+        else
+        {
+            return getArchiverCall(s);   
+        }
+    }
 
     protected String getArchiverCall(String s)
     {
-        String ret;
-        if (s.equals("string"))
-        {
-            ret = "String";
-        }
-        else if (s.equals("boolean"))
-        {
-            ret = "Bool";
-        }
-        else if (s.equals("int"))
-        {
-            ret = "Int32";
-        }
-        else if (s.equals("long"))
-        {
-            ret = "Int64";
-        }
-        else if (s.equals("double"))
-        {
-            ret = "Float64";
-        }
-        else if (s.equals("float"))
-        {
-            ret = "Float32";
-        }
-        else if (s.equals("byte"))
-        {
-            ret = "Int8";
-        }
-        else
-        {
-            ret = "##### ERROR";
-        }
-        
-        if (s.endsWith("[]"))
-        {
-            ret += "Vector";
-        }
-
-        return ret;
+        if (s.equals("string"))       return "String";
+        else if (s.equals("boolean")) return "Bool";
+        else if (s.equals("int"))     return "Int32";
+        else if (s.equals("long"))    return "Int64";
+        else if (s.equals("double"))  return "Float64";
+        else if (s.equals("float"))   return "Float32";
+        else if (s.equals("byte"))    return "Int8";
+        return "### ERROR";
     }
 
 }
