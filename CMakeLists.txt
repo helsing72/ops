@@ -24,7 +24,6 @@ endif()
 
 if(NOT Java_JAVAC_EXECUTABLE)
   message(WARNING "Could not find a Java compiler")
-  #message(FATAL " Need java to build OPS")
 endif()
 
 # find Boost. If not found we can't build c++ libs

@@ -137,7 +137,7 @@ set(LIB_SRCS
 source_group("Header Files" FILES ${LIB_PUBLIC_HEADERS})
 
 # generate the library target
-add_library(${LIB_NAME}
+add_library(${LIB_NAME} SHARED
     ${LIB_SRCS}
     ${LIB_PUBLIC_HEADERS}
 )
@@ -145,7 +145,21 @@ add_library(${LIB_NAME}
 set_target_properties(${LIB_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
 
 target_link_libraries(${LIB_NAME} ${Boost_LIBRARIES})
+if(MINGW)
+  target_link_libraries(${LIB_NAME} ws2_32 mswsock)
+  #target_link_libraries(${LIB_NAME} ws2_32)
+endif()
 #message("link ${LIB_NAME} to ${Boost_LIBRARIES}")
+
+# build it again but statically this time
+set(LIB_STATIC ${LIB_NAME}-static)
+# generate the library target
+add_library(${LIB_STATIC} STATIC
+    ${LIB_SRCS}
+    ${LIB_PUBLIC_HEADERS}
+)
+set_target_properties(${LIB_STATIC} PROPERTIES VERSION ${PROJECT_VERSION})
+target_link_libraries(${LIB_STATIC} ${Boost_LIBRARIES})
 
 # library and headers installation
 set(INSTALL_INCDIR include)
@@ -158,7 +172,7 @@ else()
   set(INSTALL_ARCHIVEDIR lib${LIB_POSTFIX})
 endif()
 
-install(TARGETS ${LIB_NAME}
+install(TARGETS ${LIB_NAME} ${LIB_STATIC}
   RUNTIME DESTINATION ${INSTALL_BINDIR}
   LIBRARY DESTINATION ${INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${INSTALL_ARCHIVEDIR}
