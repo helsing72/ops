@@ -19,5 +19,3 @@
 */
 #include "OPSTypeDefs.h"
 #include "OPSArchiverIn.h"
-
-        
