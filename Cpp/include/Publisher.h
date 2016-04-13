@@ -31,12 +31,13 @@
 #include <string>
 #include "MemoryMap.h"
 #include "Participant.h"
+#include "OPSExport.h"
 
 //#include "DataHeaderHelper.h"
 
 namespace ops
 {
-class Publisher
+class OPS_EXPORT Publisher
 {
 public:
 

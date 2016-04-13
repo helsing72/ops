@@ -20,6 +20,8 @@
 
 #ifndef ops_ByteBufferH
 #define ops_ByteBufferH
+
+#include "OPSExport.h"
 #include <string>
 #include <vector>
 #include "MemoryMap.h"
@@ -32,7 +34,7 @@ namespace ops
     ///prealocated buffer(for writing) or a buffer containing the data (reading).
     ///Use the public methods to read and write to/from the buffer.
     //TODO: Decide if this class is to be devided in two, one for read and one for write.
-	class ByteBuffer
+	class OPS_EXPORT ByteBuffer
 	{
     private:
         ///The Write Policy is default to preserve all written data.

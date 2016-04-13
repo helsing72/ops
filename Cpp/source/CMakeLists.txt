@@ -37,6 +37,7 @@ set(LIB_PUBLIC_HEADERS
   ${HEADER_PATH}/OPSConfig.h
   ${HEADER_PATH}/OPSConstants.h
   ${HEADER_PATH}/ops.h
+  ${HEADER_PATH}/OPSExport.h
   ${HEADER_PATH}/OPSMessage.h
   ${HEADER_PATH}/OPSObjectFactory.h
   ${HEADER_PATH}/OPSObject.h
@@ -143,6 +144,7 @@ add_library(${LIB_NAME} SHARED
 )
 
 set_target_properties(${LIB_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
+set_target_properties(${LIB_NAME} PROPERTIES COMPILE_DEFINITIONS OPS_LIBRARY)
 
 target_link_libraries(${LIB_NAME} ${Boost_LIBRARIES})
 if(MINGW)
@@ -159,6 +161,7 @@ add_library(${LIB_STATIC} STATIC
     ${LIB_PUBLIC_HEADERS}
 )
 set_target_properties(${LIB_STATIC} PROPERTIES VERSION ${PROJECT_VERSION})
+set_target_properties(${LIB_STATIC} PROPERTIES COMPILE_DEFINITIONS OPS_LIBRARY_STATIC)
 target_link_libraries(${LIB_STATIC} ${Boost_LIBRARIES})
 
 # library and headers installation

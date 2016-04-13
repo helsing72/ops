@@ -21,6 +21,7 @@
 #ifndef ops_OPSObject_h
 #define ops_OPSObject_h
 
+#include "OPSExport.h"
 #include <string>
 #include "Serializable.h"
 #include "ArchiverInOut.h"
@@ -31,7 +32,7 @@ namespace ops
     
     ///Base class for object that can be serialized with OPSArchivers
 	///LA Moved inheritance of Reservable to OPSMessage
-	class OPSObject :  public Serializable
+	class OPS_EXPORT OPSObject :  public Serializable
     {
         
         friend class ByteBuffer;

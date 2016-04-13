@@ -21,6 +21,7 @@
 #ifndef ops_LockableH
 #define ops_LockableH
 
+#include "OPSExport.h"
 #include "OPSTypeDefs.h"
 
 #ifdef USE_C11
@@ -38,7 +39,7 @@ class SafeLock;
 
 
 //TODO: Make this class platform independant
-class Lockable
+class OPS_EXPORT Lockable
 {
 	friend class SafeLock;
 

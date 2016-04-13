@@ -23,12 +23,13 @@
 
 #include "Lockable.h"
 #include "ReserveInfo.h"
+#include "OPSExport.h"
 
 
 namespace ops
 {
 	class ReferenceHandler;
-	class Reservable//: public Notifier<ReserveInfo>
+	class OPS_EXPORT Reservable//: public Notifier<ReserveInfo>
 	{
 	public:
 		Reservable();

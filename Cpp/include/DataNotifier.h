@@ -20,6 +20,8 @@
 
 #ifndef DataNotifier_h
 #define DataNotifier_h
+
+#include "OPSExport.h"
 #include <vector>
 #include "DataListener.h"
 #include "OPSObject.h"
@@ -29,7 +31,7 @@ namespace ops
     ///class which in the conjunction with DataListener forms an implementation of the
     ///observer GoF-pattern. classes extending this class extends an interface to which
     ///DataListeners can register their interest to be notified when new OPSObjects are available.
-    class DataNotifier
+    class OPS_EXPORT DataNotifier
     {
     private:
         

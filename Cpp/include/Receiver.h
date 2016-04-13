@@ -25,11 +25,12 @@
 #include "Notifier.h"
 #include "IOService.h" 
 #include "BytesSizePair.h"
+#include "OPSExport.h"
 
 
 namespace ops
 {
-	class Receiver : public Notifier<BytesSizePair>
+	class OPS_EXPORT Receiver : public Notifier<BytesSizePair>
 	{
 	public:
 		virtual ~Receiver() {}

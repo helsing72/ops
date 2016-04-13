@@ -22,11 +22,12 @@
 #define	ops_MemoryMap_h
 
 #include <memory.h>
+#include "OPSExport.h"
 
 namespace ops
 {
 
-class MemoryMap
+class OPS_EXPORT MemoryMap
 {
 public:
 	MemoryMap(int width_, int height_)

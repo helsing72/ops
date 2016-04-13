@@ -20,6 +20,7 @@
 #ifndef ops_Domain_h
 #define	ops_Domain_h
 
+#include "OPSObject.h"
 #include <string>
 #include <vector>
 #include "IOService.h"
@@ -28,7 +29,7 @@
 
 namespace ops
 {
-	class Domain : public OPSObject
+	class OPS_EXPORT Domain : public OPSObject
 	{
 		std::string domainAddress;
 		int timeToLive;
