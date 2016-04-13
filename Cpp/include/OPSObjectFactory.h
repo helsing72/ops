@@ -23,11 +23,12 @@
 
 #include "SerializableInheritingTypeFactory.h"
 #include <string>
+#include "OPSExport.h"
 
 namespace ops
 {
 
-class OPSObjectFactory : public SerializableInheritingTypeFactory
+class OPS_EXPORT OPSObjectFactory : public SerializableInheritingTypeFactory
 {
     
 public:

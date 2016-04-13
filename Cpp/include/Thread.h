@@ -21,6 +21,8 @@
 #ifndef ops_ThreadH
 #define ops_ThreadH
 
+#include "OPSExport.h"
+
 //Forward declaration
 namespace boost{class thread;}
 
@@ -28,7 +30,7 @@ namespace ops
 {
 
     ///Abstract Thread class for other classes that wishes to be "Active".
-    class Thread
+    class OPS_EXPORT Thread
     {
     public:
         Thread();

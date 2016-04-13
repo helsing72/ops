@@ -42,6 +42,7 @@ set(LIB_PUBLIC_HEADERS
   ${HEADER_PATH}/OPSConfig.h
   ${HEADER_PATH}/OPSConstants.h
   ${HEADER_PATH}/ops.h
+  ${HEADER_PATH}/OPSExport.h
   ${HEADER_PATH}/OPSMessage.h
   ${HEADER_PATH}/OPSObjectFactory.h
   ${HEADER_PATH}/OPSObject.h
@@ -142,15 +143,33 @@ set(LIB_SRCS
 source_group("Header Files" FILES ${LIB_PUBLIC_HEADERS})
 
 # generate the library target
-add_library(${LIB_NAME}
+add_library(${LIB_NAME} SHARED
     ${LIB_SRCS}
     ${LIB_PUBLIC_HEADERS}
 )
 
 
 set_target_properties(${LIB_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
+set_target_properties(${LIB_NAME} PROPERTIES COMPILE_DEFINITIONS OPS_LIBRARY)
 
 target_link_libraries(${LIB_NAME} ${Boost_LIBRARIES})
+
+if(MINGW)
+  target_link_libraries(${LIB_NAME} ws2_32 mswsock)
+  #target_link_libraries(${LIB_NAME} ws2_32)
+endif()
+#message("link ${LIB_NAME} to ${Boost_LIBRARIES}")
+
+# build it again but statically this time
+set(LIB_STATIC ${LIB_NAME}-static)
+# generate the library target
+add_library(${LIB_STATIC} STATIC
+    ${LIB_SRCS}
+    ${LIB_PUBLIC_HEADERS}
+)
+set_target_properties(${LIB_STATIC} PROPERTIES VERSION ${PROJECT_VERSION})
+set_target_properties(${LIB_STATIC} PROPERTIES COMPILE_DEFINITIONS OPS_LIBRARY_STATIC)
+target_link_libraries(${LIB_STATIC} ${Boost_LIBRARIES})
 
 # library and headers installation
 set(INSTALL_INCDIR include)
@@ -163,7 +182,7 @@ else()
   set(INSTALL_ARCHIVEDIR lib${LIB_POSTFIX})
 endif()
 
-install(TARGETS ${LIB_NAME}
+install(TARGETS ${LIB_NAME} ${LIB_STATIC}
   RUNTIME DESTINATION ${INSTALL_BINDIR}
   LIBRARY DESTINATION ${INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${INSTALL_ARCHIVEDIR}

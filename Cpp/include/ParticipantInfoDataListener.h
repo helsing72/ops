@@ -25,12 +25,13 @@
 #include "Subscriber.h"
 #include "SendDataHandler.h"
 #include "Lockable.h"
+#include "OPSExport.h"
 
 namespace ops
 {
 	class Participant;
 
-	class ParticipantInfoDataListener : public DataListener
+	class OPS_EXPORT ParticipantInfoDataListener : public DataListener
 	{
 	public:
 		ParticipantInfoDataListener(Participant* part);

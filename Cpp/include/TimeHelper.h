@@ -22,11 +22,12 @@
 #define	ops_TimeHelperH
 
 #include <string>
+#include "OPSExport.h"
 
 
 namespace ops
 {
-class TimeHelper
+class OPS_EXPORT TimeHelper
 {
 
 public:

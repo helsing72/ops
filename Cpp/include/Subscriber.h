@@ -37,15 +37,19 @@
 #include "DeadlineTimer.h"
 //#include <boost/asio.hpp>
 //#include <boost/date_time/posix_time/posix_time.hpp>
+#include "OPSExport.h"
+
+// Forward declarations
 namespace boost
 {
     class mutex;
     class condition_variable;
 }
-namespace ops
-{ //Forward declarations
 
-    class Subscriber : public DataNotifier, public Lockable, public Listener<OPSMessage*>, public Listener<int>
+namespace ops
+{
+
+    class OPS_EXPORT Subscriber : public DataNotifier, public Lockable, public Listener<OPSMessage*>, public Listener<int>
     {
     public:
         Subscriber(Topic t);

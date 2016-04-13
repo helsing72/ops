@@ -28,6 +28,7 @@
 #ifndef _KEYFILTERQOSPOLICY_H
 #define	_KEYFILTERQOSPOLICY_H
 
+#include "OPSExport.h"
 #include "FilterQoSPolicy.h"
 #include "Lockable.h"
 #include <string>
@@ -39,7 +40,7 @@ namespace ops
     //Forward declaration
     class OPSObject;
 
-    class KeyFilterQoSPolicy
+    class OPS_EXPORT KeyFilterQoSPolicy
 		: public FilterQoSPolicy, public Lockable
 	{
     public:

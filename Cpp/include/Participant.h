@@ -36,7 +36,7 @@
 #include "ParticipantInfoData.h"
 #include "ParticipantInfoDataListener.h"
 #include "SendDataHandler.h"
-
+#include "OPSExport.h"
 
 
 namespace ops
@@ -48,7 +48,7 @@ namespace ops
 	class Domain;
     class Publisher;
 
-	class Participant : Runnable, Listener<int>
+	class OPS_EXPORT Participant : Runnable, Listener<int>
 	{
 		friend class Subscriber;
 		friend class Publisher;

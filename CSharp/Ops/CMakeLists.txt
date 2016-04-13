@@ -84,18 +84,31 @@ set(OPS_CS_SOURCE
 set(OPS_DBG_TARGET ${CMAKE_BINARY_DIR}/bin/${OPS_LIB_NAME}-${OPS_VERSION}-dbg.dll)
 set(OPS_OPT_TARGET ${CMAKE_BINARY_DIR}/bin/${OPS_LIB_NAME}-${OPS_VERSION}-opt.dll)
 
+if(WIN32)
+  get_filename_component(CSCOMPILER_PATH ${CSCOMPILER} DIRECTORY)
+  get_filename_component(CXXCOMPILER_PATH ${CMAKE_CXX_COMPILER} DIRECTORY)
+  get_filename_component(CXXCOMPILER_PATH ${CXXCOMPILER_PATH} DIRECTORY)
+  if(CMAKE_CL_64)
+    get_filename_component(CXXCOMPILER_PATH ${CXXCOMPILER_PATH} DIRECTORY)
+  endif()
 
-
-set(OPS_TARGET ${OPS_OPT_TARGET}) #pane, added to OPS_OPT_TARGET ...
-
-if(MSVC)
-  # message("CSCOMPILER ${CSCOMPILER}")
-
-  # find_path(CSREFERENCE_PATH System.Data.dll HINTS ${CSCOMPILER})
-  find_path(CSREFERENCE_PATH System.Data.dll HINTS "C:\\Program Files (x86)\\Reference Assemblies\\Microsoft\\Framework\\.NETFramework\\v4.6")
+  # Locate path where the CSharp runtime and support assemblies are
+  find_path(CSREFERENCE_PATH System.Data.dll HINTS ${CSCOMPILER_PATH} )
   file(TO_NATIVE_PATH ${CSREFERENCE_PATH} CSREFERENCE_NATIVEPATH)
 
-  # message("CSREFERENCE_PATH ${CSREFERENCE_PATH}")
+  # Locate vsvars.bat script, it is required for cmd-line building
+  find_file(VCVARSALL vcvarsall.bat HINTS ${CXXCOMPILER_PATH} )
+  file(TO_NATIVE_PATH ${VCVARSALL} VCVARSALL_NATIVEPATH)
+  if(NOT VCVARSALL)
+    message("Failed to find vcvarsall.bat -- please locate it yourself")
+    return()
+  endif()
+
+  if(CMAKE_CL_64)
+    set(VSVARSALL_ARCHITECTURE x64)
+  else()
+    set(VSVARSALL_ARCHITECTURE x86)
+  endif()
 
   # convert files to native file paths, i.e. with '\'
   foreach(csfile ${OPS_CS_SOURCE})
@@ -104,7 +117,8 @@ if(MSVC)
   endforeach()
 
   add_custom_command(OUTPUT ${OPS_DBG_TARGET} ${OPS_OPT_TARGET}
-    COMMAND "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" x86
+    #COMMAND "${VS80COMNTOOLS}vsvars32.bat x86"
+    COMMAND "${VCVARSALL}" ${VSVARSALL_ARCHITECTURE}
     COMMAND ${CSCOMPILER} /noconfig /debug /nowarn:1701,1702 /warn:4 /define:TRACE /lib:${CSREFERENCE_NATIVEPATH} /reference:System.dll,System.Drawing.dll,System.Windows.Forms.dll,System.Xml.dll,System.Linq.dll,System.Web.dll,System.Web.Services.dll /target:library /out:${OPS_DBG_TARGET} ${OPS_CS_SOURCE_LIST}
     COMMAND ${CSCOMPILER} /noconfig /optimize /nowarn:1701,1702 /warn:4 /define:TRACE /lib:${CSREFERENCE_NATIVEPATH} /reference:System.dll,System.Drawing.dll,System.Windows.Forms.dll,System.Xml.dll,System.Linq.dll,System.Web.dll,System.Web.Services.dll /target:library /out:${OPS_OPT_TARGET} ${OPS_CS_SOURCE_LIST}
     DEPENDS ${OPS_CS_SOURCE}
@@ -114,9 +128,8 @@ if(MSVC)
     )
 else()
   # removed System.Net.dll for Microsoft.Net v2.0.xyz
-
-  add_custom_command(OUTPUT ${OPS_TARGET}  
-	COMMAND ${CSCOMPILER} -reference:System.dll,System.Drawing.dll,System.Windows.Forms.dll,System.Web.dll,System.Web.Services.dll -target:library -out:${OPS_TARGET} ${OPS_CS_SOURCE}
+  add_custom_command(OUTPUT ${OPS_DBG_TARGET} ${OPS_OPT_TARGET}
+    COMMAND ${CSCOMPILER} -reference:System.dll,System.Drawing.dll,System.Windows.Forms.dll,System.Web.dll,System.Web.Services.dll -target:library -out:${OPS_TARGET} ${OPS_CS_SOURCE}
     DEPENDS ${OPS_CS_SOURCE}
     COMMENT "Building C# sources using ${CSCOMPILER}"
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}

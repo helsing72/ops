@@ -33,14 +33,14 @@
 #include <iostream>
 #include "BytesSizePair.h"
 #include "ReferenceHandler.h"
-
+#include "OPSExport.h"
 
 
 namespace ops
 {	//Forward declaration
 	class Participant;
 	
-	class ReceiveDataHandler : public Notifier<OPSMessage*>, Listener<BytesSizePair>
+	class OPS_EXPORT ReceiveDataHandler : public Notifier<OPSMessage*>, Listener<BytesSizePair>
 	{
 	public:
 		

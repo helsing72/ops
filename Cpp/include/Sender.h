@@ -31,6 +31,7 @@
 #include "ByteBuffer.h"
 #include <string>
 #include "IOService.h" 
+#include "OPSExport.h"
 
 namespace ops
 {
@@ -47,9 +48,9 @@ namespace ops
 		virtual void open() = 0;
 		virtual void close() = 0;
 
-        static Sender* create(std::string localInterface = "0.0.0.0", int ttl = 1, __int64 outSocketBufferSize = 16000000);
-        static Sender* createUDPSender(std::string localInterface = "0.0.0.0", int ttl = 1, __int64 outSocketBufferSize = 16000000);
-        static Sender* createTCPServer(std::string ip, int port, IOService* ioService, __int64 outSocketBufferSize = 16000000);
+        static OPS_EXPORT Sender* create(std::string localInterface = "0.0.0.0", int ttl = 1, __int64 outSocketBufferSize = 16000000);
+        static OPS_EXPORT Sender* createUDPSender(std::string localInterface = "0.0.0.0", int ttl = 1, __int64 outSocketBufferSize = 16000000);
+        static OPS_EXPORT Sender* createTCPServer(std::string ip, int port, IOService* ioService, __int64 outSocketBufferSize = 16000000);
 
         virtual ~Sender()
         {

@@ -7,7 +7,7 @@
 
 namespace ops
 {
-	class OPSConfig : public OPSObject
+	class OPS_EXPORT OPSConfig : public OPSObject
 	{
 	public:
 		static OPSConfig* getConfig();

@@ -20,9 +20,11 @@
 #ifndef ops_IOService_h
 #define ops_IOService_h
 
+#include "OPSExport.h"
+
 namespace ops
 {
-	class IOService
+	class OPS_EXPORT IOService
 	{
 	public:
 		virtual void run() = 0;

@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2016 Anton Gravestam.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -18,25 +18,19 @@
 * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef ops_SerializableInheritingTypeFactoryH
-#define ops_SerializableInheritingTypeFactoryH
+#ifndef ops_OPSExport_h
+#define ops_OPSExport_h
 
-#include "SerializableCompositeFactory.h"
-#include <string>
-#include "OPSExport.h"
+#if defined(_MSC_VER) || defined(__CYGWIN__) || defined(__MINGW32__) || defined( __BCPLUSPLUS__)  || defined( __MWERKS__)
+    #  if defined( OPS_LIBRARY_STATIC )
+    #    define OPS_EXPORT
+    #  elif defined( OPS_LIBRARY )
+    #    define OPS_EXPORT   __declspec(dllexport)
+    #  else
+    #    define OPS_EXPORT   __declspec(dllimport)
+    #  endif
+#else
+    #  define OPS_EXPORT
+#endif
 
-namespace ops
-{
-
-class OPS_EXPORT SerializableInheritingTypeFactory : public SerializableCompositeFactory
-{
-public:
-    /**
-     * Tries to construct the most specialized object in the given typeString list
-     */
-	virtual Serializable* create(std::string& typeString);
-    
-};
-
-}
 #endif

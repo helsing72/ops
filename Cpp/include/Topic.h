@@ -23,14 +23,14 @@
 
 #include <string>
 #include "OPSObject.h"
-
+#include "OPSExport.h"
 
 
 namespace ops
 {   /*template<class DataType = OPSObject>*/
 	class Participant;
 
-	class Topic : public OPSObject
+	class OPS_EXPORT Topic : public OPSObject
     {
 		friend class Domain;
 		friend class Participant;

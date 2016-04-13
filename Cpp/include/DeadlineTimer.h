@@ -19,12 +19,14 @@
 */
 #ifndef ops_DeadlineTimer_h
 #define ops_DeadlineTimer_h
+
+#include "OPSExport.h"
 #include "Notifier.h"
 #include "IOService.h"
 
 namespace ops
 {
-	class DeadlineTimer : public Notifier<int>
+	class OPS_EXPORT DeadlineTimer : public Notifier<int>
 	{
 	public:
 		virtual void start(__int64 timeoutMs) = 0;
