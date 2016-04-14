@@ -1,0 +1,8 @@
+package pizza.special;
+
+class Cheese
+{
+    string name;
+    double age;
+
+}
