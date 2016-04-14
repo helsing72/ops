@@ -21,6 +21,7 @@ else()
   # install manually
   set(JAR_OUTPUT ${CMAKE_BINARY_DIR}/bin/OPSCompilerLib-${OPS_VERSION}.jar)
   install(FILES ${JAR_OUTPUT} DESTINATION ${OPS_JAR_REL_INSTALL_PATH})
+  install(FILES ${JAR_OUTPUT} DESTINATION ${OPS_JAR_REL_INSTALL_PATH} RENAME OPSCompilerLib.jar)
 endif()
 
 if(BUILD_DOCUMENTATION)

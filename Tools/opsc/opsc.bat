@@ -5,5 +5,5 @@
 @echo Current working directory: %CD%
 
 @pushd .
-@java -jar %SCRIPT_PATH%/dist/opsc.jar %*
+@java -jar %SCRIPT_PATH%opsc.jar %*
 @popd
