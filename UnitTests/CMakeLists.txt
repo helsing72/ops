@@ -1,1 +1,2 @@
-add_subdirectory(OPStest)
+add_subdirectory(OPStest-C++)
+add_subdirectory(OPStest-Python)

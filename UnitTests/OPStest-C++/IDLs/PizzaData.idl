@@ -1,0 +1,8 @@
+package pizza;
+
+class PizzaData
+{
+    string cheese;
+    string tomatoSauce;
+
+}
