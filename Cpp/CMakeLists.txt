@@ -1,13 +1,10 @@
 
-# Make the headers visible to everything
+# Make the headers visible to everything (below this location)
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-################################################################################
-# Find external dependencies
-
-# if we need to link with libraries
+# We are going to need the boost headers
 include_directories(${Boost_INCLUDE_DIRS})
 
 # with msvc and mingw we need to set a platform...
@@ -28,9 +25,6 @@ add_subdirectory(source)
 
 ################################################################################
 # Documentation
-
-# Find doxygen, dot, latex, htmlhelp
-#sbd_setup_documentation()
 
 # Do documentation targets
 if(BUILD_DOCUMENTATION AND DOXYGEN)

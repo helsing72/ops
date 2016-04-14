@@ -14,7 +14,14 @@ add_jar(OPSCompilerLib ${OPSCOMPILERLIB_SRC}
   OUTPUT_DIR ${CMAKE_BINARY_DIR}/bin
 )
 
-install_jar(OPSCompilerLib ${OPS_JAR_REL_INSTALL_PATH})
+# in cmake-3.1 (at least) the install_jar is broken for Windows
+if(UNIX)
+  install_jar(OPSCompilerLib ${OPS_JAR_REL_INSTALL_PATH})
+else()
+  # install manually
+  set(JAR_OUTPUT ${CMAKE_BINARY_DIR}/bin/OPSCompilerLib-${OPS_VERSION}.jar)
+  install(FILES ${JAR_OUTPUT} DESTINATION ${OPS_JAR_REL_INSTALL_PATH})
+endif()
 
 if(BUILD_DOCUMENTATION)
   create_javadoc(OPSCompilerLib
