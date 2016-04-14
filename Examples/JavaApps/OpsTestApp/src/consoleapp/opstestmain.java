@@ -90,8 +90,9 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
       otherParticipant = Participant.getInstance(OtherDomain, OtherDomain);
       otherParticipant.addTypeSupport(new PizzaProjectTypeFactory());
       otherParticipant.addListener(this);
-      OnLog("Created Participants\n");
 
+
+      OnLog("Created Participants\n");
       OnLog("DomainID: " + participant.getDomain().getDomainID());
       OnLog("DomainAddress: " + participant.getDomain().getDomainAddress());
       OnLog("InSocketBufferSize: " + participant.getDomain().GetInSocketBufferSize());

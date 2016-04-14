@@ -83,6 +83,7 @@ set(OPS_CS_SOURCE
 
 set(OPS_DBG_TARGET ${CMAKE_BINARY_DIR}/bin/${OPS_LIB_NAME}-${OPS_VERSION}-dbg.dll)
 set(OPS_OPT_TARGET ${CMAKE_BINARY_DIR}/bin/${OPS_LIB_NAME}-${OPS_VERSION}-opt.dll)
+set(OPS_TARGET ${OPS_OPT_TARGET}) #pane, added to OPS_OPT_TARGET ...
 
 if(WIN32)
   get_filename_component(CSCOMPILER_PATH ${CSCOMPILER} DIRECTORY)
@@ -128,8 +129,8 @@ if(WIN32)
     )
 else()
   # removed System.Net.dll for Microsoft.Net v2.0.xyz
-  add_custom_command(OUTPUT ${OPS_DBG_TARGET} ${OPS_OPT_TARGET}
-    COMMAND ${CSCOMPILER} -reference:System.dll,System.Drawing.dll,System.Windows.Forms.dll,System.Web.dll,System.Web.Services.dll -target:library -out:${OPS_TARGET} ${OPS_CS_SOURCE}
+  add_custom_command(OUTPUT ${OPS_TARGET}
+	COMMAND ${CSCOMPILER} -reference:System.dll,System.Drawing.dll,System.Windows.Forms.dll,System.Web.dll,System.Web.Services.dll -target:library -out:${OPS_TARGET} ${OPS_CS_SOURCE}
     DEPENDS ${OPS_CS_SOURCE}
     COMMENT "Building C# sources using ${CSCOMPILER}"
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}

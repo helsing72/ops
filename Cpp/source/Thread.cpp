@@ -19,7 +19,7 @@
 */
 #include "OPSTypeDefs.h"
 #include "Thread.h"
-#include <boost/thread.hpp>
+#include "boost/thread.hpp"
 namespace ops
 {
     Thread::Thread() : threadRunning(false), thread(NULL)
