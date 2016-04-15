@@ -189,14 +189,14 @@ int main(int argc, const char* args[])
 		dataClone->i++;
 
 		dataClone->d = (20/fact * sin(theta * pi / 180.0)) + (fact * sin(3 * theta * pi / 180.0));
-		dataClone->f = (30/fact * cos(theta * pi / 180.0)) + (fact * cos(3 * theta * pi / 180.0));
+		dataClone->f = (float)((30/fact * cos(theta * pi / 180.0)) + (fact * cos(3 * theta * pi / 180.0)));
 		theta++;
 
 		dataClone->fs.clear();
 		dataClone->ds.clear();
 		for (float v = 0; v < 600; v++)
 		{
-			dataClone->fs.push_back(offset + (fact * sin(v * pi / 180.0)));
+			dataClone->fs.push_back((float)(offset + (fact * sin(v * pi / 180.0))));
 			dataClone->ds.push_back(-offset + (fact * cos(v * pi / 180.0)));
 		}
 
