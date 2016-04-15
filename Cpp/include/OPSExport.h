@@ -25,10 +25,11 @@
     #  if defined( OPS_LIBRARY_STATIC )
     #    define OPS_EXPORT
     #  elif defined( OPS_LIBRARY )
-    #    define OPS_EXPORT   __declspec(dllexport)
+///TODO        #    define OPS_EXPORT   __declspec(dllexport)
+	#    define OPS_EXPORT
     #  else
 ///TODO    #    define OPS_EXPORT   __declspec(dllimport)
-	#  define OPS_EXPORT
+	#    define OPS_EXPORT
     #  endif
 #else
     #  define OPS_EXPORT
