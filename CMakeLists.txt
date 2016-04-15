@@ -39,7 +39,12 @@ endif()
 
 
 # find Boost. If not found we can't build c++ libs
+option(Boost_DEBUG "Set to ON to debug Boost paths" OFF)
+# this prevents the FindBoost.cmake to search for cmake-built Boost
 set(Boost_NO_BOOST_CMAKE ON)
+# if the Boost home environment var is set, use it to hint the FindBoost.cmake about Boost location
+set(BOOST_ROOT $ENV{BOOST_HOME})
+
 if(MSVC)
   set(Boost_USE_STATIC_LIBS ON)
   find_package(Boost MODULE COMPONENTS system thread date_time regex chrono)
@@ -79,20 +84,13 @@ find_jar(SWINGLAYOUT_JAR swing-layout
 include(${CMAKE_ROOT}/Modules/Documentation.cmake OPTIONAL)
 mark_as_advanced(CLEAR BUILD_DOCUMENTATION)
 
-# Dynamic vs Static Linking
-option(OPS_DYNAMIC "Set to ON to build OPS for dynamic linking.  Use OFF for static." ON)
-if(OPS_DYNAMIC)
-  set(BUILD_SHARED_LIBS ON)
-else()
-  set(BUILD_SHARED_LIBS OFF)
-endif()
-
 # set path to where jars should be installed
 set(OPS_JAR_REL_INSTALL_PATH lib/ops)
 
 ################################################################################
 # Build the source
 
+# recurse into java source
 if(Java_JAVAC_EXECUTABLE)
   # this builds ConfigurationLib and JarSearch
   add_subdirectory(Libs)
@@ -106,14 +104,15 @@ endif()
 #add_subdirectory(CSharp)
 
 # add the C++ source, only if Boost is loaded
-if(DEFINED ENV{BOOST_HOME})
+if(Boost_FOUND)
   
-  set(Boost_INCLUDE_DIRS $ENV{BOOST_HOME}) 
-  set(Boost_LIBRARIES $ENV{BOOST_LIB})
-  link_directories($ENV{BOOST_LIB})
+  #set(Boost_INCLUDE_DIRS $ENV{BOOST_HOME}) 
+  #set(Boost_LIBRARIES $ENV{BOOST_LIB})
+  #link_directories($ENV{BOOST_LIB})
   add_subdirectory(Cpp)
-  
-  if(CMAKE_BUILD_TYPE MATCHES "Debug")
+
+  option(OPS_BUILD_UNITTESTS "Enable to build the UnitTest app(s)" OFF)  
+  if(OPS_BUILD_UNITTESTS OR CMAKE_BUILD_TYPE MATCHES "Debug")
     add_subdirectory(UnitTests) #pane added
   endif()
   
