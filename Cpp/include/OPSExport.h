@@ -27,7 +27,8 @@
     #  elif defined( OPS_LIBRARY )
     #    define OPS_EXPORT   __declspec(dllexport)
     #  else
-    #    define OPS_EXPORT   __declspec(dllimport)
+///TODO    #    define OPS_EXPORT   __declspec(dllimport)
+	#  define OPS_EXPORT
     #  endif
 #else
     #  define OPS_EXPORT
