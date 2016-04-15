@@ -39,6 +39,7 @@ endif()
 
 
 # find Boost. If not found we can't build c++ libs
+option(Boost_DEBUG "Set to ON to debug Boost paths" OFF)
 # this prevents the FindBoost.cmake to search for cmake-built Boost
 set(Boost_NO_BOOST_CMAKE ON)
 # if the Boost home environment var is set, use it to hint the FindBoost.cmake about Boost location
