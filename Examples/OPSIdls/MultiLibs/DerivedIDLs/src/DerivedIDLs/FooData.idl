@@ -2,6 +2,7 @@ package DerivedIDLs;
 
 class FooData extends BaseIDLs.BaseData
 {
-    //TODO: rename or remove this class and package to fit your needs.
     string fooString;
+
+    BaseIDLs.CommonData common;
 }
