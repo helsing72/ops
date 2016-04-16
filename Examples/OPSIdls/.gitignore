@@ -1,0 +1,5 @@
+# ignore generated files
+Generated
+cs_build_script.bat
+java_build_script.bat
+DebugProject.xml
