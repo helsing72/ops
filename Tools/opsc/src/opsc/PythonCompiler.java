@@ -38,6 +38,7 @@ public class PythonCompiler extends opsc.CompilerSupport
     private final static String SERIALIZE_REGEX = "__serialize";
     private final static String CREATE_BODY_REGEX = "__createBody";
     private final static String CLASS_COMMENT_REGEX = "__classComment";
+    private final static String VALIDATION_REGEX = "__validation";
 //module template
     private final static String IMPORTS_REGEX = "__imports";
     private final static String CLASSES_REGEX = "__classes";
@@ -291,6 +292,9 @@ public class PythonCompiler extends opsc.CompilerSupport
         templateText = templateText.replace(BASE_CLASS_NAME_REGEX, baseClassName);
         templateText = templateText.replace(DECLARATIONS_REGEX, getDeclarations(idlClass));
         templateText = templateText.replace(SERIALIZE_REGEX, getSerialize(idlClass));
+        templateText = templateText.replace(VALIDATION_REGEX, getValidation(idlClass));
+
+
 
         helper.setClassDeclaration(templateText);
         checkForImports(helper,idlClass);
@@ -527,7 +531,11 @@ public class PythonCompiler extends opsc.CompilerSupport
         String ret = "";
         for (IDLField field : idlClass.getFields())
         {
-            String seralizerString = "self." + field.getName() + " = archiver.";
+            String seralizerString = "archiver.";
+            if (field.isArray()==false)
+            {
+                seralizerString = "self." + field.getName() + " = " + seralizerString;
+            }
 
             if (field.isIdlType())
             {
@@ -559,6 +567,60 @@ public class PythonCompiler extends opsc.CompilerSupport
             ret += tab(2) + seralizerString + endl();
         }
         return ret;
+    }
+
+    protected String getValidation(IDLClass idlClass)
+    {
+        String ret = "";
+        for (IDLField field : idlClass.getFields())
+        {
+                String fieldName = "self." + field.getName();
+                String typeName = field.getType();
+
+                //ret+=tab(2) + "print \"Checking " + fieldName + " for " + typeName + "\"" + endl();
+
+                int tabs = 2;
+
+
+                if (field.isIdlType())
+                {                    
+                    int splitIndex = typeName.lastIndexOf(".");
+                    typeName   = typeName.substring(splitIndex+1);
+                }
+                if (field.isArray())
+                {
+                    typeName = typeName.substring(0,typeName.length() - 2);
+                    ret += tab(tabs++) + "for x in self." + field.getName() + ":" + endl();
+                    fieldName = "x";
+                }
+                if (field.isIdlType()==false)
+                {
+                    typeName = getValidationString(typeName);
+                }
+                ret += tab(tabs++) + "if not isinstance(" + fieldName + "," + typeName +")";
+                if (field.isIdlType())
+                {
+                    ret += " or not " + fieldName + ".validate()";
+                }
+                ret += ":" + endl();
+                ret += tab(tabs) + "raise ValueError()" + endl();
+        }
+        return ret;
+    }   
+    protected String getValidationString(String type)
+    {
+        if (type.equals("byte") || type.equals("int"))
+            return "int";
+        if (type.equals("long"))
+            return "(int,long)";
+        if (type.equals("float") || type.equals("double"))
+            return "float";
+        if (type.equals("string"))
+            return "str";
+        if (type.equals("boolean"))
+            return "bool";
+        
+        return "##### ERROR getValidationString("+type+")";
     }
 
     protected String getTypeInitialization(String s)

@@ -14,6 +14,14 @@ class PizzaData(OPS_Object):
 		self.cheese = archiver.String("cheese", self.cheese)
 		self.tomatoSauce = archiver.String("tomatoSauce", self.tomatoSauce)
 
+	def validate(self):
+		super(PizzaData,self).validate()
+		print "Checking self.cheese for string"
+		if not isinstance(self.cheese,str):
+			raise ValueError()
+		print "Checking self.tomatoSauce for string"
+		if not isinstance(self.tomatoSauce,str):
+			raise ValueError()
 
 class VessuvioData(PizzaData):
 	TypeName = "pizza.VessuvioData"
@@ -26,6 +34,11 @@ class VessuvioData(PizzaData):
 		super(VessuvioData,self).serialize(archiver)
 		self.ham = archiver.String("ham", self.ham)
 
+	def validate(self):
+		super(VessuvioData,self).validate()
+		print "Checking self.ham for string"
+		if not isinstance(self.ham,str):
+			raise ValueError()
 
 class CapricosaData(VessuvioData):
 	TypeName = "pizza.CapricosaData"
@@ -38,4 +51,9 @@ class CapricosaData(VessuvioData):
 		super(CapricosaData,self).serialize(archiver)
 		self.mushrooms = archiver.String("mushrooms", self.mushrooms)
 
+	def validate(self):
+		super(CapricosaData,self).validate()
+		print "Checking self.mushrooms for string"
+		if not isinstance(self.mushrooms,str):
+			raise ValueError()
 

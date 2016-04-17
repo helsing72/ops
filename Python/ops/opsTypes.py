@@ -17,6 +17,10 @@ class OPS_Object(object):
 	def serialize(self,dataBuffer):
 		self.key = dataBuffer.String("key",self.key)
 
+	def validate(self):
+		if not isinstance(self.key,str):
+			raise ValueError()
+
 	def appendType(self,str):
 		self.typesString = str + " " + self.typesString
 
@@ -56,6 +60,26 @@ class Message(OPS_Object):
 		self.topLevelKey = dataBuffer.String("topLevelKey",self.topLevelKey)
 		self.address = dataBuffer.String("address",self.address)
 		self.data = dataBuffer.Ops("data",self.data)
+	
+	def validate(self):
+		if not super(Message,self).validate():
+			raise ValueError()
+		if not isinstance(self.messageType,int):
+			raise ValueError()
+		if not isinstance(self.publisherPriority,int):
+			raise ValueError()
+		if not isinstance(self.publicationID,(int,long)):
+			raise ValueError()
+		if not isinstance(self.publisherName,str):
+			raise ValueError()
+		if not isinstance(self.topicName,str):
+			raise ValueError()
+		if not isinstance(self.topLevelKey,str):
+			raise ValueError()
+		if not isinstance(self.address,str):
+			raise ValueError()
+		if not isinstance(self.data,OPS_Object) or not self.data.validate():
+			raise ValueError()
 
 	def setSource(self,addr):
 		self.sourceAddr = addr
@@ -110,6 +134,27 @@ class Topic(OPS_Object):
 		self.transport = archiver.String("transport",self.transport)
 		if self.transport=="":
 			self.transport = TRANSPORT_MC
+
+	def validate(self):
+		if not super(Topic,self).validate():
+			raise ValueError()
+		if not isinstance(self.name,str):
+			raise ValueError()
+		if not isinstance(self.typeID,str):
+			raise ValueError()
+		if not isinstance(self.port,int):
+			raise ValueError()
+		if not isinstance(self.domainAddress,str):
+			raise ValueError()
+		if not isinstance(self.outSocketBufferSize,int):
+			raise ValueError()
+		if not isinstance(self.inSocketBufferSize,int):
+			raise ValueError()
+		if not isinstance(self.sampleMaxSize,int):
+			raise ValueError()
+		if not isinstance(self.transport,str):
+			raise ValueError()
+
 	def getName(self):
 		return self.name
 
@@ -155,6 +200,27 @@ class Domain(OPS_Object):
 		self.outSocketBufferSize = archiver.Int32("outSocketBufferSize",self.outSocketBufferSize)
 		self.metaDataMcPort = archiver.Int32("metaDataMcPort",self.metaDataMcPort)
 
+	def validate(self):
+		if not super(Config,self).validate():
+			raise ValueError()
+		if not isinstance(self.domainID,str):
+			raise ValueError()
+		for x in self.topics:
+			if not isinstance(x,Topic) or not x.validate():
+				raise ValueError()
+		if not isinstance(self.domainAddress,str):
+			raise ValueError()
+		if not isinstance(self.localInterface,str):
+			raise ValueError()
+		if not isinstance(self.timeToLive,int):
+			raise ValueError()
+		if not isinstance(self.inSocketBufferSize,int):
+			raise ValueError()
+		if not isinstance(self.outSocketBufferSize,int):
+			raise ValueError()
+		if not isinstance(self.metaDataMcPort,int):
+			raise ValueError()
+
 	def getTopic(self,name):
 		for t in self.topics:
 			if t.domainAddress == "":
@@ -197,7 +263,13 @@ class Config(OPS_Object):
 	def serialize(self,dataBuffer):
 		super(Config,self).serialize(dataBuffer)
 		dataBuffer.OpsVector("domains",self.domains,Domain)
-
+	
+	def validate(self):
+		if not super(Config,self).validate():
+			raise ValueError()
+		for x in self.domains:
+			if not isinstance(x,Domain) or not x.validate():
+				raise ValueError()
 
 class DefaultOPSConfigImpl(Config):
 	def __init__(self):

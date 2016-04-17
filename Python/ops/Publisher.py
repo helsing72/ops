@@ -24,7 +24,10 @@ class Publisher(object):
 		self.participant = Participant.getInstance(topic.domainID, topic.participantID)
 		self.sendDataHandler = self.participant.getSendDataHandler(topic)
 
-	def write(self,data):
+	def write(self,data,doValidation = True):
+		if doValidation:
+			data.validate()
+
 		if self.key != "":
 			data.key=self.key
 		self.message.data = data
