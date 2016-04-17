@@ -9,8 +9,8 @@
 @IF NOT EXIST %DBG_DIR% mkdir %DBG_DIR%
 @cd %DBG_DIR%
 cmake -DCMAKE_BUILD_TYPE=Debug ..
-msbuild ALL_BUILD.vcxproj
-msbuild INSTALL.vcxproj
+cmake --build . --target ALL_BUILD --config Debug
+cmake --build . --target INSTALL --config Debug
 @popd
 
 @rem build and install Release
@@ -18,6 +18,6 @@ msbuild INSTALL.vcxproj
 @IF NOT EXIST %OPT_DIR% mkdir %OPT_DIR%
 @cd %OPT_DIR%
 cmake -DCMAKE_BUILD_TYPE=Release ..
-msbuild ALL_BUILD.vcxproj
-msbuild INSTALL.vcxproj
+cmake --build . --target ALL_BUILD --config Release
+cmake --build . --target INSTALL --config Release
 @popd
