@@ -27,16 +27,26 @@ if(NOT Java_JAVAC_EXECUTABLE)
 endif()
 
 
-
 # add compiler flags for release or debug
-if(CMAKE_BUILD_TYPE MATCHES "Release")
-	set(CMAKE_CXX_FLAGS "-O2")
-	string(REPLACE "-O3 -DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE} )
-elseif(CMAKE_BUILD_TYPE MATCHES "Debug")
-	set(CMAKE_CXX_FLAGS "-g -fprofile-arcs -ftest-coverage -O0") #fPIC is set
-	string(REPLACE "-g" "" CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG} )
-endif()	
+if(MSVC)
+#  set(warnings "/W4 /WX /EHsc")
+  set(warnings "/EHsc")
+else()
+  if(CMAKE_BUILD_TYPE MATCHES "Release")
+  	set(CMAKE_CXX_FLAGS "-O2")
+  	string(REPLACE "-O3 -DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE} )
+  elseif(CMAKE_BUILD_TYPE MATCHES "Debug")
+  	set(CMAKE_CXX_FLAGS "-g -fprofile-arcs -ftest-coverage -O0") #fPIC is set
+  	string(REPLACE "-g" "" CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG} )
+  endif()
+#  set(warnings "-Wall -Wextra -Werror")
+  set(warnings "-Wall")
+endif()
+set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} ${warnings}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${warnings}")
 
+message ("c Flags: " ${CMAKE_C_FLAGS})
+message ("cxx Flags: " ${CMAKE_CXX_FLAGS})
 
 # find Boost. If not found we can't build c++ libs
 option(Boost_DEBUG "Set to ON to debug Boost paths" OFF)
@@ -101,21 +111,21 @@ if(Java_JAVAC_EXECUTABLE)
 endif()
 
 
-#add_subdirectory(CSharp)
+add_subdirectory(CSharp)
 
 # add the C++ source, only if Boost is loaded
 if(Boost_FOUND)
-  
-  #set(Boost_INCLUDE_DIRS $ENV{BOOST_HOME}) 
+
+  #set(Boost_INCLUDE_DIRS $ENV{BOOST_HOME})
   #set(Boost_LIBRARIES $ENV{BOOST_LIB})
   #link_directories($ENV{BOOST_LIB})
   add_subdirectory(Cpp)
 
-  option(OPS_BUILD_UNITTESTS "Enable to build the UnitTest app(s)" OFF)  
-  if(OPS_BUILD_UNITTESTS OR CMAKE_BUILD_TYPE MATCHES "Debug")
+  option(OPS_BUILD_UNITTESTS "Enable to build the UnitTest app(s)" OFF)
+  if(OPS_BUILD_UNITTESTS AND CMAKE_BUILD_TYPE MATCHES "Debug")
     add_subdirectory(UnitTests) #pane added
   endif()
-  
+
 else()
   message(WARNING "install Boost to build OPS C++ libraries")
 endif()
