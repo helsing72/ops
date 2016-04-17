@@ -199,12 +199,16 @@ def WriteToAllSelected():
 			if (len(info.helper.data.strings) == 0):
 				for k in range(1000):
 					info.helper.data.strings.append("hej")
-
-
 		info.helper.Write()
 		WriteToAllSelected.Counter+=1
 
 WriteToAllSelected.Counter = 0
+
+def ResendToAllSelected():
+	for info in ItemInfoList:
+		if not info.selected:
+			continue
+		info.helper.Write()
 
 def menu():
 	for i,k in enumerate(ItemInfoList):
@@ -223,6 +227,7 @@ def menu():
 	print "\t V ms  Set send period [ms] [%s]" % sendPeriod
 	print "\t A     Start/Stop periodical Write with set period"
 	print "\t W     Write data"
+	print "\t R     Resend data"
 	print "\t Q     Quite (minimize program output)"
 	print "\t X     Exit program"
 
@@ -362,6 +367,10 @@ while not doExit:
 
 		elif (commands[0]=="W"):
 			WriteToAllSelected()
+			del commands[0]
+
+		elif (commands[0]=="R"):
+			ResendToAllSelected()
 			del commands[0]
 
 		elif (commands[0]=="L"):

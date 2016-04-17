@@ -48,7 +48,7 @@ class Publisher(object):
 		self.sendDataHandler.addPublisher(self)
 
 	def stop(self):
-		self.sendDataHandler.removePublisher(this)
+		self.sendDataHandler.removePublisher(self)
 
 	def getTopic(self):
 		return self.topic
