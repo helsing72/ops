@@ -16,10 +16,8 @@ class PizzaData(OPS_Object):
 
 	def validate(self):
 		super(PizzaData,self).validate()
-		print "Checking self.cheese for string"
 		if not isinstance(self.cheese,str):
 			raise ValueError()
-		print "Checking self.tomatoSauce for string"
 		if not isinstance(self.tomatoSauce,str):
 			raise ValueError()
 
@@ -36,7 +34,6 @@ class VessuvioData(PizzaData):
 
 	def validate(self):
 		super(VessuvioData,self).validate()
-		print "Checking self.ham for string"
 		if not isinstance(self.ham,str):
 			raise ValueError()
 
@@ -53,7 +50,6 @@ class CapricosaData(VessuvioData):
 
 	def validate(self):
 		super(CapricosaData,self).validate()
-		print "Checking self.mushrooms for string"
 		if not isinstance(self.mushrooms,str):
 			raise ValueError()
 

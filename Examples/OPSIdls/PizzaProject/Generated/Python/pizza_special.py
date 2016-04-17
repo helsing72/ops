@@ -18,10 +18,8 @@ class Cheese(OPS_Object):
 
 	def validate(self):
 		super(Cheese,self).validate()
-		print "Checking self.name for string"
 		if not isinstance(self.name,str):
 			raise ValueError()
-		print "Checking self.age for double"
 		if not isinstance(self.age,float):
 			raise ValueError()
 
@@ -42,13 +40,10 @@ class LHCData(CapricosaData):
 
 	def validate(self):
 		super(LHCData,self).validate()
-		print "Checking self.bearnaise for string"
 		if not isinstance(self.bearnaise,str):
 			raise ValueError()
-		print "Checking self.beef for string"
 		if not isinstance(self.beef,str):
 			raise ValueError()
-		print "Checking self.p for pizza.PizzaData[]"
 		for x in self.p:
 			if not isinstance(x,PizzaData) or not x.validate():
 				raise ValueError()
@@ -98,59 +93,43 @@ class ExtraAllt(LHCData):
 
 	def validate(self):
 		super(ExtraAllt,self).validate()
-		print "Checking self.extraCheese for boolean"
 		if not isinstance(self.extraCheese,bool):
 			raise ValueError()
-		print "Checking self.nrOfMushRooms for byte"
 		if not isinstance(self.nrOfMushRooms,int):
 			raise ValueError()
-		print "Checking self.meetQuality for int"
 		if not isinstance(self.meetQuality,int):
 			raise ValueError()
-		print "Checking self.timestamp for long"
 		if not isinstance(self.timestamp,(int,long)):
 			raise ValueError()
-		print "Checking self.timeBakedHours for float"
 		if not isinstance(self.timeBakedHours,float):
 			raise ValueError()
-		print "Checking self.timeBakedSeconds for double"
 		if not isinstance(self.timeBakedSeconds,float):
 			raise ValueError()
-		print "Checking self.description for string"
 		if not isinstance(self.description,str):
 			raise ValueError()
-		print "Checking self.cheese_ for pizza.special.Cheese"
 		if not isinstance(self.cheese_,Cheese) or not self.cheese_.validate():
 			raise ValueError()
-		print "Checking self.bools for boolean[]"
 		for x in self.bools:
 			if not isinstance(x,bool):
 				raise ValueError()
-		print "Checking self.bytes for byte[]"
 		for x in self.bytes:
 			if not isinstance(x,int):
 				raise ValueError()
-		print "Checking self.ints for int[]"
 		for x in self.ints:
 			if not isinstance(x,int):
 				raise ValueError()
-		print "Checking self.longs for long[]"
 		for x in self.longs:
 			if not isinstance(x,(int,long)):
 				raise ValueError()
-		print "Checking self.floats for float[]"
 		for x in self.floats:
 			if not isinstance(x,float):
 				raise ValueError()
-		print "Checking self.doubles for double[]"
 		for x in self.doubles:
 			if not isinstance(x,float):
 				raise ValueError()
-		print "Checking self.strings for string[]"
 		for x in self.strings:
 			if not isinstance(x,str):
 				raise ValueError()
-		print "Checking self.cheeses for pizza.special.Cheese[]"
 		for x in self.cheeses:
 			if not isinstance(x,Cheese) or not x.validate():
 				raise ValueError()
