@@ -1,4 +1,4 @@
-[Installation](Installation.md) [Examples](SimpleCpp.md) [BuildInstructions](BuildInstructions.md)
+[Examples](SimpleCpp.md) [BuildInstructions](BuildInstructions.md)
 
 ---
 

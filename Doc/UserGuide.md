@@ -1,7 +1,7 @@
 # User Guide #
 
   * [Concepts](BasicConcepts.md)
-  * [Installation](Installation.md)
+  * [Build Instructions](BuildInstructions.md)
   * [Defining Data Types in IDL](IDLLanguage.md)
   * [Defining Topic and Configuration](OpsConfig.md)
   * [Subscribing to Topics](SubscribingToTopic.md)

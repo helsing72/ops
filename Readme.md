@@ -3,7 +3,7 @@
 
 ---
 
-See [Installation](Doc/Installation.md) or [User Guide](Doc/UserGuide.md) to get started!
+See [Build Instructions](Doc/BuildInstructions.md) or [User Guide](Doc/UserGuide.md) to get started!
 
 ---
 
