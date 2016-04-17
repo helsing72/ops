@@ -28,7 +28,7 @@
 // Macro used to remove compiler warnings about non used variables/parameters
 #define UNUSED(expr) (void)(expr);
 
-#ifndef WIN32
+#ifndef _WIN32
 
 #define OPS_LINUX
 
