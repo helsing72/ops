@@ -81,9 +81,13 @@ set(OPS_CS_SOURCE
   Utilities/WindowLogger.cs
 )
 
-set(OPS_DBG_TARGET ${CMAKE_BINARY_DIR}/bin/${OPS_LIB_NAME}-${OPS_VERSION}-dbg.dll)
-set(OPS_OPT_TARGET ${CMAKE_BINARY_DIR}/bin/${OPS_LIB_NAME}-${OPS_VERSION}-opt.dll)
-set(OPS_TARGET ${OPS_OPT_TARGET}) #pane, added to OPS_OPT_TARGET ...
+if(CMAKE_BUILD_TYPE MATCHES "Debug")
+  set(OPS_TARGET ${CMAKE_BINARY_DIR}/bin/${OPS_LIB_NAME}-${OPS_VERSION}-dbg.dll)
+  set(OPS_CSHARP_FLAGS /debug)
+else()
+  set(OPS_TARGET ${CMAKE_BINARY_DIR}/bin/${OPS_LIB_NAME}-${OPS_VERSION}-opt.dll)
+  set(OPS_CSHARP_FLAGS /optimize)
+endif()
 
 if(WIN32)
   get_filename_component(CSCOMPILER_PATH ${CSCOMPILER} DIRECTORY)
@@ -117,16 +121,16 @@ if(WIN32)
     list(APPEND OPS_CS_SOURCE_LIST ${CSNATIVEFILE})
   endforeach()
 
-  add_custom_command(OUTPUT ${OPS_DBG_TARGET} ${OPS_OPT_TARGET}
+  add_custom_command(OUTPUT ${OPS_TARGET} 
     #COMMAND "${VS80COMNTOOLS}vsvars32.bat x86"
     COMMAND "${VCVARSALL}" ${VSVARSALL_ARCHITECTURE}
-    COMMAND ${CSCOMPILER} /noconfig /debug /nowarn:1701,1702 /warn:4 /define:TRACE /lib:${CSREFERENCE_NATIVEPATH} /reference:System.dll,System.Drawing.dll,System.Windows.Forms.dll,System.Xml.dll,System.Linq.dll,System.Web.dll,System.Web.Services.dll /target:library /out:${OPS_DBG_TARGET} ${OPS_CS_SOURCE_LIST}
-    COMMAND ${CSCOMPILER} /noconfig /optimize /nowarn:1701,1702 /warn:4 /define:TRACE /lib:${CSREFERENCE_NATIVEPATH} /reference:System.dll,System.Drawing.dll,System.Windows.Forms.dll,System.Xml.dll,System.Linq.dll,System.Web.dll,System.Web.Services.dll /target:library /out:${OPS_OPT_TARGET} ${OPS_CS_SOURCE_LIST}
+    COMMAND ${CSCOMPILER} /noconfig ${OPS_CSHARP_FLAGS} /nowarn:1701,1702 /warn:4 /define:TRACE /lib:${CSREFERENCE_NATIVEPATH} /reference:System.dll,System.Drawing.dll,System.Windows.Forms.dll,System.Xml.dll,System.Linq.dll,System.Web.dll,System.Web.Services.dll /target:library /out:${OPS_TARGET} ${OPS_CS_SOURCE_LIST}
     DEPENDS ${OPS_CS_SOURCE}
     COMMENT "Building C# sources using ${CSCOMPILER}"
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     VERBATIM
     )
+
 else()
   # removed System.Net.dll for Microsoft.Net v2.0.xyz
   add_custom_command(OUTPUT ${OPS_TARGET}
@@ -138,6 +142,7 @@ else()
     )
 endif()
 
-add_custom_target(ops-csharp ALL DEPENDS ${OPS_DBG_TARGET} ${OPS_OPT_TARGET})
+add_custom_target(ops-csharp ALL DEPENDS ${OPS_TARGET})
 
-install(FILES ${OPS_DBG_TARGET} ${OPS_OPT_TARGET} DESTINATION lib/mono)
+install(FILES ${OPS_TARGET} DESTINATION lib/mono)
+
