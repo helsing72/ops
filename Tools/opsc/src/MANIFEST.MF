@@ -1,1 +1,0 @@
-Class-Path: OPSCompilerLib.jar IDLParser.jar ConfigurationLib.jar OPSJLib.jar IDLTemplates.jar

@@ -12,10 +12,13 @@ set(OPSC_SRC
   opsc/JarDependency.java
 )
 
+# generate a MANIFEST file
+configure_file(MANIFEST.MF.in MANIFEST.MF)
+
 add_jar(opsc ${OPSC_SRC}
   INCLUDE_JARS OPSCompilerLib OPSJLib IDLParser ConfigurationLib IDLTemplates
   ENTRY_POINT opsc/OpsCompiler
-  MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/MANIFEST.MF
+  MANIFEST ${CMAKE_CURRENT_BINARY_DIR}/MANIFEST.MF
   VERSION ${PROJECT_VERSION}
   OUTPUT_DIR ${CMAKE_BINARY_DIR}/bin
 )
