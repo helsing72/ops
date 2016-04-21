@@ -3,6 +3,7 @@ BUILD_OPT=build.opt
 
 CC=$(shell which gcc)
 CXX=$(shell which g++)
+INSTALL_PREFIX=$(CURDIR)/deploy
 
 CCV=$(shell $(CC) -dumpversion)
 CXXV=$(shell $(CXX) -dumpversion)
@@ -33,7 +34,7 @@ $(BUILD_OPT)/Makefile : %/Makefile :
 	export CXX=$(CXX) && \
 	mkdir -p $* && \
 	cd $* && \
-	cmake -DCMAKE_BUILD_TYPE=Release ..
+	cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_PREFIX) -DCMAKE_BUILD_TYPE=Release ..
 
 .PHONY : debug
 debug: $(BUILD_DEBUG)/Makefile
@@ -44,8 +45,7 @@ $(BUILD_DEBUG)/Makefile : %/Makefile :
 	export CXX=$(CXX) && \
 	mkdir -p $* && \
 	cd $* && \
-	cmake -DCMAKE_BUILD_TYPE=Debug ..
-
+	cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_PREFIX) -DCMAKE_BUILD_TYPE=Debug ..
 
 .PHONY : unittest
 unittest : debug
@@ -53,25 +53,26 @@ unittest : debug
 	cd UnitTests/OPStest && \
 	./pizzatest.sh
 
-.PHONY : deploy
-deploy : deploy_cpp
+.PHONY : install
+install : install_debug install_opt 
+	$(MAKE) $(INSTALL_PREFIX)/lib/README
+	@echo "Installed ops4 in $(INSTALL_PREFIX)"
 
-.PHONY : deploy_cpp
-deploy_cpp :
-	@echo "Target: $@"
-	mkdir -p deploy/cpp/src
-	mkdir -p deploy/cpp/src/xml
-	cp -r Cpp/include deploy/cpp
-	cp -r Cpp/source/* deploy/cpp/src
-	-cp -r build.debug/Cpp/source/*.a deploy/cpp/lib
-	-cp -r build.debug/Cpp/source/*.so* deploy/cpp/lib
-	-cp -r build.opt/Cpp/source/*.a deploy/cpp/lib
-	-cp -r build.opt/Cpp/source/*.so* deploy/cpp/lib
-	echo "gcc version: $(CCV)" > deploy/cpp/README
-	echo "g++ version: $(CXXV)" >> deploy/cpp/README
-	@echo "Deployment made to $(CURDIR)/deploy"
+.PHONY : install_debug
+install_debug : debug
+	$(MAKE) -C $(BUILD_DEBUG) install
+
+.PHONY : install_opt
+install_opt : opt
+	$(MAKE) -C $(BUILD_OPT) install
+
+$(INSTALL_PREFIX)/lib/README :
+	mkdir -p $(shell dirname $@)
+	echo "gcc version: $(CCV)" > $@
+	echo "g++ version: $(CXXV)" >> $@
 
 .PHONY : clean_deploy
+
 clean_deploy :
 	rm -rf deploy
 
@@ -81,7 +82,7 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... opt (optimized/release)"
 	@echo "... debug"
-	@echo "... deploy"
+	@echo "... install"
 	@echo "... unittest"
 	@echo "... clean"
 	@echo "... clean_debug"
