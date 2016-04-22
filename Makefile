@@ -10,7 +10,7 @@ CXXV=$(shell $(CXX) -dumpversion)
 
 .PHONY : all
 all: debug opt
-	$(MAKE) deploy
+	$(MAKE) install
 
 .PHONY : clean
 clean: clean_debug clean_opt clean_deploy
