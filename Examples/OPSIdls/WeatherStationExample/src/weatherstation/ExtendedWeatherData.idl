@@ -2,7 +2,6 @@ package weatherstation;
 
 class ExtendedWeatherData extends BasicWeatherData
 {
-    virtual WindData windData;
+    virtual ExtendedWindData windData;
     double humidity;
-
 }
