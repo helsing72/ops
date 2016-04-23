@@ -536,6 +536,8 @@ namespace OPSTest
 
         private void button1_Click(object sender, EventArgs e)
         {
+            ///Test UdpReceiver rrr = new UdpReceiver(0, "0.0.0.0", 0);
+
             //System.Net.NetworkInformation.IPGlobalProperties gp = System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties();
             //System.Net.NetworkInformation.UnicastIPAddressInformationCollection x = gp.GetUnicastAddresses();
             //for (int i = 0; i < x.Count; i++)

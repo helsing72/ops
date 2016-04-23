@@ -4,11 +4,6 @@ if(MINGW)
   return()
 endif()
 
-if(UNIX)
-  message(STATUS "No support for CSharp when building with Mono toolchain yet")
-  return()
-endif()
-
 if(CMAKE_CL_64)
   find_program(CSCOMPILER NAMES csc.exe gmcs mcs
     HINTS
@@ -33,3 +28,4 @@ if(CSCOMPILER)
 else()
   message(STATUS "CSharp compiler not found...")
 endif()
+
