@@ -37,7 +37,7 @@ endif()
 # add compiler flags for release or debug
 if(MSVC)
 #  set(warnings "/W4 /WX /EHsc")
-  set(warnings "/EHsc")
+  set(warnings "/W3 /WX /EHsc")
 else()
   if(CMAKE_BUILD_TYPE MATCHES "Release" OR CMAKE_BUILD_TYPE MATCHES "")
   	set(CMAKE_CXX_FLAGS "-O2")
