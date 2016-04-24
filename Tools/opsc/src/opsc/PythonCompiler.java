@@ -75,20 +75,47 @@ public class PythonCompiler extends opsc.CompilerSupport
 
         private String packageName;
         private String className;
-        private String baseClassName = "opsTypes.OPS_Object";
-        private PythonHelper baseClass = null;
-        
+        //private String baseClassName = "opsTypes.OPS_Object";
+        //private PythonHelper baseClass = null;
+        private ArrayList<String>       dependencyName;
+        private ArrayList<PythonHelper> dependencyHelper;
+
         private String classDeclaration;
         private HashSet<String> imports;
 
         private boolean inherited = false;
         private boolean saved = false;
         
+        /*
+        public String toString()
+        {
+            String str = "package : " + packageName + "\n";
+            str += "  " + className + " extends " + baseClassName + "\n";
+            //str += "  hasBaseClass " + (baseClass == null ? "false":"true") + "\n";
+            //str += "  inherited " + (inherited ? "true":"false") + "\n";
+
+
+            return str;
+        }
+        */
+
         public PythonHelper(String packageName,String className)
         {
             this.packageName = packageName;
             this.className = className;
             imports = new HashSet<String>();
+
+            dependencyName = new ArrayList<String>();
+            dependencyHelper = new ArrayList<PythonHelper>();
+
+            dependencyName.add("opsTypes.OPS_Object");
+            dependencyHelper.add(null);
+        }
+        public void addDependency(String name)
+        {
+            System.out.println("Adding " + name + " to " + className);
+            dependencyName.add(name);
+            dependencyHelper.add(null);
         }
         public String getPackageName()
         {
@@ -104,26 +131,50 @@ public class PythonCompiler extends opsc.CompilerSupport
         }
         public void setBaseClassName(String baseClassName)
         {
-            this.baseClassName=baseClassName;
+            //this.baseClassName=baseClassName;
+            dependencyName.set(0,baseClassName);
             inherited = true;
         }
 
-        public boolean setParentage(PythonHelper other)
+        public boolean connect(PythonHelper other)
         {
+            if (inherited == false) return true;
+            //System.out.println("connect : " + this.baseClassName);
             if (this.packageName.equals(other.packageName))
             {
+                //System.out.println("  same package");
+                //System.out.println("  comparing " + this.baseClassName +" to " + other.className);
+
+                //System.out.println("For " + className);
+                for (int i=0;i<dependencyName.size();i++)
+                {
+                    if (dependencyHelper.get(i) != null) continue;
+
+                    //System.out.print("  Trying to connect " + dependencyName.get(i) + " to " + other.className + ": ");
+                    if (dependencyName.get(i).equals(other.className))
+                    {
+                        dependencyHelper.set(i,other);    
+                        //System.out.println("success");
+                        return true;
+                    }
+                    else
+                    {
+                        //System.out.println("failed");
+                    }
+                }
+/*
                 if (this.baseClassName.equals(other.className))
                 {
-                    this.baseClass = other;  
-                    System.out.println(other.className + " is base for " + this.className);
+                    this.baseClass = other;
+                    dependencies.add(other);
+//                    System.out.println(other.className + " is base for " + this.className);
                     return true;
                 }
-                if (other.baseClassName.equals(this.className))
-                {
-                    other.baseClass = this;
-                    System.out.println(this.className + " is base for " + other.className);
-                    return true;
-                }
+                */
+            }
+            else
+            {
+                //System.out.println("  other package");
             }
             return false;
         }
@@ -137,8 +188,18 @@ public class PythonCompiler extends opsc.CompilerSupport
         }
         public boolean canBeSaved()
         {
-            return baseClass==null || baseClass.saved;
+            //if ((baseClass!=null) && (baseClass.saved == false)) return false;
+            //return true;
+
+            for (PythonHelper h : dependencyHelper)
+            {
+                if (h==null) continue;
+                if (h.saved == false) return false;
+            }
+            return true;
+
         }
+        /*
         public boolean isParentInPackage()
         {
             if (baseClass==null)
@@ -146,12 +207,33 @@ public class PythonCompiler extends opsc.CompilerSupport
 
             return packageName.equals(baseClass.packageName);
         }
-        private void createBaseImport()
+        */
+        private void createImports()
         {
             if (inherited)
             {
+                for (int i=0;i<dependencyHelper.size();i++)
+                {
+                    PythonHelper h = dependencyHelper.get(i);
+                    if (h==null)
+                        continue;
+                    if (packageName.equals(h.packageName)) continue;
+
+                    int splitIndex = dependencyName.get(i).lastIndexOf(".");
+                    if (splitIndex <0)
+                        System.out.println("incorrect split of " + dependencyName.get(i) + " for " + className);
+                    String packageStr = dependencyName.get(i).substring(0,splitIndex);
+                    String classStr   = dependencyName.get(i).substring(splitIndex+1);
+                    packageStr.replace(".","_");
+                    addImport(packageStr,classStr);
+                }
+
+/*
+
                 if (isParentInPackage()) return;
                 int splitIndex = baseClassName.lastIndexOf(".");
+                if (splitIndex <0)
+                    System.out.println("incorrect split of " + baseClassName + " for " + className);
                 String packageStr = baseClassName.substring(0,splitIndex);
                 String classStr   = baseClassName.substring(splitIndex+1);
 
@@ -159,6 +241,7 @@ public class PythonCompiler extends opsc.CompilerSupport
                     packageStr.replace(".","_");
 
                 addImport(packageStr,classStr);
+                */
             }   
             else
             {
@@ -171,6 +254,7 @@ public class PythonCompiler extends opsc.CompilerSupport
         }
         public void getImports(HashSet<String> imports)
         {
+            createImports();
             imports.addAll(this.imports);
         }
 
@@ -244,14 +328,11 @@ public class PythonCompiler extends opsc.CompilerSupport
         {
             if (idlClass.getType() == IDLClass.ENUM_TYPE)
             {
-                System.out.println("Compile enum");
                 compileEnum(idlClass);
             }
             else
             {
                 compileDataClass(idlClass);
-                //compileSubscriber(idlClass);
-                //compilePublisher(idlClass);
             }
 
             _idlClasses.add(idlClass);
@@ -282,6 +363,19 @@ public class PythonCompiler extends opsc.CompilerSupport
             baseClassName  = baseClassName.substring(splitIndex+1);
         }
 
+        for (IDLField field : idlClass.getFields())
+        {
+            if (field.isIdlType())
+            {
+                String typeName = field.getType();
+                if (field.isArray())
+                {
+                    typeName = typeName.substring(0,typeName.length() - 2);
+                }
+                helper.addDependency(typeName);
+            }
+        }
+
         java.io.InputStream stream = findTemplateFile("pythonclasstemplate.tpl");
         setTemplateTextFromResource(stream);
         String templateText = getTemplateText();
@@ -298,25 +392,40 @@ public class PythonCompiler extends opsc.CompilerSupport
 
         helper.setClassDeclaration(templateText);
         checkForImports(helper,idlClass);
+        //System.out.println(helper);
+    }
+
+    protected void compileEnum(IDLClass idlClass) throws IOException
+    {
+        String packageName = idlClass.getPackageName();
+        String className = idlClass.getClassName();
+        String baseClassName = "OPS_Object";
+
+        PythonHelper helper = new PythonHelper(packageName,className);
+        helpers.add(helper);
+
+        java.io.InputStream stream = findTemplateFile("pythonenumtemplate.tpl");
+        setTemplateTextFromResource(stream);
+        String templateText = getTemplateText();
+
+
+        templateText = templateText.replace(CLASS_NAME_REGEX, className);
+        templateText = templateText.replace(PACKAGE_NAME_REGEX, packageName);
+        templateText = templateText.replace(BASE_CLASS_NAME_REGEX, baseClassName);
+        templateText = templateText.replace(DECLARATIONS_REGEX, getEnumDeclarations(idlClass));
+        templateText = templateText.replace(VALIDATION_REGEX, "" + idlClass.getEnumNames().size());
+
+        helper.setClassDeclaration(templateText);
+        checkForImports(helper,idlClass);
     }
 
     public void connectHelpers()
     {
         for (int i=0;i<helpers.size();i++)
         {
-            boolean done = false;
-            int j = i+1;
-            while (!done)
+            for (int j=0;j<helpers.size();j++)
             {
-                if (j>=helpers.size())
-                {
-                    done = true;
-                }
-                else
-                {
-                    done = helpers.get(i).setParentage(helpers.get(j));
-                }
-                j++;
+                helpers.get(i).connect(helpers.get(j));
             }
         }
     }
@@ -339,7 +448,7 @@ public class PythonCompiler extends opsc.CompilerSupport
                 {
                     if (helper.canBeSaved())
                     {
-                        helper.createBaseImport();
+                        //helper.createBaseImport();
 
                         String packageName = helper.getPackageName();
 
@@ -351,7 +460,6 @@ public class PythonCompiler extends opsc.CompilerSupport
 
                         packages.get(packageName).append(helper.getClassDeclaration());
                         helper.getImports(packages.get(packageName).imports);
-
                         helper.setSaved(true);
                         numSaved++;
                     }
@@ -393,6 +501,8 @@ public class PythonCompiler extends opsc.CompilerSupport
                 }
 
                 int splitIndex = typeName.lastIndexOf(".");
+                if (splitIndex == -1) continue;
+
                 String packageStr = typeName.substring(0,splitIndex);
                 String classStr   = typeName.substring(splitIndex+1);
 
@@ -410,11 +520,6 @@ public class PythonCompiler extends opsc.CompilerSupport
         }
     }
 
-
-    protected void compileEnum(IDLClass idlClass) throws IOException
-    {
-        System.out.println("PythonCompiler::compileEnum NOT IMPLEMENTED");
-    }
 
 /*
     protected void compilePublisher(IDLClass idlClass) throws IOException
@@ -466,6 +571,16 @@ public class PythonCompiler extends opsc.CompilerSupport
     public void compileTopicConfig(Vector<TopicInfo> topics, String name, String packageString, String projectDirectory)
     {
         System.out.println("PythonCompiler::compileTopicConfig NOT IMPLEMENTED");
+    }
+
+    private String getEnumDeclarations(IDLClass idlClass) {
+        String ret = "";
+        for (int i = 0; i < idlClass.getEnumNames().size(); i++)
+        {
+            ret += tab(1) + idlClass.getEnumNames().get(i) + " = " + i + endl();
+
+        }
+        return ret;
     }
 
     protected String getDeclarations(IDLClass idlClass)
@@ -597,13 +712,12 @@ public class PythonCompiler extends opsc.CompilerSupport
                 {
                     typeName = getValidationString(typeName);
                 }
-                ret += tab(tabs++) + "if not isinstance(" + fieldName + "," + typeName +")";
+                ret += tab(tabs++) + "if not isinstance(" + fieldName + "," + typeName +"):"+endl();
+                ret += tab(tabs--) + "raise ValueError()" + endl();
                 if (field.isIdlType())
                 {
-                    ret += " or not " + fieldName + ".validate()";
+                    ret += tab(tabs++) + fieldName + ".validate()"+endl();
                 }
-                ret += ":" + endl();
-                ret += tab(tabs) + "raise ValueError()" + endl();
         }
         return ret;
     }   
@@ -614,7 +728,7 @@ public class PythonCompiler extends opsc.CompilerSupport
         if (type.equals("long"))
             return "(int,long)";
         if (type.equals("float") || type.equals("double"))
-            return "float";
+            return "(float,int,long)";
         if (type.equals("string"))
             return "str";
         if (type.equals("boolean"))
