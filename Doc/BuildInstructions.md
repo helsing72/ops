@@ -40,4 +40,4 @@ See [Building Examples](BuildingExamples.md).
 ## Deploy Binaries ##
 TBD
 
-Under OPS_DIR\DeployScripts, there are three runnable bat files that package Java, C++ and Tools binaries. The deploy script are simple and you can edit them to fit your choices as you like.
+Under OPS_DIR\Scripts, there are three runnable Deploy bat-files that package Java, C++ and Tools binaries. The deploy scripts are simple and you can edit them to fit your choices as you like.

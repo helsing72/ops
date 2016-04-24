@@ -1,5 +1,5 @@
 ## Build opsc (command-line OPS IDL compiler) and OPS Core for Java on Windows ##
-Run the bat-file 'OPS_DIR\Build Script\Build_Idl_Compiler.bat'. This will compile the necessary Java libraries, including *OPS Core for Java*, and the opsc compiler.
+Run the bat-file 'OPS_DIR\Script\Build_Idl_Compiler.bat'. This will compile the necessary Java libraries, including *OPS Core for Java*, and the opsc compiler.
 
 The result will be in "OPS_DIR\Tools\opsc\dist".
 
