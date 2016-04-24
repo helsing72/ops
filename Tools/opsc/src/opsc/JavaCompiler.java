@@ -569,6 +569,11 @@ public class JavaCompiler extends opsc.Compiler
         // The batch / bash file will be running  in the _output dir
         String classOutputDir = ".obj";
 
+        String silent = "";
+        if (!isLinux) {
+          silent = "@";
+        }
+
         String execString =
                 "javac -cp " + jarDepString +
                 " -d " + classOutputDir +
@@ -586,10 +591,10 @@ public class JavaCompiler extends opsc.Compiler
 
         } else {
             //batFileText += "@echo off" + endl();
-            batFileText += "@pushd %~dp0" + endl();   // cd to bat-file directory
+            batFileText += silent + "pushd %~dp0" + endl();   // cd to bat-file directory
         }
-        batFileText += "echo Compiling Java..." + endl();
-        batFileText += "javac -version" + endl();
+        batFileText += silent + "echo Compiling Java..." + endl();
+        batFileText += silent + "javac -version" + endl();
         if (isLinux) {
             batFileText += "mkdir -p " + classOutputDir + endl();
         } else {
@@ -611,9 +616,9 @@ public class JavaCompiler extends opsc.Compiler
         String jarPackString = "jar cfm \"" + _projectName + ".jar\" \"" +
             manFile + "\" -C " + classOutputDir + " . ";
         batFileText += jarPackString + endl();
-        batFileText += "echo Compiling done." + endl();
+        batFileText += silent + "echo Compiling Java done." + endl();
         if (!isLinux) {
-            batFileText += "@popd" + endl();
+            batFileText += silent + "popd" + endl();
         }
 
         String script = "";
