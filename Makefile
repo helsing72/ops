@@ -54,7 +54,9 @@ unittest : debug
 	./pizzatest.sh
 
 .PHONY : install
-install : install_debug install_opt 
+install :
+	$(MAKE) install_debug
+	$(MAKE) install_opt
 	$(MAKE) $(INSTALL_PREFIX)/lib/README
 	@echo "Installed ops4 in $(INSTALL_PREFIX)"
 
