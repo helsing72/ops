@@ -19,5 +19,4 @@ On Linux do
 This creates a 'Generated' directory in the TestAll directory with all generated files.
 
 ## Build TestAll C++ Example ##
-Open **TestAllC++Test.sln** under **TestAllC++Test**, check the boost reference to the include and library directories so they point to your boost installation and then build and run to
-see that your OPS installation works correctly for C++.
+Open **TestAllC++Test.sln** under **TestAllC++Test**, check the boost reference to the include and library directories so they point to your boost installation and then build and run to see that your OPS installation works correctly for C++.

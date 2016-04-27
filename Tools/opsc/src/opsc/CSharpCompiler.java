@@ -539,10 +539,10 @@ public class CSharpCompiler extends opsc.Compiler
                 dllDepString + " /recurse:\"" + _outputDir + File.separator + "*.cs\"";
       String  batFileText = "";
       batFileText += "@pushd %~dp0" + endl();   // cd to bat-file directory
-      batFileText += "echo Building C#..."  + endl();
+      batFileText += "@echo Compiling C#..."  + endl();
       batFileText += execString + endl();
       batFileText += "@popd" + endl();
-      batFileText += "echo done."  + endl();
+      batFileText += "@echo Compiling C# done."  + endl();
 
       String script = _outputDir + File.separator + "cs_build_script.bat";
       createAndWriteFile(script, batFileText);

@@ -71,6 +71,7 @@ namespace Ops
                 // We need to bind to a specific interface so we can get an IP address to publish to udp senders
                 if (this.localInterface.Equals("0.0.0.0"))
                 {
+                    /* This does not work on mono (tested with version 4.2.3)
                     System.Net.NetworkInformation.IPGlobalProperties gp = System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties();
                     System.Net.NetworkInformation.UnicastIPAddressInformationCollection x = gp.GetUnicastAddresses();
                     for (int i = 0; i < x.Count; i++)
@@ -79,6 +80,27 @@ namespace Ops
                         {
                             IpAddress = x[i].Address.ToString();
                             break;
+                        }
+                    }
+                    */
+                    // Alternative implementation to enable use on mono
+                    System.Net.NetworkInformation.NetworkInterface[] nics = System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces();
+                    if (nics != null)
+                    {
+                        foreach (System.Net.NetworkInformation.NetworkInterface adapter in nics)
+                        {
+                            System.Net.NetworkInformation.IPInterfaceProperties properties = adapter.GetIPProperties();
+                            System.Net.NetworkInformation.UnicastIPAddressInformationCollection uniCast = properties.UnicastAddresses;
+                            if (uniCast != null)
+                            {
+                                foreach (System.Net.NetworkInformation.UnicastIPAddressInformation uni in uniCast)
+                                {
+                                    if (uni.Address.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork) continue; //IPV4
+                                    IpAddress = uni.Address.ToString();
+                                    break;
+                                }
+                            }
+                            if (!IpAddress.Equals("0.0.0.0")) break;
                         }
                     }
                 }

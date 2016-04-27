@@ -1,5 +1,5 @@
 ## Build opsc (command-line OPS IDL compiler) and OPS Core for Java on Windows ##
-Run the bat-file 'OPS_DIR\Build Script\Build_Idl_Compiler.bat'. This will compile the necessary Java libraries, including *OPS Core for Java*, and the opsc compiler.
+Run the bat-file 'OPS_DIR\Script\Build_Idl_Compiler.bat'. This will compile the necessary Java libraries, including *OPS Core for Java*, and the opsc compiler.
 
 The result will be in "OPS_DIR\Tools\opsc\dist".
 
@@ -22,3 +22,14 @@ Build the solution for all configurations (both x86 and x64):
   * "Release DLL" - for compiler setting Multi-threaded Release DLL
 
 Verify they all compile alright (you will have some warnings).
+
+## Building OPS Core for C# with Visual Studio ##
+Open the solution/project with Visual Studio (has been used with
+VS2008, VS2010, VS2012, VS2013 and VS2015) in directory
+
+> "OPS_DIR\CSharp\Projects\OpsLibrary\OpsLibrary.sln"
+
+Build the solution for all configurations:
+
+  * "Debug" - for compiler setting Debug
+  * "Release" - for compiler setting Release

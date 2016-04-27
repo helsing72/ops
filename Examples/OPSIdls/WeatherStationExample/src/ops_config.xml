@@ -1,44 +1,3 @@
-# Weather station example #
-
-```
-package weatherstation;
-
-class BasicWeatherData
-{
-    double temperature;
-}
-
-```
-
-```
-package weatherstation;
-
-class ExtendedWeatherData extends BasicWeatherData
-{
-    virtual ExtendedWindData windData;
-    double humidity;
-}
-```
-
-```
-package weatherstation;
-
-class BasicWindData
-{
-    double speed;
-}
-```
-
-```
-package weatherstation;
-
-class ExtendedWindData extends BasicWindData
-{
-    double direction;
-}
-```
-
-```
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
  Description:
@@ -62,4 +21,3 @@ class ExtendedWindData extends BasicWindData
         </domains>
     </ops_config>
 </root>
-```

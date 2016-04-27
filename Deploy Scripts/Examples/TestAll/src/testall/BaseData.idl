@@ -1,7 +1,0 @@
-package TestAll;
-
-class BaseData
-{
-    string baseText;
-
-}

@@ -450,7 +450,6 @@ public class CppCompiler extends opsc.Compiler
     protected String getDeclarations(IDLClass idlClass) {
         String ret = "";
         for (IDLField field : idlClass.getFields()) {
-
             if (!field.getComment().equals("")) {
                 String comment = field.getComment();
                 int idx;

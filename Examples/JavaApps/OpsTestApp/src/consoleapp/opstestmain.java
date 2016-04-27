@@ -91,7 +91,6 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
       otherParticipant.addTypeSupport(new PizzaProjectTypeFactory());
       otherParticipant.addListener(this);
 
-
       OnLog("Created Participants\n");
       OnLog("DomainID: " + participant.getDomain().getDomainID());
       OnLog("DomainAddress: " + participant.getDomain().getDomainAddress());
@@ -146,6 +145,11 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
       } else if (Data instanceof PizzaData) {
           OnData(topName, (PizzaData)Data);
       }
+  }
+
+  public boolean isSelected(int index) {
+    MyTopicInfo info = MyTopicInfoList.elementAt(index);
+    return info.selected;
   }
 
   public void ChangeSelect(int index, boolean value) {
@@ -207,6 +211,15 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
       }
   }
 
+  public void SetDeadLineInterval(long timeoutMs) {
+    for(int i = 0; i < MyTopicInfoList.size(); i++) {
+        MyTopicInfo info = MyTopicInfoList.elementAt(i);
+        if (info.selected) {
+            info.helper.SetDeadLineInterval(timeoutMs);
+        }
+    }
+  }
+
   public void WriteToAll(int NumExtraBytes) {
       Counter++;
       pizzaData.cheese = "Java " + Counter;
@@ -229,6 +242,10 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
           }
       }
   }
+
+  int NumVessuvioBytes = 0;
+  int deadlineTimeout = 1000;
+  int sendPeriod = 1000;
 
   public void menu()
 	{
@@ -262,10 +279,10 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
   	System.out.println("\t SD    Delete Subscriber");
   	System.out.println("\t SS    Start Subscriber");
   	System.out.println("\t ST    Stop Subscriber");
-  	//System.out.println("\t L num Set num Vessuvio Bytes [" << NumVessuvioBytes << "]" << std::endl;
-  	//System.out.println("\t T ms  Set deadline timeout [ms]");
-  	//System.out.println("\t V ms  Set send period [ms] [" << sendPeriod << "]" << std::endl;
-  	//System.out.println("\t A     Start/Stop periodical Write with set period");
+  	System.out.println("\t L num Set num Vessuvio Bytes [" + NumVessuvioBytes + "]");
+  	System.out.println("\t T ms  Set deadline timeout [ms]");
+  	System.out.println("\t V ms  Set send period [ms] [" + sendPeriod + "]");
+  	System.out.println("\t A     Start/Stop periodical Write with set period");
   	System.out.println("\t W     Write data");
   	//System.out.println("\t Q     Quite (minimize program output)");
   	System.out.println("\t X     Exit program");
@@ -273,13 +290,29 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
 
   public void doRun()
   {
+    // set item 0 as default
+    ChangeSelect(0, true);
     menu();
+
+    boolean doPeriodicalSends = false;
+
     for (; ; ) {
 			System.out.print(" command > ");
-			String input = System.console().readLine();
-			//char tmp = (char) System.in.read();
 
-			//System.out.printf("Input was: '%s'\n", input);
+      if (doPeriodicalSends) {
+        try {
+          while (!System.console().reader().ready()) {
+            WriteToAll(NumVessuvioBytes);
+            try {
+              Thread.sleep(sendPeriod);
+            } catch (InterruptedException e) {
+            }
+          }
+        } catch (java.io.IOException e) {
+        }
+      }
+
+			String input = System.console().readLine().toLowerCase();
 
 			if (input.length() == 0) continue;
 
@@ -287,9 +320,9 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
 				try {
 					int i = Integer.parseInt(input);
 					//System.out.printf("Integer was: %d\n", i);
-					ChangeSelect(i, true);
+					ChangeSelect(i, !isSelected(i));
           menu();
-				} catch(NumberFormatException nfe) {
+				} catch (NumberFormatException nfe) {
 					System.err.println("Invalid Format!");
 				}
 			}
@@ -306,7 +339,35 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
 			if (input.startsWith("ss", 0)) { StartSubscriber(); }
 			if (input.startsWith("st", 0)) { StopSubscriber(); }
 
-			if (input.startsWith("w", 0)) { WriteToAll(0); }
+      if (input.startsWith("l", 0)) {
+        try {
+          NumVessuvioBytes = Integer.parseInt(input.substring(2));
+        } catch (NumberFormatException nfe) {
+          System.err.println("Invalid Format!");
+        }
+        menu();
+      }
+      if (input.startsWith("t", 0)) {
+        try {
+          long t = Long.parseLong(input.substring(2));
+          SetDeadLineInterval(t);
+        } catch (NumberFormatException nfe) {
+          System.err.println("Invalid Format!");
+        }
+      }
+      if (input.startsWith("v", 0)) {
+        try {
+          sendPeriod = Integer.parseInt(input.substring(2));
+          menu();
+        } catch (NumberFormatException nfe) {
+          System.err.println("Invalid Format!");
+        }
+      }
+      if (input.startsWith("a", 0)) {
+        doPeriodicalSends = !doPeriodicalSends;
+      }
+
+			if (input.startsWith("w", 0)) { WriteToAll(NumVessuvioBytes); }
 			if (input.startsWith("x", 0)) break;
 		}
 

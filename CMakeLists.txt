@@ -14,6 +14,13 @@ endif()
 ################################################################################
 # Find external dependencies
 
+# help the FindGtest script locate gtest
+if(DEFINED ENV{GOOGLETEST_HOME})
+  set(GTEST_ROOT $ENV{GOOGLETEST_HOME})
+  list(APPEND CMAKE_PREFIX_PATH $ENV{GOOGLETEST_LIB})
+endif()
+find_package(GTest)
+
 # if we need to link with libraries
 find_package(Java COMPONENTS Runtime Development)
 
@@ -30,9 +37,9 @@ endif()
 # add compiler flags for release or debug
 if(MSVC)
 #  set(warnings "/W4 /WX /EHsc")
-  set(warnings "/EHsc")
+  set(warnings "/W3 /WX /EHsc")
 else()
-  if(CMAKE_BUILD_TYPE MATCHES "Release")
+  if(CMAKE_BUILD_TYPE MATCHES "Release" OR CMAKE_BUILD_TYPE MATCHES "")
   	set(CMAKE_CXX_FLAGS "-O2")
   	string(REPLACE "-O3 -DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE} )
   elseif(CMAKE_BUILD_TYPE MATCHES "Debug")
@@ -115,10 +122,6 @@ add_subdirectory(CSharp)
 
 # add the C++ source, only if Boost is loaded
 if(Boost_FOUND)
-
-  #set(Boost_INCLUDE_DIRS $ENV{BOOST_HOME})
-  #set(Boost_LIBRARIES $ENV{BOOST_LIB})
-  #link_directories($ENV{BOOST_LIB})
   add_subdirectory(Cpp)
 
   option(OPS_BUILD_UNITTESTS "Enable to build the UnitTest app(s)" OFF)

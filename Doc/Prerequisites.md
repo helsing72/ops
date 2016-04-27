@@ -30,7 +30,7 @@ Make sure you have boost installed, otherwise download pre-built binaries for bo
     * Boost System
     * Boost Thread
 
-OPS has been used with Boost versions 1.38, 1.48, 1.55 and 1.60.
+OPS has been used with Boost versions 1.38, 1.48, 1.53, 1.55 and 1.60.
 
 ## CMake ##
 Version 3.0.0 or later is required to build OPS with CMake. Make sure the cmake command is in your path. CMake can be downloaded at https://cmake.org/.
@@ -43,8 +43,8 @@ OPS has been used with VS2008, VS2010, VS2012, VS2013 and VS2015.
 ## Google Test (required for unit tests) ##
 Google Test can be downloaded at https://github.com/google/googletest.
 
-## gcovr (required for unit tests) ##
+## gcovr ##
 TBD
 
-## cppcheck (required for unit tests) ##
+## cppcheck ##
 TBD

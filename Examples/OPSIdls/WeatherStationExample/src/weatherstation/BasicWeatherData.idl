@@ -1,0 +1,6 @@
+package weatherstation;
+
+class BasicWeatherData
+{
+    double temperature;
+}
