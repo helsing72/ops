@@ -21,6 +21,9 @@ import pizza.PizzaDataPublisher;
 import pizza.VessuvioData;
 import pizza.VessuvioDataSubscriber;
 import pizza.VessuvioDataPublisher;
+import pizza.special.ExtraAllt;
+import pizza.special.ExtraAlltSubscriber;
+import pizza.special.ExtraAlltPublisher;
 import PizzaProject.PizzaProjectTypeFactory;
 
 import ops.ConfigurationException;
@@ -57,6 +60,7 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
 
   private pizza.PizzaData pizzaData = new PizzaData();
   private pizza.VessuvioData vessuvioData = new VessuvioData();
+  private pizza.special.ExtraAllt extraAlltData = new ExtraAllt();
 
   private long deadLineEventIntervall = 0;
   private int Counter = 0;
@@ -71,10 +75,11 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
     MyTopicInfoList.add(new MyTopicInfo("PizzaDomain",      "TcpVessuvioTopic",   "pizza.VessuvioData"));
     MyTopicInfoList.add(new MyTopicInfo("PizzaDomain",      "TcpPizzaTopic2",     "pizza.PizzaData"));
     MyTopicInfoList.add(new MyTopicInfo("PizzaDomain",      "TcpVessuvioTopic2",  "pizza.VessuvioData"));
-    MyTopicInfoList.add(new MyTopicInfo("OtherPizzaDomain", "OtherPizzaTopic",    "pizza.PizzaData"));
-    MyTopicInfoList.add(new MyTopicInfo("OtherPizzaDomain", "OtherVessuvioTopic", "pizza.VessuvioData"));
     MyTopicInfoList.add(new MyTopicInfo("PizzaDomain",      "UdpPizzaTopic",      "pizza.PizzaData"));
     MyTopicInfoList.add(new MyTopicInfo("PizzaDomain",      "UdpVessuvioTopic",   "pizza.VessuvioData"));
+    MyTopicInfoList.add(new MyTopicInfo("OtherPizzaDomain", "OtherPizzaTopic",    "pizza.PizzaData"));
+    MyTopicInfoList.add(new MyTopicInfo("OtherPizzaDomain", "OtherVessuvioTopic", "pizza.VessuvioData"));
+    MyTopicInfoList.add(new MyTopicInfo("PizzaDomain",      "ExtraAlltTopic",     "pizza.special.ExtraAllt"));
 
     for(int i = 0; i < MyTopicInfoList.size(); i++) {
         MyTopicInfo info = MyTopicInfoList.elementAt(i);
@@ -139,8 +144,20 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
       OnLog("[ " + topName + " ] New VessuvioData: " + Data.cheese + ", Ham length: " + Data.ham.length() + "\n");
   }
 
+  public void OnData(final String topName, final pizza.special.ExtraAllt Data) {
+      String str = "";
+
+      if (Data.shs.size() > 1) str = ", shs[1]: " + Data.shs.elementAt(1);
+
+      OnLog("[ " + topName + " ] New ExtraAllt: " + Data.cheese +
+            str +
+            ", Num strings: " + Data.strings.size() + "\n");
+  }
+
   public void OnData(final String topName, final OPSObject Data) {
-      if (Data instanceof VessuvioData) {
+      if (Data instanceof ExtraAllt) {
+          OnData(topName, (ExtraAllt)Data);
+      } else if (Data instanceof VessuvioData) {
           OnData(topName, (VessuvioData)Data);
       } else if (Data instanceof PizzaData) {
           OnData(topName, (PizzaData)Data);
@@ -222,14 +239,26 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
 
   public void WriteToAll(int NumExtraBytes) {
       Counter++;
-      pizzaData.cheese = "Java " + Counter;
-
-      vessuvioData.cheese = "Java " + Counter;
+      pizzaData.cheese = "From Java " + Counter;
+      vessuvioData.cheese = "From Java " + Counter;
+      extraAlltData.cheese = "From Java " + Counter;
 
       StringBuilder sb = new StringBuilder();
       sb.setLength(NumExtraBytes);
       vessuvioData.ham = sb.toString();
 
+      extraAlltData.sh = -7;
+      if (extraAlltData.shs.size() == 0) {
+        extraAlltData.shs.add((short)11);
+        extraAlltData.shs.add((short)22);
+        extraAlltData.shs.add((short)33);
+      }
+      if (extraAlltData.strings.size() == 0) {
+        extraAlltData.strings.add("aaa");
+        extraAlltData.strings.add("bbbbbb");
+        extraAlltData.strings.add("cc");
+        extraAlltData.strings.add("ddddddddd");
+      }
       for(int i = 0; i < MyTopicInfoList.size(); i++) {
           MyTopicInfo info = MyTopicInfoList.elementAt(i);
           if (info.selected) {
@@ -238,6 +267,9 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
               }
               if (info.typeName.equals(VessuvioData.getTypeName())) {
                   info.helper.Write(vessuvioData);
+              }
+              if (info.typeName.equals(ExtraAllt.getTypeName())) {
+                  info.helper.Write(extraAlltData);
               }
           }
       }

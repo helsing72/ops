@@ -351,7 +351,7 @@ public:
 				"[Topic: " << sub->getTopic().getName() << 
 				"] (From " << addr << ":" << port <<
 				") Pizza:: Cheese: " << data->cheese << 
-				",  Tomato sauce: " << data->tomatoSauce << std::endl;
+				", Tomato sauce: " << data->tomatoSauce << std::endl;
 		}
 	}
 
@@ -366,7 +366,7 @@ public:
 				"[Topic: " << sub->getTopic().getName() << 
 				"] (From " << addr << ":" << port <<
 				") Vessuvio:: Cheese: " << data->cheese << 
-				",  Tomato sauce: " << data->tomatoSauce << 
+				", Tomato sauce: " << data->tomatoSauce << 
 				", Ham length: " << data->ham.size() << std::endl;
 		}
 	}
@@ -378,11 +378,19 @@ public:
 		sub->getMessage()->getSource(addr, port);
 
 		if (!beQuite) {
+			std::ostringstream ss;
+			if (data->shs.size() > 1) {
+				ss << ", shs[1]: " << data->shs.at(1) << std::ends;
+			} else {
+				ss << "" << std::ends;
+			}
+
 			std::cout << 
 				"[Topic: " << sub->getTopic().getName() << 
 				"] (From " << addr << ":" << port <<
 				") Pizza:: Cheese: " << data->cheese << 
-				",  Tomato sauce: " << data->tomatoSauce << 
+				ss.str() <<
+				", Tomato sauce: " << data->tomatoSauce << 
 				", Num strings: " << data->strings.size() << std::endl;
 		}
 	}
@@ -406,6 +414,7 @@ void WriteToAllSelected()
 		if (info->TypeName == pizza::PizzaData::getTypeName()) {
 			TPizzaHelper* hlp = (TPizzaHelper*)info->helper;
 			hlp->data.cheese = "Pizza from C++: " + CounterStr;
+			hlp->data.tomatoSauce = "Tomato";
 #ifdef USE_MESSAGE_HEADER
 			hlp->data.systemTime = sds::sdsSystemTime();
 #endif
@@ -423,6 +432,12 @@ void WriteToAllSelected()
 			hlp->data.cheese = "ExtraAllt from C++: " + CounterStr;
 			if (hlp->data.strings.size() == 0) {
 				for (int k = 0; k < 1000; k++) hlp->data.strings.push_back("hej");
+			}
+			hlp->data.sh = -7;
+			if (hlp->data.shs.size() == 0) {
+				hlp->data.shs.push_back(17);
+				hlp->data.shs.push_back(42);
+				hlp->data.shs.push_back(-63);
 			}
 #ifdef USE_MESSAGE_HEADER
 			hlp->data.systemTime = sds::sdsSystemTime();

@@ -1,6 +1,6 @@
 package TestAll;
 
-//Dummy data extending BaseData and add fields of all available types
+//Dummy data extending BaseData and adding fields of all available types
 //including aggregating a third data type TestData
 class ChildData extends BaseData
 {
@@ -8,6 +8,8 @@ class ChildData extends BaseData
     boolean bo;
     /* */
     byte b;
+    /* */
+    short sh;
     /* */
     int i;
     /* */
@@ -33,6 +35,8 @@ class ChildData extends BaseData
     boolean[] bos;
     /* */
     byte[] bs;
+    /* */
+    short[] shs;
     /* */
     int[] is_;
     /* */
