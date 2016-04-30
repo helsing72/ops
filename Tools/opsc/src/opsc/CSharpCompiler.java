@@ -369,6 +369,10 @@ public class CSharpCompiler extends opsc.Compiler
         {
             return "bool";
         }
+        else if (s.equals("short"))
+        {
+            return "short";
+        }
         else if (s.equals("int"))
         {
             return "int";
@@ -392,6 +396,10 @@ public class CSharpCompiler extends opsc.Compiler
         else if (s.equals("string[]"))
         {
             return "List<string>";
+        }
+        else if (s.equals("short[]"))
+        {
+            return "List<short>";
         }
         else if (s.equals("int[]"))
         {
@@ -452,6 +460,10 @@ public class CSharpCompiler extends opsc.Compiler
                 {
                     ret += tab(3) + "_" + field.getName() + " = (" + languageType(field.getType()) + ") archive.InoutIntegerList(\"" + field.getName() + "\", _" + field.getName() + ");" + endl();
                 }
+                else if(field.getType().equals("short[]"))
+                {
+                    ret += tab(3) + "_" + field.getName() + " = (" + languageType(field.getType()) + ") archive.InoutShortList(\"" + field.getName() + "\", _" + field.getName() + ");" + endl();
+                }
                 else if(field.getType().equals("byte[]"))
                 {
                     ret += tab(3) + "_" + field.getName() + " = (" + languageType(field.getType()) + ") archive.InoutByteList(\"" + field.getName() + "\", _" + field.getName() + ");" + endl();
@@ -497,7 +509,7 @@ public class CSharpCompiler extends opsc.Compiler
       final boolean isLinux = System.getProperty("os.name").equals("Linux");
 
       if (isLinux) {
-        System.out.println("Info: Building C# on Linux is not supported");
+        System.out.println("Info: Building C# on Linux is not yet supported");
         return;
       }
 

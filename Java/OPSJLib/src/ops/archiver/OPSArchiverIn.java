@@ -45,7 +45,7 @@ public class OPSArchiverIn implements ArchiverInOut
         compositeFactory = OPSObjectFactory.getInstance();
         readBuf = buf;
     }
-    
+
     public boolean remove(Object o)
     {
         return compositeFactory.remove(o);
@@ -72,7 +72,7 @@ public class OPSArchiverIn implements ArchiverInOut
 
     public short inout(String name, short v) throws IOException
     {
-       throw new UnsupportedOperationException("Not supported yet.");
+        return readBuf.readshort();
     }
 
     public float inout(String name, float v) throws IOException
@@ -106,8 +106,6 @@ public class OPSArchiverIn implements ArchiverInOut
         return newSer;
     }
 
-    
-
     public List<Integer> inoutIntegerList(String name, List<Integer> v) throws IOException
     {
         return (List<Integer>) readBuf.readintArr();
@@ -125,7 +123,7 @@ public class OPSArchiverIn implements ArchiverInOut
 
     public List<Short> inoutShortList(String name, List<Short> v) throws IOException
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return (List<Short>) readBuf.readshortArr();
     }
 
     public List<Float> inoutFloatList(String name, List<Float> v) throws IOException
@@ -153,7 +151,7 @@ public class OPSArchiverIn implements ArchiverInOut
         Vector list = new Vector();
         int size = readBuf.readint();
         for (int i = 0; i < size; i++)
-        { 
+        {
             list.add(inout("", (Serializable)null));
         }
         return list;
