@@ -7,7 +7,7 @@
         <domains>
 
             <!-- First multicast domain -->
-            <element type = "MulticastDomain">
+            <element type = "Domain">
                 <domainID>TestAllDomain</domainID>
                 <domainAddress>234.5.6.8</domainAddress>
                 <!--optional <timeToLive>1</timeToLive>-->
