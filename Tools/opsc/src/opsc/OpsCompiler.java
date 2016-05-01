@@ -445,6 +445,7 @@ public class OpsCompiler
         if(opsc._props.generateJava) {
             // if compile is successful and user opted to build java
             if(opsc.compileJava() && opsc._props.buildJava) {
+                System.out.println("");
                 opsc.buildJava();
             }
         }
@@ -453,6 +454,7 @@ public class OpsCompiler
         if(opsc._props.generateCS) {
             // if compile is successful and user opted to build C#
             if(opsc.compileCs() && opsc._props.buildCS) {
+                System.out.println("");
                 opsc.buildCs();
             }
         }
