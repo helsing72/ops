@@ -119,6 +119,11 @@ public class CSharpCompiler extends opsc.Compiler
         if (idlClass.getBaseClassName() != null)
         {
             baseClassName = idlClass.getBaseClassName();
+            // Fix for different casing in C# and Java/C++ on ops namespace
+            int idx = baseClassName.indexOf("ops.");
+            if (idx == 0) {
+                baseClassName = "Ops." + baseClassName.substring(4);
+            }
         }
         String packageName = idlClass.getPackageName();
         String packageFilePart = packageName.replace(".", "/");
