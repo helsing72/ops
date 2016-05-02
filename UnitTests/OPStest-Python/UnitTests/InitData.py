@@ -102,3 +102,11 @@ def initExtraAlltLarge():
 			cheeseVal.name	= "god ost"
 			
 	return m_extraAllt
+
+
+def initVessuvioData():
+	m_vessuvioData = pizza.VessuvioData()
+	m_vessuvioData.ham = "my ham"
+	m_vessuvioData.cheese = "my cheese"
+	m_vessuvioData.tomatoSauce = "my tomatosauce"
+	return m_vessuvioData
