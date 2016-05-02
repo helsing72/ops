@@ -108,7 +108,6 @@ public class XMLArchiverIn implements ArchiverInOut
     public byte getByte(String name)
     {
         return Byte.parseByte(getValue(name));
-
     }
 
     public int getInt(String name)
@@ -118,7 +117,7 @@ public class XMLArchiverIn implements ArchiverInOut
 
     public short getShort(String name)
     {
-        return Byte.parseByte(getValue(name));
+        return Short.parseShort(getValue(name));
     }
 
     public long getLong(String name)
@@ -179,7 +178,7 @@ public class XMLArchiverIn implements ArchiverInOut
         {
             currentNode = nodeStack.pop();
         }
-        
+
 
     }
 //    public Deserializable getElement(String name, int i, Deserializable deserializable)

@@ -500,96 +500,75 @@ public class CppCompiler extends opsc.Compiler
 
     protected String languageType(String s)
     {
-        if (s.equals("string"))
-        {
-            return "std::string";
-        } else
-        {
-            if (s.equals("boolean"))
-            {
-                return "bool";
-            } else
-            {
-                if (s.equals("int"))
-                {
-                    return "int";
-                } else
-                {
-                    if (s.equals("long"))
-                    {
-                        return "__int64";
-                    } else
-                    {
-                        if (s.equals("double"))
-                        {
-                            return "double";
-                        } else
-                        {
-                            if (s.equals("float"))
-                            {
-                                return "float";
-                            } else
-                            {
-                                if (s.equals("byte"))
-                                {
-                                    return "char";
-                                } else
-                                {
-                                    if (s.equals("string[]"))
-                                    {
-                                        return "std::vector<std::string>";
-                                    } else
-                                    {
-                                        if (s.equals("int[]"))
-                                        {
-                                            return "std::vector<int>";
-                                        } else
-                                        {
-                                            if (s.equals("long[]"))
-                                            {
-                                                return "std::vector<__int64>";
-                                            } else
-                                            {
-                                                if (s.equals("double[]"))
-                                                {
-                                                    return "std::vector<double>";
-                                                } else
-                                                {
-                                                    if (s.equals("float[]"))
-                                                    {
-                                                        return "std::vector<float>";
-                                                    } else
-                                                    {
-                                                        if (s.equals("byte[]"))
-                                                        {
-                                                            return "std::vector<char>";
-                                                        } else
-                                                        {
-                                                            if (s.equals("boolean[]"))
-                                                            {
-                                                                return "std::vector<bool>";
-                                                            } else
-                                                            {
-                                                                if (s.endsWith("[]"))
-                                                                {
-                                                                    return "std::vector<" + applyLanguagePackageSeparator(s.substring(0, s.indexOf('['))) + "*>";
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return applyLanguagePackageSeparator(s) + "";
-
+      if (s.equals("string"))
+      {
+        return "std::string";
+      }
+      else if (s.equals("boolean"))
+      {
+        return "bool";
+      }
+      else if (s.equals("int"))
+      {
+        return "int";
+      }
+      else if (s.equals("short"))
+      {
+        return "short";
+      }
+      else if (s.equals("long"))
+      {
+        return "__int64";
+      }
+      else if (s.equals("double"))
+      {
+        return "double";
+      }
+      else if (s.equals("float"))
+      {
+        return "float";
+      }
+      else if (s.equals("byte"))
+      {
+        return "char";
+      }
+      else if (s.equals("string[]"))
+      {
+        return "std::vector<std::string>";
+      }
+      else if (s.equals("int[]"))
+      {
+        return "std::vector<int>";
+      }
+      else if (s.equals("short[]"))
+      {
+        return "std::vector<short>";
+      }
+      else if (s.equals("long[]"))
+      {
+        return "std::vector<__int64>";
+      }
+      else if (s.equals("double[]"))
+      {
+        return "std::vector<double>";
+      }
+      else if (s.equals("float[]"))
+      {
+        return "std::vector<float>";
+      }
+      else if (s.equals("byte[]"))
+      {
+        return "std::vector<char>";
+      }
+      else if (s.equals("boolean[]"))
+      {
+        return "std::vector<bool>";
+      }
+      else if (s.endsWith("[]"))
+      {
+        return "std::vector<" + applyLanguagePackageSeparator(s.substring(0, s.indexOf('['))) + "*>";
+      }
+      return applyLanguagePackageSeparator(s) + "";
     }
 
     protected String applyLanguagePackageSeparator(String packageName)
@@ -607,7 +586,6 @@ public class CppCompiler extends opsc.Compiler
         }
         for (IDLField field : idlClass.getFields())
         {
-
             if (field.isIdlType())
             {
                 String type = field.getType();
@@ -623,7 +601,6 @@ public class CppCompiler extends opsc.Compiler
         for (String includeType : typesToInclude.values())
         {
             ret += tab(0) + "#include \"" + getSlashedType(includeType) + ".h\"" + endl();
-
         }
         return ret;
     }

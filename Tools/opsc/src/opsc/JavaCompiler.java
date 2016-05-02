@@ -271,8 +271,6 @@ public class JavaCompiler extends opsc.Compiler
 
     }
 
-
-
     private String getEnumDeclarations(IDLClass idlClass)
     {
         String ret = "";
@@ -337,6 +335,10 @@ public class JavaCompiler extends opsc.Compiler
         {
             return "boolean";
         }
+        else if (s.equals("short"))
+        {
+            return "short";
+        }
         else if (s.equals("int"))
         {
             return "int";
@@ -360,6 +362,10 @@ public class JavaCompiler extends opsc.Compiler
         else if (s.equals("string[]"))
         {
             return "java.util.Vector<String>";
+        }
+        else if (s.equals("short[]"))
+        {
+            return "java.util.Vector<Short>";
         }
         else if (s.equals("int[]"))
         {
@@ -423,6 +429,10 @@ public class JavaCompiler extends opsc.Compiler
                 else if (field.getType().equals("byte[]"))
                 {
                     ret += tab(2) + field.getName() + " = (" + languageType(field.getType()) + ") archive.inoutByteList(\"" + field.getName() + "\", " + field.getName() + ");" + endl();
+                }
+                else if (field.getType().equals("short[]"))
+                {
+                    ret += tab(2) + field.getName() + " = (" + languageType(field.getType()) + ") archive.inoutShortList(\"" + field.getName() + "\", " + field.getName() + ");" + endl();
                 }
                 else if (field.getType().equals("long[]"))
                 {
@@ -599,7 +609,9 @@ public class JavaCompiler extends opsc.Compiler
             batFileText += "mkdir -p " + classOutputDir + endl();
         } else {
             // on windows, mkdir works like posix mkdir -p IF commandline extensions are enabled
-            batFileText += "mkdir " + classOutputDir + endl();
+            batFileText += silent + "if not exist \"" + classOutputDir + "\" (" + endl();
+            batFileText += silent + "mkdir " + classOutputDir + endl();
+            batFileText += ")" + endl();
         }
 
         // Add commands for copying all dependency jars

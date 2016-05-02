@@ -180,9 +180,6 @@ public class WriteByteBuffer
         {
             outBuffer.putInt(v);
         }
-
-        //getDos().writeInt(v);
-        //outBuffer.putInt(v);
     }
 
     public void writeintArr(List<Integer> arr) throws IOException
@@ -192,20 +189,37 @@ public class WriteByteBuffer
         {
             write(v);
         }
+    }
 
+    public void write(short v) throws IOException
+    {
+        if (nextSegmentAt - outBuffer.position() < 2)
+        {
+            write(ByteBuffer.allocate(2).order(ByteOrder.LITTLE_ENDIAN).putShort(v).array(), 0, 2);
+        } else
+        {
+            outBuffer.putShort(v);
+        }
+    }
+
+    public void writeshortArr(List<Short> arr) throws IOException
+    {
+        write(arr.size());
+        for (Short v : arr)
+        {
+            write(v);
+        }
     }
 
     public void write(byte v) throws IOException
     {
         if (nextSegmentAt - outBuffer.position() < 1)
         {
-
             write(ByteBuffer.allocate(1).order(ByteOrder.LITTLE_ENDIAN).put(v).array(), 0, 1);
         } else
         {
             outBuffer.put(v);
         }
-        //outBuffer.put(v);
     }
 
     public void writebyteArr(List<Byte> arr) throws IOException
@@ -226,11 +240,6 @@ public class WriteByteBuffer
         {
             outBuffer.putLong(v);
         }
-
-
-
-        //getDos().writeLong(v);
-        //outBuffer.putLong(v);
     }
 
     public void writelongArr(List<Long> arr) throws IOException

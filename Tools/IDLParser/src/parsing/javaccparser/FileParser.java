@@ -21,6 +21,7 @@ public class FileParser implements IDLFileParser
     boolean parseComplete = false;
     IDLClass idlClass = new IDLClass();
     private String pendingComment = "";
+
     public IDLClass parse(String content) throws ParseException
     {
 
@@ -29,16 +30,15 @@ public class FileParser implements IDLFileParser
 
         parser.idlDeclareEvent.add(new ParserEventCallback<String>()
         {
-
             public void onEvent(String eventData, ParserEvent e)
             {
                 idlClass.setClassName(eventData);
                 pendingComment = "";
             }
         });
+
         parser.idlCloseEvent.add(new ParserEventCallback<String>()
         {
-
             public void onEvent(String eventData, ParserEvent e)
             {
                 parseComplete = true;
@@ -48,7 +48,6 @@ public class FileParser implements IDLFileParser
 
         parser.packageDeclareEvent.add(new ParserEventCallback<String>()
         {
-
             public void onEvent(String eventData, ParserEvent e)
             {
                 idlClass.setPackageName(eventData);
@@ -58,38 +57,37 @@ public class FileParser implements IDLFileParser
 
         parser.enumDeclareEvent.add(new ParserEventCallback<String>()
         {
-
             public void onEvent(String eventData, ParserEvent e)
             {
-                System.out.println("enum declare");
+                ///System.out.println("enum declare");
                 idlClass.setClassName(eventData);
                 idlClass.setType(IDLClass.ENUM_TYPE);
                 pendingComment = "";
             }
         });
+
         parser.enumCloseEvent.add(new ParserEventCallback<String>()
         {
-
             public void onEvent(String eventData, ParserEvent e)
             {
-                 System.out.println("enum close");
+                ///System.out.println("enum close");
                 parseComplete = true;
                 pendingComment = "";
             }
         });
+
         parser.enumElementEvent.add(new ParserEventCallback<String>()
         {
-
             public void onEvent(String eventData, ParserEvent e)
             {
-                 System.out.println("enum element = " + eventData);
+                ///System.out.println("enum element = " + eventData);
                 idlClass.getEnumNames().add(eventData);
                 pendingComment = "";
             }
         });
+
         parser.fieldDeclareEvent.add(new ParserEventCallback<IDLField>()
         {
-
             public void onEvent(IDLField eventData, ParserEvent e)
             {
                 eventData.setComment(pendingComment);
@@ -97,21 +95,19 @@ public class FileParser implements IDLFileParser
                 pendingComment = "";
             }
         });
+
         parser.extendsEvent.add(new ParserEventCallback<String>()
         {
-
             public void onEvent(String eventData, ParserEvent e)
             {
                 idlClass.setBaseClassName(eventData);
             }
         });
+
         parser.commentEvent.add(new ParserEventCallback<String>()
         {
-
-
             public void onEvent(String eventData, ParserEvent e)
             {
-///                pendingComment = eventData;
                 if (pendingComment.isEmpty()) {
                     pendingComment = eventData;
                 } else {
@@ -120,13 +116,12 @@ public class FileParser implements IDLFileParser
             }
         });
 
-
         try
         {
             parser.specification();
-            System.out.println("Parsing complete");
+            System.out.println("Info: Completed Parsing of " + idlClass.getClassName());
             return idlClass;
-        } 
+        }
         catch (parsing.javaccparser.ParseException parseException)
         {
             throw new ParseException(parseException.getMessage());
@@ -135,8 +130,8 @@ public class FileParser implements IDLFileParser
         {
             throw new ParseException(parseException.getMessage());
         }
-
     }
+
     public static void main(String[] args)
     {
         try

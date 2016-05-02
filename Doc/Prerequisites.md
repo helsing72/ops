@@ -43,6 +43,12 @@ OPS has been used with VS2008, VS2010, VS2012, VS2013 and VS2015.
 ## Google Test (required for unit tests) ##
 Google Test can be downloaded at https://github.com/google/googletest.
 
+## JavaCC (required for rebuilding the IDL parser) ##
+The Java Compiler Compiler is used to generate the IDL parser for the OPS IDL language.
+JavaCC can be downloaded from http://java.net/projects/javacc.
+
+OPS uses JavaCC version 6.0.
+
 ## gcovr ##
 TBD
 

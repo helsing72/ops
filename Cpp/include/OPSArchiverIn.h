@@ -68,7 +68,6 @@ namespace ops
         void inout(const std::string& name, __int16& value)
         {
             UNUSED(name)
-            //Not implemented
             value = buf->ReadShort();
         }
 
@@ -96,13 +95,11 @@ namespace ops
             value = buf->ReadString();
         }
 
-///LA
 		void inout(const std::string& name, char* buffer, int bufferSize)
 		{
             UNUSED(name)
 			buf->ReadChars(buffer, bufferSize);
 		}
-///LA
 
 		void inout(const std::string& name, Serializable& value)
         {
@@ -167,9 +164,7 @@ namespace ops
         void inout(const std::string& name, std::vector<__int16>& value)
         {
             UNUSED(name)
-            UNUSED(value)
-            //Not implemented
-            //return value;
+            buf->ReadShorts(value);
         }
 
         void inout(const std::string& name, std::vector<__int64>& value)

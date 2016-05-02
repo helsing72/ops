@@ -11,10 +11,15 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Ops;
 using pizza;
+using pizza.special;
 
 namespace OPSTest
 {
-    public partial class Form_TestOps : Form, ILogListener, IOpsHelperCallback<VessuvioData>, IOpsHelperCallback<PizzaData>, IOpsHelperCallback<Ops.ParticipantInfoData>
+    public partial class Form_TestOps : Form, ILogListener, 
+        IOpsHelperCallback<VessuvioData>, 
+        IOpsHelperCallback<PizzaData>,
+        IOpsHelperCallback<ExtraAllt>,
+        IOpsHelperCallback<Ops.ParticipantInfoData>
     {
         private Participant myParticipant = null;
         private Participant OtherParticipant = null;
@@ -63,6 +68,7 @@ namespace OPSTest
 
         private List<COpsHelper<PizzaData>> Pizza = new List<COpsHelper<PizzaData>>();
         private List<COpsHelper<VessuvioData>> Vessuvio = new List<COpsHelper<VessuvioData>>();
+        private List<COpsHelper<ExtraAllt>> ExAllt = new List<COpsHelper<ExtraAllt>>();
 
         //private COpsHelperPartInfoData partInfoHelper = null;
 
@@ -97,6 +103,7 @@ namespace OPSTest
             MyTopicInfoList.Add(new MyTopicInfo("PizzaDomain",      "UdpVessuvioTopic",   "pizza.VessuvioData"));
             MyTopicInfoList.Add(new MyTopicInfo("OtherPizzaDomain", "OtherPizzaTopic",    "pizza.PizzaData"));
             MyTopicInfoList.Add(new MyTopicInfo("OtherPizzaDomain", "OtherVessuvioTopic", "pizza.VessuvioData"));
+            MyTopicInfoList.Add(new MyTopicInfo("PizzaDomain",      "ExtraAlltTopic",     "pizza.special.ExtraAllt"));
 
             // Fill in the listbox and create the needed helper objects
             foreach (MyTopicInfo info in MyTopicInfoList)
@@ -115,6 +122,12 @@ namespace OPSTest
                     info.Index = Vessuvio.Count - 1;
                     info.OpsHelper = Vessuvio[info.Index];
                 }
+                if (info.TypeName == ExtraAllt.GetTypeName())
+                {
+                    ExAllt.Add(new COpsHelper<ExtraAllt>(this));
+                    info.Index = ExAllt.Count - 1;
+                    info.OpsHelper = ExAllt[info.Index];
+                }
 
             }
             checkedListBoxTopics.SetItemChecked(0, true);
@@ -127,6 +140,7 @@ namespace OPSTest
             // may otherwise give exceptions when we are destroyed.
             foreach (COpsHelper<PizzaData> p in Pizza) p.StopSubscriber(false);
             foreach (COpsHelper<VessuvioData> v in Vessuvio) v.StopSubscriber(false);
+            foreach (COpsHelper<ExtraAllt> v in ExAllt) v.StopSubscriber(false);
         }
 
         private void buttonGCCollect_Click(object sender, EventArgs e)
@@ -365,9 +379,9 @@ namespace OPSTest
                     //
                     Pizza[idx2].Write();
                 }
-                else
+                else if (info.TypeName == VessuvioData.GetTypeName())
                 {
-                    Vessuvio[idx2].Data.cheese = "cheese " + Convert.ToString(myMessageCounter);
+                    Vessuvio[idx2].Data.cheese = "From C# " + Convert.ToString(myMessageCounter);
                     Vessuvio[idx2].Data.tomatoSauce = "tomatosauce " + Convert.ToString(myMessageCounter);
                     int numBytes = 0;
                     int.TryParse(textBoxNumBytes.Text, out numBytes);
@@ -375,6 +389,25 @@ namespace OPSTest
                     strb.Length = numBytes;
                     Vessuvio[idx2].Data.ham = strb.ToString();
                     Vessuvio[idx2].Write();
+                }
+                else
+                {
+                    ExAllt[idx2].Data.cheese = "From C# " + Convert.ToString(myMessageCounter);
+                    ExAllt[idx2].Data.tomatoSauce = "tomatosauce " + Convert.ToString(myMessageCounter);
+                    ExAllt[idx2].Data.sh = -7;
+                    if (ExAllt[idx2].Data.shs.Count() == 0)
+                    {
+                        ExAllt[idx2].Data.shs.Add(100);
+                        ExAllt[idx2].Data.shs.Add(200);
+                        ExAllt[idx2].Data.shs.Add(300);
+                        ExAllt[idx2].Data.shs.Add(400);
+                    }
+                    if (ExAllt[idx2].Data.strings.Count() == 0)
+                    {
+                        ExAllt[idx2].Data.strings.Add("qwerty");
+                        ExAllt[idx2].Data.strings.Add("asdfgh");
+                    }
+                    ExAllt[idx2].Write();
                 }
                 myMessageCounter++;
             }
@@ -520,7 +553,21 @@ namespace OPSTest
             OPSMessage mess = sender.GetMessage();
 
             Log("[Topic: " + sender.GetTopic().GetName() + "] Vessuvio:: Cheese: " + data.cheese + 
-                ",  Tomato sauce: " + data.tomatoSauce + ", Ham length: " + data.ham.Length +
+                ", Tomato sauce: " + data.tomatoSauce + ", Ham length: " + data.ham.Length +
+                ", From " + mess.GetSourceIP() + ":" + mess.GetSourcePort());
+        }
+
+        public void SubscriberNewData(Subscriber sender, ExtraAllt data)
+        {
+            OPSMessage mess = sender.GetMessage();
+
+            String str = "";
+            if (data.shs.Count > 1) str = ", shs[1]: " + data.shs.ElementAt(1);
+
+            Log("[Topic: " + sender.GetTopic().GetName() + "] ExtraAllt:: Cheese: " + data.cheese +
+                ", Tomato sauce: " + data.tomatoSauce + 
+                str +
+                ", Num strings: " + data.strings.Count() +
                 ", From " + mess.GetSourceIP() + ":" + mess.GetSourcePort());
         }
 

@@ -145,15 +145,13 @@ namespace ops
         void inout(const std::string& name, std::vector<int>& value)
         {
             UNUSED(name)
-            UNUSED(value)
             buf->WriteInts(value);
         }
 
         void inout(const std::string& name, std::vector<__int16>& value)
         {
-            //Not implemented
             UNUSED(name)
-            UNUSED(value)
+            buf->WriteShorts(value);
         }
 
         void inout(const std::string& name, std::vector<__int64>& value)
