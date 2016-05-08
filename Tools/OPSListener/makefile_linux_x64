@@ -1,0 +1,34 @@
+# ----------------------
+# OPS related files
+
+OPSDIR=../../deploy
+
+OPSINCDIR=-I$(OPSDIR)/include/ops
+OPSLIBS=$(OPSDIR)/lib/libops-static-dbg.a
+
+# ----------------------
+# Boost
+
+BOOSTLIBS=-lboost_system-mt -lboost_thread-mt
+
+
+# ----------------------
+
+all: OPSListener 
+
+
+SdsSystemTime.o: Source/SdsSystemTime.cpp
+	g++ -std=c++11 -O2 $(OPSINCDIR) -c $< -o $@
+
+OPSListener.o: Source/OPSListener.cpp
+	g++ -std=c++11 -O2 $(OPSINCDIR) -c $< -o $@
+
+OPSListener: OPSListener.o SdsSystemTime.o $(OPSLIBS)
+	g++ -std=c++11 -O2 $^ $(OPSLIBS) $(BOOSTLIBS) -o $@ 
+
+
+clean:
+	rm -f *.o
+	rm -f OPSListener
+
+
