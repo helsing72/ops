@@ -2,3 +2,4 @@ Debug
 *.ncb
 *.suo
 *.vcproj.*
+*.sln.cache
