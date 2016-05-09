@@ -5,11 +5,8 @@ import os
 import platform
 
 
-sys.path.append("/home/pane/slask/jali-ops/ops-development/Python")
 from ops import Participant,Publisher,Subscriber,Print_Archiver
 
-curDir = os.getcwd()
-sys.path.append(curDir+"/../Pizzas")
 
 import pizza
 import pizza_special
@@ -48,10 +45,8 @@ class CHelper(object):
 	def Write(self,pizzaSize):
 		if pizzaSize == "normal":
 			self.data = InitData.initExtraAlltNormal()
-			print "sending normal"
 		if pizzaSize == "large":
 			self.data = InitData.initExtraAlltLarge()
-			print "sending large"
 		
 		self.pub.write(self.data)
 
@@ -68,7 +63,7 @@ class ItemInfo(object):
 
 info = ItemInfo("PizzaDomain", "ExtraAlltTopic", "pizza.special.ExtraAllt")
 
-participant = Participant.Participant.getInstance("PizzaDomain", "PizzaDomain", "../ops_config.xml")
+participant = Participant.Participant.getInstance("PizzaDomain", "PizzaDomain", "ops_config.xml")
 if participant == None:
 	print "Failed to create Participant. Missing ops_config.xml ??"
 	sys.exit(-1)
