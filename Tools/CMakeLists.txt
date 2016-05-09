@@ -13,6 +13,7 @@ endif()
 
 add_subdirectory(opsc)
 
+add_subdirectory(OPSListener)
 
 # install the latest template files
 set(TMPL_PATH NBOPSIDLSupport/src/ops/netbeansmodules/idlsupport/templates)

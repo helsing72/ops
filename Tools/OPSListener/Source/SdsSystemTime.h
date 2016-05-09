@@ -5,9 +5,13 @@
 #ifndef __SdsSystemTime_H__
 #define __SdsSystemTime_H__
 
-#if _MSC_VER < 1900
-// The int64_t type isn't defined before VS2015
-typedef __int64 int64_t;
+#ifdef _WIN32
+  #if _MSC_VER < 1900
+    // The int64_t type isn't defined before VS2015
+    typedef __int64 int64_t;
+  #endif
+#else
+  #include "inttypes.h"
 #endif
 
 namespace sds {

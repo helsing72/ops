@@ -514,7 +514,13 @@ public:
 
 	bool HandleArguments(LPWSTR* szArglist, int nStart, int nArgs)
 	{
-		if (verboseOutput) for (int i = nStart; i < nArgs; i++) printf("%s %d: %ws\n", indent.c_str(), i, szArglist[i]);
+		if (verboseOutput) for (int i = nStart; i < nArgs; i++) {
+#ifdef _WIN32
+			printf("%s %d: %ws\n", indent.c_str(), i, szArglist[i]);
+#else
+			printf("%s %d: %s\n", indent.c_str(), i, szArglist[i]);
+#endif
+		}
 
 		// Decode arguments
 		int argIdx = nStart;
@@ -793,7 +799,7 @@ int main(int argc, char* argv[])
 		while (true) {
 			if (_kbhit()) {
 				char buffer[1024];
-				char* ptr = fgets(buffer, sizeof(buffer), stdin);
+				fgets(buffer, sizeof(buffer), stdin);
 				std::string line(buffer);
 
 				// trim start
