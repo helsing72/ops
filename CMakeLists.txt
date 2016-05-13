@@ -29,7 +29,12 @@ if(Java_Runtime_FOUND)
   include(UseJava)
 endif()
 
-if(NOT Java_JAVAC_EXECUTABLE)
+if(Java_JAVAC_EXECUTABLE)
+  # set JAVA_HOME if we haven't already
+  if(NOT DEFINED JAVA_HOME)
+    get_filename_component (JAVA_HOME "${Java_JAVAC_EXECUTABLE}" DIRECTORY)
+  endif()
+else()
   message(WARNING "Could not find a Java compiler")
 endif()
 
@@ -136,6 +141,13 @@ endif()
 ################################################################################
 # Build Examples
 
+# we need the opsc compiler to generate code for the examples
+if(TARGET opsc)
+  option(OPS_BUILD_EXAMPLES "Enable to build the example applications" ON)
+  if(OPS_BUILD_EXAMPLES)
+    add_subdirectory(Examples)
+  endif()
+endif()
 
 ################################################################################
 # present the packaging option only if we have the cpack command defined (effectively >= 2.6.0)
