@@ -143,7 +143,7 @@ endif()
 
 # we need the opsc compiler to generate code for the examples
 if(TARGET opsc)
-  option(OPS_BUILD_EXAMPLES "Enable to build the example applications" ON)
+  option(OPS_BUILD_EXAMPLES "Enable to build the example applications" OFF)
   if(OPS_BUILD_EXAMPLES)
     add_subdirectory(Examples)
   endif()
