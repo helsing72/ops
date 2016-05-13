@@ -9,6 +9,7 @@
 @rem built with the windows bat-files that places jars in source tree
 @IF NOT EXIST %SCRIPT_PATH%opsc-${OPS_VERSION}.jar set SCRIPT_PATH=%SCRIPT_PATH%dist\
 
-@pushd .
+@PATH="${JAVA_HOME}";%PATH%
+
+@java -version
 @java -jar %SCRIPT_PATH%opsc-${OPS_VERSION}.jar %*
-@popd
