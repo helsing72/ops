@@ -69,6 +69,11 @@ namespace ops
 		//Create a Topic for subscribing or publishing on ParticipantInfoData
 		ops::Topic createParticipantInfoTopic();
 
+		//Get the name that this participant has set in its ParticipantInfoData
+		std::string getPartInfoName() {
+			return partInfoData.name;
+		}
+
 		//Add a SerializableFactory which has support for data types (i.e. OPSObject derivatives you want this Participant to understand)
 		//Takes over ownership of the object and it will be deleted with the participant
 		void addTypeSupport(ops::SerializableFactory* typeSupport);
