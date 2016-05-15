@@ -90,6 +90,22 @@ namespace ops
 			const boost::asio::ip::address_v4 networkInterface(boost::asio::ip::address_v4::from_string(localInterface));
 			sock->set_option(boost::asio::ip::multicast::join_group(multicastAddress,networkInterface));
 
+#ifndef _WIN32
+			// IP_MULTICAST_ALL (since Linux 2.6.31)
+			// This option can be used to modify the delivery policy of multicast messages to sockets bound
+			// to the wildcard INADDR_ANY address. The argument is a boolean integer (defaults to 1). 
+			// If set to 1, the socket will receive messages from all the groups that have been joined
+			// globally on the whole system. Otherwise, it will deliver messages only from the groups that
+			// have been explicitly joined (for example via the IP_ADD_MEMBERSHIP option) on this particular socket.
+			int nsock = sock->native();
+			if (nsock >= 0) {
+				int mc_all = 0;
+				if ((setsockopt(nsock, IPPROTO_IP, IP_MULTICAST_ALL, (void*) &mc_all, sizeof(mc_all))) < 0) {
+					perror("setsockopt() failed");
+				}
+			}
+#endif
+
 			port = sock->local_endpoint().port();
 		}
 
