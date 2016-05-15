@@ -69,6 +69,14 @@ public:
 		if (cfg) delete cfg;
 	}
 
+	void getAvailableDomains(std::vector<std::string>& domains) 
+	{
+		domains.clear();
+		for (std::map<std::string, std::string>::iterator it = domainMap.begin(); it != domainMap.end(); ++it) {
+			domains.push_back(it->first);
+		}
+	}
+
 	ops::Participant* getDomainParticipant(std::string name)
 	{
 		if (domainMap.find(name) == domainMap.end()) {
