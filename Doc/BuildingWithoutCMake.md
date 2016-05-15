@@ -25,7 +25,7 @@ Verify they all compile alright (you will have some warnings).
 
 ## Building OPS Core for C# with Visual Studio ##
 Open the solution/project with Visual Studio (has been used with
-VS2008, VS2010, VS2012, VS2013 and VS2015) in directory
+VS2010, VS2012, VS2013 and VS2015) in directory
 
 > "OPS_DIR\CSharp\Projects\OpsLibrary\OpsLibrary.sln"
 

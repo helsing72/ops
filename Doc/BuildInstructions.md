@@ -31,8 +31,10 @@ The install result will be in the subdirectory 'deploy' with the following struc
 ## Building without CMake ##
 See [Building without CMake](BuildingWithoutCMake.md).
 
-## Building OPS IDL Builder with Netbeans 6.7 ##
+## Building OPS IDL Builder with Netbeans ##
 Open from Netbeans "OPS_DIR\Tools\OPS IDL Builder NB", make sure you check Open Required Projects and Open as main project. Right click the main project and select "Build All". This will build several projects and output quite a lot of text in the output window. Make sure you scroll to the bottom of the output window and verify it says "BUILD SUCCESSFUL". Try the OPS IDL Builder by choosing "Run" on the main project (OPS IDL Builder NB).
+
+Has been used with Netbeans 6.7, 6.9 and 8.0.
 
 ## Building Examples ##
 See [Building Examples](BuildingExamples.md).
