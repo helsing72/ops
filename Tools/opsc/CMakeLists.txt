@@ -13,6 +13,9 @@ if(WIN32)
     DESTINATION ${OPS_JAR_REL_INSTALL_PATH} RENAME opsc-${OPS_VERSION}.bat
     )
 else()
+  # put opsc script in build dir so we can invoke it directly without installing
+  configure_file(opsc.sh ${CMAKE_BINARY_DIR}/bin/opsc.sh COPYONLY)
+  # install-time installation of opsc.sh script
   install(FILES opsc.sh DESTINATION ${OPS_JAR_REL_INSTALL_PATH}
     PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
     )
