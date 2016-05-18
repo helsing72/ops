@@ -16,7 +16,7 @@ else()
 endif()
 
 add_custom_command(OUTPUT ${JAR_OUTPUT}
-    COMMAND ${Java_JAVA_EXECUTABLE} -jar ${CMAKE_BINARY_DIR}/bin/opsc.jar -P ${CMAKE_CURRENT_SOURCE_DIR}
+  COMMAND ${OPS_COMPILER} -P ${CMAKE_CURRENT_SOURCE_DIR}
   COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/Generated/Java/HelloRequestReply.jar ${JAR_OUTPUT}
   DEPENDS ${CURRENT_SRCS}
   COMMENT "Generating ${JAR_OUTPUT} from ${CMAKE_CURRENT_SOURCE_DIR}"
