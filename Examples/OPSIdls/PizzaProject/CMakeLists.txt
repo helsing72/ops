@@ -13,12 +13,12 @@ set(PIZZA_SRCS
 # the output file that we want
 set(JAR_OUTPUT ${CMAKE_BINARY_DIR}/bin/PizzaProject.jar)
 
-add_custom_command(OUTPUT ${JAR_OUTPUT}
-  COMMAND ${OPS_COMPILER} -P ${CMAKE_CURRENT_SOURCE_DIR} -o ${CMAKE_CURRENT_BINARY_DIR}
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different Java/PizzaProject.jar ${JAR_OUTPUT}
-  DEPENDS ${PIZZA_SRCS}
-  COMMENT "Generating ${JAR_OUTPUT} from ${CMAKE_CURRENT_SOURCE_DIR}"
-  VERBATIM
-  )
+  add_custom_command(OUTPUT ${JAR_OUTPUT}
+    COMMAND ${Java_JAVA_EXECUTABLE} -jar ${CMAKE_BINARY_DIR}/bin/opsc.jar -P ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/Generated/Java/PizzaProject.jar ${JAR_OUTPUT}
+    DEPENDS ${PIZZA_SRCS}
+    COMMENT "Generating ${JAR_OUTPUT} from ${CMAKE_CURRENT_SOURCE_DIR}"
+    VERBATIM
+    )
 
 add_custom_target(PizzaProject DEPENDS ${JAR_OUTPUT})
