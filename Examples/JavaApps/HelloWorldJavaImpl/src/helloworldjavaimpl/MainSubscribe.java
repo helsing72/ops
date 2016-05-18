@@ -8,12 +8,14 @@ import java.util.Observer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ops.Participant;
+import ops.ConfigurationException;
 
 public class MainSubscribe
 {
 
     public static void main(String[] args)
     {
+        try { 
         Participant participant = Participant.getInstance("HelloDomain");
         participant.addTypeSupport(new HelloWorldTypeFactory());
 
@@ -40,6 +42,10 @@ public class MainSubscribe
             {
                 Logger.getLogger(MainSubscribe.class.getName()).log(Level.SEVERE, null, ex);
             }
+        }
+        } catch (ConfigurationException e)
+        {
+            System.out.println("Exception: " + e.getMessage());
         }
 
     }

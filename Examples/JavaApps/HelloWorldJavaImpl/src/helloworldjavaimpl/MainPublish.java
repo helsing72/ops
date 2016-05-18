@@ -5,6 +5,7 @@ import hello.HelloDataPublisher;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ops.Participant;
+import ops.ConfigurationException;
 
 public class MainPublish
 {
@@ -29,6 +30,10 @@ public class MainPublish
         {
             Logger.getLogger(MainPublish.class.getName()).log(Level.SEVERE, null, ex);
         } 
+        catch (ConfigurationException e)
+        {
+            System.out.println("Exception: " + e.getMessage());
+        }
 
     }
 }
