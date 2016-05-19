@@ -5,7 +5,7 @@ add_subdirectory(OPSIdls)
 # java example applications
 add_subdirectory(JavaApps)
 
-add_subdirectory(PizzaTest/src)
+##add_subdirectory(PizzaTest/src)
 
 # C++ applications
 
