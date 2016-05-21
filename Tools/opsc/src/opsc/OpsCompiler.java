@@ -355,6 +355,36 @@ public class OpsCompiler
         return true;
     }
 
+    protected boolean buildDebugProject() {
+
+        opsc.DebugProjectCompiler compiler = new opsc.DebugProjectCompiler(_strProjectName);
+
+        Property propTemplatePath = _props.getProperty("templatePath");
+        if(propTemplatePath != null)
+            compiler.setTemplateDir(propTemplatePath.value);
+
+        Property propOutPath = _props.getProperty("outputPath");
+
+        compiler.createDebugProjectFile(propOutPath.value, _strProjectName, _props);
+
+        return true;
+    }
+
+    protected boolean buildVSExample() {
+
+        opsc.VisualStudio2008CppExampleCompiler compiler = new opsc.VisualStudio2008CppExampleCompiler(_strProjectName);
+
+        Property propTemplatePath = _props.getProperty("templatePath");
+        if(propTemplatePath != null)
+            compiler.setTemplateDir(propTemplatePath.value);
+
+        Property propOutPath = _props.getProperty("outputPath");
+
+        compiler.compileVSCppExample(propOutPath.value, _strProjectName, _props);
+
+        return true;
+    }
+
     protected void dump()
     {
       System.out.println("");
@@ -458,5 +488,18 @@ public class OpsCompiler
                 opsc.buildCs();
             }
         }
+
+        // generate debug project
+        if(opsc._props.buildDebugProject) {
+            System.out.println("");
+            opsc.buildDebugProject();
+        }
+
+        // generate VS Example
+        if(Boolean.parseBoolean(opsc._props.getPropertyValue("vsExampleEnabled", "false"))) {
+            System.out.println("");
+            opsc.buildVSExample();
+        }
+
     }
 };

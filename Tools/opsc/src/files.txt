@@ -7,3 +7,5 @@ src/opsc/IDLParser.java
 src/opsc/ProjectProperties.java
 src/opsc/Property.java
 src/opsc/JarDependency.java
+src/opsc/DebugProjectCompiler.java
+src/opsc/VisualStudio2008CppExampleCompiler.java

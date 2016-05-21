@@ -10,6 +10,8 @@ set(OPSC_SRC
   opsc/ProjectProperties.java
   opsc/Property.java
   opsc/JarDependency.java
+  opsc/DebugProjectCompiler.java
+  opsc/VisualStudio2008CppExampleCompiler.java
 )
 
 # generate a MANIFEST file
