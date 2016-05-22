@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #endif
 
-//Create a class to act as a listener for OPS data 
+//Create a class to act as a listener for OPS data
 class Main : ops::DataListener
 {
 public:
@@ -68,7 +68,7 @@ public:
 };
 
 //Application entry point
-int main(int argc, char* args)
+int main(int argc, char* args[])
 {
 	//Create an object that will listen to OPS events
 	Main m;
@@ -85,4 +85,3 @@ int main(int argc, char* args)
 
 	return 0;
 }
-

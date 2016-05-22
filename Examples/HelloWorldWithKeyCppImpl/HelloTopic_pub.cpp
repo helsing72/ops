@@ -8,8 +8,12 @@
 //Include iostream to get std::cout
 #include <iostream>
 //Include windows to get Sleep()
+#ifdef _WIN32
 #include <windows.h>
-
+#else
+#include <unistd.h>
+#include <stdlib.h>
+#endif
 
 int main(int argc, const char* args[])
 {
@@ -20,7 +24,11 @@ int main(int argc, const char* args[])
 	if(!participant)
 	{
 		std::cout << "Create participant failed. do you have ops_config.xml on your rundirectory?" << std::endl;
+#ifdef _WIN32
 		Sleep(10000); exit(1);
+#else
+                usleep(10000000); exit(1);
+#endif
 	}
 
 	//Add type support for our types, to make this participant understand what we are talking
@@ -46,8 +54,11 @@ int main(int argc, const char* args[])
 	{
 		pub.write(&data);
 		std::cout << "Writing data"  <<  std::endl;
+#ifdef _WIN32
 		Sleep(mainSleep);
-		
+#else
+                usleep(mainSleep*1000);
+#endif		
 	}
 
 	return 0;

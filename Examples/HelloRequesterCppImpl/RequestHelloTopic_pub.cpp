@@ -6,7 +6,12 @@
 #include "RequestReply.h"
 #include "HelloRequestReply/HelloRequestReplyTypeFactory.h"
 #include <iostream>
+#ifdef _WIN32
 #include <windows.h>
+#else
+#include <unistd.h>
+#include <stdlib.h>
+#endif
 
 
 int main(int argc, const char* args[])
@@ -18,7 +23,11 @@ ops::Participant* participant = Participant::getInstance("HelloDomain");
 if(!participant)
 {
 	std::cout << "Create participant failed. do you have ops_config.xml on your rundirectory?" << std::endl;
+#ifdef _WIN32
 	Sleep(10000); exit(1);
+#else
+  exit(1);
+#endif
 }
 
 //Add type support for our types, to make this participant understand what we are talking
@@ -48,9 +57,12 @@ while(true)
 	{
 		std::cout << "No reply." << std::endl;
 	}
+#ifdef _WIN32
 	Sleep(1000);
+#else
+	usleep(1000000);
+#endif
 }
 
 	return 0;
 }
-

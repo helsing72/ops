@@ -7,7 +7,7 @@
     <ops_config type = "DefaultOPSConfigImpl">
         <domains>
 
-            <element type = "MulticastDomain">
+            <element type = "Domain">
                 <domainID>HelloDomain</domainID>
                 <domainAddress>234.5.6.8</domainAddress>
                 <topics>

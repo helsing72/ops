@@ -2,9 +2,16 @@
 //Auto generated code example for subscribing to RequestHelloTopic on domain HelloDomain generated from project HelloRequestReply
 #include <ops.h>
 #include "hello/RequestHelloDataSubscriber.h"
+#include "hello/HelloDataPublisher.h"
 #include "HelloRequestReply/HelloRequestReplyTypeFactory.h"
 #include <iostream>
 #include <vector>
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#include <stdlib.h>
+#endif
 
 //Create a class to act as a listener for OPS data and deadlines
 class Main : ops::DataListener, ops::DeadlineMissedListener
@@ -12,6 +19,7 @@ class Main : ops::DataListener, ops::DeadlineMissedListener
 public:
 	//Use a member subscriber so we can use it from onNewData, see below.
 	hello::RequestHelloDataSubscriber* sub;
+	hello::HelloDataPublisher* pub;
 
 public:
 
@@ -22,7 +30,11 @@ public:
 		if(!participant)
 		{
 			std::cout << "Create participant failed. do you have ops_config.xml in your rundirectory?" << std::endl;
+#ifdef _WIN32
 			Sleep(10000); exit(1);
+#else
+      exit(1);
+#endif
 		}
 
 		//Add type support for our types, to make this participant understand what we are talking
@@ -43,9 +55,12 @@ public:
 		//Add this class as a listener for deadline missed events
 		sub->deadlineMissedEvent.addDeadlineMissedListener(this);
 
+		// Setup publisher for sending reply on
+		ops::Topic replyTopic = participant->createTopic("HelloTopic");
+		pub = new hello::HelloDataPublisher(replyTopic);
+
 		//Start the subscription
 		sub->start();
-
 	}
 	///Override from ops::DataListener, called whenever new data arrives.
 	void onNewData(ops::DataNotifier* subscriber)
@@ -53,8 +68,14 @@ public:
 		hello::RequestHelloData data;
 		if(sub == subscriber)
 		{
-			sub->getData(&data);
-			std::cout << "Data received. " << std::endl;
+			sub->getData(data);
+			std::cout << "Data received. RequestId: " << data.requestId << std::endl;
+
+			hello::HelloData reply;
+			reply.requestId = data.requestId;
+			reply.helloString = "Hello there, here is my reply";
+			reply.setKey(data.getKey());
+			pub->write(reply);
 		}
 	}
 	///Override from ops::DeadlineMissedListener, called if no new data has arrived within deadlineQoS.
@@ -70,7 +91,7 @@ public:
 };
 
 //Application entry point
-int main(int argc, char* args)
+int main(int argc, char* args[])
 {
 	ops::Participant* participant = ops::Participant::getInstance("TestAllDomain");
 
@@ -81,9 +102,12 @@ int main(int argc, char* args)
 	//Just keep program alive, action will take place in Main::onNewData()
 	while(true)
 	{
+#ifdef _WIN32
 		Sleep(10000);
+#else
+		usleep(10000000);
+#endif
 	}
 
 	return 0;
 }
-

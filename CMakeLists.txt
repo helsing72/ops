@@ -7,9 +7,9 @@ project(OPS VERSION 4.1.0)
 ################################################################################
 #
 #if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-if (WIN32)
-  set (CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/installed" CACHE PATH "default install path" FORCE )
-endif()
+#if (WIN32)
+#  set (CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/installed" CACHE PATH "default install path" FORCE )
+#endif()
 
 ################################################################################
 # Find external dependencies

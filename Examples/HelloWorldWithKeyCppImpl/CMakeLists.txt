@@ -1,6 +1,6 @@
 
-set(PUB_NAME HelloWorldPub)
-set(SUB_NAME HelloWorldSub)
+set(PUB_NAME HelloWorldWithKeyPub)
+set(SUB_NAME HelloWorldWithKeySub)
 
 include_directories(${CMAKE_SOURCE_DIR}/Examples/OPSIdls/HelloWorld/Generated/Cpp)
 

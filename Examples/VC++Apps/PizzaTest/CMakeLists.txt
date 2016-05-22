@@ -9,10 +9,10 @@ set(APP_SRCS
   SdsSystemTime.h
   targetver.h
 )
- 
+
 add_executable(${APP_NAME} ${APP_SRCS})
 
-# generate HelloWorld ops idl project if necessary
+# generate PizzaProject ops idl project if necessary
 add_dependencies(${APP_NAME} PizzaProject)
 
 set_target_properties(${APP_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
@@ -30,4 +30,6 @@ if(MINGW)
   target_link_libraries(${APP_NAME} ws2_32 mswsock)
 endif()
 
-install(TARGETS ${APP_NAME} DESTINATION bin)
+install(TARGETS ${APP_NAME} DESTINATION examples/pizzatest)
+
+file(INSTALL Debug/ops_config.xml DESTINATION ${CMAKE_INSTALL_PREFIX}/examples/pizzatest)

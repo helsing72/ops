@@ -4,8 +4,14 @@
 #include "HelloWorld/HelloWorldTypeFactory.h"
 #include <iostream>
 #include <vector>
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#include <stdlib.h>
+#endif
 
-//Create a class to act as a listener for OPS data 
+//Create a class to act as a listener for OPS data
 class Main : ops::DataListener
 {
 public:
@@ -22,7 +28,11 @@ public:
 		if(!participant)
 		{
 			std::cout << "Create participant failed. do you have ops_config.xml in your rundirectory?" << std::endl;
+#ifdef _WIN32
 			Sleep(10000); exit(1);
+#else
+                        exit(1);
+#endif
 		}
 
 		//Add type support for our types, to make this participant understand what we are talking
@@ -63,7 +73,7 @@ public:
 };
 
 //Application entry point
-int main(int argc, char* args)
+int main(int argc, char* args[])
 {
 	//Create an object that will listen to OPS events
 	Main m;
@@ -71,9 +81,12 @@ int main(int argc, char* args)
 	//Just keep program alive, action will take place in Main::onNewData()
 	while(true)
 	{
+#ifdef _WIN32
 		Sleep(10000);
+#else
+		usleep(10000000);
+#endif
 	}
 
 	return 0;
 }
-
