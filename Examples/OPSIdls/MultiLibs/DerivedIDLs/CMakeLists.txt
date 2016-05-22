@@ -19,3 +19,4 @@ add_custom_command(OUTPUT ${JAR_OUTPUT}
 add_custom_target(DerivedIDLs ALL DEPENDS ${JAR_OUTPUT})
 
 add_dependencies(DerivedIDLs BaseIDLs)
+add_dependencies(DerivedIDLs opsc)

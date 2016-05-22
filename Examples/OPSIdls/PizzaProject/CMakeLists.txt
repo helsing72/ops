@@ -23,3 +23,4 @@ add_custom_command(OUTPUT ${JAR_OUTPUT}
   )
 
 add_custom_target(PizzaProject DEPENDS ${JAR_OUTPUT})
+add_dependencies(PizzaProject opsc)

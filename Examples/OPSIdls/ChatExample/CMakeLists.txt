@@ -21,3 +21,4 @@ add_custom_command(OUTPUT ${JAR_OUTPUT}
   )
 
 add_custom_target(ChatExample ALL DEPENDS ${JAR_OUTPUT})
+add_dependencies(ChatExample opsc)

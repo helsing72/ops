@@ -18,3 +18,4 @@ add_custom_command(OUTPUT ${JAR_OUTPUT}
   )
 
 add_custom_target(HelloRequestReply DEPENDS ${JAR_OUTPUT})
+add_dependencies(HelloRequestReply opsc)

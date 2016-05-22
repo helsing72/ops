@@ -17,3 +17,4 @@ add_custom_command(OUTPUT ${JAR_OUTPUT}
   )
 
 add_custom_target(HelloWorld DEPENDS ${JAR_OUTPUT})
+add_dependencies(HelloWorld opsc)
