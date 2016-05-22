@@ -53,13 +53,12 @@ namespace ops
 			ss << key << reqInt;
 			req->requestId = ss.str(); 
 			
-			__int64 requestStartTime = TimeHelper::currentTimeMillis();
+			__int64 requestLimit = TimeHelper::currentTimeMillis() + (__int64)timeout;
 			sub->getDataReference();
 			pub->writeOPSObject(req);
-			while(TimeHelper::currentTimeMillis() - requestStartTime < timeout)
+			while(TimeHelper::currentTimeMillis() < requestLimit)
 			{
-				
-				if(sub->waitForNewData(timeout - (TimeHelper::currentTimeMillis() - requestStartTime)))
+				if(sub->waitForNewData((int)(requestLimit - TimeHelper::currentTimeMillis())))
 				{
 					if(((RepType*)sub->getMessage()->getData())->requestId == req->requestId)
 					{

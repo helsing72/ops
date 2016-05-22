@@ -40,6 +40,15 @@ public:
 		archiver->inout(std::string("message"), message);
 	}
 
+	virtual void fillClone(OPSObject* obj) const
+	{
+        Reply* narrRet = (Reply*)obj;
+        OPSObject::fillClone(narrRet);
+		narrRet->requestId =requestId;
+		narrRet->requestAccepted = requestAccepted;
+		narrRet->message = message;
+	}
+        
 };
 }
 #endif
