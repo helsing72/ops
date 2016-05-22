@@ -132,7 +132,7 @@ namespace ops
 		void removeListener(Listener<Error*>* listener);
 
 		//TODO: Review
-		~Participant();
+		virtual ~Participant();
 
 	private:
 
