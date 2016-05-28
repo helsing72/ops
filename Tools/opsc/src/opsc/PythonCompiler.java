@@ -85,7 +85,7 @@ public class PythonCompiler extends opsc.CompilerSupport
 
         private boolean inherited = false;
         private boolean saved = false;
-        
+
         /*
         public String toString()
         {
@@ -153,7 +153,7 @@ public class PythonCompiler extends opsc.CompilerSupport
                     //System.out.print("  Trying to connect " + dependencyName.get(i) + " to " + other.className + ": ");
                     if (dependencyName.get(i).equals(other.className))
                     {
-                        dependencyHelper.set(i,other);    
+                        dependencyHelper.set(i,other);
                         //System.out.println("success");
                         return true;
                     }
@@ -242,7 +242,7 @@ public class PythonCompiler extends opsc.CompilerSupport
 
                 addImport(packageStr,classStr);
                 */
-            }   
+            }
             else
             {
                 addImport("ops.opsTypes","OPS_Object");
@@ -250,7 +250,7 @@ public class PythonCompiler extends opsc.CompilerSupport
         }
         public void addImport(String packageStr,String classStr)
         {
-            imports.add("from " + packageStr + " import " + classStr + endl());   
+            imports.add("from " + packageStr + " import " + classStr + endl());
         }
         public void getImports(HashSet<String> imports)
         {
@@ -473,13 +473,13 @@ public class PythonCompiler extends opsc.CompilerSupport
 
         java.io.InputStream stream = findTemplateFile("pythonpackagetemplate.tpl");
         setTemplateTextFromResource(stream);
-        
+
 
         for(String key: packages.keySet())
         {
             setOutputFileName(_outputDir + File.separator + key.replace(".","_") + ".py");
             String templateText = getTemplateText();
-            
+
             templateText = templateText.replace(CLASSES_REGEX, packages.get(key).classes);
             templateText = templateText.replace(IMPORTS_REGEX, packages.get(key).createImport());
 
@@ -558,7 +558,7 @@ public class PythonCompiler extends opsc.CompilerSupport
 
         Collections.sort(importString);
         Collections.sort(createBodyText);
-        
+
         templateText = templateText.replace(IMPORTS_REGEX, String.join("", importString));
         templateText = templateText.replace(CLASS_NAME_REGEX, className);
         templateText = templateText.replace(CREATE_BODY_REGEX, String.join("", createBodyText));
@@ -677,7 +677,7 @@ public class PythonCompiler extends opsc.CompilerSupport
             }
             else
             {
-                seralizerString += getArchiverCall(field) + "(\"" + field.getName() + "\", self." + field.getName() + ")";    
+                seralizerString += getArchiverCall(field) + "(\"" + field.getName() + "\", self." + field.getName() + ")";
             }
             ret += tab(2) + seralizerString + endl();
         }
@@ -698,7 +698,7 @@ public class PythonCompiler extends opsc.CompilerSupport
 
 
                 if (field.isIdlType())
-                {                    
+                {
                     int splitIndex = typeName.lastIndexOf(".");
                     typeName   = typeName.substring(splitIndex+1);
                 }
@@ -720,10 +720,10 @@ public class PythonCompiler extends opsc.CompilerSupport
                 }
         }
         return ret;
-    }   
+    }
     protected String getValidationString(String type)
     {
-        if (type.equals("byte") || type.equals("int"))
+        if (type.equals("byte") || type.equals("short") || type.equals("int"))
             return "int";
         if (type.equals("long"))
             return "(int,long)";
@@ -733,7 +733,7 @@ public class PythonCompiler extends opsc.CompilerSupport
             return "str";
         if (type.equals("boolean"))
             return "bool";
-        
+
         return "##### ERROR getValidationString("+type+")";
     }
 
@@ -741,6 +741,7 @@ public class PythonCompiler extends opsc.CompilerSupport
     {
         if (s.equals("string"))       return "\"\"";
         else if (s.equals("boolean")) return "False";
+        else if (s.equals("short"))   return "0";
         else if (s.equals("int"))     return "0";
         else if (s.equals("long"))    return "0";
         else if (s.equals("double"))  return "0.0";
@@ -758,7 +759,7 @@ public class PythonCompiler extends opsc.CompilerSupport
         }
         else
         {
-            return getArchiverCall(s);   
+            return getArchiverCall(s);
         }
     }
 
@@ -766,6 +767,7 @@ public class PythonCompiler extends opsc.CompilerSupport
     {
         if (s.equals("string"))       return "String";
         else if (s.equals("boolean")) return "Bool";
+        else if (s.equals("short"))   return "Int16";
         else if (s.equals("int"))     return "Int32";
         else if (s.equals("long"))    return "Int64";
         else if (s.equals("double"))  return "Float64";
