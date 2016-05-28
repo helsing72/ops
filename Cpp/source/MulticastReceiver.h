@@ -1,5 +1,5 @@
 /**
-* 
+*
 * Copyright (C) 2006-2009 Anton Gravestam.
 *
 * This file is part of OPS (Open Publish Subscribe).
@@ -40,8 +40,8 @@ namespace ops
 	class MulticastReceiver : public Receiver
 	{
 	public:
-		MulticastReceiver(std::string mcAddress, int bindPort, IOService* ioServ, std::string localInterface = "0.0.0.0", __int64 inSocketBufferSizent = 16000000): 
-		  sock(NULL), localEndpoint(NULL), max_length(65535), 
+		MulticastReceiver(std::string mcAddress, int bindPort, IOService* ioServ, std::string localInterface = "0.0.0.0", __int64 inSocketBufferSizent = 16000000):
+		  sock(NULL), localEndpoint(NULL), max_length(65535),
 		  cancelled(false), m_asyncCallActive(false), m_working(false)
 		{
 			ipaddress = mcAddress;
@@ -59,7 +59,7 @@ namespace ops
 //			boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(localInterface));
 
 			localEndpoint = new boost::asio::ip::udp::endpoint(ipAddr, bindPort);
-			
+
 			sock = new boost::asio::ip::udp::socket(*ioService);
 		}
 
@@ -67,7 +67,7 @@ namespace ops
 		void start()
 		{
 			sock->open(localEndpoint->protocol());
-				
+
 			if(inSocketBufferSizent > 0)
 			{
 				boost::asio::socket_base::receive_buffer_size option((int)inSocketBufferSizent);
@@ -81,7 +81,7 @@ namespace ops
 					Participant::reportStaticError(&err);
 				}
 			}
-			
+
 			sock->set_option(boost::asio::ip::udp::socket::reuse_address(true));
 			sock->bind(*localEndpoint);
 
@@ -93,7 +93,7 @@ namespace ops
 #ifndef _WIN32
 			// IP_MULTICAST_ALL (since Linux 2.6.31)
 			// This option can be used to modify the delivery policy of multicast messages to sockets bound
-			// to the wildcard INADDR_ANY address. The argument is a boolean integer (defaults to 1). 
+			// to the wildcard INADDR_ANY address. The argument is a boolean integer (defaults to 1).
 			// If set to 1, the socket will receive messages from all the groups that have been joined
 			// globally on the whole system. Otherwise, it will deliver messages only from the groups that
 			// have been explicitly joined (for example via the IP_ADD_MEMBERSHIP option) on this particular socket.
@@ -130,14 +130,14 @@ namespace ops
 			m_working = true;
 			m_asyncCallActive = true;
 			sock->async_receive_from(
-				boost::asio::buffer(data, max_length), 
+				boost::asio::buffer(data, max_length),
 				sendingEndPoint,
 				boost::bind(&MulticastReceiver::handle_receive_from, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
 		}
 
 		// Used to get the sender IP and port for a received message
 		// Only safe to call in callback, before a new asynchWait() is called.
-		void getSource(std::string& address, int& port) 
+		void getSource(std::string& address, int& port)
 		{
 			address = sendingEndPoint.address().to_string();
 			port = sendingEndPoint.port();
@@ -158,12 +158,12 @@ namespace ops
 					handleReadError(error);
 				}
 			}
-			// We update the "m_working" flag as the last thing in the callback, so we don't access the object any more 
+			// We update the "m_working" flag as the last thing in the callback, so we don't access the object any more
 			// in case the destructor has been called and waiting for us to be finished.
 			// If we haven't started a new async call above, this will clear the flag.
 			m_working = m_asyncCallActive;
 		}
-			
+
 		void handleReadOK(char* bytes_, int size)
 		{
 			notifyNewEvent(BytesSizePair(data, size));
@@ -181,9 +181,9 @@ namespace ops
 			//printf("___________handleReadError__________ %d\n", error.value());
 			ops::BasicError err("MulticastReceiver", "handleReadError", "Error");
 			Participant::reportStaticError(&err);
-			
+
 			//WSAEFAULT (10014) "Illegal buffer address" is fatal, happens e.g. if a too small buffer is given and
-			// it probably wont go away by calling the same again, so just report error and then exit without 
+			// it probably wont go away by calling the same again, so just report error and then exit without
 			// starting a new async_receive().
 #ifdef _WIN32
 			if (error.value() == WSAEFAULT) return;

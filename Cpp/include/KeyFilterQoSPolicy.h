@@ -1,5 +1,5 @@
 /**
-* 
+*
 * Copyright (C) 2006-2009 Anton Gravestam.
 *
 * This file is part of OPS (Open Publish Subscribe).
@@ -72,7 +72,7 @@ namespace ops
     private:
         std::vector<std::string> keyStrings;
     };
-    
+
 }
 
 #endif	/* _KEYFILTERQOSPOLICY_H */
