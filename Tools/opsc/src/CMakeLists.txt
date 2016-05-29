@@ -3,12 +3,14 @@ set(OPSC_SRC
   # opsc
   opsc/OpsCompiler.java
   opsc/Compiler.java
+  opsc/CompilerSupport.java
   opsc/CSharpCompiler.java
   opsc/CppCompiler.java
   opsc/JavaCompiler.java
   opsc/IDLParser.java
   opsc/ProjectProperties.java
   opsc/Property.java
+  opsc/PythonCompiler.java
   opsc/JarDependency.java
   opsc/DebugProjectCompiler.java
   opsc/VisualStudio2008CppExampleCompiler.java

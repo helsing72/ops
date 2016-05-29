@@ -40,6 +40,10 @@ set(OPS_TEMPLATE_FILES
   ${TMPL_PATH}/vs_sln.tpl
   ${TMPL_PATH}/vs_sub_cpp.tpl
   ${TMPL_PATH}/vs_sub_proj.tpl
+  ${TMPL_PATH}/pythonclasstemplate.tpl
+  ${TMPL_PATH}/pythonenumtemplate.tpl
+  ${TMPL_PATH}/pythonpackagetemplate.tpl
+  ${TMPL_PATH}/pythontypefactorytemplate.tpl
 )
 
 source_group("Template Files" FILES ${OPS_TEMPLATE_FILES})
