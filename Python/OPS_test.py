@@ -32,16 +32,18 @@ def onVessuvioData(sub,mess):
 		tempStr +=") Vessuvio:: Cheese: " + data.cheese
 		tempStr +=",  Tomato sauce: " + data.tomatoSauce
 		tempStr +=", Ham length: " + str(len(data.ham))
+		print tempStr
 
 def onExtraAllt(sub,mess):
 	if not beQuite:
 		addr,port = map(str,mess.getSource())
 		data=mess.data
-		tempStr = "[Topic: " + sub.getTopic().getName() 
+		tempStr = "[Topic: " + sub.getTopic().getName()
 		tempStr +="] (From " + addr + ":" + port
-		tempStr +=") Pizza:: Cheese: " + data.cheese 
-		tempStr +=",  Tomato sauce: " + data.tomatoSauce 
+		tempStr +=") Pizza:: Cheese: " + data.cheese
+		tempStr +=",  Tomato sauce: " + data.tomatoSauce
 		tempStr +=", Num strings: " + str(len(data.strings))
+		print tempStr
 
 class IHelper(object):
 	def __init__(self):
@@ -136,7 +138,7 @@ class CHelper(IHelper):
 				self.sub.addCallback(self.callback)
 
 			self.sub.start()
-			
+
 	def DeleteSubscriber(self,doLog = True):
 		if self.sub:
 			print "Deleting subscriber for topic " + self.sub.getTopic().getName()
@@ -152,7 +154,7 @@ class CHelper(IHelper):
 			self.sub.start();
 		else:
 			print "Subscriber must be created first!!"
-	
+
 	def StopSubscriber(self):
 		if sub:
 			print "Stoping subscriber for topic " + self.sub.getTopic().getName()
@@ -186,7 +188,7 @@ def WriteToAllSelected():
 	for info in ItemInfoList:
 		if not info.selected:
 			continue
-		
+
 		if info.TypeName == pizza.PizzaData.TypeName:
 			info.helper.data.cheese = "Pizza from Python: " + str(WriteToAllSelected.Counter)
 
@@ -298,7 +300,7 @@ menu()
 
 while not doExit:
 	commands = re.split(" |\t", raw_input(" (? = menu) > ").upper())
-	
+
 	while len(commands)>0:
 
 		if commands[0].isdigit():
@@ -384,6 +386,3 @@ while not doExit:
 		else:
 			print "unknown command: " + commands[0]
 			del commands[0]
-
-
-

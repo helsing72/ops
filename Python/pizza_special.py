@@ -1,7 +1,6 @@
 #Auto generated OPS-code. DO NOT MODIFY!
 from ops.opsTypes import OPS_Object
-from pizza import CapricosaData
-from pizza import PizzaData
+from pizza import PizzaData,CapricosaData
 
 class Cheese(OPS_Object):
 	TypeName = "pizza.special.Cheese"
@@ -20,7 +19,7 @@ class Cheese(OPS_Object):
 		super(Cheese,self).validate()
 		if not isinstance(self.name,str):
 			raise ValueError()
-		if not isinstance(self.age,float):
+		if not isinstance(self.age,(float,int,long)):
 			raise ValueError()
 
 class LHCData(CapricosaData):
@@ -45,8 +44,9 @@ class LHCData(CapricosaData):
 		if not isinstance(self.beef,str):
 			raise ValueError()
 		for x in self.p:
-			if not isinstance(x,PizzaData) or not x.validate():
+			if not isinstance(x,PizzaData):
 				raise ValueError()
+			x.validate()
 
 class ExtraAllt(LHCData):
 	TypeName = "pizza.special.ExtraAllt"
@@ -63,8 +63,10 @@ class ExtraAllt(LHCData):
 		self.timeBakedSeconds = 0.0
 		self.description = ""
 		self.cheese_ = Cheese()
+		self.sh = 0
 		self.bools = []
 		self.bytes = []
+		self.shs = []
 		self.ints = []
 		self.longs = []
 		self.floats = []
@@ -82,8 +84,10 @@ class ExtraAllt(LHCData):
 		self.timeBakedSeconds = archiver.Float64("timeBakedSeconds", self.timeBakedSeconds)
 		self.description = archiver.String("description", self.description)
 		self.cheese_ = archiver.Ops("cheese_", self.cheese_)
+		self.sh = archiver.Int16("sh", self.sh)
 		archiver.BoolVector("bools", self.bools)
 		archiver.Int8Vector("bytes", self.bytes)
+		archiver.Int16Vector("shs", self.shs)
 		archiver.Int32Vector("ints", self.ints)
 		archiver.Int64Vector("longs", self.longs)
 		archiver.Float32Vector("floats", self.floats)
@@ -101,18 +105,24 @@ class ExtraAllt(LHCData):
 			raise ValueError()
 		if not isinstance(self.timestamp,(int,long)):
 			raise ValueError()
-		if not isinstance(self.timeBakedHours,float):
+		if not isinstance(self.timeBakedHours,(float,int,long)):
 			raise ValueError()
-		if not isinstance(self.timeBakedSeconds,float):
+		if not isinstance(self.timeBakedSeconds,(float,int,long)):
 			raise ValueError()
 		if not isinstance(self.description,str):
 			raise ValueError()
-		if not isinstance(self.cheese_,Cheese) or not self.cheese_.validate():
+		if not isinstance(self.cheese_,Cheese):
+			raise ValueError()
+		self.cheese_.validate()
+		if not isinstance(self.sh,int):
 			raise ValueError()
 		for x in self.bools:
 			if not isinstance(x,bool):
 				raise ValueError()
 		for x in self.bytes:
+			if not isinstance(x,int):
+				raise ValueError()
+		for x in self.shs:
 			if not isinstance(x,int):
 				raise ValueError()
 		for x in self.ints:
@@ -122,15 +132,15 @@ class ExtraAllt(LHCData):
 			if not isinstance(x,(int,long)):
 				raise ValueError()
 		for x in self.floats:
-			if not isinstance(x,float):
+			if not isinstance(x,(float,int,long)):
 				raise ValueError()
 		for x in self.doubles:
-			if not isinstance(x,float):
+			if not isinstance(x,(float,int,long)):
 				raise ValueError()
 		for x in self.strings:
 			if not isinstance(x,str):
 				raise ValueError()
 		for x in self.cheeses:
-			if not isinstance(x,Cheese) or not x.validate():
+			if not isinstance(x,Cheese):
 				raise ValueError()
-
+			x.validate()
