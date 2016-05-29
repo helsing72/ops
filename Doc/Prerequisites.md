@@ -49,6 +49,9 @@ JavaCC can be downloaded from http://java.net/projects/javacc.
 
 OPS uses JavaCC version 6.0.
 
+## Python ##
+Experimental support exist for Python 2.7.
+
 ## gcovr ##
 TBD
 
