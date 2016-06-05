@@ -48,6 +48,11 @@ public class Main {
 
         data.ss.add("TestString in Array.");
 
+        for (int i = 0; i < 50; i++)
+        {
+            data.fs.add((float) i);
+        }
+
         while (true)
         {
             data.i ++;
