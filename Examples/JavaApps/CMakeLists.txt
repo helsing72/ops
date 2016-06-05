@@ -5,6 +5,8 @@ add_subdirectory(HelloWorldJavaImpl/src)
 
 add_subdirectory(HelloWorldWithKeyJavaImpl/src)
 
+# Add two variants that uses the PizzaProject IDLs
+add_subdirectory(OpsTestApp/src)
 add_subdirectory(PizzaTest/src)
 
 add_subdirectory(SimpleChatSenderJavaImpl/src)
