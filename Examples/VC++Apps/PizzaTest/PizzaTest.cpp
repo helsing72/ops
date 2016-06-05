@@ -296,7 +296,7 @@ public:
 				}
 			}
 			expectedPubId = newMess->getPublicationID() + 1;
-			client->onData(sub, (DataType*)newMess->getData());
+			client->onData(sub, dynamic_cast<DataType*>(newMess->getData()));
 		}
 	}
 
@@ -343,7 +343,13 @@ class MyListener :
 {
 public:
 	void onData(ops::Subscriber* sub, pizza::PizzaData* data)
-    {
+  {
+    // test for sending derived objects on same topic
+    if (dynamic_cast<pizza::VessuvioData*>(data) != NULL) {
+      onData(sub, dynamic_cast<pizza::VessuvioData*>(data));
+      return;
+    }
+
 		std::string addr = "";
 		int port = 0;
 		sub->getMessage()->getSource(addr, port);
@@ -352,13 +358,19 @@ public:
 			std::cout <<
 				"[Topic: " << sub->getTopic().getName() <<
 				"] (From " << addr << ":" << port <<
-				") Pizza:: Cheese: " << data->cheese <<
+				") PizzaData:: Cheese: " << data->cheese <<
 				", Tomato sauce: " << data->tomatoSauce << std::endl;
 		}
 	}
 
 	void onData(ops::Subscriber* sub, pizza::VessuvioData* data)
-    {
+  {
+    // test for sending derived objects on same topic
+    if (dynamic_cast<pizza::special::ExtraAllt*>(data) != NULL) {
+      onData(sub, dynamic_cast<pizza::special::ExtraAllt*>(data));
+      return;
+    }
+
 		std::string addr = "";
 		int port = 0;
 		sub->getMessage()->getSource(addr, port);
@@ -367,14 +379,14 @@ public:
 			std::cout <<
 				"[Topic: " << sub->getTopic().getName() <<
 				"] (From " << addr << ":" << port <<
-				") Vessuvio:: Cheese: " << data->cheese <<
+				") VessuvioData:: Cheese: " << data->cheese <<
 				", Tomato sauce: " << data->tomatoSauce <<
 				", Ham length: " << data->ham.size() << std::endl;
 		}
 	}
 
 	void onData(ops::Subscriber* sub, pizza::special::ExtraAllt* data)
-    {
+  {
 		std::string addr = "";
 		int port = 0;
 		sub->getMessage()->getSource(addr, port);
@@ -390,7 +402,7 @@ public:
 			std::cout <<
 				"[Topic: " << sub->getTopic().getName() <<
 				"] (From " << addr << ":" << port <<
-				") Pizza:: Cheese: " << data->cheese <<
+				") ExtraAllt:: Cheese: " << data->cheese <<
 				ss.str() <<
 				", Tomato sauce: " << data->tomatoSauce <<
 				", Num strings: " << data->strings.size() << std::endl;
