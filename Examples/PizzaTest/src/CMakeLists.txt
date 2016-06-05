@@ -1,13 +1,26 @@
 
 set(APP_SRC
-  pizzatest/Main.java
+  pizzatestimpl/Main.java
 )
 
-add_jar(PizzaTest ${APP_SRC}
+# generate a MANIFEST file
+configure_file(MANIFEST.MF.in MANIFEST.MF)
+
+add_jar(PizzaTestImpl ${APP_SRC}
   INCLUDE_JARS ${PROJECT_BINARY_DIR}/bin/PizzaProject.jar OPSJLib ConfigurationLib
-  ENTRY_POINT pizzatest/Main
-  MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/MANIFEST.MF
+  ENTRY_POINT pizzatestimpl/Main
+  MANIFEST ${CMAKE_CURRENT_BINARY_DIR}/MANIFEST.MF
   VERSION ${PROJECT_VERSION}
   OUTPUT_DIR ${CMAKE_BINARY_DIR}/bin
 )
-add_dependencies(PizzaTest PizzaProject)
+
+add_dependencies(PizzaTestImpl PizzaProject)
+
+install(FILES
+  ${CMAKE_BINARY_DIR}/bin/PizzaTestImpl-${PROJECT_VERSION}.jar
+  ${CMAKE_BINARY_DIR}/bin/OPSJLib-${PROJECT_VERSION}.jar
+  ${CMAKE_BINARY_DIR}/bin/ConfigurationLib-${PROJECT_VERSION}.jar
+  ${PROJECT_BINARY_DIR}/bin/PizzaProject.jar
+  ../ops_config.xml
+  DESTINATION examples/pizzatest
+)
