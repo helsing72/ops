@@ -5,8 +5,6 @@ add_subdirectory(OPSIdls)
 # Java example applications
 add_subdirectory(JavaApps)
 
-add_subdirectory(PizzaTest/src)
-
 # C++ example applications
 # All will need the ops headers
 include_directories(${CMAKE_SOURCE_DIR}/Cpp/include)
