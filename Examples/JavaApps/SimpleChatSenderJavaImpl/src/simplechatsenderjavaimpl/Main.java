@@ -11,6 +11,7 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Scanner;
 import ops.Participant;
+import ops.ConfigurationException;
 
 /**
  *
@@ -24,7 +25,7 @@ public class Main
      */
     public static void main(String[] args)
     {
-
+      try {
         // TODO code application logic here
         System.out.println("Please enter your name.");
         String name;
@@ -38,7 +39,6 @@ public class Main
         ChatDataSubscriber subscriber = new ChatDataSubscriber(participant.createTopic("ChatTopic"));
         subscriber.addObserver(new Observer()
         {
-
             public void update(Observable o, Object arg)
             {
                 onNewChatData((ChatData) arg);
@@ -48,14 +48,12 @@ public class Main
         subscriber.setDeadlineQoS(1000);
         subscriber.deadlineEvent.addObserver(new Observer()
         {
-
             public void update(Observable o, Object arg)
             {
                 System.out.println("Deadline Missed");
             }
         });
         subscriber.start();
-
 
         ChatData chatData = new ChatData();
         chatData.sender.name = name;
@@ -64,10 +62,10 @@ public class Main
             chatData.messageData.message = in.nextLine();
             publisher.write(chatData);
         }
-
-
-
-
+      } catch (ConfigurationException e)
+      {
+          System.out.println("Exception: " + e.getMessage());
+      }
     }
 
     private static void onNewChatData(ChatData chatData)

@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import ops.KeyFilterQoSPolicy;
 import ops.Participant;
 import ops.Topic;
+import ops.ConfigurationException;
 
 /**
  * Example showing how to subscribe to data on OPS from Java
@@ -25,7 +26,7 @@ public class Main {
     {
         // TODO code application logic here
         //OPSObjectFactory.getInstance().add(new TestAll.TestAllTypeFactory());
-
+      try {
         Participant participant = Participant.getInstance("TestAllDomain");
         participant.addTypeSupport(new TestAll.TestAllTypeFactory());
 
@@ -41,6 +42,10 @@ public class Main {
         {
             sleep(1000);
         }
+      } catch (ConfigurationException e)
+      {
+          System.out.println("Exception: " + e.getMessage());
+      }
 
     }
     private static void onNewChildData(ChildData childData)
@@ -55,7 +60,7 @@ public class Main {
             Thread.sleep(i);
         }
         catch (InterruptedException ex)
-        {          
+        {
         }
     }
 
