@@ -9,14 +9,14 @@
 
             <!-- TODO: Change domainID and domainAddress to your own ones. -->
             <element type = "MulticastDomain">
-                <domainID>ChatDomain</domainID>
+                <domainID>FooDomain</domainID>
                 <domainAddress>234.5.6.8</domainAddress>
                 <topics>
                     <!-- TODO: Remove FooTopic and create your own ones. -->
                     <element type = "Topic">
-                        <name>ChatTopic</name>
-                        <port>19000</port>
-                        <dataType>chat.ChatData</dataType>
+                        <name>FooTopic</name>
+                        <port>6686</port>
+                        <dataType>foopackage.FooData</dataType>
                     </element>
                     <!-- TODO: Add more topics here... -->
                 </topics>

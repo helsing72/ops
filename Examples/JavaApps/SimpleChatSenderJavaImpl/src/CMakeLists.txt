@@ -21,6 +21,6 @@ install(FILES
   ${CMAKE_BINARY_DIR}/bin/OPSJLib-${PROJECT_VERSION}.jar
   ${CMAKE_BINARY_DIR}/bin/ConfigurationLib-${PROJECT_VERSION}.jar
   ${PROJECT_BINARY_DIR}/bin/ChatExample.jar
-  ../ops_config.xml
+  ${OPSIDL_SOURCE_DIR}/ChatExample/src/ops_config.xml
   DESTINATION examples/chatexample
 )

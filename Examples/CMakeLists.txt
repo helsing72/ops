@@ -2,6 +2,8 @@
 # generate code from Example idl projects
 add_subdirectory(OPSIdls)
 
+set(OPSIDL_SOURCE_DIR ${CMAKE_SOURCE_DIR}/Examples/OPSIdls)
+
 # Java example applications
 add_subdirectory(JavaApps)
 

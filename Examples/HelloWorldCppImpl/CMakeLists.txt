@@ -24,4 +24,4 @@ endif()
 
 install(TARGETS ${PUB_NAME} ${SUB_NAME} DESTINATION examples/helloworld)
 
-file(INSTALL ops_config.xml DESTINATION ${CMAKE_INSTALL_PREFIX}/examples/helloworld)
+file(INSTALL ${OPSIDL_SOURCE_DIR}/HelloWorld/src/ops_config.xml DESTINATION ${CMAKE_INSTALL_PREFIX}/examples/helloworld)
