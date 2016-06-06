@@ -1,9 +1,6 @@
 // Example1.cpp : Defines the entry point for the console application.
 //
 
-//#include "stdafx.h"
-#include <windows.h>	// for Sleep()
-
 #include <ops.h>
 
 // The following include files are created by the OPS IDL Builder
@@ -73,7 +70,7 @@ void PublisherExample()
 		std::cout << "Writing ChildTopic " << data.l <<  std::endl;
 		pub.write(data);
 
-		Sleep(1000);
+		ops::TimeHelper::sleep(1000);
 	}
 
 }
@@ -130,7 +127,7 @@ void PollingSubscriberExample()
 			sub.getData(data);
 			std::cout << "New data found: Received ChildTopic with " << data.l << std::endl;
 		}
-		Sleep(10);
+		ops::TimeHelper::sleep(10);
 #endif
 	}
 
@@ -237,7 +234,7 @@ void CallbackSubscriberExample()
 	SubscriptionHandler handler;
 
 	while(true) {
-		Sleep(1000);
+		ops::TimeHelper::sleep(1000);
 	}
 }
 
