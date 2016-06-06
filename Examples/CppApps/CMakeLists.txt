@@ -1,0 +1,9 @@
+
+add_subdirectory(Example1)
+
+add_subdirectory(HelloRequesterCppImpl)
+
+add_subdirectory(HelloWorldCppImpl)
+add_subdirectory(HelloWorldWithKeyCppImpl)
+
+add_subdirectory(PizzaTest)

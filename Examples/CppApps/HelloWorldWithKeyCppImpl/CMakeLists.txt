@@ -2,7 +2,7 @@
 set(PUB_NAME HelloWorldWithKeyPub)
 set(SUB_NAME HelloWorldWithKeySub)
 
-include_directories(${CMAKE_SOURCE_DIR}/Examples/OPSIdls/HelloWorld/Generated/Cpp)
+include_directories(${OPSIDL_SOURCE_DIR}/HelloWorld/Generated/Cpp)
 
 #
 add_executable(${PUB_NAME} HelloTopic_pub.cpp)

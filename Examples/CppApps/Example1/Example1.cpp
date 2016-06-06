@@ -71,7 +71,7 @@ void PublisherExample()
 		data.l++;
 
 		std::cout << "Writing ChildTopic " << data.l <<  std::endl;
-		pub.write(&data);
+		pub.write(data);
 
 		Sleep(1000);
 	}
@@ -119,7 +119,7 @@ void PollingSubscriberExample()
 		if (sub.waitForNewData(100)) {
 			// Need to lock message while using it's data via the reference
 			sub.aquireMessageLock();
-			ChildData* data = (ChildData*)sub.getDataReference();
+			ChildData* data = sub.getTypedDataReference();
 			std::cout << "New data found: Received ChildTopic with " << data->l << std::endl;
 			sub.releaseMessageLock();
 		}
@@ -127,7 +127,7 @@ void PollingSubscriberExample()
 		if (sub.newDataExist()) {
 			ChildData data;
 			// Message lock is handled internaly in subscriber
-			sub.getData(&data);
+			sub.getData(data);
 			std::cout << "New data found: Received ChildTopic with " << data.l << std::endl;
 		}
 		Sleep(10);

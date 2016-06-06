@@ -117,8 +117,9 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
+				AdditionalIncludeDirectories="D:\OPS\OPS4\Examples\OPSIdls\TestAll\Generated\Cpp;D:\OPS\OPS4\Cpp\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -135,7 +136,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="OPSCppLib_vc90_MT.lib"
 				LinkIncremental="1"
+				AdditionalLibraryDirectories="&quot;D:\OPS\OPS4\Cpp\lib-vc90-x86&quot;;&quot;C:\Program Files (x86)\boost\boost_1_38\lib&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"

@@ -1,7 +1,7 @@
 
 set(APP_NAME PizzaTestCpp)
 
-include_directories(${CMAKE_SOURCE_DIR}/Examples/OPSIdls/PizzaProject/Generated/Cpp)
+include_directories(${OPSIDL_SOURCE_DIR}/PizzaProject/Generated/Cpp)
 
 set(APP_SRCS
   PizzaTest.cpp

@@ -2,7 +2,7 @@
 set(PUB_NAME RequestHelloPub)
 set(SUB_NAME RequestHelloSub)
 
-include_directories(${CMAKE_SOURCE_DIR}/Examples/OPSIdls/HelloRequestReply/Generated/Cpp)
+include_directories(${OPSIDL_SOURCE_DIR}/HelloRequestReply/Generated/Cpp)
 
 #
 add_executable(${PUB_NAME} RequestHelloTopic_pub.cpp)
