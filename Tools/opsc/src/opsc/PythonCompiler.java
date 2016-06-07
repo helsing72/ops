@@ -134,23 +134,21 @@ public class PythonCompiler extends opsc.CompilerSupport
             //this.baseClassName=baseClassName;
             dependencyName.set(0,baseClassName);
             inherited = true;
+
+            System.out.println(this.className +" extends "+ baseClassName);
         }
 
         public boolean connect(PythonHelper other)
         {
-            if (inherited == false) return true;
+            //if (inherited == false) return true;
             //System.out.println("connect : " + this.baseClassName);
             if (this.packageName.equals(other.packageName))
             {
-                //System.out.println("  same package");
                 //System.out.println("  comparing " + this.baseClassName +" to " + other.className);
-
-                //System.out.println("For " + className);
                 for (int i=0;i<dependencyName.size();i++)
                 {
                     if (dependencyHelper.get(i) != null) continue;
-
-                    //System.out.print("  Trying to connect " + dependencyName.get(i) + " to " + other.className + ": ");
+                    System.out.print("For " + className + "  comparing " + dependencyName.get(i) +" to " + other.className + ": ");
                     if (dependencyName.get(i).equals(other.className))
                     {
                         dependencyHelper.set(i,other);
@@ -159,7 +157,7 @@ public class PythonCompiler extends opsc.CompilerSupport
                     }
                     else
                     {
-                        //System.out.println("failed");
+                        System.out.println("failed");
                     }
                 }
 /*
@@ -174,7 +172,8 @@ public class PythonCompiler extends opsc.CompilerSupport
             }
             else
             {
-                //System.out.println("  other package");
+                System.out.println("For " + className + "  comparing " + "XXX" +" to " + other.className);
+
             }
             return false;
         }
@@ -216,16 +215,26 @@ public class PythonCompiler extends opsc.CompilerSupport
                 {
                     PythonHelper h = dependencyHelper.get(i);
                     if (h==null)
-                        continue;
-                    if (packageName.equals(h.packageName)) continue;
+                    {
+                        int splitIndex = dependencyName.get(i).lastIndexOf(".");
+                        String packageStr = dependencyName.get(i).substring(0,splitIndex);
+                        if (packageName.equals(packageStr)) continue;
+                        String classStr   = dependencyName.get(i).substring(splitIndex+1);
+                        packageStr.replace(".","_");
+                        addImport(packageStr,classStr);
+                    }
+                    else
+                    {
+                        if (packageName.equals(h.packageName)) continue;
 
-                    int splitIndex = dependencyName.get(i).lastIndexOf(".");
-                    if (splitIndex <0)
-                        System.out.println("incorrect split of " + dependencyName.get(i) + " for " + className);
-                    String packageStr = dependencyName.get(i).substring(0,splitIndex);
-                    String classStr   = dependencyName.get(i).substring(splitIndex+1);
-                    packageStr.replace(".","_");
-                    addImport(packageStr,classStr);
+                        int splitIndex = dependencyName.get(i).lastIndexOf(".");
+                        if (splitIndex <0)
+                            System.out.println("incorrect split of " + dependencyName.get(i) + " for " + className);
+                        String packageStr = dependencyName.get(i).substring(0,splitIndex);
+                        String classStr   = dependencyName.get(i).substring(splitIndex+1);
+                        packageStr.replace(".","_");
+                        addImport(packageStr,classStr);
+                    }
                 }
 
 /*
@@ -275,8 +284,7 @@ public class PythonCompiler extends opsc.CompilerSupport
         {
             ArrayList<String> temp = new ArrayList<String>(imports);
             Collections.sort(temp);
-            return String.join("", temp);
-        }
+            return String.join("", temp); }
     }
 
 

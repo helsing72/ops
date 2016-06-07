@@ -1,6 +1,7 @@
 #Auto generated OPS-code. DO NOT MODIFY!
 from ops.opsTypes import OPS_Object
-from pizza import PizzaData,CapricosaData
+from pizza import CapricosaData
+from pizza import PizzaData
 
 class Cheese(OPS_Object):
 	TypeName = "pizza.special.Cheese"
@@ -144,3 +145,4 @@ class ExtraAllt(LHCData):
 			if not isinstance(x,Cheese):
 				raise ValueError()
 			x.validate()
+
