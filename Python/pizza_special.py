@@ -20,7 +20,7 @@ class Cheese(OPS_Object):
 		super(Cheese,self).validate()
 		if not isinstance(self.name,str):
 			raise ValueError()
-		if not isinstance(self.age,float):
+		if not isinstance(self.age,(float,int,long)):
 			raise ValueError()
 
 class LHCData(CapricosaData):
@@ -45,8 +45,9 @@ class LHCData(CapricosaData):
 		if not isinstance(self.beef,str):
 			raise ValueError()
 		for x in self.p:
-			if not isinstance(x,PizzaData) or not x.validate():
+			if not isinstance(x,PizzaData):
 				raise ValueError()
+			x.validate()
 
 class ExtraAllt(LHCData):
 	TypeName = "pizza.special.ExtraAllt"
@@ -101,14 +102,15 @@ class ExtraAllt(LHCData):
 			raise ValueError()
 		if not isinstance(self.timestamp,(int,long)):
 			raise ValueError()
-		if not isinstance(self.timeBakedHours,float):
+		if not isinstance(self.timeBakedHours,(float,int,long)):
 			raise ValueError()
-		if not isinstance(self.timeBakedSeconds,float):
+		if not isinstance(self.timeBakedSeconds,(float,int,long)):
 			raise ValueError()
 		if not isinstance(self.description,str):
 			raise ValueError()
-		if not isinstance(self.cheese_,Cheese) or not self.cheese_.validate():
+		if not isinstance(self.cheese_,Cheese):
 			raise ValueError()
+		self.cheese_.validate()
 		for x in self.bools:
 			if not isinstance(x,bool):
 				raise ValueError()
@@ -122,15 +124,16 @@ class ExtraAllt(LHCData):
 			if not isinstance(x,(int,long)):
 				raise ValueError()
 		for x in self.floats:
-			if not isinstance(x,float):
+			if not isinstance(x,(float,int,long)):
 				raise ValueError()
 		for x in self.doubles:
-			if not isinstance(x,float):
+			if not isinstance(x,(float,int,long)):
 				raise ValueError()
 		for x in self.strings:
 			if not isinstance(x,str):
 				raise ValueError()
 		for x in self.cheeses:
-			if not isinstance(x,Cheese) or not x.validate():
+			if not isinstance(x,Cheese):
 				raise ValueError()
+			x.validate()
 
