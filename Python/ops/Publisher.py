@@ -10,6 +10,10 @@ class Publisher(object):
 	def chunkstring(string, length):
 		return [string[0+i:length+i] for i in range(0, len(string), length)]
 
+	@staticmethod
+	def create(domainID,topicname):
+		return Publisher(Participant.Participant.getInstance(domainID).createTopic(topicname))
+
 	def __init__(self,topic):
 		super(Publisher, self).__init__()
 		self.topic = topic
