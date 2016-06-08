@@ -30,6 +30,9 @@ import parsing.IDLClass;
 import parsing.IDLField;
 import parsing.TopicInfo;
 
+
+
+
 public class PythonCompiler extends opsc.CompilerSupport
 {
 //class template
@@ -69,6 +72,17 @@ public class PythonCompiler extends opsc.CompilerSupport
                 }
             }
 */
+
+    private static String StringJoin(String a,ArrayList<String> list)
+    {
+        String str = list.get(0);
+
+        for (int i=1;i<list.size();i++)
+        {
+            str += a + list.get(i);
+        }
+        return str;
+    }
 
     protected class PythonHelper
     {
@@ -152,7 +166,7 @@ public class PythonCompiler extends opsc.CompilerSupport
                     if (dependencyName.get(i).equals(other.className))
                     {
                         dependencyHelper.set(i,other);
-                        //System.out.println("success");
+                        System.out.println("success");
                         return true;
                     }
                     else
@@ -284,7 +298,7 @@ public class PythonCompiler extends opsc.CompilerSupport
         {
             ArrayList<String> temp = new ArrayList<String>(imports);
             Collections.sort(temp);
-            return String.join("", temp); }
+            return StringJoin("", temp); }
     }
 
 
@@ -567,9 +581,9 @@ public class PythonCompiler extends opsc.CompilerSupport
         Collections.sort(importString);
         Collections.sort(createBodyText);
 
-        templateText = templateText.replace(IMPORTS_REGEX, String.join("", importString));
+        templateText = templateText.replace(IMPORTS_REGEX, StringJoin("", importString));
         templateText = templateText.replace(CLASS_NAME_REGEX, className);
-        templateText = templateText.replace(CREATE_BODY_REGEX, String.join("", createBodyText));
+        templateText = templateText.replace(CREATE_BODY_REGEX, StringJoin("", createBodyText));
 
 
 
