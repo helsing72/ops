@@ -112,7 +112,15 @@ namespace ops
 
         virtual Serializable* inout(const std::string& name, Serializable* value, int element)
         {
+			OPSObject* opsO = dynamic_cast<OPSObject*> (value);
+			if (opsO != NULL)
+			{
+				os << tab() << name << " type = " << opsO->getTypeString() << "\n";
+				currentTabDepth++;
+				value->serialize(this);
+				currentTabDepth--;
 
+			}
             return value;
 
         }
@@ -148,6 +156,13 @@ namespace ops
 
 
         }
+
+///LA
+        virtual void inout(const std::string& name, char* buffer, int bufferSize)
+        {
+            ///TODO
+        }
+///LA
 
         virtual void inout(const std::string& name, std::vector<bool>& value)
         {

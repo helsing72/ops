@@ -1,0 +1,110 @@
+import Factory
+
+class Archiver_In(object):
+	def __init__(self,factory=None):
+		super(Archiver_In, self).__init__()
+		if factory is not None:
+			self.factory = factory
+		else:
+			self.factory = Factory.OpsDefaultFactory()
+	def Bool(self,name,value):
+		raise NotImplementedError
+		return "Error"
+	def Int8(self,name,value):
+		raise NotImplementedError
+		return "Error"
+	def Int16(self,name,value):
+		raise NotImplementedError
+		return "Error"
+	def Int32(self,name,value):
+		raise NotImplementedError
+		return "Error"
+	def Int64(self,name,value):
+		raise NotImplementedError
+		return "Error"
+	def Float32(self,name,value):
+		raise NotImplementedError
+		return "Error"
+	def Float64(self,name,value):
+		raise NotImplementedError
+		return "Error"
+	def String(self,name,value):
+		raise NotImplementedError
+		return "Error"
+	def Ops(self,name,value):
+		raise NotImplementedError
+		return "Error"
+
+	def BoolVector(self,name,value):
+		raise NotImplementedError
+	def Int8Vector(self,name,value):
+		raise NotImplementedError
+	def Int16Vector(self,name,value):
+		raise NotImplementedError
+	def Int32Vector(self,name,value):
+		raise NotImplementedError
+	def Int64Vector(self,name,value):
+		raise NotImplementedError
+	def Float32Vector(self,name,value):
+		raise NotImplementedError
+	def Float64Vector(self,name,value):
+		raise NotImplementedError
+	def StringVector(self,name,value):
+		raise NotImplementedError
+	def OpsVector(self,name,value):
+		raise NotImplementedError
+	def Spare(self):
+ 		raise NotImplementedError
+
+
+class Archiver_Out(object):
+	def __init__(self):
+		super(Archiver_Out, self).__init__()
+	def Bool(self,name,value):
+		raise NotImplementedError
+		return "Error"
+	def Int8(self,name,value):
+		raise NotImplementedError
+		return "Error"
+	def Int16(self,name,value):
+		raise NotImplementedError
+		return "Error"
+	def Int32(self,name,value):
+		raise NotImplementedError
+		return "Error"
+	def Int64(self,name,value):
+		raise NotImplementedError
+		return "Error"
+	def Float32(self,name,value):
+		raise NotImplementedError
+		return "Error"
+	def Float64(self,name,value):
+		raise NotImplementedError
+		return "Error"
+	def String(self,name,value):
+		raise NotImplementedError
+		return "Error"
+	def Ops(self,name,value,prototype):
+		raise NotImplementedError
+		return "Error"
+
+	def BoolVector(self,name,value):
+		raise NotImplementedError
+	def Int8Vector(self,name,value):
+		raise NotImplementedError
+	def Int16Vector(self,name,value):
+		raise NotImplementedError
+	def Int32Vector(self,name,value):
+		raise NotImplementedError
+	def Int64Vector(self,name,value):
+		raise NotImplementedError
+	def Float32Vector(self,name,value):
+		raise NotImplementedError
+	def Float64Vector(self,name,value):
+		raise NotImplementedError
+	def StringVector(self,name,value):
+		raise NotImplementedError
+	def OpsVector(self,name,value,prototype):
+		raise NotImplementedError
+	def Spare(self,data):
+		raise NotImplementedError
