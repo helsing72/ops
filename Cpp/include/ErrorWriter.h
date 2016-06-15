@@ -12,10 +12,9 @@ namespace ops
 	class ErrorWriter : public Listener<Error*>
 	{
 	public:
-		ErrorWriter(std::ostream& os) : oStream(os)
-		{
-			
-		}
+		ErrorWriter(std::ostream& os) : oStream(os) {}
+		virtual ~ErrorWriter() {}
+
 		void onNewEvent(Notifier<Error*>* notifier, Error* error)
 		{
 			oStream << "@" << TimeHelper::getTimeToString() << " - Error code: " << error->getErrorCode() << ". Message: " << error->getMessage() << "." << std::endl;
@@ -23,7 +22,5 @@ namespace ops
 	private:
 		std::ostream& oStream;
 	};
-
-
 }
 #endif

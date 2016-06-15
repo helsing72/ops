@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Vector;
-import parsing.AbstractTemplateBasedIDLCompiler;
 import parsing.IDLClass;
 import parsing.IDLField;
 import parsing.TopicInfo;
@@ -27,29 +26,30 @@ import parsing.TopicInfo;
  *
  * @author helm
  */
-public abstract class Compiler extends AbstractTemplateBasedIDLCompiler
+public abstract class Compiler extends CompilerSupport
 {
     /** Where to find templates. Default is in directory /templates in jar file IDLTemplates.jar */
-    private String _templateDir = "templates";
-    protected String _outputDir = ".";
-    protected String _projectName = "";
-    Vector<IDLClass> _idlClasses = new Vector<IDLClass>();
-    protected Vector<String> _generatedFiles;
+//    private String _templateDir = "templates";
+//    protected String _outputDir = ".";
+//    protected String _projectName = "";
+//    Vector<IDLClass> _idlClasses = new Vector<IDLClass>();
+//    protected Vector<String> _generatedFiles;
 
     /** A verbosity flag. Currently supports 0 or not 0 */
-    protected int _verbose = 0;
+//    protected int _verbose = 0;
 
-    public void setVerbose(int value) {
-      _verbose = value;
-    }
+//    public void setVerbose(int value) {
+//      _verbose = value;
+//    }
 
     public Compiler(String projectName) {
+        super(projectName);
         // set projectname
-        _projectName = projectName;
+        //_projectName = projectName;
         // tab is 4 spaces
-        setTabString("    ");
+        //setTabString("    ");
         // endl is platform specific
-        setEndlString(System.getProperty("line.separator"));
+        //setEndlString(System.getProperty("line.separator"));
     }
 
     public abstract void compileDataClass(IDLClass idlClass) throws IOException;
@@ -87,19 +87,20 @@ public abstract class Compiler extends AbstractTemplateBasedIDLCompiler
     protected abstract String getSerialize(IDLClass idlClass);
 
 
-
+/*
     public void setTemplateDir(String templatedir) {
         _templateDir = templatedir;
     }
 
     public void setOutputDir(String dir) {
-        /** @todo Check and remove trailing slash */
+        // @todo Check and remove trailing slash
         _outputDir = dir;
     }
 
     public void setProjectName(String name) {
         _projectName = name;
     }
+*/
 
     /**
      * @Override from IDLCompiler interface
@@ -161,14 +162,14 @@ public abstract class Compiler extends AbstractTemplateBasedIDLCompiler
     public void compileTopicConfig(Vector<TopicInfo> topics, String name, String packageString, String projectDirectory)
     {
     }
-
+/*
     protected void setTemplateTextFromResource(java.io.InputStream stream) throws IOException
     {
         byte[] templateBytes = new byte[stream.available()];
         stream.read(templateBytes);
         setTemplateText(new String(templateBytes));
     }
-
+*/
     /**
      * Simple helper that create file on disc and writes text in it
      */
@@ -183,7 +184,7 @@ public abstract class Compiler extends AbstractTemplateBasedIDLCompiler
         fos.write(outFileText.getBytes());
         fos.close();
     }
-
+/*
     protected java.io.InputStream findTemplateFile(String templateName) throws IOException {
         // search for a file called templateName
         File thefile = new File( templateName );
@@ -234,10 +235,11 @@ public abstract class Compiler extends AbstractTemplateBasedIDLCompiler
 
         throw new IOException("No such template " + templateName);
     }
-
+*/
     /**
      * @override
      * */
+    /*
     protected void saveOutputText(String templateText)
     {
         FileOutputStream fos = null;
@@ -262,5 +264,6 @@ public abstract class Compiler extends AbstractTemplateBasedIDLCompiler
             }
         }
     }
+    */
 
 }

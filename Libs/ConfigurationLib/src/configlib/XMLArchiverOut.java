@@ -16,19 +16,19 @@ public class XMLArchiverOut implements ArchiverInOut
     private static String LINE_CHANGE = "\n";
     private static String  HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?>" + LINE_CHANGE;
     private static String TAB = "    ";
-    private static String TYPE_ADD_DOUBLE = " type = \"double\" "; 
-    private static String TYPE_ADD_FLOAT = " type = \"float\" "; 
-    private static String TYPE_ADD_INT = " type = \"int\" "; 
-    private static String TYPE_ADD_LONG = " type = \"long\" "; 
-    private static String TYPE_ADD_BYTE = " type = \"byte\" "; 
-    private static String TYPE_ADD_SHORT = " type = \"short\" "; 
-    private static String TYPE_ADD_STRING = " type = \"string\" "; 
+    private static String TYPE_ADD_DOUBLE = " type = \"double\" ";
+    private static String TYPE_ADD_FLOAT = " type = \"float\" ";
+    private static String TYPE_ADD_INT = " type = \"int\" ";
+    private static String TYPE_ADD_LONG = " type = \"long\" ";
+    private static String TYPE_ADD_BYTE = " type = \"byte\" ";
+    private static String TYPE_ADD_SHORT = " type = \"short\" ";
+    private static String TYPE_ADD_STRING = " type = \"string\" ";
     private static String TYPE_ADD_CLASS = " type = ";
     private static String TYPE_ADD_BOOLEAN = " type = \"boolean\" ";
-    
-    
+
+
     OutputStream os = null;
-    
+
     private int currentTabDepth = 0;
     private boolean writType = true;
     private boolean writeXMLHeader = true;
@@ -51,7 +51,7 @@ public class XMLArchiverOut implements ArchiverInOut
         {
             os.write(HEADER.getBytes());
         }
-        
+
     }
 
     public XMLArchiverOut(OutputStream os, boolean writeXMLHeader, String rootTag) throws IOException
@@ -74,41 +74,41 @@ public class XMLArchiverOut implements ArchiverInOut
             os.write(HEADER.getBytes());
         }
     }
-    
+
     public void put(String name, byte v) throws IOException
     {
         String typeAdd = writType ? TYPE_ADD_BYTE : "";
-        putXMLLeaf(name, "" + v, typeAdd);        
+        putXMLLeaf(name, "" + v, typeAdd);
     }
     public void put(String name, short v) throws IOException
     {
         String typeAdd = writType ? TYPE_ADD_SHORT : "";
-        putXMLLeaf(name, "" + v, typeAdd); 
+        putXMLLeaf(name, "" + v, typeAdd);
     }
     public void put(String name, int v) throws IOException
     {
         String typeAdd = writType ? TYPE_ADD_INT : "";
-        putXMLLeaf(name, "" + v, typeAdd); 
+        putXMLLeaf(name, "" + v, typeAdd);
     }
     public void put(String name, long v) throws IOException
     {
         String typeAdd = writType ? TYPE_ADD_LONG : "";
-        putXMLLeaf(name, "" + v, typeAdd); 
+        putXMLLeaf(name, "" + v, typeAdd);
     }
     public void put(String name, float v) throws IOException
     {
        String typeAdd = writType ? TYPE_ADD_FLOAT : "";
-        putXMLLeaf(name, "" + v, typeAdd); 
+        putXMLLeaf(name, "" + v, typeAdd);
     }
     public void put(String name, double v) throws IOException
     {
         String typeAdd = writType ? TYPE_ADD_DOUBLE : "";
-        putXMLLeaf(name, "" + v, typeAdd); 
+        putXMLLeaf(name, "" + v, typeAdd);
     }
     public void put(String name, String v) throws IOException
     {
         String typeAdd = writType ? TYPE_ADD_STRING : "";
-        putXMLLeaf(name, "" + v, typeAdd); 
+        putXMLLeaf(name, "" + v, typeAdd);
     }
 
     public boolean getWriteXMLHeader()
@@ -120,8 +120,8 @@ public class XMLArchiverOut implements ArchiverInOut
     {
         this.writeXMLHeader = writeXMLHeader;
     }
-    
-    
+
+
 
     public void setWriteTypes(boolean b)
     {
@@ -130,7 +130,7 @@ public class XMLArchiverOut implements ArchiverInOut
     private void putXMLLeaf(String name, String value, String type) throws IOException
     {
         String nodeString = tab(currentTabDepth) + "<" + name + type + ">" + value + "</" + name + ">" + LINE_CHANGE;
-        os.write(nodeString.getBytes());               
+        os.write(nodeString.getBytes());
     }
     private String tab(int i)
     {
@@ -138,7 +138,7 @@ public class XMLArchiverOut implements ArchiverInOut
         for (int j = 0; j < i; j++)
         {
             ret += TAB;
-            
+
         }
         return ret;
     }
@@ -398,7 +398,7 @@ public class XMLArchiverOut implements ArchiverInOut
 
 
 
-    
-    
+
+
 
 }

@@ -1,10 +1,6 @@
 
 # the library name
-if(CMAKE_BUILD_TYPE MATCHES "Release")
-	set(LIB_NAME opsopt)
-elseif(CMAKE_BUILD_TYPE MATCHES "Debug")
-	set(LIB_NAME opsdbg)
-endif()	
+set(LIB_NAME ops)
 
 
 # where are the headers
@@ -150,15 +146,16 @@ add_library(${LIB_NAME} SHARED
 
 
 set_target_properties(${LIB_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
+# adds -DOPS_LIBRARY to commandline. Can't use add_definitions here
 set_target_properties(${LIB_NAME} PROPERTIES COMPILE_DEFINITIONS OPS_LIBRARY)
+set_target_properties(${LIB_NAME} PROPERTIES DEBUG_POSTFIX "-dbg")
+set_target_properties(${LIB_NAME} PROPERTIES RELEASE_POSTFIX "-opt")
 
 target_link_libraries(${LIB_NAME} ${Boost_LIBRARIES})
 
 if(MINGW)
   target_link_libraries(${LIB_NAME} ws2_32 mswsock)
-  #target_link_libraries(${LIB_NAME} ws2_32)
 endif()
-#message("link ${LIB_NAME} to ${Boost_LIBRARIES}")
 
 # build it again but statically this time
 set(LIB_STATIC ${LIB_NAME}-static)
@@ -169,6 +166,9 @@ add_library(${LIB_STATIC} STATIC
 )
 set_target_properties(${LIB_STATIC} PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(${LIB_STATIC} PROPERTIES COMPILE_DEFINITIONS OPS_LIBRARY_STATIC)
+set_target_properties(${LIB_STATIC} PROPERTIES DEBUG_POSTFIX "-dbg")
+set_target_properties(${LIB_STATIC} PROPERTIES RELEASE_POSTFIX "-opt")
+
 target_link_libraries(${LIB_STATIC} ${Boost_LIBRARIES})
 
 # library and headers installation

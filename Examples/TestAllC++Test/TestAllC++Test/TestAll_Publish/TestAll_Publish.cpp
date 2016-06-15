@@ -5,13 +5,16 @@
 #include <math.h>
 #include <conio.h>
 
+//Include a publisher for the data type we want to publish, generated from our IDL project TestAll.
 #include "TestAll/ChildDataPublisher.h"
 #include "TestAll/BaseDataPublisher.h"
+//Include type support for the data types we have defined in our IDL project, generated from our IDL project TestAll.
 #include "TestAll/TestAllTypeFactory.h"
 #include <ops.h>
 #include <XMLArchiverOut.h>
 #include <XMLArchiverIn.h>
 
+//Include iostream to get std::cout
 #include <iostream>
 #include <fstream>
 
@@ -48,6 +51,13 @@ int main(int argc, const char* args[])
 	bP.clear();
 
 	ops::Participant* participant = Participant::getInstance("TestAllDomain");
+	if(!participant)
+	{
+		std::cout << "Create participant failed. do you have ops_config.xml on your rundirectory?" << std::endl;
+		Sleep(10000); exit(1);
+	}
+
+	//Add type support for our types, to make this participant understand what we are talking
 	participant->addTypeSupport(new TestAll::TestAllTypeFactory());
 
 	ErrorWriter* errorWriter = new ErrorWriter(std::cout);
@@ -113,21 +123,25 @@ int main(int argc, const char* args[])
 	//Set primitives
 	data.bo = true;
 	data.b = 3;
+	data.sh = 16777;
 	data.i = 0;
 	data.l = -3;
 	data.f = 4.0;
 	data.d = 5.0;
-	//data.s = "World";
 	data.s = "World";
+
+	data.fruit.value = Fruit::PEAR;
 
 	//Set arrays (vectors)
 	data.bos.push_back(true);
 	data.bs.push_back(6);
-	//data.is.push_back(7);
+	data.shs.push_back(-77);
+	data.is_.push_back(7);
 	data.ls.push_back(-8);
-	//data.fs.push_back(9.0);
+	data.fs.push_back(9.0);
 	data.ds.push_back(10.0);
 	data.ss.push_back("Hello Array");
+	
 	data.setKey("key1");
 
 	//return 0;
@@ -189,14 +203,14 @@ int main(int argc, const char* args[])
 		dataClone->i++;
 
 		dataClone->d = (20/fact * sin(theta * pi / 180.0)) + (fact * sin(3 * theta * pi / 180.0));
-		dataClone->f = (30/fact * cos(theta * pi / 180.0)) + (fact * cos(3 * theta * pi / 180.0));
+		dataClone->f = (float)((30/fact * cos(theta * pi / 180.0)) + (fact * cos(3 * theta * pi / 180.0)));
 		theta++;
 
 		dataClone->fs.clear();
 		dataClone->ds.clear();
 		for (float v = 0; v < 600; v++)
 		{
-			dataClone->fs.push_back(offset + (fact * sin(v * pi / 180.0)));
+			dataClone->fs.push_back((float)(offset + (fact * sin(v * pi / 180.0))));
 			dataClone->ds.push_back(-offset + (fact * cos(v * pi / 180.0)));
 		}
 

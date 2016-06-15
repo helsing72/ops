@@ -2,7 +2,9 @@
 
 */
 
+#ifdef _WIN32
 #include "windows.h"
+#endif
 #include <string>
 #include <time.h>
 
@@ -10,11 +12,12 @@
 
 namespace sds {
 
-__int64	iBaseTime = 0;
+int64_t iBaseTime = 0;
 
 // Must be called before sdsSystemTime() is used 
 void sdsSystemTimeInit()
 {
+#ifdef _WIN32
 	SYSTEMTIME time70;
 	FILETIME file70, fileNow;
 	LARGE_INTEGER lTime70, lOffsetTime;
@@ -45,33 +48,42 @@ void sdsSystemTimeInit()
 	iBaseTime = (lOffsetTime.QuadPart - lTime70.QuadPart) * 100;
 
 	// Substract timeGetTime() offset
-	iBaseTime -= msToSdsSystemTimeUnits((__int64)timeGetTime());
+	iBaseTime -= msToSdsSystemTimeUnits((int64_t)timeGetTime());
+#endif
 }
 
-__int64 msToSdsSystemTimeUnits(__int64 timeInMs)
+int64_t msToSdsSystemTimeUnits(int64_t timeInMs)
 {
 	return timeInMs * 1000000;			// [ns]
 }
 
-__int64 sdsSystemTimeUnitsToMs(__int64 timeInSdsUnits)
+int64_t sdsSystemTimeUnitsToMs(int64_t timeInSdsUnits)
 {
 	return timeInSdsUnits / 1000000;	// [ns]
 }
 
-__int64 sdsSystemTime()
+int64_t sdsSystemTime()
 {
-//old	return msToSdsSystemTimeUnits((__int64)GetTickCount());
-	return iBaseTime + msToSdsSystemTimeUnits((__int64)timeGetTime());
+#ifdef _WIN32
+	return iBaseTime + msToSdsSystemTimeUnits((int64_t)timeGetTime());
+#else
+	struct timespec tt;
+        //time_t   tv_sec;        /* seconds */
+        //long     tv_nsec;       /* nanoseconds */
+	clock_gettime(CLOCK_REALTIME, &tt);
+	return ((int64_t)1000000000 * (int64_t)tt.tv_sec) + (int64_t)tt.tv_nsec;
+#endif
 }
 
-std::string sdsSystemTimeToLocalTime(__int64 time)
+std::string sdsSystemTimeToLocalTime(int64_t time)
 {
-	__int64 frac;
+#ifdef _WIN32
+	int64_t frac;
 	struct tm tmTime;
 
 	frac = time;
 	time /= msToSdsSystemTimeUnits(1000);
-	frac -= (time * sds::msToSdsSystemTimeUnits(1000));
+	frac -= (time * msToSdsSystemTimeUnits(1000));
 	frac /= msToSdsSystemTimeUnits(1);
 
 	// Convert to local time.
@@ -81,6 +93,9 @@ std::string sdsSystemTimeToLocalTime(__int64 time)
 	sprintf_s(tmp, sizeof(tmp), "%.2d:%.2d:%.2d.%.3I64d", tmTime.tm_hour, tmTime.tm_min, tmTime.tm_sec, frac);
 
 	return tmp;
+#else
+	return "TODO";
+#endif
 }
 
 }

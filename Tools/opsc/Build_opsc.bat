@@ -16,5 +16,8 @@
 
 @javac -cp "dist\ConfigurationLib.jar;dist\OPSJLib.jar;dist\IDLParser.jar;dist\OPSCompilerLib.jar;dist\IDLTemplates.jar" @"src/files.txt" -d "build/classes"
 
-@jar cfme "dist/opsc.jar" "src/MANIFEST.MF"  "opsc/OpsCompiler" -C "build/classes/" .
+@rem Generate the manifest file needed below
+@echo Class-Path: OPSCompilerLib.jar IDLParser.jar ConfigurationLib.jar OPSJLib.jar IDLTemplates.jar > dist\MANIFEST.MF
+
+@jar cfme "dist/opsc.jar" "dist/MANIFEST.MF"  "opsc/OpsCompiler" -C "build/classes/" .
 @popd

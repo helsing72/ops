@@ -1,7 +1,7 @@
 
 options
 {
-  
+
   STATIC = false;
 
 }
@@ -87,7 +87,16 @@ public class IDLParser
 
                 public void onEvent(IDLField eventData, ParserEvent e)
                 {
-                    System.out.println("field  " + eventData + ".");
+                    System.out.println("  eventData.getName()     : " + eventData.getName());
+                    System.out.println("  eventData.getArraySize(): " + eventData.getArraySize());
+                    System.out.println("  eventData.getType()     : " + eventData.getType());
+                    System.out.println("  eventData.getComment()  : " + eventData.getComment());
+                    System.out.println("  eventData.getValue()    : " + eventData.getValue());
+                    System.out.println("  eventData.isIdlType()   : " + eventData.isIdlType());
+                    System.out.println("  eventData.isArray()     : " + eventData.isArray());
+                    System.out.println("  eventData.isStatic()    : " + eventData.isStatic());
+                    System.out.println("  eventData.isAbstract()  : " + eventData.isAbstract());
+                    System.out.println("");
                 }
             });
         parser.extendsEvent.add(new ParserEventCallback<String>() {
@@ -148,7 +157,7 @@ void definition() :
 {}
 {
   "package" module() ";" (body_declare())+ <EOF>
-    
+
 }
 void body_declare():
 {}
@@ -192,7 +201,7 @@ String struct_type() :
   "class" name=identifier() {idlDeclareEvent.fireEvent(name);}  member_list()
   {
     {idlCloseEvent.fireEvent(name);}
-    System.out.println("struct " + name);
+    ///System.out.println("struct " + name);
     return name;
   }
 
@@ -248,7 +257,7 @@ void member() :
         fieldName = fieldName.replace("]", "").trim();
         //currentIDLField.setArray(true);
     }
-    
+
     currentIDLField.setName(fieldName);
     currentIDLField.setType(typeName);
     fieldDeclareEvent.fireEvent(currentIDLField);
@@ -284,7 +293,7 @@ String declarators(IDLField currentIDLField) :
         currentIDLField.setArraySize(Integer.parseInt(size));
      }
 
-     return "[" + size + "] " + ret;}
+     return "[] " + ret;}
 
 
 
@@ -307,7 +316,7 @@ String type_spec() :
 {String ret = "";}
 {
 
-    ret = simple_type_spec() 
+    ret = simple_type_spec()
 
  {return ret;}
 
@@ -546,8 +555,5 @@ TOKEN :
     < ANOTATION: "/*" (~["*"])* "*" (~["/"] (~["*"])* "*")* "/">
 
 
-    
+
 }
-
-
-

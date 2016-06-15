@@ -1,7 +1,6 @@
 # Weather station example #
 
 ```
-
 package weatherstation;
 
 class BasicWeatherData

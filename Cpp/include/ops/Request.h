@@ -36,6 +36,12 @@ public:
 		archiver->inout(std::string("requestId"), requestId);
 	}
 	
+	virtual void fillClone(OPSObject* obj) const
+	{
+        Request* narrRet = (Request*)obj;
+        OPSObject::fillClone(narrRet);
+		narrRet->requestId =requestId;
+	}
 
 };
 }

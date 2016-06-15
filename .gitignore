@@ -207,6 +207,6 @@ $RECYCLE.BIN/
 
 #---------------------------------------
 # OPS additions
-build.debug
-build.opt
-
+/build.debug/
+/build.opt/
+/deploy/

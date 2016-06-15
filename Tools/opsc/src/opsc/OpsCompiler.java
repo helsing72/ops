@@ -24,6 +24,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.net.URL;
 
+import parsing.IDLClass;
+import parsing.IDLField;
+
 /**
  *
  * @author helm
@@ -45,6 +48,7 @@ public class OpsCompiler
 
     /** A verbosity flag. Currently supports 0 or not 0 */
     int _verbose = 0;
+    boolean _dumpFlag = false;
 
     /** The java generator instance */
     protected opsc.JavaCompiler _javaCompiler;
@@ -65,6 +69,7 @@ public class OpsCompiler
         System.out.println("  -P <IDL proj dir> use as project directory with pre-defined subdirectories");
         System.out.println("  -h | --help       show this help");
         System.out.println("  -d                verbose output");
+        System.out.println("  -dump             print all parsed objects");
         System.out.println("  -pp               name an ops IDL project.properties file");
         System.out.println("  -parse            only parse, don't generate");
         System.out.println("  -printProps       print system props");
@@ -102,7 +107,7 @@ public class OpsCompiler
 
     protected boolean parseCommandLineArgs(String args[])
     {
-        System.out.println("Info: Parse arguments...");
+        //System.out.println("Info: Parse arguments...");
 
         Vector<String> extraArgs = new Vector<String>();
         boolean projDirGiven = false;
@@ -218,6 +223,8 @@ public class OpsCompiler
                 System.out.println("Info: Project name set to " + _strProjectName);
             } else if(arg.equals("-d")) {
                 _verbose = 1;
+            } else if (arg.equals("-dump")) {
+               _dumpFlag = true;
             } else if(arg.equals("-dd")) {
                 _verbose = 2;
             } else if(arg.equals("-parse")) {
@@ -268,6 +275,22 @@ public class OpsCompiler
         // parse the file
         String filename_wo_ext = inputfile.getName().substring(0, inputfile.getName().lastIndexOf("."));
         parsing.IDLClass idlclass = _parser.parse(filename_wo_ext, fileString);
+
+        return true;
+    }
+
+    protected boolean compilePython() {
+        // create the compiler and set parameters
+        opsc.PythonCompiler compiler = new opsc.PythonCompiler(_strProjectName);
+        Property propTemplatePath = _props.getProperty("templatePath");
+        if(propTemplatePath != null)
+            compiler.setTemplateDir(propTemplatePath.value);
+        Property propOutPath = _props.getProperty("outputPath");
+        if(propOutPath != null)
+            compiler.setOutputDir(propOutPath.value + File.separator + "Python");
+
+        compiler.compileDataClasses(_parser._idlClasses, "baba");
+        //compiler.compileTypeSupport();
 
         return true;
     }
@@ -348,6 +371,67 @@ public class OpsCompiler
         return true;
     }
 
+    protected boolean buildDebugProject() {
+
+        opsc.DebugProjectCompiler compiler = new opsc.DebugProjectCompiler(_strProjectName);
+
+        Property propTemplatePath = _props.getProperty("templatePath");
+        if(propTemplatePath != null)
+            compiler.setTemplateDir(propTemplatePath.value);
+
+        Property propOutPath = _props.getProperty("outputPath");
+
+        compiler.createDebugProjectFile(propOutPath.value, _strProjectName, _props);
+
+        return true;
+    }
+
+    protected boolean buildVSExample() {
+
+        opsc.VisualStudio2008CppExampleCompiler compiler = new opsc.VisualStudio2008CppExampleCompiler(_strProjectName);
+
+        Property propTemplatePath = _props.getProperty("templatePath");
+        if(propTemplatePath != null)
+            compiler.setTemplateDir(propTemplatePath.value);
+
+        Property propOutPath = _props.getProperty("outputPath");
+
+        compiler.compileVSCppExample(propOutPath.value, _strProjectName, _props);
+
+        return true;
+    }
+
+    protected void dump()
+    {
+      System.out.println("");
+      for (IDLClass idlClass : _parser._idlClasses)
+      {
+        System.out.println("idlClass.getPackageName()   : " + idlClass.getPackageName());
+        System.out.println("idlClass.getClassName()     : " + idlClass.getClassName());
+        System.out.println("idlClass.getBaseClassName() : " + idlClass.getBaseClassName());
+
+        if (idlClass.getType() == IDLClass.ENUM_TYPE) {
+          for (String str : idlClass.getEnumNames()) {
+            System.out.println("  enum : " + str);
+          }
+          System.out.println("");
+        } else {
+          for (IDLField field : idlClass.getFields()) {
+            System.out.println("  field.getName()     : " + field.getName());
+            System.out.println("  field.getArraySize(): " + field.getArraySize());
+            System.out.println("  field.getType()     : " + field.getType());
+            System.out.println("  field.getComment()  : " + field.getComment());
+            System.out.println("  field.getValue()    : " + field.getValue());
+            System.out.println("  field.isIdlType()   : " + field.isIdlType());
+            System.out.println("  field.isArray()     : " + field.isArray());
+            System.out.println("  field.isStatic()    : " + field.isStatic());
+            System.out.println("  field.isAbstract()  : " + field.isAbstract());
+            System.out.println("");
+          }
+        }
+      }
+    }
+
     public static void main(String args[]) {
 
         // instantiate this class
@@ -362,7 +446,7 @@ public class OpsCompiler
         if(opsc._verbose > 0) {
             System.out.println("Debug: command line args ("+ (args.length-1) + ")");
             for(int i = 0 ; i < args.length ; i++) {
-                System.out.println("arg" + i + ": " + args[i] );
+                System.out.println("  arg" + i + ": " + args[i] );
             }
         }
 
@@ -390,6 +474,19 @@ public class OpsCompiler
             }
         }
 
+        if (opsc._dumpFlag) opsc.dump();
+
+        ///TODO Check that all types, which are not prefixed with a 'name.',
+        /// are core types or defined with the idl's we parsed.
+
+        // Quit if we only should parse
+        if(opsc._bOnlyParse) return;
+
+        // generate python if requested
+        if(opsc._props.generatePython) {
+            opsc.compilePython();
+        }
+
         // generate c++ if requested
         if(opsc._props.generateCpp) {
             opsc.compileCpp();
@@ -399,6 +496,7 @@ public class OpsCompiler
         if(opsc._props.generateJava) {
             // if compile is successful and user opted to build java
             if(opsc.compileJava() && opsc._props.buildJava) {
+                System.out.println("");
                 opsc.buildJava();
             }
         }
@@ -407,8 +505,22 @@ public class OpsCompiler
         if(opsc._props.generateCS) {
             // if compile is successful and user opted to build C#
             if(opsc.compileCs() && opsc._props.buildCS) {
+                System.out.println("");
                 opsc.buildCs();
             }
         }
+
+        // generate debug project
+        if(opsc._props.buildDebugProject) {
+            System.out.println("");
+            opsc.buildDebugProject();
+        }
+
+        // generate VS Example
+        if(Boolean.parseBoolean(opsc._props.getPropertyValue("vsExampleEnabled", "false"))) {
+            System.out.println("");
+            opsc.buildVSExample();
+        }
+
     }
 };

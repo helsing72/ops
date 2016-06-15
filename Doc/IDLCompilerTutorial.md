@@ -1,28 +1,11 @@
-[Installation](Installation.md) [Examples](SimpleCpp.md) [BuildInstructions](BuildInstructions.md)
+[Examples](SimpleCpp.md) [BuildInstructions](BuildInstructions.md)
 
 ---
 
-# The IDL Builder Basics #
-## What is IDL? ##
-IDL stands for Interface Definition Language and is a common name for programming language neutral languages used in middlewares to enable support for multiple programming languages (E.g. C++ and Java).
-In OPS the IDL language is very simple and is only used to define data classes (i.e. structs). Once a data class is defined in IDL, it can be “compiled” into the desired target programming languages that will be used in your distributed application.
-The OPS IDL resembles simplified Java or C++, a simple data class could look as follows:
+# OPS IDL Builder #
+Learn more about the OPS IDL language [here](IDLLanguage.md).
 
-```
-package samples;
-
-class SimpleData
-{
-	int i;
-	double d;
-	string s;
-}
-```
-
-Learn more about OPS IDL [here](IDLLanguage.md).
-
-## The OPS IDL Builder ##
-To edit IDL files and to compile these files into target languages, OPS comes with a tool called OPS IDL Builder. The OPS IDL Builder can be seen as an IDE for OPS projects. The OPS IDL Builder looks as follows, with the sample code from above open in a sample project:
+To edit IDL files and to compile these files into target languages, OPS comes with a tool called OPS IDL Builder. The OPS IDL Builder can be seen as an IDE for OPS projects. The OPS IDL Builder looks as follows, with some sample code open in a sample project:
 
 ![idlcompiler.jpg](idlcompiler.jpg)
 

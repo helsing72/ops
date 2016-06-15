@@ -1,8 +1,9 @@
 # The OPS IDL Language #
-The OPS IDL language is a language for defining data types (or data classes) in a programming language neutral way. The point is to define data types to be communicated over OPS once in OPS IDL and then ”compile” the IDL code into the desired target programming languages. In addition to a language specific data class it is also necessary to generate additional code to enable type safe and developer friendly communication for the data types.
+## What is IDL? ##
+IDL stands for Interface Definition Language and is a common name for programming language neutral languages used in middlewares to enable support for multiple programming languages (E.g. C++ and Java). In OPS the IDL language is very simple and is only used to define data classes. Once a data class is defined in IDL, it can be “compiled” into the desired target programming languages that will be used in your distributed application, see [IDL Builder](IDLCompilerTutorial.md) and [IDL Compiler](IDLCommandlineCompiler.md).
 
 ## Basics ##
-The OPS IDL language resembles very simplified Java and is due to its minimalistic design easy to learn and read. As mention above, the language is made for designing data classes, and that is in fact also the only thing it can do. A data class definition in OPS IDL must contain the following:
+The OPS IDL language resembles very simplified Java and is due to its minimalistic design easy to learn and read. As mentioned above, the language is made for designing data classes, and that is in fact also the only thing it can do. A data class definition in OPS IDL must contain the following:
 
   * One and only one package definition
   * One and only one class definition

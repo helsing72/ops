@@ -47,7 +47,7 @@ __int64 getNow()
 
 #include <stdio.h>
 #include <sys/select.h>
-#include <sys/ioctl.h> 
+#include <sys/ioctl.h>
 #include <termios.h>
 
 int _kbhit() {
@@ -105,7 +105,8 @@ class CHelper : public IHelper, ops::DataListener, ops::DeadlineMissedListener
 {
 private:
 	CHelperListener<DataType>* client;
-	ops::Publisher* pub;
+	//ops::Publisher* pub;
+	DataTypePublisher* pub;
 	ops::Subscriber* sub;
 	__int64 expectedPubId;
 
@@ -136,13 +137,13 @@ public:
 				//Create topic, might throw ops::NoSuchTopicException
 				ops::Topic topic = part->createTopic(topicName);
 
-				std::cout << "Created topic " << topic.getName() << 
-					" [" << topic.getTransport() << 
+				std::cout << "Created topic " << topic.getName() <<
+					" [" << topic.getTransport() <<
 					"::" << topic.getDomainAddress() <<
-					"::" << topic.getPort() << 
+					"::" << topic.getPort() <<
 					"] " << std::endl;
 
-				std::cout << 
+				std::cout <<
 					"  InSocketBufferSize: " << topic.getInSocketBufferSize() << std::endl <<
 					"  OutSocketBufferSize: " << topic.getOutSocketBufferSize() << std::endl <<
 					"  SampleMaxSize: " << topic.getSampleMaxSize() << std::endl;
@@ -169,7 +170,7 @@ public:
 		if (pub) {
 			std::cout << "Deleting publisher for topic " << pub->getTopic().getName() << std::endl;
 			//pub->stop();
-			delete pub; 
+			delete pub;
 			pub = NULL;
 		} else {
 			if (doLog) std::cout << "Publisher must be created first!!" << std::endl;
@@ -197,7 +198,8 @@ public:
 	void Write()
 	{
 		if (pub) {
-			pub->writeOPSObject(&data);
+			//pub->writeOPSObject(&data);		// Write using pointer
+			pub->write(data);					// Write using ref
 		} else {
 			std::cout << "Publisher must be created first!!" << std::endl;
 		}
@@ -212,13 +214,13 @@ public:
 				//Create topic, might throw ops::NoSuchTopicException
 				ops::Topic topic = part->createTopic(topicName);
 
-				std::cout << "Created topic " << topic.getName() << 
-					" [" << topic.getTransport() << 
+				std::cout << "Created topic " << topic.getName() <<
+					" [" << topic.getTransport() <<
 					"::" << topic.getDomainAddress() <<
-					"::" << topic.getPort() << 
+					"::" << topic.getPort() <<
 					"] " << std::endl;
 
-				std::cout << 
+				std::cout <<
 					"  InSocketBufferSize: " << topic.getInSocketBufferSize() << std::endl <<
 					"  OutSocketBufferSize: " << topic.getOutSocketBufferSize() << std::endl <<
 					"  SampleMaxSize: " << topic.getSampleMaxSize() << std::endl;
@@ -240,7 +242,7 @@ public:
 		if (sub) {
 			std::cout << "Deleting subscriber for topic " << sub->getTopic().getName() << std::endl;
 			sub->stop();
-			delete sub; 
+			delete sub;
 			sub = NULL;
 		} else {
 			if (doLog) std::cout << "Subscriber must be created first!!" << std::endl;
@@ -272,7 +274,7 @@ public:
 	{
 		if (sub) {
 			std::cout << "Setting deadlineQos to " << timeoutMs << " [ms] for topic " << sub->getTopic().getName() << std::endl;
-			sub->setDeadlineQoS(timeoutMs);		
+			sub->setDeadlineQoS(timeoutMs);
 		} else {
 			std::cout << "Subscriber must be created first!!" << std::endl;
 		}
@@ -286,10 +288,10 @@ public:
 			// Check if we have lost any messages. We use the publicationID and that works as long as
 			// it is the same publisher sending us messages.
 			ops::OPSMessage* newMess = sub->getMessage();
-			
+
 			if (expectedPubId >= 0) {
 				if (expectedPubId != newMess->getPublicationID()) {
-					std::cout << ">>>>> Lost message for topic " << sub->getTopic().getName() << 
+					std::cout << ">>>>> Lost message for topic " << sub->getTopic().getName() <<
 						". Exp.pubid: " << expectedPubId << " got: " << newMess->getPublicationID() << std::endl;
 				}
 			}
@@ -319,7 +321,7 @@ struct ItemInfo {
 	IHelper* helper;
 	ops::Participant* part;
 
-	ItemInfo(std::string dom, std::string top, std::string typ) 
+	ItemInfo(std::string dom, std::string top, std::string typ)
 	{
 		Domain = dom;
 		TopicName = top;
@@ -332,10 +334,10 @@ struct ItemInfo {
 std::vector<ItemInfo*> ItemInfoList;
 
 static bool beQuite = false;
-	
 
-class MyListener : 
-	public CHelperListener<pizza::PizzaData>, 
+
+class MyListener :
+	public CHelperListener<pizza::PizzaData>,
 	public CHelperListener<pizza::VessuvioData>,
 	public CHelperListener<pizza::special::ExtraAllt>
 {
@@ -347,11 +349,11 @@ public:
 		sub->getMessage()->getSource(addr, port);
 
 		if (!beQuite) {
-			std::cout << 
-				"[Topic: " << sub->getTopic().getName() << 
+			std::cout <<
+				"[Topic: " << sub->getTopic().getName() <<
 				"] (From " << addr << ":" << port <<
-				") Pizza:: Cheese: " << data->cheese << 
-				",  Tomato sauce: " << data->tomatoSauce << std::endl;
+				") Pizza:: Cheese: " << data->cheese <<
+				", Tomato sauce: " << data->tomatoSauce << std::endl;
 		}
 	}
 
@@ -362,11 +364,11 @@ public:
 		sub->getMessage()->getSource(addr, port);
 
 		if (!beQuite) {
-			std::cout << 
-				"[Topic: " << sub->getTopic().getName() << 
+			std::cout <<
+				"[Topic: " << sub->getTopic().getName() <<
 				"] (From " << addr << ":" << port <<
-				") Vessuvio:: Cheese: " << data->cheese << 
-				",  Tomato sauce: " << data->tomatoSauce << 
+				") Vessuvio:: Cheese: " << data->cheese <<
+				", Tomato sauce: " << data->tomatoSauce <<
 				", Ham length: " << data->ham.size() << std::endl;
 		}
 	}
@@ -378,11 +380,19 @@ public:
 		sub->getMessage()->getSource(addr, port);
 
 		if (!beQuite) {
-			std::cout << 
-				"[Topic: " << sub->getTopic().getName() << 
+			std::ostringstream ss;
+			if (data->shs.size() > 1) {
+				ss << ", shs[1]: " << data->shs.at(1) << std::ends;
+			} else {
+				ss << "" << std::ends;
+			}
+
+			std::cout <<
+				"[Topic: " << sub->getTopic().getName() <<
 				"] (From " << addr << ":" << port <<
-				") Pizza:: Cheese: " << data->cheese << 
-				",  Tomato sauce: " << data->tomatoSauce << 
+				") Pizza:: Cheese: " << data->cheese <<
+				ss.str() <<
+				", Tomato sauce: " << data->tomatoSauce <<
 				", Num strings: " << data->strings.size() << std::endl;
 		}
 	}
@@ -406,6 +416,7 @@ void WriteToAllSelected()
 		if (info->TypeName == pizza::PizzaData::getTypeName()) {
 			TPizzaHelper* hlp = (TPizzaHelper*)info->helper;
 			hlp->data.cheese = "Pizza from C++: " + CounterStr;
+			hlp->data.tomatoSauce = "Tomato";
 #ifdef USE_MESSAGE_HEADER
 			hlp->data.systemTime = sds::sdsSystemTime();
 #endif
@@ -424,6 +435,12 @@ void WriteToAllSelected()
 			if (hlp->data.strings.size() == 0) {
 				for (int k = 0; k < 1000; k++) hlp->data.strings.push_back("hej");
 			}
+			hlp->data.sh = -7;
+			if (hlp->data.shs.size() == 0) {
+				hlp->data.shs.push_back(17);
+				hlp->data.shs.push_back(42);
+				hlp->data.shs.push_back(-63);
+			}
 #ifdef USE_MESSAGE_HEADER
 			hlp->data.systemTime = sds::sdsSystemTime();
 #endif
@@ -435,9 +452,9 @@ void WriteToAllSelected()
 void printDomainInfo(ops::Participant* part)
 {
 	ops::Domain* dom = part->getDomain();
-	std::cout << std::endl << 
+	std::cout << std::endl <<
 		"  DomainID: " << dom->getDomainID() << std::endl <<
-		"  DomainAddress: " << dom->getDomainAddress() << std::endl << 
+		"  DomainAddress: " << dom->getDomainAddress() << std::endl <<
 		"  InSocketBufferSize: " << dom->getInSocketBufferSize() << std::endl <<
 		"  OutSocketBufferSize: " << dom->getOutSocketBufferSize() << std::endl <<
 		"  MetaDataMcPort: " << dom->getMetaDataMcPort() << std::endl <<
@@ -450,11 +467,11 @@ void menu()
 	std::cout << "" << std::endl;
 	for (unsigned int i = 0; i < ItemInfoList.size(); i++) {
             ItemInfo* ii = ItemInfoList[i];
-		std::cout << "\t " << i << 
-			" " << 
-		(ii->helper->HasPublisher() ? "P" : " ") << 
-		(ii->helper->HasSubscriber() ? "S" : " ") << 
-		(ii->selected ? "*" : " ") << 
+		std::cout << "\t " << i <<
+			" " <<
+		(ii->helper->HasPublisher() ? "P" : " ") <<
+		(ii->helper->HasSubscriber() ? "S" : " ") <<
+		(ii->selected ? "*" : " ") <<
 			" " <<
 		ii->Domain << "::" << ii->TopicName << std::endl;
 	}
@@ -481,7 +498,7 @@ int main(int argc, char**argv)
 {
 #ifdef _WIN32
 	// --------------------------------------------------------------------
-	// Try to set timer resolution to 1 ms 
+	// Try to set timer resolution to 1 ms
 	#define TARGET_RESOLUTION 1         // 1-millisecond target resolution
 
 	TIMECAPS tc;
@@ -490,7 +507,7 @@ int main(int argc, char**argv)
 	if (timeGetDevCaps(&tc, sizeof(TIMECAPS)) == TIMERR_NOERROR) {
 		wTimerRes = min(max(tc.wPeriodMin, TARGET_RESOLUTION), tc.wPeriodMax);
 	}
-	timeBeginPeriod(wTimerRes); 
+	timeBeginPeriod(wTimerRes);
 
 	sds::sdsSystemTimeInit();
 #endif
@@ -532,7 +549,7 @@ int main(int argc, char**argv)
     }
 	participant->addTypeSupport(new PizzaProject::PizzaProjectTypeFactory());
 	printDomainInfo(participant);
-	
+
 	ops::Participant* otherParticipant = ops::Participant::getInstance("OtherPizzaDomain", "OtherPizzaDomain");
 	if (otherParticipant == NULL) {
 		std::cout << "Failed to create Participant. Missing ops_config.xml ??" << std::endl;
@@ -572,7 +589,7 @@ int main(int argc, char**argv)
 		}
 	}
 
-	ItemInfo* ii = ItemInfoList[0]; 
+	ItemInfo* ii = ItemInfoList[0];
 	ii->selected = true;
 
 	bool doExit = false;
@@ -595,7 +612,7 @@ int main(int argc, char**argv)
 					// Calc next time to send
 					nextSendTime = now + sendPeriod;
 				}
-				ops::TimeHelper::sleep(1);			
+				ops::TimeHelper::sleep(1);
 			}
 		}
 
@@ -624,7 +641,7 @@ int main(int argc, char**argv)
 				std::cout << "ERROR: Expected character after '" << ch << "'" << std::endl;
 				continue;
 			}
-			ch = line[0];			
+			ch = line[0];
 			line.erase(0, 1);
 		}
 
@@ -652,7 +669,7 @@ int main(int argc, char**argv)
 		}
 
                 ItemInfo* ii = ItemInfoList[num];
-                
+
 		switch (ch) {
 			case '?':
 				menu();
@@ -754,7 +771,7 @@ int main(int argc, char**argv)
 
 			case 'x':
 			case 'X':
-				doExit = true;	
+				doExit = true;
 				break;
 
 			case 'y':
@@ -770,7 +787,7 @@ int main(int argc, char**argv)
 		if (ii->helper) delete ii->helper;
 		ii->helper = NULL;
 		ii->part = NULL;
-		delete ItemInfoList[idx]; 
+		delete ItemInfoList[idx];
 		ItemInfoList[idx] = NULL;
 	}
 
@@ -779,16 +796,14 @@ int main(int argc, char**argv)
 
 	delete errorWriter; errorWriter = NULL;
 	delete errorWriter2; errorWriter2 = NULL;
-	
+
 ///TODO this should be done by asking Participant to delete instances??
 	delete participant;
 
 #ifdef _WIN32
 	// --------------------------------------------------------------------
 	// We don't need the set resolution any more
-	timeEndPeriod(wTimerRes); 
+	timeEndPeriod(wTimerRes);
 #endif
-        
+
 }
-
-

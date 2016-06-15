@@ -7,12 +7,19 @@ project(OPS VERSION 4.1.0)
 ################################################################################
 #
 #if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-if (WIN32)
-  set (CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/installed" CACHE PATH "default install path" FORCE )
-endif()
+#if (WIN32)
+#  set (CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/installed" CACHE PATH "default install path" FORCE )
+#endif()
 
 ################################################################################
 # Find external dependencies
+
+# help the FindGtest script locate gtest
+if(DEFINED ENV{GOOGLETEST_HOME})
+  set(GTEST_ROOT $ENV{GOOGLETEST_HOME})
+  list(APPEND CMAKE_PREFIX_PATH $ENV{GOOGLETEST_LIB})
+endif()
+find_package(GTest)
 
 # if we need to link with libraries
 find_package(Java COMPONENTS Runtime Development)
@@ -22,24 +29,44 @@ if(Java_Runtime_FOUND)
   include(UseJava)
 endif()
 
-if(NOT Java_JAVAC_EXECUTABLE)
+if(Java_JAVAC_EXECUTABLE)
+  # set JAVA_HOME if we haven't already
+  if(NOT DEFINED JAVA_HOME)
+    get_filename_component (JAVA_HOME "${Java_JAVAC_EXECUTABLE}" DIRECTORY)
+  endif()
+else()
   message(WARNING "Could not find a Java compiler")
 endif()
 
 
-
 # add compiler flags for release or debug
-if(CMAKE_BUILD_TYPE MATCHES "Release")
-	set(CMAKE_CXX_FLAGS "-O2")
-	string(REPLACE "-O3 -DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE} )
-elseif(CMAKE_BUILD_TYPE MATCHES "Debug")
-	set(CMAKE_CXX_FLAGS "-g -fprofile-arcs -ftest-coverage -O0") #fPIC is set
-	string(REPLACE "-g" "" CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG} )
-endif()	
+if(MSVC)
+#  set(warnings "/W4 /WX /EHsc")
+  set(warnings "/W3 /WX /EHsc")
+else()
+  if(CMAKE_BUILD_TYPE MATCHES "Release" OR CMAKE_BUILD_TYPE MATCHES "")
+  	set(CMAKE_CXX_FLAGS "-O2")
+  	string(REPLACE "-O3 -DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE} )
+  elseif(CMAKE_BUILD_TYPE MATCHES "Debug")
+  	set(CMAKE_CXX_FLAGS "-g -fprofile-arcs -ftest-coverage -O0") #fPIC is set
+  	string(REPLACE "-g" "" CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG} )
+  endif()
+#  set(warnings "-Wall -Wextra -Werror")
+  set(warnings "-Wall")
+endif()
+set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} ${warnings}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${warnings}")
 
+message ("c Flags: " ${CMAKE_C_FLAGS})
+message ("cxx Flags: " ${CMAKE_CXX_FLAGS})
 
 # find Boost. If not found we can't build c++ libs
+option(Boost_DEBUG "Set to ON to debug Boost paths" OFF)
+# this prevents the FindBoost.cmake to search for cmake-built Boost
 set(Boost_NO_BOOST_CMAKE ON)
+# if the Boost home environment var is set, use it to hint the FindBoost.cmake about Boost location
+set(BOOST_ROOT $ENV{BOOST_HOME})
+
 if(MSVC)
   set(Boost_USE_STATIC_LIBS ON)
   find_package(Boost MODULE COMPONENTS system thread date_time regex chrono)
@@ -79,20 +106,13 @@ find_jar(SWINGLAYOUT_JAR swing-layout
 include(${CMAKE_ROOT}/Modules/Documentation.cmake OPTIONAL)
 mark_as_advanced(CLEAR BUILD_DOCUMENTATION)
 
-# Dynamic vs Static Linking
-option(OPS_DYNAMIC "Set to ON to build OPS for dynamic linking.  Use OFF for static." ON)
-if(OPS_DYNAMIC)
-  set(BUILD_SHARED_LIBS ON)
-else()
-  set(BUILD_SHARED_LIBS OFF)
-endif()
-
 # set path to where jars should be installed
 set(OPS_JAR_REL_INSTALL_PATH lib/ops)
 
 ################################################################################
 # Build the source
 
+# recurse into java source
 if(Java_JAVAC_EXECUTABLE)
   # this builds ConfigurationLib and JarSearch
   add_subdirectory(Libs)
@@ -103,20 +123,17 @@ if(Java_JAVAC_EXECUTABLE)
 endif()
 
 
-#add_subdirectory(CSharp)
+add_subdirectory(CSharp)
 
 # add the C++ source, only if Boost is loaded
-if(DEFINED ENV{BOOST_HOME})
-  
-  set(Boost_INCLUDE_DIRS $ENV{BOOST_HOME}) 
-  set(Boost_LIBRARIES $ENV{BOOST_LIB})
-  link_directories($ENV{BOOST_LIB})
+if(Boost_FOUND)
   add_subdirectory(Cpp)
-  
-  if(CMAKE_BUILD_TYPE MATCHES "Debug")
+
+  option(OPS_BUILD_UNITTESTS "Enable to build the UnitTest app(s)" OFF)
+  if(OPS_BUILD_UNITTESTS AND CMAKE_BUILD_TYPE MATCHES "Debug")
     add_subdirectory(UnitTests) #pane added
   endif()
-  
+
 else()
   message(WARNING "install Boost to build OPS C++ libraries")
 endif()
@@ -124,6 +141,13 @@ endif()
 ################################################################################
 # Build Examples
 
+# we need the opsc compiler to generate code for the examples
+if(TARGET opsc)
+  option(OPS_BUILD_EXAMPLES "Enable to build the example applications" OFF)
+  if(OPS_BUILD_EXAMPLES)
+    add_subdirectory(Examples)
+  endif()
+endif()
 
 ################################################################################
 # present the packaging option only if we have the cpack command defined (effectively >= 2.6.0)

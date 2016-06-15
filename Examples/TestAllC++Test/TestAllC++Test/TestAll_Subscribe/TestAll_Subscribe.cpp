@@ -154,7 +154,8 @@ public:
 			}
 			lastPacket = data.i;
 			std::cout << data.baseText << " "  << " " << sub->getMessage()->getPublicationID() 
-				<< " From: " << sub->getMessage()->getPublisherName() 
+				<< " From: " << sub->getMessage()->getPublisherName()
+				<< " ds[0] = " << data.ds.at(0) 
 				<< ". Lost messages: " << packagesLost << "          \r";// << std::endl;
 		
 		}

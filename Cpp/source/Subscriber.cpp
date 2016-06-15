@@ -21,6 +21,7 @@
 #include "Subscriber.h"
 #include "TimeHelper.h"
 #include "Participant.h"
+#include "BasicError.h" 
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition_variable.hpp>
 #include "boost/date_time/local_time/local_time.hpp"
@@ -101,11 +102,14 @@ namespace ops
         //Check that this message is delivered on the same topic as this Subscriber use
         if (message->getTopicName() != topic.getName())
         {
+            // This is a normal case when several Topics use the same port
             return;
         }
         //Check that the type of the delivered data can be interpreted as the type we expect in this Subscriber
         else if (message->getData()->getTypeString().find(topic.getTypeID()) == std::string::npos)
         {
+            BasicError err("Subscriber", "onNewEvent", "Received message with wrong data type for Topic");
+            participant->reportError(&err);
             return;
         }
 

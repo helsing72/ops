@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Description:
+ A template ops_config.xml file, this file shall be put on run directory of all applications that wants to use these topics.
+-->
+<root>
+    <ops_config type = "DefaultOPSConfigImpl">
+        <domains>
+
+            <element type = "Domain">
+                <domainID>HelloDomain</domainID>
+                <domainAddress>234.5.6.8</domainAddress>
+                <localInterface>127.0.0.1</localInterface>
+                <topics>
+                    <!-- TODO: Remove FooTopic and create your own ones. -->
+                    <element type = "Topic">
+                        <name>RequestHelloTopic</name>
+                        <port>6686</port>
+                        <dataType>hello.RequestHelloData</dataType>
+                    </element>
+                   <element type = "Topic">
+                        <name>HelloTopic</name>
+                        <port>6687</port>
+                        <dataType>hello.HelloData</dataType>
+                    </element>
+                </topics>
+            </element>
+
+        </domains>
+    </ops_config>
+</root>

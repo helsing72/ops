@@ -1,7 +1,7 @@
 # User Guide #
 
   * [Concepts](BasicConcepts.md)
-  * [Installation](Installation.md)
+  * [Build Instructions](BuildInstructions.md)
   * [Defining Data Types in IDL](IDLLanguage.md)
   * [Defining Topic and Configuration](OpsConfig.md)
   * [Subscribing to Topics](SubscribingToTopic.md)
@@ -16,9 +16,11 @@
   * Transports
     * [Multicast](MulticastTransport.md)
     * [TCP](TcpTransport.md)
-  * Using OPS Tools
-    * [OPS Debugger](OPSDebugger.md)
+  * Tools
     * [IDL Builder](IDLCompilerTutorial.md)
+    * [IDL Compiler](IDLCommandlineCompiler.md)
+    * [OPS Listener](OPSListener.md)
+    * [OPS Debugger](OPSDebugger.md)
   * Advanced Concepts and Features
     * [Understanding OPSObject and OPSMessage](OpsMessage.md)
     * [Serializing](Serializing.md)

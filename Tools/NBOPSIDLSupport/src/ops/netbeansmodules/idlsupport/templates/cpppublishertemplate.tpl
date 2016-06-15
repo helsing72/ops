@@ -9,39 +9,37 @@
 
 __packageDeclaration
 
-
-
-class __classNamePublisher : public ops::Publisher 
+class __classNamePublisher : public ops::Publisher
 {
-    
+
 public:
     __classNamePublisher(ops::Topic t)
         : ops::Publisher(t)
     {
-
-
     }
-    
+
     ~__classNamePublisher(void)
     {
     }
-    
+
     void write(__className* data)
     {
         ops::Publisher::write(data);
-
     }
+
+    void write(__className& data)
+    {
+        ops::Publisher::write(&data);
+    }
+
     /*
     ops::AckData writeReliable(__className* data, std::string destinationIdentity)
     {
         return ops::Publisher::writeReliable(data, destinationIdentity);
-
     }
     */
-    
 
 };
-
 
 __packageCloser
 

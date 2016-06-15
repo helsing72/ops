@@ -104,7 +104,6 @@ public class OPSArchiverOut implements ArchiverInOut
         return v;
     }
 
-   
     public List<Integer> inoutIntegerList(String name, List<Integer> v) throws IOException
     {
         writeBuf.writeintArr(v);
@@ -125,7 +124,8 @@ public class OPSArchiverOut implements ArchiverInOut
 
     public List<Short> inoutShortList(String name, List<Short> v) throws IOException
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        writeBuf.writeshortArr(v);
+        return v;
     }
 
     public List<Float> inoutFloatList(String name, List<Float> v) throws IOException

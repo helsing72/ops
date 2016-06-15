@@ -271,8 +271,6 @@ public class JavaCompiler extends opsc.Compiler
 
     }
 
-
-
     private String getEnumDeclarations(IDLClass idlClass)
     {
         String ret = "";
@@ -337,6 +335,10 @@ public class JavaCompiler extends opsc.Compiler
         {
             return "boolean";
         }
+        else if (s.equals("short"))
+        {
+            return "short";
+        }
         else if (s.equals("int"))
         {
             return "int";
@@ -360,6 +362,10 @@ public class JavaCompiler extends opsc.Compiler
         else if (s.equals("string[]"))
         {
             return "java.util.Vector<String>";
+        }
+        else if (s.equals("short[]"))
+        {
+            return "java.util.Vector<Short>";
         }
         else if (s.equals("int[]"))
         {
@@ -423,6 +429,10 @@ public class JavaCompiler extends opsc.Compiler
                 else if (field.getType().equals("byte[]"))
                 {
                     ret += tab(2) + field.getName() + " = (" + languageType(field.getType()) + ") archive.inoutByteList(\"" + field.getName() + "\", " + field.getName() + ");" + endl();
+                }
+                else if (field.getType().equals("short[]"))
+                {
+                    ret += tab(2) + field.getName() + " = (" + languageType(field.getType()) + ") archive.inoutShortList(\"" + field.getName() + "\", " + field.getName() + ");" + endl();
                 }
                 else if (field.getType().equals("long[]"))
                 {
@@ -569,6 +579,11 @@ public class JavaCompiler extends opsc.Compiler
         // The batch / bash file will be running  in the _output dir
         String classOutputDir = ".obj";
 
+        String silent = "";
+        if (!isLinux) {
+          silent = "@";
+        }
+
         String execString =
                 "javac -cp " + jarDepString +
                 " -d " + classOutputDir +
@@ -586,15 +601,17 @@ public class JavaCompiler extends opsc.Compiler
 
         } else {
             //batFileText += "@echo off" + endl();
-            batFileText += "@pushd %~dp0" + endl();   // cd to bat-file directory
+            batFileText += silent + "pushd %~dp0" + endl();   // cd to bat-file directory
         }
-        batFileText += "echo Compiling Java..." + endl();
-        batFileText += "javac -version" + endl();
+        batFileText += silent + "echo Compiling Java..." + endl();
+        batFileText += silent + "javac -version" + endl();
         if (isLinux) {
             batFileText += "mkdir -p " + classOutputDir + endl();
         } else {
             // on windows, mkdir works like posix mkdir -p IF commandline extensions are enabled
-            batFileText += "mkdir " + classOutputDir + endl();
+            batFileText += silent + "if not exist \"" + classOutputDir + "\" (" + endl();
+            batFileText += silent + "mkdir " + classOutputDir + endl();
+            batFileText += ")" + endl();
         }
 
         // Add commands for copying all dependency jars
@@ -611,9 +628,9 @@ public class JavaCompiler extends opsc.Compiler
         String jarPackString = "jar cfm \"" + _projectName + ".jar\" \"" +
             manFile + "\" -C " + classOutputDir + " . ";
         batFileText += jarPackString + endl();
-        batFileText += "echo Compiling done." + endl();
+        batFileText += silent + "echo Compiling Java done." + endl();
         if (!isLinux) {
-            batFileText += "@popd" + endl();
+            batFileText += silent + "popd" + endl();
         }
 
         String script = "";
