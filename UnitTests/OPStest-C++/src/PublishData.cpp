@@ -290,6 +290,7 @@ int main(int argc, char**argv)
 
 	TExtraAlltHelper* hlpExtra = NULL;
 
+
 	// Finish up our ItemInfo's
 	for(int i = 0; i < ItemInfoList.size(); ++i) {
 		ItemInfo* itemInfo = ItemInfoList[i];
@@ -310,13 +311,14 @@ int main(int argc, char**argv)
 		else if	(i == 2) std::cout << "skickar extra allt UDP" << std::endl;
 
 
-		hlpExtra = (TExtraAlltHelper*)itemInfo->helper;
 
+		hlpExtra = (TExtraAlltHelper*)itemInfo->helper;
 		if		(i == 0) hlpExtra->data = extraAlltNormal;
 		else if (i == 1) hlpExtra->data = extraAlltNormalTCP;
 		else if (i == 2) hlpExtra->data = extraAlltNormalUDP;
 
 		ops::TimeHelper::sleep(2000);
+
 		itemInfo->helper->Write();
 		std::cout << "should write first data" << std::endl;
 		ops::TimeHelper::sleep(1000);

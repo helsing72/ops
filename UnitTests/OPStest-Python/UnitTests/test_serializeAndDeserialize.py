@@ -17,9 +17,11 @@ import InitData
 delta = 0.00001
 
 def test_extraAllt():
+	print "testing extra allt"
 	
 	m_factory = PizzaProjectTypeFactory.PizzaProjectTypeFactory()
 	
+	#initialize data to pack / unpack
 	extraAllt = InitData.initExtraAlltNormal()
 
 	m_OPS_archiver_out = OPS_Archiver.OPS_Archiver_Out(10000) #buffer size
@@ -45,15 +47,15 @@ def test_extraAllt():
 	#unpacking data
 	m_OPS_archiver_in = OPS_Archiver.OPS_Archiver_In(m_factory,m_OPS_archiver_out.buffer)
 	
-	unpacked_extraAllt = pizza_special.ExtraAllt()
-	unpacked_extraAllt.extraCheese = m_OPS_archiver_in.Bool("extraCheese", m_OPS_archiver_out.buffer)
-	unpacked_extraAllt.nrOfMushRooms = m_OPS_archiver_in.Int8("nrOfMushRooms", m_OPS_archiver_out.buffer)
-	unpacked_extraAllt.meetQuality = m_OPS_archiver_in.Int32("meetQuality", m_OPS_archiver_out.buffer)
-	unpacked_extraAllt.timestamp = m_OPS_archiver_in.Int64("timestamp", m_OPS_archiver_out.buffer)
-	unpacked_extraAllt.timeBakedHours = m_OPS_archiver_in.Float32("timeBakedHours", m_OPS_archiver_out.buffer)
+	unpacked_extraAllt 					= pizza_special.ExtraAllt()
+	unpacked_extraAllt.extraCheese 		= m_OPS_archiver_in.Bool("extraCheese", m_OPS_archiver_out.buffer)
+	unpacked_extraAllt.nrOfMushRooms 	= m_OPS_archiver_in.Int8("nrOfMushRooms", m_OPS_archiver_out.buffer)
+	unpacked_extraAllt.meetQuality 		= m_OPS_archiver_in.Int32("meetQuality", m_OPS_archiver_out.buffer)
+	unpacked_extraAllt.timestamp 		= m_OPS_archiver_in.Int64("timestamp", m_OPS_archiver_out.buffer)
+	unpacked_extraAllt.timeBakedHours 	= m_OPS_archiver_in.Float32("timeBakedHours", m_OPS_archiver_out.buffer)
 	unpacked_extraAllt.timeBakedSeconds = m_OPS_archiver_in.Float64("timeBakedSeconds", m_OPS_archiver_out.buffer)
-	unpacked_extraAllt.description = m_OPS_archiver_in.String("description", m_OPS_archiver_out.buffer)
-	unpacked_extraAllt.cheese_ = m_OPS_archiver_in.Ops("cheese_", m_OPS_archiver_out.buffer)
+	unpacked_extraAllt.description 		= m_OPS_archiver_in.String("description", m_OPS_archiver_out.buffer)
+	unpacked_extraAllt.cheese_ 			= m_OPS_archiver_in.Ops("cheese_", m_OPS_archiver_out.buffer)
 	
 	
 	#unpacling vectors
@@ -76,76 +78,74 @@ def test_extraAllt():
 	m_OPS_archiver_in.StringVector("strings", unpacked_strings)
 	m_OPS_archiver_in.OpsVector("cheeses", unpacked_cheeses)
 	
-	unpacked_extraAllt.bools = unpacked_bools
-	unpacked_extraAllt.bytes = unpacked_bytes
-	unpacked_extraAllt.ints = unpacked_ints
-	unpacked_extraAllt.floats = unpacked_floats
-	unpacked_extraAllt.longs = unpacked_longs
-	unpacked_extraAllt.doubles = unpacked_doubles
-	unpacked_extraAllt.strings = unpacked_strings
-	unpacked_extraAllt.cheeses = unpacked_cheeses
+	unpacked_extraAllt.bools 	= unpacked_bools
+	unpacked_extraAllt.bytes 	= unpacked_bytes
+	unpacked_extraAllt.ints 	= unpacked_ints
+	unpacked_extraAllt.floats 	= unpacked_floats
+	unpacked_extraAllt.longs 	= unpacked_longs
+	unpacked_extraAllt.doubles 	= unpacked_doubles
+	unpacked_extraAllt.strings 	= unpacked_strings
+	unpacked_extraAllt.cheeses 	= unpacked_cheeses
 	
 	
 	#test data
-	assert(unpacked_extraAllt.extraCheese 	, True )
-	assert(unpacked_extraAllt.nrOfMushRooms	, 14 )
-	assert(unpacked_extraAllt.meetQuality	, 9 )
+	assert(unpacked_extraAllt.extraCheese 	== True )
+	assert(unpacked_extraAllt.nrOfMushRooms	== 14 )
+	assert(unpacked_extraAllt.meetQuality	== 9 )
 	assert(abs(unpacked_extraAllt.timeBakedHours -123.4) < delta )
-	assert(unpacked_extraAllt.timeBakedSeconds, 53.4 )
-	assert(unpacked_extraAllt.description	, "Pizza with extra allt" )
-	assert(unpacked_extraAllt.cheese_.age	, 12.0 )
-	assert(unpacked_extraAllt.cheese_.name	, "gorgonzola" )
+	assert(unpacked_extraAllt.timeBakedSeconds== 53.4 )
+	assert(unpacked_extraAllt.description	== "Pizza with extra allt" )
+	assert(unpacked_extraAllt.cheese_.age	== 12.0 )
+	assert(unpacked_extraAllt.cheese_.name	== "gorgonzola" )
 	
-	assert(len(unpacked_extraAllt.bools)	, 6)
+	assert(len(unpacked_extraAllt.bools)	== 6)
 	
-	assert(len(unpacked_extraAllt.bytes)	, 6)
-	assert(len(unpacked_extraAllt.ints) 	, 5)
-	assert(len(unpacked_extraAllt.floats) 	, 5)
-	assert(len(unpacked_extraAllt.doubles) 	, 5)
-	assert(len(unpacked_extraAllt.longs) 	, 5)
-	assert(len(unpacked_extraAllt.strings) 	, 6)
-	assert(len(unpacked_extraAllt.cheeses) 	, 4)
+	assert(len(unpacked_extraAllt.bytes)	== 6)
+	assert(len(unpacked_extraAllt.ints) 	== 5)
+	assert(len(unpacked_extraAllt.floats) 	== 5)
+	assert(len(unpacked_extraAllt.doubles) 	== 5)
+	assert(len(unpacked_extraAllt.longs) 	== 5)
+	assert(len(unpacked_extraAllt.strings) 	== 6)
+	assert(len(unpacked_extraAllt.cheeses) 	== 4)
 	
-	assert(unpacked_extraAllt.bools   		, [True, False, True, False, True, False] )
-	assert(unpacked_extraAllt.bytes   		, [-64, -32, -16, 15, 31, 63] )
-	assert(unpacked_extraAllt.ints    		, [0, 123, -523, 1000, -5000] )
-	assert(unpacked_extraAllt.longs   		, [0, 123, -523, 1000, -5000] )
-	assert(unpacked_extraAllt.floats  		, [0.0, 123.0, -523.0, 1000.0, -5000.0] )
-	assert(unpacked_extraAllt.doubles 		, [0.0, 123.0, -523.0, 1000.0, -5000.0] )
-	assert(unpacked_extraAllt.strings 		, ["extra", "allt", "er", "den", "basta", "pizzan"] )
-	assert(unpacked_extraAllt.cheeses[0].age 	, 1 )
-	assert(unpacked_extraAllt.cheeses[0].name , "ost1" )
-	assert(unpacked_extraAllt.cheeses[1].age 	, 2 )
-	assert(unpacked_extraAllt.cheeses[1].name , "ost2" )
-	assert(unpacked_extraAllt.cheeses[2].age 	, 3 )
-	assert(unpacked_extraAllt.cheeses[2].name , "ost3" )
-	assert(unpacked_extraAllt.cheeses[3].age 	, 4 )
-	assert(unpacked_extraAllt.cheeses[3].name , "ost4" )
+	assert(unpacked_extraAllt.bools   		== [True, False, True, False, True, False] )
+	assert(unpacked_extraAllt.bytes   		== [-64, -32, -16, 15, 31, 63] )
+	assert(unpacked_extraAllt.ints    		== [0, 123, -523, 1000, -5000] )
+	assert(unpacked_extraAllt.longs   		== [0, 123, -523, 1000, -5000] )
+	assert(unpacked_extraAllt.floats  		== [0.0, 123.0, -523.0, 1000.0, -5000.0] )
+	assert(unpacked_extraAllt.doubles 		== [0.0, 123.0, -523.0, 1000.0, -5000.0] )
+	assert(unpacked_extraAllt.strings 		== ["extra", "allt", "er", "den", "basta", "pizzan"] )
+	assert(unpacked_extraAllt.cheeses[0].age 	== 1 )
+	assert(unpacked_extraAllt.cheeses[0].name 	== "ost1" )
+	assert(unpacked_extraAllt.cheeses[1].age 	== 2 )
+	assert(unpacked_extraAllt.cheeses[1].name 	== "ost2" )
+	assert(unpacked_extraAllt.cheeses[2].age 	== 3 )
+	assert(unpacked_extraAllt.cheeses[2].name 	== "ost3" )
+	assert(unpacked_extraAllt.cheeses[3].age 	== 4 )
+	assert(unpacked_extraAllt.cheeses[3].name 	== "ost4" )
 	
 
 	
 def test_vessuvio():
 	m_factory = PizzaProjectTypeFactory.PizzaProjectTypeFactory()
-	
+	print "testing vessuvio"
 	vessuvioData = InitData.initVessuvioData()
 
 	#serialize
 	m_OPS_archiver_out = OPS_Archiver.OPS_Archiver_Out(200) #buffer size
-	
-	m_OPS_archiver_out.String("ham", vessuvioData.ham)
-	m_OPS_archiver_out.String("cheese", vessuvioData.cheese)
-	m_OPS_archiver_out.String("tomatoSauce", vessuvioData.tomatoSauce)
+	m_OPS_archiver_out.String("ham" , vessuvioData.ham)
+	m_OPS_archiver_out.String("cheese" , vessuvioData.cheese)
+	m_OPS_archiver_out.String("tomatoSauce" , vessuvioData.tomatoSauce)
 	
 	#unpack
 	m_OPS_archiver_in = OPS_Archiver.OPS_Archiver_In(m_factory,m_OPS_archiver_out.buffer)
 	
 	unpacked_vessuvioData = pizza.VessuvioData()
-	unpacked_vessuvioData.ham = m_OPS_archiver_in.String("ham", m_OPS_archiver_out.buffer)
-	unpacked_vessuvioData.cheese = m_OPS_archiver_in.String("cheese", m_OPS_archiver_out.buffer)
-	unpacked_vessuvioData.tomatoSauce = m_OPS_archiver_in.String("tomatoSauce", m_OPS_archiver_out.buffer)
+	unpacked_vessuvioData.ham = m_OPS_archiver_in.String("ham" , m_OPS_archiver_out.buffer)
+	unpacked_vessuvioData.cheese = m_OPS_archiver_in.String("cheese" , m_OPS_archiver_out.buffer)
+	unpacked_vessuvioData.tomatoSauce = m_OPS_archiver_in.String("tomatoSauce" , m_OPS_archiver_out.buffer)
 	
 	#test data
-	assert(unpacked_vessuvioData.ham, "my ham")
-	assert(unpacked_vessuvioData.cheese, "my cheese")
-	assert(unpacked_vessuvioData.tomatoSauce, "my tomatosauce")
-	
+	assert(unpacked_vessuvioData.ham == "my ham")
+	assert(unpacked_vessuvioData.cheese == "my cheese")
+	assert(unpacked_vessuvioData.tomatoSauce == "my tomatosauce")

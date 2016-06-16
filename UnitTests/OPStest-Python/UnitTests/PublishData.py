@@ -3,11 +3,7 @@ import re
 import sys
 import os
 import platform
-
-
 from ops import Participant,Publisher,Subscriber,Print_Archiver
-
-
 import pizza
 import pizza_special
 import PizzaProjectTypeFactory
@@ -77,6 +73,8 @@ info.part = participant
 info.helper.CreatePublisher(info.part, info.TopicName)
 
 info.helper.StartPublisher()
+
+
 
 info.helper.Write("normal")
 msleep(1000)
