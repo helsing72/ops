@@ -14,6 +14,8 @@ import java.util.logging.Logger;
 import ops.KeyFilterQoSPolicy;
 import ops.Participant;
 import ops.Topic;
+import ops.ConfigurationException;
+import ops.protocol.OPSMessage;
 
 /**
  * Example showing how to subscribe to data on OPS from Java
@@ -21,17 +23,17 @@ import ops.Topic;
  */
 public class Main {
 
+    private static ChildDataSubscriber sub;
+
     public static void main(String[] args)
     {
-        // TODO code application logic here
-        //OPSObjectFactory.getInstance().add(new TestAll.TestAllTypeFactory());
-
+      try {
         Participant participant = Participant.getInstance("TestAllDomain");
         participant.addTypeSupport(new TestAll.TestAllTypeFactory());
 
         Topic topic = participant.createTopic("ChildTopic");
 
-        ChildDataSubscriber sub = new ChildDataSubscriber(topic);
+        sub = new ChildDataSubscriber(topic);
 
         sub.addObserver(new Observer() { public void update(Observable o, Object arg){onNewChildData((ChildData)arg);} });
 
@@ -41,11 +43,17 @@ public class Main {
         {
             sleep(1000);
         }
+      } catch (ConfigurationException e)
+      {
+          System.out.println("Exception: " + e.getMessage());
+      }
 
     }
     private static void onNewChildData(ChildData childData)
     {
         System.out.println("Wohooo!, New ChildData!" + childData.i);
+        OPSMessage message = sub.getMessage();
+        System.out.println("Publication " + message.getPublicationID() + " from " + message.getPublisherName());
     }
 
     private static void sleep(int i)
@@ -55,7 +63,7 @@ public class Main {
             Thread.sleep(i);
         }
         catch (InterruptedException ex)
-        {          
+        {
         }
     }
 

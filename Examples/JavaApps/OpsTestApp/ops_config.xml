@@ -9,8 +9,8 @@
       <element type = "Domain">
         <domainID>PizzaDomain</domainID>
         <domainAddress>234.5.6.8</domainAddress>
-		<localInterface>192.168.0.0/24</localInterface>
-	    <!--<localInterface>127.0.0.1</localInterface>-->
+		<!--<localInterface>192.168.0.0/24</localInterface>-->
+	    <localInterface>127.0.0.1</localInterface>
 		<!--<localInterface>192.168.184.0/255.255.255.0</localInterface>-->
 		<!--<localInterface>192.168.0.0/255.255.255.0</localInterface>-->
 		<!--optional <timeToLive>1</timeToLive>-->

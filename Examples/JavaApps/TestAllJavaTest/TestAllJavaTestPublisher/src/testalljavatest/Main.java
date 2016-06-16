@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import ops.Participant;
 import ops.Topic;
+import ops.ConfigurationException;
 
 /**
  * Example showing how to publish data on OPS from Java
@@ -23,7 +24,7 @@ public class Main {
      */
     public static void main(String[] args)
     {
-
+      try {
         Participant participant = Participant.getInstance("TestAllDomain");
         participant.addTypeSupport(new TestAll.TestAllTypeFactory());
 
@@ -42,10 +43,15 @@ public class Main {
         data.f = 2.0f;
         data.d = 3.0;
         data.bs.add((byte)4);
-        data.is.add(5);
+        data.is_.add(5);
         data.ls.add((long)7);
 
         data.ss.add("TestString in Array.");
+
+        for (int i = 0; i < 50; i++)
+        {
+            data.fs.add((float) i);
+        }
 
         while (true)
         {
@@ -54,7 +60,10 @@ public class Main {
             pub.write(data);
             sleep(1000);
         }
-
+      } catch (ConfigurationException e)
+      {
+          System.out.println("Exception: " + e.getMessage());
+      }
     }
 
     private static void sleep(int i)
