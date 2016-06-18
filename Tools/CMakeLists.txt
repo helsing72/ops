@@ -5,12 +5,6 @@ add_subdirectory(IDLParser)
 
 add_subdirectory(OPSReflectionLib)
 
-option(OPS_BUILD_OPSCOMPILER "Enable to build OPSCompiler." OFF)
-if(OPS_BUILD_OPSCOMPILER)
-  message(WARNING " The OPSCompiler codebase is hopelessly outdated. Are you sure?")
-  add_subdirectory(IDLCompiler)
-endif()
-
 add_subdirectory(opsc)
 
 add_subdirectory(OPSListener)
