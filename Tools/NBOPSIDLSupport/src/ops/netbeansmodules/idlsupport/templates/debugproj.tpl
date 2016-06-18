@@ -2,7 +2,7 @@
 <root>
     <factoryConfig type = "opsreflection.OPSFactoryConfig">
         <domainID>__DomainID</domainID>
-        <opsConfigRelativePath>src/ops_config.xml</opsConfigRelativePath>
+        <opsConfigRelativePath>../src/ops_config.xml</opsConfigRelativePath>
         <jarFilePaths>
             <element type = "opsreflection.JarPathConfig">
                 __jarPaths
