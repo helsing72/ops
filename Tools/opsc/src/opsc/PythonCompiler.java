@@ -231,6 +231,8 @@ public class PythonCompiler extends opsc.CompilerSupport
                     if (h==null)
                     {
                         int splitIndex = dependencyName.get(i).lastIndexOf(".");
+                        if (splitIndex <0) continue;
+
                         String packageStr = dependencyName.get(i).substring(0,splitIndex);
                         if (packageName.equals(packageStr)) continue;
                         String classStr   = dependencyName.get(i).substring(splitIndex+1);
