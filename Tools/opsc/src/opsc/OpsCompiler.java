@@ -60,21 +60,31 @@ public class OpsCompiler
     }
 
     public static void usage() {
+        System.out.println("");
+        System.out.println("opsc -P <IDL_proj_dir> [options]");
+        System.out.println("  or");
         System.out.println("opsc [options] idlfiles...");
         System.out.println("");
         System.out.println("OPTIONS");
-        System.out.println("  -o <dir>          set output directory");
-        System.out.println("  -t <dir>          set template directory (overrides built-in templates)");
-        System.out.println("  -p <projname>     set project name");
-        System.out.println("  -P <IDL proj dir> use as project directory with pre-defined subdirectories");
-        System.out.println("  -h | --help       show this help");
+        System.out.println("  -? | -h | --help  show this help");
+        System.out.println("  -b <feature>      build given feature");
+        System.out.println("  -B <feature>      don't build given feature");
         System.out.println("  -d                verbose output");
         System.out.println("  -dump             print all parsed objects");
-        System.out.println("  -pp               name an ops IDL project.properties file");
+        System.out.println("  -g <feature>      generate given feature");
+        System.out.println("  -G <feature>      don't generate given feature");
+        System.out.println("  -o <dir>          set output directory");
+        System.out.println("  -P <IDL_proj_dir> use as project directory with pre-defined subdirectories");
+        System.out.println("  -p <projname>     set project name");
         System.out.println("  -parse            only parse, don't generate");
+        System.out.println("  -pp <file>        name an ops IDL project.properties file");
         System.out.println("  -printProps       print system props");
+        System.out.println("  -t <dir>          set template directory (overrides built-in templates)");
         System.out.println("");
-        System.exit(1);
+        System.out.println("FEATURE");
+        System.out.println("  for generate: cpp, csharp, java, python, debug");
+        System.out.println("  for build:    csharp, java");
+        System.out.println("");
     }
 
     /**
@@ -103,6 +113,21 @@ public class OpsCompiler
           extraArgs.add(f.getAbsolutePath());
         }
       }
+    }
+
+    protected void updateGenerateProp(String feature, boolean value)
+    {
+      if(feature.equals("cpp")) _props.generateCpp = value;
+      if(feature.equals("csharp")) _props.generateCS = value;
+      if(feature.equals("java")) _props.generateJava = value;
+      if(feature.equals("python")) _props.generatePython = value;
+      if(feature.equals("debug")) _props.buildDebugProject = value;
+    }
+
+    protected void updateBuildProp(String feature, boolean value)
+    {
+      if(feature.equals("csharp")) _props.buildCS = value;
+      if(feature.equals("java")) _props.buildJava = value;
     }
 
     protected boolean parseCommandLineArgs(String args[])
@@ -221,22 +246,29 @@ public class OpsCompiler
                 arg = extraArgs.elementAt(i);
                 _strProjectName = arg;
                 System.out.println("Info: Project name set to " + _strProjectName);
+            } else if((arg.equals("-b") || arg.equals("-B")) && (i < extraArgs.size())) {
+                i++;
+                updateBuildProp(extraArgs.elementAt(i), arg.equals("-b"));
             } else if(arg.equals("-d")) {
                 _verbose = 1;
-            } else if (arg.equals("-dump")) {
-               _dumpFlag = true;
             } else if(arg.equals("-dd")) {
                 _verbose = 2;
+            } else if (arg.equals("-dump")) {
+                _dumpFlag = true;
+            } else if((arg.equals("-g") || arg.equals("-G")) && (i < extraArgs.size())) {
+                i++;
+                updateGenerateProp(extraArgs.elementAt(i), arg.equals("-g"));
             } else if(arg.equals("-parse")) {
                 _bOnlyParse = true;
-            } else if(arg.equals("-h") || arg.equals("--help")) {
+            } else if(arg.equals("-?") || arg.equals("-h") || arg.equals("--help")) {
                 usage();
-                return true;
+                System.exit(1);
             } else if(arg.equals("-printProps")) {
+                System.out.println("");
                 System.getProperties().list(System.out);
+                System.out.println("");
                 _props.list(System.out);
-                usage();
-                return true;
+                System.exit(1);
             } else if(arg.equals("-pp")) {
                 // ignore -pp here
                 i++;
@@ -417,15 +449,15 @@ public class OpsCompiler
           System.out.println("");
         } else {
           for (IDLField field : idlClass.getFields()) {
-            System.out.println("  field.getName()     : " + field.getName());
-            System.out.println("  field.getArraySize(): " + field.getArraySize());
-            System.out.println("  field.getType()     : " + field.getType());
-            System.out.println("  field.getComment()  : " + field.getComment());
-            System.out.println("  field.getValue()    : " + field.getValue());
-            System.out.println("  field.isIdlType()   : " + field.isIdlType());
-            System.out.println("  field.isArray()     : " + field.isArray());
-            System.out.println("  field.isStatic()    : " + field.isStatic());
-            System.out.println("  field.isAbstract()  : " + field.isAbstract());
+            System.out.println("  field.getName()       : " + field.getName());
+            System.out.println("    field.getArraySize(): " + field.getArraySize());
+            System.out.println("    field.getType()     : " + field.getType());
+            System.out.println("    field.getComment()  : " + field.getComment());
+            System.out.println("    field.getValue()    : " + field.getValue());
+            System.out.println("    field.isIdlType()   : " + field.isIdlType());
+            System.out.println("    field.isArray()     : " + field.isArray());
+            System.out.println("    field.isStatic()    : " + field.isStatic());
+            System.out.println("    field.isAbstract()  : " + field.isAbstract());
             System.out.println("");
           }
         }
@@ -476,6 +508,8 @@ public class OpsCompiler
 
         if (opsc._dumpFlag) opsc.dump();
 
+        System.out.flush();
+
         ///TODO Check that all types, which are not prefixed with a 'name.',
         /// are core types or defined with the idl's we parsed.
 
@@ -487,10 +521,14 @@ public class OpsCompiler
             opsc.compilePython();
         }
 
+        System.out.flush();
+
         // generate c++ if requested
         if(opsc._props.generateCpp) {
             opsc.compileCpp();
         }
+
+        System.out.flush();
 
         // generate java if so requested
         if(opsc._props.generateJava) {
@@ -501,6 +539,8 @@ public class OpsCompiler
             }
         }
 
+        System.out.flush();
+
         // generate cs if so requested
         if(opsc._props.generateCS) {
             // if compile is successful and user opted to build C#
@@ -510,17 +550,23 @@ public class OpsCompiler
             }
         }
 
+        System.out.flush();
+
         // generate debug project
         if(opsc._props.buildDebugProject) {
             System.out.println("");
             opsc.buildDebugProject();
         }
 
+        System.out.flush();
+
         // generate VS Example
         if(Boolean.parseBoolean(opsc._props.getPropertyValue("vsExampleEnabled", "false"))) {
             System.out.println("");
             opsc.buildVSExample();
         }
+
+        System.out.flush();
 
     }
 };

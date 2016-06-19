@@ -22,10 +22,10 @@ public class ProjectProperties implements Serializable
     public boolean generatePython = true;
     public boolean generateCpp = true;
     public boolean generateJava = true;
-    public boolean buildJava = false;
     public boolean generateCS = true;
-    public boolean buildCS = true;
-    public boolean buildDebugProject = true;
+    public boolean buildJava = false;
+    public boolean buildCS = false;
+    public boolean buildDebugProject = false;
     public String defaultOPSTopicConfigFile = "src/ops_config.xml";
     public Vector<JarDependency> javaBuildJarDependencies = new Vector<JarDependency>();
     public Vector<JarDependency> csBuildDllDependencies = new Vector<JarDependency>();
@@ -109,11 +109,33 @@ public class ProjectProperties implements Serializable
         return false;
     }
 
-    public void list(java.io.PrintStream out) {
-        for (Property property : properties)
-        {
-            out.println(property.key + ": " + property.value);
-        }
+    public void list(java.io.PrintStream out)
+    {
+      out.println("-- OPS project properties --");
+      out.println("generate Cpp: " + generateCpp);
+      out.println("generate C#: " + generateCS);
+      out.println("generate Java: " + generateJava);
+      out.println("generate Python: " + generatePython);
+      out.println("generate DebugProject: " + buildDebugProject);
+      out.println("build C#: " + buildCS);
+      out.println("build Java: " + buildJava);
+      ///String defaultOPSTopicConfigFile = "src/ops_config.xml";
+      for (JarDependency dep : javaBuildJarDependencies) {
+        out.println("Java jar dependency: " + dep);
+      }
+      for (JarDependency dep : csBuildDllDependencies) {
+        out.println("C# dll dependency: " + dep);
+      }
+      ///boolean generateOPSConfigClass = false;
+      ///boolean opsConfigClassNamespace = false;
+      ///boolean generateOPSConfigXMLFileFromSourceComments = false;
+      ///boolean addChecksumToConfig = false;
+      out.println("debugProjDomainID: " + debugProjDomainID);
+
+      for (Property property : properties)
+      {
+        out.println(property.key + ": " + property.value);
+      }
     }
 
     public static SerializableFactory getSerializableFactory()
