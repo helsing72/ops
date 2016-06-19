@@ -1,16 +1,16 @@
 
 #define AppName "OPS IDL Builder"
 ; #define AppVersion GetFileVersion(AddBackslash(SourcePath) + "..\app.exe")
-#define AppVersion "2013.08.27"
+#define AppVersion "2016.06.18"
 
 [Setup]
 AppName={#AppName}
 AppVerName={#AppName} version {#AppVersion}
-;AppCopyright=Copyright © 2008-2012 .
+;AppCopyright=Copyright ï¿½ 2008-2016 .
 DefaultDirName={pf}\OPS\{#AppName}
 DefaultGroupName={#AppName}
 ; UninstallDisplayIcon={app}\app.exe
-OutputDir=..\Release\Tools
+OutputDir=Release\Tools
 OutputBaseFilename=OPS_IDL_Builder_{#AppVersion}_Setup
 ShowLanguageDialog=no
 PrivilegesRequired=none
