@@ -11,7 +11,9 @@ SCRIPT_PATH=`readlink -f "$0"`; SCRIPT_PATH=`dirname "$SCRIPT_PATH"`; SCRIPT_PAT
 #CWD=$(pwd)
 #echo "current working directory $CWD"
 
-export PYTHONPATH=$SCRIPT_PATH/../../../Python:$PYTHONPATH
+OPS_PATH=$SCRIPT_PATH/../../../Python
+GEN_PATH=$SCRIPT_PATH/../../OPSIdls/PizzaProject/Generated/Python
+GEN_PATH2=$GEN_PATH/PizzaProject
+export PYTHONPATH=$OPS_PATH:$GEN_PATH:$GEN_PATH2:$PYTHONPATH
 
 python $SCRIPT_PATH/OPS_test.py $@
-
