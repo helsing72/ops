@@ -216,8 +216,6 @@ struct ItemInfo {
 
 std::vector<ItemInfo*> ItemInfoList;
 
-static bool beQuite = false;
-
 
 class MyListener :
 		public CHelperListener<pizza::VessuvioData>,
@@ -292,7 +290,7 @@ int main(int argc, char**argv)
 
 
 	// Finish up our ItemInfo's
-	for(int i = 0; i < ItemInfoList.size(); ++i) {
+	for(unsigned int i = 0; i < ItemInfoList.size(); ++i) {
 		ItemInfo* itemInfo = ItemInfoList[i];
 		itemInfo->helper = new TExtraAlltHelper(&myListener);
 
