@@ -2,8 +2,8 @@
 
 #cd OPStest-C++
 #./pizzatest-xml.sh
-cd OPStest-Python/
 echo
-echo "in run unit test script"
+echo "ls in run_unit_tests-xml.sh"
 ls
+cd OPStest-Python/
 ./pizzatest-xml.sh
