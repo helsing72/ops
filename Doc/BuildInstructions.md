@@ -7,6 +7,9 @@ See [Prerequisites](Prerequisites.md) for the required tools to build OPS.
 Use a Git client of your choice to clone the OPS repository to a directory of your choice, on windows e.g. "C:\\OPS" (OPS_DIR). You can then choose to checkout either trunk, a tag or a branch of your choice. Tags should be compilable and deployable right away. Trunk should normally build but is not sure to function properly. Refer to the latest commit comments to see if there are known issues or unfinished work in progress.
 
 ## Building with CMake ##
+#### Configuration ####
+Building the examples from the *Examples* directory can optionally be turned on using the *cmake-gui* or by editing CMakeLists.txt.
+
 #### Linux ####
 In directory "OPS_DIR" type 'make'.
 
@@ -24,6 +27,7 @@ The install result will be in the subdirectory 'deploy' with the following struc
 
 > deploy
 >  - bin
+>  - examples (building is optional in CMake)
 >  - include
 >  - lib
 >  - share
@@ -34,10 +38,7 @@ See [Building without CMake](BuildingWithoutCMake.md).
 ## Building OPS IDL Builder with Netbeans ##
 Open from Netbeans "OPS_DIR\Tools\OPS IDL Builder NB", make sure you check Open Required Projects and Open as main project. Right click the main project and select "Build All". This will build several projects and output quite a lot of text in the output window. Make sure you scroll to the bottom of the output window and verify it says "BUILD SUCCESSFUL". Try the OPS IDL Builder by choosing "Run" on the main project (OPS IDL Builder NB).
 
-Has been used with Netbeans 6.7, 6.9 and 8.0.
-
-## Building Examples ##
-See [Building Examples](BuildingExamples.md).
+Current OPS IDL Builder source has been used with Netbeans 8.0.
 
 ## Deploy Binaries ##
 TBD

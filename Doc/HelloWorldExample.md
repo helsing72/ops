@@ -1,3 +1,6 @@
+[Building Examples](BuildingExamples.md), [Build Instructions](BuildInstructions.md)
+
+---
 ## Hello World Example ##
 
 
@@ -249,7 +252,7 @@ public:
 
 //Application entry point
 int main(int argc, char* args)
-{
+
 	//Create an object that will listen to OPS events
 	Main m;
 
@@ -265,4 +268,4 @@ int main(int argc, char* args)
 
 Once again if you are not following have a look at [Subscribing To Topics](SubscribingToTopic.md)
 
-Thats all code needed to publish and subscribe to Hello World messages to and from C++ and Java. To build and run this example, check out [Installation](Installation.md) and build the examples.
+Thats all code needed to publish and subscribe to Hello World messages to and from C++ and Java. To build and run this example, check out [Installation](Installation.md) and [building examples](BuildingExamples.md).

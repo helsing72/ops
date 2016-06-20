@@ -1,3 +1,4 @@
+# Building without CMake #
 ## Build opsc (command-line OPS IDL compiler) and OPS Core for Java on Windows ##
 Run the bat-file 'OPS_DIR\Script\Build_Idl_Compiler.bat'. This will compile the necessary Java libraries, including *OPS Core for Java*, and the opsc compiler.
 
@@ -33,3 +34,6 @@ Build the solution for all configurations:
 
   * "Debug" - for compiler setting Debug
   * "Release" - for compiler setting Release
+
+## Building Examples ##
+See [Building Examples](BuildingExamples.md).

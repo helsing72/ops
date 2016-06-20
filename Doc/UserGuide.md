@@ -3,7 +3,7 @@
   * [Concepts](BasicConcepts.md)
   * [Build Instructions](BuildInstructions.md)
   * [Defining Data Types in IDL](IDLLanguage.md)
-  * [Defining Topic and Configuration](OpsConfig.md)
+  * [Defining Topics and Configuration](OpsConfig.md)
   * [Subscribing to Topics](SubscribingToTopic.md)
   * [Publishing on Topics](PublishingOnTopic.md)
   * [Hello World Example](HelloWorldExample.md)
@@ -21,6 +21,7 @@
     * [IDL Compiler](IDLCommandlineCompiler.md)
     * [OPS Listener](OPSListener.md)
     * [OPS Debugger](OPSDebugger.md)
+    * [Syntax highlighters](SyntaxHighlighters.md)
   * Advanced Concepts and Features
     * [Understanding OPSObject and OPSMessage](OpsMessage.md)
     * [Serializing](Serializing.md)

@@ -5,11 +5,20 @@
 # OPS IDL Builder #
 Learn more about the OPS IDL language [here](IDLLanguage.md).
 
-To edit IDL files and to compile these files into target languages, OPS comes with a tool called OPS IDL Builder. The OPS IDL Builder can be seen as an IDE for OPS projects. The OPS IDL Builder looks as follows, with some sample code open in a sample project:
+To edit IDL files and to compile these files into target languages, OPS comes with a tool called **OPS IDL Builder**. The **OPS IDL Builder** can be seen as an IDE for OPS projects.
+
+Prerequisites for compiling IDL files with the tool **OPS IDL Builder** is to define the  
+environment symbol **OPS_OPSC_PATH** with the path to the **opsc.bat** file, e.g.:
+```
+OPS_OPSC_PATH=D:\OPS\OPS4\Tools\opsc
+```
+
+The OPS IDL Builder looks as follows, with some sample code open in a sample project:
 
 ![idlcompiler.jpg](idlcompiler.jpg)
 
-With the OPS IDL Compiler you create projects containing possibly multiple IDL files with all the different data types you use in your project.
+With the OPS IDL Compiler you create projects containing possibly multiple IDL files with all the different data types you use in your project. To compile the IDL files press the 'hammer'-button.
+
 Compiled to C++, this is what would be generated from the SimpleData data type above:
 
 ```
