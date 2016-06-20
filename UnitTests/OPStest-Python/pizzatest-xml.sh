@@ -2,7 +2,7 @@
 
 JENK_DIR="/tmp/jenkins/workspace/ops_pizzatest"
 
-cd OPStest-Python/
+#cd OPStest-Python/
 
 export PYTHONPATH=$PYTHONPATH:$PWD/Pizzas
 export PYTHONPATH=$PYTHONPATH:"../../Python"
