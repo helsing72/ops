@@ -12,20 +12,20 @@ find build.debug/ -name '*.gcda' | xargs rm -f
 
 mkdir -p UnitTests/OPStest-C++/Unit_test_results
 date > UnitTests/OPStest-C++/Unit_test_results/UnitTests-result.txt 
-build.debug/UnitTests/OPStest-C++/UnitTests/test-serialize-and-deserialize >> UnitTests/OPStest-C++/Unit_test_results/UnitTests-result.txt
+build.debug/UnitTests/OPStest-C++/UnitTests/test-serialize-and-deserialize
 exit_des_ser=$?
 
-build.debug/UnitTests/OPStest-C++/UnitTests/test-subscribe    & #>> UnitTests/OPStest-C++/Unit_test_results/UnitTests-result.txt &
+build.debug/UnitTests/OPStest-C++/UnitTests/test-subscribe  
 pid_normal=$!
 
-build.debug/UnitTests/OPStest-C++/UnitTests/test-subscribeTCP & # >> UnitTests/OPStest-C++/Unit_test_results/UnitTests-result.txt &
+build.debug/UnitTests/OPStest-C++/UnitTests/test-subscribeTCP
 pid_tcp=$!
 
-build.debug/UnitTests/OPStest-C++/UnitTests/test-subscribeUDP & #>> UnitTests/OPStest-C++/Unit_test_results/UnitTests-result.txt &
+build.debug/UnitTests/OPStest-C++/UnitTests/test-subscribeUDP
 pid_udp=$!
 
 sleep 1
-build.debug/UnitTests/OPStest-C++/src/publishBin              >> UnitTests/OPStest-C++/Unit_test_results/UnitTests-result.txt
+build.debug/UnitTests/OPStest-C++/src/publishBin
 
 wait $pid_normal
 exit_normal=$?
