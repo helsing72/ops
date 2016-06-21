@@ -121,7 +121,7 @@ void initExtraAlltNormal(pizza::special::ExtraAllt &extraAllt) {
 	(extraAllt.shorts).push_back(0);
 	(extraAllt.shorts).push_back(123);
 	(extraAllt.shorts).push_back(-523);
-	(extraAllt.shorts).push_back(62860);
+	(extraAllt.shorts).push_back(30000);
 	(extraAllt.shorts).push_back(short_min);
 	(extraAllt.shorts).push_back(short_max);
 

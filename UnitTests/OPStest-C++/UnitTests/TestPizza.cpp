@@ -62,7 +62,7 @@ void testExtraAlltNormal(pizza::special::ExtraAllt &extraAllt) {
 	EXPECT_EQ((extraAllt.shorts).at(0), 0);
 	EXPECT_EQ((extraAllt.shorts).at(1), 123);
 	EXPECT_EQ((extraAllt.shorts).at(2), -523);
-	EXPECT_EQ((extraAllt.shorts).at(3), 62860);
+	EXPECT_EQ((extraAllt.shorts).at(3), 30000);
 	EXPECT_EQ((extraAllt.shorts).at(4), short_min);
 	EXPECT_EQ((extraAllt.shorts).at(5), short_max);
 
