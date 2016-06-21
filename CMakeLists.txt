@@ -75,6 +75,15 @@ else()
 endif()
 
 
+# Python, we only support 2.7.x
+find_package(PythonInterp 2.7 EXACT)
+if(PYTHONINTERP_FOUND)
+  message("Found Python interpreter version " ${PYTHON_VERSION_STRING})
+else()
+  message(WARNING "Could not find a Python interpreter")
+endif()
+
+
 # If we have java
 # we need ANother Tool for Language Recognition
 find_jar(ANTLR_JAR antlr
@@ -136,6 +145,10 @@ if(Boost_FOUND)
 
 else()
   message(WARNING "install Boost to build OPS C++ libraries")
+endif()
+
+if(PYTHONINTERP_FOUND)
+  add_subdirectory(Python)
 endif()
 
 ################################################################################

@@ -15,6 +15,7 @@ TOKEN:keyword:(
 "idltype" |
 "extends"|
 "byte" |
+"short"|
 "int"|
 "long"|
 "float"|
@@ -33,7 +34,7 @@ TOKEN:operator: (
 
 "{" | "}" |
 "," | ";" |
-"." | "[]"
+"." | "[" | "]"
 )
 TOKEN:string:(
 "\""

@@ -39,6 +39,7 @@ public class PropertiesDialog extends javax.swing.JDialog
         genCppCheckBox.setSelected(properties.generateCpp);
         genJavaCheckBox.setSelected(properties.generateJava);
         genCsCheckBox.setSelected(properties.generateCS);
+        genPythonCheckBox.setSelected(properties.generatePython);
 
         buildJavaCheckBox.setSelected(properties.buildJava);
         buildCsCheckBox.setSelected(properties.buildCS);
@@ -61,6 +62,7 @@ public class PropertiesDialog extends javax.swing.JDialog
         properties.generateCpp = genCppCheckBox.isSelected();
         properties.generateJava = genJavaCheckBox.isSelected();
         properties.generateCS = genCsCheckBox.isSelected();
+        properties.generatePython = genPythonCheckBox.isSelected();
         properties.buildJava = buildJavaCheckBox.isSelected();
         properties.buildCS = buildCsCheckBox.isSelected();
         properties.buildDebugProject = buildDebugProjectCheckBox.isSelected();
@@ -92,6 +94,7 @@ public class PropertiesDialog extends javax.swing.JDialog
         genCppCheckBox = new javax.swing.JCheckBox();
         genJavaCheckBox = new javax.swing.JCheckBox();
         genCsCheckBox = new javax.swing.JCheckBox();
+        genPythonCheckBox = new javax.swing.JCheckBox();
         jPanel2 = new javax.swing.JPanel();
         buildJavaCheckBox = new javax.swing.JCheckBox();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -175,6 +178,8 @@ public class PropertiesDialog extends javax.swing.JDialog
 
         genCsCheckBox.setText(org.openide.util.NbBundle.getMessage(PropertiesDialog.class, "PropertiesDialog.genCsCheckBox.text")); // NOI18N
 
+        genPythonCheckBox.setText(org.openide.util.NbBundle.getMessage(PropertiesDialog.class, "PropertiesDialog.genPythonCheckBox.text")); // NOI18N
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -186,7 +191,9 @@ public class PropertiesDialog extends javax.swing.JDialog
                 .addComponent(genJavaCheckBox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(genCsCheckBox)
-                .addContainerGap(287, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(genPythonCheckBox, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(193, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -194,8 +201,9 @@ public class PropertiesDialog extends javax.swing.JDialog
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(genCppCheckBox)
                     .addComponent(genJavaCheckBox)
-                    .addComponent(genCsCheckBox))
-                .addContainerGap(2, Short.MAX_VALUE))
+                    .addComponent(genCsCheckBox)
+                    .addComponent(genPythonCheckBox))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(org.openide.util.NbBundle.getMessage(PropertiesDialog.class, "PropertiesDialog.jPanel2.border.title"))); // NOI18N
@@ -288,19 +296,20 @@ public class PropertiesDialog extends javax.swing.JDialog
                 .addContainerGap()
                 .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel11Layout.createSequentialGroup()
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 414, Short.MAX_VALUE)
-                        .addContainerGap())
-                    .addGroup(jPanel11Layout.createSequentialGroup()
-                        .addComponent(buildCsCheckBox)
-                        .addContainerGap(367, Short.MAX_VALUE))
-                    .addGroup(jPanel11Layout.createSequentialGroup()
                         .addComponent(addCsDepButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(removeCsDepButton)
                         .addGap(280, 280, 280))
                     .addGroup(jPanel11Layout.createSequentialGroup()
-                        .addComponent(jLabel9)
-                        .addContainerGap(343, Short.MAX_VALUE))))
+                        .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane2)
+                            .addGroup(jPanel11Layout.createSequentialGroup()
+                                .addComponent(buildCsCheckBox)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addGroup(jPanel11Layout.createSequentialGroup()
+                                .addComponent(jLabel9)
+                                .addGap(0, 0, Short.MAX_VALUE)))
+                        .addContainerGap())))
         );
         jPanel11Layout.setVerticalGroup(
             jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -522,7 +531,7 @@ public class PropertiesDialog extends javax.swing.JDialog
                 .addContainerGap()
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTabbedPane2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 471, Short.MAX_VALUE))
+                    .addComponent(jTabbedPane2, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addContainerGap())
         );
         mainPanelLayout.setVerticalGroup(
@@ -660,6 +669,7 @@ public class PropertiesDialog extends javax.swing.JDialog
     private javax.swing.JCheckBox genCppCheckBox;
     private javax.swing.JCheckBox genCsCheckBox;
     private javax.swing.JCheckBox genJavaCheckBox;
+    private javax.swing.JCheckBox genPythonCheckBox;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

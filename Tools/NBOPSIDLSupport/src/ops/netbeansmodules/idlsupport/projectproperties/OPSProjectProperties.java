@@ -4,7 +4,7 @@
  */
 package ops.netbeansmodules.idlsupport.projectproperties;
 
-import com.sun.corba.se.impl.orbutil.GetPropertyAction;
+//import com.sun.corba.se.impl.orbutil.GetPropertyAction;
 import configlib.ArchiverInOut;
 import configlib.Serializable;
 import configlib.SerializableFactory;
@@ -24,6 +24,7 @@ public class OPSProjectProperties implements Serializable
     public boolean buildJava = true;
     public boolean generateCS = true;
     public boolean buildCS = true;
+    public boolean generatePython = true;
     public boolean buildDebugProject = true;
     public String defaultOPSTopicConfigFile = "src/ops_config.xml";
     public Vector<JarDependency> javaBuildJarDependencies = new Vector<JarDependency>();
@@ -46,6 +47,7 @@ public class OPSProjectProperties implements Serializable
         buildJava = archiver.inout("buildJava", buildJava);
         generateCS = archiver.inout("generateCS", generateCS);
         buildCS = archiver.inout("buildCS", buildCS);
+        generatePython = archiver.inout("generatePython", generatePython);
         buildDebugProject = archiver.inout("buildDebugProject", buildDebugProject);
         debugProjDomainID = archiver.inout("debugProjDomainID", debugProjDomainID);
         defaultOPSTopicConfigFile = archiver.inout("defaultOPSTopicConfigFile", defaultOPSTopicConfigFile);

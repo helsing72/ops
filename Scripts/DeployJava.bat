@@ -1,7 +1,14 @@
+@rem find out where this script is
+@set SCRIPT_PATH=%~dp0
 
-mkdir Java
+@pushd %~dp0
 
-copy "..\Java\OPSJLib\dist\*.*" "Java"
-copy "..\Libs\ConfigurationLib\dist\*.*" "Java"
+mkdir Release
+mkdir Release\Java
 
+copy "..\Java\OPSJLib\dist\*.*" "Release\Java"
+copy "..\Libs\ConfigurationLib\dist\*.*" "Release\Java"
 
+pause
+
+@popd

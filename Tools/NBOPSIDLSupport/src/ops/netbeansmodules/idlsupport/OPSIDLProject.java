@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -251,48 +252,73 @@ public class OPSIDLProject implements Project
             }
             else if(fileObject.getExt().toLowerCase().equals("idl"))
             {
-                try
-                {
-                    //int size = fileObject.getInputStream().available();
-
-                    //byte[] textBytes = new byte[size];
-                    //fileObject.getInputStream().read(textBytes);
-                    projectIDLParser.parse(fileObject.getName(), fileObject.asText()/*new String(textBytes)*/, io);
-                    //fileObject.getInputStream().close();
-
-                    
-                } catch (IOException ex)
-                {
-                    Exceptions.printStackTrace(ex);
-                }
+//                try
+//                {
+//                    //int size = fileObject.getInputStream().available();
+//
+//                    //byte[] textBytes = new byte[size];
+//                    //fileObject.getInputStream().read(textBytes);
+//                    projectIDLParser.parse(fileObject.getName(), fileObject.asText()/*new String(textBytes)*/, io);
+//                    //fileObject.getInputStream().close();
+//                } catch (IOException ex)
+//                {
+//                    Exceptions.printStackTrace(ex);
+//                }
             }
         }
+    }
+    
+    private void CommandLineCompiler(InputOutput io)
+    {
+        String opscPath = System.getenv("OPS_OPSC_PATH");
+        if (opscPath == null) {
+            io.getOut().println("Info: Path to OPS command-line compiler \"opsc.bat\" can be set using env. symbol OPS_OPSC_PATH");
+            opscPath = "opsc.bat";
+        } else {
+            opscPath += "\\opsc.bat";
+            io.getOut().println("Info: OPS command-line compiler \"" + opscPath + "\" used (from env. symbol OPS_OPSC_PATH)");
+        }
 
+        try {
+          ProcessBuilder pb = new ProcessBuilder(opscPath, "-P", getProjectDirectory().getPath());
+          pb.redirectErrorStream(true);
+          Process p = pb.start();
+          InputStream inp = p.getInputStream();
+
+          int c;
+          while ((c = inp.read()) != -1) {
+            io.getOut().write(c);
+            io.getOut().flush();
+          }
+        }
+        catch (IOException e) {
+          io.getOut().println("Error: " + e.getMessage());
+        }
     }
     
     public void build()
     {
-        
         try {
             InputOutput io = IOProvider.getDefault().getIO("OPS Build - " + getName(), false);
             //io.getOut().reset();
             io.getOut().reset();
             io.select();
             io.getOut().println("Starting build of " + getName() + "...");
-            iterateFiles(io);
+            
+            // Call built-in parser/compiler
+            //iterateFiles(io);
+            
+            // Call the command-line compiler opsc.bat/.sh
+            CommandLineCompiler(io);
 
             if(projectIDLParser.getNrErrors() == 0)
             {
-
             }
             io.getOut().println("Build finished.");
         } catch (Exception ex)
         {
-            
             Exceptions.printStackTrace(ex);
         }
-
-
     }
 
     private void iterateFiles(InputOutput io)
@@ -310,7 +336,7 @@ public class OPSIDLProject implements Project
             //InputOutput io = IOProvider.getDefault().getIO("OPS Build - " + getName(), false);
             io.select();
             io.getOut().println("Parsing successful.");
-            projectIDLCompiler.compile(projectIDLParser.getIdlClasses(), io);
+//            projectIDLCompiler.compile(projectIDLParser.getIdlClasses(), io);
         }
     }
 
