@@ -1,5 +1,5 @@
 #!/bin/bash
-
+JENK_DIR="/tmp/jenkins/workspace/ops_pizzatest"
 cd ../../
 
 exit_count=0
