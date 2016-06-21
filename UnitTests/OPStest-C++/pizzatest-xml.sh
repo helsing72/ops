@@ -1,16 +1,40 @@
 #!/bin/bash
 
-cd ../..
-JENK_DIR="/tmp/jenkins/workspace/ops_pizzatest"
+cd ../../
 
-build.debug/UnitTests/OPStest/UnitTests/test-serialize-and-deserialize --gtest_output="xml:$JENK_DIR/unittest-c++-ser-deser-result.xml"
+exit_count=0
+exit_des_ser=0
+exit_normal=0
+exit_tcp=0
+exit_udp=0
+#remove gcda files build folder
+find build.debug/ -name '*.gcda' | xargs rm -f
 
-build.debug/UnitTests/OPStest/UnitTests/test-subscribe  	--gtest_output="xml:$JENK_DIR/unittest-c++-pub-sub-result.xml"     &
-build.debug/UnitTests/OPStest/UnitTests/test-subscribeTCP	--gtest_output="xml:$JENK_DIR/unittest-c++-pub-sub-result-tcp.xml" &
-build.debug/UnitTests/OPStest/UnitTests/test-subscribeUDP  	--gtest_output="xml:$JENK_DIR/unittest-c++-pub-sub-result-udp.xml" &
+mkdir -p UnitTests/OPStest-C++/Unit_test_results
+date > UnitTests/OPStest-C++/Unit_test_results/UnitTests-result.txt 
+build.debug/UnitTests/OPStest-C++/UnitTests/test-serialize-and-deserialize --gtest_output="xml:$JENK_DIR/unittest-c++-ser-deser-result.xml"
+exit_des_ser=$?
+
+build.debug/UnitTests/OPStest-C++/UnitTests/test-subscribe    --gtest_output="xml:$JENK_DIR/unittest-c++-pub-sub-result.xml"     &
+pid_normal=$!
+
+build.debug/UnitTests/OPStest-C++/UnitTests/test-subscribeTCP --gtest_output="xml:$JENK_DIR/unittest-c++-pub-sub-result-tcp.xml" &
+pid_tcp=$!
+
+build.debug/UnitTests/OPStest-C++/UnitTests/test-subscribeUDP --gtest_output="xml:$JENK_DIR/unittest-c++-pub-sub-result-udp.xml" &
+pid_udp=$!
 
 sleep 1
-build.debug/UnitTests/OPStest/src/publishBin
+build.debug/UnitTests/OPStest-C++/src/publishBin
+
+wait $pid_normal
+exit_normal=$?
+
+wait $pid_tcp
+exit_tcp=$?
+
+wait $pid_udp
+exit_udp=$?
 
 sleep 3
 gcovr --root . -b --xml --xml-pretty -o $JENK_DIR/coverage-c++-result.xml
@@ -19,3 +43,11 @@ bash
 	cppcheck --enable=all --inconclusive --xml --xml-version=2 Cpp/source Cpp/include 2> $JENK_DIR/cppcheck-c++-result.xml
 exit
 
+exit_count=$(( $exit_des_ser + $exit_normal + $exit_tcp  + $exit_udp ))
+
+if [ $exit_count == 0 ]
+then
+	printf "\n\n   ALL TEST PASSED\n\n\n"
+else
+	printf "\n\n   $exit_count TEST FAILED\n\n\n"
+fi
