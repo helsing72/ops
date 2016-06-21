@@ -180,13 +180,11 @@ TEST_F(Test_OPS_Serialization_And_Deserialization, test_ExtraAllt_OPSMessage) {
 
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
 	ops::OPSMessage myMess;
 	myMess.setDataOwner(true);
 	init::initVessuvioData(vessuvio);
 	init::initExtraAlltNormal(extraAllt);
-
     // required init of gtest library
     ::testing::InitGoogleTest(&argc, argv);
     int result = RUN_ALL_TESTS();

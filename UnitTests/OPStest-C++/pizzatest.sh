@@ -15,13 +15,13 @@ date > UnitTests/OPStest-C++/Unit_test_results/UnitTests-result.txt
 build.debug/UnitTests/OPStest-C++/UnitTests/test-serialize-and-deserialize >> UnitTests/OPStest-C++/Unit_test_results/UnitTests-result.txt
 exit_des_ser=$?
 
-build.debug/UnitTests/OPStest-C++/UnitTests/test-subscribe    >> UnitTests/OPStest-C++/Unit_test_results/UnitTests-result.txt &
+build.debug/UnitTests/OPStest-C++/UnitTests/test-subscribe    & #>> UnitTests/OPStest-C++/Unit_test_results/UnitTests-result.txt &
 pid_normal=$!
 
-build.debug/UnitTests/OPStest-C++/UnitTests/test-subscribeTCP >> UnitTests/OPStest-C++/Unit_test_results/UnitTests-result.txt &
+build.debug/UnitTests/OPStest-C++/UnitTests/test-subscribeTCP & # >> UnitTests/OPStest-C++/Unit_test_results/UnitTests-result.txt &
 pid_tcp=$!
 
-build.debug/UnitTests/OPStest-C++/UnitTests/test-subscribeUDP >> UnitTests/OPStest-C++/Unit_test_results/UnitTests-result.txt &
+build.debug/UnitTests/OPStest-C++/UnitTests/test-subscribeUDP & #>> UnitTests/OPStest-C++/Unit_test_results/UnitTests-result.txt &
 pid_udp=$!
 
 sleep 1
