@@ -158,7 +158,7 @@ TEST_F(Test_OPS_Serialization_And_Deserialization, test_ExtraAllt_OPSMessage) {
 
 	out.inout(std::string("data"), &mess);
 
-	EXPECT_EQ(buf.GetSize(), 858);
+	EXPECT_EQ(buf.GetSize(), 862);
 
 	// Create object from buffer (using type info in buffer)
 	buf.Reset();
@@ -176,7 +176,7 @@ TEST_F(Test_OPS_Serialization_And_Deserialization, test_ExtraAllt_OPSMessage) {
 	//testing values of extra allt
 	test::testExtraAlltNormal(*recreatedExtraAllt);
 
-	EXPECT_EQ(buf.GetSize(), 858);
+	EXPECT_EQ(buf.GetSize(), 862);
 
 }
 
