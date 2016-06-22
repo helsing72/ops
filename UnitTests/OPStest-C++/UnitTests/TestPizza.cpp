@@ -3,19 +3,12 @@
 
 namespace test {
 
-const int int_max 			= std::numeric_limits<int>::max();
-const int int_min 			= std::numeric_limits<int>::min();
 const float float_max 		= std::numeric_limits<float>::max();
 const float float_min	 	= std::numeric_limits<float>::min();
 const double double_max 	= std::numeric_limits<double>::max();
 const double double_min 	= std::numeric_limits<double>::min();
-//const short short_max 		= std::numeric_limits<short>::max();
-//const short short_min	 	= std::numeric_limits<short>::min();
-const __int64 int64_max 	= std::numeric_limits<__int64>::max();
-const __int64 int64_min 	= std::numeric_limits<__int64>::min();
+
 double delta 				= 0.0001;
-
-
 
 void testExtraAlltNormal(pizza::special::ExtraAllt &extraAllt) {
 
