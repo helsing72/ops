@@ -9,8 +9,8 @@ const float float_max 		= std::numeric_limits<float>::max();
 const float float_min	 	= std::numeric_limits<float>::min();
 const double double_max 	= std::numeric_limits<double>::max();
 const double double_min 	= std::numeric_limits<double>::min();
-const short short_max 		= std::numeric_limits<short>::max();
-const short short_min	 	= std::numeric_limits<short>::min();
+//const short short_max 		= std::numeric_limits<short>::max();
+//const short short_min	 	= std::numeric_limits<short>::min();
 const __int64 int64_max 	= std::numeric_limits<__int64>::max();
 const __int64 int64_min 	= std::numeric_limits<__int64>::min();
 double delta 				= 0.0001;
@@ -54,8 +54,8 @@ void testExtraAlltNormal(pizza::special::ExtraAllt &extraAllt) {
 	EXPECT_EQ((extraAllt.ints).at(1), 123);
 	EXPECT_EQ((extraAllt.ints).at(2), -523);
 	EXPECT_EQ((extraAllt.ints).at(3), 62860);
-	EXPECT_EQ((extraAllt.ints).at(4), int_min);
-	EXPECT_EQ((extraAllt.ints).at(5), int_max);
+	EXPECT_EQ((extraAllt.ints).at(4), -2147483648);
+	EXPECT_EQ((extraAllt.ints).at(5), 2147483647);
 
 	//test shorts
 	EXPECT_EQ((extraAllt.shorts).size(), 6) << "size of the shorts vector are not correct";
@@ -63,8 +63,8 @@ void testExtraAlltNormal(pizza::special::ExtraAllt &extraAllt) {
 	EXPECT_EQ((extraAllt.shorts).at(1), 123);
 	EXPECT_EQ((extraAllt.shorts).at(2), -523);
 	EXPECT_EQ((extraAllt.shorts).at(3), 30000);
-	EXPECT_EQ((extraAllt.shorts).at(4), short_min);
-	EXPECT_EQ((extraAllt.shorts).at(5), short_max);
+	EXPECT_EQ((extraAllt.shorts).at(4), -32768);
+	EXPECT_EQ((extraAllt.shorts).at(5), 32767);
 
 	//test floats
 	EXPECT_EQ((extraAllt.floats).size(), 6) << "size of the floats vector are not correct";
@@ -90,8 +90,8 @@ void testExtraAlltNormal(pizza::special::ExtraAllt &extraAllt) {
 	EXPECT_EQ((extraAllt.longs).at(1), 123);
 	EXPECT_EQ((extraAllt.longs).at(2), -523);
 	EXPECT_EQ((extraAllt.longs).at(3), 3951379600);
-	EXPECT_EQ((extraAllt.longs).at(4), int64_min);
-	EXPECT_EQ((extraAllt.longs).at(5), int64_max);
+	EXPECT_EQ((extraAllt.longs).at(4), -9223372036854775808);
+	EXPECT_EQ((extraAllt.longs).at(5), 9223372036854775807);
 
 	//test cheeses
 	EXPECT_EQ((extraAllt.cheeses).size(), 6) << "size of the cheeses vector are not correct";
