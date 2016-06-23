@@ -216,8 +216,6 @@ struct ItemInfo {
 
 std::vector<ItemInfo*> ItemInfoList;
 
-static bool beQuite = false;
-
 
 class MyListener :
 		public CHelperListener<pizza::VessuvioData>,
@@ -244,14 +242,14 @@ int main(int argc, char**argv)
 
 	// Create participants
 	// NOTE that the second parameter (participantID) must be different for the two participant instances
-	ops::Participant* participant = ops::Participant::getInstance("PizzaDomain", "PizzaDomain", "UnitTests/OPStest/ops_config.xml");
+	ops::Participant* participant = ops::Participant::getInstance("PizzaDomain", "PizzaDomain", "UnitTests/OPStest-C++/ops_config.xml");
 	if (participant == NULL) {
 	    std::cout << "Failed to create Participant. Missing ops_config.xml ??" << std::endl;
 		exit(-1);
 	}
 	participant->addTypeSupport(new PizzaProject::PizzaProjectTypeFactory());
 
-	ops::Participant* otherParticipant = ops::Participant::getInstance("OtherPizzaDomain", "OtherPizzaDomain", "UnitTests/OPStest/ops_config.xml");
+	ops::Participant* otherParticipant = ops::Participant::getInstance("OtherPizzaDomain", "OtherPizzaDomain", "UnitTests/OPStest-C++/ops_config.xml");
 	if (otherParticipant == NULL) {
 		std::cout << "Failed to create Participant. Missing ops_config.xml ??" << std::endl;
         exit(-1);
@@ -290,8 +288,9 @@ int main(int argc, char**argv)
 
 	TExtraAlltHelper* hlpExtra = NULL;
 
+
 	// Finish up our ItemInfo's
-	for(int i = 0; i < ItemInfoList.size(); ++i) {
+	for(unsigned int i = 0; i < ItemInfoList.size(); ++i) {
 		ItemInfo* itemInfo = ItemInfoList[i];
 		itemInfo->helper = new TExtraAlltHelper(&myListener);
 
@@ -310,13 +309,14 @@ int main(int argc, char**argv)
 		else if	(i == 2) std::cout << "skickar extra allt UDP" << std::endl;
 
 
-		hlpExtra = (TExtraAlltHelper*)itemInfo->helper;
 
+		hlpExtra = (TExtraAlltHelper*)itemInfo->helper;
 		if		(i == 0) hlpExtra->data = extraAlltNormal;
 		else if (i == 1) hlpExtra->data = extraAlltNormalTCP;
 		else if (i == 2) hlpExtra->data = extraAlltNormalUDP;
 
 		ops::TimeHelper::sleep(2000);
+
 		itemInfo->helper->Write();
 		std::cout << "should write first data" << std::endl;
 		ops::TimeHelper::sleep(1000);

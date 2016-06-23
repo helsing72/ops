@@ -58,6 +58,9 @@
 *.out
 *.app
 
+## Python ##
+*.pyc
+
 ## Qt ##
 
 # C++ objects and libs

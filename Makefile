@@ -47,10 +47,17 @@ $(BUILD_DEBUG)/Makefile : %/Makefile :
 	cd $* && \
 	cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_PREFIX) -DCMAKE_BUILD_TYPE=Debug ..
 
-.PHONY : unittest
-unittest : debug
-	@echo "Running unit tests!!!"
-	cd UnitTests/OPStest && \
+.PHONY : unittest-c++
+unittest-c++ : debug
+	@echo "Running C++ unit tests!!!"
+	cd UnitTests/OPStest-C++ && \
+	./pizzatest.sh
+	
+	
+.PHONY : unittest-python
+unittest-python :
+	@echo "Running C++ unit tests!!!"
+	cd UnitTests/OPStest-Python && \
 	./pizzatest.sh
 
 .PHONY : install
@@ -84,6 +91,8 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... opt (optimized/release)"
 	@echo "... debug"
+	@echo "... unittest-c++"
+	@echo "... unittest-python"
 	@echo "... install"
 	@echo "... unittest"
 	@echo "... clean"

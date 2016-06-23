@@ -138,7 +138,7 @@ add_subdirectory(CSharp)
 if(Boost_FOUND)
   add_subdirectory(Cpp)
 
-  option(OPS_BUILD_UNITTESTS "Enable to build the UnitTest app(s)" OFF)
+  option(OPS_BUILD_UNITTESTS "Enable to build the UnitTest app(s)" ON)
   if(OPS_BUILD_UNITTESTS AND CMAKE_BUILD_TYPE MATCHES "Debug")
     add_subdirectory(UnitTests) #pane added
   endif()

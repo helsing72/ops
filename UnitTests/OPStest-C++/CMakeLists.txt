@@ -1,7 +1,6 @@
 
 project (OPStest)
 
-
 if(NOT GTEST_FOUND)
   message(FATAL_ERROR "GOOGLETEST_HOME is undefined")
 endif()
@@ -21,6 +20,7 @@ include_directories(${CMAKE_SOURCE_DIR}/Cpp/include)
 # The Gtest headers are at:
 include_directories(${GTEST_INCLUDE_DIRS})
 
+
 # we have Pizza headers in lib
 include_directories(lib)
 
@@ -28,7 +28,6 @@ include_directories(lib)
 add_subdirectory(src)
 # This is the series of test applications
 add_subdirectory(UnitTests)
-
 #if(CMAKE_BUILD_TYPE MATCHES "Debug")
   add_custom_target(UnitTests DEPENDS 
 	publishBin

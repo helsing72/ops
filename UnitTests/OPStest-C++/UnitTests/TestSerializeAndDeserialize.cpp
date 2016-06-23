@@ -118,7 +118,7 @@ TEST_F(Test_OPS_Serialization_And_Deserialization, test_ExtraAllt_OPSObject) {
 
 	out.inout(std::string("data"), &extraAllt);
 
-	EXPECT_EQ(buf.GetSize(), 799);
+	EXPECT_EQ(buf.GetSize(), 815);
 
 	// Create object from buffer (using type info in buffer)
 	buf.Reset();
@@ -131,7 +131,7 @@ TEST_F(Test_OPS_Serialization_And_Deserialization, test_ExtraAllt_OPSObject) {
 
 	test::testExtraAlltNormal(*recreatedExtraAllt);
 
-	EXPECT_EQ((int) buf.GetSize(), 799);
+	EXPECT_EQ((int) buf.GetSize(), 815);
 }
 
 TEST_F(Test_OPS_Serialization_And_Deserialization, test_ExtraAllt_OPSMessage) {
@@ -158,7 +158,7 @@ TEST_F(Test_OPS_Serialization_And_Deserialization, test_ExtraAllt_OPSMessage) {
 
 	out.inout(std::string("data"), &mess);
 
-	EXPECT_EQ(buf.GetSize(), 858);
+	EXPECT_EQ(buf.GetSize(), 874);
 
 	// Create object from buffer (using type info in buffer)
 	buf.Reset();
@@ -176,17 +176,15 @@ TEST_F(Test_OPS_Serialization_And_Deserialization, test_ExtraAllt_OPSMessage) {
 	//testing values of extra allt
 	test::testExtraAlltNormal(*recreatedExtraAllt);
 
-	EXPECT_EQ(buf.GetSize(), 858);
+	EXPECT_EQ(buf.GetSize(), 874);
 
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
 	ops::OPSMessage myMess;
 	myMess.setDataOwner(true);
 	init::initVessuvioData(vessuvio);
 	init::initExtraAlltNormal(extraAllt);
-
     // required init of gtest library
     ::testing::InitGoogleTest(&argc, argv);
     int result = RUN_ALL_TESTS();
