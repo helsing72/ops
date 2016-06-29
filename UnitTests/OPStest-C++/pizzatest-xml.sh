@@ -1,5 +1,4 @@
 #!/bin/bash
-JENK_DIR="/tmp/jenkins/workspace/ops_pizzatest"
 cd ../../
 
 exit_count=0
@@ -12,16 +11,16 @@ find build.debug/ -name '*.gcda' | xargs rm -f
 
 mkdir -p UnitTests/OPStest-C++/Unit_test_results
 date > UnitTests/OPStest-C++/Unit_test_results/UnitTests-result.txt 
-build.debug/UnitTests/OPStest-C++/UnitTests/test-serialize-and-deserialize --gtest_output="xml:$JENK_DIR/unittest-c++-ser-deser-result.xml"
+build.debug/UnitTests/OPStest-C++/UnitTests/test-serialize-and-deserialize --gtest_output="xml:unittest-c++-ser-deser-result.xml"
 exit_des_ser=$?
 
-build.debug/UnitTests/OPStest-C++/UnitTests/test-subscribe    --gtest_output="xml:$JENK_DIR/unittest-c++-pub-sub-result.xml"     &
+build.debug/UnitTests/OPStest-C++/UnitTests/test-subscribe    --gtest_output="xml:unittest-c++-pub-sub-result.xml"     &
 pid_normal=$!
 
-build.debug/UnitTests/OPStest-C++/UnitTests/test-subscribeTCP --gtest_output="xml:$JENK_DIR/unittest-c++-pub-sub-result-tcp.xml" &
+build.debug/UnitTests/OPStest-C++/UnitTests/test-subscribeTCP --gtest_output="xml:unittest-c++-pub-sub-result-tcp.xml" &
 pid_tcp=$!
 
-build.debug/UnitTests/OPStest-C++/UnitTests/test-subscribeUDP --gtest_output="xml:$JENK_DIR/unittest-c++-pub-sub-result-udp.xml" &
+build.debug/UnitTests/OPStest-C++/UnitTests/test-subscribeUDP --gtest_output="xml:unittest-c++-pub-sub-result-udp.xml" &
 pid_udp=$!
 
 sleep 1
@@ -37,10 +36,10 @@ wait $pid_udp
 exit_udp=$?
 
 sleep 3
-gcovr --root . -b --xml --xml-pretty -o $JENK_DIR/coverage-c++-result.xml
+gcovr --root . -b --xml --xml-pretty -o coverage-c++-result.xml
 
 bash
-	cppcheck --enable=all --inconclusive --xml --xml-version=2 Cpp/source Cpp/include 2> $JENK_DIR/cppcheck-c++-result.xml
+	cppcheck --enable=all --inconclusive --xml --xml-version=2 Cpp/source Cpp/include 2> cppcheck-c++-result.xml
 exit
 
 exit_count=$(( $exit_des_ser + $exit_normal + $exit_tcp  + $exit_udp ))

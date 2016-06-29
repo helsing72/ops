@@ -210,3 +210,4 @@ $RECYCLE.BIN/
 /build.debug/
 /build.opt/
 /deploy/
+/build-arm/
