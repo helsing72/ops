@@ -1,4 +1,3 @@
-BUILD_ARM=build-arm
 BUILD_DEBUG=build.debug
 BUILD_OPT=build.opt
 
@@ -10,11 +9,11 @@ CCV=$(shell $(CC) -dumpversion)
 CXXV=$(shell $(CXX) -dumpversion)
 
 .PHONY : all
-all: debug opt arm
+all: debug opt
 	$(MAKE) install
 
 .PHONY : clean
-clean: clean_debug clean_opt clean_deploy clean_arm
+clean: clean_debug clean_opt clean_deploy
 
 .PHONY : clean_debug
 clean_debug:
@@ -25,11 +24,6 @@ clean_debug:
 clean_opt:
 	@echo "Cleaning opt"
 	rm -rf $(BUILD_OPT)
-
-.PHONY : clean_arm
-clean_arm:
-	@echo "Cleaning opt"
-	rm -rf $(BUILD_ARM)	
 
 .PHONY : opt
 opt: $(BUILD_OPT)/Makefile
@@ -53,19 +47,12 @@ $(BUILD_DEBUG)/Makefile : %/Makefile :
 	cd $* && \
 	cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_PREFIX) -DCMAKE_BUILD_TYPE=Debug ..
 
-.PHONY : arm
-arm:	
-	[ -d $(BUILD_ARM) ] || mkdir -p $(BUILD_ARM)
-	cd $(BUILD_ARM) && cmake -DCMAKE_TOOLCHAIN_FILE=../../../cmake/Toolchain-arm-xilinx-linux-gnueabi.cmake -DBOOST_LIBRARYDIR=$(BOOST_HOME)/lib-arm ..
-	$(MAKE) -C $(BUILD_ARM)/Cpp
-
 .PHONY : unittest-c++
 unittest-c++ : debug
 	@echo "Running C++ unit tests!!!"
 	cd UnitTests/OPStest-C++ && \
 	./pizzatest.sh
-	
-	
+
 .PHONY : unittest-python
 unittest-python :
 	@echo "Running C++ unit tests!!!"
