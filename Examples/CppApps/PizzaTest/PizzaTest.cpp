@@ -508,6 +508,11 @@ void menu()
 
 int main(int argc, char**argv)
 {
+//	for (int i = 0; i < 10; i++) {
+//		std::cout << ".";
+//		ops::TimeHelper::sleep(1000);
+//	}
+
 #ifdef _WIN32
 	// --------------------------------------------------------------------
 	// Try to set timer resolution to 1 ms
@@ -810,7 +815,8 @@ int main(int argc, char**argv)
 	delete errorWriter2; errorWriter2 = NULL;
 
 ///TODO this should be done by asking Participant to delete instances??
-	delete participant;
+/// Participant is a singleton and should not be deleted in this way!!!
+///	delete participant;
 
 #ifdef _WIN32
 	// --------------------------------------------------------------------
