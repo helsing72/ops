@@ -19,6 +19,8 @@ import java.util.Vector;
  */
 public class ProjectProperties implements Serializable
 {
+    public boolean generateAda = false;
+    public boolean generateDelphi = false;
     public boolean generatePython = true;
     public boolean generateCpp = true;
     public boolean generateJava = true;
@@ -42,6 +44,8 @@ public class ProjectProperties implements Serializable
 
     public void serialize(ArchiverInOut archiver) throws IOException
     {
+        generateAda = archiver.inout("generateAda", generateAda);
+        generateDelphi = archiver.inout("generateDelphi", generateDelphi);
         generatePython = archiver.inout("generatePython", generatePython);
         generateCpp = archiver.inout("generateCpp", generateCpp);
         generateJava = archiver.inout("generateJava", generateJava);
@@ -112,8 +116,10 @@ public class ProjectProperties implements Serializable
     public void list(java.io.PrintStream out)
     {
       out.println("-- OPS project properties --");
+      out.println("generate Ada: " + generateAda);
       out.println("generate Cpp: " + generateCpp);
       out.println("generate C#: " + generateCS);
+      out.println("generate Delphi: " + generateDelphi);
       out.println("generate Java: " + generateJava);
       out.println("generate Python: " + generatePython);
       out.println("generate DebugProject: " + buildDebugProject);

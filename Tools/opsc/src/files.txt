@@ -3,6 +3,7 @@ src/opsc/CompilerSupport.java
 src/opsc/Compiler.java
 src/opsc/CSharpCompiler.java
 src/opsc/CppCompiler.java
+src/opsc/DelphiCompiler.java
 src/opsc/JavaCompiler.java
 src/opsc/PythonCompiler.java
 src/opsc/IDLParser.java

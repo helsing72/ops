@@ -4,8 +4,7 @@
  *  @author Mattias Helsing <mattias.helsing@saabgroup.com>
  *
  * An attempt to create a command line application for generating
- * Cpp files from OPS IDL files. Should be extended to generate C#
- * and java classes too.
+ * Cpp files from OPS IDL files.
  *
  ***************************************************************************
  */
@@ -53,6 +52,7 @@ public class OpsCompiler
     /** The java generator instance */
     protected opsc.JavaCompiler _javaCompiler;
     protected opsc.CSharpCompiler _CSharpCompiler;
+    protected opsc.DelphiCompiler _DelphiCompiler;
 
     public OpsCompiler() {
         // create a parser to generate IDLClasses for us
@@ -82,7 +82,7 @@ public class OpsCompiler
         System.out.println("  -t <dir>          set template directory (overrides built-in templates)");
         System.out.println("");
         System.out.println("FEATURE");
-        System.out.println("  for generate: cpp, csharp, java, python, debug");
+        System.out.println("  for generate: ada, cpp, csharp, delphi, java, python, debug");
         System.out.println("  for build:    csharp, java");
         System.out.println("");
     }
@@ -117,8 +117,10 @@ public class OpsCompiler
 
     protected void updateGenerateProp(String feature, boolean value)
     {
+      if(feature.equals("ada")) _props.generateAda = value;
       if(feature.equals("cpp")) _props.generateCpp = value;
       if(feature.equals("csharp")) _props.generateCS = value;
+      if(feature.equals("delphi")) _props.generateDelphi = value;
       if(feature.equals("java")) _props.generateJava = value;
       if(feature.equals("python")) _props.generatePython = value;
       if(feature.equals("debug")) _props.buildDebugProject = value;
@@ -403,6 +405,22 @@ public class OpsCompiler
         return true;
     }
 
+    protected boolean compileDelphi() {
+        // create the compiler and set parameters
+        _DelphiCompiler = new opsc.DelphiCompiler(_strProjectName);
+        Property propTemplatePath = _props.getProperty("templatePath");
+        if(propTemplatePath != null)
+            _DelphiCompiler.setTemplateDir(propTemplatePath.value);
+        Property propOutPath = _props.getProperty("outputPath");
+        if(propOutPath != null)
+            _DelphiCompiler.setOutputDir(propOutPath.value + File.separator + "Delphi");
+
+        _DelphiCompiler.compileDataClasses(_parser._idlClasses, "baba");
+        _DelphiCompiler.compileTypeSupport();
+
+        return true;
+    }
+
     protected boolean buildDebugProject() {
 
         opsc.DebugProjectCompiler compiler = new opsc.DebugProjectCompiler(_strProjectName);
@@ -548,6 +566,13 @@ public class OpsCompiler
                 System.out.println("");
                 opsc.buildCs();
             }
+        }
+
+        System.out.flush();
+
+        // generate Delphi if so requested
+        if(opsc._props.generateDelphi) {
+            opsc.compileDelphi();
         }
 
         System.out.flush();

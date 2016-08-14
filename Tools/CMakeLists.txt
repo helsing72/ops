@@ -23,6 +23,9 @@ set(OPS_TEMPLATE_FILES
   ${TMPL_PATH}/cstemplate.tpl
   ${TMPL_PATH}/cstypefactorytemplate.tpl
   ${TMPL_PATH}/debugproj.tpl
+  ${TMPL_PATH}/delphienumtemplate.tpl
+  ${TMPL_PATH}/delphitemplate.tpl
+  ${TMPL_PATH}/delphitypefactorytemplate.tpl
   ${TMPL_PATH}/javaconfig.tpl
   ${TMPL_PATH}/javaenumtemplate.tpl
   ${TMPL_PATH}/javapublishertemplate.tpl

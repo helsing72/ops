@@ -6,6 +6,7 @@ set(OPSC_SRC
   opsc/CompilerSupport.java
   opsc/CSharpCompiler.java
   opsc/CppCompiler.java
+  opsc/DelphiCompiler.java
   opsc/JavaCompiler.java
   opsc/IDLParser.java
   opsc/ProjectProperties.java
