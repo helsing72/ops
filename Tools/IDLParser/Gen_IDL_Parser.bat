@@ -3,3 +3,4 @@
 @pushd %~dp0\src\parsing\javaccparser
 @call %JAVACC% IDL.jj
 @popd
+@pause

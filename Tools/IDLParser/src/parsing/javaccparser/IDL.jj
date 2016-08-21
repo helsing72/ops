@@ -232,11 +232,11 @@ void enum_body() :
 void member_list() :
 {String tName = "";}
 {
-  "extends" tName = idl_type() {extendsEvent.fireEvent(tName);} "{"( member() )+ "}"
+  "extends" tName = idl_type() {extendsEvent.fireEvent(tName);} "{"( member() )* "}"
 |
 LOOKAHEAD(2)
 (
-  "{" ( member() )+ "}"
+  "{" ( member() )* "}"
 )
 
 }

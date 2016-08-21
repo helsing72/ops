@@ -280,7 +280,6 @@ extendsEvent.fireEvent(tName);
       jj_consume_token(12);
       label_5:
       while (true) {
-        member();
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
         case 18:
         case 19:
@@ -300,6 +299,7 @@ extendsEvent.fireEvent(tName);
           jj_la1[7] = jj_gen;
           break label_5;
         }
+        member();
       }
       jj_consume_token(13);
       break;
@@ -310,7 +310,6 @@ extendsEvent.fireEvent(tName);
         jj_consume_token(12);
         label_6:
         while (true) {
-          member();
           switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
           case 18:
           case 19:
@@ -330,6 +329,7 @@ extendsEvent.fireEvent(tName);
             jj_la1[8] = jj_gen;
             break label_6;
           }
+          member();
         }
         jj_consume_token(13);
       } else {
@@ -918,11 +918,11 @@ void integer_literal() throws ParseException {
  {
     if (jj_scan_token(12)) return true;
     Token xsp;
-    if (jj_3R_10()) return true;
     while (true) {
       xsp = jj_scanpos;
       if (jj_3R_10()) { jj_scanpos = xsp; break; }
     }
+    if (jj_scan_token(13)) return true;
     return false;
   }
 
