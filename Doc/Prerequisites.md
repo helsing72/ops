@@ -52,6 +52,9 @@ OPS uses JavaCC version 6.0.
 ## Python ##
 Experimental support exist for Python 2.7.
 
+## Delphi ##
+OPS has been used with Delphi XE2.
+
 ## gcovr ##
 TBD
 

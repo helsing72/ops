@@ -35,7 +35,7 @@ Current working directory: D:\OPS\OPS4
     -t <dir>          set template directory (overrides built-in templates)
 
   FEATURE
-    for generate: cpp, csharp, java, python, debug
+    for generate: cpp, csharp, delphi, java, python, debug
     for build:    csharp, java
 
 ```
