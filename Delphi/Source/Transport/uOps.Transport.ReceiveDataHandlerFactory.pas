@@ -26,6 +26,7 @@ uses System.Generics.Collections,
      System.SyncObjs,
      uNotifier,
      uOps.Types,
+     uOps.Error,
      uOps.Topic,
      uOps.MemoryMap,
      uOps.OPSMessage,
@@ -34,8 +35,15 @@ uses System.Generics.Collections,
      uOps.Transport.ReceiveDataHandler;
 
 type
+  // Method prototype to call when we want to set UDP transport info for the participant info data
+  TOnUdpTransportInfoProc = procedure(ipaddress : string; port : Integer) of object;
+
   TReceiveDataHandlerFactory = class(TObject)
   private
+    // Borrowed references
+    FOnUdpTransportInfoProc : TOnUdpTransportInfoProc;
+    FErrorService : TErrorService;
+
     // By Singelton, one ReceiveDataHandler per 'key' on this Participant
     FReceiveDataHandlerInstances : TDictionary<string,TReceiveDataHandler>;
 
@@ -46,7 +54,7 @@ type
 		function makeKey(top : TTopic) : string;
 
   public
-    constructor Create;
+    constructor Create(Proc : TOnUdpTransportInfoProc; Reporter : TErrorService);
     destructor Destroy; override;
 
     function getReceiveDataHandler(
@@ -62,11 +70,14 @@ type
 
 implementation
 
-uses SysUtils;
+uses SysUtils,
+     uOps.Transport.UDPReceiver;
 
-constructor TReceiveDataHandlerFactory.Create;
+constructor TReceiveDataHandlerFactory.Create(Proc : TOnUdpTransportInfoProc; Reporter : TErrorService);
 begin
   inherited Create;
+  FOnUdpTransportInfoProc := Proc;
+  FErrorService := Reporter;
   FReceiveDataHandlerInstances := TDictionary<string,TReceiveDataHandler>.Create;
   FGarbageLock := TMutex.Create;
   FGarbageReceiveDataHandlers := TObjectList<TReceiveDataHandler>.Create;
@@ -97,9 +108,16 @@ function TReceiveDataHandlerFactory.getReceiveDataHandler(
           top : TTopic;
           dom : TDomain;
           opsObjectFactory : TSerializableInheritingTypeFactory) : TReceiveDataHandler;
+
+  procedure Report(msg : string);
+  begin
+    if Assigned(FErrorService) then begin
+      FErrorService.Report(TBasicError.Create('ReceiveDataHandlerFactory', 'getReceiveDataHandler', msg));
+    end;
+  end;
+
 var
   key : string;
-  mess : string;
 begin
   Result := nil;
 
@@ -116,32 +134,31 @@ begin
       // This will lead to a problem when using the same port or using UDP, if samples becomes > MAX_SEGMENT_SIZE
       if ((Result.SampleMaxSize > PACKET_MAX_SIZE) or (top.SampleMaxSize > PACKET_MAX_SIZE)) then begin
         if top.Transport = TTopic.TRANSPORT_UDP then begin
-          mess := 'Warning: UDP Transport is used with Topics with "sampleMaxSize" > ' + IntToStr(PACKET_MAX_SIZE);
+          Report('Warning: UDP Transport is used with Topics with "sampleMaxSize" > ' + IntToStr(PACKET_MAX_SIZE));
         end else begin
-          mess := 'Warning: Same port (' + IntToStr(top.Port) +
-                  ') is used with Topics with "sampleMaxSize" > ' + IntToStr(PACKET_MAX_SIZE);
+          Report('Warning: Same port (' + IntToStr(top.Port) +
+                 ') is used with Topics with "sampleMaxSize" > ' + IntToStr(PACKET_MAX_SIZE));
         end;
-//      	BasicError err("ReceiveDataHandlerFactory", "getReceiveDataHandler", myMessage.str());
-// 				participant->reportError(&err);
       end;
 
     end else if (top.Transport = TTopic.TRANSPORT_MC) or (top.Transport = TTopic.TRANSPORT_TCP) then begin
-      Result := TReceiveDataHandler.Create(top, dom, opsObjectFactory);
+      Result := TReceiveDataHandler.Create(top, dom, opsObjectFactory, FErrorService);
       FReceiveDataHandlerInstances.Add(key, Result);
 
     end else if top.Transport = TTopic.TRANSPORT_UDP then begin
-      Result := TReceiveDataHandler.Create(top, dom, opsObjectFactory);
+      Result := TReceiveDataHandler.Create(top, dom, opsObjectFactory, FErrorService);
 
-//			participant->setUdpTransportInfo(
-//				((UDPReceiver*) udpReceiveDataHandler->getReceiver())->getAddress(),
-//				((UDPReceiver*) udpReceiveDataHandler->getReceiver())->getPort() );
+      if Assigned(FOnUdpTransportInfoProc) then begin
+        FOnUdpTransportInfoProc(
+          (Result.getReceiver as TUDPReceiver).Address,
+          (Result.getReceiver as TUDPReceiver).Port);
+      end;
 
       FReceiveDataHandlerInstances.Add(key, Result);
 
     end else begin // For now we can not handle more transports
-      // Signal an error by returning NULL.
-//			BasicError err("ReceiveDataHandlerFactory", "getReceiveDataHandler", "Unknown transport for Topic: " + top.getName());
-//			participant->reportError(&err);
+      Report('Unknown transport for Topic: ' + string(top.Name));
+      // Signal an error by returning nil.
 
     end;
   finally
@@ -162,15 +179,21 @@ begin
 		if FReceiveDataHandlerInstances.ContainsKey(key) then begin
       rdh := FReceiveDataHandlerInstances.Items[key];
       if rdh.NumListeners = 0 then begin
-        // Time to mark this receiveDataHandler as garbage.
+        // Since the receiveDataHandler still can have reserved messages, we
+        // put it on the garbage list for later removal.
+
+        // Start by removing it from the active list
         FReceiveDataHandlerInstances.Remove(key);
 
         rdh.Stop;
 
 				if top.Transport = TTopic.TRANSPORT_UDP then begin
-//          FParticipant->setUdpTransportInfo("", 0);
+          if Assigned(FOnUdpTransportInfoProc) then begin
+            FOnUdpTransportInfoProc('', 0);
+          end;
 				end;
 
+        // Put it on the garbage list
         FGarbageReceiveDataHandlers.Add(rdh);
       end;
     end;
@@ -180,18 +203,16 @@ begin
 end;
 
 procedure TReceiveDataHandlerFactory.cleanUpReceiveDataHandlers;
+var
+  i : Integer;
 begin
   FGarbageLock.Acquire;
   try
-//        for (int i = (int)garbageReceiveDataHandlers.size() - 1; i >= 0; i--)
-//        {
-//            if (garbageReceiveDataHandlers[i]->numReservedMessages() == 0)
-//            {
-//                delete garbageReceiveDataHandlers[i];
-//                std::vector<ReceiveDataHandler*>::iterator iter = garbageReceiveDataHandlers.begin() + i;
-//                garbageReceiveDataHandlers.erase(iter);
-//            }
-//        }
+    for i := FGarbageReceiveDataHandlers.Count - 1 downto 0 do begin
+      if FGarbageReceiveDataHandlers[i].numReservedMessages = 0 then begin
+        FGarbageReceiveDataHandlers.Delete(i);
+      end;
+    end;
   finally
     FGarbageLock.Release;
   end;

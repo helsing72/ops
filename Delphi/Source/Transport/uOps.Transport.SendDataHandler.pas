@@ -60,7 +60,7 @@ end;
 
 destructor TSendDataHandler.Destroy;
 begin
-  FreeAndNIl(FMutex);
+  FreeAndNil(FMutex);
   FreeAndNil(FUsers);
   inherited;
 end;

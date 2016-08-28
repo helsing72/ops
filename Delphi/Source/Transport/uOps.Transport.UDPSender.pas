@@ -36,6 +36,8 @@ type
 
     FSocket: TUdpSocketEx;
 
+    procedure Report(method : string; mess : string);
+
   public
     // Constructs a new UDPSender and binds its underlying socket to local host
     // and a dynamically allocated local port.
@@ -54,8 +56,6 @@ type
     function getPort() : Integer; override;
     function getAddress() : string; override;
 
-    ///function receiveReply(buf : PByte; size : Integer) : Integer; override;
-    ///function waitForReply(timeoutMS : Integer) : Boolean;
   end;
 
 implementation
@@ -63,8 +63,7 @@ implementation
 uses SysUtils,
      WinSock,
      Sockets,
-     uOps.Exceptions,
-     uOps.Transport.Error;
+     uOps.Error;
 
 { TUDPSender }
 
@@ -87,6 +86,13 @@ begin
   inherited;
 end;
 
+procedure TUDPSender.Report(method : string; mess : string);
+begin
+  if Assigned(FErrorService) then begin
+    FErrorService.Report(TSocketError.Create('UDPSender', method, mess, FLastErrorCode));
+  end;
+end;
+
 procedure TUDPSender.Open;
 begin
   if Assigned(FSocket) then Exit;
@@ -96,16 +102,16 @@ begin
   FSocket.Active := True;
 
   if FSocket.Handle = INVALID_SOCKET then begin
-    raise ECommException.Create('Socket could not be opened');
-    // TTransportError.Create('UDPSender', 'Open', 'Socket could not be created');
-    // TParticipant.reportStaticError(&err);
+    FLastErrorCode := WSAGetLastError;
+    Report('Open', 'Socket could not be created');
+    Exit;
   end;
 
   if FOutSocketBufferSize > 0 then begin
     FSocket.SetSendBufferSize(Integer(FOutSocketBufferSize));
     if FSocket.GetSendBufferSize <> Integer(FOutSocketBufferSize) then begin
-      // TTransportError.Create('UDPSender', 'Open', 'Socket buffer size could not be set');
-      // TParticipant::reportStaticError(&err);
+      FLastErrorCode := SOCKET_ERROR;
+      Report('Open', 'Socket buffer size could not be set');
     end;
   end;
 
@@ -148,48 +154,25 @@ var
 begin
   Result := False;
   if not Assigned(FSocket) then Exit;
+  FLastErrorCode := 0;
 
   try
     ToAddr := FSocket.GetSocketAddr(AnsiString(ip), AnsiString(IntToStr(port)));
     if FSocket.SendTo(buf^, size, ToAddr) = SOCKET_ERROR then begin
-      raise ECommException.Create('Exception at ops::UDPSender::SendMessageTo: sendto() failed');
+      FLastErrorCode := WSAGetLastError;
+      Report('sendTo', 'sendto() failed');
+    end else begin
+      Result := True;
     end;
 
-    Result := True;
-
   except
-//		catch (std::exception& ex)
-//        {
-//			std::stringstream ss;
-//			ss << "Error when sending udp message: " << ex.what() << " Params: buf = " << buf << ", size = " << size << ", ip = " << ip << ", port = " << port;
-//			ops::BasicError err("UDPSender", "sendTo", ss.str());
-//			Participant::reportStaticError(&err);
-//            return false;
-//        }
-//        catch (...)
-//        {
-//			std::stringstream ss;
-//			ss << "Error when sending udp message: Params: buf = " << buf << ", size = " << size << ", ip = " << ip << ", port = " << port;
-//			ops::BasicError err("UDPSender", "sendTo", ss.str());
-//			Participant::reportStaticError(&err);
-//            return false;
-//        }
+    FLastErrorCode := SOCKET_ERROR;
+    Report('sendTo',
+           'Exception when sending udp message: Params: buf = ' + IntToHex(Int64(buf),8) +
+           ', size = ' + IntToStr(size) + ', ip = ' + ip + ', port = ' + IntToStr(port)
+          );
   end;
 end;
-
-//function TUDPSender.receiveReply(buf: PByte; size: Integer): Integer;
-//begin
-//		if (!socket) return 0;
-//		size_t nReceived = socket->receive(boost::asio::buffer(buf, size));
-//		return (int)nReceived;
-//end;
-
-//function TUDPSender.waitForReply(int timeout) : Boolean;
-//begin
-//		/*__int64 startWait = TimeHelper::currentTimeMillis();
-//		while(TimeHelper::currentTimeMillis())*/
-//		return false;
-//end;
 
 end.
 

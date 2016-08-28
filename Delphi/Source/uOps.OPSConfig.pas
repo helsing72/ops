@@ -47,9 +47,11 @@ type
     class procedure releaseConfig(var cfg : TOPSConfig);
 
     // Returns a reference to the given Domain
+    // NOTE: The OPSConfig still owns it
     function getDomain(domainID : string) : TDomain; virtual;
 
-    // Returns a reference to the internal storage
+    // Returns references to the internal Domains
+    // NOTE: The OPSConfig still owns them
     function getDomains : TDynDomainArray;
 
     procedure Serialize(archiver : TArchiverInOut); override;
@@ -98,7 +100,7 @@ end;
 
 function TOPSConfig.getDomains : TDynDomainArray;
 begin
-  Result := FDomains;
+  Result := Copy(FDomains);
 end;
 
 procedure TOPSConfig.Serialize(archiver : TArchiverInOut);

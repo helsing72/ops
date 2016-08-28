@@ -43,7 +43,7 @@ type
     FTopicName : AnsiString;      // Serialized
     FTopLevelKey : AnsiString;    // Serialized (not used, empty string)
     FAddress : AnsiString;        // Serialized (not used, empty string)
-    fData : TOPSObject;           // Serialized
+    FData : TOPSObject;           // Serialized
 
   public
     constructor Create;
@@ -70,7 +70,6 @@ begin
   inherited;
   FDataOwner := True;
   AppendType('ops.protocol.OPSMessage');
-  FData := nil;
 end;
 
 destructor TOPSMessage.Destroy;

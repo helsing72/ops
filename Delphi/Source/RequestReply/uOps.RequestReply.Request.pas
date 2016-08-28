@@ -1,4 +1,4 @@
-unit uOps.Types;
+unit uOps.RequestReply.Request;
 
 (**
 *
@@ -22,34 +22,35 @@ unit uOps.Types;
 
 interface
 
-uses uLogger;
-
-const
-  PACKET_MAX_SIZE = 60000;
-  MAX_DEADLINE_TIMEOUT = High(Int64);
+uses uOps.ArchiverInOut,
+     uOps.OPSObject;
 
 type
-  TDynSingleArray = array of Single;
-  TDynInt16Array = array of Int16;
-  TDynInt32Array = array of Int32;
-  TDynInt64Array = array of Int64;
-  TDynDoubleArray = array of Double;
-  TDynByteArray = array of Byte;
-  TDynBooleanArray = array of Boolean;
-  TDynAnsiStringArray = array of AnsiString;
+  TRequest = class(TOPSObject)
+  public
+    requestId : AnsiString;
 
-var
-  Logger : TLogger;
+    procedure Serialize(archiver : TArchiverInOut); override;
+
+    // Fills the parameter obj with all values from this object.
+    procedure FillClone(var obj : TOPSObject); override;
+  end;
 
 implementation
 
-initialization
-  Logger := TLogger.Create;
-  Logger.AddTime := True;
-  Logger.LogType := ltNone;   // Only used for debug, so set default to no logging
+procedure TRequest.Serialize(archiver : TArchiverInOut);
+begin
+  inherited Serialize(archiver);
+  archiver.inout('requestId', requestId);
+end;
 
-finalization
-  Logger.Free;
+procedure TRequest.FillClone(var obj : TOPSObject);
+begin
+	inherited FillClone(obj);
+  with obj as TRequest do begin
+		requestId := Self.requestId;
+	end;
+end;
 
 end.
 

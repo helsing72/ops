@@ -1,4 +1,4 @@
-unit uOps.Transport.Error;
+unit uOps.RequestReply.Reply;
 
 (**
 *
@@ -22,12 +22,41 @@ unit uOps.Transport.Error;
 
 interface
 
-uses uOps.BasicError;
+uses uOps.ArchiverInOut,
+     uOps.OPSObject;
 
 type
-  TTransportError = class(TBasicError);
+  TReply = class(TOPSObject)
+  public
+    requestId : AnsiString;
+    requestAccepted : Boolean;
+    mess : AnsiString;
+
+    procedure Serialize(archiver : TArchiverInOut); override;
+
+    // Fills the parameter obj with all values from this object.
+    procedure FillClone(var obj : TOPSObject); override;
+  end;
 
 implementation
+
+procedure TReply.Serialize(archiver : TArchiverInOut);
+begin
+  inherited Serialize(archiver);
+  archiver.inout('requestId', requestId);
+  archiver.inout('requestAccepted', requestAccepted);
+  archiver.inout('message', mess);
+end;
+
+procedure TReply.FillClone(var obj : TOPSObject);
+begin
+	inherited FillClone(obj);
+  with obj as TReply do begin
+    requestId := Self.requestId;
+    requestAccepted := Self.requestAccepted;
+    mess := Self.mess;
+  end;
+end;
 
 end.
 

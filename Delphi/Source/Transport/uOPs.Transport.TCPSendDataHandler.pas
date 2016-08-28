@@ -1,4 +1,4 @@
-unit uOps.Transport.McSendDataHandler;
+unit uOps.Transport.TCPSendDataHandler;
 
 (**
 *
@@ -30,26 +30,27 @@ uses System.SyncObjs,
      uOps.Transport.SendDataHandler;
 
 type
-  TMcSendDataHandler = class(TSendDataHandler)
+  TTCPSendDataHandler = class(TSendDataHandler)
+  private
   public
-    constructor Create(topic : TTopic; localInterface : string; ttl : Integer; Reporter : TErrorService);
+    constructor Create(topic : TTopic; Reporter : TErrorService);
     destructor Destroy; override;
 
-		function sendData(buf : PByte; bufSize : Integer; topic : TTopic) : Boolean; override;
+    function sendData(buf : PByte; bufSize : Integer; topic : TTopic) : Boolean; override;
   end;
 
 implementation
 
 uses SysUtils;
 
-constructor TMcSendDataHandler.Create(topic : TTopic; localInterface : string; ttl : Integer; Reporter : TErrorService);
+constructor TTCPSendDataHandler.Create(topic : TTopic; Reporter : TErrorService);
 begin
   inherited Create;
-  FSender := TSenderFactory.CreateMCSender(localInterface, ttl, topic.OutSocketBufferSize);
+  FSender := TSenderFactory.createTCPServer(string(topic.DomainAddress), topic.Port, topic.OutSocketBufferSize);
   FSender.ErrorService := Reporter;
 end;
 
-destructor TMcSendDataHandler.Destroy;
+destructor TTCPSendDataHandler.Destroy;
 begin
   FMutex.Acquire;
   try
@@ -60,9 +61,10 @@ begin
   inherited;
 end;
 
-function TMcSendDataHandler.sendData(buf : PByte; bufSize : Integer; topic : TTopic) : Boolean;
+function TTCPSendDataHandler.sendData(buf : PByte; bufSize : Integer; topic : TTopic) : Boolean;
 begin
-  Result := FSender.sendTo(buf, bufSize, string(topic.DomainAddress), topic.Port);
+  // We don't "sendTo" but rather lets the server (sender) send to all conncted clients.
+  Result := FSender.sendTo(buf, bufSize, '', 0);
 end;
 
 end.

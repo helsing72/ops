@@ -43,6 +43,8 @@ uses SysUtils,
      uOps.OPSMessage,
      uOPs.Topic,
      uOps.Domain,
+     uOps.ParticipantInfoData,
+     uOps.TopicInfoData,
      uOps.ArchiverInOut,
      uOps.SerializableFactory;
 
@@ -67,7 +69,9 @@ begin
   end else if types = 'Domain' then begin
     Result := TDomain.Create;
   end else if types = 'ops.ParticipantInfoData' then begin
-///TODO                return new ParticipantInfoData();
+    Result := TParticipantInfoData.Create;
+  end else if types = 'TopicInfoData' then begin
+    Result := TTopicInfoData.Create;
   end;
 end;
 

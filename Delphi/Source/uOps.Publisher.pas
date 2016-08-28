@@ -30,27 +30,18 @@ uses uOps.Types,
      uOps.Participant,
      uOps.Transport.SendDataHandler,
      uOps.OpsObject,
-     uOps.OpsMessage;
+     uOps.OpsMessage,
+     uOps.PublisherAbs;
 
 type
-  TPublisher = class(TObject)
-  private
-    FName : AnsiString;
-    FKey : AnsiString;
+  TPublisher = class(TPublisherAbs)
+  protected
     FCurrentPublicationID : UInt64;
-
-    // Send behavior parameters
-    FSendSleepTime : Int64;
-    FSleepEverySendPacket : Integer;
-    FSleepOnSendFailed : Boolean;
 
     FMemMap : TMemoryMap;
     FBuf : TByteBuffer;
     FArchive : TOPSArchiverOut;
     FMessage : TOPSMessage;
-
-    // The Topic this Publisher publish on (NOTE: we don't own the object)
-    FTopic : TTopic;
 
     // The Participant to which this Publisher belongs (NOTE: we don't own the object)
     FParticipant : TParticipant;
@@ -62,23 +53,13 @@ type
     constructor Create(t : TTopic);
     destructor Destroy; override;
 
-    procedure Start;
-    procedure Stop;
+    procedure Start; override;
+    procedure Stop; override;
 
-    procedure WriteOPSObject(obj : TOPSObject);
-
-    property Name : AnsiString read FName write FName;
-    property Key : AnsiString read FKey write FKey;
-    property Topic : TTopic read FTopic;
-
-    // Send behavior parameters
-    property SendSleepTime : Int64 read FSendSleepTime write FSendSleepTime;
-    property SleepEverySendPacket : Integer read FSleepEverySendPacket write FSleepEverySendPacket;
-    property SleepOnSendFailed : Boolean read FSleepOnSendFailed write FSleepOnSendFailed;
+    procedure WriteOPSObject(obj : TOPSObject); override;
 
   protected
   	procedure Write(data : TOPSObject);
-    //procedure SetTopic(topic : TTopic);
   end;
 
 implementation
@@ -132,11 +113,6 @@ procedure TPublisher.Stop;
 begin
   FSendDataHandler.removeUser(Self);
 end;
-
-//procedure TPublisher.SetTopic(topic : TTopic);
-//begin
-//  fTopic := topic;
-//end;
 
 procedure TPublisher.WriteOPSObject(obj : TOPSObject);
 begin

@@ -49,9 +49,6 @@ type
 		procedure WriteNewSegment;
 
   private
-    ///Utility method for swaping byte order of basic types (int float etc.)
-    //procedure ByteSwap(chars : PByte; n : Integer);
-
 		procedure ReadNewSegment;
 		procedure WriteBytes(var buf : array of Byte; offset : Integer; length : Integer); overload;
 		procedure ReadBytes(var buf : array of Byte; offset : Integer; length : Integer); overload;
@@ -267,22 +264,6 @@ begin
     ReadChars(chars + bytesLeftInSegment, length - bytesLeftInSegment);
   end;
 end;
-
-//procedure TByteBuffer.ByteSwap(chars : PByte; n : Integer);
-//var
-//  i, j : Integer;
-//  t : Byte;
-//begin
-//  i := 0;
-//  j := n-1;
-//  while (i < j) do begin
-//    t := chars[i];
-//    chars[i] := chars[j];
-//    chars[j] := t;
-//    Inc(i);
-//    Dec(j);
-//  end;
-//end;
 
 function TByteBuffer.GetSize: Integer;
 begin

@@ -158,7 +158,7 @@ begin
 end;
 
 /// ------------------------------------------
-/// Helper to get all interfaces
+/// Helper to get all IP interfaces
 
 procedure VVGetIpAddrTable(var p: PMibIpAddrTable; var Size: Cardinal; const bOrder: BOOL);
 var

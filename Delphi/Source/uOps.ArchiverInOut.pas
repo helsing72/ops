@@ -61,42 +61,7 @@ type
     procedure inout(const name : String; var value : TDynDoubleArray); overload; virtual; abstract;
     procedure inout(const name : String; var value : TDynAnsiStringArray); overload; virtual; abstract;
 
-//    template <class SerializableType> void inout(const std::string& name, std::vector<SerializableType>& vec, SerializableType prototype)
-//    {
-//        int size = beginList(name, (int)vec.size());
-//        if ((int) vec.size() < size)
-//        {
-//            vec.clear();
-//            vec.reserve(size);
-//            vec.resize(size, prototype);
-//            for (int i = 0; i < size; i++)
-//            {
-//                inout(std::string("element"), vec[i]);
-//            }
-//            //vec.resize(size, new SerializableType());
-//        }
-//        else
-//        {
-//            for (int i = 0; i < size; i++)
-//            {
-//                inout(std::string("element"), vec[i]);
-//            }
-//        }
-//        endList(name);
-//    }
-
-    //    template <class SerializableType> void inout(const std::string& name, std::vector<SerializableType*>& vec)
     procedure inout(const name : string; var Value : TDynSerializableArray); overload; virtual; abstract;
-
-//    /*template <class SerializableTypeVector> void in(std::string name&, SerializableTypeVector& vec)
-//    {
-//            int size = beginList(name, size);
-//            vec.clear();
-//            for(unsigned int i = 0; i < size; i++)
-//            {
-//                    vec.push_back(*inout((Serializable*)NULL));
-//            }
-//    }*/
 
   protected
     function beginList(const name : String; size : Integer) : Integer; virtual; abstract;

@@ -1,4 +1,4 @@
-unit uOps.Transport.MulticastReceiver;
+unit uOps.Transport.UDPReceiver;
 
 (**
 *
@@ -37,12 +37,10 @@ uses System.Generics.Collections,
      uOps.Transport.Sockets;
 
 type
-	TMulticastReceiver = class(TReceiver)
-	private
+	TUDPReceiver = class(TReceiver)
+  private
     FPort : Integer;
     FIpAddress : string;
-    FLocalInterface : string;
-    FInSocketBufferSize : Int64;
 
     FSocket: TUdpSocketEx;
 
@@ -64,7 +62,7 @@ type
     procedure Report(method : string; mess : string);
 
   public
-    constructor Create(mcAddress : string; bindPort : Integer; localInterface : string = '0.0.0.0'; inSocketBufferSize : Int64 = 16000000);
+    constructor Create(bindPort : Integer; localInterface : string = '0.0.0.0'; inSocketBufferSize : Int64 = 16000000);
     destructor Destroy; override;
 
     // Start():
@@ -102,50 +100,28 @@ implementation
 uses SysUtils,
      uOps.Error;
 
-constructor TMulticastReceiver.Create(mcAddress : string; bindPort : Integer; localInterface : string; inSocketBufferSize : Int64);
-begin
-  inherited Create;
-
-  FPort := bindPort;
-  FIpaddress := mcAddress;
-  FLocalInterface := localInterface;
-  FInSocketBufferSize := inSocketBufferSize;
-end;
-
-destructor TMulticastReceiver.Destroy;
-begin
-	Stop;   // Make sure socket is closed
-  inherited;
-end;
-
-procedure TMulticastReceiver.Report(method : string; mess : string);
-begin
-  if Assigned(FErrorService) then begin
-    FErrorService.Report(TSocketError.Create('MulticastReceiver', method, mess, FLastErrorCode));
-  end;
-end;
-
-// Override from Receiver
-function TMulticastReceiver.Start(bytes : PByte; size : Integer) : Boolean;
+constructor TUDPReceiver.Create(bindPort : Integer; localInterface : string = '0.0.0.0'; inSocketBufferSize : Int64 = 16000000);
 var
   localip : string;
 begin
-  Result := False;
-  if Assigned(FSocket) then Exit;
-
-  FTerminated := False;
-  FBuffer := bytes;
-  FBufferSize := size;
+  inherited Create;
 
   FSocket := TUdpSocketEx.Create(nil);
   FSocket.BlockMode := bmBlocking;
-  FSocket.LocalHost := '0.0.0.0';
-  FSocket.LocalPort := AnsiString(IntToStr(FPort));
+
+  if localInterface = '0.0.0.0' then begin
+    FIpAddress := string(FSocket.LocalHostAddr);
+  end else begin
+    FIpAddress := localInterface;
+  end;
+
+  FSocket.LocalHost := AnsiString(FIpAddress);
+  FSocket.LocalPort := AnsiString(IntToStr(bindPort));
   FSocket.Active := True;
 
   if FSocket.Handle = INVALID_SOCKET then begin
     FLastErrorCode := WSAGetLastError;
-    Report('Start', 'Open error');
+    Report('Create', 'Open error');
     Exit;
   end;
 
@@ -153,22 +129,56 @@ begin
 
   if not FSocket.Bind then begin
     FLastErrorCode := WSAGetLastError;
-    Report('Start', 'Bind error');
+    Report('Create', 'Bind error');
     Exit;
   end;
 
   // Get actual port that socket is bound to (in case bindport = 0)
   FSocket.GetLocalAddr(localip, FPort);
 
-  if FInSocketBufferSize > 0 then begin
-    FSocket.SetReceiveBufferSize(Integer(FInSocketBufferSize));
-    if FSocket.GetReceiveBufferSize <> Integer(FInSocketBufferSize) then begin
+  if inSocketBufferSize > 0 then begin
+    FSocket.SetReceiveBufferSize(Integer(inSocketBufferSize));
+    if FSocket.GetReceiveBufferSize <> Integer(inSocketBufferSize) then begin
       FLastErrorCode := SOCKET_ERROR;
-      Report('Start', 'Socket buffer size could not be set');
+      Report('Create', 'Socket buffer size could not be set');
     end;
   end;
+end;
 
-  FSocket.AddMulticastMembership(FIpAddress, FLocalInterface);
+destructor TUDPReceiver.Destroy;
+begin
+  Stop;   // Make sure socket is closed
+  FreeAndNil(FSocket);
+  inherited;
+end;
+
+procedure TUDPReceiver.Report(method : string; mess : string);
+begin
+  if Assigned(FErrorService) then begin
+    FErrorService.Report(TSocketError.Create('UDPReceiver', method, mess, FLastErrorCode));
+  end;
+end;
+
+// Start():
+// Starts the receiver, and reads bytes into given buffer.
+// When a message is read, a callback (notification) will be done with the
+// buffer and actual number of bytes read.
+// When the callback returns a new read is started to the current buffer
+function TUDPReceiver.Start(bytes : PByte; size : Integer) : Boolean;
+begin
+  Result := False;
+  if Assigned(FRunner) then Exit;
+
+  if not FSocket.Active then begin
+    // This is a Start after Stop case. Do we need to handle that???
+    FLastErrorCode := SOCKET_ERROR;
+    Report('Start', 'Can''t Start after a Stop (NYI)');
+    Exit;
+  end;
+
+  FTerminated := False;
+  FBuffer := bytes;
+  FBufferSize := size;
 
   if Assigned(FBuffer) then begin
     // Start a thread running our run() method
@@ -177,45 +187,44 @@ begin
   Result := True;
 end;
 
-// Override from Receiver
-// Used to get the sender IP and port for a received message
-// Only safe to call in callback
-procedure TMulticastReceiver.getSource(var address : string; var port : Integer);
+// GetSource():
+// Used to get the sender IP and port for a received message.
+// Should only be called from the callback.
+procedure TUDPReceiver.GetSource(var address : string; var port : Integer);
 begin
   address := TUDPSocketEx.getIpAddress(FFromAddress);
   port := TUDPSocketEx.getPort(FFromAddress);
 end;
 
-// Override from Receiver
-// Only safe to call in callback
-procedure TMulticastReceiver.SetReceiveBuffer(bytes : PByte; size : Integer);
+// SetReceiveBuffer():
+// Changes the current buffer to use for reads.
+// Should only be called from the callback.
+procedure TUDPReceiver.SetReceiveBuffer(bytes : PByte; size : Integer);
 begin
   FBuffer := bytes;
   FBufferSize := size;
 end;
 
-// Override from Receiver
-procedure TMulticastReceiver.Stop;
+// Stop():
+// Aborts an ongoing read. NOTE: Must NOT be called from the callback.
+procedure TUDPReceiver.Stop;
 begin
-  if not Assigned(FSocket) then Exit;
-
   // Tell thread to terminate
   FTerminated := True;
   if Assigned(FRunner) then FRunner.Terminate;
 
+  // Thread is probably waiting in a read, so we must close the socket
   shutdown(FSocket.Handle, SD_BOTH);
   FSocket.Active := False;
 
   // If thread exist, wait for thread to terminate and then delete the object
   FreeAndNil(FRunner);
 
-  FreeAndNil(FSocket);
-
   FBuffer := nil;
   FBufferSize := 0;
 end;
 
-function TMulticastReceiver.available : Boolean;
+function TUDPReceiver.available : Boolean;
 begin
   Result := Assigned(FSocket);
 end;
@@ -223,7 +232,7 @@ end;
 (**************************************************************************
 *
 **************************************************************************)
-function TMulticastReceiver.ReceiveMessage(o: PByte; size: Integer; var fromAddr : TSockAddr; var len : Integer): Integer;
+function TUDPReceiver.ReceiveMessage(o: PByte; size: Integer; var fromAddr : TSockAddr; var len : Integer): Integer;
 begin
   Result := 0;
   if not Assigned(FSocket) then Exit;
@@ -239,7 +248,7 @@ end;
 (**************************************************************************
 *
 **************************************************************************)
-procedure TMulticastReceiver.Run;
+procedure TUDPReceiver.Run;
 var
   Res : Integer;
 begin
@@ -273,5 +282,5 @@ begin
   end;
 end;
 
-end.
+end.
 

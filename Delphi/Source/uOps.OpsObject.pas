@@ -83,7 +83,7 @@ procedure TOPSObject.FillClone(var obj : TOPSObject);
 begin
   obj.FKey := FKey;
   obj.FTypesString := FTypesString;
-  ///TODO spareBytes
+  obj.spareBytes := Copy(spareBytes);
 end;
 
 procedure TOPSObject.Serialize(archiver : TArchiverInOut);

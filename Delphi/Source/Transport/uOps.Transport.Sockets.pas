@@ -22,9 +22,28 @@ unit uOps.Transport.Sockets;
 
 interface
 
-uses WinSock, Classes, Sockets;
+uses WinSock, Classes, Sockets,
+     uOps.Error;
 
 type
+  TSocketError = class(TBasicError)
+  public
+    constructor Create(className, method, mess : string; socketError : Integer = SOCKET_ERROR);
+    function getMessage : string; override;
+  end;
+
+(**************************************************************************
+* Internal help class
+*
+**************************************************************************)
+  TIpSocketHelper = class helper for TIpSocket
+    procedure SetReceiveBufferSize(size : Integer);
+    procedure SetSendBufferSize(size : Integer);
+    function GetReceiveBufferSize: Integer;
+    function GetSendBufferSize: Integer;
+    procedure SetTcpNoDelay(Value: Boolean);
+  end;
+
 (**************************************************************************
 * Internal help class
 *
@@ -53,10 +72,10 @@ type
     // A corrected implementation
     function WaitForData(TimeOut: Integer): Boolean;
 
-    procedure SetReceiveBufferSize(size : Integer);
-    procedure SetSendBufferSize(size : Integer);
-    function GetReceiveBufferSize: Integer;
-    function GetSendBufferSize: Integer;
+//    procedure SetReceiveBufferSize(size : Integer);
+//    procedure SetSendBufferSize(size : Integer);
+//    function GetReceiveBufferSize: Integer;
+//    function GetSendBufferSize: Integer;
 
     procedure SetReuseAddress(value : Boolean);
 
@@ -73,6 +92,74 @@ type
 implementation
 
 uses Windows, SysUtils, uOps.Types, uOps.Exceptions;
+
+{ TIpSocketHelper }
+
+function TIpSocketHelper.GetReceiveBufferSize: Integer;
+var
+  OptLen : Integer;
+  OptVal : Integer;
+begin
+  OptVal := 0;
+  if Handle <> INVALID_SOCKET then begin
+    OptLen := 4;
+    // function getsockopt(s: TSocket; level, optname: Integer; optval: PAnsiChar; var optlen: Integer): Integer; stdcall;
+    getsockopt(Handle, SOL_SOCKET, SO_RCVBUF, PAnsiChar(@OptVal), OptLen);
+  end;
+  Result := OptVal;
+end;
+
+function TIpSocketHelper.GetSendBufferSize: Integer;
+var
+  OptLen : Integer;
+  OptVal : Integer;
+begin
+  OptVal := 0;
+  if Handle <> INVALID_SOCKET then begin
+    OptLen := 4;
+    // function getsockopt(s: TSocket; level, optname: Integer; optval: PAnsiChar; var optlen: Integer): Integer; stdcall;
+    getsockopt(Handle, SOL_SOCKET, SO_SNDBUF, PAnsiChar(@OptVal), OptLen);
+  end;
+  Result := OptVal;
+end;
+
+procedure TIpSocketHelper.SetReceiveBufferSize(size: Integer);
+var
+  OptLen : Integer;
+  OptVal : Integer;
+begin
+  if Handle = INVALID_SOCKET then Exit;
+
+  OptVal := size;
+  OptLen := 4;
+  // function setsockopt(s: TSocket; level, optname: Integer; optval: PAnsiChar; optlen: Integer): Integer; stdcall;
+  setsockopt(Handle, SOL_SOCKET, SO_RCVBUF, PAnsiChar(@OptVal), OptLen);
+end;
+
+procedure TIpSocketHelper.SetSendBufferSize(size: Integer);
+var
+  OptLen : Integer;
+  OptVal : Integer;
+begin
+  if Handle = INVALID_SOCKET then Exit;
+
+  OptVal := size;
+  OptLen := 4;
+  // function setsockopt(s: TSocket; level, optname: Integer; optval: PAnsiChar; optlen: Integer): Integer; stdcall;
+  setsockopt(Handle, SOL_SOCKET, SO_SNDBUF, PAnsiChar(@OptVal), OptLen);
+end;
+
+procedure TIpSocketHelper.SetTcpNoDelay(Value: Boolean);
+var
+  Flag : BOOL;
+begin
+  if Handle = INVALID_SOCKET then Exit;
+
+  Flag := value;
+  // function setsockopt(s: TSocket; level, optname: Integer; optval: PAnsiChar; optlen: Integer): Integer; stdcall;
+  setsockopt(Handle, IPPROTO_TCP, TCP_NODELAY, PAnsiChar(@Flag), SizeOf(Flag));
+end;
+
 
 { TUdpSocketEx }
 
@@ -157,59 +244,59 @@ begin
     end;
 end;
 
-procedure TUdpSocketEx.SetReceiveBufferSize(size : Integer);
-var
-  OptLen : Integer;
-  OptVal : Integer;
-begin
-  if Handle = INVALID_SOCKET then Exit;
+//procedure TUdpSocketEx.SetReceiveBufferSize(size : Integer);
+//var
+//  OptLen : Integer;
+//  OptVal : Integer;
+//begin
+//  if Handle = INVALID_SOCKET then Exit;
+//
+//  OptVal := size;
+//  OptLen := 4;
+//  // function setsockopt(s: TSocket; level, optname: Integer; optval: PAnsiChar; optlen: Integer): Integer; stdcall;
+//  setsockopt(Handle, SOL_SOCKET, SO_RCVBUF, PAnsiChar(@OptVal), OptLen);
+//end;
 
-  OptVal := size;
-  OptLen := 4;
-  // function setsockopt(s: TSocket; level, optname: Integer; optval: PAnsiChar; optlen: Integer): Integer; stdcall;
-  setsockopt(Handle, SOL_SOCKET, SO_RCVBUF, PAnsiChar(@OptVal), OptLen);
-end;
+//procedure TUdpSocketEx.SetSendBufferSize(size : Integer);
+//var
+//  OptLen : Integer;
+//  OptVal : Integer;
+//begin
+//  if Handle = INVALID_SOCKET then Exit;
+//
+//  OptVal := size;
+//  OptLen := 4;
+//  // function setsockopt(s: TSocket; level, optname: Integer; optval: PAnsiChar; optlen: Integer): Integer; stdcall;
+//  setsockopt(Handle, SOL_SOCKET, SO_SNDBUF, PAnsiChar(@OptVal), OptLen);
+//end;
 
-procedure TUdpSocketEx.SetSendBufferSize(size : Integer);
-var
-  OptLen : Integer;
-  OptVal : Integer;
-begin
-  if Handle = INVALID_SOCKET then Exit;
+//function TUdpSocketEx.GetReceiveBufferSize: Integer;
+//var
+//  OptLen : Integer;
+//  OptVal : Integer;
+//begin
+//  OptVal := 0;
+//  if Handle <> INVALID_SOCKET then begin
+//    OptLen := 4;
+//    // function getsockopt(s: TSocket; level, optname: Integer; optval: PAnsiChar; var optlen: Integer): Integer; stdcall;
+//    getsockopt(Handle, SOL_SOCKET, SO_RCVBUF, PAnsiChar(@OptVal), OptLen);
+//  end;
+//  Result := OptVal;
+//end;
 
-  OptVal := size;
-  OptLen := 4;
-  // function setsockopt(s: TSocket; level, optname: Integer; optval: PAnsiChar; optlen: Integer): Integer; stdcall;
-  setsockopt(Handle, SOL_SOCKET, SO_SNDBUF, PAnsiChar(@OptVal), OptLen);
-end;
-
-function TUdpSocketEx.GetReceiveBufferSize: Integer;
-var
-  OptLen : Integer;
-  OptVal : Integer;
-begin
-  OptVal := 0;
-  if Handle <> INVALID_SOCKET then begin
-    OptLen := 4;
-    // function getsockopt(s: TSocket; level, optname: Integer; optval: PAnsiChar; var optlen: Integer): Integer; stdcall;
-    getsockopt(Handle, SOL_SOCKET, SO_RCVBUF, PAnsiChar(@OptVal), OptLen);
-  end;
-  Result := OptVal;
-end;
-
-function TUdpSocketEx.GetSendBufferSize: Integer;
-var
-  OptLen : Integer;
-  OptVal : Integer;
-begin
-  OptVal := 0;
-  if Handle <> INVALID_SOCKET then begin
-    OptLen := 4;
-    // function getsockopt(s: TSocket; level, optname: Integer; optval: PAnsiChar; var optlen: Integer): Integer; stdcall;
-    getsockopt(Handle, SOL_SOCKET, SO_SNDBUF, PAnsiChar(@OptVal), OptLen);
-  end;
-  Result := OptVal;
-end;
+//function TUdpSocketEx.GetSendBufferSize: Integer;
+//var
+//  OptLen : Integer;
+//  OptVal : Integer;
+//begin
+//  OptVal := 0;
+//  if Handle <> INVALID_SOCKET then begin
+//    OptLen := 4;
+//    // function getsockopt(s: TSocket; level, optname: Integer; optval: PAnsiChar; var optlen: Integer): Integer; stdcall;
+//    getsockopt(Handle, SOL_SOCKET, SO_SNDBUF, PAnsiChar(@OptVal), OptLen);
+//  end;
+//  Result := OptVal;
+//end;
 
 procedure TUdpSocketEx.SetReuseAddress(value : Boolean);
 var
@@ -325,6 +412,24 @@ end;
 //   imr.imr_interface.s_addr  = iaddr;
 //   return setsockopt(sd, IPPROTO_IP, IP_ADD_SOURCE_MEMBERSHIP, (char *) &imr, sizeof(imr));
 //}
+
+// ----------------------------------------------------------------------------
+
+{ TSocketError }
+
+constructor TSocketError.Create(className, method, mess: string; socketError: Integer);
+begin
+  inherited Create(className, method, mess);
+  FErrorCode := socketError;
+end;
+
+function TSocketError.getMessage: string;
+begin
+  Result := inherited getMessage;
+  if FErrorCode <> SOCKET_ERROR then begin
+    Result := Result + ' [' + IntToStr(FErrorCode) + ']';
+  end;
+end;
 
 end.
 

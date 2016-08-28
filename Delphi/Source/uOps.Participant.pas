@@ -25,6 +25,7 @@ interface
 uses System.Generics.Collections,
      System.SyncObjs,
      uNotifier,
+     uRunner,
      uOps.Types,
      uOps.Topic,
      uOps.Domain,
@@ -35,54 +36,31 @@ uses System.Generics.Collections,
      uOps.Transport.ReceiveDataHandlerFactory,
      uOps.SerializableFactory,
      uOps.OPSObjectFactory,
-     uOps.BasicError,
+     uOps.Error,
      uOps.OPSConfig,
+     uOps.ParticipantInfoData,
+     uOps.ParticipantInfoDataListener,
+     uOps.PublisherAbs,
      uOps.OpsObject,
      uOps.OpsMessage;
 
-//#include "ThreadPool.h"
-//#include "Runnable.h"
-//#include "IOService.h"
-//#include "DeadlineTimer.h"
-//#include "ErrorService.h"
-//#include "ParticipantInfoData.h"
-//#include "ParticipantInfoDataListener.h"
-
 type
-//	//Forward declaration..
-//  class Publisher;
-
 	TParticipant = class(TObject) //  : Runnable, Listener<int>
-  private
-//		friend class Subscriber;
-//		friend class Publisher;
-//		friend class ParticipantInfoDataListener;
   public
     class function getInstance(domainID : string) : TParticipant; overload;
     class function getInstance(domainID : string; participantID : string) : TParticipant; overload;
     class function getInstance(domainID : string; participantID : string; configFile : string) : TParticipant; overload;
 
-    // Report an error via all participants ErrorServices or the static ErrorService if it exists
-    // Takes ownership over given TError instance
-    class procedure ReportStaticError(error : TError);
-
-//		//Create a Topic for subscribing or publishing on ParticipantInfoData
-//		ops::Topic createParticipantInfoTopic();
-//
-//		//Get the name that this participant has set in its ParticipantInfoData
-//		std::string getPartInfoName() {
-//			return partInfoData.name;
-//		}
+    // Get the name that this participant has set in its ParticipantInfoData
+    function getPartInfoName : string;
 
     // Add a SerializableFactory which has support for data types (i.e. OPSObject derivatives you want this Participant to understand)
     // Takes over ownership of the object and it will be deleted with the participant
     procedure addTypeSupport(typeSupport : TSerializableFactory);
 
-    // Create a Topic from the ops config. See config below.
+    // Get a Topic from the ops config. See config below.
     // Returns a reference to the internal storage
-    function createTopic(name : string) : TTopic;
-
-//		void run();
+    function getTopic(name : string) : TTopic;
 
     // Make this participant report an Error, which will be delivered to all ErrorService listeners
     // Takes ownership over given TError instance
@@ -93,22 +71,19 @@ type
 //
 //		///Cleans up ReceiveDataHandlers
 //		//void cleanUpReceiveDataHandlers();
-//
-//		///Get a pointer to the underlying IOService.
-//		//TODO: private?
-//		IOService* getIOService()
-//		{
-//			return ioService;
-//		}
 
     // Returns a reference to the internal instance
     function getConfig : TOPSConfig;
 
-//		ErrorService* getErrorService()
-//		{
-//			return errorService;
-//		}
-//
+    // Return a reference to the internal ErrorService instance
+    //
+    // Add a listener to the service to get error resports from the participant and its objects
+    // Prototype for listener is:
+    //    procedure <someobject>.OnErrorReport(Sender : TObject; Error : TError);
+    //
+    // Note that several threads at a time can report errors so take that into account
+    function getErrorService : TErrorService;
+
 //		// A static error service that user could create, by calling getStaticErrorService(), and connect to.
 //		// If it exist, "reportStaticError()" will use this instead of using all participants errorservices
 //		// which leads to duplicated error messages when several participants exist.
@@ -142,29 +117,24 @@ type
     FConfig : TOPSConfig;
     FDomain : TDomain;
 
-//		///The IOService used for this participant, it handles communication and timers for all receivers, subscribers and member timers of this Participant.
-//		IOService* ioService;
+    // The ErrorService
+    FErrorService : TErrorService;
 
-//		///The ErrorService
-//		ErrorService* errorService;
-//
 //		///The threadPool drives ioService. By default Participant use a SingleThreadPool i.e. only one thread drives ioService.
 //		ThreadPool* threadPool;
 //
 //		///A timer that fires with a certain periodicity, it keeps this Participant alive in the system by publishing ParticipantInfoData
 //		DeadlineTimer* aliveDeadlineTimer;
-//
-//		//------------------------------------------------------------------------
-//		///A publisher of ParticipantInfoData
-//		Publisher* partInfoPub;
-//
-//		///The ParticipantInfoData that partInfoPub will publish periodically
-//		ParticipantInfoData partInfoData;
-//		Lockable partInfoDataMutex;
 
-//		//------------------------------------------------------------------------
-//		///A listener and handler for ParticipantInfoData
-//    ParticipantInfoDataListener* partInfoListener;
+    //------------------------------------------------------------------------
+    // The ParticipantInfoData that partInfoPub will publish periodically
+    FPartInfoData : TParticipantInfoData;
+    FPartInfoDataMutex : TMutex;
+
+    //------------------------------------------------------------------------
+    // A listener and handler for ParticipantInfoData
+    FPartInfoListener : TParticipantInfoDataListener;
+    FPartInfoTopic : TTopic;
 
     //------------------------------------------------------------------------
     //
@@ -174,27 +144,38 @@ type
 //		///Mutex for ioService, used to shutdown safely
 //		Lockable serviceMutex;
 
-//		///As long this is true, we keep on running this participant
-//		bool keepRunning;
-//
-//		///The interval with which this Participant publishes ParticipantInfoData
-//		__int64 aliveTimeout;
+    // The interval with which this Participant publishes ParticipantInfoData
+    FAliveTimeout : Int64;
 
     // The data type factory used in this Participant.
     FObjectFactory : TOPSObjectFactory;
 
+    // Our thread running our Run() method
+    FRunner : TRunner;
+    FTerminated : Boolean;
+
+    procedure Run;
+
     // Constructor is private, instances are acquired through getInstance()
     constructor Create(domainID : string; participantID : string; configFile : string);
+
+    procedure OnErrorReport(Sender : TObject; Error : TError);
 
     // Called from SendDataHandlerFactory when UDP topics should be connected/disconnected
     // to/from the participant info data listener
     procedure OnUdpConnectDisconnectProc(top : TTopic; sdh : TSendDataHandler; connect : Boolean);
 
+    // Called from ReceiveDataHandlerFactory when an UDP Reciver is created/deleted, so
+    // we can send the correct UDP transport info in the participant info data
+    procedure OnUdpTransportInfoProc(ipaddress : string; port : Integer);
+
+    // Create a Topic for subscribing or publishing on ParticipantInfoData
+    function createParticipantInfoTopic : TTopic;
+
 //		///Remove this instance from the static instance map
 //		void RemoveInstance();
-//
+
 //		//Visible to friends only
-//		void setUdpTransportInfo(std::string ip, int port);
 //		bool hasPublisherOn(std::string topicName);
 //
 
@@ -203,8 +184,11 @@ type
 implementation
 
 uses
+  Windows,
   SysUtils,
-  uOps.Exceptions;
+  WinSock,
+  uOps.Exceptions,
+  uOps.Publisher;
 
 var
   // By Singelton, one Participant per 'domainId + participantID'
@@ -236,16 +220,12 @@ begin
         Result := TParticipant.Create(domainID, participantID, configFile);
         gInstances.Add(key, Result);
       except
-        on ex : EConfigException do begin
-          ReportStaticError(
-            TBasicError.Create('Participant', 'Participant', ex.ToString()));
-        end;
-        on ex : ECommException do begin
-          ReportStaticError(
-            TBasicError.Create('Participant', 'Participant', ex.ToString()));
+        on ex : Exception do begin
+          uOps.Error.gStaticErrorService.Report(
+            TBasicError.Create('Participant', 'Participant', ex.ToString));
         end;
         else begin
-          ReportStaticError(
+          uOps.Error.gStaticErrorService.Report(
             TBasicError.Create('Participant', 'Participant', 'Unknown Exception'));
         end;
       end;
@@ -259,32 +239,37 @@ end;
 
 // -----------------------------------------------------------------------------
 
-// Report an error via all participants ErrorServices or the static ErrorService if it exists
-// Takes ownership over given TError instance
-class procedure TParticipant.ReportStaticError(error : TError);
-begin
-///TODO
-///  don't forget to delete error instance
-  FreeAndNil(error);
-end;
-
 // Make this participant report an Error, which will be delivered to all ErrorService listeners
 // Takes ownership over given TError instance
 procedure TParticipant.ReportError(error : TError);
 begin
-///TODO
-///  don't forget to delete error instance
-  FreeAndNil(error);
+  // Gives ownership to error service
+  FErrorService.Report(error);
+end;
+
+// Note that several threads can at the same time report errors so
+// we need to take that into account
+procedure TParticipant.OnErrorReport(Sender : TObject; Error : TError);
+begin
+  // NOTE For this notification the notifier free's the error object!!!
+
+  ///TODO
 end;
 
 // -----------------------------------------------------------------------------
 
 // Constructor is private, instances are acquired through getInstance()
 constructor TParticipant.Create(domainID : string; participantID : string; configFile : string);
+var
+  hname: array[0..1023] of AnsiChar;
 begin
   inherited Create;
   FDomainID := domainID;
   FParticipantID := participantID;
+  FAliveTimeout := 1000;
+
+  FErrorService := TErrorService.Create;
+  FErrorService.addListener(onErrorReport);
 
   // Read configFile
   //Should trow?
@@ -311,11 +296,27 @@ begin
   // Create a factory instance for each participant
   FObjectFactory := TOPSObjectFactoryImpl.Create;
 
-  FSendDataHandlerFactory := TSendDataHandlerFactory.Create(FDomain, OnUdpConnectDisconnectProc);
-  FReceiveDataHandlerFactory := TReceiveDataHandlerFactory.Create;
+  // Initialize static data in partInfoData
+  FPartInfoData := TParticipantInfoData.Create;
+  FPartInfoDataMutex := TMutex.Create;
+
+  hname[0] := #0;
+  gethostname(hname, sizeof(hname));
+  FPartInfoData.name := AnsiString(hname) + '(' + AnsiString(IntToStr(GetCurrentProcessId)) + ')';
+  FPartInfoData.languageImplementation := 'Delphi';
+  FPartInfoData.id := AnsiString(FParticipantID);
+  FPartInfoData.domain := AnsiString(FDomainID);
 
 
 
+  FSendDataHandlerFactory := TSendDataHandlerFactory.Create(FDomain, OnUdpConnectDisconnectProc, FErrorService);
+  FReceiveDataHandlerFactory := TReceiveDataHandlerFactory.Create(OnUdpTransportInfoProc, FErrorService);
+
+  FPartInfoTopic := createParticipantInfoTopic;
+  FPartInfoListener := TParticipantInfoDataListener.Create(FDomain, FPartInfoTopic, FErrorService);
+
+  // Start a thread running our run() method
+  FRunner := TRunner.Create(Run);
 end;
 
 destructor TParticipant.Destroy;
@@ -323,11 +324,28 @@ begin
   ///TODO Extract Self from gInstances ???
 
 
+  // Tell thread to terminate
+  FTerminated := True;
+  if Assigned(FRunner) then FRunner.Terminate;
+
+  // If thread exist, wait for thread to terminate and then delete the object
+  FreeAndNil(FRunner);
+
+  FreeAndNil(FPartInfoListener);    // Must be done before send/receive factory delete below
+  FreeAndNil(FPartInfoTopic);
+
   FreeAndNil(FReceiveDataHandlerFactory);
   FreeAndNil(FSendDataHandlerFactory);
+
+  FreeAndNil(FPartInfoData);
+  FreeAndNil(FPartInfoDataMutex);
+
   FreeAndNil(FObjectFactory);
 
-  TOPSConfig.releaseConfig(FConfig);
+  TOPSConfig.releaseConfig(FConfig);   // Free's both FConfig and FDomain
+  FDomain := nil;
+
+  FreeAndNil(FErrorService);
   inherited;
 end;
 
@@ -337,57 +355,75 @@ function TParticipant.getSendDataHandler(top : TTopic) : TSendDataHandler;
 begin
   Result := FSendDataHandlerFactory.getSendDataHandler(top);
 
-  ///TODO add to partinfodata
+  if Assigned(Result) then begin
+    FPartInfoDataMutex.Acquire;
+    try
+      // Need to add topic to partInfoData.publishTopics
+      FPartInfoData.addTopic(FPartInfoData.publishTopics, top);
+    finally
+      FPartInfoDataMutex.Release;
+    end;
+  end;
 end;
 
 procedure TParticipant.releaseSendDataHandler(top : TTopic);
 begin
   FSendDataHandlerFactory.releaseSendDataHandler(top);
 
-  ///TODO remove from partinfodata
+  FPartInfoDataMutex.Acquire;
+  try
+    // Remove topic from partInfoData.publishTopics
+    FPartInfoData.removeTopic(FPartInfoData.publishTopics, top);
+  finally
+    FPartInfoDataMutex.Release;
+  end;
 end;
 
 function TParticipant.getReceiveDataHandler(top : TTopic) : TReceiveDataHandler;
 begin
   Result := FReceiveDataHandlerFactory.getReceiveDataHandler(top, FDomain, FObjectFactory);
 
-//		if (result) {
-//			SafeLock lock(&partInfoDataMutex);
-//			//Need to add topic to partInfoData.subscribeTopics (TODO ref count if same topic??)
-//            partInfoData.subscribeTopics.push_back(TopicInfoData(top));
-//		}
-//		return result;
+  if Assigned(Result) then begin
+    FPartInfoDataMutex.Acquire;
+    try
+      // Need to add topic to partInfoData.subscribeTopics
+      FPartInfoData.addTopic(FPartInfoData.subscribeTopics, top);
+    finally
+      FPartInfoDataMutex.Release;
+    end;
+  end;
 end;
 
 procedure TParticipant.releaseReceiveDataHandler(top : TTopic);
 begin
   FReceiveDataHandlerFactory.releaseReceiveDataHandler(top);
 
-//		SafeLock lock(&partInfoDataMutex);
-//		// Remove topic from partInfoData.subscribeTopics (TODO the same topic, ref count?)
-//		std::vector<TopicInfoData>::iterator it;
-//		for (it = partInfoData.subscribeTopics.begin(); it != partInfoData.subscribeTopics.end(); it++) {
-//			if (it->name == top.getName()) {
-//				partInfoData.subscribeTopics.erase(it);
-//				break;
-//			}
-//		}
+  FPartInfoDataMutex.Acquire;
+  try
+    // Remove topic from partInfoData.subscribeTopics
+    FPartInfoData.removeTopic(FPartInfoData.subscribeTopics, top);
+  finally
+    FPartInfoDataMutex.Release;
+  end;
 end;
+
+// -----------------------------------------------------------------------------
 
 function TParticipant.getObjectFactory : TOPSObjectFactory;
 begin
   Result := FObjectFactory;
 end;
 
-// Add a SerializableFactory which has support for data types (i.e. OPSObject derivatives you want this Participant to understand)
+// Add a SerializableFactory which has support for data types (i.e. OPSObject
+// derivatives you want this Participant to understand)
 // Takes over ownership of the object and it will be deleted with the participant
 procedure TParticipant.addTypeSupport(typeSupport : TSerializableFactory);
 begin
   FObjectFactory.Add(typeSupport);
 end;
 
-// Create a Topic from the ops config. See config below.
-function TParticipant.createTopic(name : string) : TTopic;
+// Get a Topic from the ops config
+function TParticipant.getTopic(name : string) : TTopic;
 begin
   Result := FDomain.getTopic(AnsiString(name));
   Result.ParticipantID := FParticipantID;
@@ -395,16 +431,54 @@ begin
 //  Result.participant = this;
 end;
 
+// Create a Topic for subscribing or publishing on ParticipantInfoData
+function TParticipant.createParticipantInfoTopic : TTopic;
+begin
+  // ops::Topic infoTopic("ops.bit.ParticipantInfoTopic", 9494, "ops.ParticipantInfoData", domain->getDomainAddress());
+  Result := TTopic.Create('ops.bit.ParticipantInfoTopic', FDomain.MetaDataMcPort, 'ops.ParticipantInfoData', FDomain.DomainAddress);
+  Result.DomainID := FDomainID;
+  Result.ParticipantID := FParticipantID;
+  Result.Transport := TTopic.TRANSPORT_MC;
+end;
+
+// Get the name that this participant has set in its ParticipantInfoData
+function TParticipant.getPartInfoName : string;
+begin
+  Result := string(FPartInfoData.name);
+end;
+
+// -----------------------------------------------------------------------------
+
 // Called from SendDataHandlerFactory when UDP topics should be connected/disconnected
 // to/from the participant info data listener
 procedure TParticipant.OnUdpConnectDisconnectProc(top : TTopic; sdh : TSendDataHandler; connect : Boolean);
 begin
+  // FPartInfoListener is deleted before sendDataHandlerFactory (and it must be in that order
+  // since FPartInfoListener uses a subscriber that uses the sendDataHandlerFactory).
+  // Therefore we must check that it is assigned here
+  if not Assigned(FPartInfoListener) then Exit;
+
   if connect then begin
-///TODO
+    FPartInfoListener.connectUdp(top, sdh);
   end else begin
-///TODO
+    FPartInfoListener.disconnectUdp(top, sdh);
   end;
 end;
+
+// Called from ReceiveDataHandlerFactory when an UDP Reciver is created/deleted, so
+// we can send the correct UDP transport info in the participant info data
+procedure TParticipant.OnUdpTransportInfoProc(ipaddress : string; port : Integer);
+begin
+  FPartInfoDataMutex.Acquire;
+  try
+    FPartInfoData.ip := AnsiString(ipaddress);
+    FPartInfoData.mc_udp_port := port;
+  finally
+    FPartInfoDataMutex.Release;
+  end;
+end;
+
+// -----------------------------------------------------------------------------
 
 function TParticipant.getDomain : TDomain;
 begin
@@ -414,6 +488,67 @@ end;
 function TParticipant.getConfig : TOPSConfig;
 begin
   Result := FConfig;
+end;
+
+function TParticipant.getErrorService : TErrorService;
+begin
+  Result := FErrorService;
+end;
+
+(**************************************************************************
+*
+**************************************************************************)
+procedure TParticipant.Run;
+var
+  errMessage : string;
+  partInfoTopic : TTopic;
+  // A publisher of ParticipantInfoData
+  partInfoPub : TPublisher;
+begin
+  partInfoTopic := nil;
+  partInfoPub := nil;
+
+  while not FTerminated do begin
+    Sleep(FAliveTimeout);
+    if FTerminated then Exit;
+
+    // Handle periodic publishing of metadata, i.e. FPartInfoData
+    try
+      // Create the meta data publisher if user hasn't disabled it for the domain.
+      // The meta data publisher is only necessary if we have topics using transport UDP.
+      if (not Assigned(partInfoPub)) and (FDomain.MetaDataMcPort > 0) then begin
+        partInfoTopic := createParticipantInfoTopic;
+        partInfoPub := TPublisher.Create(partInfoTopic);
+      end;
+      if Assigned(partInfoPub) then begin
+        FPartInfoDataMutex.Acquire;
+        try
+          partInfoPub.WriteOPSObject(FPartInfoData);
+        finally
+          FPartInfoDataMutex.Release;
+        end;
+      end;
+
+    except
+      on E: Exception do begin
+				if not Assigned(partInfoPub) then begin
+					errMessage := 'Failed to create publisher for ParticipantInfoTopic. Check localInterface and metaDataMcPort in configuration file.';
+				end else begin
+					errMessage := 'Failed to publish ParticipantInfoTopic data.';
+				end;
+				uOps.Error.gStaticErrorService.Report(TBasicError.Create('Participant', 'Run', errMessage));
+			end;
+    end;
+    if FTerminated then Exit;
+
+    // TODO
+//		SafeLock lock(&serviceMutex);
+//		receiveDataHandlerFactory->cleanUpReceiveDataHandlers();
+
+  end;
+
+  FreeAndNil(partInfoPub);
+  FreeAndNil(partInfoTopic);
 end;
 
 initialization

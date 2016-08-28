@@ -25,6 +25,7 @@ interface
 uses System.Generics.Collections,
      System.SyncObjs,
      uOps.Types,
+     uOps.Error,
      uOps.Topic,
      uOps.Domain,
      uOps.Transport.Sender,
@@ -36,6 +37,9 @@ type
 
   TSendDataHandlerFactory = class(TObject)
   private
+    // Borrowed reference
+    FErrorService : TErrorService;
+
     // The Domain to which this Factory belongs (NOTE: we don't own the object)
     FDomain : TDomain;
 
@@ -50,7 +54,7 @@ type
     FMutex : TMutex;
 
   public
-    constructor Create(Dom : TDomain; Proc : TOnUdpConnectDisconnectProc);
+    constructor Create(Dom : TDomain; Proc : TOnUdpConnectDisconnectProc; Reporter : TErrorService);
     destructor Destroy; override;
 
     function getSendDataHandler(top : TTopic) : TSendDataHandler;
@@ -60,13 +64,19 @@ type
 implementation
 
 uses SysUtils,
-     uOps.Transport.McSendDataHandler;
+     uOps.Transport.McSendDataHandler,
+     uOps.Transport.McUdpSendDataHandler,
+     uOps.Transport.TCPSendDataHandler;
 
 { TSendDataHandlerFactory }
 
-constructor TSendDataHandlerFactory.Create(Dom : TDomain; Proc : TOnUdpConnectDisconnectProc);
+constructor TSendDataHandlerFactory.Create(
+              Dom : TDomain;
+              Proc : TOnUdpConnectDisconnectProc;
+              Reporter : TErrorService);
 begin
   inherited Create;
+  FErrorService := Reporter;
   FDomain := dom;
   FOnUdpConnectDisconnectProc := Proc;
   FMutex := TMutex.Create;
@@ -112,15 +122,16 @@ begin
     ttl := FDomain.TimeToLive;
 
 		if top.Transport = TTopic.TRANSPORT_MC then begin
-      Result := TMcSendDataHandler.Create(top, localIf, ttl);
+      Result := TMcSendDataHandler.Create(top, localIf, ttl, FErrorService);
       FSendDataHandlers.Add(key, Result);
 
-		end else if top.Transport = TTopic.TRANSPORT_UDP then begin
-			if not Assigned(FUdpSendDataHandler) then begin
-				// We have only one sender for all topics, so use the domain value for buffer size
-//				FUdpSendDataHandler := TMcUdpSendDataHandler.Create(localIf,
-//															  ttl,
-//															  FDomain.OutSocketBufferSize);
+    end else if top.Transport = TTopic.TRANSPORT_UDP then begin
+      if not Assigned(FUdpSendDataHandler) then begin
+      // We have only one sender for all topics, so use the domain value for buffer size
+        FUdpSendDataHandler := TMcUdpSendDataHandler.Create(localIf,
+                                 ttl,
+                                 FDomain.OutSocketBufferSize,
+                                 FErrorService);
 			end;
 
 			// Setup a listener on the participant info data published by participants on our domain.
@@ -128,11 +139,11 @@ begin
 			// ie. we extract ip and port from the information and add it to our McUdpSendDataHandler
       if Assigned(FOnUdpConnectDisconnectProc) then FOnUdpConnectDisconnectProc(top, FUdpSendDataHandler, True);
 
-			Result := FUdpSendDataHandler;
+      Result := FUdpSendDataHandler;
 
 		end else if top.Transport = TTopic.TRANSPORT_TCP then begin
-//			Result := TTCPSendDataHandler.Create(top);
-//      FSendDataHandlers.Add(key, Result);
+      Result := TTCPSendDataHandler.Create(top, FErrorService);
+      FSendDataHandlers.Add(key, Result);
 
 		end;
   finally

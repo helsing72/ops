@@ -1,4 +1,4 @@
-unit uOps.BasicError;
+unit uOps.Error;
 
 (**
 *
@@ -21,6 +21,8 @@ unit uOps.BasicError;
 *)
 
 interface
+
+uses uNotifier;
 
 type
   // Interface for errors in OPS
@@ -46,7 +48,29 @@ type
     function getMessage : string; override;
   end;
 
+  TErrorService = class(TObject)
+  private
+    FErrorNotifier : TNotifier<TError>;
+  public
+    constructor Create;
+    destructor Destroy; override;
+
+    // Note that several threads can at the same time report errors so
+    // listeners need to take that into account
+    procedure addListener(Proc : TOnNotifyEvent<TError>);
+    procedure removeListener(Proc : TOnNotifyEvent<TError>);
+
+    // The ErrorService takes ower ownership of error objects from the caller
+    // They will be free'd when all listeners have been notified
+    procedure Report(Error : TError);
+  end;
+
+var
+  gStaticErrorService : TErrorService;
+
 implementation
+
+uses SysUtils;
 
 constructor TBasicError.Create(className, method, mess : string);
 begin
@@ -66,6 +90,45 @@ function TBasicError.getMessage : string;
 begin
   Result := FClassName + '.' + FMethod + '(): ' + FMessage;
 end;
+
+{ TErrorService }
+
+constructor TErrorService.Create;
+begin
+  inherited Create;
+  FErrorNotifier := TNotifier<TError>.Create(Self);
+end;
+
+destructor TErrorService.Destroy;
+begin
+  FreeAndNil(FErrorNotifier);
+  inherited;
+end;
+
+procedure TErrorService.addListener(Proc: TOnNotifyEvent<TError>);
+begin
+  FErrorNotifier.addListener(Proc);
+end;
+
+procedure TErrorService.removeListener(Proc: TOnNotifyEvent<TError>);
+begin
+  FErrorNotifier.removeListener(Proc);
+end;
+
+procedure TErrorService.Report(Error: TError);
+begin
+  try
+    FErrorNotifier.doNotify(Error);
+  except
+  end;
+  FreeAndNil(Error);
+end;
+
+initialization
+  gStaticErrorService := TErrorService.Create;
+
+finalization
+  FreeAndNil(gStaticErrorService);
 
 end.
 

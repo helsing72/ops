@@ -28,10 +28,6 @@ uses uOps.Types,
 
 
 type
-///TODO	class Participant;
-//		friend class Domain;
-//		friend class Participant;
-
 	TTopic = class(TOPSObject)
   public
     const

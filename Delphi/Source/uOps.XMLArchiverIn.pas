@@ -28,7 +28,7 @@ uses System.Generics.Collections,
      Xml.XmlDom,
      Xml.XmlIntf,
      uOps.Types,
-     uOPs.BasicError,
+     uOPs.Error,
      uOps.ArchiverInOut,
      uOps.SerializableInheritingTypeFactory;
 

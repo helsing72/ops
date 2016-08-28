@@ -26,6 +26,7 @@ uses System.Generics.Collections,
      System.SyncObjs,
      uNotifier,
      uOps.Types,
+     uOps.Error,
      uOps.Topic,
      uOps.MemoryMap,
      uOps.ByteBuffer,
@@ -37,8 +38,11 @@ uses System.Generics.Collections,
      uOps.Transport.Receiver;
 
 type
-  TReceiveDataHandler = class(TObject)// public Notifier<OPSMessage*>, Listener<BytesSizePair>
+  TReceiveDataHandler = class(TObject)
   private
+    // Borrowed references
+    FErrorService : TErrorService;
+
     // Used for notifications to users of the ReceiveDataHandler
     FDataNotifier : TNotifier<TOPSMessage>;
 
@@ -50,6 +54,7 @@ type
     FBuffer : TByteBuffer;
     FSampleMaxSize : Integer;
 
+    // Archiver used for deserializing byte buffers into messages
     FArchiver : TOPSArchiverIn;
 
     // Temporary MemoryMap and buffer
@@ -73,7 +78,10 @@ type
     function GetNumListeners : Integer;
 
   public
-    constructor Create(top : TTopic; dom : TDomain; opsObjectFactory : TSerializableInheritingTypeFactory);
+    constructor Create(top : TTopic;
+                       dom : TDomain;
+                       opsObjectFactory : TSerializableInheritingTypeFactory;
+                       Reporter : TErrorService);
     destructor Destroy; override;
 
     function aquireMessageLock : Boolean;
@@ -84,15 +92,9 @@ type
 		procedure addListener(Proc : TOnNotifyEvent<TOPSMessage>);
 		procedure removeListener(Proc : TOnNotifyEvent<TOPSMessage>);
 
-//		int numReservedMessages()
-//		{
-//			return messageReferenceHandler.size();
-//		}
+    function numReservedMessages : Integer;
 
-    //		Receiver* getReceiver()
-    //		{
-    //			return receiver;
-    //		}
+    function getReceiver : TReceiver;
 
     property SampleMaxSize : Integer read FSampleMaxSize;
     property NumListeners : Integer read GetNumListeners;
@@ -101,18 +103,23 @@ type
     // Called whenever the receiver has new data.
     procedure onNewEvent(Sender : TObject; arg : TBytesSizePair);
 
+    // Handles spare bytes, i.e. extra bytes in buffer not consumed by created message
     procedure calculateAndSetSpareBytes(segmentPaddingSize : Integer);
 	end;
 
 implementation
 
 uses SysUtils,
-     uOps.Exceptions,
-     uOps.Transport.ReceiverFactory;
+     uOps.Exceptions;
 
-constructor TReceiveDataHandler.Create(top : TTopic; dom : TDomain; opsObjectFactory : TSerializableInheritingTypeFactory);
+constructor TReceiveDataHandler.Create(
+              top : TTopic;
+              dom : TDomain;
+              opsObjectFactory : TSerializableInheritingTypeFactory;
+              Reporter : TErrorService);
 begin
   inherited Create;
+  FErrorService := Reporter;
   FDataNotifier := TNotifier<TOPSMessage>.Create(Self);
   FMessageLock := TMutex.Create;
 
@@ -126,7 +133,7 @@ begin
   FTmpMemMap := TMemoryMap.Create(nil, 0);
   FTmpBuffer := TByteBuffer.Create(FTmpMemMap);
 
-  FReceiver := TReceiverFactory.getReceiver(top, dom);
+  FReceiver := TReceiverFactory.getReceiver(top, dom, FErrorService);
   if not Assigned(FReceiver) then begin
     raise ECommException.Create('Could not create receiver');
   end;
@@ -190,17 +197,31 @@ begin
   Result := FDataNotifier.numListeners;
 end;
 
-//	void ReportError(Participant* participant, std::string message, std::string addr, int port)
-//	{
-//		std::ostringstream errPort;
-//		errPort << port;
-//		message += " [" + addr + "::" + errPort.str() + "]";
-//		BasicError err("ReceiveDataHandler", "onNewEvent", message);
-//		participant->reportError(&err);
-//	}
+function TReceiveDataHandler.getReceiver : TReceiver;
+begin
+  Result := FReceiver;
+end;
+
+function TReceiveDataHandler.numReservedMessages : Integer;
+begin
+  Result := 0; ///TODO return messageReferenceHandler.size();
+end;
 
 // Called whenever the receiver has new data.
 procedure TReceiveDataHandler.onNewEvent(Sender : TObject; arg : TBytesSizePair);
+
+  procedure Report(msg : string); overload;
+  begin
+    if Assigned(FErrorService) then begin
+      FErrorService.Report(TBasicError.Create('ReceiveDataHandler', 'onNewEvent', msg));
+    end;
+  end;
+
+  procedure Report(msg : string; addr : string; port : Integer); overload;
+  begin
+    Report(msg + ' [' + addr + '::' + IntToStr(port) + ']');
+  end;
+
 var
   nrOfFragments : UInt32;
   currentFragment : UInt32;
@@ -216,13 +237,11 @@ begin
 //
 //            if (byteSizePair.size == -5)
 //            {
-//                BasicError err("ReceiveDataHandler", "onNewEvent", "Connection was lost but is now reconnected.");
-//                participant->reportError(&err);
+//                Report('Connection was lost but is now reconnected.');
 //            }
 //            else
 //            {
-//                BasicError err("ReceiveDataHandler", "onNewEvent", "Empty message or error.");
-//                participant->reportError(&err);
+//                Report('Empty message or error.');
 //            }
 
     // Continue with the same buffer, so just exit
@@ -244,7 +263,7 @@ begin
     currentFragment := FTmpBuffer.ReadInt;
 
     if (currentFragment <> (nrOfFragments - 1)) and (arg.size <> PACKET_MAX_SIZE) then begin
-//				ReportError(participant, "Debug: Received broken package.", addr, port);
+      Report('Debug: Received broken package.', srcAddr, srcPort);
     end;
 
     Inc(FCurrentMessageSize, arg.size);
@@ -252,8 +271,8 @@ begin
     if currentFragment <> FExpectedSegment then begin
       // Error
       if FFirstReceived then begin
-//					ReportError(participant, "Segment Error, sample will be lost.", addr, port);
-          FFirstReceived := False;
+        Report('Segment Error, sample will be lost.', srcAddr, srcPort);
+        FFirstReceived := False;
       end;
       FExpectedSegment := 0;
       FCurrentMessageSize := 0;
@@ -300,13 +319,13 @@ begin
 //            if Assigned(oldMessage) then oldMessage.Unreserve;
             FCurrentMessageSize := 0;
           end else begin
-//            ReportError(participant, "Failed to deserialize message. Check added Factories.", addr, port);
+            Report('Failed to deserialize message. Check added Factories.', srcAddr, srcPort);
             FreeAndNil(FMessage);
             FMessage := oldMessage;
           end;
         end else begin
           // Inform participant that invalid data is on the network.
-//          ReportError(participant, "Unexpected type received. Type creation failed.", addr, port);
+          Report('Unexpected type received. Type creation failed.', srcAddr, srcPort);
           FMessage := oldMessage;
         end;
       finally
@@ -316,7 +335,7 @@ begin
       Inc(FExpectedSegment);
 
   		if FExpectedSegment >= FMemMap.NrOfSegments then begin
-//        ReportError(participant, "Buffer too small for received message.", addr, port);
+        Report('Buffer too small for received message.', srcAddr, srcPort);
         FExpectedSegment := 0;
         FCurrentMessageSize := 0;
 			end;
@@ -324,7 +343,7 @@ begin
     FReceiver.SetReceiveBuffer(FMemMap.getSegment(FExpectedSegment), FMemMap.SegmentSize);
   end else begin
     //Inform participant that invalid data is on the network.
-//		ReportError(participant, "Protocol ERROR.", addr, port);
+    Report('Protocol ERROR.', srcAddr, srcPort);
     FReceiver.SetReceiveBuffer(FMemMap.getSegment(FExpectedSegment), FMemMap.SegmentSize);
   end;
 end;
@@ -333,10 +352,10 @@ procedure TReceiveDataHandler.Stop;
 begin
   FReceiver.removeListener(onNewEvent);
 
-//		// Need to release the last message we received, if any.
-//		// (We always keep a reference to the last message received)
-//		// If we don't, the garbage-cleaner won't delete us.
-//		if Assigned(FMessage) FMessage.Unreserve;
+  // Need to release the last message we received, if any.
+  // (We always keep a reference to the last message received)
+  // If we don't, the garbage-cleaner won't delete us.
+///TODO  if Assigned(FMessage) FMessage.Unreserve;
   FMessage := nil;
 
 ///TODO  receiver->stop(); ???

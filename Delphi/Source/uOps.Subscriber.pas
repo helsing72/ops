@@ -186,7 +186,7 @@ type
 implementation
 
 uses SysUtils,
-     uOps.BasicError,
+     uOps.Error,
      uOps.TimeHelper;
 
 constructor TSubscriber.Create(t : TTopic);

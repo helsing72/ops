@@ -22,13 +22,9 @@ unit uOps.Transport.Receiver;
 
 interface
 
-uses System.Generics.Collections,
-     System.SyncObjs,
-     uNotifier,
-     uOps.Types,
+uses uNotifier,
+     uOps.Error,
      uOps.Topic,
-     uOps.MemoryMap,
-     uOps.OPSMessage,
      uOps.Domain;
 
 type
@@ -38,18 +34,22 @@ type
     constructor Create(ABytes : PByte; ASize : Integer);
   end;
 
+  (* ------------------------------------------------------------------------ *)
+
 	TReceiver = class(TObject)
   protected
+    // Borrowed reference
+    FErrorService : TErrorService;
+
+    // Result from WSAGetLastError() on error
+    FLastErrorCode : Integer;
+
     // Used for notifications to users of the Receiver
     FDataNotifier : TNotifier<TBytesSizePair>;
 
 	public
     constructor Create;
     destructor Destroy; override;
-
-    class function createMCReceiver(ip : string; bindPort : Integer; localInterface : string = '0.0.0.0'; inSocketBufferSize : Int64 = 16000000) : TReceiver;
-    class function createTCPClient(ip : string; port : Integer; inSocketBufferSize : Int64 = 16000000) : TReceiver;
-    class function createUDPReceiver(port : Integer; localInterface : string = '0.0.0.0'; inSocketBufferSize : Int64 = 16000000) : TReceiver;
 
 		procedure addListener(Proc : TOnNotifyEvent<TBytesSizePair>);
 		procedure removeListener(Proc : TOnNotifyEvent<TBytesSizePair>);
@@ -59,7 +59,7 @@ type
     // When a message is read, a callback (notification) will be done with the
     // buffer and actual number of bytes read.
     // When the callback returns a new read is started to the current buffer
-    procedure Start(bytes : PByte; size : Integer); virtual; abstract;
+    function Start(bytes : PByte; size : Integer) : Boolean; virtual; abstract;
 
     // GetSource():
     // Used to get the sender IP and port for a received message.
@@ -75,18 +75,33 @@ type
     // Aborts an ongoing read. NOTE: Must NOT be called from the callback.
     procedure Stop; virtual; abstract;
 
+    property LastErrorCode : Integer read FLastErrorCode;
+  end;
+
+  (* ------------------------------------------------------------------------ *)
+
+  TReceiverFactory = class(TObject)
+  public
+    // Creates a receiver based on topic transport information
+    class function getReceiver(top : TTopic; dom : TDomain; Reporter : TErrorService) : TReceiver;
   end;
 
 implementation
 
 uses SysUtils,
-     uOps.Transport.MulticastReceiver;
+     uOps.Transport.MulticastReceiver,
+     uOps.Transport.UDPReceiver,
+     uOps.Transport.TCPClient;
+
+{ TBytesSizePair }
 
 constructor TBytesSizePair.Create(ABytes : PByte; ASize : Integer);
 begin
   Bytes := ABytes;
   Size := ASize;
 end;
+
+{ TReceiver }
 
 constructor TReceiver.Create;
 begin
@@ -100,23 +115,6 @@ begin
   inherited;
 end;
 
-class function TReceiver.createMCReceiver(ip : string; bindPort : Integer; localInterface : string = '0.0.0.0'; inSocketBufferSize : Int64 = 16000000) : TReceiver;
-begin
-  Result :=	TMulticastReceiver.Create(ip, bindPort, localInterface, inSocketBufferSize);
-end;
-
-class function TReceiver.createTCPClient(ip : string; port : Integer; inSocketBufferSize : Int64 = 16000000) : TReceiver;
-begin
-  Result := nil;
-//  Result := TTCPClient(ip, port, ioService, inSocketBufferSize);
-end;
-
-class function TReceiver.createUDPReceiver(port : Integer; localInterface : string = '0.0.0.0'; inSocketBufferSize : Int64 = 16000000) : TReceiver;
-begin
-  Result := nil;
-//  Result := TUDPReceiver(port, ioService, localInterface, inSocketBufferSize);
-end;
-
 procedure TReceiver.addListener(Proc : TOnNotifyEvent<TBytesSizePair>);
 begin
   FDataNotifier.addListener(Proc);
@@ -125,6 +123,29 @@ end;
 procedure TReceiver.removeListener(Proc : TOnNotifyEvent<TBytesSizePair>);
 begin
   FDataNotifier.removeListener(Proc);
+end;
+
+{ TReceiverFactory }
+
+class function TReceiverFactory.getReceiver(top : TTopic; dom : TDomain; Reporter : TErrorService) : TReceiver;
+var
+  localif : string;
+begin
+  Result := nil;
+
+  localIf := string(TDomain.doSubnetTranslation(dom.LocalInterface));
+
+  if top.Transport = TTopic.TRANSPORT_MC then begin
+    Result := TMulticastReceiver.Create(string(top.DomainAddress), top.Port, localIf, top.InSocketBufferSize);
+
+  end else if top.Transport = TTopic.TRANSPORT_TCP then begin
+    Result := TTCPClientReceiver.Create(string(top.DomainAddress), top.Port, top.InSocketBufferSize);
+
+  end else if top.Transport = TTopic.TRANSPORT_UDP then begin
+    Result := TUDPReceiver.Create(0, localIf, top.InSocketBufferSize);
+  end;
+
+  if Assigned(Result) then Result.FErrorService := Reporter;
 end;
 
 end.
