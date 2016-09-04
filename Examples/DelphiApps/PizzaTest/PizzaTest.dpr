@@ -56,7 +56,12 @@ uses
   pizza.special.Cheese in '..\..\OPSIdls\PizzaProject\Generated\Delphi\pizza\special\pizza.special.Cheese.pas',
   pizza.special.ExtraAllt in '..\..\OPSIdls\PizzaProject\Generated\Delphi\pizza\special\pizza.special.ExtraAllt.pas',
   pizza.special.LHCData in '..\..\OPSIdls\PizzaProject\Generated\Delphi\pizza\special\pizza.special.LHCData.pas',
-  PizzaProject.PizzaProjectTypeFactory in '..\..\OPSIdls\PizzaProject\Generated\Delphi\PizzaProject\PizzaProject.PizzaProjectTypeFactory.pas';
+  PizzaProject.PizzaProjectTypeFactory in '..\..\OPSIdls\PizzaProject\Generated\Delphi\PizzaProject\PizzaProject.PizzaProjectTypeFactory.pas',
+  uOps.XMLArchiverOut in '..\..\..\Delphi\Source\uOps.XMLArchiverOut.pas',
+  uOps.RequestReply in '..\..\..\Delphi\Source\RequestReply\uOps.RequestReply.pas',
+  uOps.RequestReply.Reply in '..\..\..\Delphi\Source\RequestReply\uOps.RequestReply.Reply.pas',
+  uOps.RequestReply.Request in '..\..\..\Delphi\Source\RequestReply\uOps.RequestReply.Request.pas',
+  uOps.PrintArchiverOut in '..\..\..\Delphi\Source\uOps.PrintArchiverOut.pas';
 
 {$R *.res}
 

@@ -36,9 +36,6 @@ object Form1: TForm1
       'Memo1')
     ScrollBars = ssBoth
     TabOrder = 0
-    ExplicitTop = 212
-    ExplicitWidth = 635
-    ExplicitHeight = 216
   end
   object Panel1: TPanel
     Left = 0
@@ -47,6 +44,13 @@ object Form1: TForm1
     Height = 193
     Align = alTop
     TabOrder = 1
+    object Label_NumOpsMessages: TLabel
+      Left = 614
+      Top = 14
+      Width = 6
+      Height = 13
+      Caption = '0'
+    end
     object Button_CreateParticipants: TButton
       Left = 8
       Top = 8
@@ -138,9 +142,9 @@ object Form1: TForm1
       OnClick = Button_StopPublishersClick
     end
     object Button_WriteData: TButton
-      Left = 664
+      Left = 648
       Top = 130
-      Width = 75
+      Width = 91
       Height = 25
       Caption = 'Write Data'
       TabOrder = 10
@@ -156,9 +160,9 @@ object Form1: TForm1
       OnClick = CheckListBox1Click
     end
     object LabeledEdit1: TLabeledEdit
-      Left = 664
+      Left = 648
       Top = 103
-      Width = 75
+      Width = 91
       Height = 21
       EditLabel.Width = 62
       EditLabel.Height = 13
@@ -176,11 +180,60 @@ object Form1: TForm1
       TabOrder = 13
       OnClick = Button_ClearClick
     end
+    object Button_ClearStorage: TButton
+      Left = 648
+      Top = 8
+      Width = 91
+      Height = 25
+      Caption = 'Clear Storage'
+      Enabled = False
+      TabOrder = 14
+      OnClick = Button_ClearStorageClick
+    end
+    object LabeledEdit_Deadline: TLabeledEdit
+      Left = 556
+      Top = 103
+      Width = 82
+      Height = 21
+      EditLabel.Width = 65
+      EditLabel.Height = 13
+      EditLabel.Caption = 'Deadline [ms]'
+      TabOrder = 15
+      Text = '0'
+      OnExit = LabeledEdit_DeadlineExit
+    end
+    object Button_SetDeadline: TButton
+      Left = 556
+      Top = 130
+      Width = 82
+      Height = 25
+      Caption = 'Set Deadline'
+      TabOrder = 16
+      OnClick = Button_SetDeadlineClick
+    end
+    object LabeledEdit_SendPeriod: TLabeledEdit
+      Left = 648
+      Top = 64
+      Width = 91
+      Height = 21
+      EditLabel.Width = 89
+      EditLabel.Height = 13
+      EditLabel.Caption = 'Send Interval [ms]'
+      TabOrder = 17
+      Text = '0'
+      OnExit = LabeledEdit_SendPeriodExit
+    end
   end
   object Timer1: TTimer
     Interval = 100
     OnTimer = Timer1Timer
     Left = 8
+    Top = 360
+  end
+  object Timer_Send: TTimer
+    Enabled = False
+    OnTimer = Timer_SendTimer
+    Left = 64
     Top = 360
   end
 end

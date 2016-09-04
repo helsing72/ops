@@ -13,6 +13,7 @@ uses
   pizza.PizzaData,
   pizza.VessuvioData,
   pizza.special.ExtraAllt,
+  pizza.special.Cheese,
   Vcl.CheckLst;
 
 type
@@ -30,6 +31,8 @@ type
     procedure StartSubscriber; virtual; abstract;
     procedure StopSubscriber; virtual; abstract;
     procedure SetDeadlineQos(timeoutMs : Int64); virtual; abstract;
+
+    procedure ClearStorage; virtual; abstract;
   end;
 
   TItemInfo = class(Tobject)
@@ -63,6 +66,12 @@ type
     CheckListBox1: TCheckListBox;
     LabeledEdit1: TLabeledEdit;
     Button_Clear: TButton;
+    Label_NumOpsMessages: TLabel;
+    Button_ClearStorage: TButton;
+    LabeledEdit_Deadline: TLabeledEdit;
+    Button_SetDeadline: TButton;
+    LabeledEdit_SendPeriod: TLabeledEdit;
+    Timer_Send: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure Button_CreateParticipantsClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -81,6 +90,11 @@ type
     procedure CheckListBox1Click(Sender: TObject);
     procedure LabeledEdit1Exit(Sender: TObject);
     procedure Button_ClearClick(Sender: TObject);
+    procedure Button_ClearStorageClick(Sender: TObject);
+    procedure LabeledEdit_DeadlineExit(Sender: TObject);
+    procedure Button_SetDeadlineClick(Sender: TObject);
+    procedure LabeledEdit_SendPeriodExit(Sender: TObject);
+    procedure Timer_SendTimer(Sender: TObject);
   private
     { Private declarations }
     FMsgLog : TStringList;
@@ -115,10 +129,12 @@ implementation
 
 uses
   uOps.Domain,
+  uOps.Types,
   uOps.Topic,
   uOps.OPSObject,
   uOps.OPSMessage,
   uOps.Publisher,
+  uOps.XMLArchiverOut,
   PizzaProject.PizzaProjectTypeFactory;
 
 {$R *.dfm}
@@ -145,7 +161,11 @@ type
     FSub : TSubscriber;
 	  FExpectedPubId : Int64;
 
+    FStorage : TObjectList<TOPSMessage>;
+    FMutex : TMutex;
+
     procedure OnOpsMessage(Sender : TObject; obj : TOPSMessage);
+    procedure OndeadlineMissed(Sender : TObject; int : Integer);
     procedure Log(mess : string);
 
   public
@@ -166,6 +186,7 @@ type
     procedure StartSubscriber; override;
     procedure StopSubscriber; override;
     procedure SetDeadlineQos(timeoutMs : Int64); override;
+    procedure ClearStorage; override;
   end;
 
   TPizzaHelper = THelper<PizzaData, PizzaDataPublisher, PizzaDataSubscriber>;
@@ -176,6 +197,8 @@ constructor THelper<DataType, DataTypePublisher, DataTypeSubscriber>.Create(Clie
 begin
   inherited Create;
   Data := DataType.Create;
+  FStorage := TObjectList<TOPSMessage>.Create(False);
+  FMutex := TMutex.Create;
 
   FExpectedPubId := -1;
   FClient := Client;
@@ -186,6 +209,9 @@ destructor THelper<DataType, DataTypePublisher, DataTypeSubscriber>.Destroy;
 begin
   DeletePublisher(False);
   DeleteSubscriber(False);
+  ClearStorage;
+  FreeAndNil(FStorage);
+  FReeAndNil(FMutex);
 end;
 
 procedure THelper<DataType, DataTypePublisher, DataTypeSubscriber>.Log(mess : string);
@@ -277,7 +303,7 @@ var
   topic : TTopic;
 begin
   if Assigned(FSub) then begin
-    Log('Subscriber already exist for topic ' + string(FPub.Topic.Name));
+    Log('Subscriber already exist for topic ' + string(FSub.Topic.Name));
   end else begin
     try
       // Create topic, might throw ops::NoSuchTopicException
@@ -295,8 +321,9 @@ begin
 
       // Create a subscriber on that topic.
       FSub := TSubscriber.Create(topic);
+//      FSub.SetHistoryMaxSize(10);            //TEST
       FSub.AddDataListener(OnOpsMessage);
-//TODO				sub->deadlineMissedEvent.addDeadlineMissedListener(this);
+      FSub.AddDeadlineListener(OnDeadlineMissed);
       FSub.Start;
     except
       Log('Requested topic "' + topicName + '" does not exist!!');
@@ -307,7 +334,7 @@ end;
 procedure THelper<DataType, DataTypePublisher, DataTypeSubscriber>.DeleteSubscriber(doLog : Boolean);
 begin
   if Assigned(FSub) then begin
-    if (doLog) then Log('Deleting subscriber for topic ' + string(FPub.Topic.Name));
+    if (doLog) then Log('Deleting subscriber for topic ' + string(FSub.Topic.Name));
     FSub.Stop;
     FreeAndNil(FSub);
   end else begin
@@ -318,7 +345,7 @@ end;
 procedure THelper<DataType, DataTypePublisher, DataTypeSubscriber>.StartSubscriber;
 begin
   if Assigned(FSub) then begin
-    Log('Starting subscriber for topic ' + string(FPub.Topic.Name));
+    Log('Starting subscriber for topic ' + string(FSub.Topic.Name));
     FSub.Start;
   end else begin
     Log('Subscriber must be created first!!');
@@ -328,7 +355,7 @@ end;
 procedure THelper<DataType, DataTypePublisher, DataTypeSubscriber>.StopSubscriber;
 begin
   if Assigned(FSub) then begin
-    Log('Stopping subscriber for topic ' + string(FPub.Topic.Name));
+    Log('Stopping subscriber for topic ' + string(FSub.Topic.Name));
     FSub.Stop;
   end else begin
     Log('Subscriber must be created first!!');
@@ -338,7 +365,7 @@ end;
 procedure THelper<DataType, DataTypePublisher, DataTypeSubscriber>.SetDeadlineQos(timeoutMs : Int64);
 begin
   if Assigned(FSub) then begin
-    Log('Setting deadlineQos to ' + IntToStr(timeoutMs) + ' [ms] for topic ' + string(FPub.Topic.Name));
+    Log('Setting deadlineQos to ' + IntToStr(timeoutMs) + ' [ms] for topic ' + string(FSub.Topic.Name));
     FSub.DeadlineQoS := timeoutMs;
   end else begin
     Log('Subscriber must be created first!!');
@@ -357,17 +384,38 @@ begin
       end;
     end;
     FExpectedPubId := obj.PublicationID + 1;
+    FMutex.Acquire;
+    try
+//      obj.Reserve;        //TEST  Bump up the reservation count so object isn't deleted
+//      FStorage.Add(obj);
+    finally
+      FMutex.Release;
+    end;
     if Assigned(FClient) then begin
       FClient(FSub, obj.Data as DataType);
     end;
   end;
 end;
 
-//TODO	///Override from ops::DeadlineMissedListener, called if no new data has arrived within deadlineQoS.
-//	void onDeadlineMissed(ops::DeadlineMissedEvent* evt)
-//	{
-//		std::cout << "Deadline Missed for topic " << sub->getTopic().getName() << std::endl;
-//	}
+procedure THelper<DataType, DataTypePublisher, DataTypeSubscriber>.OndeadlineMissed(Sender : TObject; int : Integer);
+begin
+  Log('Deadline Missed for topic ' + string(FSub.Topic.Name));
+end;
+
+procedure THelper<DataType, DataTypePublisher, DataTypeSubscriber>.ClearStorage;
+var
+  i : Integer;
+begin
+  FMutex.Acquire;
+  try
+    // Now tell objects that we don't need them any more, which may
+    // lead to they beeing deleted.
+    for i := 0 to FStorage.Count - 1 do FStorage.Items[i].UnReserve;
+    FStorage.Clear;
+  finally
+    FMutex.Release;
+  end;
+end;
 
 // ----------------------------------------------------------------------------
 
@@ -380,6 +428,28 @@ begin
     SetLength(FFillerString, len);
   except
     LabeledEdit1.SetFocus;
+  end;
+end;
+
+procedure TForm1.LabeledEdit_DeadlineExit(Sender: TObject);
+begin
+  try
+    StrToInt(Trim(LabeledEdit_Deadline.Text));
+  except
+    LabeledEdit_Deadline.SetFocus;
+  end;
+end;
+
+procedure TForm1.LabeledEdit_SendPeriodExit(Sender: TObject);
+var
+  val : Integer;
+begin
+  try
+    val := StrToInt(Trim(LabeledEdit_SendPeriod.Text));
+    Timer_Send.Interval := val;
+    Timer_Send.Enabled := val > 0;
+  except
+    LabeledEdit_SendPeriod.SetFocus;
   end;
 end;
 
@@ -467,6 +537,19 @@ begin
   Memo1.Clear;
 end;
 
+procedure TForm1.Button_ClearStorageClick(Sender: TObject);
+var
+  i : Integer;
+  info : TItemInfo;
+begin
+  for i := 0 to FItemInfoList.Count - 1 do begin
+    info := FItemInfoList[i];
+    if not info.Selected then Continue;
+    if not Assigned(info.Helper) then Continue;
+		info.Helper.ClearStorage;
+  end;
+end;
+
 procedure TForm1.Button_CreateParticipantsClick(Sender: TObject);
 var
   i : Integer;
@@ -527,6 +610,7 @@ begin
   for i := 0 to FItemInfoList.Count - 1 do begin
     info := FItemInfoList[i];
     if not info.Selected then Continue;
+    if not Assigned(info.Helper) then Continue;
 		info.Helper.CreatePublisher(info.part, info.TopicName);
   end;
   UpdateListbox;
@@ -540,6 +624,7 @@ begin
   for i := 0 to FItemInfoList.Count - 1 do begin
     info := FItemInfoList[i];
     if not info.Selected then Continue;
+    if not Assigned(info.Helper) then Continue;
 		info.Helper.CreateSubscriber(info.part, info.TopicName);
   end;
   UpdateListbox;
@@ -560,6 +645,7 @@ begin
   for i := 0 to FItemInfoList.Count - 1 do begin
     info := FItemInfoList[i];
     if not info.Selected then Continue;
+    if not Assigned(info.Helper) then Continue;
 		info.Helper.DeletePublisher;
   end;
   UpdateListbox;
@@ -573,9 +659,23 @@ begin
   for i := 0 to FItemInfoList.Count - 1 do begin
     info := FItemInfoList[i];
     if not info.Selected then Continue;
+    if not Assigned(info.Helper) then Continue;
 		info.Helper.DeleteSubscriber;
   end;
   UpdateListbox;
+end;
+
+procedure TForm1.Button_SetDeadlineClick(Sender: TObject);
+var
+  i : Integer;
+  info : TItemInfo;
+begin
+  for i := 0 to FItemInfoList.Count - 1 do begin
+    info := FItemInfoList[i];
+    if not info.Selected then Continue;
+    if not Assigned(info.Helper) then Continue;
+    info.Helper.SetDeadlineQos(StrToInt(Trim(LabeledEdit_Deadline.Text)));
+  end;
 end;
 
 procedure TForm1.Button_StartPublishersClick(Sender: TObject);
@@ -586,6 +686,7 @@ begin
   for i := 0 to FItemInfoList.Count - 1 do begin
     info := FItemInfoList[i];
     if not info.Selected then Continue;
+    if not Assigned(info.Helper) then Continue;
 		info.Helper.StartPublisher;
   end;
 end;
@@ -598,6 +699,7 @@ begin
   for i := 0 to FItemInfoList.Count - 1 do begin
     info := FItemInfoList[i];
     if not info.Selected then Continue;
+    if not Assigned(info.Helper) then Continue;
 		info.Helper.StartSubscriber;
   end;
 end;
@@ -610,6 +712,7 @@ begin
   for i := 0 to FItemInfoList.Count - 1 do begin
     info := FItemInfoList[i];
     if not info.Selected then Continue;
+    if not Assigned(info.Helper) then Continue;
 		info.Helper.StopPublisher;
   end;
 end;
@@ -622,6 +725,7 @@ begin
   for i := 0 to FItemInfoList.Count - 1 do begin
     info := FItemInfoList[i];
     if not info.Selected then Continue;
+    if not Assigned(info.Helper) then Continue;
 		info.Helper.StopSubscriber;
   end;
 end;
@@ -634,7 +738,6 @@ end;
 procedure TForm1.CheckListBox1Click(Sender: TObject);
 var
   i : Integer;
-  info : TItemInfo;
 begin
   for i := 0 to CheckListBox1.Count - 1 do begin
     FItemInfoList[i].Selected := CheckListBox1.Checked[i];
@@ -684,7 +787,7 @@ begin
   FItemInfoList.Add(TItemInfo.Create('PizzaDomain', 'ExtraAlltTopic', 'pizza.special.ExtraAllt'));
 
   // Setup the OPS static error service (common for all participants, reports errors during participant creation)
-  uOPs.Error.gStaticErrorService.addListener(OnErrorReport);
+  uOps.Error.gStaticErrorService.addListener(OnErrorReport);
 
   info := FItemInfoList[0];
   info.Selected := True;
@@ -732,6 +835,7 @@ begin
   for i := 0 to FItemInfoList.Count -1 do begin
     info := FItemInfoList[i];
     if not info.Selected then Continue;
+    if not Assigned(info.Helper) then Continue;
 
     if info.TypeName = PizzaData.getTypeName then begin
       with info.Helper as TPizzaHelper do begin
@@ -804,6 +908,13 @@ begin
   finally
     list.Free;
   end;
+  Label_NumOpsMessages.Caption := IntToStr(uOps.OPSMessage.gNumObjects);
+end;
+
+procedure TForm1.Timer_SendTimer(Sender: TObject);
+begin
+  WriteToAllSelected;
 end;
 
 end.
+
