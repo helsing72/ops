@@ -251,7 +251,7 @@ public class DelphiCompiler extends opsc.Compiler
       {
           if (field.isIdlType()) {
               if (field.isArray()) {
-                ret += tab(1) + "for i := 0 to Length(" + field.getName() + ") do begin" + endl();
+                ret += tab(1) + "for i := 0 to High(" + field.getName() + ") do begin" + endl();
                 ret += tab(2) +   "FreeAndNil(" + field.getName() + "[i]);" + endl();
                 ret += tab(1) + "end;" + endl();
               } else {
