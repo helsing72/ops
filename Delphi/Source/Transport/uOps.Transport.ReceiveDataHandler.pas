@@ -46,7 +46,7 @@ type
     // Used for notifications to users of the ReceiveDataHandler
     FDataNotifier : TNotifier<TOPSMessage>;
 
-    // The receiver used for this topic.
+    // The receiver used for this ReceiveHandler.
     FReceiver : TReceiver;
 
     // Preallocated MemoryMap and buffer for receiving data
@@ -57,21 +57,20 @@ type
     // Archiver used for deserializing byte buffers into messages
     FArchiver : TOPSArchiverIn;
 
-    // Temporary MemoryMap and buffer
+    // Temporary MemoryMap and buffer used during basic validation of a segment
     FTmpMemMap : TMemoryMap;
     FTmpBuffer : TByteBuffer;
 
 		// Current OPSMessage, valid until next sample arrives.
     FMessage : TOPSMessage;
 
-    // The accumulated size in bytes of the current message
+    // The accumulated size in bytes of the current message being received
     FCurrentMessageSize : Integer;
 
+    //
     FMessageLock : TMutex;
 
-//		///ReferenceHandler that keeps track of object created on reception and deletes them when no one is interested anymore.
-//		ReferenceHandler messageReferenceHandler;
-
+    // Status variables for the reception
     FExpectedSegment : Uint32;
     FFirstReceived : Boolean;
 
@@ -92,8 +91,6 @@ type
 		procedure addListener(Proc : TOnNotifyEvent<TOPSMessage>);
 		procedure removeListener(Proc : TOnNotifyEvent<TOPSMessage>);
 
-    function numReservedMessages : Integer;
-
     function getReceiver : TReceiver;
 
     property SampleMaxSize : Integer read FSampleMaxSize;
@@ -104,7 +101,7 @@ type
     procedure onNewEvent(Sender : TObject; arg : TBytesSizePair);
 
     // Handles spare bytes, i.e. extra bytes in buffer not consumed by created message
-    procedure calculateAndSetSpareBytes(segmentPaddingSize : Integer);
+    procedure calculateAndSetSpareBytes(mess : TOPSMessage; segmentPaddingSize : Integer);
 	end;
 
 implementation
@@ -142,6 +139,7 @@ end;
 
 destructor TReceiveDataHandler.Destroy;
 begin
+  Stop;
   FreeAndNil(FReceiver);
   FreeAndNil(FTmpBuffer);
   FreeAndNil(FTmpMemMap);
@@ -202,11 +200,6 @@ begin
   Result := FReceiver;
 end;
 
-function TReceiveDataHandler.numReservedMessages : Integer;
-begin
-  Result := 0; ///TODO return messageReferenceHandler.size();
-end;
-
 // Called whenever the receiver has new data.
 procedure TReceiveDataHandler.onNewEvent(Sender : TObject; arg : TBytesSizePair);
 
@@ -226,7 +219,7 @@ var
   nrOfFragments : UInt32;
   currentFragment : UInt32;
   segmentPaddingSize : Integer;
-  oldMessage : TOPSMessage;
+  oldMessage, newMessage : TOPSMessage;
   srcAddr : string;
   srcPort : Integer;
 begin
@@ -293,44 +286,51 @@ begin
       segmentPaddingSize := FBuffer.GetSize;
 
       // Read of the actual OPSMessage
-      FMessageLock.Acquire;
+      newMessage := nil;
       try
-        oldMessage := FMessage;
-
-        FMessage := nil;
-        FMessage := TOPSMessage(FArchiver.inout2('message', TSerializable(FMessage)));
-        if Assigned(FMessage) then begin
+        newMessage := TOPSMessage(FArchiver.inout2('message', TSerializable(newMessage)));
+        if Assigned(newMessage) then begin
           // Check that we succeded in creating the actual data message
-          if Assigned(FMessage.Data) then begin
-            // Put spare bytes in data of message
-            calculateAndSetSpareBytes(segmentPaddingSize);
+          if Assigned(newMessage.Data) then begin
+            // Put spare bytes in data-field of message
+            calculateAndSetSpareBytes(newMessage, segmentPaddingSize);
 
             // Add IP and port for source as meta data into OPSMessage
-            FMessage.setSource(srcAddr, srcPort);
-
-            // Add message to a reference handler that will keep the message until it is no longer needed.
-//						messageReferenceHandler.addReservable(message);
-//            FMessage.Reserve;
-
-            // Send it to Subscribers
-            FDataNotifier.doNotify(FMessage);
-
-            // This will delete this message if no one reserved it in the application layer.
-//            if Assigned(oldMessage) then oldMessage.Unreserve;
-            FCurrentMessageSize := 0;
+            newMessage.setSource(srcAddr, srcPort);
           end else begin
             Report('Failed to deserialize message. Check added Factories.', srcAddr, srcPort);
-            FreeAndNil(FMessage);
-            FMessage := oldMessage;
+            FreeAndNil(newMessage);
           end;
         end else begin
           // Inform participant that invalid data is on the network.
           Report('Unexpected type received. Type creation failed.', srcAddr, srcPort);
-          FMessage := oldMessage;
         end;
-      finally
-        FMessageLock.Release;
+      except
+        FreeAndNil(newMessage);
       end;
+
+      FCurrentMessageSize := 0;
+
+      if Assigned(newMessage) then begin
+        FMessageLock.Acquire;
+        try
+          oldMessage := FMessage;
+          FMessage := newMessage;
+          newMessage := nil;
+
+          // Increment ref count for message
+          FMessage.Reserve;
+
+          // Send it to Subscribers
+          FDataNotifier.doNotify(FMessage);
+
+          // This will delete the old message if no one has reserved it in the application layer.
+          if Assigned(oldMessage) then oldMessage.Unreserve;
+        finally
+          FMessageLock.Release;
+        end;
+      end;
+
     end else begin
       Inc(FExpectedSegment);
 
@@ -354,15 +354,14 @@ begin
 
   // Need to release the last message we received, if any.
   // (We always keep a reference to the last message received)
-  // If we don't, the garbage-cleaner won't delete us.
-///TODO  if Assigned(FMessage) FMessage.Unreserve;
+  if Assigned(FMessage) then FMessage.Unreserve;
   FMessage := nil;
 
 ///TODO  receiver->stop(); ???
 
 end;
 
-procedure TReceiveDataHandler.calculateAndSetSpareBytes(segmentPaddingSize : Integer);
+procedure TReceiveDataHandler.calculateAndSetSpareBytes(mess : TOPSMessage; segmentPaddingSize : Integer);
 var
   nrOfSerializedBytes : Integer;
   totalNrOfSegments : Integer;
@@ -380,9 +379,9 @@ begin
   nrOfSpareBytes := FCurrentMessageSize - FBuffer.GetSize - (nrOfUnserializedSegments * segmentPaddingSize);
 
   if nrOfSpareBytes > 0 then begin
-    SetLength(FMessage.Data.spareBytes, nrOfSpareBytes);
-    // This will read the rest of the bytes as raw bytes and put them into sparBytes field of data.
-    FBuffer.ReadChars(@FMessage.Data.spareBytes[0], nrOfSpareBytes);
+    SetLength(mess.Data.spareBytes, nrOfSpareBytes);
+    // This will read the rest of the bytes as raw bytes and put them into spareBytes field of data.
+    FBuffer.ReadChars(@mess.Data.spareBytes[0], nrOfSpareBytes);
   end;
 end;
 

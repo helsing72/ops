@@ -151,16 +151,18 @@ end;
 
 function TOPSArchiverIn.inout2(const name : String; var value : TSerializable) : TSerializable;
 var
-  types : string;
+  types : AnsiString;
 begin
-  if Assigned(value) then begin //Either we do this or we initialize object to NULL in generated code.
+  if Assigned(value) then begin
     FreeAndNil(value);
   end;
-  types := string(Fbuf.ReadString);
-  Result := FFactory.Make(types);
+  types := Fbuf.ReadString;
+  Result := FFactory.Make(string(types));
   if Assigned(Result) then begin
-    //Do this to preserve type information even if slicing has occured.
-///TODO    TOPSObject(Result).typesString := types;
+    // We need to preserve the type information since the factory only can create
+    // objects it knows how to create, and this can be a more generalized (base) object
+    // than the actual one. The rest of the bytes will be placed in the spareBytes member.
+    SetTypesString(Result, types);
 
     Result.Serialize(Self);
   end;
@@ -238,17 +240,5 @@ begin
   endList(name);
 end;
 
-//        /*template <class SerializableTypeVector> SerializableTypeVector archiveSerializables(ArchiverInOut* archive, SerializableTypeVector vec)
-//        {
-//                int size = archive->inout("size", size);
-//                for(unsigned int i = 0; i < size; i++)
-//                {
-//                        vec[i] = archive->inout((Serializable*)NULL);
-//                }
-//                return vec;
-//        }*/
-
 end.
-
-
 

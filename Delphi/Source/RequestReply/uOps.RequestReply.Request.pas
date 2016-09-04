@@ -32,6 +32,9 @@ type
 
     procedure Serialize(archiver : TArchiverInOut); override;
 
+    // Returns a newely allocated deep copy/clone of this object.
+    function Clone : TOPSObject; override;
+
     // Fills the parameter obj with all values from this object.
     procedure FillClone(var obj : TOPSObject); override;
   end;
@@ -42,6 +45,13 @@ procedure TRequest.Serialize(archiver : TArchiverInOut);
 begin
   inherited Serialize(archiver);
   archiver.inout('requestId', requestId);
+end;
+
+// Returns a newely allocated deep copy/clone of this object.
+function TRequest.Clone : TOPSObject;
+begin
+	Result := TRequest.Create;
+  Self.FillClone(Result);
 end;
 
 procedure TRequest.FillClone(var obj : TOPSObject);

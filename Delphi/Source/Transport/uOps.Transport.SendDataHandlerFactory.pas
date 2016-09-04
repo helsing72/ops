@@ -24,11 +24,9 @@ interface
 
 uses System.Generics.Collections,
      System.SyncObjs,
-     uOps.Types,
      uOps.Error,
      uOps.Topic,
      uOps.Domain,
-     uOps.Transport.Sender,
      uOps.Transport.SendDataHandler;
 
 type
@@ -36,6 +34,13 @@ type
   TOnUdpConnectDisconnectProc = procedure(top : TTopic; sdh : TSendDataHandler; connect : Boolean) of object;
 
   TSendDataHandlerFactory = class(TObject)
+  private
+    type
+      THandlerInfo = record
+        handler : TSendDataHandler;
+        numUsers : Integer;
+      end;
+
   private
     // Borrowed reference
     FErrorService : TErrorService;
@@ -49,9 +54,14 @@ type
 
     // There is only one McUdpSendDataHandler for each participant
     FUdpSendDataHandler : TSendDataHandler;
+    FUdpUsers : Integer;
 
-    FSendDataHandlers : TDictionary<string,TSendDataHandler>;
+    // Dictionary with all SendDataHandlers except for UDP-transport
+    FSendDataHandlers : TDictionary<string,THandlerInfo>;
     FMutex : TMutex;
+
+    // Generate the key used in the dictionary
+    function getKey(top : TTopic) : string;
 
   public
     constructor Create(Dom : TDomain; Proc : TOnUdpConnectDisconnectProc; Reporter : TErrorService);
@@ -80,22 +90,42 @@ begin
   FDomain := dom;
   FOnUdpConnectDisconnectProc := Proc;
   FMutex := TMutex.Create;
-  FSendDataHandlers := TDictionary<string,TSendDataHandler>.Create;
+  FSendDataHandlers := TDictionary<string,THandlerInfo>.Create;
 end;
 
 destructor TSendDataHandlerFactory.Destroy;
+var
+  value : THandlerInfo;
+  handlerExist : Boolean;
 begin
+  handlerExist := False;
   // Cleanup/Free all senddatahandlers under protection
   FMutex.Acquire;
   try
-    // TODO
+    if FUdpUsers <> 0 then handlerExist := True;
+    FreeAndNil(FUdpSendDataHandler);
 
+    for Value in FSendDataHandlers.Values do begin
+      if Value.numUsers <> 0 then handlerExist := True;
+      if Assigned(Value.handler) then Value.handler.Free;
+    end;
   finally
     FMutex.Release;
+  end;
+  if handlerExist then begin
+    if Assigned(FErrorService) then begin
+      FErrorService.Report(TBasicError.Create(
+        'TSendDataHandlerFactory', 'Destroy', 'Publishers still alive when deleting factory!!!'));
+    end;
   end;
   FreeAndNil(FSendDataHandlers);
   FreeAndNil(FMutex);
   inherited;
+end;
+
+function TSendDataHandlerFactory.getKey(top : TTopic) : string;
+begin
+  Result := string(top.Transport) + '::' + string(top.DomainAddress) + '::' + IntToStr(top.Port);
 end;
 
 function TSendDataHandlerFactory.getSendDataHandler(top: TTopic): TSendDataHandler;
@@ -103,18 +133,24 @@ var
   key : string;
   localIf : string;
   ttl : Integer;
+  info : THandlerInfo;
 begin
   Result := nil;
 
   // We need to store SendDataHandlers with more than just the name as key.
   // Since topics can use the same port, we need to return the same SendDataHandler.
   // Make a key with the transport info that uniquely defines the receiver.
-  key := string(top.Transport) + '::' + string(top.DomainAddress) + '::' + IntToStr(top.Port);
+  key := getKey(top);
 
   FMutex.Acquire;
   try
 		if FSendDataHandlers.ContainsKey(key) then begin
-			Result := FSendDataHandlers.Items[key];
+      // Increment usage count
+			info := FSendDataHandlers.Items[key];
+      Inc(info.numUsers);
+			FSendDataHandlers.Items[key] := info;
+      // Return found handler
+      Result := info.handler;
       Exit;
 		end;
 
@@ -123,11 +159,13 @@ begin
 
 		if top.Transport = TTopic.TRANSPORT_MC then begin
       Result := TMcSendDataHandler.Create(top, localIf, ttl, FErrorService);
-      FSendDataHandlers.Add(key, Result);
+      info.handler := Result;
+      info.numUsers := 1;
+      FSendDataHandlers.Add(key, info);
 
     end else if top.Transport = TTopic.TRANSPORT_UDP then begin
       if not Assigned(FUdpSendDataHandler) then begin
-      // We have only one sender for all topics, so use the domain value for buffer size
+        // We have only one sender for all topics, so use the domain value for buffer size
         FUdpSendDataHandler := TMcUdpSendDataHandler.Create(localIf,
                                  ttl,
                                  FDomain.OutSocketBufferSize,
@@ -139,11 +177,15 @@ begin
 			// ie. we extract ip and port from the information and add it to our McUdpSendDataHandler
       if Assigned(FOnUdpConnectDisconnectProc) then FOnUdpConnectDisconnectProc(top, FUdpSendDataHandler, True);
 
+      Inc(FUdpUsers);
+
       Result := FUdpSendDataHandler;
 
 		end else if top.Transport = TTopic.TRANSPORT_TCP then begin
       Result := TTCPSendDataHandler.Create(top, FErrorService);
-      FSendDataHandlers.Add(key, Result);
+      info.handler := Result;
+      info.numUsers := 1;
+      FSendDataHandlers.Add(key, info);
 
 		end;
   finally
@@ -152,15 +194,39 @@ begin
 end;
 
 procedure TSendDataHandlerFactory.releaseSendDataHandler(top: TTopic);
+var
+  key : string;
+  info : THandlerInfo;
+  ent : TPair<string,THandlerInfo>;
 begin
   FMutex.Acquire;
   try
     if top.Transport = TTopic.TRANSPORT_UDP then begin
       if Assigned(FOnUdpConnectDisconnectProc) then FOnUdpConnectDisconnectProc(top, FUdpSendDataHandler, False);
-		end;
+      Dec(FUdpUsers);
+      if FUdpUsers = 0 then begin
+        // This is the last matching call, so now no one is using the SendDataHandler
+        // Delete it
+        FreeAndNil(FUdpSendDataHandler);
+      end;
 
-///TODO
+		end else begin
+      key := getKey(top);
 
+	  	if FSendDataHandlers.ContainsKey(key) then begin
+        // Decrement usage count
+	  		info := FSendDataHandlers.Items[key];
+        Dec(info.numUsers);
+			  FSendDataHandlers.Items[key] := info;
+
+        if info.numUsers = 0 then begin
+          // This is the last matching call, so now no one is using the SendDataHandler
+          // Remove it from the dictionary and then delete it
+          ent := FSendDataHandlers.ExtractPair(key);
+          FreeAndNil(ent.Value.handler);
+        end;
+	  	end;
+    end;
   finally
     FMutex.Release;
   end;

@@ -46,6 +46,11 @@ type
 
     procedure Serialize(archiver : TArchiverInOut); override;
 
+		// Returns a newely allocated deep copy/clone of this object.
+		function Clone : TOPSObject; override;
+
+		// Fills the parameter obj with all values from this object.
+		procedure FillClone(var obj : TOPSObject); override;
   end;
 
 implementation
@@ -83,6 +88,27 @@ begin
   archiver.inout('port', Port);
   archiver.inout('keys', Keys);
   //archiver.inout('filters', filters);
+end;
+
+// Returns a newely allocated deep copy/clone of this object.
+function TTopicInfoData.Clone : TOPSObject;
+begin
+	Result := TTopicInfoData.Create;
+  Self.FillClone(Result);
+end;
+
+// Fills the parameter obj with all values from this object.
+procedure TTopicInfoData.FillClone(var obj : TOPSObject);
+begin
+	inherited FillClone(obj);
+  with obj as TTopicInfoData do begin
+    Name := Self.Name;
+    DataType := Self.DataType;
+    Transport := Self.Transport;
+    Address := Self.Address;
+    Port := Self.Port;
+    Keys := Self.Keys;
+	end;
 end;
 
 end.

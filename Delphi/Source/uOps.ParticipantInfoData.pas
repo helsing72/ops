@@ -56,6 +56,12 @@ type
 
     procedure Serialize(archiver : TArchiverInOut); override;
 
+		// Returns a newely allocated deep copy/clone of this object.
+		function Clone : TOPSObject; override;
+
+		// Fills the parameter obj with all values from this object.
+		procedure FillClone(var obj : TOPSObject); override;
+
     // Help routines for updating the dynamic arrays with TopicInfoData
     procedure addTopic(var arr : TDynTopicInfoDataArray; top : TTopic);
     procedure removeTopic(var arr : TDynTopicInfoDataArray; top : TTopic);
@@ -90,6 +96,46 @@ begin
   archiver.inout('subscribeTopics', TDynSerializableArray(subscribeTopics));
   archiver.inout('publishTopics', TDynSerializableArray(publishTopics));
   archiver.inout('knownTypes', knownTypes);
+end;
+
+// Returns a newely allocated deep copy/clone of this object.
+function TParticipantInfoData.Clone : TOPSObject;
+begin
+	Result := TParticipantInfoData.Create;
+  Self.FillClone(Result);
+end;
+
+// Fills the parameter obj with all values from this object.
+procedure TParticipantInfoData.FillClone(var obj : TOPSObject);
+var
+  i : Integer;
+begin
+	inherited FillClone(obj);
+  with obj as TParticipantInfoData do begin
+		Name := Self.Name;
+		Id := Self.Id;
+		Domain := Self.Domain;
+		Ip := Self.Ip;
+		LanguageImplementation := Self.LanguageImplementation;
+		OpsVersion := Self.OpsVersion;
+		mc_udp_port := Self.mc_udp_port;
+		mc_tcp_port := Self.mc_tcp_port;
+
+    SetLength(subscribeTopics, Length(Self.subscribeTopics));
+    for i := 0 to High(Self.subscribeTopics) do begin
+      subscribeTopics[i] := Self.subscribeTopics[i].Clone as TTopicInfoData;
+    end;
+
+    SetLength(publishTopics, Length(Self.publishTopics));
+    for i := 0 to High(Self.publishTopics) do begin
+      publishTopics[i] := Self.publishTopics[i].Clone as TTopicInfoData;
+    end;
+
+    SetLength(knownTypes, Length(Self.knownTypes));
+    for i := 0 to High(Self.knownTypes) do begin
+      knownTypes[i] := Self.knownTypes[i];
+    end;
+  end;
 end;
 
 procedure TParticipantInfoData.addTopic(var arr: TDynTopicInfoDataArray; top: TTopic);

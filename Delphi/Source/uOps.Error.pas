@@ -65,6 +65,8 @@ type
     procedure Report(Error : TError);
   end;
 
+// A static error service that user can connect to.
+// The static error service is e.g. used for errors during Participant creation.
 var
   gStaticErrorService : TErrorService;
 

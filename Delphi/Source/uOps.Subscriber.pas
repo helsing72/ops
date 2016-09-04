@@ -66,9 +66,8 @@ type
     FFilterQoSPolicies : TObjectList<TFilterQoSPolicy>;
     FFilterQoSPolicyMutex : TMutex;
 
-//    std::deque<OPSMessage*> messageBuffer;
-//    unsigned int messageBufferMaxSize;
-//    void addToBuffer(OPSMessage* mess);
+    FMessageBuffer : TQueue<TOpsMessage>;
+    FMessageBufferMaxSize : Integer;
 
     // Used for wakeup of thread waiting for new data in 'WaitForNewData()'
     FNewDataEvent : TEvent;
@@ -76,19 +75,16 @@ type
     // Time used for deadline missed checks
     FTimeLastData : Int64;
     FDeadlineTimeout : Int64;
-    FDeadlineMissed : Boolean;
 
     // Time used for time based filter
     FTimeLastDataForTimeBase : Int64;
     FTimeBaseMinSeparationTime : Int64;
 
+    procedure AddToBuffer(mess : TOPSMessage);
+
     function ApplyFilterQoSPolicies(o : TOPSObject) : Boolean;
 
-//    void registerForDeadlineTimeouts();
-//    void cancelDeadlineTimeouts();
-
     procedure SetDeadlineQoS(millis : Int64);
-    function GetNumReservedMessages : Integer;
 
   protected
     FMessage : TOPSMessage;
@@ -98,13 +94,9 @@ type
     FHasUnreadData : Boolean;
 
     function getData : TOPSObject;
-    procedure checkAndNotifyDeadlineMissed;
 
     // Message listener callback
     procedure onNewMessage(Sender : TObject; arg : TOPSMessage);
-
-    // Deadline listener callback
-    procedure onNewEvent(Sender : TObject; arg : Integer);
 
   public
     constructor Create(t : TTopic);
@@ -140,31 +132,36 @@ type
     //   protected method getData()
     //   public method getMessage()
     //   public method getDataReference()
+    //   public method getHistory()
     function aquireMessageLock : Boolean;
     procedure releaseMessageLock;
 
-    ///Returns a reference to the latest received OPSMessage (including the latest data object).
-    ///Clears the "new data" flag.
-    ///NOTE: MessageLock should be hold while working with the message, to prevent a
-    ///new incomming message to delete the current one while in use.
+    // Returns a reference to the latest received OPSMessage (including the latest data object).
+    // Clears the "new data" flag.
+    // NOTE: MessageLock should be held while working with the message, to prevent a
+    // new incomming message to delete the current one while in use.
     function getMessage : TOPSMessage;
 
     function isDeadlineMissed : Boolean;
 
-//    void setHistoryMaxSize(int s);
-//    std::deque<OPSMessage*> getHistory();
+    // Returns an array with the last received OPS messages (0 to HistoryMaxSize messages).
+    // NOTE: MessageLock should be held while working with the messages, to prevent a
+    // new incomming message to delete an older one while in use.
+    function GetHistory : TArray<TOpsMessage>;
 
-    ///Returns a reference the latest received data object.
-    ///Clears the "new data" flag.
-    ///NOTE: MessageLock should be hold while working with the data object, to prevent a
-    ///new incomming message to delete the current one while in use.
+    procedure SetHistoryMaxSize(size : Integer);
+
+    // Returns a reference the latest received data object.
+    // Clears the "new data" flag.
+    // NOTE: MessageLock should be held while working with the data object, to prevent a
+    // new incomming message to delete the current one while in use.
     function getDataReference : TOPSObject; virtual;
 
     property Name : string read FName write FName;
     property Topic : TTopic read FTopic;
 
-    ///Checks if new data exist (same as 'waitForNewData(0)' but faster)
-    ///Returns: true if new data (i.e. unread data) exist.
+    // Checks if new data exist (same as 'waitForNewData(0)' but faster)
+    // Returns: true if new data (i.e. unread data) exist.
     property NewDataExist : Boolean read FHasUnreadData;
 
     // The deadline timout [ms] for this subscriber.
@@ -176,11 +173,6 @@ type
     // Received messages in between will be ignored by this Subscriber
     // == 0, no filtering on time
     property TimeBasedFilterQoS : Int64 read FTimeBaseMinSeparationTime write FTimeBaseMinSeparationTime;
-
-    // Returns the number of reserved messages in the underlying ReceiveDataHandler
-    // This value is the total nr for this topic on this participant not only
-    // for this subscriber.
-    property numReservedMessages : Integer read GetNumReservedMessages;
   end;
 
 implementation
@@ -199,7 +191,9 @@ begin
   FFilterQoSPolicyMutex := TMutex.Create;
   FNewDataEvent := TEvent.Create(nil, True, False, '');
 
-//    messageBufferMaxSize(1),
+  FMessageBuffer := TQueue<TOpsMessage>.Create; // Don't own objects
+  FMessageBufferMaxSize := 1;
+
   FDeadlineTimeout := 0;
 
   FParticipant := TParticipant.getInstance(topic.DomainID, topic.ParticipantID);
@@ -208,14 +202,16 @@ begin
 end;
 
 destructor TSubscriber.Destroy;
+var
+  i : Integer;
 begin
   FDeadlineNotifier.Cancel;
   if FStarted then Stop;
 
-//		while (messageBuffer.size() > 0) {
-//			messageBuffer.back()->unreserve();
-//			messageBuffer.pop_back();
-//		}
+  for i := 0 to FMessageBuffer.Count - 1 do begin
+    FMessageBuffer.Dequeue.UnReserve;
+  end;
+  FreeAndNil(FMessageBuffer);
 
   FreeAndNil(FNewDataEvent);
   FreeAndNil(FFilterQoSPolicyMutex);
@@ -254,12 +250,6 @@ begin
 end;
 
 // ---------------------------------------------------------------------------
-
-function TSubscriber.GetNumReservedMessages : Integer;
-begin
-  Result := 0;
-//  return FReceiveDataHandler.numReservedMessages();
-end;
 
 function TSubscriber.getMessage : TOPSMessage;
 begin
@@ -332,6 +322,27 @@ end;
 
 // ---------------------------------------------------------------------------
 
+procedure TSubscriber.SetHistoryMaxSize(size : Integer);
+begin
+  FMessageBufferMaxSize := size;
+end;
+
+procedure TSubscriber.AddToBuffer(mess : TOPSMessage);
+begin
+  mess.Reserve;
+  FMessageBuffer.Enqueue(mess);
+  while FMessageBuffer.Count > FMessageBufferMaxSize do begin
+    FMessageBuffer.Dequeue.UnReserve;
+  end;
+end;
+
+function TSubscriber.getHistory : TArray<TOpsMessage>;
+begin
+  Result := FMessageBuffer.ToArray;
+end;
+
+// ---------------------------------------------------------------------------
+
 procedure TSubscriber.AddDataListener(Proc : TOnNotifyEvent<TOPSMessage>);
 begin
   FDataNotifier.addListener(Proc);
@@ -353,20 +364,20 @@ procedure TSubscriber.onNewMessage(Sender : TObject; arg : TOPSMessage);
 var
   o : TOPSObject;
 begin
-  //Perform a number of checks on incomming data to be sure we want to deliver it to the application layer
+  // Perform a number of checks on incomming data to be sure we want to deliver it to the application layer
 
-  //Check that this message is delivered on the same topic as this Subscriber use
+  // Check that this message is delivered on the same topic as this Subscriber use
   if arg.TopicName <> FTopic.Name then begin
     // This is a normal case when several Topics use the same port
     Exit;
   end
-  //Check that the type of the delivered data can be interpreted as the type we expect in this Subscriber
+  // Check that the type of the delivered data can be interpreted as the type we expect in this Subscriber
   else if Pos(FTopic.TypeID, arg.Data.TypesString) <= 0 then begin
     FParticipant.ReportError(TBasicError.Create('Subscriber', 'onNewEvent', 'Received message with wrong data type for Topic'));
     Exit;
   end;
 
-  //OK, we passed the basic checks, lets go on and filter on data content...
+  // OK, we passed the basic checks, lets go on and filter on data content...
 
   o := arg.Data;
   if applyFilterQoSPolicies(o) then begin
@@ -376,7 +387,7 @@ begin
     then begin
       FFirstDataReceived := true;
 
-//      addToBuffer(arg);
+      AddToBuffer(arg);
       FMessage := arg;
       FData := o;
 
@@ -389,7 +400,6 @@ begin
       FTimeLastData := TTimeHelper.CurrentTimeMillis;
 
       if FDeadlineTimeout > 0 then FDeadlineNotifier.Start(FDeadlineTimeout);
-      FDeadlineMissed := False;
     end;
   end;
 end;
@@ -432,26 +442,8 @@ begin
   Result := False;
   if FDeadlineTimeout = 0 then Exit;
   if (TTimeHelper.currentTimeMillis - FTimeLastData) > FDeadlineTimeout then begin
-    FDeadlineMissed := True;
     Result := True;
   end;
-end;
-
-procedure TSubscriber.checkAndNotifyDeadlineMissed;
-begin
-// if (isDeadlineMissed())
-// {
-//   //printf("DeadlineMissed timeLastData = %d, currTime = %d, deadlineTimeout = %d\n", FTimeLastData, currTime, FDeadlineTimeout);
-//   deadlineMissedEvent.notifyDeadlineMissed();
-//   FTimeLastData := TTimeHelper.CurrentTimeMillis;
-// }
-end;
-
-// Deadline listener callback
-procedure TSubscriber.onNewEvent(Sender : TObject; arg : Integer);
-begin
-//        deadlineMissedEvent.notifyDeadlineMissed();
-//        deadlineTimer->start(deadlineTimeout);
 end;
 
 end.

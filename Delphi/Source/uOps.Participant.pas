@@ -29,7 +29,6 @@ uses System.Generics.Collections,
      uOps.Types,
      uOps.Topic,
      uOps.Domain,
-     uOps.DeadlineTimer,
      uOps.Transport.SendDataHandler,
      uOps.Transport.SendDataHandlerFactory,
      uOps.Transport.ReceiveDataHandler,
@@ -45,7 +44,7 @@ uses System.Generics.Collections,
      uOps.OpsMessage;
 
 type
-	TParticipant = class(TObject) //  : Runnable, Listener<int>
+	TParticipant = class(TObject)
   public
     class function getInstance(domainID : string) : TParticipant; overload;
     class function getInstance(domainID : string; participantID : string) : TParticipant; overload;
@@ -66,29 +65,17 @@ type
     // Takes ownership over given TError instance
     procedure ReportError(error : TError);
 
-//		///Deadline listener callback
-//		void onNewEvent(Notifier<int>* sender, int message);
-//
-//		///Cleans up ReceiveDataHandlers
-//		//void cleanUpReceiveDataHandlers();
-
     // Returns a reference to the internal instance
     function getConfig : TOPSConfig;
 
     // Return a reference to the internal ErrorService instance
     //
-    // Add a listener to the service to get error resports from the participant and its objects
+    // Add a listener to the service to get error reports from the participant and its objects
     // Prototype for listener is:
     //    procedure <someobject>.OnErrorReport(Sender : TObject; Error : TError);
     //
     // Note that several threads at a time can report errors so take that into account
     function getErrorService : TErrorService;
-
-//		// A static error service that user could create, by calling getStaticErrorService(), and connect to.
-//		// If it exist, "reportStaticError()" will use this instead of using all participants errorservices
-//		// which leads to duplicated error messages when several participants exist.
-//		// This static errorservice also has the advantage that errors during Participant creation can be logged.
-//		static ErrorService* getStaticErrorService();
 
     // Returns a reference to the internal instance
     function getDomain : TDomain;
@@ -120,12 +107,6 @@ type
     // The ErrorService
     FErrorService : TErrorService;
 
-//		///The threadPool drives ioService. By default Participant use a SingleThreadPool i.e. only one thread drives ioService.
-//		ThreadPool* threadPool;
-//
-//		///A timer that fires with a certain periodicity, it keeps this Participant alive in the system by publishing ParticipantInfoData
-//		DeadlineTimer* aliveDeadlineTimer;
-
     //------------------------------------------------------------------------
     // The ParticipantInfoData that partInfoPub will publish periodically
     FPartInfoData : TParticipantInfoData;
@@ -140,9 +121,6 @@ type
     //
     FReceiveDataHandlerFactory : TReceiveDataHandlerFactory;
     FSendDataHandlerFactory : TSendDataHandlerFactory;
-
-//		///Mutex for ioService, used to shutdown safely
-//		Lockable serviceMutex;
 
     // The interval with which this Participant publishes ParticipantInfoData
     FAliveTimeout : Int64;
@@ -159,8 +137,6 @@ type
     // Constructor is private, instances are acquired through getInstance()
     constructor Create(domainID : string; participantID : string; configFile : string);
 
-    procedure OnErrorReport(Sender : TObject; Error : TError);
-
     // Called from SendDataHandlerFactory when UDP topics should be connected/disconnected
     // to/from the participant info data listener
     procedure OnUdpConnectDisconnectProc(top : TTopic; sdh : TSendDataHandler; connect : Boolean);
@@ -172,12 +148,8 @@ type
     // Create a Topic for subscribing or publishing on ParticipantInfoData
     function createParticipantInfoTopic : TTopic;
 
-//		///Remove this instance from the static instance map
-//		void RemoveInstance();
-
-//		//Visible to friends only
-//		bool hasPublisherOn(std::string topicName);
-//
+    // Remove this instance from the static instance map
+    procedure RemoveInstance;
 
   end;
 
@@ -237,6 +209,20 @@ begin
   end;
 end;
 
+// Remove this instance from the static instance map
+procedure TParticipant.RemoveInstance;
+var
+  key : string;
+begin
+  gMutex.Acquire;
+  try
+    key := FDomainID + '::' + FParticipantID;
+    gInstances.ExtractPair(key);
+  finally
+    gMutex.Release;
+  end;
+end;
+
 // -----------------------------------------------------------------------------
 
 // Make this participant report an Error, which will be delivered to all ErrorService listeners
@@ -245,15 +231,6 @@ procedure TParticipant.ReportError(error : TError);
 begin
   // Gives ownership to error service
   FErrorService.Report(error);
-end;
-
-// Note that several threads can at the same time report errors so
-// we need to take that into account
-procedure TParticipant.OnErrorReport(Sender : TObject; Error : TError);
-begin
-  // NOTE For this notification the notifier free's the error object!!!
-
-  ///TODO
 end;
 
 // -----------------------------------------------------------------------------
@@ -269,10 +246,8 @@ begin
   FAliveTimeout := 1000;
 
   FErrorService := TErrorService.Create;
-  FErrorService.addListener(onErrorReport);
 
   // Read configFile
-  //Should trow?
   if configFile = '' then begin
     // This gets a reference to a singleton instance and should NOT be deleted.
     // It may be shared between several Participants.
@@ -307,8 +282,6 @@ begin
   FPartInfoData.id := AnsiString(FParticipantID);
   FPartInfoData.domain := AnsiString(FDomainID);
 
-
-
   FSendDataHandlerFactory := TSendDataHandlerFactory.Create(FDomain, OnUdpConnectDisconnectProc, FErrorService);
   FReceiveDataHandlerFactory := TReceiveDataHandlerFactory.Create(OnUdpTransportInfoProc, FErrorService);
 
@@ -321,8 +294,8 @@ end;
 
 destructor TParticipant.Destroy;
 begin
-  ///TODO Extract Self from gInstances ???
-
+  // Make sure we are removed from gInstances
+  RemoveInstance;
 
   // Tell thread to terminate
   FTerminated := True;
@@ -428,7 +401,7 @@ begin
   Result := FDomain.getTopic(AnsiString(name));
   Result.ParticipantID := FParticipantID;
   Result.DomainID := FDomainID;
-//  Result.participant = this;
+  //TODO  Result.participant = Self;
 end;
 
 // Create a Topic for subscribing or publishing on ParticipantInfoData
@@ -510,7 +483,7 @@ begin
 
   while not FTerminated do begin
     Sleep(FAliveTimeout);
-    if FTerminated then Exit;
+    if FTerminated then Break;
 
     // Handle periodic publishing of metadata, i.e. FPartInfoData
     try
@@ -539,12 +512,6 @@ begin
 				uOps.Error.gStaticErrorService.Report(TBasicError.Create('Participant', 'Run', errMessage));
 			end;
     end;
-    if FTerminated then Exit;
-
-    // TODO
-//		SafeLock lock(&serviceMutex);
-//		receiveDataHandlerFactory->cleanUpReceiveDataHandlers();
-
   end;
 
   FreeAndNil(partInfoPub);

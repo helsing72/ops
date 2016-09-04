@@ -46,10 +46,7 @@ type
 
     // By Singelton, one ReceiveDataHandler per 'key' on this Participant
     FReceiveDataHandlerInstances : TDictionary<string,TReceiveDataHandler>;
-
-    // Garbage vector for ReceiveDataHandlers, these can safely be deleted.
-    FGarbageReceiveDataHandlers : TObjectList<TReceiveDataHandler>;
-    FGarbageLock : TMutex;
+    FLock : TMutex;
 
 		function makeKey(top : TTopic) : string;
 
@@ -62,9 +59,6 @@ type
               dom : TDomain;
               opsObjectFactory : TSerializableInheritingTypeFactory) : TReceiveDataHandler;
     procedure releaseReceiveDataHandler(top : TTopic);
-
-    procedure cleanUpReceiveDataHandlers;
-		function cleanUpDone : Boolean;
 
   end;
 
@@ -79,14 +73,12 @@ begin
   FOnUdpTransportInfoProc := Proc;
   FErrorService := Reporter;
   FReceiveDataHandlerInstances := TDictionary<string,TReceiveDataHandler>.Create;
-  FGarbageLock := TMutex.Create;
-  FGarbageReceiveDataHandlers := TObjectList<TReceiveDataHandler>.Create;
+  FLock := TMutex.Create;
 end;
 
 destructor TReceiveDataHandlerFactory.Destroy;
 begin
-  FreeAndNil(FGarbageReceiveDataHandlers);
-  FreeAndNil(FGarbageLock);
+  FreeAndNil(FLock);
   FreeAndNil(FReceiveDataHandlerInstances);
   inherited;
 end;
@@ -124,7 +116,7 @@ begin
   // Make a key with the transport info that uniquely defines the receiver.
   key := makeKey(top);
 
-  FGarbageLock.Acquire;
+  FLock.Acquire;
   try
 		if FReceiveDataHandlerInstances.ContainsKey(key) then begin
       // If we already have a ReceiveDataHandler for this topic, use it.
@@ -162,7 +154,7 @@ begin
 
     end;
   finally
-    FGarbageLock.Release;
+    FLock.Release;
   end;
 end;
 
@@ -174,57 +166,25 @@ begin
   // Make a key with the transport info that uniquely defines the receiver.
   key := makeKey(top);
 
-  FGarbageLock.Acquire;
+  FLock.Acquire;
   try
 		if FReceiveDataHandlerInstances.ContainsKey(key) then begin
       rdh := FReceiveDataHandlerInstances.Items[key];
       if rdh.NumListeners = 0 then begin
-        // Since the receiveDataHandler still can have reserved messages, we
-        // put it on the garbage list for later removal.
-
         // Start by removing it from the active list
         FReceiveDataHandlerInstances.Remove(key);
 
-        rdh.Stop;
+        FreeAndNil(rdh);
 
 				if top.Transport = TTopic.TRANSPORT_UDP then begin
           if Assigned(FOnUdpTransportInfoProc) then begin
             FOnUdpTransportInfoProc('', 0);
           end;
 				end;
-
-        // Put it on the garbage list
-        FGarbageReceiveDataHandlers.Add(rdh);
       end;
     end;
   finally
-    FGarbageLock.Release;
-  end;
-end;
-
-procedure TReceiveDataHandlerFactory.cleanUpReceiveDataHandlers;
-var
-  i : Integer;
-begin
-  FGarbageLock.Acquire;
-  try
-    for i := FGarbageReceiveDataHandlers.Count - 1 downto 0 do begin
-      if FGarbageReceiveDataHandlers[i].numReservedMessages = 0 then begin
-        FGarbageReceiveDataHandlers.Delete(i);
-      end;
-    end;
-  finally
-    FGarbageLock.Release;
-  end;
-end;
-
-function TReceiveDataHandlerFactory.cleanUpDone : Boolean;
-begin
-  FGarbageLock.Acquire;
-  try
-    Result := FGarbageReceiveDataHandlers.Count = 0;
-  finally
-    FGarbageLock.Release;
+    FLock.Release;
   end;
 end;
 

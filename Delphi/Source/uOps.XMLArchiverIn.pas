@@ -24,6 +24,7 @@ interface
 
 uses System.Generics.Collections,
      System.SyncObjs,
+     SysUtils,
      Xml.XmlDoc,
      Xml.XmlDom,
      Xml.XmlIntf,
@@ -35,9 +36,13 @@ uses System.Generics.Collections,
 type
   TXMLArchiverIn = class(TArchiverInOut)
   private
+    FFmt : TFormatSettings;
     FFactory : TSerializableInheritingTypeFactory;
     FDoc : IXMLDocument;
     FCurrentNode: IXMLNode;
+
+    function numElements : Integer;
+
   public
     constructor Create(xmlString : string; topNode : string; factory : TSerializableInheritingTypeFactory);
     destructor Destroy; override;
@@ -76,12 +81,12 @@ type
 
 implementation
 
-uses SysUtils;
 
 constructor TXMLArchiverIn.Create(xmlString : string; topNode : string; factory : TSerializableInheritingTypeFactory);
 begin
   FFactory := factory;
-
+  FFmt := TFormatSettings.Create;
+  FFmt.DecimalSeparator := '.';
   FDoc := TXMLDocument.Create(nil);
   FDoc.LoadFromXML(xmlString);
 
@@ -100,7 +105,7 @@ var
 begin
   tempNode := FCurrentNode.ChildNodes.FindNode(name);
   if Assigned(tempNode) then begin
-    s := tempNode.Text;
+    s := Trim(tempNode.Text);
     if UpperCase(s) = 'TRUE' then value := True;
     if UpperCase(s) = 'FALSE' then value := False;
   end;
@@ -114,7 +119,7 @@ begin
   tempNode := FCurrentNode.ChildNodes.FindNode(name);
   if Assigned(tempNode) then begin
     s := tempNode.Text;
-    value := StrToInt(s);
+    value := StrToIntDef(Trim(s), value);
   end;
 end;
 
@@ -126,7 +131,7 @@ begin
   tempNode := FCurrentNode.ChildNodes.FindNode(name);
   if Assigned(tempNode) then begin
     s := tempNode.Text;
-    value := StrToInt(s);
+    value := StrToIntDef(Trim(s), value);
   end;
 end;
 
@@ -138,7 +143,7 @@ begin
   tempNode := FCurrentNode.ChildNodes.FindNode(name);
   if Assigned(tempNode) then begin
     s := tempNode.Text;
-    value := StrToInt(s);
+    value := StrToIntDef(Trim(s), value);
   end;
 end;
 
@@ -150,7 +155,7 @@ begin
   tempNode := FCurrentNode.ChildNodes.FindNode(name);
   if Assigned(tempNode) then begin
     s := tempNode.Text;
-    value := StrToInt64(s);
+    value := StrToInt64Def(Trim(s), value);
   end;
 end;
 
@@ -162,7 +167,7 @@ begin
   tempNode := FCurrentNode.ChildNodes.FindNode(name);
   if Assigned(tempNode) then begin
     s := tempNode.Text;
-    value := StrToFloat(s)
+    value := StrToFloatDef(Trim(s), value, FFmt);
   end;
 end;
 
@@ -174,7 +179,7 @@ begin
   tempNode := FCurrentNode.ChildNodes.FindNode(name);
   if Assigned(tempNode) then begin
     s := tempNode.Text;
-    value := StrToFloat(s)
+    value := StrToFloatDef(Trim(s), value, FFmt);
   end;
 end;
 
@@ -188,12 +193,12 @@ begin
   end;
 end;
 
-procedure TXMLArchiverIn.inout(const name : String; buffer : PByte; bufferSize : Integer);
+procedure TXMLArchiverIn.inout(const name : String; var value : TSerializable);
 begin
   //TODO
 end;
 
-procedure TXMLArchiverIn.inout(const name : String; var value : TSerializable);
+procedure TXMLArchiverIn.inout(const name : String; buffer : PByte; bufferSize : Integer);
 begin
   //TODO
 end;
@@ -203,7 +208,10 @@ var
   tempNode : IXMLNode;
   types : string;
 begin
-  Result := Value;
+  if Assigned(value) then begin
+    FreeAndNil(value);
+  end;
+  Result := nil;
 
   tempNode := FCurrentNode;
 
@@ -213,6 +221,11 @@ begin
       types := FCurrentNode.Attributes['type'];
       Result := FFactory.Make(types);
       if Assigned(Result) then begin
+        // We need to preserve the type information since the factory only can create
+        // objects it knows how to create, and this can be a more generalized (base) object
+        // than the actual one. The rest of the bytes will be placed in the spareBytes member.
+        SetTypesString(Result, AnsiString(types));
+
         Result.serialize(Self);
       end;
     end;
@@ -257,199 +270,223 @@ begin
   end;
 end;
 
-procedure TXMLArchiverIn.inout(const name : String; var value : TDynBooleanArray);
+function TXMLArchiverIn.numElements : Integer;
+var
+  i : Integer;
 begin
-//            if (!currentNode.getChildNode(name.c_str()).isEmpty())
-//            {
-//                opsXML::XMLNode tempNode = currentNode;
-//                currentNode = currentNode.getChildNode(name.c_str());
-//
-//                int size = currentNode.nChildNode("element");
-//                value.reserve(size);
-//                value.resize(size, false);
-//                for (int i = 0; i < size; i++)
-//                {
-//                    string s(currentNode.getChildNode("element").getText());
-//                    if (s.compare("true") == 0) value[i] = true;
-//                    if (s.compare("false") == 0) value[i] = false;
-//                    if (s.compare("TRUE") == 0) value[i] = true;
-//                    if (s.compare("FALSE") == 0) value[i] = false;
-//                    if (s.compare("true") == 0) value[i] = true;
-//                    if (s.compare("false") == 0) value[i] = false;
-//                    if (s.compare("True") == 0) value[i] = true;
-//                    if (s.compare("False") == 0) value[i] = false;
-//                }
-//
-//                currentNode = tempNode;
-//            }
+  Result := 0;
+  for i := 0 to FCurrentNode.ChildNodes.Count - 1 do begin
+    if FCurrentNode.ChildNodes[i].NodeName = 'element' then Inc(Result);
+  end;
+end;
+
+procedure TXMLArchiverIn.inout(const name : String; var value : TDynBooleanArray);
+var
+  i, elem : Integer;
+  s : string;
+  tempNode : IXMLNode;
+begin
+  tempNode := FCurrentNode;
+
+  FCurrentNode := FCurrentNode.ChildNodes.FindNode(name);
+  if Assigned(FCurrentNode) then begin
+    // Set new length (elements will be False)
+    SetLength(value, numElements);
+
+    elem := 0;
+    for i := 0 to FCurrentNode.ChildNodes.Count - 1 do begin
+      if FCurrentNode.ChildNodes[i].NodeName = 'element' then begin
+        s := Trim(FCurrentNode.ChildNodes[i].Text);
+        if UpperCase(s) = 'TRUE' then value[elem] := True;
+        if UpperCase(s) = 'FALSE' then value[elem] := False;
+        Inc(elem);
+      end;
+    end;
+  end;
+
+  FCurrentNode := tempNode;
 end;
 
 procedure TXMLArchiverIn.inout(const name : String; var value : TDynByteArray);
+var
+  i, elem : Integer;
+  s : string;
+  tempNode : IXMLNode;
 begin
-//            if (!currentNode.getChildNode(name.c_str()).isEmpty())
-//            {
-//                opsXML::XMLNode tempNode = currentNode;
-//                currentNode = currentNode.getChildNode(name.c_str());
-//
-//                int size = currentNode.nChildNode("element");
-//                value.reserve(size);
-//                value.resize(size, 0);
-//                for (int i = 0; i < size; i++)
-//                {
-//                    string s(currentNode.getChildNode("element").getText());
-//                    stringstream ss(s);
-//
-//                    int inVal;
-//                    ss >> inVal;
-//                    value[i] = inVal;
-//                }
-//
-//                currentNode = tempNode;
-//            }
+  tempNode := FCurrentNode;
+
+  FCurrentNode := FCurrentNode.ChildNodes.FindNode(name);
+  if Assigned(FCurrentNode) then begin
+    // Set new length (elements will be 0)
+    SetLength(value, numElements);
+
+    elem := 0;
+    for i := 0 to FCurrentNode.ChildNodes.Count - 1 do begin
+      if FCurrentNode.ChildNodes[i].NodeName = 'element' then begin
+        s := FCurrentNode.ChildNodes[i].Text;
+        value[elem] := StrToIntDef(Trim(s), value[elem]);
+        Inc(elem);
+      end;
+    end;
+  end;
+
+  FCurrentNode := tempNode;
 end;
 
 procedure TXMLArchiverIn.inout(const name : String; var value : TDynInt32Array);
+var
+  i, elem : Integer;
+  s : string;
+  tempNode : IXMLNode;
 begin
-//            if (!currentNode.getChildNode(name.c_str()).isEmpty())
-//            {
-//                opsXML::XMLNode tempNode = currentNode;
-//                currentNode = currentNode.getChildNode(name.c_str());
-//
-//                int size = currentNode.nChildNode("element");
-//                value.reserve(size);
-//                value.resize(size, 0);
-//                for (int i = 0; i < size; i++)
-//                {
-//                    string s(currentNode.getChildNode("element").getText());
-//                    stringstream ss(s);
-//
-//                    int inVal;
-//                    ss >> inVal;
-//                    value[i] = inVal;
-//                }
-//
-//                currentNode = tempNode;
-//            }
+  tempNode := FCurrentNode;
+
+  FCurrentNode := FCurrentNode.ChildNodes.FindNode(name);
+  if Assigned(FCurrentNode) then begin
+    // Set new length (elements will be 0)
+    SetLength(value, numElements);
+
+    elem := 0;
+    for i := 0 to FCurrentNode.ChildNodes.Count - 1 do begin
+      if FCurrentNode.ChildNodes[i].NodeName = 'element' then begin
+        s := FCurrentNode.ChildNodes[i].Text;
+        value[elem] := StrToIntDef(Trim(s), value[elem]);
+        Inc(elem);
+      end;
+    end;
+  end;
+
+  FCurrentNode := tempNode;
 end;
 
 procedure TXMLArchiverIn.inout(const name : String; var value : TDynInt16Array);
+var
+  i, elem : Integer;
+  s : string;
+  tempNode : IXMLNode;
 begin
-//            if (!currentNode.getChildNode(name.c_str()).isEmpty())
-//            {
-//                opsXML::XMLNode tempNode = currentNode;
-//                currentNode = currentNode.getChildNode(name.c_str());
-//
-//                int size = currentNode.nChildNode("element");
-//                value.reserve(size);
-//                value.resize(size, 0);
-//                for (int i = 0; i < size; i++)
-//                {
-//                    string s(currentNode.getChildNode("element").getText());
-//                    stringstream ss(s);
-//
-//                    int inVal;
-//                    ss >> inVal;
-//                    value[i] = inVal;
-//                }
-//
-//                currentNode = tempNode;
-//            }
+  tempNode := FCurrentNode;
+
+  FCurrentNode := FCurrentNode.ChildNodes.FindNode(name);
+  if Assigned(FCurrentNode) then begin
+    // Set new length (elements will be 0)
+    SetLength(value, numElements);
+
+    elem := 0;
+    for i := 0 to FCurrentNode.ChildNodes.Count - 1 do begin
+      if FCurrentNode.ChildNodes[i].NodeName = 'element' then begin
+        s := FCurrentNode.ChildNodes[i].Text;
+        value[elem] := StrToIntDef(Trim(s), value[elem]);
+        Inc(elem);
+      end;
+    end;
+  end;
+
+  FCurrentNode := tempNode;
 end;
 
 procedure TXMLArchiverIn.inout(const name : String; var value : TDynInt64Array);
+var
+  i, elem : Integer;
+  s : string;
+  tempNode : IXMLNode;
 begin
-//            if (!currentNode.getChildNode(name.c_str()).isEmpty())
-//            {
-//                opsXML::XMLNode tempNode = currentNode;
-//                currentNode = currentNode.getChildNode(name.c_str());
-//
-//                int size = currentNode.nChildNode("element");
-//                value.reserve(size);
-//                value.resize(size, 0);
-//                for (int i = 0; i < size; i++)
-//                {
-//                    string s(currentNode.getChildNode("element").getText());
-//                    stringstream ss(s);
-//
-//                    int inVal;
-//                    ss >> inVal;
-//                    value[i] = inVal;
-//                }
-//
-//                currentNode = tempNode;
-//            }
+  tempNode := FCurrentNode;
+
+  FCurrentNode := FCurrentNode.ChildNodes.FindNode(name);
+  if Assigned(FCurrentNode) then begin
+    // Set new length (elements will be 0)
+    SetLength(value, numElements);
+
+    elem := 0;
+    for i := 0 to FCurrentNode.ChildNodes.Count - 1 do begin
+      if FCurrentNode.ChildNodes[i].NodeName = 'element' then begin
+        s := FCurrentNode.ChildNodes[i].Text;
+        value[elem] := StrToInt64Def(Trim(s), value[elem]);
+        Inc(elem);
+      end;
+    end;
+  end;
+
+  FCurrentNode := tempNode;
 end;
 
 procedure TXMLArchiverIn.inout(const name : String; var value : TDynSingleArray);
+var
+  i, elem : Integer;
+  s : string;
+  tempNode : IXMLNode;
 begin
-//            if (!currentNode.getChildNode(name.c_str()).isEmpty())
-//            {
-//                opsXML::XMLNode tempNode = currentNode;
-//                currentNode = currentNode.getChildNode(name.c_str());
-//
-//                int size = currentNode.nChildNode("element");
-//                value.reserve(size);
-//                value.resize(size, 0.0);
-//                for (int i = 0; i < size; i++)
-//                {
-//                    string s(currentNode.getChildNode("element").getText());
-//                    stringstream ss(s);
-//
-//                    float inVal;
-//                    ss >> inVal;
-//                    value[i] = inVal;
-//                }
-//
-//                currentNode = tempNode;
-//            }
+  tempNode := FCurrentNode;
+
+  FCurrentNode := FCurrentNode.ChildNodes.FindNode(name);
+  if Assigned(FCurrentNode) then begin
+    // Set new length (elements will be 0)
+    SetLength(value, numElements);
+
+    elem := 0;
+    for i := 0 to FCurrentNode.ChildNodes.Count - 1 do begin
+      if FCurrentNode.ChildNodes[i].NodeName = 'element' then begin
+        s := FCurrentNode.ChildNodes[i].Text;
+        value[elem] := StrToFloatDef(Trim(s), value[elem], FFmt);
+        Inc(elem);
+      end;
+    end;
+  end;
+
+  FCurrentNode := tempNode;
 end;
 
 procedure TXMLArchiverIn.inout(const name : String; var value : TDynDoubleArray);
+var
+  i, elem : Integer;
+  s : string;
+  tempNode : IXMLNode;
 begin
-//            if (!currentNode.getChildNode(name.c_str()).isEmpty())
-//            {
-//                opsXML::XMLNode tempNode = currentNode;
-//                currentNode = currentNode.getChildNode(name.c_str());
-//
-//                int size = currentNode.nChildNode("element");
-//                value.reserve(size);
-//                value.resize(size, 0.0);
-//                for (int i = 0; i < size; i++)
-//                {
-//                    string s(currentNode.getChildNode("element").getText());
-//                    stringstream ss(s);
-//
-//                    double inVal;
-//                    ss >> inVal;
-//                    value[i] = inVal;
-//                }
-//
-//                currentNode = tempNode;
-//            }
+  tempNode := FCurrentNode;
+
+  FCurrentNode := FCurrentNode.ChildNodes.FindNode(name);
+  if Assigned(FCurrentNode) then begin
+    // Set new length (elements will be 0)
+    SetLength(value, numElements);
+
+    elem := 0;
+    for i := 0 to FCurrentNode.ChildNodes.Count - 1 do begin
+      if FCurrentNode.ChildNodes[i].NodeName = 'element' then begin
+        s := FCurrentNode.ChildNodes[i].Text;
+        value[elem] := StrToFloatDef(Trim(s), value[elem], FFmt);
+        Inc(elem);
+      end;
+    end;
+  end;
+
+  FCurrentNode := tempNode;
 end;
 
 procedure TXMLArchiverIn.inout(const name : String; var value : TDynAnsiStringArray);
+var
+  i, elem : Integer;
+  s : string;
+  tempNode : IXMLNode;
 begin
-//            if (!currentNode.getChildNode(name.c_str()).isEmpty())
-//            {
-//                opsXML::XMLNode tempNode = currentNode;
-//                currentNode = currentNode.getChildNode(name.c_str());
-//
-//                int size = currentNode.nChildNode("element");
-//                value.reserve(size);
-//                value.resize(size, "");
-//                for (int i = 0; i < size; i++)
-//                {
-//                    string s(currentNode.getChildNode("element").getText());
-//                    stringstream ss(s);
-//
-//                    int inVal;
-//                    ss >> inVal;
-//                    value[i] = inVal;
-//                }
-//
-//                currentNode = tempNode;
-//            }
+  tempNode := FCurrentNode;
+
+  FCurrentNode := FCurrentNode.ChildNodes.FindNode(name);
+  if Assigned(FCurrentNode) then begin
+    // Set new length (elements will be 0)
+    SetLength(value, numElements);
+
+    elem := 0;
+    for i := 0 to FCurrentNode.ChildNodes.Count - 1 do begin
+      if FCurrentNode.ChildNodes[i].NodeName = 'element' then begin
+        s := FCurrentNode.ChildNodes[i].Text;
+        value[elem] := AnsiString(s);
+        Inc(elem);
+      end;
+    end;
+  end;
+
+  FCurrentNode := tempNode;
 end;
 
 procedure TXMLArchiverIn.inout(const name : string; var value : TDynSerializableArray);
@@ -466,12 +503,8 @@ begin
       FreeAndNil(value[i]);
     end;
 
-    size := 0;
-    for i := 0 to FCurrentNode.ChildNodes.Count - 1 do begin
-      if FCurrentNode.ChildNodes[i].NodeName = 'element' then Inc(size);
-    end;
-
-    // Set new length (elements will be nil)
+    // Set new length (elements will be 0)
+    size := numElements;
     SetLength(value, size);
 
     // Now loop over all objects in the array

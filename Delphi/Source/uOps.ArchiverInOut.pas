@@ -28,6 +28,8 @@ type
   TArchiverInOut = class;
 
 	TSerializable = class(TObject)
+  protected
+    procedure SetTypesString(types : AnsiString); virtual;
   public
 		procedure Serialize(archiver : TArchiverInOut); virtual; abstract;
 	end;
@@ -66,9 +68,20 @@ type
   protected
     function beginList(const name : String; size : Integer) : Integer; virtual; abstract;
     procedure endList(const name : String); virtual; abstract;
+
+    procedure SetTypesString(obj : TSerializable; types : AnsiString);
   end;
 
 implementation
+
+procedure TSerializable.SetTypesString(types : AnsiString);
+begin
+end;
+
+procedure TArchiverInOut.SetTypesString(obj : TSerializable; types : AnsiString);
+begin
+  obj.SetTypesString(types);
+end;
 
 end.
 

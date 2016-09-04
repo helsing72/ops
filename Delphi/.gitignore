@@ -1,0 +1,6 @@
+Debug
+*.dproj.local
+*.dsk
+*.identcache
+*.~dsk
+*.res

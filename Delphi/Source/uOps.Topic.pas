@@ -61,6 +61,12 @@ type
 
     procedure Serialize(archiver : TArchiverInOut); override;
 
+		// Returns a newely allocated deep copy/clone of this object.
+		function Clone : TOPSObject; override;
+
+		// Fills the parameter obj with all values from this object.
+		procedure FillClone(var obj : TOPSObject); override;
+
     property Name : AnsiString read FName;
     property TypeID : AnsiString read FTypeID;
     property DomainID : string read FDomainID write FDomainID;
@@ -149,6 +155,31 @@ begin
   end else if (FTransport <> TRANSPORT_MC) and (FTransport <> TRANSPORT_TCP) and (FTransport <> TRANSPORT_UDP) then begin
     raise EConfigException('Illegal transport: "' + FTransport +
           '". Transport for topic must be either "multicast", "tcp", "udp" or left blank( = multicast)');
+  end;
+end;
+
+// Returns a newely allocated deep copy/clone of this object.
+function TTopic.Clone : TOPSObject;
+begin
+	Result := TTopic.Create;
+  Self.FillClone(Result);
+end;
+
+// Fills the parameter obj with all values from this object.
+procedure TTopic.FillClone(var obj : TOPSObject);
+begin
+	inherited FillClone(obj);
+  with obj as TTopic do begin
+    FName := Self.FName;
+		FPort := Self.FPort;
+		FTypeID := Self.FTypeID;
+    FDomainAddress := Self.FDomainAddress;
+		FParticipantID := Self.FParticipantID;
+		FDomainID := Self.FDomainID;
+		FSampleMaxSize := Self.FSampleMaxSize;
+		FTransport := Self.FTransport;
+		FOutSocketBufferSize := Self.FOutSocketBufferSize;
+		FInSocketBufferSize := Self.FInSocketBufferSize;
   end;
 end;
 

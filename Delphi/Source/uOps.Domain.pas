@@ -60,6 +60,12 @@ type
 
     procedure Serialize(archiver : TArchiverInOut); override;
 
+		// Returns a newely allocated deep copy/clone of this object.
+		function Clone : TOPSObject; override;
+
+		// Fills the parameter obj with all values from this object.
+		procedure FillClone(var obj : TOPSObject); override;
+
 		class function doSubnetTranslation(addr : AnsiString) : AnsiString;
 
 		property DomainAddress : AnsiString read FDomainAddress;
@@ -155,6 +161,36 @@ begin
 	archiver.inout('inSocketBufferSize', FInSocketBufferSize);
 	archiver.inout('outSocketBufferSize', FOutSocketBufferSize);
 	archiver.inout('metaDataMcPort', FMetaDataMcPort);
+end;
+
+// Returns a newely allocated deep copy/clone of this object.
+function TDomain.Clone : TOPSObject;
+begin
+	Result := TDomain.Create;
+  Self.FillClone(Result);
+end;
+
+// Fills the parameter obj with all values from this object.
+procedure TDomain.FillClone(var obj : TOPSObject);
+var
+  i : Integer;
+begin
+	inherited FillClone(obj);
+  with obj as TDomain do begin
+		FDomainAddress := Self.FDomainAddress;
+		FTimeToLive := Self.FTimeToLive;
+		FLocalInterface := Self.FLocalInterface;
+		FInSocketBufferSize := Self.FInSocketBufferSize;
+		FOutSocketBufferSize := Self.FOutSocketBufferSize;
+
+    SetLength(FTopics, Length(Self.FTopics));
+    for i := 0 to High(Self.FTopics) do begin
+      FTopics[i] := Self.FTopics[i].Clone as TTopic;
+    end;
+
+		FDomainID := Self.FDomainID;
+		FMetaDataMcPort := Self.FMetaDataMcPort;
+  end;
 end;
 
 /// ------------------------------------------

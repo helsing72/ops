@@ -33,6 +33,9 @@ type
 
 		  procedure AppendType(const _type : AnsiString);
 
+      // Used from archivers
+      procedure SetTypesString(types : AnsiString); override;
+
     public
       ///Bytes that hold unserialized data for this object.
       ///This happens if a type can not be fully understood by a participants type support.
@@ -50,6 +53,7 @@ type
       procedure FillClone(var obj : TOPSObject); virtual;
 
       property Key : AnsiString read FKey write FKey;
+
       property TypesString : AnsiString read FTypesString;
   end;
 
@@ -71,6 +75,11 @@ end;
 procedure TOPSObject.AppendType(const _type : AnsiString);
 begin
 	FTypesString := _type + ' ' + FTypesString;
+end;
+
+procedure TOPSObject.SetTypesString(types: AnsiString);
+begin
+  FTypesString := types;
 end;
 
 function TOPSObject.Clone : TOPSObject;

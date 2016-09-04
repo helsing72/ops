@@ -55,6 +55,12 @@ type
     function getDomains : TDynDomainArray;
 
     procedure Serialize(archiver : TArchiverInOut); override;
+
+		// Returns a newely allocated deep copy/clone of this object.
+		function Clone : TOPSObject; override;
+
+		// Fills the parameter obj with all values from this object.
+		procedure FillClone(var obj : TOPSObject); override;
 	end;
 
   TDefaultOPSConfigImpl = class(TOPSConfig)
@@ -108,6 +114,27 @@ begin
   inherited Serialize(archiver);
 
 	archiver.inout('domains', TDynSerializableArray(FDomains));
+end;
+
+// Returns a newely allocated deep copy/clone of this object.
+function TOPSConfig.Clone : TOPSObject;
+begin
+	Result := TOPSConfig.Create;
+  Self.FillClone(Result);
+end;
+
+// Fills the parameter obj with all values from this object.
+procedure TOPSConfig.FillClone(var obj : TOPSObject);
+var
+  i : Integer;
+begin
+	inherited FillClone(obj);
+  with obj as TOPSConfig do begin
+    SetLength(FDomains, Length(Self.FDomains));
+    for i := 0 to High(Self.FDomains) do begin
+      FDomains[i] := Self.FDomains[i].Clone as TDomain;
+    end;
+  end;
 end;
 
 // ---------------------------------------------------------------------------
