@@ -316,6 +316,7 @@ public class OpsCompiler
     protected boolean compilePython() {
         // create the compiler and set parameters
         opsc.PythonCompiler compiler = new opsc.PythonCompiler(_strProjectName);
+        compiler.setVerbose(_verbose);
         Property propTemplatePath = _props.getProperty("templatePath");
         if(propTemplatePath != null)
             compiler.setTemplateDir(propTemplatePath.value);
@@ -332,6 +333,7 @@ public class OpsCompiler
     protected boolean compileCpp() {
         // create the compiler and set parameters
         opsc.CppCompiler compiler = new opsc.CppCompiler(_strProjectName);
+        compiler.setVerbose(_verbose);
         Property propTemplatePath = _props.getProperty("templatePath");
         if(propTemplatePath != null)
             compiler.setTemplateDir(propTemplatePath.value);
@@ -379,6 +381,7 @@ public class OpsCompiler
     protected boolean compileCs() {
         // create the compiler and set parameters
         _CSharpCompiler = new opsc.CSharpCompiler(_strProjectName);
+        _CSharpCompiler.setVerbose(_verbose);
         Property propTemplatePath = _props.getProperty("templatePath");
         if(propTemplatePath != null)
             _CSharpCompiler.setTemplateDir(propTemplatePath.value);
@@ -408,6 +411,7 @@ public class OpsCompiler
     protected boolean compileDelphi() {
         // create the compiler and set parameters
         _DelphiCompiler = new opsc.DelphiCompiler(_strProjectName);
+        _DelphiCompiler.setVerbose(_verbose);
         Property propTemplatePath = _props.getProperty("templatePath");
         if(propTemplatePath != null)
             _DelphiCompiler.setTemplateDir(propTemplatePath.value);

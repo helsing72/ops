@@ -162,16 +162,16 @@ public class PythonCompiler extends opsc.CompilerSupport
                 for (int i=0;i<dependencyName.size();i++)
                 {
                     if (dependencyHelper.get(i) != null) continue;
-                    System.out.print("For " + className + "  comparing " + dependencyName.get(i) +" to " + other.className + ": ");
+                    if (_verbose > 0) System.out.print("For " + className + "  comparing " + dependencyName.get(i) +" to " + other.className + ": ");
                     if (dependencyName.get(i).equals(other.className))
                     {
                         dependencyHelper.set(i,other);
-                        System.out.println("success");
+                        if (_verbose > 0) System.out.println("success");
                         return true;
                     }
                     else
                     {
-                        System.out.println("failed");
+                        if (_verbose > 0) System.out.println("failed");
                     }
                 }
 /*
@@ -186,7 +186,7 @@ public class PythonCompiler extends opsc.CompilerSupport
             }
             else
             {
-                System.out.println("For " + className + "  comparing " + "XXX" +" to " + other.className);
+                if (_verbose > 0) System.out.println("For " + className + "  comparing " + "XXX" +" to " + other.className);
 
             }
             return false;
