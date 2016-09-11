@@ -56,7 +56,7 @@ type
     // NOTE: The Domain still owns it
     function getTopic(Name : AnsiString) : TTopic;
 
-		function existsTopic(Name : AnsiString) : Boolean;
+		function topicExist(Name : AnsiString) : Boolean;
 
     procedure Serialize(archiver : TArchiverInOut); override;
 
@@ -137,7 +137,7 @@ begin
 	raise ENoSuchTopicException.Create('Topic ' + string(Name) + ' does not exist in ops config file.');
 end;
 
-function TDomain.existsTopic(Name : AnsiString) : Boolean;
+function TDomain.topicExist(Name : AnsiString) : Boolean;
 var
   i : Integer;
 begin

@@ -154,6 +154,7 @@
       <ProgramDataBaseFileName>$(TargetDir)\$(TargetName).pdb</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Lib>
       <OutputFile>$(TargetDir)$(TargetFileName)</OutputFile>
@@ -196,6 +197,7 @@
       <ProgramDataBaseFileName>$(TargetDir)\$(TargetName).pdb</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
@@ -246,6 +248,7 @@
       <ProgramDataBaseFileName>$(TargetDir)\$(TargetName).pdb</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Lib>
       <OutputFile>$(TargetDir)$(TargetFileName)</OutputFile>
@@ -288,6 +291,7 @@
       <ProgramDataBaseFileName>$(TargetDir)\$(TargetName).pdb</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
@@ -326,6 +330,8 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\include\OPSConfigRepository.h" />
+    <ClInclude Include="..\..\..\include\OPSUtilities.h" />
     <ClInclude Include="..\..\..\include\SerializableInheritingTypeFactory.h" />
     <ClInclude Include="..\..\..\source\BasicError.h" />
     <ClInclude Include="..\..\..\source\BoostDeadlineTimerImpl.h" />
@@ -417,6 +423,7 @@
     <ClCompile Include="..\..\..\source\OPSArchiverIn.cpp" />
     <ClCompile Include="..\..\..\source\OPSArchiverOut.cpp" />
     <ClCompile Include="..\..\..\source\OPSConfig.cpp" />
+    <ClCompile Include="..\..\..\source\OPSConfigRepository.cpp" />
     <ClCompile Include="..\..\..\source\OPSObject.cpp" />
     <ClCompile Include="..\..\..\source\OPSObjectFactory.cpp" />
     <ClCompile Include="..\..\..\source\Participant.cpp" />

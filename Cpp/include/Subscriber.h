@@ -195,7 +195,7 @@ namespace ops
 
         bool started;
 
-        __int64 currentPulicationID;
+        ///__int64 currentPulicationID;
 
         DeadlineTimer* deadlineTimer;
     };

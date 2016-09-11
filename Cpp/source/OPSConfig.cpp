@@ -20,7 +20,7 @@
 
 #include "OPSTypeDefs.h"
 #include "OPSConfig.h"
-#include "DefaultOPSConfigImpl.h"
+#include "OPSConfigRepository.h"
 #include "XMLArchiverIn.h"
 #include "OPSObjectFactory.h"
 #include <fstream>
@@ -37,38 +37,12 @@ namespace ops
 			XMLArchiverIn archiver(inStream, "root", OPSObjectFactory::getInstance());
 			theConfig = (OPSConfig*)archiver.inout(std::string("ops_config"), theConfig);
 		}
-
-///		if (theConfig == NULL) {
-///		}
-
 		return theConfig;
 	}
 
 	OPSConfig* OPSConfig::getConfig()
 	{
-		static OPSConfig* theConfiguration = NULL;
-
-		if (theConfiguration == NULL) {
-			theConfiguration = getConfig("ops_config.xml");
-			
-			//std::ifstream inStream("ops_config.xml");
-			//if(inStream.is_open())
-			//{
-			//	XMLArchiverIn archiver(inStream, "root");
-			//	theConfiguration = (OPSConfig*)archiver.inout(std::string("ops_config"), theConfiguration);
-			//}
-
-			//if(theConfiguration == NULL)
-			//	{
-			//		theConfiguration = new DefaultOPSConfigImpl();
-			//	}
-			//}
-			//else
-			//{
-			//	theConfiguration = new DefaultOPSConfigImpl();
-			//}
-			
-		}
+		static OPSConfig* theConfiguration = OPSConfigRepository::Instance()->getConfig();
 		return theConfiguration;
 	}
 

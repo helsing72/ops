@@ -401,7 +401,6 @@ begin
   Result := FDomain.getTopic(AnsiString(name));
   Result.ParticipantID := FParticipantID;
   Result.DomainID := FDomainID;
-  //TODO  Result.participant = Self;
 end;
 
 // Create a Topic for subscribing or publishing on ParticipantInfoData

@@ -26,7 +26,6 @@ uses uOps.Types,
      uOps.ArchiverInOut,
      uOps.OpsObject;
 
-
 type
 	TTopic = class(TOPSObject)
   public
@@ -50,8 +49,6 @@ type
 		FTransport : AnsiString;
 		FOutSocketBufferSize : Int64;
 		FInSocketBufferSize : Int64;
-
-///TODO		Participant* participant;
 
 		procedure SetSampleMaxSize(Value : Integer);
 
@@ -77,13 +74,7 @@ type
     property Port : Integer read FPort write FPort;
     property OutSocketBufferSize : Int64 read FOutSocketBufferSize write FOutSocketBufferSize;
     property InSocketBufferSize : Int64 read FInSocketBufferSize write FInSocketBufferSize;
-
-///TODO		Participant* getParticipant()
-		{
-			return participant;
-		}
-
-end;
+  end;
 
 implementation
 

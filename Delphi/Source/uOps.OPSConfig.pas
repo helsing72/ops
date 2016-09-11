@@ -34,16 +34,23 @@ type
   public
     type
       TDynDomainArray = array of TDomain;
-	private
+	protected
     FDomains : TDynDomainArray;
 
 	public
     constructor Create;
     destructor Destroy; override;
 
+    // Returns a reference to a singleton instance and should NOT be deleted.
+    // See also releaseConfig below
     class function getConfig : TOPSConfig; overload;
+
+    // Returns a reference to a unique instance and should be deleted.
+    // See also releaseConfig below
     class function getConfig(configFile : string) : TOPSConfig; overload;
 
+    // Help method that deletes the config if it isn't the singleton instance
+    // The variable used in the call will always be set to NIL
     class procedure releaseConfig(var cfg : TOPSConfig);
 
     // Returns a reference to the given Domain
@@ -74,6 +81,7 @@ implementation
 uses Classes,
      SysUtils,
      System.SyncObjs,
+     uOps.OPSConfigRepository,
      uOps.OPSObjectFactory,
      uOps.XMLArchiverIn;
 
@@ -180,11 +188,10 @@ end;
 
 class function TOPSConfig.getConfig : TOPSConfig;
 begin
-  // Protection
   gMutex.Acquire;
   try
   	if not Assigned(gConfiguration) then begin
-      gConfiguration := getConfig('ops_config.xml');
+      gConfiguration := TOPSConfigRepository.Instance.getConfig();
     end;
   finally
     gMutex.Release;
@@ -195,7 +202,9 @@ end;
 class procedure TOPSConfig.releaseConfig(var cfg : TOPSConfig);
 begin
   // We don't want to delete the singleton instance
-  if cfg <> gConfiguration then FreeAndNil(cfg);
+  if cfg <> gConfiguration then begin
+    FreeAndNil(cfg);
+  end;
   cfg := nil;
 end;
 
@@ -204,7 +213,8 @@ initialization
   gMutex := TMutex.Create;
 
 finalization
-  FreeAndNil(gConfiguration);
+  //Don't delete config (gConfiguration) since we got it from the TOPSConfigRepository who will delete it
+  //FreeAndNil(gConfiguration);
   FreeAndNil(gMutex);
 
 end.
