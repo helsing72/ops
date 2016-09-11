@@ -26,27 +26,36 @@ namespace ops
     {
         key = "k";
 		typesString = "";
-        
     }
+
 	OPSObject* OPSObject::clone()
 	{
 		OPSObject* obj = new OPSObject();
 		fillClone(obj);
 		return obj;
 	}
+
 	void OPSObject::fillClone(OPSObject* obj)const
 	{
 		obj->key = key;
 		obj->typesString = typesString;
+		// Copy spareBytes vector
+		size_t len = spareBytes.size();
+		obj->spareBytes.reserve(len);
+		obj->spareBytes.resize(len, 0);
+		memcpy((void*)&obj->spareBytes[0], (void*)&spareBytes[0], len);
 	}
+
     std::string OPSObject::getKey()
     {
          return key;
     }
+
 	const std::string& OPSObject::getTypeString()
 	{
 		return typesString;
 	}
+
 	void OPSObject::setKey(std::string k)
 	{
 		key = k;
