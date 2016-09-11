@@ -68,12 +68,13 @@ namespace ops
 
 	Participant* Participant::getInstance(std::string domainID_, std::string participantID, std::string configFile)
 	{
+		std::string key = domainID_ + "::" + participantID;
 		SafeLock lock(&creationMutex);
-		if (instances.find(participantID) == instances.end()) {
+		if (instances.find(key) == instances.end()) {
 			try
 			{
 				Participant* newInst = new Participant(domainID_, participantID, configFile);
-				instances[participantID] = newInst;
+				instances[key] = newInst;
 			}
 			catch(ops::ConfigException ex)
 			{
@@ -94,14 +95,15 @@ namespace ops
 				return NULL;
 			}
 		}
-		return instances[participantID];
+		return instances[key];
 	}
 
 	///Remove this instance from the static instance map
 	void Participant::RemoveInstance()
 	{
+		std::string key = domainID + "::" + participantID;
 		SafeLock lock(&creationMutex);
-		instances.erase(participantID);		
+		instances.erase(key);		
 	}
 
 
