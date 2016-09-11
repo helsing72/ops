@@ -26,6 +26,9 @@
 
 #include "PizzaProject/PizzaProjectTypeFactory.h"
 
+#include "OPSConfigRepository.h"
+#include "OPSUtilities.h"
+
 #ifdef _WIN32
 #include "SdsSystemTime.h"
 #endif
@@ -343,12 +346,12 @@ class MyListener :
 {
 public:
 	void onData(ops::Subscriber* sub, pizza::PizzaData* data)
-  {
-    // test for sending derived objects on same topic
-    if (dynamic_cast<pizza::VessuvioData*>(data) != NULL) {
-      onData(sub, dynamic_cast<pizza::VessuvioData*>(data));
-      return;
-    }
+	{
+		// test for sending derived objects on same topic
+		if (dynamic_cast<pizza::VessuvioData*>(data) != NULL) {
+			onData(sub, dynamic_cast<pizza::VessuvioData*>(data));
+			return;
+		}
 
 		std::string addr = "";
 		int port = 0;
@@ -359,17 +362,27 @@ public:
 				"[Topic: " << sub->getTopic().getName() <<
 				"] (From " << addr << ":" << port <<
 				") PizzaData:: Cheese: " << data->cheese <<
-				", Tomato sauce: " << data->tomatoSauce << std::endl;
+				", Tomato sauce: " << data->tomatoSauce << 
+				", spareBytes: " << data->spareBytes.size() << 
+				std::endl;
 		}
+
+//		pizza::PizzaData* ttt = (pizza::PizzaData*)data->clone();
+//		std::cout <<
+//			"Clone PizzaData:: Cheese: " << ttt->cheese <<
+//			", Tomato sauce: " << ttt->tomatoSauce << 
+//			", spareBytes: " << ttt->spareBytes.size() << 
+//			std::endl;
+
 	}
 
 	void onData(ops::Subscriber* sub, pizza::VessuvioData* data)
   {
-    // test for sending derived objects on same topic
-    if (dynamic_cast<pizza::special::ExtraAllt*>(data) != NULL) {
-      onData(sub, dynamic_cast<pizza::special::ExtraAllt*>(data));
-      return;
-    }
+		// test for sending derived objects on same topic
+		if (dynamic_cast<pizza::special::ExtraAllt*>(data) != NULL) {
+			onData(sub, dynamic_cast<pizza::special::ExtraAllt*>(data));
+			return;
+		}
 
 		std::string addr = "";
 		int port = 0;
@@ -529,6 +542,20 @@ int main(int argc, char**argv)
 	sds::sdsSystemTimeInit();
 #endif
 
+	// Setup the OPS static error service (common for all participants, reports errors during participant creation)
+	ops::ErrorWriter* errorWriterStatic = new ops::ErrorWriter(std::cout);
+	ops::Participant::getStaticErrorService()->addListener(errorWriterStatic);
+
+	// Add all Domain's from given file(s)
+	ops::OPSConfigRepository::Instance()->Add("ops_config.xml");
+//	ops::OPSConfigRepository::Instance()->Add("ops_config2.xml");
+
+	// Add a specific domain from a file
+//	ops::OPSConfigRepository::Instance()->Add("ops_config.xml", "PizzaDomain");
+//	ops::OPSConfigRepository::Instance()->Add("ops_config2.xml", "OtherPizzaDomain");
+
+	
+
 	// --------------------------------------------------------------------
 	MyListener myListener;
 
@@ -552,10 +579,6 @@ int main(int argc, char**argv)
 	ItemInfoList.push_back(new ItemInfo("OtherPizzaDomain", "OtherVessuvioTopic", "pizza.VessuvioData"));
 
 	ItemInfoList.push_back(new ItemInfo("PizzaDomain", "ExtraAlltTopic", "pizza.special.ExtraAllt"));
-
-	// Setup the OPS static error service (common for all participants, reports errors during participant creation)
-	ops::ErrorWriter* errorWriterStatic = new ops::ErrorWriter(std::cout);
-	ops::Participant::getStaticErrorService()->addListener(errorWriterStatic);
 
 	// Create participants
 	// NOTE that the second parameter (participantID) must be different for the two participant instances

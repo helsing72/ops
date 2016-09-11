@@ -61,7 +61,9 @@ uses
   uOps.RequestReply in '..\..\..\Delphi\Source\RequestReply\uOps.RequestReply.pas',
   uOps.RequestReply.Reply in '..\..\..\Delphi\Source\RequestReply\uOps.RequestReply.Reply.pas',
   uOps.RequestReply.Request in '..\..\..\Delphi\Source\RequestReply\uOps.RequestReply.Request.pas',
-  uOps.PrintArchiverOut in '..\..\..\Delphi\Source\uOps.PrintArchiverOut.pas';
+  uOps.PrintArchiverOut in '..\..\..\Delphi\Source\uOps.PrintArchiverOut.pas',
+  uOps.OPSConfigRepository in '..\..\..\Delphi\Source\uOps.OPSConfigRepository.pas',
+  uOps.Utilities in '..\..\..\Delphi\Source\uOps.Utilities.pas';
 
 {$R *.res}
 

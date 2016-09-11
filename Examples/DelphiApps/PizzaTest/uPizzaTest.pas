@@ -135,6 +135,7 @@ uses
   uOps.OPSMessage,
   uOps.Publisher,
   uOps.XMLArchiverOut,
+  uOps.OPSConfigRepository,
   PizzaProject.PizzaProjectTypeFactory;
 
 {$R *.dfm}
@@ -762,6 +763,10 @@ var
   info : TItemInfo;
 begin
   FMsgLog := TStringList.Create;
+
+  // Setup the OPS static error service (common for all participants, reports errors during participant creation)
+  uOps.Error.gStaticErrorService.addListener(OnErrorReport);
+
   FMutex := TMutex.Create;
   FItemInfoList := TList<TItemInfo>.Create;
 
@@ -786,8 +791,13 @@ begin
 
   FItemInfoList.Add(TItemInfo.Create('PizzaDomain', 'ExtraAlltTopic', 'pizza.special.ExtraAllt'));
 
-  // Setup the OPS static error service (common for all participants, reports errors during participant creation)
-  uOps.Error.gStaticErrorService.addListener(OnErrorReport);
+  // Add all Domain's from file(s)
+  TOPSConfigRepository.Instance.Add('ops_config.xml');
+//  TOPSConfigRepository.Instance.Add('ops_config2.xml');
+
+  // Add a specific domain from a file
+//  TOPSConfigRepository.Instance.Add('ops_config.xml', 'PizzaDomain');
+//  TOPSConfigRepository.Instance.Add('ops_config2.xml', 'OtherPizzaDomain');
 
   info := FItemInfoList[0];
   info.Selected := True;
