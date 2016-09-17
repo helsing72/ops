@@ -44,7 +44,6 @@ uses
   uOps.Transport.SendDataHandler in '..\..\..\Delphi\Source\Transport\uOps.Transport.SendDataHandler.pas',
   uOps.Transport.SendDataHandlerFactory in '..\..\..\Delphi\Source\Transport\uOps.Transport.SendDataHandlerFactory.pas',
   uOps.Transport.Sender in '..\..\..\Delphi\Source\Transport\uOps.Transport.Sender.pas',
-  uOps.Transport.Sockets in '..\..\..\Delphi\Source\Transport\uOps.Transport.Sockets.pas',
   uOps.Transport.TCPClient in '..\..\..\Delphi\Source\Transport\uOps.Transport.TCPClient.pas',
   uOPs.Transport.TCPSendDataHandler in '..\..\..\Delphi\Source\Transport\uOPs.Transport.TCPSendDataHandler.pas',
   uOps.Transport.TCPServer in '..\..\..\Delphi\Source\Transport\uOps.Transport.TCPServer.pas',
@@ -63,7 +62,8 @@ uses
   uOps.RequestReply.Request in '..\..\..\Delphi\Source\RequestReply\uOps.RequestReply.Request.pas',
   uOps.PrintArchiverOut in '..\..\..\Delphi\Source\uOps.PrintArchiverOut.pas',
   uOps.OPSConfigRepository in '..\..\..\Delphi\Source\uOps.OPSConfigRepository.pas',
-  uOps.Utilities in '..\..\..\Delphi\Source\uOps.Utilities.pas';
+  uOps.Utilities in '..\..\..\Delphi\Source\uOps.Utilities.pas',
+  uSockets in '..\..\..\Delphi\Common\uSockets.pas';
 
 {$R *.res}
 
