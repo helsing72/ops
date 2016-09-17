@@ -23,11 +23,10 @@ unit uOps.Transport.TCPServer;
 interface
 
 uses System.Generics.Collections,
-     Sockets,
      uRunner,
      uOps.Error,
      uOps.Transport.Sender,
-     uOps.Transport.Sockets;
+     uSockets;
 
 type
   TTCPServerSender = class(TSender)
@@ -36,10 +35,10 @@ type
     FIpAddress : string;
     FOutSocketBufferSize : Int64;
 
-    FTcpServer : TTcpServer;
+    FTcpServer : TTcpServerSocket;
 
     // List owns objects, i.e. when list is free'd all objects in it is free'd
-    FConnectedSockets : TObjectList<TTcpClient>;
+    FConnectedSockets : TObjectList<TTcpClientSocket>;
 
     // Our thread running our Run() method
     FRunner : TRunner;
@@ -66,6 +65,9 @@ type
 implementation
 
 uses SysUtils,
+{$IF CompilerVersion >= 31}      // Delphi 10.1 Berlin
+     AnsiStrings,
+{$IFEND}
      WinSock;
 
 constructor TTCPServerSender.Create(serverIP : string; serverPort : Integer; outSocketBufferSize : Int64);
@@ -75,11 +77,10 @@ begin
   FIpAddress := serverIP;
   FOutSocketBufferSize := outSocketBufferSize;
 
-  FConnectedSockets := TObjectList<TTcpClient>.Create;
+  FConnectedSockets := TObjectList<TTcpClientSocket>.Create;
 
-  fTcpServer := TTcpServer.Create(nil);
-  fTcpServer.BlockMode := bmBlocking;
-  fTcpServer.LocalPort := AnsiString(IntToStr(FPort));
+  fTcpServer := TTcpServerSocket.Create;
+  fTcpServer.LocalPort := FPort;
   fTcpServer.LocalHost := AnsiString(FIpAddress);
 end;
 
@@ -115,7 +116,7 @@ begin
   FTerminated := True;
   if Assigned(FRunner) then FRunner.Terminate;
 
-  FTcpServer.Active := False;
+  FTcpServer.Close;
 
   // If thread exist, wait for thread to terminate and then delete the object
   FreeAndNil(FRunner);
@@ -144,6 +145,9 @@ begin
   Result := True;
 
   // First, prepare a package of fixed length 22 with information about the size of the data package
+{$IF CompilerVersion >= 31}      // Delphi 10.1 Berlin
+  AnsiStrings.
+{$IFEND}
   StrPCopy(@sizeInfo[0], AnsiString('opsp_tcp_size_info'));
   PInteger(@sizeInfo[18])^ := size;
 
@@ -164,8 +168,8 @@ begin
       ErrorFlag := True;
     end;
 
-    if errorFlag then begin
-      FLastErrorCode := WSAGetLastError;
+    if ErrorFlag then begin
+      FLastErrorCode := FConnectedSockets[i].LastError;
       Report('sendTo', 'Error sending');
       FConnectedSockets.Delete(i);
     end;
@@ -174,27 +178,30 @@ end;
 
 procedure TTCPServerSender.Run;
 var
-  tcpClient : TTcpClient;
+  tcpClient : TTcpClientSocket;
 begin
   tcpClient := nil;
 
   while not FTerminated do begin
     try
-      // Activate (socket(), bind(), listen())
-      FTcpServer.Active := True;
+      // Setup server socket for listening
+      FTcpServer.Open;
+      FTcpServer.Bind;
+      FTcpServer.Listen;
 
       if not FTcpServer.Listening then begin
-        FTcpServer.Active := False;
+        FTcpServer.Close;
         Sleep(100);
         Continue;
       end;
 
+      // Keep listening for connecting clients
       while not FTerminated do begin
         // Create a client socket ready for the calling client
-        tcpClient := TTcpClient.Create(nil);
+        tcpClient := TTcpClientSocket.Create;
 
         // accept()
-        while (not FTerminated) and (not FTcpServer.Accept(TCustomIpClient(tcpClient))) do
+        while (not FTerminated) and (not FTcpServer.Accept(tcpClient)) do
           Sleep(10);
 
         if FTerminated then Break;
@@ -207,6 +214,9 @@ begin
             Report('Run', 'Socket buffer size could not be set');
           end;
         end;
+
+        // Disable Nagle algorithm
+        tcpClient.SetTcpNoDelay(True);
 
         // and put it in list and then wait for another connection
         FConnectedSockets.Add(tcpClient);

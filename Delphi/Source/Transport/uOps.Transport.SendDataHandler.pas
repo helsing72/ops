@@ -49,7 +49,7 @@ type
 
 implementation
 
-uses SysUtils;
+uses Classes, SysUtils, System.Types;
 
 constructor TSendDataHandler.Create;
 begin

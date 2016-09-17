@@ -24,7 +24,6 @@ interface
 
 uses System.Generics.Collections,
      System.SyncObjs,
-     Sockets,
      WinSock,
      uNotifier,
      uRunner,
@@ -34,7 +33,7 @@ uses System.Generics.Collections,
      uOps.OPSMessage,
      uOps.Domain,
      uOps.Transport.Receiver,
-     uOps.Transport.Sockets;
+     uSockets;
 
 type
   TTCPClientReceiver = class(TReceiver)
@@ -43,7 +42,7 @@ type
     FIpAddress : string;
     FInSocketBufferSize : Int64;
 
-    FTcpClient : TTcpClient;
+    FTcpClient : TTcpClientSocket;
 
     // Current read buffer from user
     FBuffer : PByte;
@@ -98,10 +97,9 @@ begin
 
   FInSocketBufferSize := inSocketBufferSize;
 
-  fTcpClient := TTcpClient.Create(nil);
-  fTcpClient.BlockMode := bmBlocking;
+  fTcpClient := TTcpClientSocket.Create;
   fTcpClient.RemoteHost := AnsiString(FIpAddress);
-  fTcpClient.RemotePort := AnsiString(IntToStr(FPort));
+  fTcpClient.RemotePort := FPort;
 end;
 
 destructor TTCPClientReceiver.Destroy;
@@ -168,6 +166,7 @@ begin
   if Assigned(FRunner) then FRunner.Terminate;
 
   FTcpClient.Disconnect;
+  FTcpClient.Close;
 
   // If thread exist, wait for thread to terminate and then delete the object
   FreeAndNil(FRunner);
@@ -218,19 +217,32 @@ var
     BufferIdx := 0;
   end;
 
+  procedure OpenAndConnect;
+  begin
+    FTcpClient.Open;
+    FTcpClient.Connect;
+  end;
+
+  procedure DisconnectAndClose;
+  begin
+    FTcpClient.Disconnect;
+    FTcpClient.Close;
+  end;
+
 begin
   while not FTerminated do begin
     try
       // Connect loop
       while (not FTerminated) and (not fTcpClient.Connected) do begin
-        FTcpClient.Active := False;
+        DisconnectAndClose;
         Sleep(100);
-        FTcpClient.Active := True;
+        OpenAndConnect;
       end;
       if FTerminated then Break;
 
-      // Connected
-      // Set size using our helper class
+      FTcpClient.SetNonBlocking(False);
+
+      // Connected, Set buffer size
       if FInSocketBufferSize > 0 then begin
         FTcpClient.SetReceiveBufferSize(Integer(FInSocketBufferSize));
         if FTcpClient.GetReceiveBufferSize <> Integer(FInSocketBufferSize) then begin
@@ -255,15 +267,15 @@ begin
         if FTerminated then Break;
         if Res = 0 then begin
           // Connection closed gracefully
-          FTcpClient.Active := False;
+          DisconnectAndClose;
           Break;
 
         end else if Res < 0 then begin
           // Some error
-          FLastErrorCode := WSAGetLastError;
+          FLastErrorCode := FTcpClient.LastError;
           Report('Run', 'Read failed');
 //          notifyNewEvent(BytesSizePair(NULL, -2));
-          FTcpClient.Active := False;
+          DisconnectAndClose;
           Break;
 
         end else begin
@@ -276,7 +288,7 @@ begin
               phPayload : HandlePayload;
             end;
             if ErrorDetected then begin
-              FTcpClient.Active := False;
+              DisconnectAndClose;
               Break;
             end;
           end else begin
@@ -284,12 +296,12 @@ begin
           end;
         end;
       end;
-      FTcpClient.Active := False;
+      DisconnectAndClose;
     except
       on E: Exception do begin
         FLastErrorCode := SOCKET_ERROR;
         Report('Run', 'Exception "' + E.Message + '"');
-        FTcpClient.Active := False;
+        DisconnectAndClose;
       end;
     end;
   end;

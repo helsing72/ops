@@ -23,7 +23,7 @@ unit uOps.Transport.UDPSender;
 interface
 
 uses uOps.Transport.Sender,
-     uOps.Transport.Sockets;
+     uSockets;
 
 type
   // A sender implementation that dispatches messages over ip based UDP.
@@ -34,7 +34,7 @@ type
     FOutSocketBufferSize : Int64;
     FMulticastSocket : Boolean;
 
-    FSocket: TUdpSocketEx;
+    FSocket: TUdpSocket;
 
     procedure Report(method : string; mess : string);
 
@@ -62,7 +62,6 @@ implementation
 
 uses SysUtils,
      WinSock,
-     Sockets,
      uOps.Error;
 
 { TUDPSender }
@@ -97,15 +96,15 @@ procedure TUDPSender.Open;
 begin
   if Assigned(FSocket) then Exit;
 
-  FSocket := TUdpSocketEx.Create(nil);
-  FSocket.BlockMode := bmNonBlocking;
-  FSocket.Active := True;
+  FSocket := TUdpSocket.Create;
 
-  if FSocket.Handle = INVALID_SOCKET then begin
-    FLastErrorCode := WSAGetLastError;
+  if not FSocket.Open then begin
+    FLastErrorCode := Fsocket.LastError;
     Report('Open', 'Socket could not be created');
     Exit;
   end;
+
+  FSocket.SetNonBlocking(True);
 
   if FOutSocketBufferSize > 0 then begin
     FSocket.SetSendBufferSize(Integer(FOutSocketBufferSize));
@@ -117,7 +116,7 @@ begin
 
   if FMulticastSocket then begin
     FSocket.SetMulticastTtl(FTtl);
-    FSocket.SetMulticastInterface(FLocalInterface);
+    FSocket.SetMulticastInterface(AnsiString(FLocalInterface));
   end;
 
   FSocket.Bind;
@@ -125,27 +124,28 @@ end;
 
 procedure TUDPSender.Close;
 begin
-  if Assigned(FSocket) then shutdown(FSocket.Handle, SD_BOTH);
   FreeAndNil(FSocket);
 end;
 
 function TUDPSender.getAddress: string;
 var
   dummy : Integer;
+  str : AnsiString;
 begin
   Result := '';
   if not Assigned(FSocket) then Exit;
   dummy := 0;
-  FSocket.GetLocalAddr(Result, dummy);
+  FSocket.GetLocalAddress(str, dummy);
+  Result := string(str);
 end;
 
 function TUDPSender.getPort: Integer;
 var
-  dummy : string;
+  dummy : AnsiString;
 begin
   Result := 0;
   if not Assigned(FSocket) then Exit;
-  FSocket.GetLocalAddr(dummy, Result);
+  FSocket.GetLocalAddress(dummy, Result);
 end;
 
 function TUDPSender.sendTo(buf: PByte; size: Integer; ip: string; port: Integer): Boolean;
@@ -157,9 +157,9 @@ begin
   FLastErrorCode := 0;
 
   try
-    ToAddr := FSocket.GetSocketAddr(AnsiString(ip), AnsiString(IntToStr(port)));
+    ToAddr := FSocket.MakeSockAddr(AnsiString(ip), port);
     if FSocket.SendTo(buf^, size, ToAddr) = SOCKET_ERROR then begin
-      FLastErrorCode := WSAGetLastError;
+      FLastErrorCode := FSocket.LastError;
       Report('sendTo', 'sendto() failed');
     end else begin
       Result := True;

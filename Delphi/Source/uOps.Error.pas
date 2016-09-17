@@ -28,8 +28,8 @@ type
   // Interface for errors in OPS
 	TError = class(TObject)
   public
-    function getErrorCode : Integer; virtual; abstract;
-    function getMessage : string; virtual; abstract;
+    function GetErrorCode : Integer; virtual; abstract;
+    function GetMessage : string; virtual; abstract;
   end;
 
   // Basic implementaion of an error for OPS.
@@ -44,8 +44,14 @@ type
     FErrorCode : Integer;
   public
     constructor Create(className, method, mess : string);
-    function getErrorCode : Integer; override;
-    function getMessage : string; override;
+    function GetErrorCode : Integer; override;
+    function GetMessage : string; override;
+  end;
+
+  TSocketError = class(TBasicError)
+  public
+    constructor Create(ClassName, Method, Mess : string; SocketError : Integer = -1);
+    function GetMessage : string; override;
   end;
 
   TErrorService = class(TObject)
@@ -83,14 +89,30 @@ begin
   FErrorCode := ERROR_CODE;
 end;
 
-function TBasicError.getErrorCode : Integer;
+function TBasicError.GetErrorCode : Integer;
 begin
   Result := FErrorCode;
 end;
 
-function TBasicError.getMessage : string;
+function TBasicError.GetMessage : string;
 begin
   Result := FClassName + '.' + FMethod + '(): ' + FMessage;
+end;
+
+{ TSocketError }
+
+constructor TSocketError.Create(ClassName, Method, Mess: string; SocketError: Integer);
+begin
+  inherited Create(ClassName, Method, Mess);
+  FErrorCode := SocketError;
+end;
+
+function TSocketError.GetMessage: string;
+begin
+  Result := inherited GetMessage;
+  if FErrorCode <> -1 then begin
+    Result := Result + ' [' + IntToStr(FErrorCode) + ']';
+  end;
 end;
 
 { TErrorService }

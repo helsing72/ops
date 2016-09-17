@@ -24,7 +24,6 @@ interface
 
 uses System.Generics.Collections,
      System.SyncObjs,
-     Sockets,
      WinSock,
      uNotifier,
      uRunner,
@@ -34,7 +33,7 @@ uses System.Generics.Collections,
      uOps.OPSMessage,
      uOps.Domain,
      uOps.Transport.Receiver,
-     uOps.Transport.Sockets;
+     uSockets;
 
 type
 	TUDPReceiver = class(TReceiver)
@@ -42,7 +41,7 @@ type
     FPort : Integer;
     FIpAddress : string;
 
-    FSocket: TUdpSocketEx;
+    FSocket: TUdpSocket;
 
     // Current read buffer from user
     FBuffer : PByte;
@@ -102,39 +101,39 @@ uses SysUtils,
 
 constructor TUDPReceiver.Create(bindPort : Integer; localInterface : string = '0.0.0.0'; inSocketBufferSize : Int64 = 16000000);
 var
-  localip : string;
+  localip : AnsiString;
 begin
   inherited Create;
 
-  FSocket := TUdpSocketEx.Create(nil);
-  FSocket.BlockMode := bmBlocking;
+  FSocket := TUdpSocket.Create;
+
+  if not FSocket.Open then begin
+    FLastErrorCode := FSocket.LastError;
+    Report('Create', 'Open error');
+    Exit;
+  end;
 
   if localInterface = '0.0.0.0' then begin
-    FIpAddress := string(FSocket.LocalHostAddr);
+//    FIpAddress := string(FSocket.LocalHostAddr);    ///TODO
+    FIpAddress := string('127.0.0.1');
   end else begin
     FIpAddress := localInterface;
   end;
 
   FSocket.LocalHost := AnsiString(FIpAddress);
-  FSocket.LocalPort := AnsiString(IntToStr(bindPort));
-  FSocket.Active := True;
+  FSocket.LocalPort := bindPort;
 
-  if FSocket.Handle = INVALID_SOCKET then begin
-    FLastErrorCode := WSAGetLastError;
-    Report('Create', 'Open error');
-    Exit;
-  end;
-
+  FSocket.SetNonBlocking(False);
   FSocket.SetReuseAddress(True);
 
   if not FSocket.Bind then begin
-    FLastErrorCode := WSAGetLastError;
+    FLastErrorCode := FSocket.LastError;
     Report('Create', 'Bind error');
     Exit;
   end;
 
   // Get actual port that socket is bound to (in case bindport = 0)
-  FSocket.GetLocalAddr(localip, FPort);
+  FSocket.GetLocalAddress(localip, FPort);
 
   if inSocketBufferSize > 0 then begin
     FSocket.SetReceiveBufferSize(Integer(inSocketBufferSize));
@@ -169,7 +168,7 @@ begin
   Result := False;
   if Assigned(FRunner) then Exit;
 
-  if not FSocket.Active then begin
+  if not FSocket.IsOpen then begin
     // This is a Start after Stop case. Do we need to handle that???
     FLastErrorCode := SOCKET_ERROR;
     Report('Start', 'Can''t Start after a Stop (NYI)');
@@ -192,8 +191,8 @@ end;
 // Should only be called from the callback.
 procedure TUDPReceiver.GetSource(var address : string; var port : Integer);
 begin
-  address := TUDPSocketEx.getIpAddress(FFromAddress);
-  port := TUDPSocketEx.getPort(FFromAddress);
+  address := string(TUdpSocket.getIpAddress(FFromAddress));
+  port := TUdpSocket.getPort(FFromAddress);
 end;
 
 // SetReceiveBuffer():
@@ -214,8 +213,7 @@ begin
   if Assigned(FRunner) then FRunner.Terminate;
 
   // Thread is probably waiting in a read, so we must close the socket
-  shutdown(FSocket.Handle, SD_BOTH);
-  FSocket.Active := False;
+  FSocket.Close;
 
   // If thread exist, wait for thread to terminate and then delete the object
   FreeAndNil(FRunner);
@@ -241,7 +239,7 @@ begin
   len := SizeOf(fromAddr);
   Result := FSocket.ReceiveFrom(o^, size, fromAddr, len);
   if Result = SOCKET_ERROR then begin
-    FLastErrorCode := WSAGetLastError;
+    FLastErrorCode := FSocket.LastError;
   end;
 end;
 

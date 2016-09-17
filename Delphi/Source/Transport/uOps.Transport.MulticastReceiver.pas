@@ -24,7 +24,6 @@ interface
 
 uses System.Generics.Collections,
      System.SyncObjs,
-     Sockets,
      WinSock,
      uNotifier,
      uRunner,
@@ -34,7 +33,7 @@ uses System.Generics.Collections,
      uOps.OPSMessage,
      uOps.Domain,
      uOps.Transport.Receiver,
-     uOps.Transport.Sockets;
+     uSockets;
 
 type
 	TMulticastReceiver = class(TReceiver)
@@ -44,7 +43,7 @@ type
     FLocalInterface : string;
     FInSocketBufferSize : Int64;
 
-    FSocket: TUdpSocketEx;
+    FSocket: TUdpSocket;
 
     // Current read buffer from user
     FBuffer : PByte;
@@ -128,7 +127,7 @@ end;
 // Override from Receiver
 function TMulticastReceiver.Start(bytes : PByte; size : Integer) : Boolean;
 var
-  localip : string;
+  localip : AnsiString;
 begin
   Result := False;
   if Assigned(FSocket) then Exit;
@@ -137,28 +136,28 @@ begin
   FBuffer := bytes;
   FBufferSize := size;
 
-  FSocket := TUdpSocketEx.Create(nil);
-  FSocket.BlockMode := bmBlocking;
-  FSocket.LocalHost := '0.0.0.0';
-  FSocket.LocalPort := AnsiString(IntToStr(FPort));
-  FSocket.Active := True;
+  FSocket := TUdpSocket.Create;
 
-  if FSocket.Handle = INVALID_SOCKET then begin
-    FLastErrorCode := WSAGetLastError;
+  if not FSocket.Open then begin
+    FLastErrorCode := FSocket.LastError;
     Report('Start', 'Open error');
     Exit;
   end;
 
+  FSocket.LocalHost := '0.0.0.0';
+  FSocket.LocalPort := FPort;
+
+  FSocket.SetNonBlocking(False);
   FSocket.SetReuseAddress(True);
 
   if not FSocket.Bind then begin
-    FLastErrorCode := WSAGetLastError;
+    FLastErrorCode := FSocket.LastError;
     Report('Start', 'Bind error');
     Exit;
   end;
 
   // Get actual port that socket is bound to (in case bindport = 0)
-  FSocket.GetLocalAddr(localip, FPort);
+  FSocket.GetLocalAddress(localip, FPort);
 
   if FInSocketBufferSize > 0 then begin
     FSocket.SetReceiveBufferSize(Integer(FInSocketBufferSize));
@@ -168,7 +167,7 @@ begin
     end;
   end;
 
-  FSocket.AddMulticastMembership(FIpAddress, FLocalInterface);
+  FSocket.AddMulticastMembership(AnsiString(FIpAddress), AnsiString(FLocalInterface));
 
   if Assigned(FBuffer) then begin
     // Start a thread running our run() method
@@ -182,8 +181,8 @@ end;
 // Only safe to call in callback
 procedure TMulticastReceiver.getSource(var address : string; var port : Integer);
 begin
-  address := TUDPSocketEx.getIpAddress(FFromAddress);
-  port := TUDPSocketEx.getPort(FFromAddress);
+  address := string(TUdpSocket.getIpAddress(FFromAddress));
+  port := TUdpSocket.getPort(FFromAddress);
 end;
 
 // Override from Receiver
@@ -203,8 +202,7 @@ begin
   FTerminated := True;
   if Assigned(FRunner) then FRunner.Terminate;
 
-  shutdown(FSocket.Handle, SD_BOTH);
-  FSocket.Active := False;
+  FSocket.Close;
 
   // If thread exist, wait for thread to terminate and then delete the object
   FreeAndNil(FRunner);
@@ -232,7 +230,7 @@ begin
   len := SizeOf(fromAddr);
   Result := FSocket.ReceiveFrom(o^, size, fromAddr, len);
   if Result = SOCKET_ERROR then begin
-    FLastErrorCode := WSAGetLastError;
+    FLastErrorCode := FSocket.LastError;
   end;
 end;
 
