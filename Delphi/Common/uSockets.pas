@@ -48,8 +48,8 @@ type
 
     // ------------------------------------------------------
     // Winsock API Helpers
-    function Open : Boolean;
-    procedure Close; virtual;
+    function Open: Boolean;
+    function Close: Boolean; virtual;
     function Bind: Boolean;
     function SendTo(var Buffer; BufferSize: Integer; ToAddr: TSockAddr; Flags: Integer = 0): Integer;
     function ReceiveFrom(var Buffer; BufferSize: Integer; var FromAddr: TSockAddr; var Len: Integer; Flags: Integer = 0): Integer;
@@ -92,7 +92,7 @@ type
 
     // ------------------------------------------------------
     // Winsock API Helpers
-    procedure Close; override;
+    function Close : Boolean; override;
 
     function SetReuseAddress(Value : Boolean) : Boolean;
 
@@ -146,7 +146,7 @@ type
   public
     // ------------------------------------------------------
     // Winsock API Helpers
-    procedure Close; override;
+    function Close : Boolean; override;
     function Listen : Boolean;
     function Accept(var ClientSocket: TTcpClientSocket): Boolean;
 
@@ -199,7 +199,7 @@ begin
   end;
 end;
 
-procedure TBaseIpSocket.Close;
+function TBaseIpSocket.Close : Boolean;
 begin
   FLastError := 0;
   if FSocket <> INVALID_SOCKET then begin
@@ -209,6 +209,7 @@ begin
     end;
     FSocket := INVALID_SOCKET;
   end;
+  Result := FlastError = 0;
 end;
 
 function TBaseIpSocket.Bind: Boolean;
@@ -415,11 +416,11 @@ begin
   inherited Create(SOCK_DGRAM, IPPROTO_UDP);
 end;
 
-procedure TUdpSocket.Close;
+function TUdpSocket.Close : Boolean;
 begin
   //function shutdown(s: TSocket; how: Integer): Integer; stdcall;
   shutdown(FSocket, SD_BOTH);
-  inherited Close;
+  Result := inherited Close;
 end;
 
 function TUdpSocket.SetReuseAddress(Value : Boolean) : Boolean;
@@ -594,10 +595,10 @@ end;
 
 { TTcpServerSocket }
 
-procedure TTcpServerSocket.Close;
+function TTcpServerSocket.Close : Boolean;
 begin
   FListening := False;
-  inherited Close;
+  Result := inherited Close;
 end;
 
 function TTcpServerSocket.Listen : Boolean;
