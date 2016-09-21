@@ -25,6 +25,7 @@ public class ProjectProperties implements Serializable
     public boolean generateCpp = true;
     public boolean generateJava = true;
     public boolean generateCS = true;
+    public boolean generateJSON = false;
     public boolean buildJava = false;
     public boolean buildCS = false;
     public boolean buildDebugProject = false;
@@ -49,10 +50,9 @@ public class ProjectProperties implements Serializable
         generatePython = archiver.inout("generatePython", generatePython);
         generateCpp = archiver.inout("generateCpp", generateCpp);
         generateJava = archiver.inout("generateJava", generateJava);
-        //System.out.println("buildJava is " + buildJava);
-        buildJava = archiver.inout("buildJava", buildJava);
-        //System.out.println("buildJava is " + buildJava);
         generateCS = archiver.inout("generateCS", generateCS);
+        generateJSON = archiver.inout("generateJSON", generateJSON);
+        buildJava = archiver.inout("buildJava", buildJava);
         buildCS = archiver.inout("buildCS", buildCS);
         buildDebugProject = archiver.inout("buildDebugProject", buildDebugProject);
         debugProjDomainID = archiver.inout("debugProjDomainID", debugProjDomainID);
@@ -121,6 +121,7 @@ public class ProjectProperties implements Serializable
       out.println("generate C#: " + generateCS);
       out.println("generate Delphi: " + generateDelphi);
       out.println("generate Java: " + generateJava);
+      out.println("generate JSON: " + generateJSON);
       out.println("generate Python: " + generatePython);
       out.println("generate DebugProject: " + buildDebugProject);
       out.println("build C#: " + buildCS);

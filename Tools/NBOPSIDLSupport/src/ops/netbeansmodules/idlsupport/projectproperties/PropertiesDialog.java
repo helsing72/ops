@@ -40,7 +40,10 @@ public class PropertiesDialog extends javax.swing.JDialog
         genJavaCheckBox.setSelected(properties.generateJava);
         genCsCheckBox.setSelected(properties.generateCS);
         genPythonCheckBox.setSelected(properties.generatePython);
-
+        genDelphiCheckBox.setSelected(properties.generateDelphi);
+        genAdaCheckBox.setSelected(properties.generateAda);
+        genJSONCheckBox.setSelected(properties.generateJSON);
+        
         buildJavaCheckBox.setSelected(properties.buildJava);
         buildCsCheckBox.setSelected(properties.buildCS);
 
@@ -63,6 +66,10 @@ public class PropertiesDialog extends javax.swing.JDialog
         properties.generateJava = genJavaCheckBox.isSelected();
         properties.generateCS = genCsCheckBox.isSelected();
         properties.generatePython = genPythonCheckBox.isSelected();
+        properties.generateDelphi = genDelphiCheckBox.isSelected();
+        properties.generateAda = genAdaCheckBox.isSelected();
+        properties.generateJSON = genJSONCheckBox.isSelected();
+
         properties.buildJava = buildJavaCheckBox.isSelected();
         properties.buildCS = buildCsCheckBox.isSelected();
         properties.buildDebugProject = buildDebugProjectCheckBox.isSelected();
@@ -95,6 +102,9 @@ public class PropertiesDialog extends javax.swing.JDialog
         genJavaCheckBox = new javax.swing.JCheckBox();
         genCsCheckBox = new javax.swing.JCheckBox();
         genPythonCheckBox = new javax.swing.JCheckBox();
+        genDelphiCheckBox = new javax.swing.JCheckBox();
+        genAdaCheckBox = new javax.swing.JCheckBox();
+        genJSONCheckBox = new javax.swing.JCheckBox();
         jPanel2 = new javax.swing.JPanel();
         buildJavaCheckBox = new javax.swing.JCheckBox();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -180,6 +190,16 @@ public class PropertiesDialog extends javax.swing.JDialog
 
         genPythonCheckBox.setText(org.openide.util.NbBundle.getMessage(PropertiesDialog.class, "PropertiesDialog.genPythonCheckBox.text")); // NOI18N
 
+        genDelphiCheckBox.setText(org.openide.util.NbBundle.getMessage(PropertiesDialog.class, "PropertiesDialog.genDelphiCheckBox.text")); // NOI18N
+        genDelphiCheckBox.setActionCommand(org.openide.util.NbBundle.getMessage(PropertiesDialog.class, "PropertiesDialog.genDelphiCheckBox.actionCommand")); // NOI18N
+
+        genAdaCheckBox.setText(org.openide.util.NbBundle.getMessage(PropertiesDialog.class, "PropertiesDialog.genAdaCheckBox.text")); // NOI18N
+        genAdaCheckBox.setToolTipText(org.openide.util.NbBundle.getMessage(PropertiesDialog.class, "PropertiesDialog.genAdaCheckBox.toolTipText")); // NOI18N
+        genAdaCheckBox.setActionCommand(org.openide.util.NbBundle.getMessage(PropertiesDialog.class, "PropertiesDialog.genAdaCheckBox.actionCommand")); // NOI18N
+
+        genJSONCheckBox.setText(org.openide.util.NbBundle.getMessage(PropertiesDialog.class, "PropertiesDialog.genJSONCheckBox.text")); // NOI18N
+        genJSONCheckBox.setActionCommand(org.openide.util.NbBundle.getMessage(PropertiesDialog.class, "PropertiesDialog.genJSONCheckBox.actionCommand")); // NOI18N
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -192,8 +212,14 @@ public class PropertiesDialog extends javax.swing.JDialog
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(genCsCheckBox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(genPythonCheckBox, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(193, Short.MAX_VALUE))
+                .addComponent(genPythonCheckBox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(genDelphiCheckBox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(genAdaCheckBox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(genJSONCheckBox)
+                .addContainerGap(77, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -202,7 +228,10 @@ public class PropertiesDialog extends javax.swing.JDialog
                     .addComponent(genCppCheckBox)
                     .addComponent(genJavaCheckBox)
                     .addComponent(genCsCheckBox)
-                    .addComponent(genPythonCheckBox))
+                    .addComponent(genPythonCheckBox)
+                    .addComponent(genDelphiCheckBox)
+                    .addComponent(genAdaCheckBox)
+                    .addComponent(genJSONCheckBox))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -304,10 +333,9 @@ public class PropertiesDialog extends javax.swing.JDialog
                         .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jScrollPane2)
                             .addGroup(jPanel11Layout.createSequentialGroup()
-                                .addComponent(buildCsCheckBox)
-                                .addGap(0, 0, Short.MAX_VALUE))
-                            .addGroup(jPanel11Layout.createSequentialGroup()
-                                .addComponent(jLabel9)
+                                .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(buildCsCheckBox)
+                                    .addComponent(jLabel9))
                                 .addGap(0, 0, Short.MAX_VALUE)))
                         .addContainerGap())))
         );
@@ -665,9 +693,12 @@ public class PropertiesDialog extends javax.swing.JDialog
     private javax.swing.JLabel defaultConfigFileLabel;
     private javax.swing.JTextField defaultConfigFileTextField;
     private javax.swing.JTextField domainIDTextField;
+    private javax.swing.JCheckBox genAdaCheckBox;
     private javax.swing.JCheckBox genConfigFromSourceCommentsCheckBox;
     private javax.swing.JCheckBox genCppCheckBox;
     private javax.swing.JCheckBox genCsCheckBox;
+    private javax.swing.JCheckBox genDelphiCheckBox;
+    private javax.swing.JCheckBox genJSONCheckBox;
     private javax.swing.JCheckBox genJavaCheckBox;
     private javax.swing.JCheckBox genPythonCheckBox;
     private javax.swing.JLabel jLabel10;

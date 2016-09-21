@@ -82,7 +82,7 @@ public class OpsCompiler
         System.out.println("  -t <dir>          set template directory (overrides built-in templates)");
         System.out.println("");
         System.out.println("FEATURE");
-        System.out.println("  for generate: ada, cpp, csharp, delphi, java, python, debug");
+        System.out.println("  for generate: ada, cpp, csharp, delphi, java, json, python, debug");
         System.out.println("  for build:    csharp, java");
         System.out.println("");
     }
@@ -122,6 +122,7 @@ public class OpsCompiler
       if(feature.equals("csharp")) _props.generateCS = value;
       if(feature.equals("delphi")) _props.generateDelphi = value;
       if(feature.equals("java")) _props.generateJava = value;
+      if(feature.equals("json")) _props.generateJSON = value;
       if(feature.equals("python")) _props.generatePython = value;
       if(feature.equals("debug")) _props.buildDebugProject = value;
     }

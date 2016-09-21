@@ -102,8 +102,14 @@
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="genCsCheckBox" min="-2" max="-2" attributes="0"/>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                          <Component id="genPythonCheckBox" min="-2" pref="71" max="-2" attributes="0"/>
-                          <EmptySpace max="32767" attributes="0"/>
+                          <Component id="genPythonCheckBox" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="genDelphiCheckBox" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                          <Component id="genAdaCheckBox" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="genJSONCheckBox" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace pref="126" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -115,6 +121,9 @@
                               <Component id="genJavaCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="genCsCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="genPythonCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="genDelphiCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="genAdaCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="genJSONCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace pref="17" max="32767" attributes="0"/>
                       </Group>
@@ -150,6 +159,27 @@
                     </Property>
                   </Properties>
                 </Component>
+                <Component class="javax.swing.JCheckBox" name="genDelphiCheckBox">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="ops/netbeansmodules/idlsupport/Bundle.properties" key="OPSOptionsPanel.genDelphiCheckBox.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                    </Property>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JCheckBox" name="genAdaCheckBox">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="ops/netbeansmodules/idlsupport/Bundle.properties" key="OPSOptionsPanel.genAdaCheckBox.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                    </Property>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JCheckBox" name="genJSONCheckBox">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="ops/netbeansmodules/idlsupport/Bundle.properties" key="OPSOptionsPanel.genJSONCheckBox.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                    </Property>
+                  </Properties>
+                </Component>
               </SubComponents>
             </Container>
             <Container class="javax.swing.JPanel" name="jPanel7">
@@ -169,7 +199,7 @@
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="jScrollPane1" alignment="0" pref="436" max="32767" attributes="0"/>
+                              <Component id="jScrollPane1" alignment="0" max="32767" attributes="0"/>
                               <Component id="buildJavaCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
                               <Group type="102" alignment="0" attributes="0">
                                   <Component id="addJarDepButton" min="-2" max="-2" attributes="0"/>
@@ -279,7 +309,7 @@
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="jScrollPane2" alignment="0" pref="436" max="32767" attributes="0"/>
+                              <Component id="jScrollPane2" alignment="0" max="32767" attributes="0"/>
                               <Group type="102" alignment="0" attributes="0">
                                   <Component id="addDllDepButton" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
@@ -430,7 +460,7 @@
                                               <Component id="changeDefaultConfigFileButton" min="-2" max="-2" attributes="0"/>
                                           </Group>
                                           <Component id="defaultConfigFileLabel" alignment="0" min="-2" max="-2" attributes="0"/>
-                                          <Component id="genConfigFromSourceCommentsCheckBox" alignment="0" pref="415" max="32767" attributes="1"/>
+                                          <Component id="genConfigFromSourceCommentsCheckBox" alignment="0" pref="446" max="32767" attributes="1"/>
                                       </Group>
                                       <EmptySpace min="-2" pref="31" max="-2" attributes="0"/>
                                   </Group>
@@ -609,7 +639,7 @@
                                   </Group>
                               </Group>
                           </Group>
-                          <EmptySpace pref="124" max="32767" attributes="0"/>
+                          <EmptySpace pref="155" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>

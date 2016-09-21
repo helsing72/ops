@@ -21,11 +21,14 @@ public class OPSProjectProperties implements Serializable
 {
     public boolean generateCpp = true;
     public boolean generateJava = true;
-    public boolean buildJava = true;
     public boolean generateCS = true;
-    public boolean buildCS = true;
     public boolean generatePython = true;
-    public boolean buildDebugProject = true;
+    public boolean generateDelphi = true;
+    public boolean generateAda = false;
+    public boolean generateJSON = false;
+    public boolean buildJava = true;
+    public boolean buildCS = true;
+    public boolean buildDebugProject = false;
     public String defaultOPSTopicConfigFile = "src/ops_config.xml";
     public Vector<JarDependency> javaBuildJarDependencies = new Vector<JarDependency>();
     public Vector<JarDependency> csBuildDllDependencies = new Vector<JarDependency>();
@@ -44,10 +47,13 @@ public class OPSProjectProperties implements Serializable
     {
         generateCpp = archiver.inout("generateCpp", generateCpp);
         generateJava = archiver.inout("generateJava", generateJava);
-        buildJava = archiver.inout("buildJava", buildJava);
         generateCS = archiver.inout("generateCS", generateCS);
-        buildCS = archiver.inout("buildCS", buildCS);
         generatePython = archiver.inout("generatePython", generatePython);
+        generateDelphi = archiver.inout("generateDelphi", generateDelphi);
+        generateAda = archiver.inout("generateAda", generateAda);
+        generateJSON = archiver.inout("generateJSON", generateJSON);
+        buildJava = archiver.inout("buildJava", buildJava);
+        buildCS = archiver.inout("buildCS", buildCS);
         buildDebugProject = archiver.inout("buildDebugProject", buildDebugProject);
         debugProjDomainID = archiver.inout("debugProjDomainID", debugProjDomainID);
         defaultOPSTopicConfigFile = archiver.inout("defaultOPSTopicConfigFile", defaultOPSTopicConfigFile);

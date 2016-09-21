@@ -39,6 +39,9 @@ final class OPSOptionsPanel extends javax.swing.JPanel {
         genJavaCheckBox = new javax.swing.JCheckBox();
         genCsCheckBox = new javax.swing.JCheckBox();
         genPythonCheckBox = new javax.swing.JCheckBox();
+        genDelphiCheckBox = new javax.swing.JCheckBox();
+        genAdaCheckBox = new javax.swing.JCheckBox();
+        genJSONCheckBox = new javax.swing.JCheckBox();
         jPanel7 = new javax.swing.JPanel();
         buildJavaCheckBox = new javax.swing.JCheckBox();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -85,6 +88,12 @@ final class OPSOptionsPanel extends javax.swing.JPanel {
 
         org.openide.awt.Mnemonics.setLocalizedText(genPythonCheckBox, org.openide.util.NbBundle.getMessage(OPSOptionsPanel.class, "OPSOptionsPanel.genPythonCheckBox.text")); // NOI18N
 
+        org.openide.awt.Mnemonics.setLocalizedText(genDelphiCheckBox, org.openide.util.NbBundle.getMessage(OPSOptionsPanel.class, "OPSOptionsPanel.genDelphiCheckBox.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(genAdaCheckBox, org.openide.util.NbBundle.getMessage(OPSOptionsPanel.class, "OPSOptionsPanel.genAdaCheckBox.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(genJSONCheckBox, org.openide.util.NbBundle.getMessage(OPSOptionsPanel.class, "OPSOptionsPanel.genJSONCheckBox.text")); // NOI18N
+
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
@@ -97,8 +106,14 @@ final class OPSOptionsPanel extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(genCsCheckBox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(genPythonCheckBox, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(genPythonCheckBox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(genDelphiCheckBox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(genAdaCheckBox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(genJSONCheckBox)
+                .addContainerGap(126, Short.MAX_VALUE))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -107,7 +122,10 @@ final class OPSOptionsPanel extends javax.swing.JPanel {
                     .addComponent(genCppCheckBox)
                     .addComponent(genJavaCheckBox)
                     .addComponent(genCsCheckBox)
-                    .addComponent(genPythonCheckBox))
+                    .addComponent(genPythonCheckBox)
+                    .addComponent(genDelphiCheckBox)
+                    .addComponent(genAdaCheckBox)
+                    .addComponent(genJSONCheckBox))
                 .addContainerGap(17, Short.MAX_VALUE))
         );
 
@@ -140,7 +158,7 @@ final class OPSOptionsPanel extends javax.swing.JPanel {
             .addGroup(jPanel7Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 436, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1)
                     .addComponent(buildJavaCheckBox)
                     .addGroup(jPanel7Layout.createSequentialGroup()
                         .addComponent(addJarDepButton)
@@ -195,7 +213,7 @@ final class OPSOptionsPanel extends javax.swing.JPanel {
             .addGroup(jPanel8Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 436, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2)
                     .addGroup(jPanel8Layout.createSequentialGroup()
                         .addComponent(addDllDepButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -282,7 +300,7 @@ final class OPSOptionsPanel extends javax.swing.JPanel {
                                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                     .addComponent(changeDefaultConfigFileButton))
                                 .addComponent(defaultConfigFileLabel)
-                                .addComponent(genConfigFromSourceCommentsCheckBox, javax.swing.GroupLayout.DEFAULT_SIZE, 415, Short.MAX_VALUE))
+                                .addComponent(genConfigFromSourceCommentsCheckBox, javax.swing.GroupLayout.DEFAULT_SIZE, 446, Short.MAX_VALUE))
                             .addGap(31, 31, 31))
                         .addGroup(jPanel5Layout.createSequentialGroup()
                             .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
@@ -374,7 +392,7 @@ final class OPSOptionsPanel extends javax.swing.JPanel {
                         .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel5)
                             .addComponent(vsExampleDataTypeTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(124, Short.MAX_VALUE))
+                .addContainerGap(155, Short.MAX_VALUE))
         );
         jPanel6Layout.setVerticalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -510,6 +528,9 @@ final class OPSOptionsPanel extends javax.swing.JPanel {
         genJavaCheckBox.setSelected(OPSIDLProject.defaultProperties.generateJava);
         genCsCheckBox.setSelected(OPSIDLProject.defaultProperties.generateCS);
         genPythonCheckBox.setSelected(OPSIDLProject.defaultProperties.generatePython);
+        genDelphiCheckBox.setSelected(OPSIDLProject.defaultProperties.generateDelphi);
+        genAdaCheckBox.setSelected(OPSIDLProject.defaultProperties.generateAda);
+        genJSONCheckBox.setSelected(OPSIDLProject.defaultProperties.generateJSON);
 
         buildJavaCheckBox.setSelected(OPSIDLProject.defaultProperties.buildJava);
         jarDepList.setListData(OPSIDLProject.defaultProperties.javaBuildJarDependencies);
@@ -540,6 +561,9 @@ final class OPSOptionsPanel extends javax.swing.JPanel {
         OPSIDLProject.defaultProperties.generateJava = genJavaCheckBox.isSelected();
         OPSIDLProject.defaultProperties.generateCS = genCsCheckBox.isSelected();
         OPSIDLProject.defaultProperties.generatePython = genPythonCheckBox.isSelected();
+        OPSIDLProject.defaultProperties.generateDelphi = genDelphiCheckBox.isSelected();
+        OPSIDLProject.defaultProperties.generateAda = genAdaCheckBox.isSelected();
+        OPSIDLProject.defaultProperties.generateJSON = genJSONCheckBox.isSelected();
 
         OPSIDLProject.defaultProperties.buildJava = buildJavaCheckBox.isSelected();
         OPSIDLProject.defaultProperties.buildCS = buildCsCheckBox.isSelected();
@@ -573,9 +597,12 @@ final class OPSOptionsPanel extends javax.swing.JPanel {
     private javax.swing.JTextField defaultConfigFileTextField;
     private javax.swing.JList dllDepList;
     private javax.swing.JTextField domainIDTextField;
+    private javax.swing.JCheckBox genAdaCheckBox;
     private javax.swing.JCheckBox genConfigFromSourceCommentsCheckBox;
     private javax.swing.JCheckBox genCppCheckBox;
     private javax.swing.JCheckBox genCsCheckBox;
+    private javax.swing.JCheckBox genDelphiCheckBox;
+    private javax.swing.JCheckBox genJSONCheckBox;
     private javax.swing.JCheckBox genJavaCheckBox;
     private javax.swing.JCheckBox genPythonCheckBox;
     private javax.swing.JTabbedPane godeGeneratorsTabs;
