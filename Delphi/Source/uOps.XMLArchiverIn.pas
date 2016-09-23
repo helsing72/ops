@@ -81,9 +81,18 @@ type
 
 implementation
 
+{$IFDEF CONSOLE}
+uses
+  System.Win.ComObj;
+{$ENDIF}
 
 constructor TXMLArchiverIn.Create(xmlString : string; topNode : string; factory : TSerializableInheritingTypeFactory);
 begin
+{$IFDEF CONSOLE}
+  //TCoInitializeExProc = function (pvReserved: Pointer; coInit: Longint): HResult; stdcall;
+  //CoInitializeEx: TCoInitializeExProc = nil;
+  CoInitializeEx(nil, 0);    // Needed for the TXMLDocument
+{$ENDIF}
   FFactory := factory;
   FFmt := TFormatSettings.Create;
   FFmt.DecimalSeparator := '.';
