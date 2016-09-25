@@ -5,6 +5,7 @@ src/opsc/CSharpCompiler.java
 src/opsc/CppCompiler.java
 src/opsc/DelphiCompiler.java
 src/opsc/JavaCompiler.java
+src/opsc/JSONCompiler.java
 src/opsc/PythonCompiler.java
 src/opsc/IDLParser.java
 src/opsc/ProjectProperties.java

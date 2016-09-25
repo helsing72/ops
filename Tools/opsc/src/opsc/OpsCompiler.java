@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.FileFilter;
+import java.io.FileWriter;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -53,6 +54,7 @@ public class OpsCompiler
     protected opsc.JavaCompiler _javaCompiler;
     protected opsc.CSharpCompiler _CSharpCompiler;
     protected opsc.DelphiCompiler _DelphiCompiler;
+    protected opsc.JSONCompiler _JSONCompiler;
 
     public OpsCompiler() {
         // create a parser to generate IDLClasses for us
@@ -82,8 +84,8 @@ public class OpsCompiler
         System.out.println("  -t <dir>          set template directory (overrides built-in templates)");
         System.out.println("");
         System.out.println("FEATURE");
-        System.out.println("  for generate: ada, cpp, csharp, delphi, java, json, python, debug");
-        System.out.println("  for build:    csharp, java");
+        System.out.println("  for generate: ALL, ada, cpp, csharp, delphi, java, json, python, debug");
+        System.out.println("  for build:    ALL, csharp, java");
         System.out.println("");
     }
 
@@ -117,20 +119,20 @@ public class OpsCompiler
 
     protected void updateGenerateProp(String feature, boolean value)
     {
-      if(feature.equals("ada")) _props.generateAda = value;
-      if(feature.equals("cpp")) _props.generateCpp = value;
-      if(feature.equals("csharp")) _props.generateCS = value;
-      if(feature.equals("delphi")) _props.generateDelphi = value;
-      if(feature.equals("java")) _props.generateJava = value;
-      if(feature.equals("json")) _props.generateJSON = value;
-      if(feature.equals("python")) _props.generatePython = value;
-      if(feature.equals("debug")) _props.buildDebugProject = value;
+      if(feature.equals("ALL") || feature.equals("ada")) _props.generateAda = value;
+      if(feature.equals("ALL") || feature.equals("cpp")) _props.generateCpp = value;
+      if(feature.equals("ALL") || feature.equals("csharp")) _props.generateCS = value;
+      if(feature.equals("ALL") || feature.equals("delphi")) _props.generateDelphi = value;
+      if(feature.equals("ALL") || feature.equals("java")) _props.generateJava = value;
+      if(feature.equals("ALL") || feature.equals("json")) _props.generateJSON = value;
+      if(feature.equals("ALL") || feature.equals("python")) _props.generatePython = value;
+      if(feature.equals("ALL") || feature.equals("debug")) _props.buildDebugProject = value;
     }
 
     protected void updateBuildProp(String feature, boolean value)
     {
-      if(feature.equals("csharp")) _props.buildCS = value;
-      if(feature.equals("java")) _props.buildJava = value;
+      if(feature.equals("ALL") || feature.equals("csharp")) _props.buildCS = value;
+      if(feature.equals("ALL") || feature.equals("java")) _props.buildJava = value;
     }
 
     protected boolean parseCommandLineArgs(String args[])
@@ -426,6 +428,22 @@ public class OpsCompiler
         return true;
     }
 
+    protected boolean compileJSON() {
+        // create the compiler and set parameters
+        _JSONCompiler = new opsc.JSONCompiler(_strProjectName);
+        _JSONCompiler.setVerbose(_verbose);
+        Property propTemplatePath = _props.getProperty("templatePath");
+        if(propTemplatePath != null)
+            _JSONCompiler.setTemplateDir(propTemplatePath.value);
+        Property propOutPath = _props.getProperty("outputPath");
+        if(propOutPath != null)
+            _JSONCompiler.setOutputDir(propOutPath.value + File.separator + "JSON");
+
+        _JSONCompiler.compileDataClasses(_parser._idlClasses, "baba");
+
+        return true;
+    }
+
     protected boolean buildDebugProject() {
 
         opsc.DebugProjectCompiler compiler = new opsc.DebugProjectCompiler(_strProjectName);
@@ -455,6 +473,8 @@ public class OpsCompiler
 
         return true;
     }
+
+    // ------------------------------------------------------------------------
 
     protected void dump()
     {
@@ -546,7 +566,7 @@ public class OpsCompiler
 
         System.out.flush();
 
-        // generate c++ if requested
+        // generate C++ if requested
         if(opsc._props.generateCpp) {
             opsc.compileCpp();
         }
@@ -564,7 +584,7 @@ public class OpsCompiler
 
         System.out.flush();
 
-        // generate cs if so requested
+        // generate C# if so requested
         if(opsc._props.generateCS) {
             // if compile is successful and user opted to build C#
             if(opsc.compileCs() && opsc._props.buildCS) {
@@ -578,6 +598,13 @@ public class OpsCompiler
         // generate Delphi if so requested
         if(opsc._props.generateDelphi) {
             opsc.compileDelphi();
+        }
+
+        System.out.flush();
+
+        // generate JSON if so requested
+        if(opsc._props.generateJSON) {
+            opsc.compileJSON();
         }
 
         System.out.flush();
