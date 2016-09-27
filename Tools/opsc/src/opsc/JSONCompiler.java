@@ -38,6 +38,8 @@ public class JSONCompiler extends CompilerSupport
         this._idlClasses = idlClasses;
 
         res += "[" + endl();
+        res += Example_For_describing_alternative_interpretation_for_a_variable(1);
+        res += tab(1) + "," + endl();
         res += generate_coretypes_JSON(1);
         res += tab(1) + "," + endl();
         res += generate_OPSObject_JSON(1);
@@ -57,36 +59,63 @@ public class JSONCompiler extends CompilerSupport
     public void compileTopicConfig(Vector<TopicInfo> topics, String name, String packageString, String projectDirectory)
     {}
 
+    protected String Example_For_describing_alternative_interpretation_for_a_variable(int t)
+    {
+      String res = "";
+      res += tab(t) + "{" + endl();
+      res += tab(t+1) + "\"an_idea\": {" + endl();
+      res += tab(t+2) + "\"desc\": \"An idea of how to describe an alternative interpretation of a specific variable\"," + endl();
+      res += tab(t+2) + "\"topic\": \"ExampleDomain::ExampleTopic\"," + endl();
+      res += tab(t+2) + "\"variable\": \"sampledata\"," + endl();
+      res += tab(t+2) + "\"interpret_as\": [" + endl();
+      res += tab(t+3) + "{ \"name\": \"Kalle\", \"type\": \"double\" }," + endl();
+      res += tab(t+3) + "{ \"name\": \"Olle\", \"type\": \"int\" }" + endl();
+      res += tab(t+2) + "]" + endl();
+      res += tab(t+1) + "}" + endl();
+      res += tab(t) + "}" + endl();
+      return res;
+    }
+
     protected String generate_coretypes_JSON(int t)
     {
         String res = "";
         res += tab(t) + "{" + endl();
-        res += tab(t+1) + "\"coretypes\": [" + endl();
-        res += tab(t+2) + "{ \"type\": \"boolean\", \"size\": 1 }," + endl();
-        res += tab(t+2) + "{ \"type\": \"byte\", \"size\": 1 }," + endl();
-        res += tab(t+2) + "{ \"type\": \"short\", \"size\": 2 }," + endl();
-        res += tab(t+2) + "{ \"type\": \"int\", \"size\": 4 }," + endl();
-        res += tab(t+2) + "{ \"type\": \"long\", \"size\": 8 }," + endl();
-        res += tab(t+2) + "{ \"type\": \"float\", \"size\": 4 }," + endl();
-        res += tab(t+2) + "{ \"type\": \"double\", \"size\": 8 }," + endl();
+        res += tab(t+1) + "\"ops_internals\": {" + endl();
+        res += tab(t+2) + "\"coretypes\": [" + endl();
+        res += tab(t+3) + "{ \"type\": \"boolean\", \"size\": 1 }," + endl();
+        res += tab(t+3) + "{ \"type\": \"byte\", \"size\": 1 }," + endl();
+        res += tab(t+3) + "{ \"type\": \"short\", \"size\": 2 }," + endl();
+        res += tab(t+3) + "{ \"type\": \"int\", \"size\": 4 }," + endl();
+        res += tab(t+3) + "{ \"type\": \"long\", \"size\": 8 }," + endl();
+        res += tab(t+3) + "{ \"type\": \"float\", \"size\": 4 }," + endl();
+        res += tab(t+3) + "{ \"type\": \"double\", \"size\": 8 }," + endl();
 
-        res += tab(t+2) + "{ \"type\": \"string\"," + endl();
-        res += tab(t+3) + "\"comp\": [" + endl();
-        res += tab(t+4) + "{ \"num_elements\": \"int\" }," + endl();
-        res += tab(t+4) + "{ \"elements\": \"byte\" }" + endl();
+        res += tab(t+3) + "{ \"type\": \"string\"," + endl();
+        res += tab(t+4) + "\"composed_of\": [" + endl();
+        res += tab(t+5) + "{ \"num_elements\": \"int\" }," + endl();
+        res += tab(t+5) + "{ \"elements\": \"byte\" }" + endl();
+        res += tab(t+4) + "]" + endl();
+        res += tab(t+3) + "}," + endl();
+
+        res += tab(t+3) + "{ \"type\": \"vector<T>\"," + endl();
+        res += tab(t+4) + "\"composed_of\": [" + endl();
+        res += tab(t+5) + "{ \"num_elements\": \"int\" }," + endl();
+        res += tab(t+5) + "{ \"elements\": \"elementtype\" }" + endl();
+        res += tab(t+4) + "]" + endl();
+        res += tab(t+3) + "}" + endl();
+
+        res += tab(t+2) + "]," + endl();
+
+        res += tab(t+2) + "\"non-coretypes\": {" + endl();
+        res += tab(t+3) + "\"composed_of\": [" + endl();
+        res += tab(t+4) + "{ \"type_string\": \"string\" }," + endl();
+        res += tab(t+4) + "{ \"fields\": \"according to type\" }" + endl();
         res += tab(t+3) + "]" + endl();
         res += tab(t+2) + "}," + endl();
 
-        res += tab(t+2) + "{ \"type\": \"vector<T>\"," + endl();
-        res += tab(t+3) + "\"comp\": [" + endl();
-        res += tab(t+4) + "{ \"num_elements\": \"int\" }," + endl();
-        res += tab(t+4) + "{ \"elements\": \"T\" }" + endl();
-        res += tab(t+3) + "]" + endl();
-        res += tab(t+2) + "}" + endl();
-
-        res += tab(t+1) + "]," + endl();
-        res += tab(t+1) + "\"alignment\": 1," + endl();
-        res += tab(t+1) + "\"endianess\": \"little-endian\"" + endl();
+        res += tab(t+2) + "\"alignment\": 1," + endl();
+        res += tab(t+2) + "\"endianess\": \"little-endian\"" + endl();
+        res += tab(t+1) + "}" + endl();
         res += tab(t) + "}" + endl();
         return res;
     }
@@ -160,7 +189,7 @@ public class JSONCompiler extends CompilerSupport
             res += "\"" + makeType(field) + "\"";
 
             String comment = field.getComment();
-            comment = comment.replace("/*", "").replace("*/", "").replace("\n", " ").trim();
+            comment = comment.replace("/*", "").replace("*/", "").replace("\n", " ").replace("\"", "'").trim();
             if (comment.length() > 0) {
               res += ", \"desc\": \"" + comment + "\"";
             }
