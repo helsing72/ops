@@ -1,10 +1,10 @@
 @pushd %~dp0
-call ..\Tools\opsc\opsc.bat -P OPSIdls\ChatExample
-call ..\Tools\opsc\opsc.bat -P OPSIdls\HelloRequestReply
-call ..\Tools\opsc\opsc.bat -P OPSIdls\HelloWorld
-call ..\Tools\opsc\opsc.bat -P OPSIdls\MultiLibs\BaseIDLs
-call ..\Tools\opsc\opsc.bat -P OPSIdls\MultiLibs\DerivedIDLs
-call ..\Tools\opsc\opsc.bat -P OPSIdls\PizzaProject
-call ..\Tools\opsc\opsc.bat -P OPSIdls\TestAll
-call ..\Tools\opsc\opsc.bat -P OPSIdls\WeatherStationExample
+call ..\Tools\opsc\opsc.bat -P OPSIdls\ChatExample -g ALL
+call ..\Tools\opsc\opsc.bat -P OPSIdls\HelloRequestReply -g ALL
+call ..\Tools\opsc\opsc.bat -P OPSIdls\HelloWorld -g ALL
+call ..\Tools\opsc\opsc.bat -P OPSIdls\MultiLibs\BaseIDLs -g ALL
+call ..\Tools\opsc\opsc.bat -P OPSIdls\MultiLibs\DerivedIDLs -g ALL
+call ..\Tools\opsc\opsc.bat -P OPSIdls\PizzaProject -g ALL
+call ..\Tools\opsc\opsc.bat -P OPSIdls\TestAll -g ALL
+call ..\Tools\opsc\opsc.bat -P OPSIdls\WeatherStationExample -g ALL
 @popd
