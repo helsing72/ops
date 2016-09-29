@@ -46,6 +46,9 @@ type
 
       procedure Serialize(archiver : TArchiverInOut); override;
 
+      // Validates that contained object references are of the correct type
+      function Validate : Boolean; virtual;
+
       ///Returns a newely allocated deep copy/clone of this object.
       function Clone : TOPSObject; virtual;
 
@@ -80,6 +83,11 @@ end;
 procedure TOPSObject.SetTypesString(types: AnsiString);
 begin
   FTypesString := types;
+end;
+
+function TOPSObject.Validate : Boolean;
+begin
+  Result := True;
 end;
 
 function TOPSObject.Clone : TOPSObject;

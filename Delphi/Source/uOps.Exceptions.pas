@@ -41,6 +41,10 @@ type
     constructor Create(const Msg: string = '');
   end;
 
+  EPublisherException = class(Exception)
+    constructor Create(const Msg: string = '');
+  end;
+
 implementation
 
 { CommException }
@@ -69,6 +73,13 @@ end;
 constructor EReceiveTimedOutException.Create(const Msg: string);
 begin
   inherited Create('ReceiveTimedOutException: ' + Msg);
+end;
+
+{ EPublisherException }
+
+constructor EPublisherException.Create(const Msg: string);
+begin
+  inherited Create('PublisherException: ' + Msg);
 end;
 
 end.

@@ -65,6 +65,7 @@ type
 implementation
 
 uses SysUtils,
+     uOps.Exceptions,
      uOps.ArchiverInOut;
 
 constructor TPublisher.Create(t : TTopic);
@@ -124,6 +125,15 @@ var
   i, segSize : Integer;
   sendOK : Boolean;
 begin
+  // Validate data that is going to be written.
+  // We need this since IDL fields with or without 'virtual', in Delphi
+  // are represented in the same way, ie. we could change the object in a
+  // field that is supposed to be 'static' in the containing object.
+  // So we need to check that the non-virtual fields contain the correct objects.
+  if not data.Validate then begin
+    raise EPublisherException.Create('Data object contains invalid object references');
+  end;
+
   if FKey <> '' then begin
     data.Key := FKey;
   end;

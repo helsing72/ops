@@ -33,6 +33,8 @@ public class DelphiCompiler extends opsc.Compiler
     final static String SERIALIZE_REGEX = "__serialize";
     final static String FILL_CLONE_HEAD_REGEX = "__fillCloneHead";
     final static String FILL_CLONE_BODY_REGEX = "__fillCloneBody";
+    final static String VALIDATE_HEAD_REGEX = "__validateHead";
+    final static String VALIDATE_BODY_REGEX = "__validateBody";
     final static String SIZE_REGEX = "__size";
     final static String CS_DIR = "Delphi";
     private String projectDirectory;
@@ -111,7 +113,13 @@ public class DelphiCompiler extends opsc.Compiler
         String baseClassName = "TOPSObject";
         if (idlClass.getBaseClassName() != null)
         {
-            baseClassName = getLastPart(idlClass.getBaseClassName());
+          baseClassName = idlClass.getBaseClassName();
+
+          // Change name for some internal Delphi units
+          if (baseClassName.equals("ops.Reply")) baseClassName = "TReply";
+          if (baseClassName.equals("ops.Request")) baseClassName = "TRequest";
+
+          baseClassName = getLastPart(baseClassName);
         }
         String packageName = idlClass.getPackageName();
 
@@ -136,6 +144,8 @@ public class DelphiCompiler extends opsc.Compiler
         templateText = templateText.replace(SERIALIZE_REGEX, getSerialize(idlClass));
         templateText = templateText.replace(FILL_CLONE_HEAD_REGEX, getFillCloneHead(idlClass));
         templateText = templateText.replace(FILL_CLONE_BODY_REGEX, getFillCloneBody(idlClass));
+        templateText = templateText.replace(VALIDATE_HEAD_REGEX, getValidationHead(idlClass));
+        templateText = templateText.replace(VALIDATE_BODY_REGEX, getValidationBody(idlClass));
 
         //Save the modified text to the output file.
         saveOutputText(templateText);
@@ -322,6 +332,11 @@ public class DelphiCompiler extends opsc.Compiler
         if (idlClass.getBaseClassName() != null)
         {
             String unit = getUnitName(idlClass.getBaseClassName());
+
+            // Change name for some internal Delphi units
+            if (unit.equals("ops.Reply")) unit = "uOps.RequestReply.Reply";
+            if (unit.equals("ops.Request")) unit = "uOps.RequestReply.Request";
+
             typesToInclude.put(unit, unit);
         }
         for (IDLField field : idlClass.getFields())
@@ -377,8 +392,6 @@ public class DelphiCompiler extends opsc.Compiler
                 ret += tab(2) + "///" + comment.replace("/*", "").replace("*/", "") + endl();
             }
             String fieldType = getLastPart(field.getType());
-///TODO 'virtual': All fields that are objects are also virtual in DElphi!!
-///TODO   How check that it's the correct object when field in IDL isn't 'virtual'??
             if (field.isArray())
             {
                 ret += tab(2) + field.getName() + " : " + languageType(fieldType) + ";" + endl();
@@ -397,6 +410,47 @@ public class DelphiCompiler extends opsc.Compiler
             }
         }
         return ret;
+    }
+
+    protected String getValidationHead(IDLClass idlClass)
+    {
+      String ret = "";
+      for (IDLField field : idlClass.getFields())
+      {
+          if (field.isIdlType() && !field.isAbstract()) {
+              if (field.isArray()) {
+                ret += tab(0) + "var" + endl();
+                ret += tab(1) +   "__i__ : Integer;" + endl();
+                break;
+              }
+          }
+      }
+      return ret;
+    }
+
+    protected String getValidationBody(IDLClass idlClass)
+    {
+      String ret = "";
+      for (IDLField field : idlClass.getFields())
+      {
+          String fieldType = getLastPart(field.getType());
+          if (field.isIdlType() && !field.isAbstract())
+          {
+              // 'virtual': All fields that are objects are also virtual in Delphi!!
+              // Need to validate that an object that isn't declared 'virtual' really
+              // is of the correct type
+              if (field.isArray()) {
+                String s = field.getType();
+                s = getLastPart(s.substring(0, s.indexOf('[')));
+                ret += tab(1) + "for __i__ := 0 to High(" + field.getName() + ") do begin" + endl();
+                ret += tab(2) + "if not " + field.getName() + "[__i__].ClassNameIs('" + s + "') then Result := False;" + endl();
+                ret += tab(1) + "end;" + endl();
+              } else {
+                ret += tab(1) + "if not " + field.getName() + ".ClassNameIs('" + getLastPart(field.getType()) + "') then Result := False;" + endl();
+              }
+          }
+      }
+      return ret;
     }
 
     protected String languageType(String s)

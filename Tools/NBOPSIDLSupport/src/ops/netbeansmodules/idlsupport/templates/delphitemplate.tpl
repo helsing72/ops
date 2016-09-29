@@ -28,6 +28,9 @@ __declarations
     ///instance of this class to a format dictated by the implementation of the ArchiverInout.
     procedure Serialize(archiver : TArchiverInOut); override;
 
+    // Validates that contained object references are of the correct type
+    function Validate : Boolean; override;
+
 		//Returns a newely allocated deep copy/clone of this object.
 		function Clone : TOPSObject; override;
 
@@ -88,6 +91,14 @@ procedure __className.Serialize(archiver : TArchiverInOut);
 begin
 	inherited Serialize(archiver);
 __serialize
+end;
+
+// Validates that contained object references are of the correct type
+function __className.Validate : Boolean;
+__validateHead
+begin
+  Result := inherited Validate;
+__validateBody
 end;
 
 ///Returns a newely allocated deep copy/clone of this object.
