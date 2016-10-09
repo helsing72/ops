@@ -23,6 +23,7 @@
 #include "BasicError.h"
 #include "Domain.h"
 #include "DefaultOPSConfigImpl.h"
+#include "ConfigException.h"
 
 #include "OPSConfigRepository.h"
 
@@ -85,8 +86,10 @@ bool OPSConfigRepository::Add( std::string filename, std::string domain )
             if (config == NULL) return retVal;
             m_configFiles[filename] = config;
         }
-    } catch (...)
+    } catch (ops::ConfigException ex)
     {
+        BasicError err("OPSConfigRepository", "Add", std::string("Exception: ") + ex.what());
+        Participant::reportStaticError(&err);
         return retVal;
     }
 
