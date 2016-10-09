@@ -147,7 +147,7 @@ namespace ops
 		}
 		if(!config)
 		{
-			exceptions::CommException ex("No config on rundirectory");
+			ops::ConfigException ex("No config on rundirectory?");
 			throw ex;
 		}
 
