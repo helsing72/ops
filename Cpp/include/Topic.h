@@ -54,6 +54,9 @@ namespace ops
 		void setDomainAddress(std::string domainAddr);
 		std::string getDomainAddress();
 
+		void setLocalInterface(std::string localIf);
+		std::string getLocalInterface();
+
 		void setSampleMaxSize(int size);
 		int getSampleMaxSize();
 

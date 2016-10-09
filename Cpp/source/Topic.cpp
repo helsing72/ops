@@ -78,6 +78,14 @@ namespace ops
 	{
 		return domainAddress;
 	}
+	void Topic::setLocalInterface(std::string localIf)
+	{
+		localInterface = localIf;
+	}
+	std::string Topic::getLocalInterface()
+	{
+		return localInterface;
+	}
 	int Topic::getSampleMaxSize()
 	{
 		return sampleMaxSize;
