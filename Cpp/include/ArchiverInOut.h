@@ -37,9 +37,7 @@ namespace ops
     {
     public:
 
-        virtual ~ArchiverInOut()
-        {
-        }
+        virtual ~ArchiverInOut();
 
         virtual void inout(const std::string& name, bool& value) = 0;
         virtual void inout(const std::string& name, char& value) = 0;
@@ -51,9 +49,7 @@ namespace ops
         virtual void inout(const std::string& name, std::string& value) = 0;
         virtual void inout(const std::string& name, Serializable& value) = 0;
 
-///LA
 		virtual void inout(const std::string& name, char* buffer, int bufferSize) = 0;
-///LA
 
 		virtual Serializable* inout(const std::string& name, Serializable* value) = 0;
 
@@ -80,8 +76,6 @@ namespace ops
                 {
                     inout(std::string("element"), vec[i]);
                 }
-
-                //vec.resize(size, new SerializableType());
             }
             else
             {
@@ -91,7 +85,6 @@ namespace ops
                 }
             }
             endList(name);
-
         }
 
         template <class SerializableType> void inout(const std::string& name, std::vector<SerializableType*>& vec)
@@ -105,8 +98,6 @@ namespace ops
                 {
                     vec.push_back((SerializableType*) inout(std::string(name), (Serializable*) NULL, i));
                 }
-
-                //vec.resize(size, new SerializableType());
             }
             else
             {
@@ -118,19 +109,9 @@ namespace ops
             endList(name);
         }
 
-        /*template <class SerializableTypeVector> void in(std::string name&, SerializableTypeVector& vec)
-        {
-                int size = beginList(name, size);
-                vec.clear();
-                for(unsigned int i = 0; i < size; i++)
-                {
-                        vec.push_back(*inout((Serializable*)NULL));
-                }
-        }*/
     protected:
         virtual int beginList(const std::string& name, int i) = 0;
         virtual void endList(const std::string& name) = 0;
-
     };
 }
 
