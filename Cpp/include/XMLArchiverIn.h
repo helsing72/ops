@@ -60,8 +60,7 @@ namespace ops
 
     ///
 
-    class XMLArchiverIn
-    : ArchiverInOut
+    class XMLArchiverIn : public ArchiverInOut
     {
     private:
         std::istream& is;
@@ -71,7 +70,7 @@ namespace ops
         std::stringstream ss;
     public:
 
-        XMLArchiverIn(std::istream& is_, std::string topNode_, SerializableInheritingTypeFactory* factory) : is(is_)
+		XMLArchiverIn(std::istream& is_, std::string topNode_, SerializableInheritingTypeFactory* factory) : is(is_)
         {
             this->factory = factory;
 
@@ -83,13 +82,10 @@ namespace ops
                 is >> tmp;
             }
             currentNode = opsXML::XMLNode::parseString(xmlString.c_str(), topNode_.c_str());
-//            int i = currentNode.nChildNode();
-
         }
 
         ~XMLArchiverIn()
         {
-            //currentNode.
         }
 
         virtual void inout(const std::string& name, bool& value)
@@ -106,8 +102,6 @@ namespace ops
                 if (s.compare("True") == 0) value = true;
                 if (s.compare("False") == 0) value = false;
             }
-
-
         }
 
         virtual void inout(const std::string& name, char& value)
@@ -121,7 +115,6 @@ namespace ops
                 ss >> inVal;
                 value = inVal;
             }
-
         }
 
         virtual void inout(const std::string& name, int& value)
@@ -135,7 +128,6 @@ namespace ops
                 ss >> inVal;
                 value = inVal;
             }
-
         }
 
         virtual void inout(const std::string& name, __int16& value)
@@ -149,7 +141,6 @@ namespace ops
                 ss >> inVal;
                 value = inVal;
             }
-
         }
 
         virtual void inout(const std::string& name, __int64& value)
@@ -163,7 +154,6 @@ namespace ops
                 ss >> inVal;
                 value = inVal;
             }
-
         }
 
         virtual void inout(const std::string& name, float& value)
@@ -177,7 +167,6 @@ namespace ops
                 ss >> inVal;
                 value = inVal;
             }
-
         }
 
         virtual void inout(const std::string& name, double& value)
@@ -191,7 +180,6 @@ namespace ops
                 ss >> inVal;
                 value = inVal;
             }
-
         }
 
         virtual void inout(const std::string& name, std::string& value)
@@ -210,12 +198,10 @@ namespace ops
             }
         }
 
-///LA
 		virtual void inout(const std::string& name, char* buffer, int bufferSize)
 		{
 			///TODO
 		}
-///LA
 
         virtual Serializable* inout(const std::string& name, Serializable* value, int element)
         {
@@ -229,10 +215,9 @@ namespace ops
 
             }
 
-            currentNode = tempNode; //;currentNode.getParentNode();
+            currentNode = tempNode; 
 
             return newSer;
-
         }
 
         virtual void inout(const std::string& name, Serializable& value)
@@ -254,12 +239,11 @@ namespace ops
 
                 }
 
-                currentNode = tempNode; //;currentNode.getParentNode();
+                currentNode = tempNode;
 
                 return newSer;
             }
             return value;
-
         }
 
         virtual void inout(const std::string& name, std::vector<bool>& value)
@@ -274,7 +258,7 @@ namespace ops
                 value.resize(size, false);
                 for (int i = 0; i < size; i++)
                 {
-                    string s(currentNode.getChildNode("element").getText());
+                    string s(currentNode.getChildNode("element", i).getText());
                     if (s.compare("true") == 0) value[i] = true;
                     if (s.compare("false") == 0) value[i] = false;
                     if (s.compare("TRUE") == 0) value[i] = true;
@@ -287,7 +271,6 @@ namespace ops
 
                 currentNode = tempNode;
             }
-
         }
 
         virtual void inout(const std::string& name, std::vector<char>& value)
@@ -302,7 +285,7 @@ namespace ops
                 value.resize(size, 0);
                 for (int i = 0; i < size; i++)
                 {
-                    string s(currentNode.getChildNode("element").getText());
+                    string s(currentNode.getChildNode("element", i).getText());
                     stringstream ss(s);
 
                     int inVal;
@@ -312,8 +295,6 @@ namespace ops
 
                 currentNode = tempNode;
             }
-
-
         }
 
         virtual void inout(const std::string& name, std::vector<int>& value)
@@ -328,7 +309,7 @@ namespace ops
                 value.resize(size, 0);
                 for (int i = 0; i < size; i++)
                 {
-                    string s(currentNode.getChildNode("element").getText());
+                    string s(currentNode.getChildNode("element", i).getText());
                     stringstream ss(s);
 
                     int inVal;
@@ -338,8 +319,6 @@ namespace ops
 
                 currentNode = tempNode;
             }
-
-
         }
 
         virtual void inout(const std::string& name, std::vector<__int16>& value)
@@ -354,7 +333,7 @@ namespace ops
                 value.resize(size, 0);
                 for (int i = 0; i < size; i++)
                 {
-                    string s(currentNode.getChildNode("element").getText());
+                    string s(currentNode.getChildNode("element", i).getText());
                     stringstream ss(s);
 
                     int inVal;
@@ -364,8 +343,6 @@ namespace ops
 
                 currentNode = tempNode;
             }
-
-
         }
 
         virtual void inout(const std::string& name, std::vector<__int64>& value)
@@ -380,17 +357,16 @@ namespace ops
                 value.resize(size, 0);
                 for (int i = 0; i < size; i++)
                 {
-                    string s(currentNode.getChildNode("element").getText());
+                    string s(currentNode.getChildNode("element", i).getText());
                     stringstream ss(s);
 
-                    int inVal;
+                    __int64 inVal;
                     ss >> inVal;
                     value[i] = inVal;
                 }
 
                 currentNode = tempNode;
             }
-
         }
 
         virtual void inout(const std::string& name, std::vector<float>& value)
@@ -405,7 +381,7 @@ namespace ops
                 value.resize(size, 0.0);
                 for (int i = 0; i < size; i++)
                 {
-                    string s(currentNode.getChildNode("element").getText());
+                    string s(currentNode.getChildNode("element", i).getText());
                     stringstream ss(s);
 
                     float inVal;
@@ -415,9 +391,6 @@ namespace ops
 
                 currentNode = tempNode;
             }
-
-
-
         }
 
         virtual void inout(const std::string& name, std::vector<double>& value)
@@ -432,7 +405,7 @@ namespace ops
                 value.resize(size, 0.0);
                 for (int i = 0; i < size; i++)
                 {
-                    string s(currentNode.getChildNode("element").getText());
+                    string s(currentNode.getChildNode("element", i).getText());
                     stringstream ss(s);
 
                     double inVal;
@@ -442,7 +415,6 @@ namespace ops
 
                 currentNode = tempNode;
             }
-
         }
 
         virtual void inout(const std::string& name, std::vector<std::string>& value)
@@ -457,18 +429,12 @@ namespace ops
                 value.resize(size, "");
                 for (int i = 0; i < size; i++)
                 {
-                    string s(currentNode.getChildNode("element").getText());
-                    stringstream ss(s);
-
-                    int inVal;
-                    ss >> inVal;
-                    value[i] = inVal;
+                    string s(currentNode.getChildNode("element", i).getText());
+                    value[i] = s;
                 }
 
                 currentNode = tempNode;
             }
-
-
         }
 
         int beginList(const std::string& name, int size)
@@ -484,18 +450,10 @@ namespace ops
         {
             //Nothing to do in this implementation
         }
+
     private:
         SerializableInheritingTypeFactory* factory;
 
-
-        //   virtual void getDeserializable(std::string name, Deserializable* deserializable)
-        //{
-        //	currentNode = currentNode.getChildNode(name.c_str());
-        //	deserializable->deserialize(this);
-        //	currentNode = currentNode.getParentNode();
-        //
-        //}
-        //
     };
 }
 
