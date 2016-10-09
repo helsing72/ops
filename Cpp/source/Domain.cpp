@@ -21,6 +21,8 @@
 #include "Domain.h"
 #include "NoSuchTopicException.h"
 #include "BoostIOServiceImpl.h"
+#include "XMLArchiverIn.h"
+#include "ConfigException.h"
 
 namespace ops
 {
@@ -45,6 +47,10 @@ void Domain::checkTopicValues(Topic* top)
 	if (top->getDomainAddress() == "") 
 	{
 		top->setDomainAddress(domainAddress);
+	}
+	if (top->getLocalInterface() == "") 
+	{
+		top->setLocalInterface(localInterface);
 	}
 	if (top->getInSocketBufferSize() < 0) 
 	{
@@ -106,6 +112,60 @@ void Domain::serialize(ArchiverInOut* archiver)
 	archiver->inout(std::string("inSocketBufferSize"), inSocketBufferSize);
 	archiver->inout(std::string("outSocketBufferSize"), outSocketBufferSize);
 	archiver->inout(std::string("metaDataMcPort"), metaDataMcPort);
+
+	// To not break binary compatibility we only do this when we know we are
+	// reading from an XML-file
+	if (dynamic_cast<XMLArchiverIn*>(archiver) != NULL) { 
+		archiver->inout<Channel>(std::string("channels"), channels);
+		archiver->inout<Transport>(std::string("transports"), transports);
+		checkTransports();
+	}
+}
+
+Channel* Domain::findChannel(std::string id)
+{
+	if (id != "") {
+		for (unsigned int i = 0; i < channels.size(); i++) {
+			if (id == channels[i]->channelID) return channels[i];
+		}
+	}
+	return NULL;
+}
+
+Topic* Domain::findTopic(std::string id)
+{
+	if (id != "") {
+		for (unsigned int i = 0; i < topics.size(); i++) {
+			if (id == topics[i]->getName()) return topics[i];
+		}
+	}
+	return NULL;
+}
+
+void Domain::checkTransports()
+{
+	// Now update topics with values from the transports and channels
+	// Loop over all transports and for each topic, see if it needs parameters from the channel
+	for (unsigned int i = 0; i < transports.size(); i++) {
+		// Get channel
+		Channel* channel = findChannel(transports[i]->channelID);
+		if (channel == NULL) {
+			throw ops::ConfigException(
+				std::string("Non existing channelID: '") + transports[i]->channelID +
+				std::string("' used in transport spcification."));
+		} else {
+			for (unsigned int j = 0; j < transports[i]->topics.size(); j++) {
+				Topic* top = findTopic(transports[i]->topics[j]);
+				if (top == NULL) {
+					throw ops::ConfigException(
+						std::string("Non existing topicID: '") + transports[i]->topics[j] +
+						std::string("' used in transport spcification."));
+				} else {
+					channel->populateTopic(top);
+				}
+			}
+		}
+	}
 }
 
 int Domain::getTimeToLive()

@@ -22,7 +22,9 @@
 #define ops_OPSObjectFactoryImpl_h
 
 #include "OPSMessage.h"
+#include "Channel.h"
 #include "Topic.h"
+#include "Transport.h"
 #include "DefaultOPSConfigImpl.h"
 #include "Domain.h"
 #include "ParticipantInfoData.h"
@@ -43,6 +45,14 @@ namespace ops
             if (type == ("Topic"))
             {
                 return new Topic();
+            }
+            if (type == ("Channel"))
+            {
+                return new Channel();
+            }
+            if (type == ("Transport"))
+            {
+                return new Transport();
             }
             if (type == ("DefaultOPSConfigImpl"))
             {

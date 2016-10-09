@@ -25,6 +25,8 @@
 #include <vector>
 #include "IOService.h"
 #include "Topic.h"
+#include "Channel.h"
+#include "Transport.h"
 #include "OPSObject.h"
 
 namespace ops
@@ -40,7 +42,13 @@ namespace ops
 		std::string domainID;
 		int metaDataMcPort;
 
+		std::vector<Channel* > channels;
+		std::vector<Transport* > transports;
+
 		void checkTopicValues(Topic* top);
+		void checkTransports();
+		Channel* findChannel(std::string id);
+		Topic* findTopic(std::string id);
 
 	public:
 		Domain();
