@@ -11,6 +11,7 @@ set(LIB_PUBLIC_HEADERS
   ${HEADER_PATH}/ByteBuffer.h
   ${HEADER_PATH}/ByteListener.h
   ${HEADER_PATH}/BytesSizePair.h
+  ${HEADER_PATH}/Channel.h
   ${HEADER_PATH}/CommException.h
   ${HEADER_PATH}/Compatibility.h
   ${HEADER_PATH}/ConfigException.h
@@ -73,16 +74,19 @@ set(LIB_PUBLIC_HEADERS
   ${HEADER_PATH}/Topic.h
   ${HEADER_PATH}/TopicInfoData.h
   ${HEADER_PATH}/Transaction.h
+  ${HEADER_PATH}/Transport.h
   ${HEADER_PATH}/xml/xmlParser.h
   ${HEADER_PATH}/XMLArchiverIn.h
   ${HEADER_PATH}/XMLArchiverOut.h
 )
 
 set(LIB_SRCS
+  ArchiverInOut.cpp
   BasicError.h
   BoostDeadlineTimerImpl.h
   BoostIOServiceImpl.h
   ByteBuffer.cpp
+  Channel.cpp
   Compatibility.cpp
   DataNotifier.cpp
   DeadlineTimer.cpp
@@ -129,6 +133,7 @@ set(LIB_SRCS
   Thread.cpp
   TimeHelper.cpp
   Topic.cpp
+  Transport.cpp
   UDPReceiver.cpp
   UDPReceiver.h
   UDPSender.cpp

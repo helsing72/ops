@@ -561,6 +561,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath="..\..\..\source\ArchiverInOut.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\source\BasicError.h"
 				>
 			</File>
@@ -574,6 +578,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\source\ByteBuffer.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\source\Channel.cpp"
 				>
 			</File>
 			<File
@@ -753,6 +761,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\source\Transport.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\source\UDPReceiver.cpp"
 				>
 			</File>
@@ -800,6 +812,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\include\BytesSizePair.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\Channel.h"
 				>
 			</File>
 			<File
@@ -1004,6 +1020,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\include\TopicInfoData.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\Transport.h"
 				>
 			</File>
 			<File

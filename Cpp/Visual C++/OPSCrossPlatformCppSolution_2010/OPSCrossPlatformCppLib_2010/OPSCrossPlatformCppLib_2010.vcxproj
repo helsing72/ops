@@ -317,8 +317,10 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\include\Channel.h" />
     <ClInclude Include="..\..\..\include\OPSUtilities.h" />
     <ClInclude Include="..\..\..\include\SerializableInheritingTypeFactory.h" />
+    <ClInclude Include="..\..\..\include\Transport.h" />
     <ClInclude Include="..\..\..\source\BasicError.h" />
     <ClInclude Include="..\..\..\source\BoostDeadlineTimerImpl.h" />
     <ClInclude Include="..\..\..\source\BoostIOServiceImpl.h" />
@@ -397,7 +399,9 @@
     <ClInclude Include="..\..\..\include\ops\Request.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\source\ArchiverInOut.cpp" />
     <ClCompile Include="..\..\..\source\ByteBuffer.cpp" />
+    <ClCompile Include="..\..\..\source\Channel.cpp" />
     <ClCompile Include="..\..\..\source\Compatibility.cpp" />
     <ClCompile Include="..\..\..\source\DataNotifier.cpp" />
     <ClCompile Include="..\..\..\source\DeadlineTimer.cpp" />
@@ -430,6 +434,7 @@
     <ClCompile Include="..\..\..\source\Thread.cpp" />
     <ClCompile Include="..\..\..\source\TimeHelper.cpp" />
     <ClCompile Include="..\..\..\source\Topic.cpp" />
+    <ClCompile Include="..\..\..\source\Transport.cpp" />
     <ClCompile Include="..\..\..\source\UDPReceiver.cpp" />
     <ClCompile Include="..\..\..\source\UDPSender.cpp" />
     <ClCompile Include="..\..\..\source\XMLArchiverIn.cpp" />
