@@ -1,0 +1,9 @@
+package sds;
+
+class MessageHeaderData
+{
+    int  msgId;
+    int  ComponentId;
+    int  msgVerNr;
+    long systemTime;
+}

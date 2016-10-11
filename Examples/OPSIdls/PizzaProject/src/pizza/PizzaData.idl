@@ -1,6 +1,6 @@
 package pizza;
 
-class PizzaData
+class PizzaData extends sds.MessageHeaderData
 {
     string cheese;
     string tomatoSauce;
