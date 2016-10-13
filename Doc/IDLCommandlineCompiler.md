@@ -47,3 +47,12 @@ To compile IDL's for the TestAll example, run the following command:
   D:\OPS\OPS4> deploy\lib\ops\opsc.bat -P Examples\OPSIdls\TestAll
 ```
 This creates a 'Generated' directory in the TestAll directory with all generated files.
+
+NOTE: For ***opsc*** to compile C# code with the 'correct' C# compiler, you may need to set the 
+environment symbol **OPS_CSC_PATH** to the directory where the wanted compiler binary exist.
+
+Example:
+
+```
+OPS_CSC_PATH=C:\Windows\Microsoft.NET\Framework\v4.0.30319  
+```
