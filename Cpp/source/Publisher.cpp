@@ -37,27 +37,9 @@ namespace ops
     sleepOnSendFailed(true)
     {
         participant = Participant::getInstance(topic.getDomainID(), topic.getParticipantID());
-        //Participant* participant = topic.getParticipant();
 
         sendDataHandler = participant->getSendDataHandler(topic);
 
-        //MulticastDomain* mcDomain = dynamic_cast<MulticastDomain*>(participant->getConfig()->getDomain(topic.getDomainID()));
-        //if(mcDomain != NULL)
-        //{
-        //	if(topic.getTransport() == Topic::TRANSPORT_MC)
-        //	{
-        //		udpSender = Sender::create(mcDomain->getLocalInterface(), mcDomain->getTimeToLive(), topic.getOutSocketBufferSize());
-        //	}
-        //	else if(topic.getTransport() == Topic::TRANSPORT_TCP)
-        //	{
-        //		udpSender = Sender::createTCPServer(topic.getDomainAddress(), topic.getPort(), participant->getIOService());
-        //	}
-        //}
-        //else
-        //{
-        //	//TODO: decide upon exceptions, application will crash...
-        //}
-        //bytes = new char[Participant::PACKET_MAX_SIZE];
         message.setPublisherName(name);
         message.setTopicName(topic.getName());
         message.setDataOwner(false);
@@ -69,7 +51,6 @@ namespace ops
     {
 		stop();
 		participant->releaseSendDataHandler(topic);
-        //delete bytes;
     }
 
 	void Publisher::start()
@@ -114,13 +95,10 @@ namespace ops
 
     void Publisher::write(OPSObject* data)
     {
-        //ByteBuffer buf(bytes, Participant::MESSAGE_MAX_SIZE / Participant::PACKET_MAX_SIZE, Participant::PACKET_MAX_SIZE);
-
         if (key != "")
         {
             data->setKey(key);
         }
-
 
         ByteBuffer buf(&memMap);
 
@@ -158,13 +136,7 @@ namespace ops
             }
         }
 
-        //udpSender->sendTo(bytes, buf.GetSize(), topic.GetDomainAddress(), topic.GetPort());
-
-
         IncCurrentPublicationID();
-
-
-
     }
 
     void Publisher::setTopic(Topic topic)
@@ -176,7 +148,5 @@ namespace ops
     {
         currentPublicationID++;
     }
-
-
 
 }
