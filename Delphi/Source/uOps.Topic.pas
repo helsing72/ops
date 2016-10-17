@@ -37,9 +37,10 @@ type
   private
     FName : AnsiString;
 		FPort : Integer;
+		FTimeToLive : Integer;
 		FTypeID : AnsiString;
     FDomainAddress : AnsiString;
-		//FLocalInterface : string;
+		FLocalInterface : AnsiString;
 		FParticipantID : string;
 		FDomainID : string;
 		//bool reliable;
@@ -70,8 +71,10 @@ type
     property ParticipantID : string read FParticipantID write FParticipantID;
     property Transport : AnsiString read FTransport write FTransport;
     property DomainAddress : AnsiString read FDomainAddress write FDomainAddress;
+    property LocalInterface : AnsiString read FLocalInterface write FLocalInterface;
     property SampleMaxSize : Integer read FSampleMaxSize write SetSampleMaxSize;
     property Port : Integer read FPort write FPort;
+    property TimeToLive : Integer read FTimeToLive write FTimeToLive;
     property OutSocketBufferSize : Int64 read FOutSocketBufferSize write FOutSocketBufferSize;
     property InSocketBufferSize : Int64 read FInSocketBufferSize write FInSocketBufferSize;
   end;
@@ -94,6 +97,7 @@ begin
   FMinSeparation := 0;
   FOutSocketBufferSize := -1;
   FInSocketBufferSize := -1;
+  FTimeToLive := -1;
 
   AppendType('Topic');
 end;
@@ -108,6 +112,7 @@ begin
   FMinSeparation := 0;
   FOutSocketBufferSize := -1;
   FInSocketBufferSize := -1;
+  FTimeToLive := -1;
 
   AppendType('Topic');
 end;

@@ -133,7 +133,7 @@ var
 begin
   Result := nil;
 
-  localIf := string(TDomain.doSubnetTranslation(dom.LocalInterface));
+  localIf := string(TDomain.doSubnetTranslation(top.LocalInterface));
 
   if top.Transport = TTopic.TRANSPORT_MC then begin
     Result := TMulticastReceiver.Create(string(top.DomainAddress), top.Port, localIf, top.InSocketBufferSize);

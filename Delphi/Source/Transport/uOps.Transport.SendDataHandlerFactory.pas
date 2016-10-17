@@ -154,8 +154,8 @@ begin
       Exit;
 		end;
 
-    localIf := string(TDomain.doSubnetTranslation(FDomain.LocalInterface));
-    ttl := FDomain.TimeToLive;
+    localIf := string(TDomain.doSubnetTranslation(top.LocalInterface));
+    ttl := top.TimeToLive;
 
 		if top.Transport = TTopic.TRANSPORT_MC then begin
       Result := TMcSendDataHandler.Create(top, localIf, ttl, FErrorService);

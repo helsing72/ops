@@ -408,6 +408,8 @@ function TParticipant.createParticipantInfoTopic : TTopic;
 begin
   // ops::Topic infoTopic("ops.bit.ParticipantInfoTopic", 9494, "ops.ParticipantInfoData", domain->getDomainAddress());
   Result := TTopic.Create('ops.bit.ParticipantInfoTopic', FDomain.MetaDataMcPort, 'ops.ParticipantInfoData', FDomain.DomainAddress);
+  Result.LocalInterface := FDomain.LocalInterface;
+  Result.TimeToLive := FDomain.TimeToLive;
   Result.DomainID := FDomainID;
   Result.ParticipantID := FParticipantID;
   Result.Transport := TTopic.TRANSPORT_MC;

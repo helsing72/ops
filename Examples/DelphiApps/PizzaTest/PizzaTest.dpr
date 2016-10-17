@@ -63,7 +63,9 @@ uses
   uOps.PrintArchiverOut in '..\..\..\Delphi\Source\uOps.PrintArchiverOut.pas',
   uOps.OPSConfigRepository in '..\..\..\Delphi\Source\uOps.OPSConfigRepository.pas',
   uOps.Utilities in '..\..\..\Delphi\Source\uOps.Utilities.pas',
-  uSockets in '..\..\..\Delphi\Common\uSockets.pas';
+  uSockets in '..\..\..\Delphi\Common\uSockets.pas',
+  uOps.Channel in '..\..\..\Delphi\Source\uOps.Channel.pas',
+  uOps.Transport in '..\..\..\Delphi\Source\uOps.Transport.pas';
 
 {$R *.res}
 

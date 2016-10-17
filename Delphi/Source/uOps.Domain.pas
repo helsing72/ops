@@ -24,6 +24,8 @@ interface
 
 uses uOps.Types,
      uOps.Topic,
+     uOps.Channel,
+     uOps.Transport,
      uOps.ArchiverInOut,
      uOps.OpsObject;
 
@@ -32,6 +34,8 @@ type
   public
     type
       TDynTopicArray = array of TTopic;
+      TDynChannelArray = array of TChannel;
+      TDynTransportArray = array of TTransport;
 	private
 		FDomainAddress : AnsiString;
 		FTimeToLive : Integer;
@@ -42,7 +46,13 @@ type
 		FDomainID : AnsiString;
 		FMetaDataMcPort : Integer;
 
+		FChannels : TDynChannelArray;
+		FTransports : TDynTransportArray;
+
 		procedure checkTopicValues(top : TTopic);
+		procedure checkTransports;
+		function findChannel(id : AnsiString ) : TChannel;
+		function findTopic(id : AnsiString) : TTopic;
 
 	public
     constructor Create;
@@ -84,7 +94,8 @@ uses SysUtils,
      Winapi.IpHlpApi,
      Winapi.IpRtrMib,
      Winapi.Winsock,
-     uOps.Exceptions;
+     uOps.Exceptions,
+     uOps.XMLArchiverIn;
 
 constructor TDomain.Create;
 begin
@@ -109,6 +120,8 @@ end;
 procedure TDomain.checkTopicValues(top : TTopic);
 begin
 	if top.DomainAddress = '' then top.DomainAddress := FDomainAddress;
+  if top.LocalInterface = '' then top.LocalInterface := FLocalInterface;
+	if top.TimeToLive < 0 then top.TimeToLive := timeToLive;
 	if top.InSocketBufferSize < 0 then top.InSocketBufferSize := FInSocketBufferSize;
 	if top.OutSocketBufferSize < 0 then	top.OutSocketBufferSize := FOutSocketBufferSize;
 end;
@@ -161,7 +174,15 @@ begin
 	archiver.inout('inSocketBufferSize', FInSocketBufferSize);
 	archiver.inout('outSocketBufferSize', FOutSocketBufferSize);
 	archiver.inout('metaDataMcPort', FMetaDataMcPort);
-end;
+
+  // To not break binary compatibility we only do this when we know we are
+  // reading from an XML-file
+  if archiver is TXMLArchiverIn then begin
+		archiver.inout('channels', TDynSerializableArray(FChannels));
+		archiver.inout('transports', TDynSerializableArray(FTransports));
+		CheckTransports();
+  end;
+ end;
 
 // Returns a newely allocated deep copy/clone of this object.
 function TDomain.Clone : TOPSObject;
@@ -190,7 +211,77 @@ begin
 
 		FDomainID := Self.FDomainID;
 		FMetaDataMcPort := Self.FMetaDataMcPort;
+
+    SetLength(FChannels, Length(Self.FChannels));
+    for i := 0 to High(Self.FChannels) do begin
+      FChannels[i] := Self.FChannels[i].Clone as TChannel;
+    end;
+
+    SetLength(FTransports, Length(Self.FTransports));
+    for i := 0 to High(Self.FTransports) do begin
+      FTransports[i] := Self.FTransports[i].Clone as TTransport;
+    end;
   end;
+end;
+
+function TDomain.findChannel(id : AnsiString) : TChannel;
+var
+  i : Integer;
+begin
+  Result := nil;
+	if id <> '' then begin
+		for i := 0 to High(FChannels) do begin
+			if id = FChannels[i].channelID then begin
+        Result := FChannels[i];
+        Break;
+      end;
+		end;
+	end;
+end;
+
+function TDomain.findTopic(id : AnsiString) : TTopic;
+var
+  i : Integer;
+begin
+  Result := nil;
+	if id <> '' then begin
+		for i := 0 to High(FTopics) do begin
+			if id = FTopics[i].Name then begin
+        Result := FTopics[i];
+        Break;
+      end;
+		end;
+	end;
+end;
+
+procedure TDomain.checkTransports;
+var
+  i, j : Integer;
+  channel : TChannel;
+  top : TTopic;
+begin
+	// Now update topics with values from the transports and channels
+	// Loop over all transports and for each topic, see if it needs parameters from the channel
+	for i := 0 to High(FTransports) do begin
+		// Get channel
+		channel := findChannel(FTransports[i].channelID);
+		if not Assigned(channel) then begin
+			raise EConfigException.Create(
+				'Non existing channelID: "' + string(FTransports[i].channelID) +
+				'" used in transport spcification.');
+		end else begin
+			for j := 0 to High(FTransports[i].topics) do begin
+				top := findTopic(FTransports[i].topics[j]);
+				if not Assigned(top) then begin
+					raise EConfigException(
+						'Non existing topicID: "' + FTransports[i].topics[j] +
+						'" used in transport spcification.');
+				end else begin
+					channel.PopulateTopic(top);
+				end;
+			end;
+		end;
+	end;
 end;
 
 /// ------------------------------------------

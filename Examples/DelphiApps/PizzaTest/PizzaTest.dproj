@@ -147,6 +147,8 @@
 			<DCCReference Include="..\..\..\Delphi\Source\uOps.OPSConfigRepository.pas"/>
 			<DCCReference Include="..\..\..\Delphi\Source\uOps.Utilities.pas"/>
 			<DCCReference Include="..\..\..\Delphi\Common\uSockets.pas"/>
+			<DCCReference Include="..\..\..\Delphi\Source\uOps.Channel.pas"/>
+			<DCCReference Include="..\..\..\Delphi\Source\uOps.Transport.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>

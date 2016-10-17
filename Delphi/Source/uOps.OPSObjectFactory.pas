@@ -43,6 +43,8 @@ uses SysUtils,
      uOps.OPSMessage,
      uOPs.Topic,
      uOps.Domain,
+     uOps.Channel,
+     uOps.Transport,
      uOps.ParticipantInfoData,
      uOps.TopicInfoData,
      uOps.ArchiverInOut,
@@ -62,6 +64,10 @@ begin
     Result := TOPSMessage.Create;
   end else if types = 'Topic' then begin
     Result := TTopic.Create;
+  end else if types = 'Channel' then begin
+    Result := TChannel.Create;
+  end else if types = 'Transport' then begin
+    Result := TTransport.Create;
   end else if types = 'DefaultOPSConfigImpl' then begin
     Result := TDefaultOPSConfigImpl.Create;
   end else if types = 'MulticastDomain' then begin
