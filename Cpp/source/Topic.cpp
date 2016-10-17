@@ -11,6 +11,7 @@ namespace ops
 	Topic::Topic(std::string namee, int portt, std::string typeIDd, std::string domainAddresss)
 		: name(namee), 
 		port(portt), 
+		timeToLive(-1),
 		typeID(typeIDd), 
 		domainAddress(domainAddresss),
 		participantID("DEFAULT_PARTICIPANT"),
@@ -27,6 +28,7 @@ namespace ops
 	Topic::Topic()
 		: name(""), 
 		port(0), 
+		timeToLive(-1),
 		typeID(""), 
 		domainAddress(""),
 		participantID("DEFAULT_PARTICIPANT"),
@@ -108,6 +110,14 @@ namespace ops
 	void Topic::setPort(int port)
 	{
 		this->port = port;
+	}
+	void Topic::setTimeToLive(int ttl)
+	{
+		timeToLive = ttl;
+	}
+	int Topic::getTimeToLive()
+	{
+		return timeToLive;
 	}
 	std::string Topic::getTransport()
 	{

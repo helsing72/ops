@@ -41,9 +41,9 @@ namespace ops
 			return sendDataHandlers[key];
 		}			
 
-		std::string localIf = Domain::doSubnetTranslation(participant->getDomain()->getLocalInterface(), participant->getIOService());
+		std::string localIf = Domain::doSubnetTranslation(top.getLocalInterface(), participant->getIOService());
 
-		int ttl = participant->getDomain()->getTimeToLive();
+		int ttl = top.getTimeToLive();
 
 		if(top.getTransport() == Topic::TRANSPORT_MC)
 		{

@@ -30,6 +30,7 @@ namespace ops
         linktype(""),
         localInterface(""),
         domainAddress(""),
+        timeToLive(-1),
         port(0), 
         outSocketBufferSize(-1),
         inSocketBufferSize(-1)
@@ -44,7 +45,8 @@ namespace ops
         archiver->inout(std::string("linktype"), linktype);
         archiver->inout(std::string("localInterface"), localInterface);
         archiver->inout(std::string("address"), domainAddress);
-        archiver->inout(std::string("port"), port);		
+        archiver->inout(std::string("timeToLive"), timeToLive);
+        archiver->inout(std::string("port"), port);
         archiver->inout(std::string("outSocketBufferSize"), outSocketBufferSize);
         archiver->inout(std::string("inSocketBufferSize"), inSocketBufferSize);
     
@@ -62,12 +64,17 @@ namespace ops
 
     void Channel::populateTopic(Topic* top)
     {
-        if (top->getTransport() == "") top->setTransport(linktype);
-        if (top->getLocalInterface() == "") top->setLocalInterface(localInterface);
-        if (top->getDomainAddress() == "") top->setDomainAddress(domainAddress);
-        if (top->getPort() == 0) top->setPort(port);
-        if (top->getOutSocketBufferSize() < 0) top->setOutSocketBufferSize(outSocketBufferSize);
-        if (top->getInSocketBufferSize() < 0) top->setInSocketBufferSize(inSocketBufferSize);
+        // If Topic doesn't specify a transport it will default to 'multicast', therefore
+        // we can't just check for an empty 'top.getTransport()' to know when to replace value.
+        // Therfore, if a topic is listed in a 'Transport/Channel', we assume it shall
+        // use the channel values, so replace all values.
+        top->setTransport(linktype);
+        top->setLocalInterface(localInterface);
+        top->setDomainAddress(domainAddress);
+        top->setPort(port);
+        top->setOutSocketBufferSize(outSocketBufferSize);
+        top->setInSocketBufferSize(inSocketBufferSize);
+        top->setTimeToLive(timeToLive);
     }
 
     std::string Channel::LINKTYPE_MC = "multicast";

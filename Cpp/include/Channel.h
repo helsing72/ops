@@ -33,8 +33,9 @@ namespace ops
     public:
         std::string channelID;
         std::string linktype;
-        std::string localInterface;		// If multicast, this specifies interface to use
+        std::string localInterface;     // If multicast, this specifies interface to use
         std::string domainAddress;
+        int timeToLive;                 // if multicast, this specifies the ttl parameter
         int port;
         __int64 outSocketBufferSize;
         __int64 inSocketBufferSize;

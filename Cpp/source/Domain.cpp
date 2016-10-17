@@ -44,22 +44,11 @@ std::string Domain::getDomainAddress()
 
 void Domain::checkTopicValues(Topic* top)
 {
-	if (top->getDomainAddress() == "") 
-	{
-		top->setDomainAddress(domainAddress);
-	}
-	if (top->getLocalInterface() == "") 
-	{
-		top->setLocalInterface(localInterface);
-	}
-	if (top->getInSocketBufferSize() < 0) 
-	{
-		top->setInSocketBufferSize(inSocketBufferSize);
-	}
-	if (top->getOutSocketBufferSize() < 0) 
-	{
-		top->setOutSocketBufferSize(outSocketBufferSize);
-	}
+	if (top->getDomainAddress() == "") top->setDomainAddress(domainAddress);
+	if (top->getLocalInterface() == "") top->setLocalInterface(localInterface);
+	if (top->getTimeToLive() < 0) top->setTimeToLive(timeToLive);
+	if (top->getInSocketBufferSize() < 0) top->setInSocketBufferSize(inSocketBufferSize);
+	if (top->getOutSocketBufferSize() < 0) top->setOutSocketBufferSize(outSocketBufferSize);
 }
 
 std::vector<Topic* > Domain::getTopics()

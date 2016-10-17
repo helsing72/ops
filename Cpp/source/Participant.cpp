@@ -271,6 +271,8 @@ namespace ops
 	{
 ///		ops::Topic infoTopic("ops.bit.ParticipantInfoTopic", 9494, "ops.ParticipantInfoData", domain->getDomainAddress());
 		ops::Topic infoTopic("ops.bit.ParticipantInfoTopic", domain->getMetaDataMcPort(), "ops.ParticipantInfoData", domain->getDomainAddress());
+		infoTopic.setLocalInterface(domain->getLocalInterface());
+		infoTopic.setTimeToLive(domain->getTimeToLive());
 		infoTopic.setDomainID(domainID);
 		infoTopic.setParticipantID(participantID);
 		infoTopic.setTransport(Topic::TRANSPORT_MC);

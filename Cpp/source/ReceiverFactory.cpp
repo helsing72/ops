@@ -12,18 +12,17 @@ namespace ops
     {
         Receiver* receiver = NULL;
 
-        Domain* mcDomain = participant->getDomain();
         IOService* ioService = participant->getIOService();
 
-        //This shopuld never happen, logg an internal error and return NULL;
-        if (mcDomain == NULL || ioService == NULL)
+        //This should never happen, log an internal error and return NULL;
+        if (ioService == NULL)
         {
-			BasicError err("ReceiverFactory", "getReceiver", "Unexpected error, mcDomain or ioServide == NULL");
+			BasicError err("ReceiverFactory", "getReceiver", "Unexpected error, ioServide == NULL");
             participant->reportError(&err);
             return receiver;
         }
 
-		std::string localIf = Domain::doSubnetTranslation(mcDomain->getLocalInterface(), participant->getIOService());
+		std::string localIf = Domain::doSubnetTranslation(top.getLocalInterface(), participant->getIOService());
 
         if (top.getTransport() == Topic::TRANSPORT_MC)
         {

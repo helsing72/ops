@@ -63,6 +63,9 @@ namespace ops
 		void setPort(int port);
 		int getPort();
 
+		void setTimeToLive(int ttl);
+		int getTimeToLive();
+
 		void serialize(ArchiverInOut* archiver);
 
 		__int64 getOutSocketBufferSize();
@@ -85,6 +88,7 @@ namespace ops
         std::string name;
 
 		int port;
+		int timeToLive;
 		std::string typeID;
         std::string domainAddress;
 		std::string localInterface;
