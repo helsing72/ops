@@ -57,7 +57,7 @@ namespace Ops
             }
 
             // Get the local interface, doing a translation from subnet if necessary
-            string localIF = Domain.DoSubnetTranslation(participant.getDomain().GetLocalInterface());
+            string localIF = Domain.DoSubnetTranslation(top.GetLocalInterface());
 
             // Didn't exist, create one if transport is known
             if ( (top.GetTransport().Equals(Topic.TRANSPORT_MC)) || (top.GetTransport().Equals(Topic.TRANSPORT_TCP)) )

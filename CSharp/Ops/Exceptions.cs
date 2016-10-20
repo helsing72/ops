@@ -53,6 +53,19 @@ namespace Ops
     }
 
     [Serializable()]
+    public class ConfigException : System.Exception
+    {
+        public ConfigException() : base() { }
+        public ConfigException(string message) : base(message) { }
+        public ConfigException(string message, System.Exception inner) : base(message, inner) { }
+
+        // A constructor is needed for serialization when an
+        // exception propagates from a remoting server to the client. 
+        protected ConfigException(System.Runtime.Serialization.SerializationInfo info,
+            System.Runtime.Serialization.StreamingContext context) { }
+    }
+
+    [Serializable()]
     public class InvalidHeaderException : System.Exception
     {
         public InvalidHeaderException() : base() { }

@@ -233,7 +233,9 @@ namespace Ops
         public Topic CreateParticipantInfoTopic()
     	{
     		Topic infoTopic = new Topic("ops.bit.ParticipantInfoTopic", domain.GetMetaDataMcPort(), "ops.ParticipantInfoData", domain.GetDomainAddress());
-	    	infoTopic.SetDomainID(domainID);
+            infoTopic.SetLocalInterface(domain.GetLocalInterface());
+            infoTopic.SetTimeToLive(domain.getTimeToLive());
+            infoTopic.SetDomainID(domainID);
 		    infoTopic.SetParticipantID(participantID);
     		infoTopic.SetTransport(Topic.TRANSPORT_MC);
 	    	return infoTopic;

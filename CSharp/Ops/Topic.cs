@@ -11,14 +11,16 @@ namespace Ops
     {
 		private string domainAddress = "";
 		private string domainID;
-		private int inSocketBufferSize = -1;
+		private long inSocketBufferSize = -1;
+        private string localInterface = "";
 		private string name = "";
-		private int outSocketBufferSize = -1;
+		private long outSocketBufferSize = -1;
 		private string participantID;
 		private int port = -1;
 		private int replyPort = 0;
         private int sampleMaxSize = Globals.MAX_SEGMENT_SIZE;
-		private string transport;
+        private int timeToLive = -1;
+        private string transport;
 		public static readonly string TRANSPORT_MC = "multicast";
 		public static readonly string TRANSPORT_TCP = "tcp";
 		public static readonly string TRANSPORT_UDP = "udp";
@@ -49,6 +51,16 @@ namespace Ops
         public void SetDomainAddress(string domainAddress)
         {
             this.domainAddress = domainAddress;
+        }
+
+        public string GetLocalInterface()
+        {
+            return this.localInterface;
+        }
+
+        public void SetLocalInterface(string localInterface)
+        {
+            this.localInterface = localInterface;
         }
 
         public override string ToString()
@@ -156,22 +168,22 @@ namespace Ops
 
         public int GetInSocketBufferSize()
         {
-            return this.inSocketBufferSize;
+            return (int)this.inSocketBufferSize;
         }
 
         public void SetInSocketBufferSize(int inSocketBufferSize)
         {
-            this.inSocketBufferSize = inSocketBufferSize;
+            this.inSocketBufferSize = (long)inSocketBufferSize;
         }
 
         public int GetOutSocketBufferSize()
         {
-            return this.outSocketBufferSize;
+            return (int)this.outSocketBufferSize;
         }
 
         public void SetOutSocketBufferSize(int outSocketBufferSize)
         {
-            this.outSocketBufferSize = outSocketBufferSize;
+            this.outSocketBufferSize = (long)outSocketBufferSize;
         }
 
         public string GetTransport()
@@ -184,6 +196,16 @@ namespace Ops
             this.transport = transport;
         }
 
-	}
+        public int GetTimeToLive()
+        {
+            return this.timeToLive;
+        }
+
+        public void SetTimeToLive(int timeToLive)
+        {
+            this.timeToLive = timeToLive;
+        }
+
+    }
 
 }

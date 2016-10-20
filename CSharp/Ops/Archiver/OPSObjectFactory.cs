@@ -37,6 +37,14 @@ namespace Ops
             {
                 return new Topic();
             }
+            if (type.Equals("Channel"))
+            {
+                return new Channel();
+            }
+            if (type.Equals("Transport"))
+            {
+                return new Transport();
+            }
             if (type.Equals("ops.ParticipantInfoData"))
             {
                 return new ParticipantInfoData();

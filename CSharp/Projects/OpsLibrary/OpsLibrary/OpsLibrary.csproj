@@ -89,6 +89,9 @@
     <Compile Include="..\..\..\ops\BlockingBuffer.cs">
       <Link>ops\BlockingBuffer.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\Ops\Channel.cs">
+      <Link>ops\Channel.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\ops\DeadlineMissedFilterQoSPolicy.cs">
       <Link>ops\DeadlineMissedFilterQoSPolicy.cs</Link>
     </Compile>
@@ -247,6 +250,9 @@
     </Compile>
     <Compile Include="..\..\..\Ops\TopicInfoData.cs">
       <Link>ops\TopicInfoData.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Ops\Transport.cs">
+      <Link>ops\Transport.cs</Link>
     </Compile>
     <Compile Include="..\..\..\Ops\UdpReceiver.cs">
       <Link>ops\UdpReceiver.cs</Link>

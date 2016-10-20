@@ -41,12 +41,12 @@ namespace Ops
             try
             {
                 // Get the local interface, doing a translation from subnet if necessary
-                string localIF = Domain.DoSubnetTranslation(participant.getDomain().GetLocalInterface());
+                string localIF = Domain.DoSubnetTranslation(t.GetLocalInterface());
 
                 ISendDataHandler sender = null;
                 if (t.GetTransport().Equals(Topic.TRANSPORT_MC))
                 {
-                    sender = new McSendDataHandler(t, localIF, participant.getDomain().getTimeToLive());
+                    sender = new McSendDataHandler(t, localIF, t.GetTimeToLive());
                 }
                 else if (t.GetTransport().Equals(Topic.TRANSPORT_TCP))
                 {

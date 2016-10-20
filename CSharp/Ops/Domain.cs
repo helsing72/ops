@@ -20,6 +20,9 @@ namespace Ops
         private int outSocketBufferSize = -1;   // Use OS default
 		private int metaDataMcPort = 9494;
 
+        private List<Channel> channels = new List<Channel>();
+        private List<Transport> transports = new List<Transport>();
+
         public Domain()
         {
             AppendType("Domain");
@@ -30,6 +33,14 @@ namespace Ops
             if (top.GetDomainAddress().Equals(""))
             {
                 top.SetDomainAddress(domainAddress);
+            }
+            if (top.GetLocalInterface().Equals(""))
+            {
+                top.SetLocalInterface(localInterface);
+            }
+            if (top.GetTimeToLive() < 0)
+            {
+                top.SetTimeToLive(timeToLive);
             }
             if (top.GetInSocketBufferSize() < 0)
             {
@@ -78,6 +89,62 @@ namespace Ops
     		inSocketBufferSize = archive.Inout("inSocketBufferSize", inSocketBufferSize);
 	    	outSocketBufferSize = archive.Inout("outSocketBufferSize", outSocketBufferSize);
             metaDataMcPort = archive.Inout("metaDataMcPort", metaDataMcPort);
+
+        	// To not break binary compatibility we only do this when we know we are
+        	// reading from an XML-file
+            if (archive is XMLArchiverIn) { 
+        		//archiver->inout<Channel>(std::string("channels"), channels);
+		        //archiver->inout<Transport>(std::string("transports"), transports);
+        		channels = (List<Channel>)archive.InoutSerializableList("channels", channels);
+                transports = (List<Transport>)archive.InoutSerializableList("transports", transports);
+        		checkTransports();
+        	}
+        }
+
+        private Channel findChannel(string id)
+        {
+        	if (!id.Equals("")) {
+		        for (int i = 0; i < channels.Count; i++) {
+        			if (id.Equals(channels[i].channelID)) return channels[i];
+		        }
+        	}
+    	    return null;
+        }
+
+        private Topic findTopic(string id)
+        {
+        	if (!id.Equals("")) {
+        		for (int i = 0; i < topics.Count; i++) {
+		        	if (id.Equals(topics[i].GetName())) return topics[i];
+        		}
+        	}
+        	return null;
+        }
+
+        void checkTransports()
+        {
+        	// Now update topics with values from the transports and channels
+        	// Loop over all transports and for each topic, see if it needs parameters from the channel
+        	for (int i = 0; i < transports.Count; i++) {
+        		// Get channel
+        		Channel channel = findChannel(transports[i].channelID);
+        		if (channel == null) {
+        			throw new ConfigException(
+		        		"Non existing channelID: '" + transports[i].channelID +
+				        "' used in transport spcification.");
+        		} else {
+		        	for (int j = 0; j < transports[i].topics.Count; j++) {
+				        Topic top = findTopic(transports[i].topics[j]);
+    	    			if (top == null) {
+	    	    			throw new ConfigException(
+				    	    	"Non existing topicID: '" + transports[i].topics[j] +
+					    	    "' used in transport spcification.");
+        				} else {
+		        			channel.populateTopic(top);
+				        }
+        			}
+		        }
+        	}
         }
 
         public List<Topic> GetTopics() 
