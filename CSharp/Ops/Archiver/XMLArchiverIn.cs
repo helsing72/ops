@@ -311,44 +311,82 @@ namespace Ops
             compositeFactory.Add(item);
         }
 
+        delegate bool fn<T>(string input, out T res);
+
+        List<T> InoutCoretypeList<T>(string name, List<T> v, fn<T> Conv)
+        {
+            int size = GetNrElements(name);
+
+            nodeStack.Push(currentNode);
+            currentNode = GetNode(name);
+
+            v.Clear();
+
+            for (int i = 0; i < size; i++)
+            {
+                XmlNode node = GetCurrentElement(i);
+                T res;
+                if (Conv(node.InnerText.Trim(), out res))
+                {
+                    v.Add(res);
+                }
+                else
+                {
+                    throw new System.FormatException("Invalid value encountered in Xml-list. Name: '" + name + "', Value: " + node.InnerText.Trim());
+                }
+            }
+
+            currentNode = nodeStack.Pop();
+
+            return v;
+        }
+
         public List<int> InoutIntegerList(string name, List<int> v)
         {
-            throw new System.NotSupportedException("Not supported yet.");
+            return InoutCoretypeList<int>(name, v,
+                (string input, out int res) => { return int.TryParse(input, out res); });
         }
 
         public List<long> InoutLongList(string name, List<long> v) 
         {
-            throw new System.NotSupportedException("Not supported yet.");
+            return InoutCoretypeList<long>(name, v,
+                (string input, out long res) => { return long.TryParse(input, out res); });
         }
 
         public List<Byte> InoutByteList(string name, List<Byte> v) 
         {
-            throw new System.NotSupportedException("Not supported yet.");
+            return InoutCoretypeList<Byte>(name, v,
+                (string input, out Byte res) => { return Byte.TryParse(input, out res); });
         }
 
         public List<short> InoutShortList(string name, List<short> v) 
         {
-            throw new System.NotSupportedException("Not supported yet.");
+            return InoutCoretypeList<short>(name, v,
+                (string input, out short res) => { return short.TryParse(input, out res); });
         }
 
         public List<float> InoutFloatList(string name, List<float> v) 
         {
-            throw new System.NotSupportedException("Not supported yet.");
+            return InoutCoretypeList<float>(name, v,
+                (string input, out float res) => { return float.TryParse(input, numberStyles, numberFormatInfo, out res); });
         }
 
         public List<bool> InoutBooleanList(string name, List<bool> v) 
         {
-            throw new System.NotSupportedException("Not supported yet.");
+            return InoutCoretypeList<bool>(name, v,
+                (string input, out bool res) => { return bool.TryParse(input, out res); });
         }
 
         public List<string> InoutStringList(string name, List<string> v) 
         {
-            throw new System.NotSupportedException("Not supported yet.");
+            return InoutCoretypeList<string>(name, v,
+                (string input, out string res) => { res = input; return true; });
         }
 
         public List<double> InoutDoubleList(string name, List<double> v) 
         {
-            throw new System.NotSupportedException("Not supported yet.");
+            return InoutCoretypeList<double>(name, v, 
+                (string input, out double res) => { return double.TryParse(input, numberStyles, numberFormatInfo, out res); } );
         }
 
         // NB! We assume that object "v" is a generic list.
