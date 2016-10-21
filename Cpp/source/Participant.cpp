@@ -410,16 +410,30 @@ namespace ops
 		}
 	}
 
-	//TODO: Delegate to factory class
 	SendDataHandler* Participant::getSendDataHandler(Topic top)
 	{
-		return sendDataHandlerFactory->getSendDataHandler(top, this);
+		SendDataHandler* result = sendDataHandlerFactory->getSendDataHandler(top, this);
+		if (result) {
+			SafeLock lock(&partInfoDataMutex);
+			//Need to add topic to partInfoData.subscribeTopics (TODO ref count if same topic??)
+            partInfoData.publishTopics.push_back(TopicInfoData(top));
+		}
+		return result;
 	}
 
-	//TODO: Delegate to factory class
 	void Participant::releaseSendDataHandler(Topic top)
 	{
 		sendDataHandlerFactory->releaseSendDataHandler(top, this);
+
+		SafeLock lock(&partInfoDataMutex);
+		// Remove topic from partInfoData.publishTopics (TODO the same topic, ref count?)
+		std::vector<TopicInfoData>::iterator it;
+		for (it = partInfoData.publishTopics.begin(); it != partInfoData.publishTopics.end(); it++) {
+			if (it->name == top.getName()) {
+				partInfoData.publishTopics.erase(it);
+				break;
+			}
+		}
 	}
 
 }
