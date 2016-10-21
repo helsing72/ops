@@ -3,3 +3,7 @@
 *.vcproj.*
 *.vcxproj.*
 *.sdf
+*.opensdf
+*.VC.opendb
+*.VC.db
+ipch
