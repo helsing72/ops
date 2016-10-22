@@ -72,15 +72,7 @@ public class Publisher
 
     private void init()
     {
-        try
-        {
-            sendDataHandler = participant.getSendDataHandler(topic);
-            start();
-        }
-        catch (CommException ex)
-        {
-            participant.report(this.getClass().getName(), "init", ex.getMessage());
-        }
+        start();
     }
 
     /// <summary>
@@ -90,9 +82,17 @@ public class Publisher
     {
         if (!started)
         {
-            // Tell the sendDataHandler that we need it
-            sendDataHandler.addPublisher(this);
-            started = true;
+            try
+            {
+                // Tell the sendDataHandler that we need it
+                sendDataHandler = participant.getSendDataHandler(topic);
+                sendDataHandler.addPublisher(this);
+                started = true;
+            }
+            catch (CommException ex)
+            {
+                participant.report(this.getClass().getName(), "init", ex.getMessage());
+            }
         }
     }
 
@@ -105,6 +105,7 @@ public class Publisher
         {
             // Tell the sendDataHandler that we don't need it anymore
             sendDataHandler.removePublisher(this);
+            participant.releaseSendDataHandler(topic);
             started = false;
         }
     }
@@ -173,7 +174,7 @@ public class Publisher
 
     }
 
-    
+
 
     public void writeAsOPSObject(OPSObject o)
     {
@@ -242,8 +243,8 @@ public class Publisher
         }
     }
 
-    
-    
+
+
 
     public void setReliableWriteTimeout(int reliableWriteTimeout)
     {
