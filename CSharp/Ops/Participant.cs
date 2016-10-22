@@ -275,7 +275,32 @@ namespace Ops
         [MethodImpl(MethodImplOptions.Synchronized)]
         public ISendDataHandler GetSendDataHandler(Topic topic) 
         {
-            return this.sendDataHandlerFactory.GetSendDataHandler(topic, this);
+            ISendDataHandler sdh = this.sendDataHandlerFactory.GetSendDataHandler(topic, this);
+            if (sdh != null)
+            {
+                lock (partInfoData)
+                {
+                    partInfoData.publishTopics.Add(new TopicInfoData(topic));
+                }
+            }
+            return sdh;
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public void ReleaseSendDataHandler(Topic topic)
+        {
+            ///TODO this.sendDataHandlerFactory.ReleaseSendDataHandler(topic, this);
+
+            lock (partInfoData)
+            {
+                for (int i = 0; i < partInfoData.publishTopics.Count; i++)
+                {
+                    if (partInfoData.publishTopics[i].name.Equals(topic.GetName())) {
+                        partInfoData.publishTopics.RemoveAt(i);
+                        break;
+                    }
+                }
+            }
         }
 
         public Domain getDomain()

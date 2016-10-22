@@ -40,6 +40,7 @@ namespace Ops
         {
             // Must tell the sendDataHandler that we don't need it anymore
             Stop();
+            this.participant.ReleaseSendDataHandler(topic);
             this.sendDataHandler = null;
             this.participant = null;
         }
