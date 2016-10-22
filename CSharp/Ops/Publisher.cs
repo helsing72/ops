@@ -40,22 +40,13 @@ namespace Ops
         {
             // Must tell the sendDataHandler that we don't need it anymore
             Stop();
-            this.participant.ReleaseSendDataHandler(topic);
             this.sendDataHandler = null;
             this.participant = null;
         }
 
         private void Init()
         {
-            try
-            {
-                this.sendDataHandler = this.participant.GetSendDataHandler(topic);
-                Start();
-            }
-            catch (Exception ex)
-            {
-                Logger.ExceptionLogger.LogMessage(this.GetType().Name + " Init: " + ex.ToString());
-            }
+            Start();
         }
 
         /// <summary>
@@ -65,9 +56,17 @@ namespace Ops
         {
             if (!started)
             {
-                // Tell the sendDataHandler that we need it
-                this.sendDataHandler.AddPublisher(this);
-                started = true;
+                try
+                {
+                    // Tell the sendDataHandler that we need it
+                    this.sendDataHandler = this.participant.GetSendDataHandler(topic);
+                    this.sendDataHandler.AddPublisher(this);
+                    started = true;
+                }
+                catch (Exception ex)
+                {
+                    Logger.ExceptionLogger.LogMessage(this.GetType().Name + " Init: " + ex.ToString());
+                }
             }
         }
 
@@ -80,6 +79,7 @@ namespace Ops
             {
                 // Tell the sendDataHandler that we don't need it anymore
                 this.sendDataHandler.RemovePublisher(this);
+                this.participant.ReleaseSendDataHandler(topic);
                 started = false;
             }
         }
