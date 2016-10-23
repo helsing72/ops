@@ -103,8 +103,6 @@ public class XMLArchiverIn implements ArchiverInOut
         }
     }
 
-
-
     public byte getByte(String name)
     {
         return Byte.parseByte(getValue(name));
@@ -145,16 +143,8 @@ public class XMLArchiverIn implements ArchiverInOut
         return ret;
     }
 
-//    public void getDeserializable(String name, Deserializable des)
-//    {
-//        nodeStack.push(currentNode);
-//        currentNode = getNode(name);
-//        des.desirialize(this);
-//        currentNode = nodeStack.pop();
-//    }
     public int getNrElements(String name)
     {
-
         nodeStack.push(currentNode);
         try
         {
@@ -178,41 +168,10 @@ public class XMLArchiverIn implements ArchiverInOut
         {
             currentNode = nodeStack.pop();
         }
-
-
     }
-//    public Deserializable getElement(String name, int i, Deserializable deserializable)
-//    {
-//        try
-//        {
-//            nodeStack.push(currentNode);
-//            currentNode = getNode(name);
-//            nodeStack.push(currentNode);
-//            currentNode = getCurrentElement(i);
-//
-//            //Deserializable deserializable = (Deserializable) cls.getConstructor(null).newInstance();
-//
-//            deserializable.desirialize(this);
-//
-//            currentNode = nodeStack.pop();
-//            currentNode = nodeStack.pop();
-//
-//            return deserializable;
-//        }
-//        catch (Exception ex)
-//        {
-//           return null;
-//        }
-//
-//
-//
-//
-//
-//    }
 
     private Node getCurrentElement(int n)
     {
-
         int ittElement = 0;
         NodeList nodes = currentNode.getChildNodes();
         for (int i = 0; i < nodes.getLength(); i++)
@@ -228,9 +187,7 @@ public class XMLArchiverIn implements ArchiverInOut
                 }
             }
         }
-
         return null;
-
     }
 
     private Node getNode(String name)
@@ -244,7 +201,6 @@ public class XMLArchiverIn implements ArchiverInOut
             }
         }
         return null;
-
     }
 
     private String getValue(String name)
@@ -261,53 +217,6 @@ public class XMLArchiverIn implements ArchiverInOut
         return null;
     }
 
-//    public void getList(String name, AddElementCallback addElementCallback, Class<? extends Deserializable> cls)
-//    {
-//        nodeStack.push(currentNode);
-//        currentNode = getNode(name);
-//        NodeList nodes = currentNode.getChildNodes();
-//        for(int i = 0 ; i < nodes.getLength(); i++)
-//        {
-//            if(nodes.item(i).getNodeName().equals("element"))
-//            {
-//                try
-//                {
-//                    Deserializable deserializable = (Deserializable) cls.getConstructor(null).newInstance();
-//                    getDeserializable("element", deserializable);
-//                    addElementCallback.addElement(deserializable);
-//
-//                }
-//                catch (NoSuchMethodException ex)
-//                {
-//                    Logger.getLogger(XMLArchiverIn.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-//                catch (SecurityException ex)
-//                {
-//                    Logger.getLogger(XMLArchiverIn.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-//                catch (InstantiationException ex)
-//                {
-//                    Logger.getLogger(XMLArchiverIn.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-//                catch (IllegalAccessException ex)
-//                {
-//                    Logger.getLogger(XMLArchiverIn.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-//                catch (IllegalArgumentException ex)
-//                {
-//                    Logger.getLogger(XMLArchiverIn.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-//                catch (InvocationTargetException ex)
-//                {
-//                    Logger.getLogger(XMLArchiverIn.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-//            }
-//        }
-//
-//
-//        currentNode = nodeStack.pop();
-//
-//    }
     public boolean getBoolean(String name)
     {
         return Boolean.parseBoolean(getValue(name));
@@ -382,7 +291,6 @@ public class XMLArchiverIn implements ArchiverInOut
     public String inout(String name, String v) throws IOException
     {
         return getString(name);
-
     }
 
     public double inout(String name, double v) throws IOException
@@ -451,44 +359,68 @@ public class XMLArchiverIn implements ArchiverInOut
         return factory.add(e);
     }
 
+    interface Converter<T> {
+        T operation(String inp);
+    }
+
+    private <T> List<T> inoutCoretypeList(String name, List<T> v, Converter<T> conv)
+    {
+        int size = getNrElements(name);
+
+        nodeStack.push(currentNode);
+        currentNode = getNode(name);
+
+        v.clear();
+
+        for (int i = 0; i < size; i++)
+        {
+            Node node = getCurrentElement(i);
+            v.add(conv.operation(node.getTextContent().trim()));
+        }
+
+        currentNode = nodeStack.pop();
+
+        return v;
+    }
+
     public List<Integer> inoutIntegerList(String name, List<Integer> v) throws IOException
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return inoutCoretypeList(name, v, (x) -> { return Integer.parseInt(x); });
     }
 
     public List<Long> inoutLongList(String name, List<Long> v) throws IOException
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return inoutCoretypeList(name, v, (x) -> { return Long.parseLong(x); });
     }
 
     public List<Byte> inoutByteList(String name, List<Byte> v) throws IOException
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return inoutCoretypeList(name, v, (x) -> { return Byte.parseByte(x); });
     }
 
     public List<Short> inoutShortList(String name, List<Short> v) throws IOException
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return inoutCoretypeList(name, v, (x) -> { return Short.parseShort(x); });
     }
 
     public List<Float> inoutFloatList(String name, List<Float> v) throws IOException
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+      return inoutCoretypeList(name, v, (x) -> { return Float.parseFloat(x); });
     }
 
     public List<Boolean> inoutBooleanList(String name, List<Boolean> v) throws IOException
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return inoutCoretypeList(name, v, (x) -> { return Boolean.parseBoolean(x); });
     }
 
     public List<String> inoutStringList(String name, List<String> v) throws IOException
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return inoutCoretypeList(name, v, (x) -> { return x; });
     }
 
     public List<Double> inoutDoubleList(String name, List<Double> v) throws IOException
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return inoutCoretypeList(name, v, (x) -> { return Double.parseDouble(x); });
     }
 
     public List inoutSerializableList(String name, List v) throws IOException
