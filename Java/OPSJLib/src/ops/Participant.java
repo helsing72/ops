@@ -135,7 +135,7 @@ public class Participant
     {
         this.domainID = domain.getDomainID();
         this.participantID = participantID;
-        
+
         this.domain = domain;
 
         inProcessTransport.start();
@@ -230,7 +230,7 @@ public class Participant
         errorService.report(error);
     }
 
-    
+
     /**
      * Adds type support in form of a SerializablFactory to this participant.
      * Normally this is the IDL project generated TypeFactory (e.g. FooProject.FooProjectTypeFactory())
@@ -250,7 +250,7 @@ public class Participant
     public Topic createTopic(String name)
     {
         Topic topic = domain.getTopic(name);
-        
+
         if(topic == null)
             return null;
 
@@ -295,10 +295,10 @@ public class Participant
         {
             for (int i = 0; i < partInfoData.subscribeTopics.size(); i++)
             {
-    		if (partInfoData.subscribeTopics.elementAt(i).name.equals(topic.getName())) {
+                if (partInfoData.subscribeTopics.elementAt(i).name.equals(topic.getName())) {
                     partInfoData.subscribeTopics.remove(i);
                     break;
-		}
+                }
             }
         }
     }
@@ -306,7 +306,31 @@ public class Participant
     ///By modified singelton
     synchronized SendDataHandler getSendDataHandler(Topic t) throws CommException
     {
-        return sendDataHandlerFactory.getSendDataHandler(t, this);
+        SendDataHandler sdh = sendDataHandlerFactory.getSendDataHandler(t, this);
+        if (sdh != null)
+        {
+            synchronized (partInfoData)
+            {
+                partInfoData.publishTopics.add(new TopicInfoData(t));
+            }
+        }
+        return sdh;
+    }
+
+    synchronized void releaseSendDataHandler(Topic topic)
+    {
+        ///TODO sendDataHandlerFactory.ReleaseSendDataHandler(topic, this);
+
+        synchronized (partInfoData)
+        {
+            for (int i = 0; i < partInfoData.publishTopics.size(); i++)
+            {
+                if (partInfoData.publishTopics.elementAt(i).name.equals(topic.getName())) {
+                    partInfoData.publishTopics.remove(i);
+                    break;
+                }
+            }
+        }
     }
 
     public Domain getDomain()
