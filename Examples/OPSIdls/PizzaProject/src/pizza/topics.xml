@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<config>
-    <topic name = "pizza.PizzaTopic" type = "pizza.PizzaData" port = "56000"/>
-</config>
