@@ -3,7 +3,7 @@ package pizza.special;
 /*This is a really nice Pizza!*/
 class ExtraAllt extends LHCData
 {
-    /*Does the order include extra cheese???*/
+    /*Does the order "include" extra cheese???*/
     //The above comment is not up to date and should be removed...
     boolean extraCheese;
 

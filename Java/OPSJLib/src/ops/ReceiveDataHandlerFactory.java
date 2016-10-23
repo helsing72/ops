@@ -57,7 +57,7 @@ class ReceiveDataHandlerFactory
                 else
                 {
                     Logger.getLogger(ReceiveDataHandlerFactory.class.getName()).log(
-                        Level.WARNING, 
+                        Level.WARNING,
                         "Same port ({0}) is used with Topics with ''sampleMaxSize'' > {1}",
                         new Object[]{top.getPort(), StaticManager.MAX_SIZE});
                 }
@@ -65,7 +65,7 @@ class ReceiveDataHandlerFactory
             return rdh;
         }
 
-        String localIf = Domain.DoSubnetTranslation(participant.getDomain().getLocalInterface());
+        String localIf = Domain.DoSubnetTranslation(top.getLocalInterface());
 
         if(top.getTransport().equals(Topic.TRANSPORT_MC) || top.getTransport().equals(Topic.TRANSPORT_TCP))
         {

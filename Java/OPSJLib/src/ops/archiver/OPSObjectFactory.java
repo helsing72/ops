@@ -26,6 +26,8 @@ import configlib.SerializableFactory;
 import ops.DefaultOPSConfigImpl;
 import ops.Domain;
 import ops.Topic;
+import ops.Channel;
+import ops.Transport;
 import ops.protocol.OPSMessage;
 import ops.ParticipantInfoData;
 import ops.TopicInfoData;
@@ -54,6 +56,14 @@ public class OPSObjectFactory extends SerializableCompositeFactory
                     {
                         return new OPSMessage();
                     }
+                    if (type.equals("ops.ParticipantInfoData"))
+                    {
+                        return new ParticipantInfoData();
+                    }
+                    if (type.equals("TopicInfoData"))
+                    {
+                        return new TopicInfoData();
+                    }
                     if(type.equals("DefaultOPSConfigImpl"))
                     {
                         return new DefaultOPSConfigImpl();
@@ -70,13 +80,13 @@ public class OPSObjectFactory extends SerializableCompositeFactory
                     {
                         return new Topic();
                     }
-                    if (type.equals("ops.ParticipantInfoData"))
+                    if(type.equals("Channel"))
                     {
-                        return new ParticipantInfoData();
+                        return new Channel();
                     }
-                    if (type.equals("TopicInfoData"))
+                    if(type.equals("Transport"))
                     {
-                        return new TopicInfoData();
+                        return new Transport();
                     }
 
                     return null;

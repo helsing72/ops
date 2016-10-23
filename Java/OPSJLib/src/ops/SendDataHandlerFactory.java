@@ -35,11 +35,11 @@ class SendDataHandlerFactory
         SendDataHandler sender = null;
         try
         {
-            String localIf = Domain.DoSubnetTranslation(participant.getDomain().getLocalInterface());
+            String localIf = Domain.DoSubnetTranslation(t.getLocalInterface());
 
             if(t.getTransport().equals(Topic.TRANSPORT_MC))
             {
-                sender = new McSendDataHandler(t, localIf, participant.getDomain().getTimeToLive());
+                sender = new McSendDataHandler(t, localIf, t.getTimeToLive());
             }
             if(t.getTransport().equals(Topic.TRANSPORT_TCP))
             {

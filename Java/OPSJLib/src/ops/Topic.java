@@ -44,6 +44,8 @@ public class Topic<T> extends OPSObject
     private int outSocketBufferSize = -1;
     private int inSocketBufferSize = -1;
     private String transport;
+    private String localInterface = "";
+    private int timeToLive = -1;
 
     /** Creates a new instance of Topic */
     public Topic(String name, int port, String typeID, String domainAddress)
@@ -54,7 +56,6 @@ public class Topic<T> extends OPSObject
         this.domainAddress = domainAddress;
         this.sampleMaxSize = StaticManager.MAX_SIZE;
         appendType("Topic");
-
     }
 
     public Topic()
@@ -70,6 +71,16 @@ public class Topic<T> extends OPSObject
     public void setDomainAddress(String domainAddress)
     {
         this.domainAddress = domainAddress;
+    }
+
+    public String getLocalInterface()
+    {
+        return localInterface;
+    }
+
+    public void setLocalInterface(String localInterface)
+    {
+        this.localInterface = localInterface;
     }
 
     @Override
@@ -207,4 +218,15 @@ public class Topic<T> extends OPSObject
     {
         this.transport = transport;
     }
+
+    public int getTimeToLive()
+    {
+        return timeToLive;
+    }
+
+    public void setTimeToLive(int timeToLive)
+    {
+        this.timeToLive = timeToLive;
+    }
+    
 }

@@ -266,10 +266,12 @@ public class Participant
      */
     public Topic createParticipantInfoTopic()
     {
-   	Topic infoTopic = new Topic("ops.bit.ParticipantInfoTopic", domain.GetMetaDataMcPort(), "ops.ParticipantInfoData", domain.getDomainAddress());
+      Topic infoTopic = new Topic("ops.bit.ParticipantInfoTopic", domain.GetMetaDataMcPort(), "ops.ParticipantInfoData", domain.getDomainAddress());
+      infoTopic.setLocalInterface(domain.getLocalInterface());
+      infoTopic.setTimeToLive(domain.getTimeToLive());
     	infoTopic.setDomainID(domainID);
-        infoTopic.setParticipantID(participantID);
-	infoTopic.setTransport(Topic.TRANSPORT_MC);
+      infoTopic.setParticipantID(participantID);
+	    infoTopic.setTransport(Topic.TRANSPORT_MC);
     	return infoTopic;
     }
 

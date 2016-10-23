@@ -21,6 +21,7 @@
 package ops;
 
 import configlib.ArchiverInOut;
+import configlib.XMLArchiverIn;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -43,6 +44,8 @@ public class Domain extends OPSObject
     private int outSocketBufferSize = -1;   // Use OS default
     private int metaDataMcPort = 9494;
 
+    private Vector<Channel> channels = new Vector<Channel>();
+    private Vector<Transport> transports = new Vector<Transport>();
 
     public Domain()
     {
@@ -54,6 +57,14 @@ public class Domain extends OPSObject
       if (top.getDomainAddress().equals(""))
       {
         top.setDomainAddress(domainAddress);
+      }
+      if (top.getLocalInterface().equals(""))
+      {
+        top.setLocalInterface(localInterface);
+      }
+      if (top.getTimeToLive() < 0)
+      {
+        top.setTimeToLive(timeToLive);
       }
       if (top.getInSocketBufferSize() < 0)
       {
@@ -103,6 +114,60 @@ public class Domain extends OPSObject
         inSocketBufferSize = archive.inout("inSocketBufferSize", inSocketBufferSize);
         outSocketBufferSize = archive.inout("outSocketBufferSize", outSocketBufferSize);
         metaDataMcPort = archive.inout("metaDataMcPort", metaDataMcPort);
+
+        // To not break binary compatibility we only do this when we know we are
+      	// reading from an XML-file
+      	if (archive instanceof XMLArchiverIn) {
+      		  channels = (Vector<Channel>) archive.inoutSerializableList("channels", channels);
+      		  transports = (Vector<Transport>) archive.inoutSerializableList("transports", transports);
+      		  checkTransports();
+      	}
+    }
+
+    private Channel findChannel(String id)
+    {
+      if (!id.equals("")) {
+        for (Channel channel : channels) {
+          if (id.equals(channel.channelID)) return channel;
+        }
+      }
+      return null;
+    }
+
+    private Topic findTopic(String id)
+    {
+      if (!id.equals("")) {
+        for (Topic topic : topics) {
+          if (id.equals(topic.getName())) return topic;
+        }
+      }
+      return null;
+    }
+
+    void checkTransports() throws IOException
+    {
+      // Now update topics with values from the transports and channels
+      // Loop over all transports and for each topic, see if it needs parameters from the channel
+      for (Transport transport : transports) {
+        // Get channel
+        Channel channel = findChannel(transport.channelID);
+        if (channel == null) {
+          throw new IOException(
+            "Non existing channelID: '" + transport.channelID +
+            "' used in transport spcification.");
+        } else {
+          for (String topicName : transport.topics) {
+            Topic top = findTopic(topicName);
+            if (top == null) {
+              throw new IOException(
+                "Non existing topicID: '" + topicName +
+                "' used in transport spcification.");
+            } else {
+              channel.populateTopic(top);
+            }
+          }
+        }
+      }
     }
 
     public Vector<Topic> getTopics() {

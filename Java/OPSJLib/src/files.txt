@@ -18,6 +18,7 @@ src\ops\protocol\OPSMessage.java
 src\ops\transport\inprocess\InProcessTransport.java
 src\ops\AckData.java
 src\ops\BasicError.java
+src\ops\Channel.java
 src\ops\CommException.java
 src\ops\ConfigurationException.java
 src\ops\DataValidator.java
@@ -88,6 +89,7 @@ src\ops\Topic.java
 src\ops\TopicInfoData.java
 src\ops\TopicInterface.java
 src\ops\TopicInterfaceData.java
+src\ops\Transport.java
 src\ops\TypeHelper.java
 src\ops\UDPReceiver.java
 src\ops\UDPSender.java

@@ -2,6 +2,7 @@
 set(OPSJLIB_SRC
   ops/AckData.java
   ops/BasicError.java
+  ops/Channel.java
   ops/CommException.java
   ops/ConfigurationException.java
   ops/DataValidator.java
@@ -72,6 +73,7 @@ set(OPSJLIB_SRC
   ops/TopicInterfaceData.java
   ops/TopicInterface.java
   ops/Topic.java
+  ops/Transport.java
   ops/TypeHelper.java
   ops/UDPReceiver.java
   ops/UDPSender.java
