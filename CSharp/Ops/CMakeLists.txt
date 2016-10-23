@@ -4,6 +4,7 @@ set(OPS_LIB_NAME ops-csharp)
 set(OPS_CS_SOURCE
   AckData.cs
   BlockingBuffer.cs
+  Channel.cs
   DeadlineMissedFilterQoSPolicy.cs
   DeadlineNotifier.cs
   DefaultOPSConfigImpl.cs
@@ -57,6 +58,7 @@ set(OPS_CS_SOURCE
   TcpServerSender.cs
   Topic.cs
   TopicInfoData.cs
+  Transport.cs
   UdpReceiver.cs
   UdpSender.cs
   WriteByteBuffer.cs
@@ -121,7 +123,7 @@ if(WIN32)
     list(APPEND OPS_CS_SOURCE_LIST ${CSNATIVEFILE})
   endforeach()
 
-  add_custom_command(OUTPUT ${OPS_TARGET} 
+  add_custom_command(OUTPUT ${OPS_TARGET}
     #COMMAND "${VS80COMNTOOLS}vsvars32.bat x86"
     COMMAND "${VCVARSALL}" ${VSVARSALL_ARCHITECTURE}
     COMMAND ${CSCOMPILER} /noconfig ${OPS_CSHARP_FLAGS} /nowarn:1701,1702 /warn:4 /define:TRACE /lib:${CSREFERENCE_NATIVEPATH} /reference:System.dll,System.Drawing.dll,System.Windows.Forms.dll,System.Xml.dll,System.Linq.dll,System.Web.dll,System.Web.Services.dll /target:library /out:${OPS_TARGET} ${OPS_CS_SOURCE_LIST}
@@ -145,4 +147,3 @@ endif()
 add_custom_target(ops-csharp ALL DEPENDS ${OPS_TARGET})
 
 install(FILES ${OPS_TARGET} DESTINATION lib/mono)
-
