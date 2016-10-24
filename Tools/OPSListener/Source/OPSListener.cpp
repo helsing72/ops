@@ -852,7 +852,7 @@ int _kbhit() {
 
 int main(int argc, char* argv[])
 {
-	std::cout << std::endl << "OPSListener Version 2016-05-14" << std::endl << std::endl;
+	std::cout << std::endl << "OPSListener Version 2016-10-24" << std::endl << std::endl;
 
 	sds::sdsSystemTimeInit();
 
