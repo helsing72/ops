@@ -21,8 +21,8 @@ if(DEFINED ENV{GOOGLETEST_HOME})
 endif()
 find_package(GTest)
 
-# if we need to link with libraries
-find_package(Java COMPONENTS Runtime Development)
+# We need Java 1.8 (JDK 8) or later since Java code uses lambda expressions
+find_package(Java 1.8 COMPONENTS Runtime Development)
 
 if(Java_Runtime_FOUND)
   message(STATUS "Found Java version: ${Java_VERSION}")

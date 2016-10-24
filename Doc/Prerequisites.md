@@ -4,7 +4,7 @@
 Make sure you have a git client installed.
 
 ## Java ##
-Make sure you have a Java SE Development Kit (JDK, version 7 or higher) installed on
+Make sure you have a Java SE Development Kit (JDK, version 8 or higher) installed on
 your system. The tools you use to create systems with OPS are all running in Java and
 use the Java compiler to generate pre-compiled code to use for debugging. If you know
 you will only use OPS for C++ and C# and do not need any debugging capabilities, it may
@@ -53,7 +53,7 @@ OPS uses JavaCC version 6.0.
 Experimental support exist for Python 2.7.
 
 ## Delphi ##
-OPS has been used with Delphi XE2.
+OPS has been used with Delphi XE2 and Delphi 10.1 Berlin.
 
 ## gcovr ##
 TBD
