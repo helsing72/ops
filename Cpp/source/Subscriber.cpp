@@ -108,7 +108,10 @@ namespace ops
         //Check that the type of the delivered data can be interpreted as the type we expect in this Subscriber
         else if (message->getData()->getTypeString().find(topic.getTypeID()) == std::string::npos)
         {
-            BasicError err("Subscriber", "onNewEvent", "Received message with wrong data type for Topic");
+            BasicError err("Subscriber", "onNewEvent", 
+				std::string("Received message with wrong data type for Topic: ") + topic.getName() +
+				std::string("\nExpected type: ") + topic.getTypeID() + 
+				std::string("\nGot type: ") + message->getData()->getTypeString());
             participant->reportError(&err);
             return;
         }
