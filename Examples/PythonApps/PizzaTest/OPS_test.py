@@ -352,7 +352,7 @@ while not doExit:
 		elif (commands[0]=="SD"):
 			for info in ItemInfoList:
 				if info.selected:
-					info.helper.DeletePublisher()
+					info.helper.DeleteSubscriber()
 			del commands[0]
 
 		elif (commands[0]=="SS"):
