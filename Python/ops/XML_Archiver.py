@@ -8,6 +8,12 @@ class XML_Archiver_In(Archiver_In):
 		tree = ET.parse(filename)
 		self.stack = [tree.getroot()]
 
+	def Bool(self,name,value):
+		newNode = self.stack[-1].find(name)
+		if newNode is not None:
+			value = bool(newNode.text)
+		return value
+
 	def Int8(self,name,value):
 		newNode = self.stack[-1].find(name)
 		if newNode is not None:
@@ -56,7 +62,7 @@ class XML_Archiver_In(Archiver_In):
 			value = prototype()
 		else:
 	 		value = self.factory.create(typename)
-	 	
+
 	 	if value is not None:
 	 		value.serialize(self)
 	 	return value
@@ -67,8 +73,80 @@ class XML_Archiver_In(Archiver_In):
 		if newNode is not None:
 			self.stack.append(newNode)
 			value = self.__Ops(value,prototype)
-		 	self.stack.pop()
+			self.stack.pop()
 		return value
+
+	def BoolVector(self,name,value):
+		del value[:]
+		newNode = self.stack[-1].find(name);
+		if newNode is not None:
+			self.stack.append(newNode)
+			for node in self.stack[-1].findall('element'):
+				value.append(bool(node.text))
+			self.stack.pop()
+
+	def Int8Vector(self,name,value):
+		del value[:]
+		newNode = self.stack[-1].find(name);
+		if newNode is not None:
+			self.stack.append(newNode)
+			for node in self.stack[-1].findall('element'):
+				value.append(int(node.text))
+			self.stack.pop()
+
+	def Int16Vector(self,name,value):
+		del value[:]
+		newNode = self.stack[-1].find(name);
+		if newNode is not None:
+			self.stack.append(newNode)
+			for node in self.stack[-1].findall('element'):
+				value.append(int(node.text))
+			self.stack.pop()
+
+	def Int32Vector(self,name,value):
+		del value[:]
+		newNode = self.stack[-1].find(name);
+		if newNode is not None:
+			self.stack.append(newNode)
+			for node in self.stack[-1].findall('element'):
+				value.append(int(node.text))
+			self.stack.pop()
+
+	def Int64Vector(self,name,value):
+		del value[:]
+		newNode = self.stack[-1].find(name);
+		if newNode is not None:
+			self.stack.append(newNode)
+			for node in self.stack[-1].findall('element'):
+				value.append(int(node.text))
+			self.stack.pop()
+
+	def Float32Vector(self,name,value):
+		del value[:]
+		newNode = self.stack[-1].find(name);
+		if newNode is not None:
+			self.stack.append(newNode)
+			for node in self.stack[-1].findall('element'):
+				value.append(float(node.text))
+			self.stack.pop()
+
+	def Float64Vector(self,name,value):
+		del value[:]
+		newNode = self.stack[-1].find(name);
+		if newNode is not None:
+			self.stack.append(newNode)
+			for node in self.stack[-1].findall('element'):
+				value.append(float(node.text))
+			self.stack.pop()
+
+	def StringVector(self,name,value):
+		del value[:]
+		newNode = self.stack[-1].find(name);
+		if newNode is not None:
+			self.stack.append(newNode)
+			for node in self.stack[-1].findall('element'):
+		 		value.append(node.text)
+		 	self.stack.pop()
 
 	def OpsVector(self,name,values,prototype=None):
 		del values[:]
@@ -76,9 +154,9 @@ class XML_Archiver_In(Archiver_In):
 		if newNode is not None:
 			self.stack.append(newNode)
 			for node in self.stack[-1].findall('element'):
-				self.stack.append(node)		 		
+				self.stack.append(node)
 		 		data = self.__Ops(None,prototype)
-		 		values.append(data)		 		
+		 		values.append(data)
 		 		self.stack.pop()
 		 	self.stack.pop()
 
@@ -104,7 +182,7 @@ class XML_Archiver_Out(Archiver_Out):
 		text += ">\n"
 		self.file.write(text)
 		self.depth += 1
-	
+
 	def closeTag(self,name="root"):
 		self.depth -= 1
 		text = self.getIndent() + ("</%s>\n"  % name)
