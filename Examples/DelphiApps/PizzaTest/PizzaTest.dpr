@@ -65,7 +65,8 @@ uses
   uOps.Utilities in '..\..\..\Delphi\Source\uOps.Utilities.pas',
   uSockets in '..\..\..\Delphi\Common\uSockets.pas',
   uOps.Channel in '..\..\..\Delphi\Source\uOps.Channel.pas',
-  uOps.Transport in '..\..\..\Delphi\Source\uOps.Transport.pas';
+  uOps.Transport in '..\..\..\Delphi\Source\uOps.Transport.pas',
+  sds.MessageHeaderData in '..\..\OPSIdls\PizzaProject\Generated\Delphi\sds\sds.MessageHeaderData.pas';
 
 {$R *.res}
 
