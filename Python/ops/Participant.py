@@ -33,7 +33,7 @@ class Participant(object):
 		self.objectFactory = OpsDefaultFactory()
 
 		self.partInfoData = ParticipantInfoData.ParticipantInfoData()
-		
+
 		self.partInfoData.name = gethostname() + "(" + str(getpid()) + ")"
 		self.partInfoData.languageImplementation = "Python"
 		self.partInfoData.id = participantID
@@ -41,7 +41,7 @@ class Participant(object):
 
 	def __str__(self):
 		return "Participant\nConfig:\n" + self.config.__str__() + "\nDomain:\n" + self.domain.__str__()
-	
+
 
 	def createTopic(self,name):
 		topic = self.domain.getTopic(name)
@@ -60,6 +60,8 @@ class Participant(object):
 	def createParticipantInfoTopic(self):
 		topic = Topic()
 		topic.domainAddress = self.domain.domainAddress
+		topic.localInterface = self.domain.localInterface;
+		topic.timeToLive = self.domain.timeToLive;
 		topic.participantID = self.participantID;
 		topic.domainID = self.domainID;
 		topic.participant = self;

@@ -3,6 +3,12 @@
 from Constants import *
 import copy
 
+class ConfigError(Exception):
+	def __init__(self, value):
+		self.value = value
+	def __str__(self):
+		return repr(self.value)
+
 class OPS_Object(object):
 	"""docstring for OPS_Object"""
 	def __init__(self):
@@ -60,10 +66,9 @@ class Message(OPS_Object):
 		self.topLevelKey = dataBuffer.String("topLevelKey",self.topLevelKey)
 		self.address = dataBuffer.String("address",self.address)
 		self.data = dataBuffer.Ops("data",self.data)
-	
+
 	def validate(self):
-		if not super(Message,self).validate():
-			raise ValueError()
+		super(Message,self).validate()
 		if not isinstance(self.messageType,int):
 			raise ValueError()
 		if not isinstance(self.publisherPriority,int):
@@ -78,8 +83,9 @@ class Message(OPS_Object):
 			raise ValueError()
 		if not isinstance(self.address,str):
 			raise ValueError()
-		if not isinstance(self.data,OPS_Object) or not self.data.validate():
+		if not isinstance(self.data,OPS_Object):
 			raise ValueError()
+		self.data.validate()
 
 	def setSource(self,addr):
 		self.sourceAddr = addr
@@ -102,6 +108,8 @@ class Topic(OPS_Object):
 		self.sampleMaxSize=PACKET_MAX_SIZE
 		self.transport=TRANSPORT_MC
 		self.participant=None
+		self.timeToLive=-1
+		self.localInterface=""
 
 	def __str__(self):
 		temp ="\nTopic:"
@@ -113,6 +121,8 @@ class Topic(OPS_Object):
 		temp += "\n  inSocketBufferSize: %s" % self.inSocketBufferSize
 		temp += "\n  sampleMaxSize: %s" % self.sampleMaxSize
 		temp += "\n  transport: %s" % self.transport
+		temp += "\n  timeToLive: %s" % self.timeToLive
+		temp += "\n  localInterface: %s" % self.localInterface
 		return  super(Topic,self).__str__() + temp
 
 	def setSampleMaxSize(self,size):
@@ -136,8 +146,7 @@ class Topic(OPS_Object):
 			self.transport = TRANSPORT_MC
 
 	def validate(self):
-		if not super(Topic,self).validate():
-			raise ValueError()
+		super(Topic,self).validate()
 		if not isinstance(self.name,str):
 			raise ValueError()
 		if not isinstance(self.typeID,str):
@@ -158,8 +167,109 @@ class Topic(OPS_Object):
 	def getName(self):
 		return self.name
 
+
+class Channel(OPS_Object):
+	"""docstring for Channel"""
+	def __init__(self):
+		super(Channel,self).__init__()
+		self.appendType("Channel")
+		self.channelID=""
+		self.linktype=""
+		self.localInterface=""
+		self.domainAddress=""
+		self.timeToLive=-1
+		self.port=0
+		self.outSocketBufferSize=-1
+		self.inSocketBufferSize=-1
+
+	def __str__(self):
+		temp ="\nChannel:"
+		temp += "\n  channelID: %s" % self.channelID
+		temp += "\n  linktype: %s" % self.linktype
+		temp += "\n  localInterface: %s" % self.localInterface
+		temp += "\n  domainAddress: %s" % self.domainAddress
+		temp += "\n  timeToLive: %s" % self.timeToLive
+		temp += "\n  port: %s" % self.port
+		temp += "\n  outSocketBufferSize: %s" % self.outSocketBufferSize
+		temp += "\n  inSocketBufferSize: %s" % self.inSocketBufferSize
+		return super(Channel,self).__str__() + temp
+
+	def serialize(self,archiver):
+		super(Channel,self).serialize(archiver)
+		self.channelID = archiver.String("name",self.channelID)
+		self.linktype = archiver.String("linktype",self.linktype)
+		self.localInterface = archiver.String("localInterface",self.localInterface)
+		self.domainAddress = archiver.String("address",self.domainAddress)
+		self.timeToLive = archiver.Int32("timeToLive",self.timeToLive)
+		self.port = archiver.Int32("port",self.port)
+		self.outSocketBufferSize = archiver.Int64("outSocketBufferSize",self.outSocketBufferSize)
+		self.inSocketBufferSize = archiver.Int64("inSocketBufferSize",self.inSocketBufferSize)
+
+		if self.linktype=="":
+			self.linktype = TRANSPORT_MC
+
+	def validate(self):
+		super(Channel,self).validate()
+		if not isinstance(self.channelID,str):
+			raise ValueError()
+		if not isinstance(self.linktype,str):
+			raise ValueError()
+		if not isinstance(self.localInterface,str):
+			raise ValueError()
+		if not isinstance(self.domainAddress,str):
+			raise ValueError()
+		if not isinstance(self.timeToLive,int):
+			raise ValueError()
+		if not isinstance(self.port,int):
+			raise ValueError()
+		if not isinstance(self.outSocketBufferSize,int):
+			raise ValueError()
+		if not isinstance(self.inSocketBufferSize,int):
+			raise ValueError()
+
+	def populateTopic(self,top):
+		top.transport = self.linktype
+		top.localInterface = self.localInterface
+		top.domainAddress = self.domainAddress
+		top.port = self.port
+		top.outSocketBufferSize = self.outSocketBufferSize
+		top.inSocketBufferSize = self.inSocketBufferSize
+		top.timeToLive = self.timeToLive
+
+class Transport(OPS_Object):
+	"""docstring for Transport"""
+	def __init__(self):
+		super(Transport,self).__init__()
+		self.appendType("Transport")
+		self.channelID=""
+		self.topics=[]
+
+	def __str__(self):
+		temp ="\nTransport:"
+		temp += "\n  channelID: %s" % self.channelID
+		temp += "\n  topics: "
+		for tname in self.topics:
+			temp += tname + ", "
+		return super(Transport,self).__str__() + temp
+
+	def serialize(self,archiver):
+		super(Transport,self).serialize(archiver)
+		self.channelID = archiver.String("channelID",self.channelID)
+		archiver.StringVector("topics", self.topics)
+
+	def validate(self):
+		super(Transport,self).validate()
+		if not isinstance(self.channelID,str):
+			raise ValueError()
+		for x in self.topics:
+			if not isinstance(x,str):
+				raise ValueError()
+
+
+from XML_Archiver import XML_Archiver_In
+
 class Domain(OPS_Object):
-	"""docstring for Topic"""	
+	"""docstring for Domain"""
 	def __init__(self):
 		super(Domain,self).__init__()
 		self.appendType("Domain")
@@ -171,6 +281,8 @@ class Domain(OPS_Object):
 		self.metaDataMcPort = 9494
 		self.topics=[]
 		self.domainID=""
+		self.channels=[]
+		self.transports=[]
 
 	def __str__(self):
 		temp ="\nDomain:"
@@ -181,13 +293,13 @@ class Domain(OPS_Object):
 		temp += "\n  outSocketBufferSize: %s" % self.outSocketBufferSize
 		temp += "\n  metaDataMcPort: %s" % self.metaDataMcPort
 		temp += "\n  domainID: %s" % self.domainID
-
 		for t in self.topics:
 		 	temp+="\n" + t.__str__()
-		#temp += "\n  topics: %s" % self.topics
+		for chn in self.channels:
+		 	temp+="\n" + chn.__str__()
+		for trn in self.transports:
+		 	temp+="\n" + trn.__str__()
 		return super(Domain,self).__str__() + temp
-
-
 
 	def serialize(self,archiver):
 		super(Domain,self).serialize(archiver)
@@ -200,14 +312,21 @@ class Domain(OPS_Object):
 		self.outSocketBufferSize = archiver.Int32("outSocketBufferSize",self.outSocketBufferSize)
 		self.metaDataMcPort = archiver.Int32("metaDataMcPort",self.metaDataMcPort)
 
+		# To not break binary compatibility we only do this when we know we are
+		# reading from an XML-file
+		if isinstance(archiver,XML_Archiver_In):
+			archiver.OpsVector("channels",self.channels,Channel)
+			archiver.OpsVector("transports",self.transports,Transport)
+			self.checkTransports()
+
 	def validate(self):
-		if not super(Config,self).validate():
-			raise ValueError()
+		super(Domain,self).validate()
 		if not isinstance(self.domainID,str):
 			raise ValueError()
 		for x in self.topics:
-			if not isinstance(x,Topic) or not x.validate():
+			if not isinstance(x,Topic):
 				raise ValueError()
+			x.validate()
 		if not isinstance(self.domainAddress,str):
 			raise ValueError()
 		if not isinstance(self.localInterface,str):
@@ -220,19 +339,58 @@ class Domain(OPS_Object):
 			raise ValueError()
 		if not isinstance(self.metaDataMcPort,int):
 			raise ValueError()
+		for x in self.channels:
+			if not isinstance(x,Channel):
+				raise ValueError()
+			x.validate()
+		for x in self.transports:
+			if not isinstance(x,Transport):
+				raise ValueError()
+			x.validate()
 
 	def getTopic(self,name):
 		for t in self.topics:
 			if t.domainAddress == "":
 				t.domainAddress = self.domainAddress
+			if t.localInterface == "":
+				t.localInterface = self.localInterface
+			if t.timeToLive < 0:
+				t.timeToLive = self.timeToLive
+			if t.inSocketBufferSize < 0:
+				t.inSocketBufferSize = self.inSocketBufferSize
+			if t.outSocketBufferSize < 0:
+				t.outSocketBufferSize = self.outSocketBufferSize
 			if t.name == name:
 				return copy.deepcopy(t)
 		return None
 
+	def findChannel(self,name):
+		for chn in self.channels:
+			if chn.channelID == name:
+				return chn
+		return None
+
+	def findTopic(self,name):
+		for t in self.topics:
+			if t.name == name:
+				return t
+		return None
+
+	def checkTransports(self):
+		for trn in self.transports:
+			chn = self.findChannel(trn.channelID)
+			if chn == None:
+				raise ConfigError("Non existing channelID used in transport specification")
+			else:
+				for tname in trn.topics:
+					top = self.findTopic(tname)
+					if top == None:
+						raise ConfigError("Non existing topicID used in transport specification")
+					else:
+						chn.populateTopic(top)
+
 
 import Factory
-from XML_Archiver import XML_Archiver_In
-
 
 class Config(OPS_Object):
 	def __init__(self):
@@ -263,13 +421,14 @@ class Config(OPS_Object):
 	def serialize(self,dataBuffer):
 		super(Config,self).serialize(dataBuffer)
 		dataBuffer.OpsVector("domains",self.domains,Domain)
-	
+
 	def validate(self):
-		if not super(Config,self).validate():
-			raise ValueError()
+		super(Config,self).validate()
 		for x in self.domains:
-			if not isinstance(x,Domain) or not x.validate():
+			if not isinstance(x,Domain):
 				raise ValueError()
+			x.validate()
+
 
 class DefaultOPSConfigImpl(Config):
 	def __init__(self):

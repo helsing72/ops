@@ -20,9 +20,9 @@ class AbstractReceiveDataHandler(object):
 		if segment.isValid():
 			if (self.assembler==None):
 				self.assembler = DataAssembly.Assembler()
-	
+
 			if (self.assembler.addSegment(segment)==False):
-				self.assembler = DataAssembly.Assembler()	
+				self.assembler = DataAssembly.Assembler()
 			else:
 				if (self.assembler.isFull()):
 					obj = self.assembler.createOPS(self.topic.participant.objectFactory)
@@ -95,17 +95,17 @@ def getReceiveDataHandler(participant,topic):
 	rdh = None
 	if key in __ReceiveDataHandler:
 		rdh = __ReceiveDataHandler[key]
-		if max(rdh.topic.sampleMaxSize,topic.sampleMaxSize) > ops.PACKET_MAX_SIZE:
+		if max(rdh.topic.sampleMaxSize,topic.sampleMaxSize) > PACKET_MAX_SIZE:
 			message = "Warning: "
-			if topic.transport == ops.Topic.TRANSPORT_UDP:
+			if topic.transport == TRANSPORT_UDP:
 				message += "UDP Transport"
 			else:
-				message += "Same port (" +  topic.port + ")"
-			message += "is used with Topics with 'sampleMaxSize' > " + ops.PACKET_MAX_SIZE
+				message += "Same port (%s)" % topic.port
+			message += " is used with Topics with 'sampleMaxSize' > %s" % PACKET_MAX_SIZE
 			print message
 	else:
-		localInterface = Support.doSubnetTranslation(participant.domain.localInterface)
-		if topic.transport == TRANSPORT_MC:	
+		localInterface = Support.doSubnetTranslation(topic.localInterface)
+		if topic.transport == TRANSPORT_MC:
 			rdh = McReceiveDataHandler(localInterface,topic)
 		rdh.start()
 		__ReceiveDataHandler[key] = rdh

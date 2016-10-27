@@ -13,10 +13,10 @@ class BasicFactory(AbstractFactory):
 	def __init__(self):
 		super(BasicFactory, self).__init__()
 		self.types = {}
-	
+
 	def addType(self,messageID,messageType):
 		self.types[messageID] = messageType
-	
+
 	def create(self,typesString):
 		#print "Factory:create",typesString
 		for s in typesString.split(' '):
@@ -50,6 +50,8 @@ class OpsDefaultFactory(CompositFactory):
 		b = BasicFactory()
 		b.addType('ops.protocol.OPSMessage',opsTypes.Message)
 		b.addType('Topic',opsTypes.Topic)
+		b.addType('Channel',opsTypes.Channel)
+		b.addType('Transport',opsTypes.Transport)
 		b.addType('Domain',opsTypes.Domain)
 		b.addType("MulticastDomain",opsTypes.Domain)
 		b.addType("DefaultOPSConfigImpl",opsTypes.DefaultOPSConfigImpl)

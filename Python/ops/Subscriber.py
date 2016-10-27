@@ -16,7 +16,7 @@ class Subscriber(object):
 		self.started = False
 
 	def __del__(self):
-		self.disconnect()	
+		self.stop()		#disconnect()
 
 	def start(self):
 		if self.started:
@@ -24,11 +24,11 @@ class Subscriber(object):
 		self.receiveDataHandler = self.participant.getReceiveDataHandler(self.topic)
 		self.receiveDataHandler.addSubscriber(self)
 		self.started = True
-	
+
 	def stop(self):
 		if not self.started:
 			return
-		self.receiveDataHandler.removeListener(self);
+		self.receiveDataHandler.removeSubscriber(self);
 		self.receiveDataHandler = None
 		self.started = False
 
@@ -41,11 +41,10 @@ class Subscriber(object):
 				return False
 		return True
 
-
-	def disconnect(self):
-		if self.rdh is not None:
-			self.rdh.removeSubscriber(self)
-		self.rdh=None
+#	def disconnect(self):
+#		if self.rdh is not None:
+#			self.rdh.removeSubscriber(self)
+#		self.rdh=None
 
 	def newMessage(self,message):
 		if message.topicName == self.topic.name:
@@ -68,4 +67,3 @@ class Subscriber(object):
 		self.messageCallbacks.add(callback)
 	def removeCallback(self,callback):
 		self.messageCallbacks.remove(callback)
-

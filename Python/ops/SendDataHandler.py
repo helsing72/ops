@@ -6,7 +6,7 @@ class AbstractSendDataHandler(object):
 	def __init__(self):
 		super(AbstractSendDataHandler,self).__init__()
 		self.publishers = set()
-	
+
 	def addPublisher(self,client):
 		self.publishers.add(client)
 		if len(self.publishers)==1:
@@ -60,10 +60,9 @@ class McSendDataHandler(AbstractSendDataHandler):
 		self.socket.sendto(block,self.sendAddress)
 
 def getSendDataHandler(participant,topic):
-	#localIf = Domain::doSubnetTranslation(participant->getDomain()->getLocalInterface(), participant->getIOService());
-	localInterface = Support.doSubnetTranslation(participant.domain.localInterface)
+	localInterface = Support.doSubnetTranslation(topic.localInterface)
 
 	if topic.transport == TRANSPORT_MC:
-		return McSendDataHandler(localInterface,topic,1)
+		return McSendDataHandler(localInterface,topic,topic.timeToLive)
 
 	return None
