@@ -102,6 +102,7 @@ class CHelper(IHelper):
 		if self.pub is not None:
 			print "Deleting publisher for topic " + self.pub.topic.name
 			del self.pub
+			self.pub = None
 		else:
 			if doLog:
 				print "Publisher must be created first!!"
