@@ -45,7 +45,7 @@ namespace ops
 		size_t len = spareBytes.size();
 		obj->spareBytes.reserve(len);
 		obj->spareBytes.resize(len, 0);
-		memcpy((void*)&obj->spareBytes[0], (void*)&spareBytes[0], len);
+		if (len > 0) memcpy((void*)&obj->spareBytes[0], (void*)&spareBytes[0], len);
 	}
 
     std::string OPSObject::getKey()
