@@ -23,8 +23,7 @@ unit uOps.ByteBuffer;
 interface
 
 uses uOps.Types,
-     uOps.MemoryMap,
-     uOps.OpsObject;
+     uOps.MemoryMap;
 
 type
   TByteBuffer = class(TObject)
