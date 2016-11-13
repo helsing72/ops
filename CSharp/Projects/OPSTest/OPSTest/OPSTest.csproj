@@ -90,6 +90,9 @@
     <Compile Include="..\..\..\..\Examples\OPSIdls\PizzaProject\Generated\CSharp\pizza\VessuvioData.cs">
       <Link>GenIDLs\VessuvioData.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\..\Examples\OPSIdls\PizzaProject\Generated\CSharp\sds\MessageHeaderData.cs">
+      <Link>GenIDLs\MessageHeaderData.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\Ops\AckData.cs">
       <Link>Ops\AckData.cs</Link>
     </Compile>
