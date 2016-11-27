@@ -35,6 +35,7 @@ The following table shows a listing of all available OPS IDL types and their cor
 | string  | std::string | String | string | AnsiString | 4 bytes (size) + 1 byte per character (8-bit) |
 | T       | T  | T  | T | T | sizeof( T )              |
 | T`[]` | std::vector< T > | java.util.Vector< T > | List< T > | array of T | 4 bytes (size) + sizeof( T ) per element |
+| T`[size]` | T`[size]` | java.util.Vector< T > | List< T > | array`[0..size-1]` of T | 4 bytes (size) + sizeof( T ) per element |
 
 Or as IDL code example:
 
