@@ -35,6 +35,9 @@ type
 		procedure FillClone(var obj : TOPSObject); override;
   end;
 
+var
+  __classNameArchiveHelper : TArchiverInOut.TSerializableHelper<__className>;
+
 implementation
 
 uses SysUtils;
@@ -82,5 +85,11 @@ begin
     Value := Self.Value;
 	end;
 end;
+
+initialization
+  __classNameArchiveHelper := TArchiverInOut.TSerializableHelper<__className>.Create;
+
+finalization
+  FreeAndNil(__classNameArchiveHelper);
 
 end.

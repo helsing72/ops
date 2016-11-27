@@ -47,6 +47,8 @@ type
     constructor Create(xmlString : string; topNode : string; factory : TSerializableInheritingTypeFactory);
     destructor Destroy; override;
 
+    function isOut : Boolean; override;
+
     procedure inout(const name : String; var value : Boolean); overload; override;
     procedure inout(const name : String; var value : Byte); overload; override;
     procedure inout(const name : String; var value : Int32); overload; override;
@@ -72,6 +74,9 @@ type
     procedure inout(const name : String; var value : TDynDoubleArray); overload; override;
     procedure inout(const name : String; var value : TDynAnsiStringArray); overload; override;
 
+    procedure inoutfixarr(const name : string; value : Pointer; numElements : Integer; totalSize : Integer); overload; override;
+    procedure inoutfixarr(const name : string; var value : array of AnsiString; numElements : Integer); overload; override;
+
     procedure inout(const name : string; var value : TDynSerializableArray); overload; override;
 
   protected
@@ -81,10 +86,11 @@ type
 
 implementation
 
-{$IFDEF CONSOLE}
 uses
-  System.Win.ComObj;
+{$IFDEF CONSOLE}
+  System.Win.ComObj,
 {$ENDIF}
+  uOps.Exceptions;
 
 constructor TXMLArchiverIn.Create(xmlString : string; topNode : string; factory : TSerializableInheritingTypeFactory);
 begin
@@ -105,6 +111,11 @@ end;
 destructor TXMLArchiverIn.Destroy;
 begin
   inherited;
+end;
+
+function TXMLArchiverIn.isOut : Boolean;
+begin
+  Result := False;
 end;
 
 procedure TXMLArchiverIn.inout(const name : String; var value : Boolean);
@@ -523,6 +534,16 @@ begin
   end;
 
   FCurrentNode := tempNode;
+end;
+
+procedure TXMLArchiverIn.inoutfixarr(const name : string; value : Pointer; numElements : Integer; totalSize : Integer);
+begin
+  raise EArchiverException.Create('TXMLArchiverIn.inoutfixarr NYI');
+end;
+
+procedure TXMLArchiverIn.inoutfixarr(const name : string; var value : array of AnsiString; numElements : Integer);
+begin
+  raise EArchiverException.Create('TXMLArchiverIn.inoutfixarr NYI');
 end;
 
 function TXMLArchiverIn.beginList(const name : String; size : Integer) : Integer;

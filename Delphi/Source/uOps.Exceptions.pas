@@ -25,6 +25,10 @@ interface
 uses SysUtils;
 
 type
+  EArchiverException = class(Exception)
+    constructor Create(const Msg: string = '');
+  end;
+
   ECommException = class(Exception)
     constructor Create(const Msg: string = '');
   end;
@@ -80,6 +84,13 @@ end;
 constructor EPublisherException.Create(const Msg: string);
 begin
   inherited Create('PublisherException: ' + Msg);
+end;
+
+{ EArchiverException }
+
+constructor EArchiverException.Create(const Msg: string);
+begin
+  inherited Create('ArchiverException: ' + Msg);
 end;
 
 end.

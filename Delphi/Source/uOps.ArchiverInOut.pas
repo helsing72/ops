@@ -38,6 +38,8 @@ type
 
   TArchiverInOut = class(TObject)
   public
+    function isOut : Boolean; virtual; abstract;
+
     procedure inout(const name : String; var value : Boolean); overload; virtual; abstract;
     procedure inout(const name : String; var value : Byte); overload; virtual; abstract;
     procedure inout(const name : String; var value : Int32); overload; virtual; abstract;
@@ -63,7 +65,15 @@ type
     procedure inout(const name : String; var value : TDynDoubleArray); overload; virtual; abstract;
     procedure inout(const name : String; var value : TDynAnsiStringArray); overload; virtual; abstract;
 
+    procedure inoutfixarr(const name : string; value : Pointer; numElements : Integer; totalSize : Integer); overload; virtual; abstract;
+    procedure inoutfixarr(const name : string; var value : array of AnsiString; numElements : Integer); overload; virtual; abstract;
+
     procedure inout(const name : string; var Value : TDynSerializableArray); overload; virtual; abstract;
+
+    type
+      TSerializableHelper<T: TSerializable> = class(TObject)
+        class procedure inoutfixarr(archiver : TArchiverInOut; const name : string; var value : array of T; numElements : Integer);
+      end;
 
   protected
     function beginList(const name : String; size : Integer) : Integer; virtual; abstract;
@@ -74,6 +84,9 @@ type
 
 implementation
 
+uses SysUtils,
+     uOps.Exceptions;
+
 procedure TSerializable.SetTypesString(types : AnsiString);
 begin
 end;
@@ -81,6 +94,21 @@ end;
 procedure TArchiverInOut.SetTypesString(obj : TSerializable; types : AnsiString);
 begin
   obj.SetTypesString(types);
+end;
+
+class procedure TArchiverInOut.TSerializableHelper<T>.inoutfixarr(archiver : TArchiverInOut; const name : string; var value : array of T; numElements : Integer);
+var
+  num, i : Integer;
+begin
+  num := archiver.beginList(name, numElements);
+  if num <> numElements then raise EArchiverException.Create('Illegal size of fix array received. name: ' + name);
+
+  for i := 0 to numElements-1 do begin
+    if not archiver.isOut then FreeAndNil(value[i]);
+    value[i] := T(archiver.inout(name, TSerializable(value[i]), i));
+  end;
+
+  archiver.endList(name);
 end;
 
 end.

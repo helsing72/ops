@@ -26,6 +26,7 @@ public class DelphiCompiler extends opsc.Compiler
 {
     final static String UNIT_REGEX = "__unitName";
     final static String IMPORTS_REGEX = "__importUnits";
+    final static String CONSTRUCTOR_HEAD_REGEX = "__constructorHead";
     final static String CONSTRUCTOR_BODY_REGEX = "__constructorBody";
     final static String DESTRUCTOR_HEAD_REGEX = "__destructorHead";
     final static String DESTRUCTOR_BODY_REGEX = "__destructorBody";
@@ -43,7 +44,8 @@ public class DelphiCompiler extends opsc.Compiler
 
     String createdFiles = "";
 
-    public DelphiCompiler(String projname) {
+    public DelphiCompiler(String projname)
+    {
         super(projname);
         //tab is 2 spaces
         setTabString("  ");
@@ -54,16 +56,11 @@ public class DelphiCompiler extends opsc.Compiler
         createdFiles = "";
         this._idlClasses = idlClasses;
         this.projectDirectory = projectDirectory;
-        try
-        {
-            for (IDLClass iDLClass : idlClasses)
-            {
-                if (iDLClass.getType() == IDLClass.ENUM_TYPE)
-                {
+        try {
+            for (IDLClass iDLClass : idlClasses) {
+                if (iDLClass.getType() == IDLClass.ENUM_TYPE) {
                     compileEnum(iDLClass);
-                }
-                else
-                {
+                } else {
                   compileDataClass(iDLClass);
                   // We put the publisher and subscriber in the same file as the data class
                 }
@@ -111,8 +108,7 @@ public class DelphiCompiler extends opsc.Compiler
     {
         String className = idlClass.getClassName();
         String baseClassName = "TOPSObject";
-        if (idlClass.getBaseClassName() != null)
-        {
+        if (idlClass.getBaseClassName() != null) {
           baseClassName = idlClass.getBaseClassName();
 
           // Change name for some internal Delphi units
@@ -137,6 +133,7 @@ public class DelphiCompiler extends opsc.Compiler
         templateText = templateText.replace(CLASS_NAME_REGEX, className);
         templateText = templateText.replace(BASE_CLASS_NAME_REGEX, baseClassName);
         templateText = templateText.replace(PACKAGE_NAME_REGEX, packageName);
+        templateText = templateText.replace(CONSTRUCTOR_HEAD_REGEX, getConstructorHead(idlClass));
         templateText = templateText.replace(CONSTRUCTOR_BODY_REGEX, getConstructorBody(idlClass));
         templateText = templateText.replace(DESTRUCTOR_HEAD_REGEX, getDestructorHead(idlClass));
         templateText = templateText.replace(DESTRUCTOR_BODY_REGEX, getDestructorBody(idlClass));
@@ -195,6 +192,11 @@ public class DelphiCompiler extends opsc.Compiler
         createdFiles += "\"" + getOutputFileName() + "\"\n";
     }
 
+    private String elementType(String type)
+    {
+        return languageType(type.replace("[]", ""));
+    }
+
     protected String getLastPart(String name)
     {
       int idx;
@@ -225,14 +227,33 @@ public class DelphiCompiler extends opsc.Compiler
       return getUnitName(className) + "." + getLastPart(className);
     }
 
+    protected String getConstructorHead(IDLClass idlClass)
+    {
+      String ret = "";
+      for (IDLField field : idlClass.getFields()) {
+          if (field.isIdlType() && field.isArray() && field.getArraySize() > 0) {
+              ret += tab(0) + "var" + endl();
+              ret += tab(1) +   "i : Integer;" + endl();
+              break;
+          }
+      }
+      return ret;
+    }
+
     protected String getConstructorBody(IDLClass idlClass)
     {
       String ret = "";
-      for (IDLField field : idlClass.getFields())
-      {
-          if (field.isIdlType() && !field.isArray())
-          {
-              ret += tab(1) + field.getName() + " := " + getFullyQualifiedClassName(field.getType()) + ".Create;" + endl();
+      for (IDLField field : idlClass.getFields()) {
+          if (field.isIdlType()) {
+              if (field.isArray()) {
+                  if (field.getArraySize() > 0) {
+                      ret += tab(1) + "for i := 0 to High(" + field.getName() + ") do begin" + endl();
+                      ret += tab(2) +   field.getName() + "[i] := " + getFullyQualifiedClassName(elementType(field.getType())) + ".Create;" + endl();
+                      ret += tab(1) + "end;" + endl();
+                  }
+              } else {
+                  ret += tab(1) + field.getName() + " := " + getFullyQualifiedClassName(field.getType()) + ".Create;" + endl();
+              }
           }
       }
       return ret;
@@ -241,14 +262,11 @@ public class DelphiCompiler extends opsc.Compiler
     protected String getDestructorHead(IDLClass idlClass)
     {
       String ret = "";
-      for (IDLField field : idlClass.getFields())
-      {
-          if (field.isIdlType()) {
-              if (field.isArray()) {
-                ret += tab(0) + "var" + endl();
-                ret += tab(1) +   "i : Integer;" + endl();
-                break;
-              }
+      for (IDLField field : idlClass.getFields()) {
+          if (field.isIdlType() && field.isArray()) {
+              ret += tab(0) + "var" + endl();
+              ret += tab(1) +   "i : Integer;" + endl();
+              break;
           }
       }
       return ret;
@@ -257,8 +275,7 @@ public class DelphiCompiler extends opsc.Compiler
     protected String getDestructorBody(IDLClass idlClass)
     {
       String ret = "";
-      for (IDLField field : idlClass.getFields())
-      {
+      for (IDLField field : idlClass.getFields()) {
           if (field.isIdlType()) {
               if (field.isArray()) {
                 ret += tab(1) + "for i := 0 to High(" + field.getName() + ") do begin" + endl();
@@ -275,8 +292,7 @@ public class DelphiCompiler extends opsc.Compiler
     protected String getFillCloneHead(IDLClass idlClass)
     {
       String ret = "";
-      for (IDLField field : idlClass.getFields())
-      {
+      for (IDLField field : idlClass.getFields()) {
           if (field.isIdlType()) {
               if (field.isArray()) {
                 ret += tab(0) + "var" + endl();
@@ -291,33 +307,26 @@ public class DelphiCompiler extends opsc.Compiler
     private String getFillCloneBody(IDLClass idlClass)
     {
         String ret = "";
-        for (IDLField field : idlClass.getFields())
-        {
-            if (field.isIdlType())
-            {
-                if (!field.isArray())
-                {
+        for (IDLField field : idlClass.getFields()) {
+            if (field.isIdlType()) {
+                if (!field.isArray()) {
                     // Free existing object and clone the new one
                     ret += tab(2) + "FreeAndNil(" + field.getName() + ");" + endl();
                     ret += tab(2) + field.getName() + " := " + getFullyQualifiedClassName(field.getType()) + "(Self." + field.getName() + ".Clone());" + endl();
-                }
-                else
-                {
+                } else {
                     String s = field.getType();
                     s = getFullyQualifiedClassName(s.substring(0, s.indexOf('[')));
                     ret += tab(2) + "for __i__ := 0 to High("+ field.getName() + ") do FreeAndNil(" + field.getName() + "[__i__]);" + endl();
-                    ret += tab(2) + "SetLength(" + field.getName() + ", Length(Self." + field.getName() + "));" + endl();
+                    if (field.getArraySize() == 0) {
+                        ret += tab(2) + "SetLength(" + field.getName() + ", Length(Self." + field.getName() + "));" + endl();
+                    }
                     ret += tab(2) + "for __i__ := 0 to High("+ field.getName() + ") do" + endl();
                     ret += tab(3) +   field.getName() + "[__i__] := " + s + "(Self." + field.getName() + "[__i__].Clone());" + endl();
                 }
-            }
-            else if (field.isArray())
-            {
+            } else if (field.isArray() && (field.getArraySize() == 0)) {
                 // Dynamic arrays of base types can be copied using the Delphi global Copy() function
                 ret += tab(2) + field.getName() + " := Copy(Self." + field.getName() + ");" + endl();
-            }
-            else
-            {
+            } else {
                 // Base types can just be assigned
                 ret += tab(2) + field.getName() + " := Self." + field.getName() + ";" + endl();
             }
@@ -329,8 +338,7 @@ public class DelphiCompiler extends opsc.Compiler
     {
         HashMap<String, String> typesToInclude = new HashMap();
         String ret = "";
-        if (idlClass.getBaseClassName() != null)
-        {
+        if (idlClass.getBaseClassName() != null) {
             String unit = getUnitName(idlClass.getBaseClassName());
 
             // Change name for some internal Delphi units
@@ -339,21 +347,17 @@ public class DelphiCompiler extends opsc.Compiler
 
             typesToInclude.put(unit, unit);
         }
-        for (IDLField field : idlClass.getFields())
-        {
-            if (field.isIdlType())
-            {
+        for (IDLField field : idlClass.getFields()) {
+            if (field.isIdlType()) {
                 String type = field.getType();
-                if (field.isArray())
-                {
+                if (field.isArray()) {
                     type = type.substring(0, type.length() - 2);
                 }
                 String unit = getUnitName(type);
                 typesToInclude.put(unit, unit);
             }
         }
-        for (String includeType : typesToInclude.values())
-        {
+        for (String includeType : typesToInclude.values()) {
             ret += tab(1) + includeType + "," + endl();
         }
         return ret;
@@ -362,8 +366,7 @@ public class DelphiCompiler extends opsc.Compiler
     private String getEnumDeclarations(IDLClass idlClass)
     {
         String ret = "";
-        for (int i = 0; i < idlClass.getEnumNames().size(); i++)
-        {
+        for (int i = 0; i < idlClass.getEnumNames().size(); i++) {
             ret += idlClass.getEnumNames().get(i);
             if (i < idlClass.getEnumNames().size()-1) {
               ret += ",";
@@ -372,17 +375,25 @@ public class DelphiCompiler extends opsc.Compiler
         return ret;
     }
 
-    protected String getDeclareVector(IDLField field) {
-        return "";
+    protected String getDeclareVector(IDLField field)
+    {
+        String fieldType = getLastPart(field.getType());
+        String ret = field.getName() + " : ";
+        if (field.getArraySize() == 0) {
+            // idl = type[] name;
+            ret += languageType(fieldType) + ";" + endl();
+        } else {
+            // idl = type[size] name;
+            ret += "array [0.." + (field.getArraySize() - 1) + "] of " + languageType(elementType(field.getType())) + ";" + endl();
+        }
+        return ret;
     }
 
     protected String getDeclarations(IDLClass idlClass)
     {
         String ret = "";
-        for (IDLField field : idlClass.getFields())
-        {
-            if(!field.getComment().equals(""))
-            {
+        for (IDLField field : idlClass.getFields()) {
+            if(!field.getComment().equals("")) {
                 String comment = field.getComment();
                 int idx;
                 while ((idx = comment.indexOf('\n')) >= 0) {
@@ -392,20 +403,13 @@ public class DelphiCompiler extends opsc.Compiler
                 ret += tab(2) + "///" + comment.replace("/*", "").replace("*/", "") + endl();
             }
             String fieldType = getLastPart(field.getType());
-            if (field.isArray())
-            {
+            if (field.isArray()) {
+                ret += tab(2) + getDeclareVector(field);
+            } else if(field.getType().equals("string")) {
                 ret += tab(2) + field.getName() + " : " + languageType(fieldType) + ";" + endl();
-            }
-            else if(field.getType().equals("string"))
-            {
+            } else if(field.isIdlType()) {
                 ret += tab(2) + field.getName() + " : " + languageType(fieldType) + ";" + endl();
-            }
-            else if(field.isIdlType())
-            {
-                ret += tab(2) + field.getName() + " : " + languageType(fieldType) + ";" + endl();
-            }
-            else //Simple primitive type
-            {
+            } else {
                 ret += tab(2) + field.getName() + " : " + languageType(fieldType) + ";" + endl();
             }
         }
@@ -478,32 +482,42 @@ public class DelphiCompiler extends opsc.Compiler
     protected String getSerialize(IDLClass idlClass)
     {
         String ret = "";
-        for (IDLField field : idlClass.getFields())
-        {
-            if(field.isIdlType())
-            {
-                if(!field.isArray())
-                {
-                    ret += tab(1) + field.getName() + " := " + getFullyQualifiedClassName(field.getType()) +
+        for (IDLField field : idlClass.getFields()) {
+            ret += tab(1);
+            if (field.isIdlType()) {
+                if (!field.isArray()) {
+                    ret += field.getName() + " := " + getFullyQualifiedClassName(field.getType()) +
                           "(archiver.Inout2('" + field.getName() + "', TSerializable(" + field.getName() + ")));" + endl();
+                } else {
+                    if (field.getArraySize() > 0) {
+                        // idl = type[size] name;
+                        // TestDataArchiveHelper.inoutfixarr(archiver, 'ftest2s', ftest2s, 5);
+                        ret += elementType(field.getType()) + "ArchiveHelper.Inoutfixarr(archiver, '" + field.getName() + "', " + field.getName() + ", " + field.getArraySize() + ");" + endl();
+                    } else {
+                        ret += "archiver.Inout('" + field.getName() + "', TDynSerializableArray(" + field.getName() + "));" + endl();
+                    }
                 }
-                else
-                {
-                    //String s = field.getType();
-                    //s = getFullyQualifiedClassName(s.substring(0, s.indexOf('[')));
-                    ret += tab(1) + "archiver.inout('" + field.getName() + "', TDynSerializableArray(" + field.getName() + "));" + endl();
+            } else {
+                // core types
+                if (field.isArray()) {
+                    if (field.getArraySize() > 0) {
+                        // idl = type[size] name;
+                        if (field.getType().equals("string[]")) {
+                            ret += "archiver.Inoutfixarr('" + field.getName() + "', " + field.getName() + ", " + field.getArraySize() + ");" + endl();
+                        } else {
+                            ret += "archiver.Inoutfixarr('" + field.getName() + "', @" + field.getName() + "[0], " +
+                                field.getArraySize() + ", SizeOf(" + field.getName() + "));" + endl();
+                        }
+                    } else {
+                        // idl = type[] name;
+                        ret += "archiver.Inout('" + field.getName() + "', " + field.getName() + ");" + endl();
+                    }
+                } else {
+                  ret += "archiver.Inout('" + field.getName() + "', " + field.getName() + ");" + endl();
                 }
             }
-            else if(field.isArray())
-            {
-                ret += tab(1) + "archiver.Inout('" + field.getName() + "', " + field.getName() + ");" + endl();
-            }
-            else
-            {
-                ret += tab(1) + "archiver.Inout('" + field.getName() + "', " + field.getName() + ");" + endl();
-            }
-
         }
         return ret;
     }
+
 }

@@ -38,6 +38,8 @@ type
     constructor Create(buf : TByteBuffer; factory : TSerializableInheritingTypeFactory);
     destructor Destroy; override;
 
+    function isOut : Boolean; override;
+
     procedure inout(const name : String; var value : Boolean); overload; override;
     procedure inout(const name : String; var value : Byte); overload; override;
     procedure inout(const name : String; var value : Int32); overload; override;
@@ -63,6 +65,9 @@ type
     procedure inout(const name : String; var value : TDynDoubleArray); overload; override;
     procedure inout(const name : String; var value : TDynAnsiStringArray); overload; override;
 
+    procedure inoutfixarr(const name : string; value : Pointer; numElements : Integer; totalSize : Integer); overload; override;
+    procedure inoutfixarr(const name : string; var value : array of AnsiString; numElements : Integer); overload; override;
+
     procedure inout(const name : string; var value : TDynSerializableArray); overload; override;
 
   protected
@@ -72,7 +77,8 @@ type
 
 implementation
 
-uses SysUtils;
+uses SysUtils,
+     uOps.Exceptions;
 
 constructor TOPSArchiverIn.Create(buf : TByteBuffer; factory : TSerializableInheritingTypeFactory);
 begin
@@ -83,6 +89,11 @@ end;
 destructor TOPSArchiverIn.Destroy;
 begin
   inherited;
+end;
+
+function TOPSArchiverIn.isOut : Boolean;
+begin
+  Result := False;
 end;
 
 procedure TOPSArchiverIn.inout(const name : String; var value : Boolean);
@@ -206,6 +217,26 @@ end;
 procedure TOPSArchiverIn.inout(const name : String; var value : TDynAnsiStringArray);
 begin
   value := Fbuf.ReadStrings;
+end;
+
+procedure TOPSArchiverIn.inoutfixarr(const name : string; value : Pointer; numElements : Integer; totalSize : Integer);
+var
+  num : Integer;
+begin
+  num := FBuf.ReadInt;
+  if num <> numElements then raise EArchiverException.Create('Illegal size of fix array received. name: ' + name);
+  FBuf.ReadChars(PByte(value), totalSize);
+end;
+
+procedure TOPSArchiverIn.inoutfixarr(const name : string; var value : array of AnsiString; numElements : Integer);
+var
+  i, num : Integer;
+begin
+  num := FBuf.ReadInt;
+  if num <> numElements then raise EArchiverException.Create('Illegal size of fix array received. name: ' + name);
+  for i := 0 to numElements-1 do begin
+    value[i] := Fbuf.ReadString
+  end;
 end;
 
 function TOPSArchiverIn.beginList(const name : String; size : Integer) : Integer;

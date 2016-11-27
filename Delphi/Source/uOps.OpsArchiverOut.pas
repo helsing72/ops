@@ -36,6 +36,8 @@ type
     constructor Create(buf : TByteBuffer);
     destructor Destroy; override;
 
+    function isOut : Boolean; override;
+
     procedure inout(const name : String; var value : Boolean); overload; override;
     procedure inout(const name : String; var value : Byte); overload; override;
     procedure inout(const name : String; var value : Int32); overload; override;
@@ -61,6 +63,9 @@ type
     procedure inout(const name : String; var value : TDynDoubleArray); overload; override;
     procedure inout(const name : String; var value : TDynAnsiStringArray); overload; override;
 
+    procedure inoutfixarr(const name : string; value : Pointer; numElements : Integer; totalSize : Integer); overload; override;
+    procedure inoutfixarr(const name : string; var value : array of AnsiString; numElements : Integer); overload; override;
+
     procedure inout(const name : string; var value : TDynSerializableArray); overload; override;
 
   protected
@@ -70,6 +75,8 @@ type
 
 implementation
 
+uses uOps.Exceptions;
+
 constructor TOPSArchiverOut.Create(buf : TByteBuffer);
 begin
   Fbuf := buf;
@@ -78,6 +85,11 @@ end;
 destructor TOPSArchiverOut.Destroy;
 begin
   inherited;
+end;
+
+function TOPSArchiverOut.isOut : Boolean;
+begin
+  Result := True;
 end;
 
 procedure TOPSArchiverOut.inout(const name : String; var value : Boolean);
@@ -192,6 +204,22 @@ end;
 procedure TOPSArchiverOut.inout(const name : String; var value : TDynAnsiStringArray);
 begin
   Fbuf.WriteStrings(value);
+end;
+
+procedure TOPSArchiverOut.inoutfixarr(const name : string; value : Pointer; numElements : Integer; totalSize : Integer);
+begin
+  FBuf.WriteInt(numElements);
+  FBuf.WriteChars(PByte(value), totalSize);
+end;
+
+procedure TOPSArchiverOut.inoutfixarr(const name : string; var value : array of AnsiString; numElements : Integer);
+var
+  i : Integer;
+begin
+  FBuf.WriteInt(numElements);
+  for i := 0 to numElements-1 do begin
+    FBuf.WriteString(value[i]);
+  end;
 end;
 
 function TOPSArchiverOut.beginList(const name : String; size : Integer) : Integer;

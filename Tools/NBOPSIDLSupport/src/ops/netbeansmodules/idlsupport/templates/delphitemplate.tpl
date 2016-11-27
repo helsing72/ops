@@ -62,6 +62,9 @@ __declarations
     function getTypedDataReference : __className;
   end;
 
+var
+  __classNameArchiveHelper : TArchiverInOut.TSerializableHelper<__className>;
+
 implementation
 
 uses SysUtils;
@@ -69,6 +72,7 @@ uses SysUtils;
 { __className }
 
 constructor __className.Create;
+__constructorHead
 begin
   inherited Create;
   AppendType('__packageName.__className');
@@ -168,5 +172,11 @@ function __classNameSubscriber.getTypedDataReference : __className;
 begin
   Result := (getDataReference() as __className);
 end;
+
+initialization
+  __classNameArchiveHelper := TArchiverInOut.TSerializableHelper<__className>.Create;
+
+finalization
+  FreeAndNil(__classNameArchiveHelper);
 
 end.

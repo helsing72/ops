@@ -306,7 +306,10 @@ begin
           Report('Unexpected type received. Type creation failed.', srcAddr, srcPort);
         end;
       except
-        FreeAndNil(newMessage);
+        on E : Exception do begin
+          FreeAndNil(newMessage);
+          Report('Invalid data on network. Exception: ' + e.ToString, srcAddr, srcPort);
+        end;
       end;
 
       FCurrentMessageSize := 0;

@@ -43,6 +43,8 @@ type
     constructor Create;
     destructor Destroy; override;
 
+    function isOut : Boolean; override;
+
     procedure Close;
 
     procedure printObject(name : string; obj : TSerializable);
@@ -72,6 +74,9 @@ type
     procedure inout(const name : String; var value : TDynDoubleArray); overload; override;
     procedure inout(const name : String; var value : TDynAnsiStringArray); overload; override;
 
+    procedure inoutfixarr(const name : string; value : Pointer; numElements : Integer; totalSize : Integer); overload; override;
+    procedure inoutfixarr(const name : string; var value : array of AnsiString; numElements : Integer); overload; override;
+
     procedure inout(const name : string; var value : TDynSerializableArray); overload; override;
 
     property PrintString : string read FPrintString;
@@ -83,7 +88,8 @@ type
 
 implementation
 
-uses uOps.OPSObject;
+uses uOps.OPSObject,
+     uOps.Exceptions;
 
 const
   cEndl = #13#10;
@@ -113,6 +119,11 @@ end;
 destructor TPrintArchiverOut.Destroy;
 begin
   inherited;
+end;
+
+function TPrintArchiverOut.isOut : Boolean;
+begin
+  Result := True;
 end;
 
 procedure TPrintArchiverOut.Close;
@@ -315,6 +326,16 @@ begin
     inout('element', value[i]);
   end;
   Dec(FCurrentTabDepth);
+end;
+
+procedure TPrintArchiverOut.inoutfixarr(const name : string; value : Pointer; numElements : Integer; totalSize : Integer);
+begin
+  raise EArchiverException.Create('TPrintArchiverOut.inoutfixarr NYI');
+end;
+
+procedure TPrintArchiverOut.inoutfixarr(const name : string; var value : array of AnsiString; numElements : Integer);
+begin
+  raise EArchiverException.Create('TPrintArchiverOut.inoutfixarr NYI');
 end;
 
 function TPrintArchiverOut.beginList(const name : String; size : Integer) : Integer;
