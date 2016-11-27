@@ -20,7 +20,7 @@
                         <port>6689</port>
                         <dataType>TestAll.ChildData</dataType>
                         <!--<sampleMaxSize>2100000</sampleMaxSize>-->
-                        <transport>udp</transport>
+                        <transport>multicast</transport>
                         <outSocketBufferSize>260000000</outSocketBufferSize>
                         <inSocketBufferSize>160000000</inSocketBufferSize>
                     </element>

@@ -29,28 +29,42 @@ class ChildData extends BaseData
 
     /* */
     Fruit fruit;
-    //TestMore.MoreData more;
 
     /* */
     boolean[] bos;
+    boolean[11] fbos;
     /* */
     byte[] bs;
+    byte[256] fbs;
     /* */
     short[] shs;
+    short[4] fshs;
     /* */
     int[] is_;
+    int[3] fis_;
     /* */
     long[] ls;
+    long[6] fls;
     /* */
     float[] fs;
+    float[77] ffs;
     /* */
     double[] ds;
+    double[5] fds;
     /* */
     string[] ss;
+    string[10] fss;
     /* */
     virtual TestData[] test2s;
+    virtual TestData[5] ftest2s;
     /* */
     virtual TestData[] secondVirtArray;
+    virtual TestData[7] fsecondVirtArray;
     /* */
     TestData[] test2s2;
+    TestData[4] ftest2s2;
+    /* */
+    Fruit[] fruitarr;
+    Fruit[15] ffruitarr;
+    
 }

@@ -171,7 +171,11 @@ namespace ops
                 OPSMessage* oldMessage = message;
 
                 message = NULL;
-                message = dynamic_cast<OPSMessage*> (archiver.inout(std::string("message"), message));
+				try {
+					message = dynamic_cast<OPSMessage*> (archiver.inout(std::string("message"), message));
+				} catch (ops::ArchiverException& e) {
+					ReportError(participant, "Invalid data on network. Exception: " + e.GetMessage(), addr, port);
+				}
                 if (message)
                 {
 					//Check that we succeded in creating the actual data message

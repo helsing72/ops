@@ -201,6 +201,7 @@ namespace ops
 		virtual void inout(const std::string& name, char* buffer, int bufferSize)
 		{
 			///TODO
+            throw ops::ArchiverException("XMLArchiverIn.inout(name, char*, int) NYI");
 		}
 
         virtual Serializable* inout(const std::string& name, Serializable* value, int element)
@@ -435,6 +436,25 @@ namespace ops
 
                 currentNode = tempNode;
             }
+        }
+
+        void inoutfixarr(const std::string& name, void* value, int numElements, int totalSize)
+        {
+            UNUSED(name)
+            UNUSED(value)
+            UNUSED(numElements);
+            UNUSED(totalSize);
+            ///TODO
+            throw ops::ArchiverException("XMLArchiverIn.inoutfixarr NYI");
+        }
+
+        void inoutfixarr(const std::string& name, std::string* value, int numElements)
+        {
+            UNUSED(name)
+            UNUSED(value)
+            UNUSED(numElements);
+            ///TODO
+            throw ops::ArchiverException("XMLArchiverIn.inoutfixarr NYI");
         }
 
         int beginList(const std::string& name, int size)

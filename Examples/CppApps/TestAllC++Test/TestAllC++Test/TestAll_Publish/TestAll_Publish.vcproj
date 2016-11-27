@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\..\OPSIdls\TestAll\Generated\Cpp&quot;;&quot;$(SolutionDir)..\..\..\Cpp\include&quot;"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\..\..\OPSIdls\TestAll\Generated\Cpp&quot;;&quot;$(SolutionDir)..\..\..\..\Cpp\include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -63,7 +63,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="OPSCppLib_vc90_MDd.lib winmm.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;$(SolutionDir)..\..\..\Cpp\lib-vc90-x86&quot;;&quot;C:\Program Files (x86)\boost\boost_1_38\lib&quot;"
+				AdditionalLibraryDirectories="&quot;$(SolutionDir)..\..\..\..\Cpp\lib-vc90-x86&quot;;&quot;C:\Program Files (x86)\boost\boost_1_38\lib&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"

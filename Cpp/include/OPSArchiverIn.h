@@ -191,6 +191,24 @@ namespace ops
             buf->ReadStrings(value);
         }
 
+        void inoutfixarr(const std::string& name, void* value, int numElements, int totalSize)
+        {
+            UNUSED(name)
+            int num = buf->ReadInt();
+            if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: " + name);
+            buf->ReadChars((char *)value, totalSize);
+        }
+
+        void inoutfixarr(const std::string& name, std::string* value, int numElements)
+        {
+            UNUSED(name)
+            int num = buf->ReadInt();
+            if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: " + name);
+            for(int i = 0; i < numElements; i++) {
+                value[i] = buf->ReadString();
+            }
+        }
+
         int beginList(const std::string& name, int size)
         {
             UNUSED(name)
@@ -203,18 +221,6 @@ namespace ops
             UNUSED(name)
             //Nothing to do in this implementation
         }
-
-        /*template <class SerializableTypeVector> SerializableTypeVector archiveSerializables(ArchiverInOut* archive, SerializableTypeVector vec)
-        {
-                int size = archive->inout("size", size);
-                for(unsigned int i = 0; i < size; i++)
-                {
-                        vec[i] = archive->inout((Serializable*)NULL);
-                }
-                return vec;
-
-        }*/
-
 
     private:
         ByteBuffer* buf;

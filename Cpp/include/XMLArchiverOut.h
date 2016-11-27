@@ -110,12 +110,11 @@ namespace ops
             os << tab() << "<" << name << ">" << value << "</" << name << ">\n";
         }
 
-///LA
 		virtual void inout(const std::string& name, char* buffer, int bufferSize)
 		{
 			///TODO
+            throw ops::ArchiverException("XMLArchiverOut.inout(name, char*, int) NYI");
 		}
-///LA
 
         virtual Serializable* inout(const std::string& name, Serializable* value, int element)
         {
@@ -249,6 +248,25 @@ namespace ops
                 currentTabDepth--;
             }
             os << tab() << "</" << name << ">" << endl;
+        }
+
+        void inoutfixarr(const std::string& name, void* value, int numElements, int totalSize)
+        {
+            UNUSED(name)
+            UNUSED(value)
+            UNUSED(numElements);
+            UNUSED(totalSize);
+            ///TODO
+            throw ops::ArchiverException("XMLArchiverOut.inoutfixarr NYI");
+        }
+
+        void inoutfixarr(const std::string& name, std::string* value, int numElements)
+        {
+            UNUSED(name)
+            UNUSED(value)
+            UNUSED(numElements);
+            ///TODO
+            throw ops::ArchiverException("XMLArchiverOut.inoutfixarr NYI");
         }
 
         int beginList(const std::string& name, int size)

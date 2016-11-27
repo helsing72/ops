@@ -31,12 +31,32 @@
 
 namespace ops
 {
-    //Pure virtual interface.
+    namespace exceptions
+    {
+        class ArchiverException
+        {
+        private:
+            std::string message;
+        public:
+            ArchiverException()
+            {
+                message = "ArchiverException: empty";
+            }
+            ArchiverException(std::string m)
+            {
+                message = "ArchiverException: " + m;
+            }
+            std::string GetMessage()
+            {
+                return message;
+            }
+        };
+    }
+    using namespace exceptions;
 
     class ArchiverInOut
     {
     public:
-
         virtual ~ArchiverInOut();
 
         virtual void inout(const std::string& name, bool& value) = 0;
@@ -63,6 +83,9 @@ namespace ops
         virtual void inout(const std::string& name, std::vector<float>& value) = 0;
         virtual void inout(const std::string& name, std::vector<double>& value) = 0;
         virtual void inout(const std::string& name, std::vector<std::string>& value) = 0;
+
+        virtual void inoutfixarr(const std::string& name, void* value, int numElements, int totalSize) = 0;
+        virtual void inoutfixarr(const std::string& name, std::string* value, int numElements) = 0;
 
         template <class SerializableType> void inout(const std::string& name, std::vector<SerializableType>& vec, SerializableType prototype)
         {
@@ -105,6 +128,26 @@ namespace ops
                 {
                     vec[i] = (SerializableType*) inout(std::string(name), vec[i], i);
                 }
+            }
+            endList(name);
+        }
+
+        template <class SerializableType> void inoutfixarr(const std::string& name, SerializableType** value, int numElements)
+        {
+            int size = beginList(name, numElements);
+            if (size != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: " + name);
+            for (int i = 0; i < size; i++) {
+                value[i] = (SerializableType*) inout(std::string(name), value[i], i);
+            }
+            endList(name);
+        }
+
+        template <class SerializableType> void inoutfixarr(const std::string& name, SerializableType* value, int numElements)
+        {
+            int size = beginList(name, numElements);
+            if (size != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: " + name);
+            for (int i = 0; i < size; i++) {
+                inout(std::string(name), value[i]);
             }
             endList(name);
         }

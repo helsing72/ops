@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="TestAll_Subscribe"
-	ProjectGUID="{2A52CE77-840D-4011-B314-286AE376811C}"
-	RootNamespace="TestAll_Subscribe"
+	Name="VerifySerDes"
+	ProjectGUID="{79C294EF-FB9B-48B0-BD0D-443AE708A0E7}"
+	RootNamespace="VerifySerDes"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="OPSCppLib_vc90_MDd.lib"
+				AdditionalDependencies="OPSCppLib_vc90_MDd.lib winmm.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;$(SolutionDir)..\..\..\..\Cpp\lib-vc90-x86&quot;;&quot;C:\Program Files (x86)\boost\boost_1_38\lib&quot;"
 				GenerateDebugInformation="true"
@@ -117,7 +117,6 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\..\OPSIdls\TestAll\Generated\C++&quot;;&quot;$(SolutionDir)..\..\..\C++\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -136,9 +135,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="OPSCppLib_vc90_MD.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;$(SolutionDir)..\..\..\C++\lib&quot;;&quot;C:\Program Files\boost\boost_1_38\lib&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -177,7 +174,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\TestAll_Subscribe.cpp"
+				RelativePath=".\VerifySerDes.cpp"
 				>
 			</File>
 		</Filter>
@@ -192,10 +189,6 @@
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
-			<File
-				RelativePath=".\ops_config.xml"
-				>
-			</File>
 		</Filter>
 	</Files>
 	<Globals>

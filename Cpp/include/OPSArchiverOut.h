@@ -178,6 +178,22 @@ namespace ops
             buf->WriteStrings(value);
         }
 
+        void inoutfixarr(const std::string& name, void* value, int numElements, int totalSize)
+        {
+            UNUSED(name)
+            buf->WriteInt(numElements);
+            buf->WriteChars((char *)value, totalSize);
+        }
+
+        void inoutfixarr(const std::string& name, std::string* value, int numElements)
+        {
+            UNUSED(name)
+            buf->WriteInt(numElements);
+            for(int i = 0; i < numElements; i++) {
+                buf->WriteString(value[i]);
+            }
+        }
+
         int beginList(const std::string& name, int size)
         {
             UNUSED(name)
@@ -190,6 +206,7 @@ namespace ops
             //Nothing to do in this implementation
             UNUSED(name)
         }
+
     private:
         ByteBuffer* buf;
 
