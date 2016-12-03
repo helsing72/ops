@@ -375,7 +375,11 @@ int main(int argc, const char* args[])
 	bool flag = AssertEQ<bool>(sub.getData(cd3), true, "No received data");
 
 	sub.aquireMessageLock();
-	AssertEQ<int>(sub.getMessage()->spareBytes.size(), 0, "spareBytes");
+	if (sub.getMessage()) {
+		AssertEQ<int>(sub.getMessage()->spareBytes.size(), 0, "spareBytes");
+	} else {
+		std::cout << "Failed: sub.getMessage() == NULL" << std::endl;
+	}
 	sub.releaseMessageLock();
 
 	if (flag) checkObjects(cd1, cd3);
