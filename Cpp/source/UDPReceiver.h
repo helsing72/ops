@@ -89,12 +89,18 @@ namespace ops
                 }
             }
 
-            //Note, takes address even if in use.
-            sock->set_option(boost::asio::ip::udp::socket::reuse_address(true));
-            sock->bind(*localEndpoint);
+			try {
+	            //Note, takes address even if in use.
+		        sock->set_option(boost::asio::ip::udp::socket::reuse_address(true));
+			    sock->bind(*localEndpoint);
 
-            //ipaddress = localEndpoint->address().to_string();
-            port = sock->local_endpoint().port();
+				//ipaddress = localEndpoint->address().to_string();
+	            port = sock->local_endpoint().port();
+			} catch (...) {
+				ops::BasicError err("UDPReceiver", "UDPReceiver", "Failed to setup UDP socket. Check address");
+				Participant::reportStaticError(&err);
+				stop();
+			}
         }
 
         void asynchWait(char* bytes, int size)

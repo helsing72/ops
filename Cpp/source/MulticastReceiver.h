@@ -77,36 +77,42 @@ namespace ops
 				if(ec != 0 || option.value() != inSocketBufferSizent)
 				{
 					//std::cout << "Socket buffer size could not be set" << std::endl;
-					ops::BasicError err("MulticastReceiver", "MulticastReceiver", "Socket buffer size could not be set");
+					ops::BasicError err("MulticastReceiver", "Start", "Socket buffer size could not be set");
 					Participant::reportStaticError(&err);
 				}
 			}
 
-			sock->set_option(boost::asio::ip::udp::socket::reuse_address(true));
-			sock->bind(*localEndpoint);
-
-			// Join the multicast group.
-			const boost::asio::ip::address_v4 multicastAddress = boost::asio::ip::address_v4::from_string(ipaddress);
-			const boost::asio::ip::address_v4 networkInterface(boost::asio::ip::address_v4::from_string(localInterface));
-			sock->set_option(boost::asio::ip::multicast::join_group(multicastAddress,networkInterface));
+			try {
+				sock->set_option(boost::asio::ip::udp::socket::reuse_address(true));
+				sock->bind(*localEndpoint);
+			
+				// Join the multicast group.
+				const boost::asio::ip::address_v4 multicastAddress = boost::asio::ip::address_v4::from_string(ipaddress);
+				const boost::asio::ip::address_v4 networkInterface(boost::asio::ip::address_v4::from_string(localInterface));
+				sock->set_option(boost::asio::ip::multicast::join_group(multicastAddress,networkInterface));
 
 #ifndef _WIN32
-			// IP_MULTICAST_ALL (since Linux 2.6.31)
-			// This option can be used to modify the delivery policy of multicast messages to sockets bound
-			// to the wildcard INADDR_ANY address. The argument is a boolean integer (defaults to 1).
-			// If set to 1, the socket will receive messages from all the groups that have been joined
-			// globally on the whole system. Otherwise, it will deliver messages only from the groups that
-			// have been explicitly joined (for example via the IP_ADD_MEMBERSHIP option) on this particular socket.
-			int nsock = sock->native();
-			if (nsock >= 0) {
-				int mc_all = 0;
-				if ((setsockopt(nsock, IPPROTO_IP, IP_MULTICAST_ALL, (void*) &mc_all, sizeof(mc_all))) < 0) {
-					perror("setsockopt() failed");
+				// IP_MULTICAST_ALL (since Linux 2.6.31)
+				// This option can be used to modify the delivery policy of multicast messages to sockets bound
+				// to the wildcard INADDR_ANY address. The argument is a boolean integer (defaults to 1).
+				// If set to 1, the socket will receive messages from all the groups that have been joined
+				// globally on the whole system. Otherwise, it will deliver messages only from the groups that
+				// have been explicitly joined (for example via the IP_ADD_MEMBERSHIP option) on this particular socket.
+				int nsock = sock->native();
+				if (nsock >= 0) {
+					int mc_all = 0;
+					if ((setsockopt(nsock, IPPROTO_IP, IP_MULTICAST_ALL, (void*) &mc_all, sizeof(mc_all))) < 0) {
+						perror("setsockopt() failed");
+					}
 				}
-			}
 #endif
 
-			port = sock->local_endpoint().port();
+				port = sock->local_endpoint().port();
+			} catch (...) {
+				ops::BasicError err("MulticastReceiver", "Start", "Failed to setup Multicast socket. Check MC address");
+				Participant::reportStaticError(&err);
+				stop();
+			}
 		}
 
 		///Override from Receiver
