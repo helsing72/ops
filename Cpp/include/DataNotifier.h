@@ -28,28 +28,38 @@
 
 namespace ops
 {
-    ///class which in the conjunction with DataListener forms an implementation of the
-    ///observer GoF-pattern. classes extending this class extends an interface to which
+    ///Class which in the conjunction with DataListener forms an implementation of the
+    ///observer GoF-pattern. Classes extending this class extends an interface to which
     ///DataListeners can register their interest to be notified when new OPSObjects are available.
+	///There is also a possibility to use a callback instead of the DataListener interface.
     class OPS_EXPORT DataNotifier
     {
-    private:
-        
-        
-    protected:
-		///Vector that holds pointers to the DataListeners
-        std::vector<DataListener*> listeners;
-
-        ///Called by subclasses that wishes to notify its listeners of the arrival of new data.
-		void notifyNewData();
     public:
-        
+        typedef void (*CallbackFunc)(ops::DataNotifier* sender, void* userData);
+
+        ///Register a DataListener that uses callbacks
+        void addDataListener(CallbackFunc func, void* userData);
         
         ///Register a DataListener
         void addDataListener(DataListener* listener);
         
         //Destructor:
         virtual ~DataNotifier();
+
+    protected:
+        typedef struct {
+            CallbackFunc func;
+            void* userData;
+        } TEntry;
+
+        ///Vector that holds pointers to the DataListeners using callbacks
+        std::vector<TEntry> callbackListeners;
+
+        ///Vector that holds pointers to the DataListeners
+        std::vector<DataListener*> listeners;
+
+        ///Called by subclasses that wishes to notify its listeners of the arrival of new data.
+        void notifyNewData();
     };
 }
 #endif

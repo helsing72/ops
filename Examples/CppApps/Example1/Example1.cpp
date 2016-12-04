@@ -135,6 +135,80 @@ void PollingSubscriberExample()
 
 /// =======================================================================
 
+// Forward declaration
+void CallbackFunc(ops::DataNotifier* sender, void* userData);
+
+void CallbackSubscriberExample()
+{
+	// Create OPS participant to access a domain in the default configuration file
+	// "ops_config.xml" in current working directory. There are other overloads to
+	// create a participant for a specific configuration file.
+	ops::Participant* participant = ops::Participant::getInstance("TestAllDomain");
+
+	// Add our generated factory so OPS can create our data objects
+	participant->addTypeSupport(new TestAll::TestAllTypeFactory());
+
+	// Add an errorwriter instance to the participant to catch ev. internal OPS errors
+	// We can easily write our own if we want to log data in another way.
+	ops::ErrorWriter* errorWriter = new ops::ErrorWriter(std::cout);
+	participant->addListener(errorWriter);
+
+	// Create the topic to subscribe to, might throw ops::NoSuchTopicException
+	// The topic must exist in the used ops configuration file
+	ops::Topic topic = participant->createTopic("ChildTopic");
+
+	std::cout << "Subscribing to " << topic.getName() <<
+		" [" << topic.getTransport() <<
+		"::" << topic.getDomainAddress() <<
+		"::" << topic.getPort() <<
+		"] " << std::endl;
+
+
+	// Create a subscriber for ChildData
+	ChildDataSubscriber sub(topic);
+
+	// Add function callback as listener for data
+	sub.addDataListener(CallbackFunc, (void*)0);
+
+	sub.addDataListener(CallbackFunc, (void*)100);	//Test with another callback
+
+	// Setup any filters ...
+
+	// Finally start the subscriber (tell it to start listening for data)
+	sub.start();
+
+	while(true) {
+		ops::TimeHelper::sleep(1000);
+	}
+}
+
+void CallbackFunc(ops::DataNotifier* sender, void* userData)
+{
+	ChildDataSubscriber* sub = (ChildDataSubscriber*)sender;
+	int user = (int)userData;
+
+	// The OPSMessage contains some metadata for the received message
+	// eg. publisher name, publication id (message counter), ...
+	// These may be of interrest
+	ops::OPSMessage* newMess = sub->getMessage();
+
+	// Get the actual data object published
+	ChildData* data = (ChildData*)newMess->getData();
+
+	// Use the data
+	std::cout << "callback(" << user << "): Received ChildTopic with " << data->l << std::endl;
+
+	// NOTE that the OPSMessage instance and the data object, as default
+	// will be deleted when this callback returns.
+	// If you eg. want to buffer messages to keep the callback fast, you can
+	// postpone the delete by calling "newMess->reserve()" here in the callback.
+	// When you are finished with the message, call "newMess->unreserve()".
+	// This will delete the message if the reserve count == 0 (ie. if the number
+	// of reserve() and unreserve() calls match.
+}
+
+/// =======================================================================
+
 class SubscriptionHandler : ops::DataListener, ops::DeadlineMissedListener
 {
 private:
@@ -229,7 +303,7 @@ public:
 	}
 };
 
-void CallbackSubscriberExample()
+void ObjectSubscriberExample()
 {
 	SubscriptionHandler handler;
 
@@ -241,7 +315,7 @@ void CallbackSubscriberExample()
 void usage()
 {
 	std::cout << "" << std::endl;
-	std::cout << "Usage: Example1 pub|sub_poll|sub_callback" << std::endl;
+	std::cout << "Usage: Example1 pub|sub_poll|sub_object|sub_callback" << std::endl;
 	std::cout << "" << std::endl;
 }
 
@@ -253,6 +327,8 @@ int main(int argc, char**argv)
 			PublisherExample();
 		} else if (arg == "sub_callback"){
 			CallbackSubscriberExample();
+		} else if (arg == "sub_object"){
+			ObjectSubscriberExample();
 		} else if (arg == "sub_poll"){
 			PollingSubscriberExample();
 		} else {

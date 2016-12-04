@@ -28,16 +28,28 @@ namespace ops
         listeners.clear();
     }
     
-	void DataNotifier::notifyNewData()
+    void DataNotifier::notifyNewData()
     {
-        for(unsigned int i = 0; i < listeners.size() ; i++)
-        {
-			listeners[i]->onNewData(this);
+        for(unsigned int i = 0; i < listeners.size() ; i++) {
+            listeners[i]->onNewData(this);
+        }
+        for(unsigned int i = 0; i < callbackListeners.size() ; i++) {
+            TEntry& ent = callbackListeners[i];
+            ent.func(this, ent.userData);
         }
     }
-	void DataNotifier::addDataListener(DataListener* listener)
+
+    void DataNotifier::addDataListener(DataListener* listener)
     {
         listeners.push_back(listener);
     }
     
+    void DataNotifier::addDataListener(CallbackFunc func, void* userData)
+    {
+        TEntry ent;
+        ent.func = func;
+        ent.userData = userData;
+        callbackListeners.push_back(ent);
+    }
+
 }
