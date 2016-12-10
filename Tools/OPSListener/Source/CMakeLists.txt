@@ -11,7 +11,7 @@ SdsSystemTime.h
 )
 
 # generate the library target
-add_executable(${EXE_NAME} 
+add_executable(${EXE_NAME}
     ${EXE_SRCS}
 )
 
@@ -22,12 +22,13 @@ if(WIN32)
   if(MINGW)
     target_link_libraries(${EXE_NAME} ws2_32 mswsock)
   endif()
+else()
+  target_link_libraries(${EXE_NAME} pthread)
 endif()
 
 # exe installation
 set(INSTALL_BINDIR bin)
 
-install(TARGETS ${EXE_NAME} 
+install(TARGETS ${EXE_NAME}
   RUNTIME DESTINATION ${INSTALL_BINDIR}
   )
-

@@ -24,10 +24,10 @@ target_link_libraries(${APP_NAME} ${Boost_LIBRARIES} ops-static)
 # under visual studio the time functions uses function in Winmm.lib
 if(MSVC)
   target_link_libraries(${APP_NAME} Winmm)
-endif()
-
-if(MINGW)
+elseif(MINGW)
   target_link_libraries(${APP_NAME} ws2_32 mswsock)
+else()
+  target_link_libraries(${APP_NAME} pthread)
 endif()
 
 install(TARGETS ${APP_NAME} DESTINATION examples/pizzatest)

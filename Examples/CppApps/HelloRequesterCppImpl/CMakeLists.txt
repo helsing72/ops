@@ -18,8 +18,14 @@ set_target_properties(${SUB_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
 target_link_libraries(${PUB_NAME} ${Boost_LIBRARIES} ops-static)
 target_link_libraries(${SUB_NAME} ${Boost_LIBRARIES} ops-static)
 
-if(MINGW)
+if(MSVC)
+
+elseif(MINGW)
   target_link_libraries(${PUB_NAME} ws2_32 mswsock)
+  target_link_libraries(${SUB_NAME} ws2_32 mswsock)
+else()
+  target_link_libraries(${PUB_NAME} pthread)
+  target_link_libraries(${SUB_NAME} pthread)
 endif()
 
 install(TARGETS ${PUB_NAME} ${SUB_NAME} DESTINATION examples/requesthello)
