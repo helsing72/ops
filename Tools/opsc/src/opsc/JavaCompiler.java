@@ -637,17 +637,24 @@ public class JavaCompiler extends opsc.Compiler
 
         if (isLinux) {
             script = _outputDir + File.separator + "java_build_script.sh";
-            java.io.Writer output = new java.io.BufferedWriter(new java.io.FileWriter(script));
+            if (_verbose > 0) System.out.println("Debug: Path to script: " + script);
+            java.io.File file = new java.io.File(script);
+            file.setReadable(true, false);
+            //file.setWriteable(true, false);
+            file.setExecutable(true, false);
+            java.io.Writer output = new java.io.BufferedWriter(new java.io.FileWriter(file));
+//            java.io.Writer output = new java.io.BufferedWriter(new java.io.FileWriter(script));
             output.write(batFileText);
             output.close();
 
-            Runtime rTime = Runtime.getRuntime();
-            // make script executable
-            Process process = rTime.exec("chmod u+x " + script);
-
-            process.waitFor();
+//            Runtime rTime = Runtime.getRuntime();
+//            // make script executable
+//            Process process = rTime.exec("chmod u+x " + script);
+//
+//            process.waitFor();
         } else {
             script = _outputDir + File.separator + "java_build_script.bat";
+            if (_verbose > 0) System.out.println("Debug: Path to script: " + script);
             createAndWriteFile(script, batFileText);
         }
 
