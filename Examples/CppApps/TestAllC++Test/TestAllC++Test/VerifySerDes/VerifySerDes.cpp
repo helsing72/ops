@@ -1,5 +1,6 @@
 // TestAll_Publish.cpp : Defines the entry point for the console application.
 //
+#include "TestAll/ChildData.h"
 
 #include <Windows.h>
 #include <math.h>

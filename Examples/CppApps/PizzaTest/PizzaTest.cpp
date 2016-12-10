@@ -485,6 +485,23 @@ void printDomainInfo(ops::Participant* part)
 		"  MetaDataMcPort: " << dom->getMetaDataMcPort() << std::endl <<
 		"  LocalInterface: " << dom->getLocalInterface() << std::endl <<
 		"  TimeToLive: " <<	dom->getTimeToLive() << std::endl;
+
+	ops::Topic top = part->createParticipantInfoTopic();
+
+	std::cout << std::endl <<
+		"  TopicName: " << top.getName() << std::endl <<
+		"  TypeID: " << top.getTypeID() << std::endl <<
+		"  ParticipantID: " << top.getParticipantID() << std::endl <<
+		"  DomainID: " << top.getDomainID() << std::endl <<
+		"  DomainAddress: " << top.getDomainAddress() << std::endl <<
+		"  LocalInterface: " << top.getLocalInterface() << std::endl <<
+		"  Transport: " << top.getTransport() << std::endl <<
+		"  TimeToLive: " << top.getTimeToLive() << std::endl <<
+		"  SampleMaxSize: " << top.getSampleMaxSize() << std::endl <<
+		"  Port: " << top.getPort() << std::endl <<
+		"  InSocketBufferSize: " << top.getInSocketBufferSize() << std::endl <<
+		"  OutSocketBufferSize: " << top.getOutSocketBufferSize() << std::endl;
+
 }
 
 void menu()

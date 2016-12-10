@@ -185,7 +185,19 @@ void CallbackSubscriberExample()
 void CallbackFunc(ops::DataNotifier* sender, void* userData)
 {
 	ChildDataSubscriber* sub = (ChildDataSubscriber*)sender;
+#ifdef _WIN32
+  #ifdef _M_X64
+	__int64 user = (__int64)userData;
+  #else
 	int user = (int)userData;
+  #endif;
+#elif __GNUC__
+  #if (__SIZEOF_POINTER__ == 8)
+	long int user = (long int)userData;
+  #else
+	int user = (int)userData;
+  #endif;
+#endif
 
 	// The OPSMessage contains some metadata for the received message
 	// eg. publisher name, publication id (message counter), ...
