@@ -196,7 +196,7 @@ void CallbackFunc(ops::DataNotifier* sender, void* userData)
 	long int user = (long int)userData;
   #else
 	int user = (int)userData;
-  #endif;
+  #endif
 #endif
 
 	// The OPSMessage contains some metadata for the received message
