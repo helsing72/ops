@@ -5,6 +5,7 @@
 
 #include "OPSObject.h"
 #include "ArchiverInOut.h"
+#include <string.h>		// for memset() on Linux
 #include <string>
 #include <vector>
 
@@ -18,7 +19,7 @@ class __className :
 {
 public:
    static std::string getTypeName(){return std::string("__packageName.__className");}
-	
+
 __declarations
     ///Default constructor.
     __className()
@@ -68,7 +69,7 @@ __fillClone
     {
 __destructorBody
     }
-    
+
 };
 
 __packageCloser
