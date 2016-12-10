@@ -93,9 +93,6 @@ public:
 //Application entry point
 int main(int argc, char* args[])
 {
-	ops::Participant* participant = ops::Participant::getInstance("TestAllDomain");
-
-
 	//Create an object that will listen to OPS events
 	Main m;
 

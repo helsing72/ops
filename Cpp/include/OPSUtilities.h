@@ -31,13 +31,13 @@ namespace ops
 	// Methods that work on Topic names that use the syntax 'Domain::TopicName'
 
 	// Returns a full topic name on the format 'Domain::TopicName'
-	static std::string fullTopicName(std::string domainName, std::string topicName)
+	std::string fullTopicName(std::string domainName, std::string topicName)
 	{
 		return domainName + "::" + topicName;
 	}
 
 	// Returns the topic name part
-	static std::string topicName(std::string name)
+	std::string topicName(std::string name)
 	{
 		std::basic_string <char>::size_type index1;
 		std::string s = name;

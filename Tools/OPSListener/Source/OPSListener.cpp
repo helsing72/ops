@@ -852,7 +852,7 @@ int _kbhit() {
 
 int main(int argc, char* argv[])
 {
-	std::cout << std::endl << "OPSListener Version 2016-10-24" << std::endl << std::endl;
+	std::cout << std::endl << "OPSListener Version 2016-12-10" << std::endl << std::endl;
 
 	sds::sdsSystemTimeInit();
 
@@ -871,34 +871,35 @@ int main(int argc, char* argv[])
 		while (true) {
 			if (_kbhit()) {
 				char buffer[1024];
-				fgets(buffer, sizeof(buffer), stdin);
-				std::string line(buffer);
+				if (fgets(buffer, sizeof(buffer), stdin) != NULL) {
+					std::string line(buffer);
 
-				// trim start
-				std::string::size_type idx = line.find_first_not_of(" \t");
-				if (idx == std::string::npos) continue;
-				if (idx > 0) line.erase(0, idx);
-				if (line.size() == 0) continue;
+					// trim start
+					std::string::size_type idx = line.find_first_not_of(" \t");
+					if (idx == std::string::npos) continue;
+					if (idx > 0) line.erase(0, idx);
+					if (line.size() == 0) continue;
 
-				char ch = line[0];
-				line.erase(0, 1);
+					char ch = line[0];
+					line.erase(0, 1);
 
-				if (ch == 0x1b) break;
-				if ((ch == 'q') || (ch == 'Q')) break;
-				if ((ch == 'x') || (ch == 'X')) break;
+					if (ch == 0x1b) break;
+					if ((ch == 'q') || (ch == 'Q')) break;
+					if ((ch == 'x') || (ch == 'X')) break;
 
-				if ((ch == 'p') || (ch == 'P')) {
-					doPause = !doPause;
+					if ((ch == 'p') || (ch == 'P')) {
+						doPause = !doPause;
+					}
+					if ((ch == 's') || (ch == 'S')) {
+						doPause = true;
+						m->WorkOnList(1);
+					}
+
+					//if (ch == '?') {
+					//	std::cout << "Subscribing to topic: " << topicNames[0];
+					//	std::cout << std::endl;
+					//}
 				}
-				if ((ch == 's') || (ch == 'S')) {
-					doPause = true;
-					m->WorkOnList(1);
-				}
-
-				//if (ch == '?') {
-				//	std::cout << "Subscribing to topic: " << topicNames[0];
-				//	std::cout << std::endl;
-				//}
 			}
 			ops::TimeHelper::sleep(10);
 

@@ -1717,6 +1717,8 @@ XMLNode XMLNode::parseString(XMLCSTR lpszXML, XMLCSTR tag, XMLResults *pResults)
     return xnode;
 }
 
+#define UNUSED(expr) (void)(expr);
+
 XMLNode XMLNode::parseFile(XMLCSTR filename, XMLCSTR tag, XMLResults *pResults)
 {
     if (pResults) { pResults->nLine=0; pResults->nColumn=0; }
@@ -1727,7 +1729,8 @@ XMLNode XMLNode::parseFile(XMLCSTR filename, XMLCSTR tag, XMLResults *pResults)
     if (!l) { if (pResults) pResults->error=eXMLErrorEmpty; fclose(f); return emptyXMLNode; }
     fseek(f,0,SEEK_SET);
     unsigned char *buf=(unsigned char*)malloc(l+4);
-    fread(buf,l,1,f);
+    size_t res = fread(buf,l,1,f);
+	UNUSED(res)
     fclose(f);
     buf[l]=0;buf[l+1]=0;buf[l+2]=0;buf[l+3]=0;
 #ifdef _XMLWIDECHAR

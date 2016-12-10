@@ -306,6 +306,7 @@ public:
 	///Override from ops::DeadlineMissedListener, called if no new data has arrived within deadlineQoS.
 	void onDeadlineMissed(ops::DeadlineMissedEvent* evt)
 	{
+		UNUSED(evt)
 		std::cout << "Deadline Missed for topic " << sub->getTopic().getName() << std::endl;
 	}
 
@@ -538,6 +539,8 @@ void menu()
 
 int main(int argc, char**argv)
 {
+	UNUSED(argc)
+	UNUSED(argv)
 //	for (int i = 0; i < 10; i++) {
 //		std::cout << ".";
 //		ops::TimeHelper::sleep(1000);
@@ -679,6 +682,8 @@ int main(int argc, char**argv)
 
 		char buffer[1024];
 		char* ptr = fgets(buffer, sizeof(buffer), stdin);
+		if (ptr == NULL) continue;
+
 		std::string line(buffer);
 
 		// trim start

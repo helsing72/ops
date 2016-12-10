@@ -3,6 +3,7 @@
 
 #include <string>
 #include <ostream>
+#include "OPSTypeDefs.h"
 #include "Listener.h"
 #include "TimeHelper.h"
 
@@ -17,6 +18,7 @@ namespace ops
 
 		void onNewEvent(Notifier<Error*>* notifier, Error* error)
 		{
+			UNUSED(notifier)
 			oStream << "@" << TimeHelper::getTimeToString() << " - Error code: " << error->getErrorCode() << ". Message: " << error->getMessage() << "." << std::endl;
 		}
 	private:

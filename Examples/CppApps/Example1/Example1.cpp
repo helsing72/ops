@@ -190,7 +190,7 @@ void CallbackFunc(ops::DataNotifier* sender, void* userData)
 	__int64 user = (__int64)userData;
   #else
 	int user = (int)userData;
-  #endif;
+  #endif
 #elif __GNUC__
   #if (__SIZEOF_POINTER__ == 8)
 	long int user = (long int)userData;
