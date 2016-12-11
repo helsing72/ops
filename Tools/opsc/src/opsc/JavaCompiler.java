@@ -639,13 +639,14 @@ public class JavaCompiler extends opsc.Compiler
             script = _outputDir + File.separator + "java_build_script.sh";
             if (_verbose > 0) System.out.println("Debug: Path to script: " + script);
             java.io.File file = new java.io.File(script);
-            file.setReadable(true, false);
-            //file.setWriteable(true, false);
-            file.setExecutable(true, false);
             java.io.Writer output = new java.io.BufferedWriter(new java.io.FileWriter(file));
 //            java.io.Writer output = new java.io.BufferedWriter(new java.io.FileWriter(script));
             output.write(batFileText);
             output.close();
+
+            //file.setReadable(true, false);
+            //file.setWriteable(true, false);
+            file.setExecutable(true, false);
 
 //            Runtime rTime = Runtime.getRuntime();
 //            // make script executable
