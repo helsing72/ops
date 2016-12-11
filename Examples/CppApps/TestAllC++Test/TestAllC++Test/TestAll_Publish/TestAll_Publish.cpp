@@ -96,7 +96,9 @@ int main(int argc, const char* args[])
 	}
 
 	
+#ifdef _WIN32
 	timeBeginPeriod(1);
+#endif
 	using namespace TestAll;
 	using namespace ops;
 
@@ -279,7 +281,11 @@ int main(int argc, const char* args[])
 		ops::TimeHelper::sleep(mainSleep);
 
 		if (_kbhit()) {
+#ifdef _WIN32
 			char ch = _getch();
+#else
+			char ch = getchar();
+#endif
 			if (ch == '+') {
 				if (fact >= (15.0 * dist)) dist = 10.0 * dist; 
 				fact = fact + dist;
@@ -306,8 +312,9 @@ int main(int argc, const char* args[])
 		std::cout << "offset = " << offset << ", fact = " << fact << ", dist = " << dist << std::endl;
 	}
 
+#ifdef _WIN32
 	timeEndPeriod(1);
-
+#endif
 	
 	delete participant;
 	return 0;
