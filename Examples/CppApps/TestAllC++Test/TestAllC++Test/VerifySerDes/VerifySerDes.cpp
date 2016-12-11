@@ -5,6 +5,8 @@
 #ifdef _WIN32
   #include <Windows.h>
   #include <conio.h>
+#else
+  #include <stdlib.h>
 #endif
 #include <math.h>
 #include <iostream>

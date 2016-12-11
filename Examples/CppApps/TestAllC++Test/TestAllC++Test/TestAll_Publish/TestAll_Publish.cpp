@@ -1,9 +1,13 @@
 // TestAll_Publish.cpp : Defines the entry point for the console application.
 //
 
-#include <Windows.h>
+#ifdef _WIN32
+  #include <Windows.h>
+  #include <conio.h>
+#else
+  #include <stdlib.h>
+#endif
 #include <math.h>
-#include <conio.h>
 
 //Include a publisher for the data type we want to publish, generated from our IDL project TestAll.
 #include "TestAll/ChildDataPublisher.h"

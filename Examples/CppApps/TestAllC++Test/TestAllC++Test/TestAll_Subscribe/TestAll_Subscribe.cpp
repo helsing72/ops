@@ -1,5 +1,11 @@
 // TestAll_Subscribe.cpp : Defines the entry point for the console application.
 //
+#ifdef _WIN32
+  #include <Windows.h>
+#else
+  #include <stdlib.h>
+#endif
+
 #include <ops.h>
 #include "TestAll/ChildDataSubscriber.h"
 #include "TestAll/BaseDataSubscriber.h"
@@ -7,7 +13,6 @@
 #include <iostream>
 #include <vector>
 #include "Receiver.h"
-#include "windows.h"
 
 //Create a class to act as a listener for OPS data and deadlines
 class Main : ops::DataListener, ops::DeadlineMissedListener, ops::Listener<ops::BytesSizePair>

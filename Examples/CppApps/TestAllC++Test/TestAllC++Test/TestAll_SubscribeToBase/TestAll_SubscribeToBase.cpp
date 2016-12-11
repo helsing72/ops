@@ -1,6 +1,10 @@
 // TestAll_Subscribe.cpp : Defines the entry point for the console application.
 //
-#include <windows.h>
+#ifdef _WIN32
+  #include <Windows.h>
+#else
+  #include <stdlib.h>
+#endif
 #include <ops.h>
 #include "TestAll/ChildDataSubscriber.h"
 #include "TestAll/BaseDataSubscriber.h"
