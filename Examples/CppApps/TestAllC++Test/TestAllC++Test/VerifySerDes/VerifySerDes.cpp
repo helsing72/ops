@@ -2,9 +2,11 @@
 //
 #include "TestAll/ChildData.h"
 
-#include <Windows.h>
+#ifdef _WIN32
+  #include <Windows.h>
+  #include <conio.h>
+#endif
 #include <math.h>
-#include <conio.h>
 #include <iostream>
 #include <fstream>
 
