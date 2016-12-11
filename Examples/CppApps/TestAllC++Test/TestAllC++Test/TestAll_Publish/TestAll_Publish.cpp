@@ -25,6 +25,49 @@
 #include "Receiver.h"
 #include "Sender.h"
 
+#ifndef _WIN32
+#include <sys/types.h>
+#include <unistd.h>
+#include <time.h>
+
+__int64 getNow()
+{
+    struct timespec ts;
+    memset(&ts, 0, sizeof(ts));
+    clock_gettime(CLOCK_REALTIME, &ts);
+    return ((1000 * ts.tv_sec) + (ts.tv_nsec / 1000000));
+}
+
+#include <stdio.h>
+#include <sys/select.h>
+#include <sys/ioctl.h>
+#include <termios.h>
+
+int _kbhit() {
+    static const int STDIN = 0;
+    static bool initialized = false;
+
+    if (! initialized) {
+        // Use termios to turn off line buffering
+        termios term;
+        tcgetattr(STDIN, &term);
+        term.c_lflag &= ~ICANON;
+        tcsetattr(STDIN, TCSANOW, &term);
+        setbuf(stdin, NULL);
+        initialized = true;
+    }
+
+    int bytesWaiting;
+    ioctl(STDIN, FIONREAD, &bytesWaiting);
+    return bytesWaiting;
+}
+#else
+__int64 getNow()
+{
+    return (__int64)timeGetTime();
+}
+#endif
+
 int main(int argc, const char* args[])
 {
 	int mainSleep = 40;
@@ -34,10 +77,17 @@ int main(int argc, const char* args[])
 
 	if(argc > 3)
 	{
+#ifdef _WIN32
 		sscanf_s(args[1],"%i", &mainSleep);
 		sscanf_s(args[2],"%i", &nrOfFloats);
 		sscanf_s(args[3],"%i", &sleepEveryNrPackets);
 		sscanf_s(args[4],"%i", &sendSleepTime);
+#else
+		sscanf(args[1],"%i", &mainSleep);
+		sscanf(args[2],"%i", &nrOfFloats);
+		sscanf(args[3],"%i", &sleepEveryNrPackets);
+		sscanf(args[4],"%i", &sendSleepTime);
+#endif
 	}
 	else
 	{

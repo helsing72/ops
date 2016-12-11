@@ -38,9 +38,12 @@ public:
 		rec->asynchWait(bytes, 100);
 	}
 	Main(bool piSubscriber): 
+	  sub(NULL), 
+      baseSub(NULL), 
+      piSub(NULL), 
 	  packagesLost(0), 
 	  lastPacket(-1),
-	  sub(NULL), baseSub(NULL), piSub(NULL), rec(NULL)
+	  rec(NULL)
 	{
 		using namespace TestAll;
 		using namespace ops;
@@ -211,7 +214,7 @@ public:
 	{
 		std::cout << "Deadline Missed!" << std::endl;
 	}
-	~Main()
+	virtual ~Main()
 	{
 		if (baseSub) baseSub->stop();
 		if (baseSub) delete baseSub;
@@ -224,7 +227,7 @@ public:
 };
 
 //Application entry point
-int main(int argc, char* args)
+int main(int argc, char* argv[])
 {
 	ops::Participant* participant = ops::Participant::getInstance("TestAllDomain");
 	
