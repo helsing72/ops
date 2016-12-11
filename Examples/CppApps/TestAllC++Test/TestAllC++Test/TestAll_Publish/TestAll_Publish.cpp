@@ -58,7 +58,7 @@ int main(int argc, const char* args[])
 	if(!participant)
 	{
 		std::cout << "Create participant failed. do you have ops_config.xml on your rundirectory?" << std::endl;
-		Sleep(10000); exit(1);
+		ops::TimeHelper::sleep(10000); exit(1);
 	}
 
 	//Add type support for our types, to make this participant understand what we are talking
@@ -226,7 +226,7 @@ int main(int argc, const char* args[])
 		//	std::cout << "Writing BaseTopic " << std::endl;
 		}
 
-		Sleep(mainSleep);
+		ops::TimeHelper::sleep(mainSleep);
 
 		if (_kbhit()) {
 			char ch = _getch();

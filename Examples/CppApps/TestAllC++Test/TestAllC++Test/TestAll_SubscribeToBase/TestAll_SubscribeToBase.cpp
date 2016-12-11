@@ -34,7 +34,7 @@ class Main : ops::DataListener, ops::DeadlineMissedListener
 public:
 	ops::Subscriber* baseSub;
 	TestAll::BaseDataPublisher* basePub;
-	DWORD counter;
+	long counter;
 
 public:
 	Main(std::string configFile): counter(0)
@@ -125,7 +125,7 @@ int main(int argc, char* args[])
 	//Run it on main application thread only.
 	while(true)
 	{
-		Sleep(1000);
+		ops::TimeHelper::sleep(1000);
 		
 	}
 	return 0;

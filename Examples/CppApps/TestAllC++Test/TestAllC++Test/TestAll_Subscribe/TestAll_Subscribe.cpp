@@ -237,7 +237,7 @@ int main(int argc, char* args)
 	//Run it on main application thread only.
 	for(int i = 0; i < 100; )
 	{
-		Sleep(100);
+		ops::TimeHelper::sleep(100);
 		//break;
 		/*m.sub->aquireMessageLock();
 		std::deque<ops::OPSMessage*> messages = m.sub->getHistory();
