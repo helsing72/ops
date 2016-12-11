@@ -7,3 +7,5 @@ add_subdirectory(HelloWorldCppImpl)
 add_subdirectory(HelloWorldWithKeyCppImpl)
 
 add_subdirectory(PizzaTest)
+
+add_subdirectory(TestAllC++Test/TestAllC++Test)
