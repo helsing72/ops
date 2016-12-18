@@ -18,6 +18,7 @@
 //Include type support for the data types we have defined in our IDL project, generated from our IDL project TestAll.
 #include "TestAll/TestAllTypeFactory.h"
 #include <ops.h>
+#include <MemoryMap.h>
 
 template <typename T>
 T AssertEQ(T val, T exp, std::string mess = "")
@@ -344,6 +345,17 @@ int main(int argc, const char* args[])
 
 
 	std::cout << "Finished " << std::endl;
+
+
+	std::cout << "Serialize filled object" << std::endl;
+	ops::MemoryMap map(1, 65536);
+	ops::ByteBuffer buf(&map);
+	ops::OPSArchiverOut ao(&buf);
+
+	std::cout << "  GetSize()= " << buf.GetSize() << std::endl;
+    ao.inout("data", cd1);
+	std::cout << "  GetSize()= " << buf.GetSize() << std::endl;
+	std::cout << "Serialize finished" << std::endl;
 
 
 	std::cout << "Test publish/subscribe" << std::endl;
