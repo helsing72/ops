@@ -54,6 +54,7 @@ public class OpsCompiler
     protected opsc.JavaCompiler _javaCompiler;
     protected opsc.CSharpCompiler _CSharpCompiler;
     protected opsc.DelphiCompiler _DelphiCompiler;
+    protected opsc.AdaCompiler _AdaCompiler;
     protected opsc.JSONCompiler _JSONCompiler;
 
     public OpsCompiler() {
@@ -428,6 +429,23 @@ public class OpsCompiler
         return true;
     }
 
+    protected boolean compileAda() {
+        // create the compiler and set parameters
+        _AdaCompiler = new opsc.AdaCompiler(_strProjectName);
+        _AdaCompiler.setVerbose(_verbose);
+        Property propTemplatePath = _props.getProperty("templatePath");
+        if(propTemplatePath != null)
+            _AdaCompiler.setTemplateDir(propTemplatePath.value);
+        Property propOutPath = _props.getProperty("outputPath");
+        if(propOutPath != null)
+            _AdaCompiler.setOutputDir(propOutPath.value + File.separator + "Ada");
+
+        _AdaCompiler.compileDataClasses(_parser._idlClasses, "baba");
+        _AdaCompiler.compileTypeSupport();
+
+        return true;
+    }
+
     protected boolean compileJSON() {
         // create the compiler and set parameters
         _JSONCompiler = new opsc.JSONCompiler(_strProjectName);
@@ -598,6 +616,13 @@ public class OpsCompiler
         // generate Delphi if so requested
         if(opsc._props.generateDelphi) {
             opsc.compileDelphi();
+        }
+
+        System.out.flush();
+
+        // generate Ada if so requested
+        if(opsc._props.generateAda) {
+            opsc.compileAda();
         }
 
         System.out.flush();

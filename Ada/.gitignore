@@ -1,0 +1,7 @@
+*.o
+*.ali
+b__main.*
+*.db
+*.bexch
+*.exe
+*loc.xml

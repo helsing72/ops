@@ -7,6 +7,7 @@ set(OPSC_SRC
   opsc/CSharpCompiler.java
   opsc/CppCompiler.java
   opsc/DelphiCompiler.java
+  opsc/AdaCompiler.java
   opsc/JavaCompiler.java
   opsc/JSONCompiler.java
   opsc/IDLParser.java

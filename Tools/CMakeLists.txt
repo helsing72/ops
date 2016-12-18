@@ -12,6 +12,12 @@ add_subdirectory(OPSListener)
 # install the latest template files
 set(TMPL_PATH NBOPSIDLSupport/src/ops/netbeansmodules/idlsupport/templates)
 set(OPS_TEMPLATE_FILES
+  ${TMPL_PATH}/adaspectemplate.tpl
+  ${TMPL_PATH}/adabodytemplate.tpl
+  ${TMPL_PATH}/adaspecenumtemplate.tpl
+  ${TMPL_PATH}/adabodyenumtemplate.tpl
+  ${TMPL_PATH}/adaspectypefactorytemplate.tpl
+  ${TMPL_PATH}/adabodytypefactorytemplate.tpl
   ${TMPL_PATH}/cppenumtemplate.tpl
   ${TMPL_PATH}/cpppublishertemplate.tpl
   ${TMPL_PATH}/cppsubscribertemplate.tpl
