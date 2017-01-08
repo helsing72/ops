@@ -16,7 +16,9 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
-package body Ops_Pa.SerializableFactory_Pa.SerializableCompositeFactory_Pa is
+with GNAT.String_Split;
+
+package body Ops_Pa.SerializableFactory_Pa.CompFactory_Pa is
 
   -- Constructors
   function Create return SerializableCompositeFactory_Class_At is
@@ -80,4 +82,54 @@ package body Ops_Pa.SerializableFactory_Pa.SerializableCompositeFactory_Pa is
     Self.ChildFactories.Clear;
   end;
 
-end Ops_Pa.SerializableFactory_Pa.SerializableCompositeFactory_Pa;
+  -- ------------------------------------------------------------------------
+  --
+  -- ------------------------------------------------------------------------
+
+  -- Constructors
+  function Create return SerializableInheritingTypeFactory_Class_At is
+    Self : SerializableInheritingTypeFactory_Class_At := null;
+  begin
+    Self := new SerializableInheritingTypeFactory_Class;
+    InitInstance( Self.all );
+    return Self;
+  exception
+    when others =>
+      Free(Self);
+      raise;
+  end Create;
+
+  -- Tries to construct the most specialized object in the given typeString list
+  function Make( Self : SerializableInheritingTypeFactory_Class; types : string) return Serializable_Class_At is
+    use GNAT;
+
+    vtypes : String_Split.Slice_Set;
+    Seps : constant string := " ";
+    Result : Serializable_Class_At;
+  begin
+    -- types: MostSpecializedType MoreSpecializedType DerivedType ... BaseType
+    String_Split.Create(S => vtypes,
+                        From => types,
+                        Separators => Seps,
+                        Mode => String_Split.Multiple);
+
+    for i in 1 .. String_Split.Slice_Count(vtypes) loop
+      Result := Make( SerializableCompositeFactory_Class(Self), String_Split.Slice(vtypes, i) );
+      if Result /= null then
+        return Result;
+      end if;
+    end loop;
+    return null;
+  end;
+
+  procedure InitInstance( Self : in out SerializableInheritingTypeFactory_Class ) is
+  begin
+    InitInstance( SerializableCompositeFactory_Class(Self) );
+  end;
+
+  procedure Finalize( Self : in out SerializableInheritingTypeFactory_Class ) is
+  begin
+    Finalize( SerializableCompositeFactory_Class(Self) );
+  end;
+
+end Ops_Pa.SerializableFactory_Pa.CompFactory_Pa;

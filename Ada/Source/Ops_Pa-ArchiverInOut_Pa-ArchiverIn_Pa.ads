@@ -18,8 +18,8 @@
 
 with Ops_Pa.ByteBuffer_Pa;
 use Ops_Pa.ByteBuffer_Pa;
-with Ops_Pa.SerializableFactory_Pa.SerializableCompositeFactory_Pa.SerializableInheritingTypeFactory_Pa;
-use Ops_Pa.SerializableFactory_Pa.SerializableCompositeFactory_Pa.SerializableInheritingTypeFactory_Pa;
+with Ops_Pa.SerializableFactory_Pa.CompFactory_Pa;
+use Ops_Pa.SerializableFactory_Pa.CompFactory_Pa;
 
 package Ops_Pa.ArchiverInOut_Pa.ArchiverIn_Pa is
 

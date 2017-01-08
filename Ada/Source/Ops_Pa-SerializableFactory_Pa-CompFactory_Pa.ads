@@ -18,7 +18,7 @@
 
 with Ada.Containers.Vectors;
 
-package Ops_Pa.SerializableFactory_Pa.SerializableCompositeFactory_Pa is
+package Ops_Pa.SerializableFactory_Pa.CompFactory_Pa is
 
 -- ==========================================================================
 --      C l a s s    D e c l a r a t i o n.
@@ -34,6 +34,18 @@ package Ops_Pa.SerializableFactory_Pa.SerializableCompositeFactory_Pa is
 
   -- Create a serializable class instance from given type
   overriding function Make( Self : SerializableCompositeFactory_Class; types : string) return Serializable_Class_At;
+
+-- ==========================================================================
+--      C l a s s    D e c l a r a t i o n.
+-- ==========================================================================
+  type SerializableInheritingTypeFactory_Class    is new SerializableCompositeFactory_Class with private;
+  type SerializableInheritingTypeFactory_Class_At is access all SerializableInheritingTypeFactory_Class'Class;
+
+  -- Constructors
+  function Create return SerializableInheritingTypeFactory_Class_At;
+
+  -- Tries to construct the most specialized object in the given typeString list
+  overriding function Make( Self : SerializableInheritingTypeFactory_Class; types : string) return Serializable_Class_At;
 
 private
 -- ==========================================================================
@@ -60,4 +72,20 @@ private
   --------------------------------------------------------------------------
   procedure Finalize( Self : in out SerializableCompositeFactory_Class );
 
-end Ops_Pa.SerializableFactory_Pa.SerializableCompositeFactory_Pa;
+-- ==========================================================================
+--
+-- ==========================================================================
+  type SerializableInheritingTypeFactory_Class    is new SerializableCompositeFactory_Class with
+    record
+      null;
+    end record;
+
+  procedure InitInstance( Self : in out SerializableInheritingTypeFactory_Class );
+
+  --------------------------------------------------------------------------
+  --  Finalize the object
+  --  Will be called automatically when object is deleted.
+  --------------------------------------------------------------------------
+  procedure Finalize( Self : in out SerializableInheritingTypeFactory_Class );
+
+end Ops_Pa.SerializableFactory_Pa.CompFactory_Pa;

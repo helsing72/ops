@@ -33,10 +33,6 @@ package Ops_Pa is
   -- Extra parameter in notification callbacks using a procedure call
   subtype NotifyParam_T is Com_Base_Abs_Pa.Com_Base_Abs_Class_At;
 
-  -- Constants
---  MAX_SIZE : constant := 60000;
---  Is_Network_Byte_Order : constant Boolean := System.Default_Bit_Order = System.High_Order_First;
-
   -- Types
   subtype Byte    is Ctv.Unsigned_Int8;
   subtype UInt8   is Ctv.Unsigned_Int8;
@@ -86,12 +82,19 @@ package Ops_Pa is
   use type Ctv.Float32;
   use type Ctv.Float64;
 
+  -- Constants
+  PACKET_MAX_SIZE : constant := 60000;
+  MAX_DEADLINE_TIMEOUT : constant := Int64'Last;
+--  Is_Network_Byte_Order : constant Boolean := System.Default_Bit_Order = System.High_Order_First;
+
   -- Exceptions
   TODO : exception;
   Not_Yet_Implemented : exception;
 
---  ECommException : exception;
---  EReceiveTimedOutException : Exception;
+  EConfigException : exception;
+  ENoSuchTopicException : exception;
+  --  ECommException : exception;
+  --  EReceiveTimedOutException : Exception;
   Illegal_Array_Length : exception;
   Null_Object_In_Array : exception;
   Null_Object_Not_Allowed : exception;

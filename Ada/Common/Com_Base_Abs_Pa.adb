@@ -39,14 +39,15 @@ package body Com_Base_Abs_Pa is
   ----------------------------------------------------------------------
   procedure Free(Self : access Com_Base_Abs_Class) is
     Dummy : Com_Base_Abs_Class_At;
+    tmp : Integer32;
   begin
     Dummy := Com_Base_Abs_Class_At(Self);
     if Dummy /= null then
-      Count := Com_SyncPrimitives_Pa.InterlockedDecrement(Count'Access);
+      tmp := Com_SyncPrimitives_Pa.InterlockedDecrement(Count'Access);
       if TraceRoutine /= null then
         TraceRoutine( Class         => OriginalClassName( Self.all ),
                       CreateStatus  => Dealloc,
-                      TotalAllocObj => Count);
+                      TotalAllocObj => tmp);
       end if;
       Com_Base_Abs_Pa.Dealloc(Dummy);
     end if;
@@ -56,12 +57,13 @@ package body Com_Base_Abs_Pa is
   -- Initialize object (Only used to trace allocation of object)
   ----------------------------------------------------------------------
   procedure Initialize(Self : in out Com_Base_Abs_Class) is
+    tmp : Integer32;
   begin
-    Count := Com_SyncPrimitives_Pa.InterlockedIncrement(Count'Access);
+    tmp := Com_SyncPrimitives_Pa.InterlockedIncrement(Count'Access);
     if TraceRoutine /= null then
       TraceRoutine( Class         => OriginalClassName( Self ),
                     CreateStatus  => Alloc,
-                    TotalAllocObj => Count);
+                    TotalAllocObj => tmp);
     end if;
   end Initialize;
 
