@@ -17,26 +17,21 @@
 * You should have received a copy of the GNU Lesser General Public License
 * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 */
+
 #include "OPSTypeDefs.h"
 #include "IOService.h"
-#include "BoostIOServiceImpl.h"
 
+#ifndef REPLACE_TRANSPORT_LAYER
+
+#include "BoostIOServiceImpl.h"
 
 namespace ops
 {
-	
-	//static create method
+
 	IOService* IOService::create()
 	{
 		return new BoostIOServiceImpl();
-		//static IOService* theIOService = NULL;
-		//
-		//if(theIOService == NULL)
-		//{
-		//	theIOService = new BoostIOServiceImpl();
-		//}
-		//return theIOService;
-
 	}
 
 }
+#endif // REPLACE_TRANSPORT_LAYER

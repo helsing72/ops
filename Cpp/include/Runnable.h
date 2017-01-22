@@ -23,7 +23,6 @@
 
 namespace ops
 {
-	class ThreadPool;
 	class Runnable
 	{
 	public:

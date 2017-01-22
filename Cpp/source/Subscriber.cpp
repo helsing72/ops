@@ -22,9 +22,13 @@
 #include "TimeHelper.h"
 #include "Participant.h"
 #include "BasicError.h" 
+#ifdef USE_C11
+#include <chrono>
+#else
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition_variable.hpp>
 #include "boost/date_time/local_time/local_time.hpp"
+#endif
 
 
 namespace ops
@@ -37,10 +41,8 @@ namespace ops
     messageBufferMaxSize(1),
     timeBaseMinSeparationTime(0),
     deadlineTimeout(TimeHelper::infinite),
-    //threadPolicy(SHARED_THREAD),
     deadlineMissed(false),
     started(false)
-    //deadlineTimer(*Participant::getIOService())
     {
         message = NULL;
         data = NULL;
@@ -48,8 +50,10 @@ namespace ops
         participant = Participant::getInstance(topic.getDomainID(), topic.getParticipantID());
         deadlineTimer = DeadlineTimer::create(participant->getIOService());
         
+#ifndef USE_C11
         newDataMutex = new boost::mutex();
         newDataEvent = new boost::condition_variable;
+#endif
         timeLastData = TimeHelper::currentTimeMillis();
     }
 
@@ -66,9 +70,11 @@ namespace ops
 			messageBuffer.back()->unreserve();
 			messageBuffer.pop_back();
 		}
-		delete newDataMutex;
-		delete newDataEvent;
-    }
+#ifndef USE_C11
+        delete newDataMutex;
+        delete newDataEvent;
+#endif
+	}
 
     void Subscriber::start()
     {
@@ -129,13 +135,23 @@ namespace ops
                 this->message = message;
                 data = o;
 
+                // Notify all registered listeners
                 notifyNewData();
 
+                // Signal any waiting thread(s)
+#ifdef USE_C11
+				std::unique_lock<std::mutex> lock(newDataMutex);
+				hasUnreadData = true;
+				newDataEvent.notify_all();
+				lock.unlock();
+#else
                 boost::unique_lock<boost::mutex> lock(*newDataMutex);
                 hasUnreadData = true;
                 newDataEvent->notify_all();
                 lock.unlock();
+#endif;
 
+				// Update deadline variables
                 timeLastDataForTimeBase = TimeHelper::currentTimeMillis();
                 timeLastData = TimeHelper::currentTimeMillis();
                 setDeadlineMissed(false);
@@ -174,12 +190,6 @@ namespace ops
         hasUnreadData = false;
         return data;
     }
-
-    /*void Subscriber::setData(OPSObject* data)
-    {
-        SafeLock lock(this);
-        this->data = data;
-    }*/
 
     Topic Subscriber::getTopic()
     {
@@ -252,34 +262,30 @@ namespace ops
         timeBaseMinSeparationTime = timeBaseMinSeparationMillis;
     }
 
-    bool Subscriber::waitForNewData(int timeout)
+    bool Subscriber::waitForNewData(int timeoutMs)
     {
-        if (hasUnreadData)
-        {
+        if (hasUnreadData) {
             return true;
         }
 
-        boost::unique_lock<boost::mutex> lock(*newDataMutex);
+#ifdef USE_C11
+		std::unique_lock<std::mutex> lock(newDataMutex);
+
+		if (newDataEvent.wait_for(lock, std::chrono::milliseconds(timeoutMs), [this] { return this->newDataExist(); })) {
+			return true;
+		}
+#else
+		boost::unique_lock<boost::mutex> lock(*newDataMutex);
 
         boost::system_time time = boost::get_system_time();
-        time += boost::posix_time::milliseconds(timeout);
+        time += boost::posix_time::milliseconds(timeoutMs);
 
-        if(newDataEvent->timed_wait(lock, time))
-        {
+        if(newDataEvent->timed_wait(lock, time)) {
             return true;
         }
-        return false;
+#endif
+		return false;
     }
-
-    /*int Subscriber::getThreadPolicy()
-    {
-        return threadPolicy;
-    }*/
-
-    /*void Subscriber::setThreadPolicy(int threadPolicy)
-    {
-        this->threadPolicy = threadPolicy;
-    }*/
 
     std::string Subscriber::getName()
     {
@@ -310,50 +316,17 @@ namespace ops
     void Subscriber::registerForDeadlineTimeouts()
     {
         deadlineTimer->addListener(this);
-        //boost::asio::deadline_timer t(Participant::getIOService(), boost::posix_time::milliseconds(deadlineTimeout));
-        //deadlineTimer.cancel();
-
-        /*if(deadlineTimer.expires_from_now(boost::posix_time::milliseconds(deadlineTimeout)) > 0)
-        {*/
-        //deadlineTimer.async_wait(boost::bind(&Subscriber::asynchHandleDeadlineTimeout, this, boost::asio::placeholders::error));
-        //}
     }
 
     void Subscriber::cancelDeadlineTimeouts()
     {
         deadlineTimer->start(deadlineTimeout);
-        //if(deadlineTimer.expires_from_now(boost::posix_time::milliseconds(deadlineTimeout)) > 0)
-        //{
-        //	//deadlineTimer.async_wait(boost::bind(&Subscriber::asynchHandleDeadlineTimeout, this, boost::asio::placeholders::error));
-        //}
-        //else
-        //{
-        //	/*boost::asio::deadline_timer newTimer(*Participant::getIOService());
-        //	deadlineTimer = newTimer;
-        //	deadlineTimer.expires_from_now(boost::posix_time::milliseconds(deadlineTimeout));*/
-        //}
     }
-
-    //void Subscriber::asynchHandleDeadlineTimeout(const boost::system::error_code& e)
-    //{
-    //	if (e != boost::asio::error::operation_aborted)
-    //	{
-    //		// Timer was not cancelled, take necessary action.
-    //		deadlineMissedEvent.notifyDeadlineMissed();
-
-    //		cancelDeadlineTimeouts();
-    //		registerForDeadlineTimeouts();
-    //	}
-    //
-    //	//t.reset();
-    //
-    //}
 
     void Subscriber::onNewEvent(Notifier<int>* sender, int message)
     {
         deadlineMissedEvent.notifyDeadlineMissed();
         deadlineTimer->start(deadlineTimeout);
-        //cancelDeadlineTimeouts();
     }
 
     bool Subscriber::aquireMessageLock()

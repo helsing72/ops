@@ -19,6 +19,9 @@
 */
 #include "OPSTypeDefs.h"
 #include "Receiver.h"
+
+#ifndef REPLACE_TRANSPORT_LAYER
+
 #include "MulticastReceiver.h"
 #include "TCPClient.h"
 #include "UDPReceiver.h"
@@ -39,3 +42,4 @@ namespace ops
 	}
 
 }
+#endif // REPLACE_TRANSPORT_LAYER

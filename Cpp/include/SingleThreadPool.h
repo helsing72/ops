@@ -21,12 +21,11 @@
 #ifndef ops_SingleThreadPool
 #define ops_SingleThreadPool
 
-#include "TimeHelper.h"
+#include <vector>
 #include "Thread.h"
 #include "ThreadPool.h"
-#include <boost/thread/mutex.hpp>
+#include "Lockable.h"
 #include "Runnable.h"
-#include <vector>
 
 namespace ops
 {
@@ -34,25 +33,23 @@ namespace ops
     class SingleThreadPool : public Thread, public ThreadPool
     {
     public:
-
         virtual void addRunnable(Runnable* runnable)
         {
-            boost::mutex::scoped_lock lock(mutex);
+            SafeLock lock(&mutex);
             runnables.push_back(runnable);
         }
 
         virtual void removeRunnable(Runnable* runnable)
         {
-            for (unsigned int i = 0; i < runnables.size(); i++)
-            {
-                boost::mutex::scoped_lock lock(mutex);
-                std::vector<Runnable*>::iterator p = runnables.begin();
-                p += i;
-
-
-                runnables.erase(p);
+			SafeLock lock(&mutex);
+			std::vector<Runnable*>::iterator it = runnables.begin();
+			for (unsigned int i = 0; i < runnables.size(); i++) {
+				if (runnables[i] == runnable) {
+					it += i;
+					runnables.erase(it);
+					break;
+				}
             }
-
         }
 
         void start()
@@ -62,19 +59,13 @@ namespace ops
 
         void run()
         {
-            boost::mutex::scoped_lock lock(mutex);
-            //__int64 startTime = TimeHelper::currentTimeMillis();
-            for (unsigned int i = 0; i < runnables.size(); i++)
-            {
+			SafeLock lock(&mutex);
+			for (unsigned int i = 0; i < runnables.size(); i++) {
                 runnables[i]->run();
             }
-            /*if(TimeHelper::currentTimeMillis() - startTime < 1)
-            {
-                    TimeHelper::sleep(1);
-            }*/
         }
 
-	~SingleThreadPool() 
+		~SingleThreadPool()
         {
             // We need to stop the thread explicitly so that the run() method exits
             // before our mutex destructor is called.
@@ -84,7 +75,7 @@ namespace ops
         
     private:
         std::vector<Runnable*> runnables;
-        boost::mutex mutex;
+        Lockable mutex;
     };
 
 }

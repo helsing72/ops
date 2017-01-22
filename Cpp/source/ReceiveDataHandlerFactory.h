@@ -1,12 +1,17 @@
 #ifndef ops_ReceiveDataHandlerFactory_h
 #define ops_ReceiveDataHandlerFactory_h
 
-#include "UDPReceiver.h"
+#include <map>
+#include <vector>
+#include <string>
+#include "Lockable.h"
 
 namespace ops
 {
     //Forward declaration..
     class ReceiveDataHandler;
+	class Participant;
+	class Topic;
 
     class ReceiveDataHandlerFactory
     {

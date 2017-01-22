@@ -19,7 +19,7 @@
  */
 
 /* 
- * File:   Transport.h
+ * File:   Sender.h
  * Author: Anton Gravestam
  *
  * Created on den 22 oktober 2008, 20:01
@@ -28,21 +28,19 @@
 #ifndef ops_SenderH
 #define	ops_SenderH
 
-#include "ByteBuffer.h"
 #include <string>
+#include "ByteBuffer.h"
 #include "IOService.h" 
 #include "OPSExport.h"
 
 namespace ops
 {
     ///Interface used to send data
-
     class Sender
     {
     public:
-
         virtual bool sendTo(char* buf, int size, const std::string& ip, int port) = 0;
-        virtual int receiveReply(char* buf, int size) = 0;
+        ///virtual int receiveReply(char* buf, int size) = 0;
         virtual int getPort() = 0;
         virtual std::string getAddress() = 0;
 		virtual void open() = 0;
@@ -52,16 +50,9 @@ namespace ops
         static OPS_EXPORT Sender* createUDPSender(std::string localInterface = "0.0.0.0", int ttl = 1, __int64 outSocketBufferSize = 16000000);
         static OPS_EXPORT Sender* createTCPServer(std::string ip, int port, IOService* ioService, __int64 outSocketBufferSize = 16000000);
 
-        virtual ~Sender()
-        {
-        }
-    private:
-
-
+        virtual ~Sender() {}
     };
+
 }
 
-
-
-#endif	/* _TRANSPORT_H */
-
+#endif

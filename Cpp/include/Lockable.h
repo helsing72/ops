@@ -35,58 +35,43 @@ namespace boost
 
 namespace ops
 {
-class SafeLock;
+	class SafeLock;
 
-
-//TODO: Make this class platform independant
-class OPS_EXPORT Lockable
-{
-	friend class SafeLock;
-
-private:
-
+	class OPS_EXPORT Lockable
+	{
+		friend class SafeLock;
+	private:
 #ifdef USE_C11
-	std::recursive_mutex* mutex;
+		std::recursive_mutex* mutex;
 #else
-	boost::recursive_mutex* mutex;
+		boost::recursive_mutex* mutex;
 #endif
 
-public:
-
-	Lockable();
-	Lockable(const Lockable& l);
-	Lockable & operator = (const Lockable& l);
-	/*Lockable& Lockable::operator=(const Lockable& l) 
-	{
-	  CopyObj(rhs);
-	  return *this;
-	}*/
-
-	bool lock();
-	void unlock();
-	virtual ~Lockable();
-
-};
-
-class SafeLock
-{
-	private:
-	Lockable* lockable;
 	public:
-	SafeLock(Lockable* lockable)
-	{
-		this->lockable = lockable;
-		this->lockable->lock();
-	}
-	~SafeLock()
-	{
-		this->lockable->unlock();
-	}
+		Lockable();
+		Lockable(const Lockable& l);
+		Lockable& operator= (const Lockable& l);
 
-};
+		bool lock();
+		void unlock();
+		virtual ~Lockable();
+	};
 
+	class SafeLock
+	{
+	private:
+		Lockable* lockable;
+	public:
+		SafeLock(Lockable* lockable)
+		{
+			this->lockable = lockable;
+			this->lockable->lock();
+		}
+		~SafeLock()
+		{
+			this->lockable->unlock();
+		}
+	};
 
 }
-
-
 #endif

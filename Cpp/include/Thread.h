@@ -21,10 +21,15 @@
 #ifndef ops_ThreadH
 #define ops_ThreadH
 
+#include "OPSTypeDefs.h"
 #include "OPSExport.h"
 
+#ifdef USE_C11
+#include <thread>
+#else
 //Forward declaration
 namespace boost{class thread;}
+#endif
 
 namespace ops
 {
@@ -39,14 +44,16 @@ namespace ops
         void stop();
         bool join();
         virtual void run() = 0;
-        //boost::thread* GetThreadHandle();
         static void EntryPoint(void* pthis);
     
     protected:
         bool threadRunning;
-        boost::thread* thread;
-    };
+#ifdef USE_C11
+		std::thread* thread;
+#else
+		boost::thread* thread;
+#endif
+	};
 }
-
 
 #endif

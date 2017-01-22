@@ -54,7 +54,7 @@ namespace ops
 			m_asyncCallActive(false), m_working(false)
 		{
 			this->outSocketBufferSize = outSocketBufferSize;
-			ioService = ((BoostIOServiceImpl*)ioServ)->boostIOService;//((BoostIOServiceImpl*)Participant::getIOService())->boostIOService;
+			ioService = ((BoostIOServiceImpl*)ioServ)->boostIOService;
 			//boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(serverIP));
 			endpoint = new boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), serverPort);
 			sock = new boost::asio::ip::tcp::socket(*ioService);
@@ -108,10 +108,10 @@ namespace ops
 			}
 			return true;
 		}
-		virtual int receiveReply(char* buf, int size)
-		{
-			return -9999999;
-		}
+		//virtual int receiveReply(char* buf, int size)
+		//{
+		//	return -9999999;
+		//}
         virtual int getPort()
 		{
 			return port;

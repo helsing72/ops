@@ -36,12 +36,6 @@ namespace ops
         return *this;
     }
 
-    /*Lockable& Lockable::operator=(const Lockable& l)
-    {
-      CopyObj(rhs);
-      return *this;
-    }*/
-
     bool Lockable::lock()
     {
         mutex->lock();
@@ -55,7 +49,6 @@ namespace ops
 
     Lockable::~Lockable()
     {
-        //mutex->unlock();
         delete mutex;
     }
 }

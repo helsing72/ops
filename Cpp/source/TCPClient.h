@@ -47,7 +47,7 @@ namespace ops
 			tryToConnect(false), accumulatedSize(0),
 			m_asyncCallActive(false), m_working(false)
         {
-            boost::asio::io_service* ioService = ((BoostIOServiceImpl*) ioServ)->boostIOService; //((BoostIOServiceImpl*)Participant::getIOService())->boostIOService;
+            boost::asio::io_service* ioService = ((BoostIOServiceImpl*) ioServ)->boostIOService;
             boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(serverIP));
             endpoint = new boost::asio::ip::tcp::endpoint(ipAddr, serverPort);
 			this->inSocketBufferSizent = inSocketBufferSizent;

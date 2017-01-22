@@ -17,11 +17,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
  */
+
+#include <map>
 #include "OPSTypeDefs.h"
 #include "Sender.h"
+
+#ifndef REPLACE_TRANSPORT_LAYER
+
 #include "UDPSender.h"
 #include "TCPServer.h"
-#include <map>
 
 namespace ops
 {
@@ -56,5 +60,5 @@ namespace ops
 		return new TCPServer(ip, port, ioService, outSocketBufferSize);
     }
 
-
 }
+#endif // REPLACE_TRANSPORT_LAYER

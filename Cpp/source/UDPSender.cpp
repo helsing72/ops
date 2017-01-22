@@ -124,18 +124,18 @@ namespace ops
         }
 
     }
-	int UDPSender::receiveReply(char* buf, int size)
-	{
-		if (!socket) return 0;
-		size_t nReceived = socket->receive(boost::asio::buffer(buf, size));
-		return (int)nReceived;
-	}
-	bool UDPSender::waitForReply(int timeout)
-	{
-		/*__int64 startWait = TimeHelper::currentTimeMillis();
-		while(TimeHelper::currentTimeMillis())*/
-		return false;
-	}
+	//int UDPSender::receiveReply(char* buf, int size)
+	//{
+	//	if (!socket) return 0;
+	//	size_t nReceived = socket->receive(boost::asio::buffer(buf, size));
+	//	return (int)nReceived;
+	//}
+	//bool UDPSender::waitForReply(int timeout)
+	//{
+	//	/*__int64 startWait = TimeHelper::currentTimeMillis();
+	//	while(TimeHelper::currentTimeMillis())*/
+	//	return false;
+	//}
 
 }
 

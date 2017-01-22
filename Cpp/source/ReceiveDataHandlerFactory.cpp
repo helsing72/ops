@@ -4,6 +4,7 @@
 #include "ReceiveDataHandlerFactory.h"
 
 #include "ReceiveDataHandler.h"
+#include "Participant.h"
 #include "UDPReceiver.h"
 #include "BasicError.h"
 

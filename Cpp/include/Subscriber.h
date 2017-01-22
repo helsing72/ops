@@ -21,6 +21,8 @@
 #ifndef ops_SubscriberH
 #define	ops_SubscriberH
 
+#include <list>
+#include <deque>
 #include "OPSTypeDefs.h"
 #include "Topic.h"
 #include "Lockable.h"
@@ -28,23 +30,24 @@
 #include "DataNotifier.h"
 #include "DeadlineMissedListener.h"
 #include "FilterQoSPolicy.h"
-#include <list>
-#include <deque>
 #include "ThreadPool.h"
 #include "Listener.h"
 #include "OPSMessage.h"
 #include "ReceiveDataHandler.h"
 #include "DeadlineTimer.h"
-//#include <boost/asio.hpp>
-//#include <boost/date_time/posix_time/posix_time.hpp>
 #include "OPSExport.h"
 
+#ifdef USE_C11
+#include <mutex>
+#include <condition_variable>
+#else
 // Forward declarations
 namespace boost
 {
     class mutex;
     class condition_variable;
 }
+#endif
 
 namespace ops
 {
@@ -82,18 +85,13 @@ namespace ops
 
         ///Waits for new data to arrive or timeout.
         ///Returns: true if new data (i.e. unread data) exist.
-        bool waitForNewData(int timeout);
+        bool waitForNewData(int timeoutMs);
 
         ///Checks if new data exist (same as 'waitForNewData(0)' but faster) 
         ///Returns: true if new data (i.e. unread data) exist.
         bool newDataExist() {
             return hasUnreadData;
         }
-
-        ///Depricated since OPS4
-        //int getThreadPolicy();
-        ///Depricated since OPS4
-        //void setThreadPolicy(int threadPolicy);
 
 		///
         bool aquireMessageLock();
@@ -115,10 +113,6 @@ namespace ops
 
         std::string getName();
         void setName(std::string name);
-
-        //const static int SHARED_THREAD = 0;
-        //const static int EXCLUSIVE_THREAD = 1;
-
 
         bool isDeadlineMissed();
 
@@ -152,7 +146,6 @@ namespace ops
         bool hasUnreadData;
 
     private:
-
         ///The Participant to which this Subscriber belongs.
         Participant* participant;
 
@@ -173,19 +166,21 @@ namespace ops
         void addToBuffer(OPSMessage* mess);
 
         Lockable filterQoSPolicyMutex;
-        boost::mutex* newDataMutex;
-        boost::condition_variable* newDataEvent;
+#ifdef USE_C11
+		std::mutex newDataMutex;
+		std::condition_variable newDataEvent;
+#else
+		boost::mutex* newDataMutex;
+		boost::condition_variable* newDataEvent;
+#endif
 
         __int64 timeLastData;
         __int64 timeLastDataForTimeBase;
         __int64 timeBaseMinSeparationTime;
         __int64 deadlineTimeout;
-        //int threadPolicy;
-        //bool reliable;
 
         bool applyFilterQoSPolicies(OPSObject* o);
-        bool applyKeyFilter(OPSObject* o);
-        //void setData(OPSObject* data);
+        //bool applyKeyFilter(OPSObject* o);
 
         void registerForDeadlineTimeouts();
         void cancelDeadlineTimeouts();
@@ -194,8 +189,6 @@ namespace ops
         void setDeadlineMissed(bool deadlineMissed);
 
         bool started;
-
-        ///__int64 currentPulicationID;
 
         DeadlineTimer* deadlineTimer;
     };

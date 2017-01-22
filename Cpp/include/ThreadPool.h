@@ -23,9 +23,8 @@
 
 namespace ops
 {
-	//Forward declaration/
-	class Runnable;///////
-	//////////////////////
+	//Forward declaration
+	class Runnable;
 
 	class ThreadPool
 	{
@@ -37,7 +36,5 @@ namespace ops
 	};
 
 }
-
-
 
 #endif

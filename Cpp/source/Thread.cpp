@@ -17,9 +17,12 @@
 * You should have received a copy of the GNU Lesser General Public License
 * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "OPSTypeDefs.h"
+
 #include "Thread.h"
+#ifndef USE_C11
 #include "boost/thread.hpp"
+#endif
+
 namespace ops
 {
     Thread::Thread() : threadRunning(false), thread(NULL)
@@ -36,8 +39,12 @@ namespace ops
     {
         if (thread == NULL)
         {
-            thread = new boost::thread(&Thread::EntryPoint, this);
-        }
+#ifdef USE_C11
+			thread = new std::thread(&Thread::EntryPoint, this);
+#else
+			thread = new boost::thread(&Thread::EntryPoint, this);
+#endif
+		}
         return 0;
     }
 
@@ -52,16 +59,13 @@ namespace ops
         return true;
     }
     
-    /* 
-    boost::thread* Thread::GetThreadHandle()
-    {
-        return thread;
-    }*/
-    
     void Thread::stop()
     {
-        if (thread) thread->interrupt();
-    }
+#ifndef USE_C11
+		// Boost unique feature
+		if (thread) thread->interrupt();
+#endif
+	}
     
     /*static */ void Thread::EntryPoint(void* pthis)
     {
@@ -69,6 +73,3 @@ namespace ops
         pt->run();
     }
 }
-
-
-

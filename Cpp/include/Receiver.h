@@ -27,7 +27,6 @@
 #include "BytesSizePair.h"
 #include "OPSExport.h"
 
-
 namespace ops
 {
 	class OPS_EXPORT Receiver : public Notifier<BytesSizePair>

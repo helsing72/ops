@@ -402,7 +402,6 @@
     <ClInclude Include="..\..\..\include\Thread.h" />
     <ClInclude Include="..\..\..\include\ThreadPool.h" />
     <ClInclude Include="..\..\..\include\TimeHelper.h" />
-    <ClInclude Include="..\..\..\include\TimeMeasure.h" />
     <ClInclude Include="..\..\..\include\Topic.h" />
     <ClInclude Include="..\..\..\include\TopicInfoData.h" />
     <ClInclude Include="..\..\..\include\XMLArchiverIn.h" />
@@ -453,9 +452,6 @@
     <ClCompile Include="..\..\..\source\XMLArchiverIn.cpp" />
     <ClCompile Include="..\..\..\source\XMLArchiverOut.cpp" />
     <ClCompile Include="..\..\..\source\xml\xmlParser.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ReadMe.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

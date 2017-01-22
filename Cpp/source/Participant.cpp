@@ -18,6 +18,10 @@
 * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <sstream>
+#ifdef _WIN32
+#include <process.h>
+#include <winsock.h>
+#endif
 #include "OPSTypeDefs.h"
 #include "Participant.h"
 #include "SingleThreadPool.h"
@@ -29,6 +33,7 @@
 #include "ConfigException.h"
 #include "CommException.h"
 #include "Publisher.h"
+#include "BasicError.h"
 
 namespace ops
 {
@@ -237,7 +242,7 @@ namespace ops
 		// before receiveDataHandlerFactory is finished.
 		// Wait until receiveDataHandlerFactory has no more cleanup to do
 		while (!receiveDataHandlerFactory->cleanUpDone()) {
-			Sleep(1);
+			TimeHelper::sleep(1);
 		}
 
 		// Now stop and delete our timer (NOTE requires ioService to be running).

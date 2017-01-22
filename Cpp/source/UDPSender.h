@@ -45,13 +45,13 @@ namespace ops
         ///Override from Sender
         bool sendTo(char* buf, int size, const std::string& ip, int port);
 		///Override from Sender
-		int receiveReply(char* buf, int size);
+		///int receiveReply(char* buf, int size);
         ///Override from Sender
         int getPort() {return socket->local_endpoint().port();};
         ///Override from Sender
         std::string getAddress() {return socket->local_endpoint().address().to_string();};
 
-		bool waitForReply(int timeout);
+		///bool waitForReply(int timeout);
 
     private:
         ///This UDPSender wraps boost socket functionality.
@@ -65,9 +65,7 @@ namespace ops
 		__int64 outSocketBufferSize;
 		bool multicastSocket;
 
-
     };
 
 }
 #endif	
-

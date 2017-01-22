@@ -19,6 +19,9 @@
 */
 #include "OPSTypeDefs.h"
 #include "DeadlineTimer.h"
+
+#ifndef REPLACE_TRANSPORT_LAYER
+
 #include "BoostDeadlineTimerImpl.h"
 #include "BoostIOServiceImpl.h"
 
@@ -31,3 +34,4 @@ namespace ops
 	}
 
 }
+#endif // REPLACE_TRANSPORT_LAYER
