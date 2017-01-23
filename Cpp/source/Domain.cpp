@@ -20,7 +20,9 @@
 #include "OPSTypeDefs.h"
 #include "Domain.h"
 #include "NoSuchTopicException.h"
+#ifndef REPLACE_TRANSPORT_LAYER
 #include "BoostIOServiceImpl.h"
+#endif
 #include "XMLArchiverIn.h"
 #include "ConfigException.h"
 
@@ -186,6 +188,8 @@ Domain::~Domain()
 {
 }
 
+#ifndef REPLACE_TRANSPORT_LAYER
+
 // If argument contains a "/" we assume it is on the form:  subnet-address/subnet-mask
 // e.g "192.168.10.0/255.255.255.0" or "192.168.10.0/24"
 // In that case we loop over all interfaces and take the first one that matches
@@ -233,6 +237,6 @@ std::string Domain::doSubnetTranslation(std::string addr, IOService* ioServ)
 
 	return subnet;
 }
+#endif // REPLACE_TRANSPORT_LAYER
 
 }
-

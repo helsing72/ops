@@ -24,29 +24,22 @@
 #include <string>
 #include "OPSExport.h"
 
-
 namespace ops
 {
-class OPS_EXPORT TimeHelper
-{
+	class OPS_EXPORT TimeHelper
+	{
+	public:
+		///Returns the current time as a number of milliseconds since Epoch 1970-01-01.
+		static __int64 currentTimeMillis();
+		///Sleeps the given number of milliseconds (millis).
+	    static void sleep(__int64 millis);
+		///Returns current system time as a string to be used as user output, file names etc...
+	    static std::string getTimeToString();
+		///Returns the current time as a number of milliseconds since Epoch 1970-01-01.
+	    static __int64 getEpochTime();
 
-public:
-	///Returns the current time as a number of milliseconds since Epoch 1970-01-01.
-	static __int64 currentTimeMillis();
-	///Sleeps the given number of milliseconds (millis).
-    static void sleep(__int64 millis);
-	///Returns current system time as a string to be used as user output, file names etc...
-    static std::string getTimeToString();
-	///Returns the current time as a number of milliseconds since Epoch 1970-01-01.
-    static __int64 getEpochTime();
-
-    const static int infinite = 0x0fffffff; 
-
-
-private:
-
-
-};
+		const static __int64 infinite = 0xffffffffLL; 
+	};
 
 }
 #endif

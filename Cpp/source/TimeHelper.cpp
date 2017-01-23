@@ -20,6 +20,8 @@
 #include "OPSTypeDefs.h"
 #include "TimeHelper.h"
 
+#ifndef REPLACE_TRANSPORT_LAYER
+
 #include <sstream>
 #include <boost/date_time/local_time/local_time.hpp>
 #include <boost/thread/thread.hpp>
@@ -35,13 +37,12 @@
 namespace ops
 {
     ///Returns the current time as a number of milliseconds since Epoch 1970-01-01.
-
     __int64 TimeHelper::currentTimeMillis()
     {
         return getEpochTime();
     }
-    ///Sleeps the given number of milliseconds (millis).
 
+	///Sleeps the given number of milliseconds (millis).
     void TimeHelper::sleep(__int64 millis)
     {
         boost::xtime xt;
@@ -55,8 +56,8 @@ namespace ops
 
         boost::thread::sleep(xt);
     }
-    ///Returns current system time as a string to be used as user output, file names etc...
 
+	///Returns current system time as a string to be used as user output, file names etc...
     std::string TimeHelper::getTimeToString()
     {
         //Get time with seconds resolution
@@ -72,8 +73,8 @@ namespace ops
 
         return ret;
     }
-    ///Returns the current time as a number of milliseconds since Epoch 1970-01-01.
 
+	///Returns the current time as a number of milliseconds since Epoch 1970-01-01.
     __int64 TimeHelper::getEpochTime()
     {
         using namespace boost::gregorian;
@@ -86,13 +87,7 @@ namespace ops
         time_duration diff = p - time_t_epoch;
 
         return diff.total_milliseconds();
-
     }
 
-
-
-
-
-
 }
-
+#endif
