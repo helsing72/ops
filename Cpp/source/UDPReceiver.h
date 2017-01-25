@@ -227,12 +227,12 @@ namespace ops
             }
         }
 
-        int getPort()
+        int getLocalPort()
         {
             return port;
         }
 
-        std::string getAddress()
+        std::string getLocalAddress()
         {
             return ipaddress;
         }

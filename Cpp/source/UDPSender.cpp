@@ -28,12 +28,13 @@
 #include <iostream>
 #include "Participant.h"
 #include "BasicError.h"
+#include "BoostIOServiceImpl.h"
 
 namespace ops
 {
     using boost::asio::ip::udp;
-	UDPSender::UDPSender(std::string localInterface, int ttl, __int64 outSocketBufferSize, bool multicastSocket):
-		socket(NULL)
+	UDPSender::UDPSender(IOService* ioServ, std::string localInterface, int ttl, __int64 outSocketBufferSize, bool multicastSocket):
+		socket(NULL), io_service(((BoostIOServiceImpl*)ioServ)->boostIOService)
     {
 		this->localInterface = localInterface;
 		this->ttl = ttl;
@@ -57,7 +58,7 @@ namespace ops
 	{
 		if (socket != NULL) return;
 
-        socket = new boost::asio::ip::udp::socket(io_service, localEndpoint->protocol());
+        socket = new boost::asio::ip::udp::socket(*io_service, localEndpoint->protocol());
 
 		if(outSocketBufferSize > 0)
 		{

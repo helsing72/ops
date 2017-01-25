@@ -40,15 +40,14 @@ namespace ops
     {
     public:
         virtual bool sendTo(char* buf, int size, const std::string& ip, int port) = 0;
-        ///virtual int receiveReply(char* buf, int size) = 0;
         virtual int getPort() = 0;
         virtual std::string getAddress() = 0;
 		virtual void open() = 0;
 		virtual void close() = 0;
 
-        static OPS_EXPORT Sender* create(std::string localInterface = "0.0.0.0", int ttl = 1, __int64 outSocketBufferSize = 16000000);
-        static OPS_EXPORT Sender* createUDPSender(std::string localInterface = "0.0.0.0", int ttl = 1, __int64 outSocketBufferSize = 16000000);
-        static OPS_EXPORT Sender* createTCPServer(std::string ip, int port, IOService* ioService, __int64 outSocketBufferSize = 16000000);
+        static OPS_EXPORT Sender* create(IOService* ioService, std::string localInterface = "0.0.0.0", int ttl = 1, __int64 outSocketBufferSize = 16000000);
+        static OPS_EXPORT Sender* createUDPSender(IOService* ioService, std::string localInterface = "0.0.0.0", int ttl = 1, __int64 outSocketBufferSize = 16000000);
+        static OPS_EXPORT Sender* createTCPServer(IOService* ioService, std::string ip, int port, __int64 outSocketBufferSize = 16000000);
 
         virtual ~Sender() {}
     };

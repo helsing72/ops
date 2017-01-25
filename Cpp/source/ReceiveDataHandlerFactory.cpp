@@ -5,7 +5,6 @@
 
 #include "ReceiveDataHandler.h"
 #include "Participant.h"
-#include "UDPReceiver.h"
 #include "BasicError.h"
 
 
@@ -70,9 +69,8 @@ namespace ops
         {
 	        ReceiveDataHandler* udpReceiveDataHandler = new ReceiveDataHandler(top, participant);
 
-			participant->setUdpTransportInfo(
-				((UDPReceiver*) udpReceiveDataHandler->getReceiver())->getAddress(),
-				((UDPReceiver*) udpReceiveDataHandler->getReceiver())->getPort() );
+			Receiver* recv = udpReceiveDataHandler->getReceiver();
+			participant->setUdpTransportInfo(recv->getLocalAddress(), recv->getLocalPort() );
             
 			receiveDataHandlerInstances[key] = udpReceiveDataHandler;
             return udpReceiveDataHandler;

@@ -34,9 +34,9 @@ namespace ops
     {
     public:
 
-        McSendDataHandler(Topic& topic, std::string localInterface, int ttl)
+        McSendDataHandler(IOService* ioService, Topic& topic, std::string localInterface, int ttl)
         {
-            sender = Sender::create(localInterface, ttl, topic.getOutSocketBufferSize());
+            sender = Sender::create(ioService, localInterface, ttl, topic.getOutSocketBufferSize());
         }
 
         bool sendData(char* buf, int bufSize, Topic& topic)

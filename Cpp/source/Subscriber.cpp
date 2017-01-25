@@ -149,7 +149,7 @@ namespace ops
                 hasUnreadData = true;
                 newDataEvent->notify_all();
                 lock.unlock();
-#endif;
+#endif
 
 				// Update deadline variables
                 timeLastDataForTimeBase = TimeHelper::currentTimeMillis();

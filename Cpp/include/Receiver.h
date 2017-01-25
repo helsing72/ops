@@ -43,6 +43,9 @@ namespace ops
 		virtual void start() = 0;
 		virtual void stop() = 0;
 
+		virtual int getLocalPort() = 0;
+		virtual std::string getLocalAddress() = 0;
+
 		// Used to get the sender IP and port for a received message
 		// Only safe to call in callback, before a new asynchWait() is called.
 		virtual void getSource(std::string& address, int& port) = 0;

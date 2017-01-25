@@ -73,22 +73,6 @@ namespace ops
 		{
 			return receiver;
 		}
-		////To be used only by creator of ReceiveDataHandler instance
-		//int getReservations()
-		//{
-		//	return reservations;
-		//}
-		////To be used only by creator of ReceiveDataHandler instance
-		//void reserve()
-		//{
-		//	reservations ++;
-
-		//}
-		////To be used only by creator of ReceiveDataHandler instance
-		//void unreserver()
-		//{
-		//	reservations --;
-		//}
 
 	protected:
 		///Override from Listener
@@ -96,9 +80,7 @@ namespace ops
 		void onNewEvent(Notifier<BytesSizePair>* sender, BytesSizePair byteSizePair);
 		void calculateAndSetSpareBytes(ByteBuffer &buf, int segmentPaddingSize);
 
-
 	private:
-
 		///The receiver used for this topic. 
 		Receiver* receiver;
 
@@ -125,10 +107,7 @@ namespace ops
 
 		////How many subscribers use this instance. This will be used to check if it is ok to delete this ReceiveDataHandler.
 		//int reservations;
-
-
 	};
-
 	
 }
 #endif

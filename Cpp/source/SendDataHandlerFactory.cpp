@@ -47,7 +47,7 @@ namespace ops
 
 		if(top.getTransport() == Topic::TRANSPORT_MC)
 		{
-			SendDataHandler* newSendDataHandler = new McSendDataHandler(top, localIf, ttl); 
+			SendDataHandler* newSendDataHandler = new McSendDataHandler(participant->getIOService(), top, localIf, ttl);
 			sendDataHandlers[key] = newSendDataHandler;
 			return newSendDataHandler;
 		}
@@ -56,7 +56,7 @@ namespace ops
 			if(udpSendDataHandler == NULL)
 			{
 				// We have only one sender for all topics, so use the domain value for buffer size
-				udpSendDataHandler = new McUdpSendDataHandler(localIf, 
+				udpSendDataHandler = new McUdpSendDataHandler(participant->getIOService(), localIf,
 															  ttl,
 															  participant->getDomain()->getOutSocketBufferSize()); 
 			}
@@ -70,7 +70,7 @@ namespace ops
 		}
 		else if(top.getTransport() == Topic::TRANSPORT_TCP)
 		{
-			SendDataHandler* newSendDataHandler = new TCPSendDataHandler(top, participant->getIOService());
+			SendDataHandler* newSendDataHandler = new TCPSendDataHandler(participant->getIOService(), top);
 			sendDataHandlers[key] = newSendDataHandler;
 			return newSendDataHandler;
 		}

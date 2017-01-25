@@ -49,7 +49,7 @@ namespace ops
 	class TCPServer : public Sender
     {
     public:
-		TCPServer(std::string serverIP, int serverPort, IOService* ioServ, __int64 outSocketBufferSize = 16000000) : 
+		TCPServer(IOService* ioServ, std::string serverIP, int serverPort, __int64 outSocketBufferSize = 16000000) :
 			endpoint(NULL), sock(NULL), acceptor(NULL), connected(false), canceled(false),
 			m_asyncCallActive(false), m_working(false)
 		{

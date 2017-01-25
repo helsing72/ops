@@ -35,10 +35,10 @@ namespace ops
     {
     public:
 
-        TCPSendDataHandler(Topic& topic, IOService* ioService)
+        TCPSendDataHandler(IOService* ioService, Topic& topic)
         {
 
-			sender = Sender::createTCPServer(topic.getDomainAddress(), topic.getPort(), ioService, topic.getOutSocketBufferSize());
+			sender = Sender::createTCPServer(ioService, topic.getDomainAddress(), topic.getPort(), topic.getOutSocketBufferSize());
         }
 
         bool sendData(char* buf, int bufSize, Topic& topic)

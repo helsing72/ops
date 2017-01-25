@@ -43,6 +43,7 @@ namespace ops
     public:
 
         TCPClient(std::string serverIP, int serverPort, IOService* ioServ, __int64 inSocketBufferSizent = 16000000) : 
+			ipaddress(serverIP), _serverPort(serverPort), 
 			sock(NULL), endpoint(NULL), connected(false), 
 			tryToConnect(false), accumulatedSize(0),
 			m_asyncCallActive(false), m_working(false)
@@ -271,8 +272,18 @@ namespace ops
 			m_working = m_asyncCallActive;
         }
 
-    private:
-        int port;
+		int getLocalPort()
+		{
+			return _serverPort;
+		}
+
+		std::string getLocalAddress()
+		{
+			return ipaddress;
+		}
+
+	private:
+        int _serverPort;
         std::string ipaddress;
 		__int64 inSocketBufferSizent;
         boost::asio::ip::tcp::socket* sock;
