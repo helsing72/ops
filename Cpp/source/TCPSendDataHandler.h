@@ -37,18 +37,22 @@ namespace ops
 
         TCPSendDataHandler(IOService* ioService, Topic& topic)
         {
-
 			sender = Sender::createTCPServer(ioService, topic.getDomainAddress(), topic.getPort(), topic.getOutSocketBufferSize());
         }
 
         bool sendData(char* buf, int bufSize, Topic& topic)
         {
             SafeLock lock(&mutex);
-            //We dont "sendTo" but rather lets the server (sender) send to all conncted clients.
+            //We dont "sendTo" but rather lets the server (sender) send to all connected clients.
             bool result = true;
-            if (sender)
-            {
-                result = sender->sendTo(buf, bufSize, "", 0);
+            if (sender) {
+				//First, prepare and send a package of fixed length 22 with information about the size of the data package
+				char sizeInfo[100] = "opsp_tcp_size_info";
+				memcpy(sizeInfo + 18, (void*)&bufSize, 4);
+				result &= sender->sendTo(sizeInfo, 22, "", 0);
+
+				// Then send the data package
+                result &= sender->sendTo(buf, bufSize, "", 0);
             }
             return result;
         }

@@ -80,14 +80,8 @@ namespace ops
 			{
 				try
 				{
-					//First, prepare and send a package of fixed length 22 with information about the size of the data package
-					char sizeInfo[100] = "opsp_tcp_size_info"; 
-					memcpy(sizeInfo + 18, (void*)&size, 4);
-					connectedSockets[i]->send(boost::asio::buffer(sizeInfo, 22));
-
-					//Send the actual data
+					//Send the data
 					connectedSockets[i]->send(boost::asio::buffer(buf, size));
-
 				}
 				catch(std::exception& e)
 				{
@@ -108,10 +102,6 @@ namespace ops
 			}
 			return true;
 		}
-		//virtual int receiveReply(char* buf, int size)
-		//{
-		//	return -9999999;
-		//}
         virtual int getPort()
 		{
 			return port;

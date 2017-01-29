@@ -43,7 +43,7 @@ namespace ops
     public:
 
         TCPClient(std::string serverIP, int serverPort, IOService* ioServ, __int64 inSocketBufferSizent = 16000000) : 
-			ipaddress(serverIP), _serverPort(serverPort), 
+			_serverPort(serverPort), ipaddress(serverIP),
 			sock(NULL), endpoint(NULL), connected(false), 
 			tryToConnect(false), accumulatedSize(0),
 			m_asyncCallActive(false), m_working(false)
