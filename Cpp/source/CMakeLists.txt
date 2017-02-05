@@ -4,7 +4,7 @@ set(LIB_NAME ops)
 
 
 # where are the headers
-set(HEADER_PATH ${PROJECT_SOURCE_DIR}/Cpp/include)
+set(HEADER_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../include)
 
 set(LIB_PUBLIC_HEADERS
   ${HEADER_PATH}/ArchiverInOut.h
@@ -30,6 +30,7 @@ set(LIB_PUBLIC_HEADERS
   ${HEADER_PATH}/Listener.h
   ${HEADER_PATH}/Lockable.h
   ${HEADER_PATH}/MemoryMap.h
+  ${HEADER_PATH}/NetworkSupport.h
   ${HEADER_PATH}/NoSuchTopicException.h
   ${HEADER_PATH}/Notifier.h
   ${HEADER_PATH}/ops/Reply.h
@@ -80,26 +81,20 @@ set(LIB_PUBLIC_HEADERS
   ${HEADER_PATH}/XMLArchiverOut.h
 )
 
-set(LIB_SRCS
+set(LIB_CORE_SRCS
   ArchiverInOut.cpp
   BasicError.h
-  BoostDeadlineTimerImpl.h
-  BoostIOServiceImpl.h
   ByteBuffer.cpp
   Channel.cpp
   Compatibility.cpp
   DataNotifier.cpp
-  DeadlineTimer.cpp
   DefaultOPSConfigImpl.h
   Domain.cpp
   ErrorService.cpp
-  IOService.cpp
   KeyFilterQoSPolicy.cpp
   Lockable.cpp
   McSendDataHandler.h
   McUdpSendDataHandler.h
-  MulticastReceiver.cpp
-  MulticastReceiver.h
   MultiThreadPool.h
   OPSArchiverIn.cpp
   OPSArchiverOut.cpp
@@ -114,7 +109,6 @@ set(LIB_SRCS
   ReceiveDataHandler.cpp
   ReceiveDataHandlerFactory.cpp
   ReceiveDataHandlerFactory.h
-  Receiver.cpp
   ReceiverFactory.cpp
   ReceiverFactory.h
   RequestReply.cpp
@@ -122,25 +116,38 @@ set(LIB_SRCS
   SendDataHandlerFactory.cpp
   SendDataHandlerFactory.h
   SendDiscoveryModule.cpp
-  Sender.cpp
   SerializableCompositeFactory.cpp
   SerializableInheritingTypeFactory.cpp
   Subscriber.cpp
-  TCPClient.cpp
-  TCPClient.h
   TCPSendDataHandler.h
-  TCPServer.h
   Thread.cpp
-  TimeHelper.cpp
   Topic.cpp
   Transport.cpp
+  xml/xmlParser.cpp
+  XMLArchiverIn.cpp
+  XMLArchiverOut.cpp
+)
+
+# Source files implementing the lowest layer, interfacing network, etc.
+# These will need to change/re-implement if boost isn't available for the platform
+set(LIB_BOTTOM_LAYER_SRC
+  BoostDeadlineTimerImpl.h
+  BoostIOServiceImpl.h
+  DeadlineTimer.cpp
+  IOService.cpp
+  MulticastReceiver.cpp
+  MulticastReceiver.h
+  NetworkSupport.cpp
+  Receiver.cpp
+  Sender.cpp
+  TCPClient.cpp
+  TCPClient.h
+  TCPServer.h
+  TimeHelper.cpp
   UDPReceiver.cpp
   UDPReceiver.h
   UDPSender.cpp
   UDPSender.h
-  xml/xmlParser.cpp
-  XMLArchiverIn.cpp
-  XMLArchiverOut.cpp
 )
 
 # ide grouping, doesn't matter for makefile projects
@@ -148,7 +155,8 @@ source_group("Header Files" FILES ${LIB_PUBLIC_HEADERS})
 
 # generate the library target
 add_library(${LIB_NAME} SHARED
-    ${LIB_SRCS}
+    ${LIB_CORE_SRCS}
+    ${LIB_BOTTOM_LAYER_SRC}
     ${LIB_PUBLIC_HEADERS}
 )
 
@@ -169,7 +177,8 @@ endif()
 set(LIB_STATIC ${LIB_NAME}-static)
 # generate the library target
 add_library(${LIB_STATIC} STATIC
-    ${LIB_SRCS}
+    ${LIB_CORE_SRCS}
+    ${LIB_BOTTOM_LAYER_SRC}
     ${LIB_PUBLIC_HEADERS}
 )
 set_target_properties(${LIB_STATIC} PROPERTIES VERSION ${PROJECT_VERSION})

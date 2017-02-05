@@ -3,7 +3,7 @@
 #include "ReceiverFactory.h"
 #include "Domain.h"
 #include "BasicError.h"
-
+#include "NetworkSupport.h"
 
 namespace ops
 {
@@ -22,7 +22,7 @@ namespace ops
             return receiver;
         }
 
-		std::string localIf = Domain::doSubnetTranslation(top.getLocalInterface(), participant->getIOService());
+		std::string localIf = doSubnetTranslation(top.getLocalInterface(), participant->getIOService());
 
         if (top.getTransport() == Topic::TRANSPORT_MC)
         {

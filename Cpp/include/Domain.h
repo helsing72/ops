@@ -68,8 +68,6 @@ namespace ops
 		int getOutSocketBufferSize();
 		
 		virtual ~Domain();
-
-		static std::string doSubnetTranslation(std::string addr, IOService* ioServ);
 	};
 }
 

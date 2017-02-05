@@ -9,6 +9,7 @@
 #include "McUdpSendDataHandler.h"
 #include "TCPSendDataHandler.h"
 #include "Domain.h"
+#include "NetworkSupport.h"
 
 namespace ops
 {
@@ -41,7 +42,7 @@ namespace ops
 			return sendDataHandlers[key];
 		}			
 
-		std::string localIf = Domain::doSubnetTranslation(top.getLocalInterface(), participant->getIOService());
+		std::string localIf = doSubnetTranslation(top.getLocalInterface(), participant->getIOService());
 
 		int ttl = top.getTimeToLive();
 
