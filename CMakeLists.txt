@@ -39,7 +39,7 @@ else()
 endif()
 
 
-# add compiler flags for release or debug
+# add compiler flags for C++11 / release / debug
 if(MSVC)
 #  set(warnings "/W4 /WX /EHsc")
   set(warnings "/W3 /WX /EHsc")
@@ -53,6 +53,7 @@ else()
   endif()
 #  set(warnings "-Wall -Wextra -Werror")
   set(warnings "-Wall")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 endif()
 set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} ${warnings}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${warnings}")
