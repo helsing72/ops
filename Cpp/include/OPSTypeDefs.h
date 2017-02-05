@@ -10,8 +10,13 @@
 
 // -----------------------------------------------------------------------------
 // Some OPS configurations
-//#define USE_C11             // Enables use of std::mutex, std::thread in some places
+#define USE_C11             // Enables use of C++11 std::mutex, std::thread, std::condition_variable
                             // instead of boost or WIN32/Linux specific calls
+
+#ifdef OVERRIDE_DEFAULT_NO_C11	// Give possibility to override default settings for backward compatibility
+#undef USE_C11					// This will use boost and WIN32/Linux specific calls instead of C++11
+#endif
+
 
 //#define OPSSLIM_NORESERVE // Removes Reservable from OPSMessage
 
