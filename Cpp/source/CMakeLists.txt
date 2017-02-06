@@ -119,6 +119,7 @@ set(LIB_CORE_SRCS
   SerializableCompositeFactory.cpp
   SerializableInheritingTypeFactory.cpp
   Subscriber.cpp
+  TCPClientBase.h
   TCPSendDataHandler.h
   Thread.cpp
   Topic.cpp
