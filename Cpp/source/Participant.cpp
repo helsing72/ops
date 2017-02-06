@@ -37,6 +37,7 @@
 #include "CommException.h"
 #include "Publisher.h"
 #include "BasicError.h"
+#include "NetworkSupport.h"
 
 namespace ops
 {
@@ -171,19 +172,16 @@ namespace ops
 		objectFactory = new OPSObjectFactoryImpl();
 		
 		// Initialize static data in partInfoData (ReceiveDataHandlerFactory() will set some more fields)
-		std::string Name;
-		char hname[1024];
-		hname[0] ='\0';
-		gethostname(hname, sizeof(hname));
+		std::string Name = GetHostName();
 		std::ostringstream myStream;
 #ifdef _WIN32
-		myStream << hname << " (" << _getpid() << ")" << std::ends;
+		myStream << Name << " (" << _getpid() << ")" << std::ends;
 #else
-		myStream << hname << " (" << getpid() << ")" << std::ends;
+		myStream << Name << " (" << getpid() << ")" << std::ends;
 #endif
 		Name = myStream.str();
 		partInfoData.name = Name;
-        partInfoData.languageImplementation = "c++";
+        partInfoData.languageImplementation = "C++";
         partInfoData.id = participantID;
         partInfoData.domain = domainID;
 

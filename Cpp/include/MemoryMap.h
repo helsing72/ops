@@ -21,7 +21,7 @@
 #ifndef ops_MemoryMap_h
 #define	ops_MemoryMap_h
 
-#include <memory.h>
+#include <string.h>
 #include "OPSExport.h"
 
 namespace ops

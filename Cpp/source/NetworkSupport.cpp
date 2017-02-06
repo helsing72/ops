@@ -75,5 +75,13 @@ std::string doSubnetTranslation(std::string addr, IOService* ioServ)
 	return subnet;
 }
 
+std::string GetHostName()
+{
+	char hname[1024];
+	hname[0] = '\0';
+	gethostname(hname, sizeof(hname));
+	return hname;
+}
+
 }
 #endif // REPLACE_TRANSPORT_LAYER
