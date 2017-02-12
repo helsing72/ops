@@ -121,6 +121,7 @@ set(LIB_CORE_SRCS
   Subscriber.cpp
   TCPClientBase.h
   TCPSendDataHandler.h
+  TCPServerBase.h
   Thread.cpp
   Topic.cpp
   Transport.cpp

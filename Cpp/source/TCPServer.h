@@ -19,7 +19,7 @@
 */
 
 /* 
- * File:   Transport.h
+ * File:   TCPServer.h
  * Author: Anton Gravestam
  *
  * Created on den 22 oktober 2008, 20:01
@@ -29,7 +29,7 @@
 #define	ops_TCPServerH
 
 #include <string>
-#include "Sender.h"
+#include "TCPServerBase.h"
 #include "IOService.h" 
 #include "BytesSizePair.h"
 
@@ -46,79 +46,29 @@ namespace ops
 {
     ///Interface used to send data
 
-	class TCPServer : public Sender
+	class TCPServer : public TCPServerBase
     {
     public:
 		TCPServer(IOService* ioServ, std::string serverIP, int serverPort, __int64 outSocketBufferSize = 16000000) :
-			endpoint(NULL), sock(NULL), acceptor(NULL), connected(false), canceled(false),
-			m_asyncCallActive(false), m_working(false)
+			TCPServerBase(),
+			_serverPort(serverPort), _serverIP(serverIP), _outSocketBufferSize(outSocketBufferSize),
+			endpoint(NULL), sock(NULL), acceptor(NULL), _canceled(false),
+			_asyncCallActive(false), _working(false)
 		{
-			this->outSocketBufferSize = outSocketBufferSize;
 			ioService = ((BoostIOServiceImpl*)ioServ)->boostIOService;
 			//boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(serverIP));
 			endpoint = new boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), serverPort);
 			sock = new boost::asio::ip::tcp::socket(*ioService);
 		}
 		
-		void open()
+		virtual ~TCPServer()
 		{
-			canceled = false;
-			if (acceptor) delete acceptor;
-			// This constructor opens, binds and listens to the given endpoint.
-			acceptor = new boost::asio::ip::tcp::acceptor(*ioService, *endpoint);
-			// Set variables indicating that we are "active"
-			m_working = true;
-			m_asyncCallActive = true;
-			acceptor->async_accept(*sock, boost::bind(&TCPServer::handleAccept, this, boost::asio::placeholders::error));
-		}
-
-		///Sends buf to any Receiver connected to this Sender, ip and port are discarded and can be left blank.
-        virtual bool sendTo(char* buf, int size, const std::string& ip, int port)
-		{
-			//Send to anyone connected. Loop backwards to avoid problems when removing broken sockets
-			for(int i = (int)connectedSockets.size() - 1; i >= 0 ; i--)
-			{
-				try
-				{
-					//Send the data
-					connectedSockets[i]->send(boost::asio::buffer(buf, size));
-				}
-				catch(std::exception& e)
-				{
-					std::stringstream ss;
-					ss << "Socket closed, exception in TCPServer::sendTo():" << e.what() << std::endl;
-					ops::BasicError err("TCPServer", "TCPServer", ss.str());
-					Participant::reportStaticError(&err);
-					connectedSockets[i]->close();
-
-					std::vector<boost::asio::ip::tcp::socket*>::iterator it;
-					it = connectedSockets.begin();
-					it += i;
-					delete connectedSockets[i];
-					connectedSockets.erase(it);
-					
-					connected = (connectedSockets.size() > 0);
-				}
-			}
-			return true;
-		}
-        virtual int getPort()
-		{
-			return port;
-		}
-        virtual std::string getAddress()
-		{
-			return ipAddress;
-		}
-
-        virtual ~TCPServer()
-        {
 			close();
 
 			/// We must handle asynchronous callbacks that haven't finished yet.
 			/// This approach works, but the recommended boost way is to use a shared pointer to the instance object
 			/// between the "normal" code and the callbacks, so the callbacks can check if the object exists.
-			while (m_working) { 
+			while (_working) {
 				Sleep(1);
 			}
 
@@ -127,82 +77,115 @@ namespace ops
 			if (endpoint) delete endpoint;
 		}
 
+		void open()
+		{
+			_canceled = false;
+			if (acceptor) delete acceptor;
+			// This constructor opens, binds and listens to the given endpoint.
+			acceptor = new boost::asio::ip::tcp::acceptor(*ioService, *endpoint);
+			// Set variables indicating that we are "active"
+			_working = true;
+			_asyncCallActive = true;
+			acceptor->async_accept(*sock, boost::bind(&TCPServer::handleAccept, this, boost::asio::placeholders::error));
+		}
+
 		void close()
 		{
-			canceled = true;
+			_canceled = true;
 			if (acceptor) acceptor->close();
-			for(int i = (int)connectedSockets.size() - 1; i >= 0 ; i--)
-			{
-				connectedSockets[i]->close();
-				delete connectedSockets[i];
-			}
-			connectedSockets.clear();
-			connected = false;
+			TCPServerBase::close();
+		}
+
+		virtual int getPort()
+		{
+			return _serverPort;
+		}
+        
+		virtual std::string getAddress()
+		{
+			return _serverIP;
 		}
 
     private:
+		class boostSocketSender : public SocketSender
+		{
+		private:
+			boost::asio::ip::tcp::socket* _sock;
+		public:
+			boostSocketSender(boost::asio::ip::tcp::socket* sock) : _sock(sock) {}
+			virtual ~boostSocketSender()
+			{
+				_sock->close();
+				delete _sock;
+			}
+			virtual int send(char* buf, int size)
+			{
+				try {
+					// Send the data
+					return (int)_sock->send(boost::asio::buffer(buf, size));
+				} catch (std::exception& e) {
+					std::stringstream ss;
+					ss << "Socket closed, exception in TCPServer::sendTo():" << e.what() << std::endl;
+					ops::BasicError err("TCPServer", "TCPServer", ss.str());
+					Participant::reportStaticError(&err);
+				}
+				return -1;
+			}
+		};
+
 		void handleAccept(const boost::system::error_code& error)
 		{
-			m_asyncCallActive = false;
+			_asyncCallActive = false;
 
-			if (canceled) {
+			if (_canceled) {
 				//This TCPServer is shutting down
 
 			} else {
-				if(!error)
-				{
-					if (outSocketBufferSize > 0) {
-						boost::asio::socket_base::send_buffer_size option((int)outSocketBufferSize);
+				if (!error) {
+					if (_outSocketBufferSize > 0) {
+						boost::asio::socket_base::send_buffer_size option((int)_outSocketBufferSize);
 						boost::system::error_code ec;
 						ec = sock->set_option(option, ec);
 						sock->get_option(option);
-						if(ec != 0 || option.value() != outSocketBufferSize)
-						{
+						if(ec != 0 || option.value() != _outSocketBufferSize) {
 							//std::cout << "Socket buffer size could not be set" << std::endl;
 							ops::BasicError err("TCPServer", "TCPServer", "Socket buffer size could not be set");
 							Participant::reportStaticError(&err);
 						}
 					}
-	//				std::cout << "accept ok" << std::endl;
-					connectedSockets.push_back(sock);
+					
+					AddSocket(new boostSocketSender(sock));
+
 					sock = new boost::asio::ip::tcp::socket(*ioService);
-					m_asyncCallActive = true;
+					_asyncCallActive = true;
 					acceptor->async_accept(*sock, boost::bind(&TCPServer::handleAccept, this, boost::asio::placeholders::error));
-					connected = true;
-				}
-				else
-				{
-	//				std::cout << "accept failed" << std::endl;
-					m_asyncCallActive = true;
+
+				} else {
+					_asyncCallActive = true;
 					acceptor->async_accept(*sock, boost::bind(&TCPServer::handleAccept, this, boost::asio::placeholders::error));
 				}
 			}
 			// We update the "m_working" flag as the last thing in the callback, so we don't access the object any more 
 			// in case the destructor has been called and waiting for us to be finished.
 			// If we haven't started a new async call above, this will clear the flag.
-			m_working = m_asyncCallActive;
+			_working = _asyncCallActive;
 		}
 
-		int port;
-		std::string ipAddress;
-		__int64 outSocketBufferSize;
+		int _serverPort;
+		std::string _serverIP;
+		__int64 _outSocketBufferSize;
 		boost::asio::ip::tcp::endpoint* endpoint;		//<-- The local port to bind to.
         boost::asio::ip::tcp::socket* sock;				//<-- The socket that handles next accept.
         
 		boost::asio::ip::tcp::acceptor* acceptor;
-		bool connected;
-		std::vector<boost::asio::ip::tcp::socket*> connectedSockets; //<-- All connected sockets
 		boost::asio::io_service* ioService;				//<-- Boost io_service handles the asynhronous operations on the sockets
 
-		bool canceled;
+		bool _canceled;
 
 		// Variables to keep track of our outstanding requests, that will result in callbacks to us
-		volatile bool m_asyncCallActive;
-		volatile bool m_working;
+		volatile bool _asyncCallActive;
+		volatile bool _working;
     };
 }
-
-
-
-#endif	/* ops_TCPServerH */
+#endif
 
