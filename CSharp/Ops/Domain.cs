@@ -230,7 +230,8 @@ namespace Ops
             string subnetIp = ip.Substring(0, index);
             string subnetMask = ip.Substring(index + 1);
 
-            byte[] mask;
+            byte[] bip = System.Net.IPAddress.Parse(subnetIp).GetAddressBytes();
+            byte[] bmask;
 
             if (subnetMask.Length <= 2)
             {
@@ -238,16 +239,18 @@ namespace Ops
                 int numBits = int.Parse(subnetMask);
                 long binMask = (((1 << numBits) - 1) << (32 - numBits)) & 0xFFFFFFFF;
 
-                mask = new byte[4];
-                mask[0] = (byte)((binMask >> 24) & 0xFF);
-                mask[1] = (byte)((binMask >> 16) & 0xFF);
-                mask[2] = (byte)((binMask >>  8) & 0xFF);
-                mask[3] = (byte)((binMask      ) & 0xFF);
+                bmask = new byte[4];
+                bmask[0] = (byte)((binMask >> 24) & 0xFF);
+                bmask[1] = (byte)((binMask >> 16) & 0xFF);
+                bmask[2] = (byte)((binMask >>  8) & 0xFF);
+                bmask[3] = (byte)((binMask      ) & 0xFF);
             }
             else
             {
-                mask = System.Net.IPAddress.Parse(subnetMask).GetAddressBytes();
+                bmask = System.Net.IPAddress.Parse(subnetMask).GetAddressBytes();
             }
+
+            for (int j = 0; j < bip.Length; j++) bip[j] = (byte)((int)bip[j] & (int)bmask[j]);
 
             System.Net.NetworkInformation.IPGlobalProperties computerProperties = System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties();
             System.Net.NetworkInformation.NetworkInterface[] nics = System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces();
@@ -265,10 +268,12 @@ namespace Ops
                         if (uni.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork) //IPV4
                         {
                             byte[] addr = uni.Address.GetAddressBytes();
-                            for (int j = 0; j < addr.Length; j++) addr[j] = (byte)((int)addr[j] & (int)mask[j]);
-                            string Subnet = new System.Net.IPAddress(addr).ToString();
+                            for (int j = 0; j < addr.Length; j++) addr[j] = (byte)((int)addr[j] & (int)bmask[j]);
 
-                            if (Subnet.Equals(subnetIp))
+                            bool eq = true;
+                            for (int j = 0; j < addr.Length; j++) eq = eq & (addr[j] == bip[j]);
+
+                            if (eq)
                             {
                                 return uni.Address.ToString();
                             }
