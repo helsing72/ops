@@ -730,7 +730,7 @@ int main(int argc, char**argv)
 			if (idx > 0) line.erase(0, idx);
 		}
 
-                ItemInfo* ii = ItemInfoList[num];
+        ii = ItemInfoList[num];
 
 		switch (ch) {
 			case '?':
@@ -804,7 +804,7 @@ int main(int argc, char**argv)
 			case 'l':
 			case 'L':
 				{
-					int num = atoi(line.c_str());
+					num = atoi(line.c_str());
 					if (num >= 0) NumVessuvioBytes = num;
 					if (FillerStr.size() > (unsigned int)num) FillerStr.erase(num);
 					while (FillerStr.size() < (unsigned int)num) FillerStr += " ";
@@ -815,7 +815,7 @@ int main(int argc, char**argv)
 			case 'v':
 			case 'V':
 				{
-					int num = atoi(line.c_str());
+					num = atoi(line.c_str());
 					if (num >= 0) sendPeriod = num;
 					std::cout << "sendPeriod: " << sendPeriod << std::endl;
 				}
@@ -845,7 +845,7 @@ int main(int argc, char**argv)
 	// --------------------------------------------------------------------
 
 	for (unsigned int idx = 0; idx < ItemInfoList.size(); idx++) {
-                ItemInfo* ii = ItemInfoList[idx];
+        ii = ItemInfoList[idx];
 		if (ii->helper) delete ii->helper;
 		ii->helper = NULL;
 		ii->part = NULL;

@@ -349,8 +349,10 @@
     <ClInclude Include="..\..\..\source\ReceiverFactory.h" />
     <ClInclude Include="..\..\..\source\SendDataHandlerFactory.h" />
     <ClInclude Include="..\..\..\source\TCPClient.h" />
+    <ClInclude Include="..\..\..\source\TCPClientBase.h" />
     <ClInclude Include="..\..\..\source\TCPSendDataHandler.h" />
     <ClInclude Include="..\..\..\source\TCPServer.h" />
+    <ClInclude Include="..\..\..\source\TCPServerBase.h" />
     <ClInclude Include="..\..\..\source\UDPReceiver.h" />
     <ClInclude Include="..\..\..\source\UDPSender.h" />
     <ClInclude Include="..\..\..\include\ArchiverInOut.h" />
