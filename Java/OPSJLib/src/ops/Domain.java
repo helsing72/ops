@@ -244,20 +244,24 @@ public class Domain extends OPSObject
 
         try
         {
-            byte[] mask;
+            byte[] bip = InetAddress.getByName(subnetIp).getAddress();
+            byte[] bmask;
+
             if (subnetMask.length() <= 2) {
 		            // Expand to the number of bits given
                 long bitmask = Integer.parseInt(subnetMask);
 		            bitmask = (((1 << bitmask)-1) << (32 - bitmask)) & 0xFFFFFFFF;
-                mask = new byte[] {
+                bmask = new byte[] {
                   (byte)(bitmask >>> 24),
                   (byte)(bitmask >>> 16),
                   (byte)(bitmask >>> 8),
                   (byte)bitmask};
             } else {
                 InetAddress ipAddress = InetAddress.getByName(subnetMask);
-                mask = ipAddress.getAddress();
+                bmask = ipAddress.getAddress();
             }
+
+            for (int j = 0; j < bip.length; j++) bip[j] = (byte)((int)bip[j] & (int)bmask[j]);
 
             Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
             for (NetworkInterface netint : java.util.Collections.list(nets))
@@ -266,14 +270,12 @@ public class Domain extends OPSObject
                 for (java.net.InterfaceAddress ifAddress : ifAddresses) {
                     if (ifAddress.getAddress() instanceof Inet4Address) {
                         byte[] addr = ifAddress.getAddress().getAddress();
-                        for (int j = 0; j < addr.length; j++) addr[j] = (byte)((int)addr[j] & (int)mask[j]);
+                        for (int j = 0; j < addr.length; j++) addr[j] = (byte)((int)addr[j] & (int)bmask[j]);
 
-                        String Subnet = InetAddress.getByAddress(addr).toString();
-                        index = Subnet.indexOf('/');
-                        if (index >= 0) Subnet = Subnet.substring(index+1);
+                        boolean eq = true;
+                        for (int j = 0; j < addr.length; j++) eq = eq & (addr[j] == bip[j]);
 
-                        if (Subnet.equals(subnetIp))
-                        {
+                        if (eq) {
                             // split "hostname/127.0.0.1/8 [0.255.255.255]"
                             String s[] = ifAddress.toString().split("/");
                             return s[1];
