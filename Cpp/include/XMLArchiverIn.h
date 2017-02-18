@@ -198,14 +198,19 @@ namespace ops
             }
         }
 
-		virtual void inout(const std::string& name, char* buffer, int bufferSize)
-		{
-			///TODO
+        virtual void inout(const std::string& name, char* buffer, int bufferSize)
+        {
+            UNUSED(name);
+            UNUSED(buffer);
+            UNUSED(bufferSize);
+            ///TODO
             throw ops::ArchiverException("XMLArchiverIn.inout(name, char*, int) NYI");
-		}
+        }
 
         virtual Serializable* inout(const std::string& name, Serializable* value, int element)
         {
+            UNUSED(value);
+
             opsXML::XMLNode tempNode = currentNode;
             currentNode = currentNode.getChildNode(name.c_str()).getChildNode("element", element);
             string types(currentNode.getAttribute("type"));
@@ -223,7 +228,8 @@ namespace ops
 
         virtual void inout(const std::string& name, Serializable& value)
         {
-
+            UNUSED(name);
+            UNUSED(value);
         }
 
         virtual Serializable* inout(const std::string& name, Serializable* value)
@@ -459,6 +465,7 @@ namespace ops
 
         int beginList(const std::string& name, int size)
         {
+            UNUSED(size);
             if (!currentNode.getChildNode(name.c_str()).isEmpty())
             {
                 return currentNode.getChildNode(name.c_str()).nChildNode("element");
@@ -468,6 +475,7 @@ namespace ops
 
         void endList(const std::string& name)
         {
+            UNUSED(name);
             //Nothing to do in this implementation
         }
 

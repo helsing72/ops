@@ -12,7 +12,8 @@ namespace ops
 
     void ErrorService::report(std::string className, std::string methodName, std::string errorMessage)
     {
-
-
+        UNUSED(className);
+        UNUSED(methodName);
+        UNUSED(errorMessage);
     }
 }

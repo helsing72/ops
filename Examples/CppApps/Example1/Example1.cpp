@@ -311,6 +311,7 @@ public:
 	// Override from ops::DeadlineMissedListener, called if no new data has arrived within deadlineQoS.
 	void onDeadlineMissed(ops::DeadlineMissedEvent* evt)
 	{
+		UNUSED(evt);
 		std::cout << "Deadline Missed!" << std::endl;
 	}
 };

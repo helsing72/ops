@@ -16,7 +16,9 @@
 
 int main(int argc, const char* args[])
 {
-using namespace ops;
+  UNUSED(argc);
+  UNUSED(args);
+  using namespace ops;
 
 //Create a Participant (i.e. an entry point for using ops.), compare with your ops_config.xml
 ops::Participant* participant = Participant::getInstance("HelloDomain");

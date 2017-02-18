@@ -17,6 +17,8 @@
 
 int main(int argc, const char* args[])
 {
+	UNUSED(argc);
+	UNUSED(args);
 	using namespace ops;
 
 	//Create a Participant (i.e. an entry point for using ops.), compare with your ops_config.xml

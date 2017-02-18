@@ -13,6 +13,7 @@ namespace ops
 
     ReceiveDataHandlerFactory::ReceiveDataHandlerFactory(Participant* participant)
     {
+        UNUSED(participant);
     }
 
 	std::string ReceiveDataHandlerFactory::makeKey(Topic& top)

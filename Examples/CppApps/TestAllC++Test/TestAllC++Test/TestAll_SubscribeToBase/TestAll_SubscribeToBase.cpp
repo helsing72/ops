@@ -66,6 +66,7 @@ public:
 	///Override from ops::DataListener, called whenever new data arrives.
 	void onNewData(ops::DataNotifier* subscriber)
 	{
+		UNUSED(subscriber);
 		counter++;
 
 		/*TestAll::BaseData* data;
@@ -83,6 +84,7 @@ public:
 	///Override from ops::DeadlineMissedListener, called if no new data has arrived within deadlineQoS.
 	void onDeadlineMissed(ops::DeadlineMissedEvent* evt)
 	{
+		UNUSED(evt);
 		std::cout << "Deadline Missed!" << std::endl;
 	}
 	~Main()
@@ -99,6 +101,8 @@ void newData()
 //Application entry point
 int main(int argc, char* args[])
 {
+	UNUSED(argc);
+	UNUSED(args);
 	//Add support for our types from TestAll IDL project.
 	//ops::OPSObjectFactory::getInstance()->add(new TestAll::TestAllTypeFactory()); 
 

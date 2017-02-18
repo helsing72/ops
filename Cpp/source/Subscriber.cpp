@@ -103,6 +103,7 @@ namespace ops
 
     void Subscriber::onNewEvent(Notifier<OPSMessage*>* sender, OPSMessage* message)
     {
+        UNUSED(sender);
         //Perform a number of checks on incomming data to be sure we want to deliver it to the application layer
 
         //Check that this message is delivered on the same topic as this Subscriber use
@@ -325,6 +326,8 @@ namespace ops
 
     void Subscriber::onNewEvent(Notifier<int>* sender, int message)
     {
+        UNUSED(sender);
+        UNUSED(message);
         deadlineMissedEvent.notifyDeadlineMissed();
         deadlineTimer->start(deadlineTimeout);
     }

@@ -63,6 +63,8 @@ namespace ops
 		///Sends buf to any Receiver connected to this Sender, ip and port are discarded and can be left blank.
         virtual bool sendTo(char* buf, int size, const std::string& ip, int port)
 		{
+			UNUSED(ip);
+			UNUSED(port);
 			std::lock_guard<std::mutex> lck(_mtx);
 			// Send to anyone connected. Loop backwards to avoid problems when removing broken sockets
 			for (int i = (int)_connectedSockets.size() - 1; i >= 0 ; i--) {

@@ -75,6 +75,8 @@ public:
 //Application entry point
 int main(int argc, char* args[])
 {
+	UNUSED(argc);
+	UNUSED(args);
 	//Create an object that will listen to OPS events
 	Main m;
 

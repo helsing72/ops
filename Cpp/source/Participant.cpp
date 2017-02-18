@@ -319,6 +319,8 @@ namespace ops
 	// Called on aliveDeadlineTimer timeouts
 	void Participant::onNewEvent(Notifier<int>* sender, int message)
 	{
+		UNUSED(sender);
+		UNUSED(message);
 		SafeLock lock(&serviceMutex);
 		receiveDataHandlerFactory->cleanUpReceiveDataHandlers();
 
@@ -387,6 +389,7 @@ namespace ops
 
 	bool Participant::hasPublisherOn(std::string topicName)
 	{
+		UNUSED(topicName);
 		///TODO
 		return true;
 	}

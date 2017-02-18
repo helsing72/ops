@@ -92,6 +92,7 @@ namespace ops
     ///Called whenever the receiver has new data.
     void ReceiveDataHandler::onNewEvent(Notifier<BytesSizePair>* sender, BytesSizePair byteSizePair)
     {
+        UNUSED(sender);
         if (byteSizePair.size <= 0)
         {
             //Inform participant that we had an error waiting for data,

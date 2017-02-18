@@ -12,10 +12,12 @@ namespace ops
 	}
 	Reservable::Reservable(const Reservable& r)
 	{
+		UNUSED(r);
 		referenceHandler = NULL;
 	}
 	Reservable& Reservable::operator = (const Reservable& l)
 	{
+		UNUSED(l);
 		return *this;
 	}
 	

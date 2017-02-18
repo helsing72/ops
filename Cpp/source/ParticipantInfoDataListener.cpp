@@ -114,6 +114,8 @@ namespace ops
 
 	void ParticipantInfoDataListener::disconnectUdp(Topic& top, SendDataHandler* handler)
 	{
+		UNUSED(top);
+		UNUSED(handler);
 		SafeLock lock(&mutex);
 
 		// Remove topic from list so we know if the subscriber is needed
@@ -130,6 +132,7 @@ namespace ops
 
 	void ParticipantInfoDataListener::connectTcp(Topic& top, void* handler)
 	{
+		UNUSED(handler);
 		SafeLock lock(&mutex);
 		if (!partInfoSub) {
 			if (!setupSubscriber()) {
@@ -146,6 +149,8 @@ namespace ops
 
 	void ParticipantInfoDataListener::disconnectTcp(Topic& top, void* handler)
 	{
+		UNUSED(top);
+		UNUSED(handler);
 		SafeLock lock(&mutex);
 		///TODO remove from map
 	}

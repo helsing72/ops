@@ -172,6 +172,7 @@ namespace ops
 
 		void handleReadOK(char* bytes_, int size)
 		{
+			UNUSED(bytes_);
 			notifyNewEvent(BytesSizePair(data, size));
 		}
 

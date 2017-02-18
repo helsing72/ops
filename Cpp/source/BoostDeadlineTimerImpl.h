@@ -112,6 +112,7 @@ namespace ops
 
     void BoostDeadlineTimerImpl::onNewEvent(Notifier<int>* sender, int message)
     {
+        UNUSED(sender);
         notifyNewEvent(message);    // Just forward the event
     }
 

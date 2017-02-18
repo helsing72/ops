@@ -19,6 +19,7 @@ namespace ops
 
     Lockable::Lockable(const Lockable& l)
     {
+        UNUSED(l);
 #ifdef USE_C11
         mutex = new std::recursive_mutex();
 #else
@@ -28,6 +29,7 @@ namespace ops
 
     Lockable & Lockable::operator =(const Lockable& l)
     {
+        UNUSED(l);
 #ifdef USE_C11
         mutex = new std::recursive_mutex();
 #else

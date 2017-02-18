@@ -81,6 +81,7 @@ public:
 	///Override from ops::DeadlineMissedListener, called if no new data has arrived within deadlineQoS.
 	void onDeadlineMissed(ops::DeadlineMissedEvent* evt)
 	{
+		UNUSED(evt);
 		std::cout << "Deadline Missed!" << std::endl;
 	}
 	~Main()
@@ -93,6 +94,8 @@ public:
 //Application entry point
 int main(int argc, char* args[])
 {
+	UNUSED(argc);
+	UNUSED(args);
 	//Create an object that will listen to OPS events
 	Main m;
 

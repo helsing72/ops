@@ -71,6 +71,8 @@ public:
 int main(int argc, char* args[])
 {
 	//Create an object that will listen to OPS events
+	UNUSED(argc);
+	UNUSED(args);
 	Main m;
 
 	//Just keep program alive, action will take place in Main::onNewData()

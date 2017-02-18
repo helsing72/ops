@@ -8,6 +8,7 @@
 #include <string>
 #include <time.h>
 
+#include "OPSTypeDefs.h"
 #include "SdsSystemTime.h"
 
 namespace sds {
@@ -94,6 +95,7 @@ std::string sdsSystemTimeToLocalTime(int64_t time)
 
 	return tmp;
 #else
+	UNUSED(time);
 	return "TODO";
 #endif
 }

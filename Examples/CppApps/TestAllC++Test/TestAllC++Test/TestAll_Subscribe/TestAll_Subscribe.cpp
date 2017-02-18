@@ -35,6 +35,8 @@ public:
 public:
 	void onNewEvent(ops::Notifier<ops::BytesSizePair>* sender, ops::BytesSizePair byteSizePair)
 	{
+		UNUSED(sender);
+		UNUSED(byteSizePair);
 		rec->asynchWait(bytes, 100);
 	}
 	Main(bool piSubscriber): 
@@ -212,6 +214,7 @@ public:
 	///Override from ops::DeadlineMissedListener, called if no new data has arrived within deadlineQoS.
 	void onDeadlineMissed(ops::DeadlineMissedEvent* evt)
 	{
+		UNUSED(evt);
 		std::cout << "Deadline Missed!" << std::endl;
 	}
 	virtual ~Main()
@@ -229,6 +232,7 @@ public:
 //Application entry point
 int main(int argc, char* argv[])
 {
+	UNUSED(argv);
 	ops::Participant* participant = ops::Participant::getInstance("TestAllDomain");
 	
 	bool asPiSub = (argc > 1); 

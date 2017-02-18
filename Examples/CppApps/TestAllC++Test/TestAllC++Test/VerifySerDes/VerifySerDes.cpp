@@ -320,6 +320,8 @@ void fillChildData(TestAll::ChildData& data)
 
 int main(int argc, const char* args[])
 {
+	UNUSED(argc);
+	UNUSED(args);
 	TestAll::ChildData cd1;
 	TestAll::ChildData cd2;
 	TestAll::ChildData cd3;

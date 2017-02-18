@@ -110,14 +110,19 @@ namespace ops
             os << tab() << "<" << name << ">" << value << "</" << name << ">\n";
         }
 
-		virtual void inout(const std::string& name, char* buffer, int bufferSize)
-		{
-			///TODO
+        virtual void inout(const std::string& name, char* buffer, int bufferSize)
+        {
+            UNUSED(name);
+            UNUSED(buffer);
+            UNUSED(bufferSize);
+            ///TODO
             throw ops::ArchiverException("XMLArchiverOut.inout(name, char*, int) NYI");
-		}
+        }
 
         virtual Serializable* inout(const std::string& name, Serializable* value, int element)
         {
+            UNUSED(name);
+            UNUSED(element);
             OPSObject* opsO = dynamic_cast<OPSObject*> (value);
 
             if (opsO != NULL)
@@ -150,7 +155,8 @@ namespace ops
 
         virtual void inout(const std::string& name, Serializable& value)
         {
-
+            UNUSED(name);
+            UNUSED(value);
         }
 
         virtual void inout(const std::string& name, std::vector<bool>& value)

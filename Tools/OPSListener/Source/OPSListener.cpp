@@ -418,11 +418,13 @@ typedef std::string (*TFormatFunc)(ops::OPSMessage* mess, ops::OPSObject* opsDat
 
 std::string publisherName(ops::OPSMessage* mess, ops::OPSObject* opsData)
 {
+	UNUSED(opsData);
 	if (!mess) return "";
 	return "Pub: " + mess->getPublisherName();
 }
 std::string publicationId(ops::OPSMessage* mess, ops::OPSObject* opsData)
 {
+	UNUSED(opsData);
 	if (!mess) return "";
 	std::stringstream str;
 	str << mess->getPublicationID();
@@ -431,11 +433,13 @@ std::string publicationId(ops::OPSMessage* mess, ops::OPSObject* opsData)
 }
 std::string topicName(ops::OPSMessage* mess, ops::OPSObject* opsData)
 {
+	UNUSED(opsData);
 	if (!mess) return "";
 	return "Topic: " + mess->getTopicName();
 }
 std::string source(ops::OPSMessage* mess, ops::OPSObject* opsData)
 {
+	UNUSED(opsData);
 	if (!mess) return "";
 	std::string srcIP;
 	int srcPort;
@@ -448,6 +452,7 @@ std::string source(ops::OPSMessage* mess, ops::OPSObject* opsData)
 // ---------------------------------------------------------------------------------------
 std::string spareBytes(ops::OPSMessage* mess, ops::OPSObject* opsData)
 {
+	UNUSED(mess);
 	if (!opsData) return "";
 	std::stringstream str;
 	str << opsData->spareBytes.size();
@@ -456,11 +461,13 @@ std::string spareBytes(ops::OPSMessage* mess, ops::OPSObject* opsData)
 }
 std::string key(ops::OPSMessage* mess, ops::OPSObject* opsData)
 {
+	UNUSED(mess);
 	if (!opsData) return "";
 	return "Key: " + opsData->getKey();
 }
 std::string typeString(ops::OPSMessage* mess, ops::OPSObject* opsData)
 {
+	UNUSED(mess);
 	if (!opsData) return "";
 	return "Type: " + opsData->getTypeString();
 }
