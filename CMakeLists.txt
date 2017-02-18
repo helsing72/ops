@@ -158,7 +158,7 @@ endif()
 # we need the opsc compiler to generate code for the examples
 if(TARGET opsc)
   option(OPS_BUILD_EXAMPLES "Enable to build the example applications" ON)
-  if(OPS_BUILD_EXAMPLES)
+  if(OPS_BUILD_EXAMPLES AND CMAKE_BUILD_TYPE MATCHES "Debug")
     add_subdirectory(Examples)
   endif()
 endif()

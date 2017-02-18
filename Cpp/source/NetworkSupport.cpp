@@ -66,7 +66,7 @@ std::string doSubnetTranslation(std::string addr, IOService* ioServ)
 		boost::asio::ip::address ipaddr = it->endpoint().address();
 		if (ipaddr.is_v4()) {
 			unsigned long Ip = ipaddr.to_v4().to_ulong();
-			if ((Ip & subnetMask) == subnetIp) 
+			if ((Ip & subnetMask) == (subnetIp & subnetMask)) 
 				return ipaddr.to_string();
 		}
 		it++;

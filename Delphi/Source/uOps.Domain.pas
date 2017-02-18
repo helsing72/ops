@@ -354,7 +354,7 @@ begin
       with p^ do begin
         for i := 0 to dwNumEntries - 1 do begin
           with table[i] do begin
-            if (dwAddr and subnetMask) = subnetIp then begin
+            if (dwAddr and subnetMask) = (subnetIp and subnetMask) then begin
               Result := IpAddressToString(dwAddr);
               Break;
             end;

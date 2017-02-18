@@ -49,7 +49,7 @@ type
 
   TSenderFactory = class(TObject)
   public
-    // Creates a receiver
+    // Creates a sender
     class function createMCSender(localInterface : string = '0.0.0.0'; ttl : Integer = 1; outSocketBufferSize : Int64 = 16000000) : TSender;
     class function createUDPSender(localInterface : string = '0.0.0.0'; ttl : Integer = 1; outSocketBufferSize : Int64 = 16000000) : TSender;
     class function createTCPServer(ip : string; port : Integer; outSocketBufferSize : Int64 = 16000000) : TSender;

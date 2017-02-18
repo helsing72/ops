@@ -66,5 +66,5 @@ class ChildData extends BaseData
     /* */
     Fruit[] fruitarr;
     Fruit[15] ffruitarr;
-    
+
 }
