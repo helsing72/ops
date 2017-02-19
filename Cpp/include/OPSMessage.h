@@ -39,7 +39,6 @@ namespace ops
 #endif
     {
     public:
-
         OPSMessage() : 
 #ifndef OPSSLIM_NORESERVE
         Reservable(),
@@ -55,7 +54,6 @@ namespace ops
             std::string typeName("ops.protocol.OPSMessage");
             OPSObject::appendType(typeName);
             data = NULL;
-
         }
 
         virtual void setDataOwner(bool ownership)
@@ -70,9 +68,7 @@ namespace ops
 
         virtual ~OPSMessage()
         {
-            //TODO: should this delete data???
-            if (dataOwner)
-            {
+            if (dataOwner) {
                 if (data) delete data;
             }
         }
@@ -126,6 +122,9 @@ namespace ops
 
         void setData(OPSObject* d)
         {
+			if (dataOwner) {
+				if (data) delete data;
+			}
             data = d;
         }
 
@@ -164,6 +163,4 @@ namespace ops
     };
 
 }
-
-
 #endif
