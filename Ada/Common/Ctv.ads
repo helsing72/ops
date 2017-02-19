@@ -39,10 +39,10 @@ package Ctv is
 
 
   -- Byte array e.g. used in sending and receiving from sockets
---  type ByteArray_T  is array ( Unsigned_Int16 range <> ) of aliased Byte_T;
---  type ByteArray_At is access all ByteArray_T;    
+  type ByteArray_T  is array ( Integer range <> ) of aliased Unsigned_Int8;
+  type ByteArray_At is access all ByteArray_T;    
   
---  procedure Dealloc is new Ada.Unchecked_Deallocation( ByteArray_T, ByteArray_At );
+  procedure Dealloc is new Ada.Unchecked_Deallocation( ByteArray_T, ByteArray_At );
 
 
   -- Here are some constants which define the bit positions in a portable

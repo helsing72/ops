@@ -53,7 +53,7 @@ package Ops_Pa is
   -- Types used for implementing OPS static and dynamic arrays
   type Boolean_Arr is array(Integer range <>) of Boolean;
   type Boolean_Arr_At is access all Boolean_Arr;
-  type Byte_Arr is array(Integer range <>) of Byte;
+  type Byte_Arr is array(Integer range <>) of aliased Byte;
   type Byte_Arr_At is access all Byte_Arr;
   type Int16_Arr is array(Integer range <>) of Int16;
   type Int16_arr_At is access all Int16_Arr;

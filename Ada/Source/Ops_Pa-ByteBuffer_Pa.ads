@@ -116,6 +116,8 @@ package Ops_Pa.ByteBuffer_Pa is
   procedure WriteProtocol( Self : in out ByteBuffer_Class );
   procedure CheckProtocol( Self : in out ByteBuffer_Class; Result : out Boolean );
 
+  procedure WriteNewSegment( Self : in out ByteBuffer_Class );
+
 private
 -- ==========================================================================
 --
@@ -134,7 +136,6 @@ private
       CurrentSegment : UInt32;
     end record;
 
-  procedure WriteNewSegment( Self : in out ByteBuffer_Class );
   procedure ReadNewSegment( Self : in out ByteBuffer_Class );
 
   procedure InitInstance( Self : in out ByteBuffer_Class; mMap : MemoryMap_Class_At );

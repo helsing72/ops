@@ -126,7 +126,7 @@ package body Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
 
   procedure SetData( Self : in out OPSMessage_Class; value : OPSObject_Class_At ) is
   begin
-    if Self.data /= null then
+    if Self.DataOwner and Self.data /= null then
       Free(Self.data);
     end if;
     Self.data := value;
