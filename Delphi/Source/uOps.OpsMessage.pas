@@ -46,6 +46,8 @@ type
     // Reservation handling
     FNrOfReservations : Integer;
 
+    procedure SetData(Value : TOPSObject);
+
   public
     constructor Create;
     destructor Destroy; override;
@@ -78,7 +80,7 @@ type
     property PublicationID : Int64 read FPublicationID write FPublicationID;
     property PublisherName : AnsiString read FPublisherName write FPublisherName;
     property TopicName : AnsiString read FTopicName write FTopicName;
-    property Data : TOPSObject read FData write FData;
+    property Data : TOPSObject read FData write SetData;
   end;
 
 var
@@ -121,6 +123,14 @@ procedure TOPSMessage.UnReserve;
 begin
   if TInterlocked.Decrement(FNrOfReservations) = 0 then
     Destroy;
+end;
+
+procedure TOPSMessage.SetData(Value : TOPSObject);
+begin
+  if FDataOwner then begin
+    FreeAndNil(FData);
+  end;
+  FData := Value;
 end;
 
 procedure TOPSMessage.setSource(addr : string; port : Integer);
