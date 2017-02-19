@@ -21,6 +21,11 @@
 //#include "boost\asio\basic_socket.hpp"
 
 #include "OPSTypeDefs.h"
+
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#endif
+
 #include "boost/asio/basic_datagram_socket.hpp"
 
 #include "UDPSender.h"

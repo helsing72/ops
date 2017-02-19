@@ -17,12 +17,10 @@
 * You should have received a copy of the GNU Lesser General Public License
 * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 */
+
 #include "OPSTypeDefs.h"
 #include "Domain.h"
 #include "NoSuchTopicException.h"
-#ifndef REPLACE_TRANSPORT_LAYER
-#include "BoostIOServiceImpl.h"
-#endif
 #include "XMLArchiverIn.h"
 #include "ConfigException.h"
 

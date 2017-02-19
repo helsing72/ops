@@ -22,6 +22,10 @@
 
 #ifndef REPLACE_TRANSPORT_LAYER
 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#endif
+
 #include <sstream>
 #include <boost/date_time/local_time/local_time.hpp>
 #include <boost/thread/thread.hpp>

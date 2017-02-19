@@ -18,4 +18,9 @@
 * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "OPSTypeDefs.h"
+
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#endif
+
 #include "UDPReceiver.h"

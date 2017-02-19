@@ -22,6 +22,10 @@
 
 #ifndef REPLACE_TRANSPORT_LAYER
 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#endif
+
 #include "MulticastReceiver.h"
 #include "TCPClient.h"
 #include "UDPReceiver.h"
