@@ -67,7 +67,7 @@ namespace ops
 	private:
 		std::vector<Domain* > domains;
 
+		static OPSConfig* getConfig(std::istream& inStream);
 	};
 }
-
 #endif

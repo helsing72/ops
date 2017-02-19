@@ -18,27 +18,26 @@
 * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <fstream>
 #include "OPSTypeDefs.h"
 #include "OPSConfig.h"
 #include "OPSConfigRepository.h"
 #include "XMLArchiverIn.h"
 #include "OPSObjectFactory.h"
-#include <fstream>
 
 namespace ops
 {
 
+#ifndef REPLACE_OPS_CONFIG
 	OPSConfig* OPSConfig::getConfig(std::string configFile)
 	{
-		OPSConfig* theConfig = NULL;
-
 		std::ifstream inStream(configFile.c_str());
 		if (inStream.is_open()) {
-			XMLArchiverIn archiver(inStream, "root", OPSObjectFactory::getInstance());
-			theConfig = (OPSConfig*)archiver.inout(std::string("ops_config"), theConfig);
+			return getConfig(inStream);
 		}
-		return theConfig;
+		return NULL;
 	}
+#endif
 
 	OPSConfig* OPSConfig::getConfig()
 	{
@@ -46,4 +45,10 @@ namespace ops
 		return theConfiguration;
 	}
 
+	OPSConfig* OPSConfig::getConfig(std::istream& inStream)
+	{
+		XMLArchiverIn archiver(inStream, "root", OPSObjectFactory::getInstance());
+		OPSConfig* theConfig = NULL;
+		return (OPSConfig*)archiver.inout(std::string("ops_config"), theConfig);
+	}
 }

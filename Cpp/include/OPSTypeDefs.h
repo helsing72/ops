@@ -21,7 +21,10 @@
 //#define OPSSLIM_NORESERVE // Removes Reservable from OPSMessage
 
 //#define REPLACE_TRANSPORT_LAYER	// Removes IOService.cpp, Sender.cpp, Receiver.cpp and DeadlineTimer.cpp
-								// from library so you can use your own implementations.
+									// from library so you can use your own implementations.
+
+//#define REPLACE_OPS_CONFIG		// Removes the OPSConfig file reader from library so yo can implement 
+									// your own for targets without a filesystem.
 
 // -----------------------------------------------------------------------------
 // OPS uses Little Endian data serialization to improve the performance since
