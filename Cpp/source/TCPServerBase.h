@@ -92,7 +92,7 @@ namespace ops
 
 		int numConnected()
 		{
-			return _connectedSockets.size();
+			return (int)_connectedSockets.size();
 		}
 
 		void AddSocket(SocketSender* sock)
