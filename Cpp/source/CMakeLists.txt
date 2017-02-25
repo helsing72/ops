@@ -2,133 +2,10 @@
 # the library name
 set(LIB_NAME ops)
 
+set(OPS4_CPP_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
-# where are the headers
-set(HEADER_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../include)
-
-set(LIB_PUBLIC_HEADERS
-  ${HEADER_PATH}/ArchiverInOut.h
-  ${HEADER_PATH}/ByteBuffer.h
-  ${HEADER_PATH}/ByteListener.h
-  ${HEADER_PATH}/BytesSizePair.h
-  ${HEADER_PATH}/Channel.h
-  ${HEADER_PATH}/CommException.h
-  ${HEADER_PATH}/Compatibility.h
-  ${HEADER_PATH}/ConfigException.h
-  ${HEADER_PATH}/ConfigLoader.h
-  ${HEADER_PATH}/DataListener.h
-  ${HEADER_PATH}/DataNotifier.h
-  ${HEADER_PATH}/DeadlineMissedListener.h
-  ${HEADER_PATH}/DeadlineTimer.h
-  ${HEADER_PATH}/Domain.h
-  ${HEADER_PATH}/Error.h
-  ${HEADER_PATH}/ErrorService.h
-  ${HEADER_PATH}/ErrorWriter.h
-  ${HEADER_PATH}/FilterQoSPolicy.h
-  ${HEADER_PATH}/IOService.h
-  ${HEADER_PATH}/KeyFilterQoSPolicy.h
-  ${HEADER_PATH}/Listener.h
-  ${HEADER_PATH}/Lockable.h
-  ${HEADER_PATH}/MemoryMap.h
-  ${HEADER_PATH}/NetworkSupport.h
-  ${HEADER_PATH}/NoSuchTopicException.h
-  ${HEADER_PATH}/Notifier.h
-  ${HEADER_PATH}/ops/Reply.h
-  ${HEADER_PATH}/ops/Request.h
-  ${HEADER_PATH}/OPSArchiverIn.h
-  ${HEADER_PATH}/OPSArchiverOut.h
-  ${HEADER_PATH}/OPSConfig.h
-  ${HEADER_PATH}/OPSConfigRepository.h
-  ${HEADER_PATH}/OPSConstants.h
-  ${HEADER_PATH}/ops.h
-  ${HEADER_PATH}/OPSExport.h
-  ${HEADER_PATH}/OPSMessage.h
-  ${HEADER_PATH}/OPSObjectFactory.h
-  ${HEADER_PATH}/OPSObject.h
-  ${HEADER_PATH}/OPSTypeDefs.h
-  ${HEADER_PATH}/OPSUtilities.h
-  ${HEADER_PATH}/Participant.h
-  ${HEADER_PATH}/ParticipantInfoData.h
-  ${HEADER_PATH}/ParticipantInfoDataListener.h
-  ${HEADER_PATH}/PrintArchiverOut.h
-  ${HEADER_PATH}/Publisher.h
-  ${HEADER_PATH}/ReceiveDataHandler.h
-  ${HEADER_PATH}/Receiver.h
-  ${HEADER_PATH}/ReceiveTransport.h
-  ${HEADER_PATH}/ReferenceHandler.h
-  ${HEADER_PATH}/RequestReply.h
-  ${HEADER_PATH}/Reservable.h
-  ${HEADER_PATH}/ReserveInfo.h
-  ${HEADER_PATH}/Runnable.h
-  ${HEADER_PATH}/SendDataHandler.h
-  ${HEADER_PATH}/Sender.h
-  ${HEADER_PATH}/SendTransport.h
-  ${HEADER_PATH}/SerializableCompositeFactory.h
-  ${HEADER_PATH}/SerializableFactory.h
-  ${HEADER_PATH}/SerializableInheritingTypeFactory.h
-  ${HEADER_PATH}/Serializable.h
-  ${HEADER_PATH}/SingleThreadPool.h
-  ${HEADER_PATH}/Subscriber.h
-  ${HEADER_PATH}/Thread.h
-  ${HEADER_PATH}/ThreadPool.h
-  ${HEADER_PATH}/TimeHelper.h
-  ${HEADER_PATH}/Topic.h
-  ${HEADER_PATH}/TopicInfoData.h
-  ${HEADER_PATH}/Transaction.h
-  ${HEADER_PATH}/Transport.h
-  ${HEADER_PATH}/xml/xmlParser.h
-  ${HEADER_PATH}/XMLArchiverIn.h
-  ${HEADER_PATH}/XMLArchiverOut.h
-)
-
-set(LIB_CORE_SRCS
-  ArchiverInOut.cpp
-  BasicError.h
-  ByteBuffer.cpp
-  Channel.cpp
-  Compatibility.cpp
-  DataNotifier.cpp
-  DefaultOPSConfigImpl.h
-  Domain.cpp
-  ErrorService.cpp
-  KeyFilterQoSPolicy.cpp
-  Lockable.cpp
-  McSendDataHandler.h
-  McUdpSendDataHandler.h
-  MultiThreadPool.h
-  OPSArchiverIn.cpp
-  OPSArchiverOut.cpp
-  OPSConfig.cpp
-  OPSConfigRepository.cpp
-  OPSObject.cpp
-  OPSObjectFactory.cpp
-  OPSObjectFactoryImpl.h
-  Participant.cpp
-  ParticipantInfoDataListener.cpp
-  Publisher.cpp
-  ReceiveDataHandler.cpp
-  ReceiveDataHandlerFactory.cpp
-  ReceiveDataHandlerFactory.h
-  ReceiverFactory.cpp
-  ReceiverFactory.h
-  RequestReply.cpp
-  Reservable.cpp
-  SendDataHandlerFactory.cpp
-  SendDataHandlerFactory.h
-  SendDiscoveryModule.cpp
-  SerializableCompositeFactory.cpp
-  SerializableInheritingTypeFactory.cpp
-  Subscriber.cpp
-  TCPClientBase.h
-  TCPSendDataHandler.h
-  TCPServerBase.h
-  Thread.cpp
-  Topic.cpp
-  Transport.cpp
-  xml/xmlParser.cpp
-  XMLArchiverIn.cpp
-  XMLArchiverOut.cpp
-)
+# Include OPS4 core source files
+include(${CMAKE_CURRENT_SOURCE_DIR}/ops4-core-source-list.cmake)
 
 # Source files implementing the lowest layer, interfacing network, etc.
 # These will need to change/re-implement if boost isn't available for the platform
@@ -157,9 +34,9 @@ source_group("Header Files" FILES ${LIB_PUBLIC_HEADERS})
 
 # generate the library target
 add_library(${LIB_NAME} SHARED
-    ${LIB_CORE_SRCS}
+    ${LIB_OPS_CORE_SRCS}
     ${LIB_BOTTOM_LAYER_SRC}
-    ${LIB_PUBLIC_HEADERS}
+    ${LIB_OPS_PUBLIC_HEADERS}
 )
 
 
@@ -179,9 +56,9 @@ endif()
 set(LIB_STATIC ${LIB_NAME}-static)
 # generate the library target
 add_library(${LIB_STATIC} STATIC
-    ${LIB_CORE_SRCS}
+    ${LIB_OPS_CORE_SRCS}
     ${LIB_BOTTOM_LAYER_SRC}
-    ${LIB_PUBLIC_HEADERS}
+    ${LIB_OPS_PUBLIC_HEADERS}
 )
 set_target_properties(${LIB_STATIC} PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(${LIB_STATIC} PROPERTIES COMPILE_DEFINITIONS OPS_LIBRARY_STATIC)
@@ -209,4 +86,4 @@ install(TARGETS ${LIB_NAME} ${LIB_STATIC}
 
 
 # install headers separately to keep the include file hierarchy
-install(DIRECTORY ${HEADER_PATH}/ DESTINATION ${INSTALL_INCDIR}/${LIB_NAME})
+install(DIRECTORY ${OPS_HEADER_PATH}/ DESTINATION ${INSTALL_INCDIR}/${LIB_NAME})
