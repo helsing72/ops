@@ -1,0 +1,92 @@
+package OPS4;
+
+{$R *.res}
+{$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO OFF}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION OFF}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES ON}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DEFINE DEBUG}
+{$ENDIF IMPLICITBUILDING}
+{$IMPLICITBUILD ON}
+
+requires
+  rtl,
+  xmlrtl;
+
+contains
+  uLogger in 'Common\uLogger.pas',
+  uNotifier in 'Common\uNotifier.pas',
+  uRunner in 'Common\uRunner.pas',
+  uSockets in 'Common\uSockets.pas',
+  uOps.ArchiverInOut in 'Source\uOps.ArchiverInOut.pas',
+  uOps.ByteBuffer in 'Source\uOps.ByteBuffer.pas',
+  uOps.Channel in 'Source\uOps.Channel.pas',
+  uOps.DeadlineTimer in 'Source\uOps.DeadlineTimer.pas',
+  uOps.Domain in 'Source\uOps.Domain.pas',
+  uOps.Error in 'Source\uOps.Error.pas',
+  uOps.Exceptions in 'Source\uOps.Exceptions.pas',
+  uOps.FilterQoSPolicy in 'Source\uOps.FilterQoSPolicy.pas',
+  uOps.KeyFilterQoSPolicy in 'Source\uOps.KeyFilterQoSPolicy.pas',
+  uOps.MemoryMap in 'Source\uOps.MemoryMap.pas',
+  uOps.OpsArchiverIn in 'Source\uOps.OpsArchiverIn.pas',
+  uOps.OpsArchiverOut in 'Source\uOps.OpsArchiverOut.pas',
+  uOps.OPSConfig in 'Source\uOps.OPSConfig.pas',
+  uOps.OPSConfigRepository in 'Source\uOps.OPSConfigRepository.pas',
+  uOps.OpsMessage in 'Source\uOps.OpsMessage.pas',
+  uOps.OpsObject in 'Source\uOps.OpsObject.pas',
+  uOps.OPSObjectFactory in 'Source\uOps.OPSObjectFactory.pas',
+  uOps.Participant in 'Source\uOps.Participant.pas',
+  uOps.ParticipantInfoData in 'Source\uOps.ParticipantInfoData.pas',
+  uOps.ParticipantInfoDataListener in 'Source\uOps.ParticipantInfoDataListener.pas',
+  uOps.PrintArchiverOut in 'Source\uOps.PrintArchiverOut.pas',
+  uOps.Publisher in 'Source\uOps.Publisher.pas',
+  uOps.PublisherAbs in 'Source\uOps.PublisherAbs.pas',
+  uOps.SerializableCompositeFactory in 'Source\uOps.SerializableCompositeFactory.pas',
+  uOps.SerializableFactory in 'Source\uOps.SerializableFactory.pas',
+  uOps.SerializableInheritingTypeFactory in 'Source\uOps.SerializableInheritingTypeFactory.pas',
+  uOps.Subscriber in 'Source\uOps.Subscriber.pas',
+  uOps.TimeHelper in 'Source\uOps.TimeHelper.pas',
+  uOps.Topic in 'Source\uOps.Topic.pas',
+  uOps.TopicInfoData in 'Source\uOps.TopicInfoData.pas',
+  uOps.Transport in 'Source\uOps.Transport.pas',
+  uOps.Types in 'Source\uOps.Types.pas',
+  uOps.Utilities in 'Source\uOps.Utilities.pas',
+  uOps.XMLArchiverIn in 'Source\uOps.XMLArchiverIn.pas',
+  uOps.XMLArchiverOut in 'Source\uOps.XMLArchiverOut.pas',
+  uOps.Transport.McSendDataHandler in 'Source\Transport\uOps.Transport.McSendDataHandler.pas',
+  uOps.Transport.McUdpSendDataHandler in 'Source\Transport\uOps.Transport.McUdpSendDataHandler.pas',
+  uOps.Transport.MulticastReceiver in 'Source\Transport\uOps.Transport.MulticastReceiver.pas',
+  uOps.Transport.ReceiveDataHandler in 'Source\Transport\uOps.Transport.ReceiveDataHandler.pas',
+  uOps.Transport.ReceiveDataHandlerFactory in 'Source\Transport\uOps.Transport.ReceiveDataHandlerFactory.pas',
+  uOps.Transport.Receiver in 'Source\Transport\uOps.Transport.Receiver.pas',
+  uOps.Transport.SendDataHandler in 'Source\Transport\uOps.Transport.SendDataHandler.pas',
+  uOps.Transport.SendDataHandlerFactory in 'Source\Transport\uOps.Transport.SendDataHandlerFactory.pas',
+  uOps.Transport.Sender in 'Source\Transport\uOps.Transport.Sender.pas',
+  uOps.Transport.TCPClient in 'Source\Transport\uOps.Transport.TCPClient.pas',
+  uOPs.Transport.TCPSendDataHandler in 'Source\Transport\uOPs.Transport.TCPSendDataHandler.pas',
+  uOps.Transport.TCPServer in 'Source\Transport\uOps.Transport.TCPServer.pas',
+  uOps.Transport.UDPReceiver in 'Source\Transport\uOps.Transport.UDPReceiver.pas',
+  uOps.Transport.UDPSender in 'Source\Transport\uOps.Transport.UDPSender.pas',
+  uOps.RequestReply in 'Source\RequestReply\uOps.RequestReply.pas',
+  uOps.RequestReply.Reply in 'Source\RequestReply\uOps.RequestReply.Reply.pas',
+  uOps.RequestReply.Request in 'Source\RequestReply\uOps.RequestReply.Request.pas';
+
+end.

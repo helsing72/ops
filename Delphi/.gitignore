@@ -4,3 +4,4 @@ Debug
 *.identcache
 *.~dsk
 *.res
+*.stat
