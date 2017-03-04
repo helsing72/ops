@@ -9,6 +9,7 @@ program Example1;
 //
 
 uses
+  System.Win.ComObj,
   System.SysUtils,
   uExamplePublisher in 'uExamplePublisher.pas',
   TestAll.BaseData in '..\..\OPSIdls\TestAll\Generated\Delphi\TestAll\TestAll.BaseData.pas',
@@ -28,6 +29,7 @@ end;
 var
   arg : string;
 begin
+  CoInitializeEx(nil, 0);    // Needed for the TXMLDocument
   try
     if ParamCount >= 1 then begin
 	  	arg := ParamStr(1);
