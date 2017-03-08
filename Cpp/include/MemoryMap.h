@@ -93,13 +93,13 @@ public:
 		{
 			for(int i = 0; i < width; i ++)
 			{
-				if(bytes[i]) delete bytes[i];
+				if(bytes[i]) delete[] bytes[i];
 			}
-			delete bytes;
+			delete[] bytes;
 		}
 		else //Do not delete individual segments.
 		{
-			delete bytes;
+			delete[] bytes;
 		}
 		
 	}
