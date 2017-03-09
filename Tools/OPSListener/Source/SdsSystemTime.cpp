@@ -95,8 +95,17 @@ std::string sdsSystemTimeToLocalTime(int64_t time)
 
 	return tmp;
 #else
-	UNUSED(time);
-	return "TODO";
+	int64_t frac;
+
+	frac = time;
+	time /= msToSdsSystemTimeUnits(1000);
+	frac -= (time * msToSdsSystemTimeUnits(1000));
+	frac /= msToSdsSystemTimeUnits(1);
+
+	char tmp[256];
+	sprintf(tmp, "%ld.%03ld", time, frac);
+
+	return tmp;
 #endif
 }
 
