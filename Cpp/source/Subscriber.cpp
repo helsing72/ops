@@ -35,18 +35,19 @@ namespace ops
 {
 
     Subscriber::Subscriber(Topic t) :
-    firstDataReceived(false),
-    hasUnreadData(false),
-    topic(t),
-    messageBufferMaxSize(1),
-    timeBaseMinSeparationTime(0),
-    deadlineTimeout(TimeHelper::infinite),
-    deadlineMissed(false),
-    started(false)
+		message(NULL),
+		data(NULL),
+		firstDataReceived(false),
+		hasUnreadData(false),
+		receiveDataHandler(NULL),
+		topic(t),
+		messageBufferMaxSize(1),
+		timeLastDataForTimeBase(0),
+		timeBaseMinSeparationTime(0),
+		deadlineTimeout(TimeHelper::infinite),
+		deadlineMissed(false),
+		started(false)
     {
-        message = NULL;
-        data = NULL;
-
         participant = Participant::getInstance(topic.getDomainID(), topic.getParticipantID());
         deadlineTimer = DeadlineTimer::create(participant->getIOService());
         
