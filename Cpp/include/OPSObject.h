@@ -21,24 +21,30 @@
 #ifndef ops_OPSObject_h
 #define ops_OPSObject_h
 
-#include "OPSExport.h"
+#include "OPSTypeDefs.h"
+#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+#include <atomic>
+#endif
 #include <string>
+
+#include "OPSExport.h"
 #include "Serializable.h"
 #include "ArchiverInOut.h"
 
-
 namespace ops
 {
-    
+
     ///Base class for object that can be serialized with OPSArchivers
-	///LA Moved inheritance of Reservable to OPSMessage
-	class OPS_EXPORT OPSObject :  public Serializable
+    class OPS_EXPORT OPSObject : public Serializable
     {
-        
+    private:
+#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+        static std::atomic<uint32_t> _NumOpsObjects;
+#endif
+
         friend class ByteBuffer;
-        //friend class OPSObjectHelper;
         friend class OPSArchiverIn;
-        
+
     protected:
         //Should only be set by the Publisher at publication time and by ByteBuffer at deserialization time.
         std::string key;
@@ -57,21 +63,26 @@ namespace ops
 		///Bytes that hold unserialized data for this object.
 		///This happens if a type can not be fully understood by a participants type support.
 		std::vector<char> spareBytes;
-		
+
 		///Returns a newely allocated deep copy/clone of this object.
 		virtual OPSObject* clone();
 
 		///Fills the parameter obj with all values from this object.
 		virtual void fillClone(OPSObject* obj) const;
-        
+
     public:
-		//static void deleteObjectVector(OPSObject* start);
         OPSObject();
         virtual ~OPSObject();
 
+        OPSObject(const OPSObject& other);                      // Copy constructor
+        OPSObject(const OPSObject&& other) = delete;            // Move constructor
 
-        
+        OPSObject& operator= (OPSObject other);                 // Copy assignment operator
+        //OPSObject& operator= (OPSObject&& other) = delete;    // Move assignment operator
+
+#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+        static uint32_t NumOpsObjects() { return _NumOpsObjects; }
+#endif
     };
 }
-
 #endif

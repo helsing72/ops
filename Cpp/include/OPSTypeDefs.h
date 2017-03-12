@@ -35,6 +35,10 @@
 //
 //#define ON_BIG_ENDIAN_MACHINE
 
+// Define this to add counting of create/delete of OPSObject() (only if also USE_C11 is defined)
+// Also adds a debug function for reading the current number of living OPSObjects
+//#define DEBUG_OPSOBJECT_COUNTER
+
 // -----------------------------------------------------------------------------
 // Macro used to remove compiler warnings about non used variables/parameters
 #define UNUSED(expr) (void)(expr);

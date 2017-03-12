@@ -19,15 +19,42 @@
 */
 
 #include <string.h>
-#include "OPSTypeDefs.h"
 #include "OPSObject.h"
 
 namespace ops
 {
-	OPSObject::OPSObject() : Serializable()
+
+#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+    std::atomic<uint32_t> OPSObject::_NumOpsObjects = 0;
+#endif
+
+    OPSObject::OPSObject()
     {
         key = "k";
-		typesString = "";
+        typesString = "";
+#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+        _NumOpsObjects++;
+#endif
+    }
+
+    OPSObject::OPSObject(const OPSObject& other)
+    {
+        key = other.key;
+        typesString = other.typesString;
+        spareBytes = other.spareBytes;
+#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+        _NumOpsObjects++;
+#endif
+    }
+
+    // Copy assignment operator
+    OPSObject& OPSObject::operator= (OPSObject other)
+    {
+        if (this == &other) return *this;
+        key = other.key;
+        typesString = other.typesString;
+        spareBytes = other.spareBytes;
+        return *this;
     }
 
 	OPSObject* OPSObject::clone()
@@ -70,5 +97,8 @@ namespace ops
 	
     OPSObject::~OPSObject()
     {
+#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+        _NumOpsObjects--;
+#endif
     }
 }
