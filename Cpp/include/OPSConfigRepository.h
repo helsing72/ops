@@ -48,6 +48,9 @@ namespace ops
 
         bool domainExist( std::string domainID );
 
+        // Just for Test
+        void DebugTotalClear();
+
     private:
         OPSConfigRepository();
 

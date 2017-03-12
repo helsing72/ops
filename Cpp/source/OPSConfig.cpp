@@ -51,4 +51,13 @@ namespace ops
 		OPSConfig* theConfig = NULL;
 		return (OPSConfig*)archiver.inout(std::string("ops_config"), theConfig);
 	}
+
+	OPSConfig::~OPSConfig()
+	{
+		for (auto it = domains.begin(); it != domains.end(); ++it) {
+			delete (*it);
+		}
+		domains.clear();
+	}
+
 }

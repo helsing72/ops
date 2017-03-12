@@ -120,6 +120,19 @@ void OPSConfigRepository::Clear()
     m_config->getRefToDomains().clear();
 }
 
+// Just for Test
+void OPSConfigRepository::DebugTotalClear()
+{
+	SafeLock lock(&repoLock);
+	m_config->getRefToDomains().clear();
+
+	for (auto it = m_configFiles.begin(); it != m_configFiles.end(); ++it) {
+		delete it->second;
+	}
+	m_configFiles.clear();
+	delete m_config;
+}
+
 // Get a reference to the OPSConfig object
 // if 'domainID' != "", the domain must exist otherwise NULL is returned.
 OPSConfig* OPSConfigRepository::getConfig( std::string domainID )

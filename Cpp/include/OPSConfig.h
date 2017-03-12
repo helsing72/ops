@@ -33,6 +33,9 @@ namespace ops
 		static OPSConfig* getConfig();
 		static OPSConfig* getConfig(std::string configFile);
 
+		// Should be used with care, since the above methods may return a singleton
+		virtual ~OPSConfig();
+
 		virtual Domain* getDomain(std::string domainID)
 		{
 			for(unsigned int i = 0; i < domains.size(); i++)
@@ -43,12 +46,10 @@ namespace ops
 				}
 			}
 			return NULL;
-
 		}
 
 		void serialize(ArchiverInOut* archiver)
 		{
-
 			OPSObject::serialize(archiver);
 		
 			archiver->inout<Domain>(std::string("domains"), domains);

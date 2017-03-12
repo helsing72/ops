@@ -184,6 +184,18 @@ int Domain::getMetaDataMcPort()
 
 Domain::~Domain()
 {
+	for (auto it = topics.begin(); it != topics.end(); ++it) {
+		delete (*it);
+	}
+	topics.clear();
+	for (auto it = channels.begin(); it != channels.end(); ++it) {
+		delete (*it);
+	}
+	channels.clear();
+	for (auto it = transports.begin(); it != transports.end(); ++it) {
+		delete (*it);
+	}
+	transports.clear();
 }
 
 }
