@@ -111,7 +111,7 @@ namespace ops
 
         OPSArchiverOut archive(&buf);
 
-        message = *((OPSMessage*) (archive.inout(std::string("message"), &message)));
+        archive.inout(std::string("message"), &message);
 
         //If data has spare bytes, write them to the end of the buf
         if (message.getData()->spareBytes.size() > 0)
@@ -139,11 +139,11 @@ namespace ops
         IncCurrentPublicationID();
     }
 
-    void Publisher::setTopic(Topic topic)
+/*    void Publisher::setTopic(Topic topic)
     {
         this->topic = topic;
     }
-
+*/
     void Publisher::IncCurrentPublicationID()
     {
         currentPublicationID++;

@@ -59,7 +59,7 @@ public:
 protected:
 	void write(OPSObject* data);
 
-    void setTopic(Topic topic);
+//    void setTopic(Topic topic);
  
 
 private:
