@@ -21,11 +21,12 @@
 #ifndef ops_OPSArchiverOutH
 #define ops_OPSArchiverOutH
 
+#include <vector>
+
+#include "OPSTypeDefs.h"
 #include "ByteBuffer.h"
 #include "Serializable.h"
 #include "ArchiverInOut.h"
-#include "OPSTypeDefs.h"
-#include <vector>
 
 namespace ops
 {
@@ -41,7 +42,6 @@ namespace ops
 
         ~OPSArchiverOut()
         {
-
         }
 
         void inout(const std::string& name, bool& value)
@@ -94,13 +94,11 @@ namespace ops
             buf->WriteString(value);
         }
 
-///LA
-		void inout(const std::string& name, char* buffer, int bufferSize)
-		{
+        void inout(const std::string& name, char* buffer, int bufferSize)
+        {
             UNUSED(name)
-			buf->WriteChars(buffer, bufferSize);
-		}
-///LA
+            buf->WriteChars(buffer, bufferSize);
+        }
 
         void inout(const std::string& name, Serializable& value)
         {
@@ -113,7 +111,6 @@ namespace ops
         Serializable* inout(const std::string& name, Serializable* value, int element)
         {
             UNUSED(name)
-            UNUSED(value)
             UNUSED(element)
             std::string typeS = ((OPSObject*) value)->getTypeString();
             buf->WriteString(typeS);
@@ -209,8 +206,6 @@ namespace ops
 
     private:
         ByteBuffer* buf;
-
     };
 }
-
 #endif

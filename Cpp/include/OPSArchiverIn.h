@@ -24,11 +24,12 @@
 #ifndef ops_OPSArchiverInH
 #define ops_OPSArchiverInH
 
+#include <vector>
+
 #include "ByteBuffer.h"
 #include "SerializableInheritingTypeFactory.h"
 #include "Serializable.h"
 #include "ArchiverInOut.h"
-#include <vector>
 
 namespace ops
 {
@@ -111,15 +112,13 @@ namespace ops
         Serializable* inout(const std::string& name, Serializable* value, int element)
         {
             UNUSED(name)
-            UNUSED(value)
             UNUSED(element)
+            if (value) delete value;
             std::string types = buf->ReadString();
             Serializable* newSer = factory->create(types);
-            if (newSer != NULL)
-            {
+            if (newSer != NULL) {
                 newSer->serialize(this);
             }
-
             return newSer;
         }
 
@@ -132,14 +131,12 @@ namespace ops
             }
             std::string types = buf->ReadString();
             Serializable* newSer = factory->create(types);
-            if (newSer != NULL)
-            {
+            if (newSer != NULL) {
                 //Do this to preserve type information even if slicing has occured.
                 ((OPSObject*) newSer)->typesString = types;
 
                 newSer->serialize(this);
             }
-
             return newSer;
         }
 
@@ -226,7 +223,6 @@ namespace ops
         ByteBuffer* buf;
         SerializableInheritingTypeFactory* factory;
     };
-
 
 }
 #endif
