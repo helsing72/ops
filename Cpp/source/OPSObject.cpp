@@ -37,6 +37,7 @@ namespace ops
 #endif
     }
 
+	// Copy constructor
     OPSObject::OPSObject(const OPSObject& other)
     {
         key = other.key;
@@ -47,7 +48,19 @@ namespace ops
 #endif
     }
 
-    // Copy assignment operator
+	// Move constructor
+	OPSObject::OPSObject(OPSObject&& other)
+	{
+		// Take other's resources
+		key = other.key;
+		typesString = other.typesString;
+		spareBytes = other.spareBytes;
+#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+		_NumOpsObjects++;
+#endif
+	}
+
+	// Copy assignment operator
     OPSObject& OPSObject::operator= (OPSObject other)
     {
         if (this == &other) return *this;
