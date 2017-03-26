@@ -22,6 +22,7 @@
 #include "TimeHelper.h"
 #include "Participant.h"
 #include "BasicError.h" 
+
 #ifdef USE_C11
 #include <chrono>
 #else
@@ -35,6 +36,7 @@ namespace ops
 {
 
     Subscriber::Subscriber(Topic t) :
+		pubIdChecker(NULL),
 		message(NULL),
 		data(NULL),
 		firstDataReceived(false),
@@ -124,7 +126,12 @@ namespace ops
             return;
         }
 
-        //OK, we passed the basic checks, lets go on and filter on data content...
+		//OK, we passed the basic checks
+
+		//If we have a publication ID checker, call it
+		if (pubIdChecker) pubIdChecker->Check(message);
+
+		//Now lets go on and filter on data content...
 
         OPSObject* o = message->getData();
         if (applyFilterQoSPolicies(o))

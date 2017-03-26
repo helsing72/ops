@@ -28,6 +28,7 @@
 
 #include "OPSConfigRepository.h"
 #include "OPSUtilities.h"
+#include "PubIdChecker.h"
 
 #ifdef _WIN32
 #include "SdsSystemTime.h"
@@ -104,7 +105,7 @@ public:
 };
 
 template <class DataType, class DataTypePublisher, class DataTypeSubscriber>
-class CHelper : public IHelper, ops::DataListener, ops::DeadlineMissedListener
+class CHelper : public IHelper, ops::DataListener, ops::DeadlineMissedListener, ops::Listener<ops::PublicationIdNotification_T>
 {
 private:
 	CHelperListener<DataType>* client;
@@ -232,6 +233,11 @@ public:
 				sub = new DataTypeSubscriber(topic);
 				sub->addDataListener(this);
 				sub->deadlineMissedEvent.addDeadlineMissedListener(this);
+
+				// Add a publication ID Checker
+				sub->pubIdChecker = new ops::PublicationIdChecker;
+				sub->pubIdChecker->addListener(this);
+
 				sub->start();
 			}
 			catch (...) {
@@ -283,6 +289,23 @@ public:
 		}
 	}
 
+	virtual void onNewEvent(ops::Notifier<ops::PublicationIdNotification_T>* sender, ops::PublicationIdNotification_T arg)
+	{
+		UNUSED(sender);
+		std::string address;
+		int port;
+		arg.mess->getSource(address, port);
+
+		std::string newPub = (arg.newPublisher) ? "NEW Publisher" : "SEQ ERROR";
+
+		std::cout << "PubIdChecker(): " << newPub << 
+			", Addr: " << address <<
+			", Port: " << port <<
+			", Expected: " << arg.expectedPubID <<
+			", Got: " << arg.mess->getPublicationID() <<
+			std::endl;
+	}
+
 	///Override from ops::DataListener, called whenever new data arrives.
 	void onNewData(ops::DataNotifier* subscriber)
 	{
@@ -292,12 +315,13 @@ public:
 			// it is the same publisher sending us messages.
 			ops::OPSMessage* newMess = sub->getMessage();
 
-			if (expectedPubId >= 0) {
-				if (expectedPubId != newMess->getPublicationID()) {
-					std::cout << ">>>>> Lost message for topic " << sub->getTopic().getName() <<
-						". Exp.pubid: " << expectedPubId << " got: " << newMess->getPublicationID() << std::endl;
-				}
-			}
+// Check is done with the OPS built-in PublicationIDChecker()
+//			if (expectedPubId >= 0) {
+//				if (expectedPubId != newMess->getPublicationID()) {
+//					std::cout << ">>>>> Lost message for topic " << sub->getTopic().getName() <<
+//						". Exp.pubid: " << expectedPubId << " got: " << newMess->getPublicationID() << std::endl;
+//				}
+//			}
 			expectedPubId = newMess->getPublicationID() + 1;
 			client->onData(sub, dynamic_cast<DataType*>(newMess->getData()));
 		}
@@ -366,6 +390,9 @@ public:
 				", Tomato sauce: " << data->tomatoSauce << 
 				", spareBytes: " << data->spareBytes.size() << 
 				std::endl;
+#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+			std::cout << std::endl << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl << std::endl;
+#endif
 		}
 
 //		pizza::PizzaData* ttt = (pizza::PizzaData*)data->clone();
@@ -535,6 +562,11 @@ void menu()
 	std::cout << "\t W     Write data" << std::endl;
 	std::cout << "\t Q     Quite (minimize program output)" << std::endl;
 	std::cout << "\t X     Exit program" << std::endl;
+
+#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+	std::cout << std::endl << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl << std::endl;
+#endif
+
 }
 
 int main(int argc, char**argv)
@@ -599,6 +631,8 @@ int main(int argc, char**argv)
 	ItemInfoList.push_back(new ItemInfo("OtherPizzaDomain", "OtherVessuvioTopic", "pizza.VessuvioData"));
 
 	ItemInfoList.push_back(new ItemInfo("PizzaDomain", "ExtraAlltTopic", "pizza.special.ExtraAllt"));
+
+	ItemInfoList.push_back(new ItemInfo("PizzaDomain", "PizzaTopic", "pizza.PizzaData"));
 
 	// Create participants
 	// NOTE that the second parameter (participantID) must be different for the two participant instances

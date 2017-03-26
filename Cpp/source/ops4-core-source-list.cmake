@@ -51,6 +51,7 @@ set(LIB_OPS_PUBLIC_HEADERS
   ${OPS_HEADER_PATH}/ParticipantInfoData.h
   ${OPS_HEADER_PATH}/ParticipantInfoDataListener.h
   ${OPS_HEADER_PATH}/PrintArchiverOut.h
+  ${OPS_HEADER_PATH}/PubIdChecker.h
   ${OPS_HEADER_PATH}/Publisher.h
   ${OPS_HEADER_PATH}/ReceiveDataHandler.h
   ${OPS_HEADER_PATH}/Receiver.h
