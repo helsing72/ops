@@ -1,9 +1,9 @@
-BUILD_DEBUG=build.debug
-BUILD_OPT=build.opt
+BUILD_DEBUG?=build.debug
+BUILD_OPT?=build.opt
 
-CC=$(shell which gcc)
-CXX=$(shell which g++)
-INSTALL_PREFIX=$(CURDIR)/deploy
+CC?=$(shell which gcc)
+CXX?=$(shell which g++)
+INSTALL_PREFIX?=$(CURDIR)/deploy
 
 CCV=$(shell $(CC) -dumpversion)
 CXXV=$(shell $(CXX) -dumpversion)
