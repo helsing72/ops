@@ -39,7 +39,7 @@ package Ops_Pa.Error_Pa is
   ERROR_CODE : constant Integer := 1;
 
   -- Constructor
-  function Create(className, method, mess : String) return BasicError_Class_At;
+  function BasicError(className, method, mess : String) return BasicError_Class_At;
 
   overriding function GetErrorCode( Self : BasicError_Class ) return Integer;
   overriding function GetMessage( Self : BasicError_Class ) return String;
@@ -51,7 +51,7 @@ package Ops_Pa.Error_Pa is
   type SocketError_Class is new BasicError_Class with private;
   type SocketError_Class_At is access all SocketError_Class'Class;
 
-  function Create(ClassName, Method, Mess : String; SocketError : Integer ) return SocketError_Class_At;
+  function SocketError(ClassName, Method, Mess : String; SocketError : Integer ) return SocketError_Class_At;
 
   overriding function GetMessage( Self : SocketError_Class ) return String;
 
@@ -67,12 +67,18 @@ package Ops_Pa.Error_Pa is
 
   -- Note that several threads can at the same time report errors so
   -- listeners need to take that into account
-  procedure addListener( Self : in out ErrorService_Class; Proc : ErrorNotifier_Pa.OnNotifyEvent_T );
-  procedure removeListener( Self : in out ErrorService_Class; Proc : ErrorNotifier_Pa.OnNotifyEvent_T );
+  procedure addListener( Self : in out ErrorService_Class; Proc : ErrorNotifier_Pa.OnNotifyEvent_T; Arg : Ops_Class_At );
+  procedure removeListener( Self : in out ErrorService_Class; Proc : ErrorNotifier_Pa.OnNotifyEvent_T; Arg : Ops_Class_At );
+  procedure addListener( Self : in out ErrorService_Class; Client : ErrorNotifier_Pa.Listener_Interface_At );
+  procedure removeListener( Self : in out ErrorService_Class; Client : ErrorNotifier_Pa.Listener_Interface_At );
 
   -- The ErrorService takes over ownership of error objects from the caller
   -- They will be free'd when all listeners have been notified
   procedure Report( Self : in out ErrorService_Class; Error : Error_Class_At );
+
+  -- Helpers
+  procedure Report( Self : in out ErrorService_Class; ClassName, Method, Mess : String);
+
 
   -- A static error service that user can connect to.
   -- The static error service is e.g. used for errors during Participant creation.
@@ -101,10 +107,7 @@ private
 -- ==========================================================================
 --
 -- ==========================================================================
-  type SocketError_Class is new BasicError_Class with
-    record
-      null;
-    end record;
+  type SocketError_Class is new BasicError_Class with null record;
 
   procedure InitInstance( Self : in out SocketError_Class; className, method, mess : String; SocketError : Integer );
 

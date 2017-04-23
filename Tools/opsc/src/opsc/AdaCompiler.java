@@ -25,6 +25,8 @@ import parsing.TopicInfo;
 public class AdaCompiler extends opsc.Compiler
 {
     final static String UNIT_REGEX = "__unitName";
+    final static String UNIT_PUB_REGEX = "__pubUnitName";
+    final static String UNIT_SUB_REGEX = "__subUnitName";
     final static String IMPORTS_REGEX = "__importUnits";
     final static String CONSTRUCTOR_HEAD_REGEX = "__constructorHead";
     final static String CONSTRUCTOR_BODY_REGEX = "__constructorBody";
@@ -41,6 +43,7 @@ public class AdaCompiler extends opsc.Compiler
     private String projectDirectory;
     private static String BASE_CLASS_NAME_REGEX = "__baseClassName";
     private static String CREATE_MAKE_BODY_REGEX = "__createMakeBody";
+    private static String PROJNAME_REGEX = "__projName";
 
     private boolean alwaysDynArray = true;
     private boolean alwaysDynObject = true;
@@ -54,6 +57,11 @@ public class AdaCompiler extends opsc.Compiler
         setTabString("  ");
     }
 
+    public String getName()
+    {
+        return "AdaFactoryIDLCompiler";
+    }
+
     public void compileDataClasses(Vector<IDLClass> idlClasses, String projectDirectory)
     {
         createdFiles = "";
@@ -64,12 +72,14 @@ public class AdaCompiler extends opsc.Compiler
                 if (iDLClass.getType() == IDLClass.ENUM_TYPE) {
                     compileEnum(iDLClass);
                 } else {
-                  compileDataClass(iDLClass);
-                  // We put the publisher and subscriber in the same file as the data class
+                    compileDataClass(iDLClass);
+                    compileSubscriber(iDLClass);
+                    compilePublisher(iDLClass);
                 }
             }
 
             compileTypeSupport(idlClasses, _projectName);
+            compileProjectFile(_projectName);
         } catch (IOException iOException)  {
             System.out.println( "Error: Generating Ada failed with the following exception: " + iOException.getMessage());
         }
@@ -80,51 +90,77 @@ public class AdaCompiler extends opsc.Compiler
     {
     }
 
-    protected void compilePublisher(IDLClass cl) {}
-    protected void compileSubscriber(IDLClass cl) {}
+    protected void compilePubSubHelper(String className, String templateName, String fileName) throws IOException
+    {
+      setOutputFileName(fileName);
+
+      java.io.InputStream stream = findTemplateFile(templateName);
+      setTemplateTextFromResource(stream);
+
+      //Get the template file as a String
+      String templateText = getTemplateText();
+
+      //Replace regular expressions in the template file.
+      templateText = templateText.replace(UNIT_REGEX, getUnitName(className));
+      templateText = templateText.replace(UNIT_PUB_REGEX, getPubUnitName(className));
+      templateText = templateText.replace(UNIT_SUB_REGEX, getSubUnitName(className));
+      templateText = templateText.replace(CLASS_NAME_REGEX, className);
+
+      //Save the modified text to the output file.
+      saveOutputText(templateText);
+      createdFiles += "\"" + getOutputFileName() + "\"\n";
+    }
+
+    protected void compilePublisher(IDLClass idlClass) throws IOException
+    {
+      String className = idlClass.getClassName();
+      String packageName = idlClass.getPackageName();
+      String packageFilePart = packageName.replace(".", "/");
+      String baseFileName = _outputDir + File.separator + packageFilePart + File.separator + getPubUnitName(className).replace(".", "-");
+      compilePubSubHelper(className, "adaspecpublishertemplate.tpl", baseFileName + ".ads");
+      compilePubSubHelper(className, "adabodypublishertemplate.tpl", baseFileName + ".adb");
+    }
+
+    protected void compileSubscriber(IDLClass idlClass) throws IOException
+    {
+      String className = idlClass.getClassName();
+      String packageName = idlClass.getPackageName();
+      String packageFilePart = packageName.replace(".", "/");
+      String baseFileName = _outputDir + File.separator + packageFilePart + File.separator + getSubUnitName(className).replace(".", "-");
+      compilePubSubHelper(className, "adaspecsubscribertemplate.tpl", baseFileName + ".ads");
+      compilePubSubHelper(className, "adabodysubscribertemplate.tpl", baseFileName + ".adb");
+    }
+
+    protected void compileEnumHelper(IDLClass idlClass, String className, String packageName, String templateName, String fileName) throws IOException
+    {
+      setOutputFileName(fileName);
+
+      java.io.InputStream stream = findTemplateFile(templateName);
+      setTemplateTextFromResource(stream);
+
+      //Get the template file as a String
+      String templateText = getTemplateText();
+
+      //Replace regular expressions in the template file.
+      templateText = templateText.replace(UNIT_REGEX, getUnitName(className));
+      templateText = templateText.replace(CLASS_NAME_REGEX, className);
+      templateText = templateText.replace(PACKAGE_NAME_REGEX, packageName);
+      templateText = templateText.replace(DECLARATIONS_REGEX, getEnumDeclarations(idlClass));
+
+      //Save the modified text to the output file.
+      saveOutputText(templateText);
+      createdFiles += "\"" + getOutputFileName() + "\"\n";
+    }
 
     protected void compileEnum(IDLClass idlClass) throws IOException
     {
         String className = idlClass.getClassName();
-
         String packageName = idlClass.getPackageName();
         String packageFilePart = packageName.replace(".", "/");
+        String baseFileName = _outputDir + File.separator + packageFilePart + File.separator + getUnitName(className).replace(".", "-");
 
-        setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + getUnitName(className).replace(".", "-") + ".ads");
-
-        java.io.InputStream stream = findTemplateFile("adaspecenumtemplate.tpl");
-        setTemplateTextFromResource(stream);
-
-        //Get the template file as a String
-        String templateText = getTemplateText();
-
-        //Replace regular expressions in the template file.
-        templateText = templateText.replace(UNIT_REGEX, getUnitName(className));                    //
-        templateText = templateText.replace(CLASS_NAME_REGEX, className);
-        templateText = templateText.replace(PACKAGE_NAME_REGEX, packageName);
-        templateText = templateText.replace(DECLARATIONS_REGEX, getEnumDeclarations(idlClass));
-
-        //Save the modified text to the output file.
-        saveOutputText(templateText);
-        createdFiles += "\"" + getOutputFileName() + "\"\n";
-
-        setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + getUnitName(className).replace(".", "-") + ".adb");
-
-        stream = findTemplateFile("adabodyenumtemplate.tpl");
-        setTemplateTextFromResource(stream);
-
-        //Get the template file as a String
-        templateText = getTemplateText();
-
-        //Replace regular expressions in the template file.
-        templateText = templateText.replace(UNIT_REGEX, getUnitName(className));                    //
-        templateText = templateText.replace(CLASS_NAME_REGEX, className);
-        templateText = templateText.replace(PACKAGE_NAME_REGEX, packageName);
-        templateText = templateText.replace(DECLARATIONS_REGEX, getEnumDeclarations(idlClass));
-
-        //Save the modified text to the output file.
-        saveOutputText(templateText);
-        createdFiles += "\"" + getOutputFileName() + "\"\n";
+        compileEnumHelper(idlClass, className, packageName, "adaspecenumtemplate.tpl", baseFileName + ".ads");
+        compileEnumHelper(idlClass, className, packageName, "adabodyenumtemplate.tpl", baseFileName + ".adb");
     }
 
     public void compileDataClass(IDLClass idlClass) throws IOException
@@ -141,7 +177,6 @@ public class AdaCompiler extends opsc.Compiler
           baseClassName = getLastPart(baseClassName);
         }
         String packageName = idlClass.getPackageName();
-
         String packageFilePart = packageName.replace(".", "/");
         setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + getUnitName(className).replace(".", "-") + ".ads");
 
@@ -184,11 +219,6 @@ public class AdaCompiler extends opsc.Compiler
         //Save the modified text to the output file.
         saveOutputText(templateText);
         createdFiles += "\"" + getOutputFileName() + "\"\n";
-    }
-
-    public String getName()
-    {
-        return "AdaFactoryIDLCompiler";
     }
 
     protected void compileTypeSupport(Vector<IDLClass> idlClasses, String projectName) throws IOException
@@ -244,6 +274,23 @@ public class AdaCompiler extends opsc.Compiler
         createdFiles += "\"" + getOutputFileName() + "\"\n";
     }
 
+    protected void compileProjectFile(String projectName) throws IOException
+    {
+      setOutputFileName(_outputDir + File.separator + projectName + ".gpr");
+
+      java.io.InputStream stream = findTemplateFile("adaprojectfiletemplate.tpl");
+      setTemplateTextFromResource(stream);
+
+      //Get the template file as a String
+      String templateText = getTemplateText();
+
+      //Replace regular expressions in the template file.
+      templateText = templateText.replace(PROJNAME_REGEX, projectName);
+
+      saveOutputText(templateText);
+      createdFiles += "\"" + getOutputFileName() + "\"\n";
+    }
+
     protected String getLastPart(String name)
     {
       int idx;
@@ -282,6 +329,16 @@ public class AdaCompiler extends opsc.Compiler
       // Assume then that the 'className' contains <packagename>.<class>
       // and that the unit is <packagename>.<class>, i.e. the same
       return baseUnit + className.replace(".", "_");
+    }
+
+    protected String getPubUnitName(String className)
+    {
+      return getUnitName(className).replace("Ops_Pa.OpsObject_Pa.", "Ops_Pa.PublisherAbs_Pa.Publisher_Pa.");
+    }
+
+    protected String getSubUnitName(String className)
+    {
+      return getUnitName(className).replace("Ops_Pa.OpsObject_Pa.", "Ops_Pa.Subscriber_Pa.");
     }
 
     protected String getFullyQualifiedClassName(String className)
@@ -557,17 +614,29 @@ public class AdaCompiler extends opsc.Compiler
         String fieldType = getLastPart(field.getType());
         String ret = "";
         if (alwaysDynArray || (field.getArraySize() == 0)) {
+            String typeStr, initStr = "", tickStr = "";
             // idl = type[] name;
             if (field.isIdlType() && (!field.isAbstract()) && (!alwaysDynObject)) {
-                ret += elementType(fieldType) + "_Class_Arr_At := null;" + endl();
+                typeStr = elementType(fieldType) + "_Class_Arr";
             } else if (field.isIdlType()) {
-                ret += elementType(fieldType) + "_Class_At_Arr_At := null;" + endl();
+                typeStr = elementType(fieldType) + "_Class_At_Arr";
+                initStr = " => Create";
+                tickStr = "'";
             } else {
                 if (elementType(fieldType) == "String_At") {
-                    ret += "String_Arr_At := null;" + endl();
+                    typeStr = "String_Arr";
+                    initStr = " => null";
+                    tickStr = "'";
                 } else {
-                    ret += elementType(fieldType) + "_Arr_At := null;" + endl();
+                    typeStr = elementType(fieldType) + "_Arr";
+                    initStr = " => " + getInitValue(fieldType);
+                    tickStr = "'";
                 }
+            }
+            if (field.getArraySize() == 0) {
+                ret += typeStr + "_At := null;" + endl();
+            } else {
+                ret += typeStr + "_At := new " + typeStr + tickStr + "(0.." + (field.getArraySize() - 1) + initStr + ");" + endl();
             }
         } else {
             // idl = type[size] name;

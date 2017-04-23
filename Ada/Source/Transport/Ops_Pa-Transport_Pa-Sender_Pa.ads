@@ -30,8 +30,8 @@ package Ops_Pa.Transport_Pa.Sender_Pa is
   -- Interface used to send data
   function sendTo( Self : in out Sender_Class; buf : Byte_Arr_At; size : Integer; ip : string; port : Integer) return Boolean is abstract;
 
-  function getPort( Self : Sender_Class ) return Integer is abstract;
-  function getAddress( Self : Sender_Class ) return String is abstract;
+  function getPort( Self : in out Sender_Class ) return Integer is abstract;
+  function getAddress( Self : in out Sender_Class ) return String is abstract;
 
   procedure Open( Self : in out Sender_Class ) is abstract;
   procedure Close( Self : in out Sender_Class ) is abstract;

@@ -40,7 +40,7 @@ package Ops_Pa.PublisherAbs_Pa is
   procedure SetName( Self : in out PublisherAbs_Class; Value : String );
 
   function Key( Self : PublisherAbs_Class ) return String;
-  procedure SetKe( Self : in out PublisherAbs_Class; Value : String );
+  procedure SetKey( Self : in out PublisherAbs_Class; Value : String );
 
   function Topic ( Self : PublisherAbs_Class ) return Topic_Class_At;
 

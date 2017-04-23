@@ -18,10 +18,6 @@
 
 with Ops_Pa.Transport_Pa.SendDataHandler_Pa.Mc_Pa;
 
---TODO
---     uOps.Transport.McUdpSendDataHandler,
---     uOps.Transport.TCPSendDataHandler;
-
 package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
 
   use type MyMap.cursor;
@@ -42,9 +38,9 @@ package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
       raise;
   end Create;
 
-  function Less (Left, Right : String_At) return Boolean is
+  function Less (Left, Right : String) return Boolean is
   begin
-    return Left.all < Right.all;
+    return Left < Right;
   end;
 
   function Equal (Left, Right : HandlerInfo) return Boolean is
@@ -60,7 +56,7 @@ package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
 
   function getSendDataHandler( Self : in out SendDataHandlerFactory_Class; top : Topic_Class_At) return SendDataHandler_Class_At is
 
-    procedure Inc( key : in String_At; element : in out HandlerInfo ) is
+    procedure Inc( key : in String; element : in out HandlerInfo ) is
     begin
       element.numUsers := element.numUsers + 1;
     end;
@@ -74,7 +70,7 @@ package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
     -- We need to store SendDataHandlers with more than just the name as key.
     -- Since topics can use the same port, we need to return the same SendDataHandler.
     -- Make a key with the transport info that uniquely defines the receiver.
-    key : String_At := new String'(getKey(top));
+    key : String := getKey(top);
 
   begin
     Self.Mutex.Acquire;
@@ -136,12 +132,12 @@ package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
 
   procedure releaseSendDataHandler( Self : in out SendDataHandlerFactory_Class; top : Topic_Class_At) is
 
-    procedure Dec( key : in String_At; element : in out HandlerInfo ) is
+    procedure Dec( key : in String; element : in out HandlerInfo ) is
     begin
       element.numUsers := element.numUsers - 1;
     end;
 
-    key : String_At := new String'(getKey(top));
+    key : String := getKey(top);
     pos : MyMap.Cursor;
     info : HandlerInfo;
 
@@ -234,8 +230,8 @@ package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
 
     if handlerExist then
       if Self.ErrorService /= null then
-        Self.ErrorService.Report(Error_Class_At(Create(
-          "SendDataHandlerFactory", "Finalize", "Publishers still alive when deleting factory!!!")));
+        Self.ErrorService.Report(
+          "SendDataHandlerFactory", "Finalize", "Publishers still alive when deleting factory!!!" );
       end if;
     end if;
   end;

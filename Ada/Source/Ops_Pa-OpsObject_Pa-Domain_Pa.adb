@@ -16,7 +16,9 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
-with Ops_Pa.Error_Pa;
+with Ops_Pa.Error_Pa,
+     Ops_Pa.ArchiverInOut_Pa.XMLArchiverIn_Pa;
+
 use Ops_Pa.Error_Pa;
 
 package body Ops_Pa.OpsObject_Pa.Domain_Pa is
@@ -89,12 +91,11 @@ package body Ops_Pa.OpsObject_Pa.Domain_Pa is
 
     -- To not break binary compatibility we only do this when we know we are
     -- reading from an XML-file
-    raise Not_Yet_Implemented;
---    if archiver is TXMLArchiverIn then
---      Channel_Class_InoutDynArr(archiver, "channels", Self.channels);
---      Transport_Class_InoutDynArr(archiver, "transports", Self.transports);
---      CheckTransports();
---    end if;
+    if archiver.all in Ops_Pa.ArchiverInOut_Pa.XMLArchiverIn_Pa.XMLArchiverIn_Class'Class then
+      Channel_Class_InoutDynArr(archiver, "channels", Self.channels);
+      Transport_Class_InoutDynArr(archiver, "transports", Self.transports);
+      Self.CheckTransports;
+    end if;
   end;
 
   -- Returns a newely allocated deep copy/clone of Self.
@@ -240,8 +241,7 @@ package body Ops_Pa.OpsObject_Pa.Domain_Pa is
       end loop;
     end if;
     StaticErrorService.
-      Report( Error_Class_At(Create("Domain", "getTopic",
-              "Topic '" & Name & "' does not exist in ops config file." )));
+      Report( "Domain", "getTopic", "Topic '" & Name & "' does not exist in ops config file." );
     raise ENoSuchTopicException;
   end;
 
@@ -288,31 +288,33 @@ package body Ops_Pa.OpsObject_Pa.Domain_Pa is
   begin
     -- Now update topics with values from the transports and channels
     -- Loop over all transports and for each topic, see if it needs parameters from the channel
-    for i in Self.Transports.all'Range loop
-      trp := Self.Transports(i);
-      -- Get channel
-      channel := findChannel( Self, trp.channelID.all );
-      if channel = null then
-        StaticErrorService.
-          Report( Error_Class_At(Create("Domain", "CheckTransport",
-                  "Non existing channelID: '" & trp.channelID.all &
-                    "' used in transport spcification." )));
-        raise EConfigException;
-      else
-        for j in trp.topics.all'Range loop
-          top := findTopic( Self, trp.Topics(j).all );
-          if top = null then
-            StaticErrorService.
-              Report( Error_Class_At(Create("Domain", "CheckTransport",
-                      "Non existing topicID: '" & trp.Topics(j).all &
-                        "' used in transport specification." )));
-            raise EConfigException;
-          else
-            channel.PopulateTopic(top);
-          end if;
-        end loop;
-      end if;
-    end loop;
+    if Self.Transports /= null then
+      for i in Self.Transports.all'Range loop
+        trp := Self.Transports(i);
+        -- Get channel
+        channel := findChannel( Self, trp.channelID.all );
+        if channel = null then
+          StaticErrorService.
+            Report( "Domain", "CheckTransport",
+                    "Non existing channelID: '" & trp.channelID.all &
+                      "' used in transport spcification." );
+          raise EConfigException;
+        else
+          for j in trp.topics.all'Range loop
+            top := findTopic( Self, trp.Topics(j).all );
+            if top = null then
+              StaticErrorService.
+                Report( "Domain", "CheckTransport",
+                        "Non existing topicID: '" & trp.Topics(j).all &
+                          "' used in transport specification." );
+              raise EConfigException;
+            else
+              channel.PopulateTopic(top);
+            end if;
+          end loop;
+        end if;
+      end loop;
+    end if;
   end;
 
 --  /// ------------------------------------------

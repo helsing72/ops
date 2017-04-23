@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -16,13 +16,10 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
-with Ops_Pa.ArchiverInOut_Pa;
-use  Ops_Pa.ArchiverInOut_Pa;
-
-with
-  Ops_Pa.OpsObject_Pa.Domain_Pa;
-use
-  Ops_Pa.OpsObject_Pa.Domain_Pa;
+with Ops_Pa.OpsObject_Pa.Domain_Pa,
+     Ops_Pa.ArchiverInOut_Pa;
+use  Ops_Pa.OpsObject_Pa.Domain_Pa,
+     Ops_Pa.ArchiverInOut_Pa;
 
 package Ops_Pa.OpsObject_Pa.OPSConfig_Pa is
 
@@ -80,6 +77,18 @@ package Ops_Pa.OpsObject_Pa.OPSConfig_Pa is
 
   procedure Serialize( Self : in out DefaultOPSConfigImpl_Class; archiver : ArchiverInOut_Class_At);
 
+-- ==========================================================================
+--      C l a s s    D e c l a r a t i o n.
+-- ==========================================================================
+  type ExtendedOPSConfig_Class is new DefaultOPSConfigImpl_Class with private;
+  type ExtendedOPSConfig_Class_At is access all ExtendedOPSConfig_Class'Class;
+
+  function Create return ExtendedOPSConfig_Class_At;
+
+  procedure Add( Self : in out ExtendedOPSConfig_Class; domain : Domain_Class_At);
+  procedure Remove( Self : in out ExtendedOPSConfig_Class; domain : Domain_Class_At);
+  procedure Clear( Self : in out ExtendedOPSConfig_Class );
+
 private
 -- ==========================================================================
 --
@@ -100,10 +109,7 @@ private
 -- ==========================================================================
 --
 -- ==========================================================================
-  type DefaultOPSConfigImpl_Class is new OPSConfig_Class with
-    record
-      null;
-    end record;
+  type DefaultOPSConfigImpl_Class is new OPSConfig_Class with null record;
 
   procedure InitInstance( Self : in out DefaultOPSConfigImpl_Class );
 
@@ -113,6 +119,14 @@ private
   --------------------------------------------------------------------------
   procedure Finalize( Self : in out DefaultOPSConfigImpl_Class );
 
+-- ==========================================================================
+--
+-- ==========================================================================
+  type ExtendedOPSConfig_Class is new DefaultOPSConfigImpl_Class with null record;
+
+  procedure InitInstance( Self : in out ExtendedOPSConfig_Class );
+
+  procedure Finalize( Self : in out ExtendedOPSConfig_Class );
 
 end Ops_Pa.OpsObject_Pa.OPSConfig_Pa;
 

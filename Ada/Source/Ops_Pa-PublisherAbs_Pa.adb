@@ -39,7 +39,7 @@ package body Ops_Pa.PublisherAbs_Pa is
     return Self.Key.all;
   end;
 
-  procedure SetKe( Self : in out PublisherAbs_Class; Value : String ) is
+  procedure SetKey( Self : in out PublisherAbs_Class; Value : String ) is
   begin
     Replace(Self.Key, Value);
   end;

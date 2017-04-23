@@ -18,6 +18,7 @@
 
 with Ada.Unchecked_Conversion;
 with Interfaces.C;
+with Interfaces.C.Strings;
 with Win32;
 
 package body Ops_Pa.Transport_Pa.Sender_Pa.Udp_Pa is
@@ -28,6 +29,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.Udp_Pa is
   function To_PSTR is new Ada.Unchecked_Conversion(System.Address, Win32.PSTR);
 
   function ToAddr is new Ada.Unchecked_Conversion(Win32.Winsock.SOCKADDR_IN, Win32.Winsock.SOCKADDR);
+  function ToAddr is new Ada.Unchecked_Conversion(Win32.Winsock.SOCKADDR, Win32.Winsock.SOCKADDR_IN);
 
   function MakeSockAddr(ip : String; port : Integer) return Win32.Winsock.SOCKADDR_IN is
     addr : Win32.Winsock.SOCKADDR_IN;
@@ -85,7 +87,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.Udp_Pa is
     error : SocketError_Class_At := null;
   begin
     if Self.ErrorService /= null then
-      error := Create("UDPSender", method, mess, Self.LastErrorCode);
+      error := SocketError("UDPSender", method, mess, Self.LastErrorCode);
       Self.ErrorService.Report(Error_Class_At(error));
     end if;
   end;
@@ -197,26 +199,36 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.Udp_Pa is
     end if;
   end;
 
-  overriding function getAddress( Self : UdpSender_Class ) return String is
---    dummy : Integer;
---    str : String_At;
+  overriding function getAddress( Self : in out UdpSender_Class ) return String is
+    Address : aliased Win32.Winsock.SOCKADDR;
+    AddressLen : aliased Win32.INT := 16;
   begin
---TODO    Result := "";
---    if not Assigned(FSocket) then Exit;
---    end if;
---    dummy := 0;
---    FSocket.GetLocalAddress(str, dummy);
-    return "";
+    -- function getsockname(s : SOCKET; name : access SOCKADDR; namelen : access Win32.INT) return Win32.INT;
+    if Win32.Winsock.getsockname( s => Self.SocketId,
+                                  name => Address'Access,
+                                  namelen => AddressLen'Access) = Win32.Winsock.SOCKET_ERROR then
+      Self.LastErrorCode := Integer(Win32.Winsock.WSAGetLastError);
+      Report(Self, "getAddress", "Failed to get bound address");
+      return "";
+    else
+      return Interfaces.C.Strings.Value(Win32.To_Chars_Ptr(Win32.Winsock.inet_ntoa( ToAddr(Address).sin_addr )));
+    end if;
   end;
 
-  overriding function getPort( Self : UdpSender_Class ) return Integer is
---    dummy : AnsiString;
+  overriding function getPort( Self : in out UdpSender_Class ) return Integer is
+    Address : aliased Win32.Winsock.SOCKADDR;
+    AddressLen : aliased Win32.INT := 16;
   begin
---TODO    Result := 0;
---    if not Assigned(FSocket) then Exit;
---    end if;
---    FSocket.GetLocalAddress(dummy, Result);
-    return 0;
+    -- function getsockname(s : SOCKET; name : access SOCKADDR; namelen : access Win32.INT) return Win32.INT;
+    if Win32.Winsock.getsockname( s => Self.SocketId,
+                                  name => Address'Access,
+                                  namelen => AddressLen'Access) = Win32.Winsock.SOCKET_ERROR then
+      Self.LastErrorCode := Integer(Win32.Winsock.WSAGetLastError);
+      Report(Self, "getPort", "Failed to get bound port");
+      return 0;
+    else
+      return Integer(Win32.Winsock.ntohs(ToAddr(Address).sin_port));
+    end if;
   end;
 
   overriding function sendTo( Self : in out UdpSender_Class; buf : Byte_Arr_At; size : Integer; ip : string; port : Integer) return Boolean is

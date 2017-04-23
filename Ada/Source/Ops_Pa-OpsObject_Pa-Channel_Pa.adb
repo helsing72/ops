@@ -57,9 +57,9 @@ package body Ops_Pa.OpsObject_Pa.Channel_Pa is
         (Self.Linktype.all /= LINKTYPE_UDP)
     then
       StaticErrorService.
-        Report( Error_Class_At(Create("Domain", "CheckTransport",
+        Report( "Domain", "CheckTransport",
                 "Illegal linktype: '" & Self.Linktype.all &
-                  "'. Linktype for Channel must be either 'multicast', 'tcp', 'udp' or left blank( = multicast)" )));
+                  "'. Linktype for Channel must be either 'multicast', 'tcp', 'udp' or left blank( = multicast)" );
       raise EConfigException;
     end if;
   end;

@@ -17,7 +17,6 @@
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
 with Ops_Pa.Transport_Pa.Sender_Pa.Udp_Pa;
---TODO with Ops_Pa.Transport_Pa.Sender_Pa.Tcp_Pa;
 
 package body Ops_Pa.Transport_Pa.Sender_Pa is
 

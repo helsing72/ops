@@ -18,13 +18,23 @@
 
 with Ops_Pa.Transport_Pa.SendDataHandler_Pa,
      Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa,
+     Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa,
+     Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa,
+     Ops_Pa.SerializableFactory_Pa,
+     Ops_Pa.SerializableFactory_Pa.CompFactory_Pa.OpsObjectFactory_Pa,
      Ops_Pa.Error_Pa,
+     Ops_Pa.OpsObject_Pa.OPSConfig_Pa,
      Ops_Pa.OpsObject_Pa.Domain_Pa,
      Ops_Pa.OpsObject_Pa.Topic_Pa;
 
 use Ops_Pa.Transport_Pa.SendDataHandler_Pa,
     Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa,
+    Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa,
+    Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa,
+    Ops_Pa.SerializableFactory_Pa,
+    Ops_Pa.SerializableFactory_Pa.CompFactory_Pa.OpsObjectFactory_Pa,
     Ops_Pa.Error_Pa,
+    Ops_Pa.OpsObject_Pa.OPSConfig_Pa,
     Ops_Pa.OpsObject_Pa.Domain_Pa,
     Ops_Pa.OpsObject_Pa.Topic_Pa;
 
@@ -41,12 +51,35 @@ package Ops_Pa.Participant_Pa is
   function getInstance(domainID : String; participantID : String) return Participant_Class_At;
   function getInstance(domainID : String; participantID : String; configFile : String) return Participant_Class_At;
 
+  -- NOTE only for debug.
+  -- If used otherwise, you must be sure that ALL users of this participant in the
+  -- program has been closed down, ortherwise the program probably will crash.
+  procedure releaseInstance( part : Participant_Class_At );
 
+  -- Add a SerializableFactory which has support for data types (i.e. OPSObject derivatives you want this Participant to understand)
+  -- Takes over ownership of the object and it will be deleted with the participant
+  procedure addTypeSupport( Self: in out Participant_Class; typeSupport : SerializableFactory_Class_At );
+
+  function getTopic( Self: Participant_Class; name : string) return Topic_Class_At;
 
   -- Should only be used by Publishers
   function getSendDataHandler( Self: in out Participant_Class; top : Topic_Class_At) return SendDataHandler_Class_At;
   procedure releaseSendDataHandler( Self: in out Participant_Class; top : Topic_Class_At );
 
+  -- Should only be used by Subscribers
+  function getReceiveDataHandler( Self: in out Participant_Class; top : Topic_Class_At) return ReceiveDataHandler_Class_At;
+  procedure releaseReceiveDataHandler( Self: in out Participant_Class; top : Topic_Class_At );
+
+  procedure ReportError( Self : in out Participant_Class; Error : Error_Class_At );
+
+  -- Return a reference to the internal ErrorService instance
+  --
+  -- Add a listener to the service to get error reports from the participant and its objects
+  -- Prototype for listener is:
+  --    procedure <someobject>.OnErrorReport(Sender : TObject; Error : TError);
+  --
+  -- Note that several threads at a time can report errors so take that into account
+  function getErrorService( Self : in out Participant_Class ) return ErrorService_Class_At;
 
 private
 -- ==========================================================================
@@ -61,11 +94,14 @@ private
       DomainID : String_At := null;
 
       -- Objects on loan from OPSConfig
-      --TODO FConfig : TOPSConfig;
+      Config : OPSConfig_Class_At := null;
       Domain : Domain_Class_At := null;
 
       -- The ErrorService
       ErrorService : ErrorService_Class_At := null;
+
+      --
+      ObjectFactory : OPSObjectFactory_Class_At := null;
 
       ------------------------------------------------------------------------
       -- The ParticipantInfoData that partInfoPub will publish periodically
@@ -74,7 +110,7 @@ private
 
       ------------------------------------------------------------------------
       --
-      --FReceiveDataHandlerFactory : TReceiveDataHandlerFactory;
+      ReceiveDataHandlerFactory : ReceiveDataHandlerFactory_Class_At := null;
       SendDataHandlerFactory : SendDataHandlerFactory_Class_At := null;
 
     end record;

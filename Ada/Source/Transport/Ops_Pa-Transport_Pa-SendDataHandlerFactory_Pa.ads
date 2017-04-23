@@ -16,7 +16,7 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
-with Ada.Containers.Ordered_Maps;
+with Ada.Containers.Indefinite_Ordered_Maps;
 
 with Com_Mutex_Pa;
 
@@ -59,10 +59,10 @@ private
       numUsers : Integer := 0;
     end record;
 
-  function Less (Left, Right : String_At) return Boolean;
+  function Less (Left, Right : String) return Boolean;
   function Equal (Left, Right : HandlerInfo) return Boolean;
 
-  package MyMap is new Ada.Containers.Ordered_Maps(String_At, HandlerInfo, Less, Equal);
+  package MyMap is new Ada.Containers.Indefinite_Ordered_Maps(String, HandlerInfo, Less, Equal);
 
 -- ==========================================================================
 --

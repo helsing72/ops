@@ -133,7 +133,7 @@ package body Ops_Pa.ArchiverInOut_Pa is
         value := new Item_At_Arr(0..Integer(num-1));
 
         for i in value.all'Range loop
-          value.all(i) := Item_At(archiver.Inout2(name, Serializable_Class_At(value.all(i))));
+          value.all(i) := Item_At(archiver.Inout(name, Serializable_Class_At(value.all(i)), i));
         end loop;
       end if;
     else

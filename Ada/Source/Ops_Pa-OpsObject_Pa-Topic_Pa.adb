@@ -168,7 +168,7 @@ package body Ops_Pa.OpsObject_Pa.Topic_Pa is
   begin
     Serialize( OpsObject_Class(Self), archiver );
     archiver.Inout("name", Self.Name);
-    archiver.Inout("datatype", Self.TypeID);
+    archiver.Inout("dataType", Self.TypeID);
     archiver.Inout("port", Self.Port);
     archiver.Inout("address", Self.DomainAddress);
 
@@ -192,9 +192,9 @@ package body Ops_Pa.OpsObject_Pa.Topic_Pa is
       (Self.Transport.all /= TRANSPORT_UDP)
     then
       StaticErrorService.
-        Report( Error_Class_At(Create("Domain", "CheckTransport",
+        Report( "Domain", "CheckTransport",
                 "Illegal transport: '" & Self.Transport.all &
-                  "'. Transport for topic must be either 'multicast', 'tcp', 'udp' or left blank( = multicast)" )));
+                  "'. Transport for topic must be either 'multicast', 'tcp', 'udp' or left blank( = multicast)" );
       raise EConfigException;
     end if;
   end;

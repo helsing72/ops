@@ -16,8 +16,13 @@ set(OPS_TEMPLATE_FILES
   ${TMPL_PATH}/adabodytemplate.tpl
   ${TMPL_PATH}/adaspecenumtemplate.tpl
   ${TMPL_PATH}/adabodyenumtemplate.tpl
+  ${TMPL_PATH}/adaspecpublishertemplate.tpl
+  ${TMPL_PATH}/adabodypublishertemplate.tpl
+  ${TMPL_PATH}/adaspecsubscribertemplate.tpl
+  ${TMPL_PATH}/adabodysubscribertemplate.tpl
   ${TMPL_PATH}/adaspectypefactorytemplate.tpl
   ${TMPL_PATH}/adabodytypefactorytemplate.tpl
+  ${TMPL_PATH}/adaprojectfiletemplate.tpl
   ${TMPL_PATH}/cppenumtemplate.tpl
   ${TMPL_PATH}/cpppublishertemplate.tpl
   ${TMPL_PATH}/cppsubscribertemplate.tpl

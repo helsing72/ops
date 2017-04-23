@@ -77,6 +77,8 @@ private
 -- ==========================================================================
   type OPSMessage_Class is new OpsObject_Class with
     record
+      SelfAt : OPSMessage_Class_At := null;
+
       -- Serialized members
       messageType : Byte := 0;
       publisherPriority : Byte := 0;
@@ -96,7 +98,7 @@ private
       NrOfReservations : aliased Ctv.Integer32 := 0;
     end record;
 
-  procedure InitInstance( Self : in out OPSMessage_Class );
+  procedure InitInstance( Self : in out OPSMessage_Class; SelfAt : OPSMessage_Class_At );
 
   --------------------------------------------------------------------------
   --  Finalize the object

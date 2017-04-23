@@ -34,42 +34,42 @@ package Ops_Pa.ArchiverInOut_Pa.ArchiverIn_Pa is
 
   overriding function IsOut( Self : in ArchiverIn_Class) return Boolean;
 
-  procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Boolean);
-  procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Byte);
-  procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Int32);
-  procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Int16);
-  procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Int64);
-  procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Float32);
-  procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Float64);
-  procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out String_At);
-  procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Serializable_Class_At);
+  overriding procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Boolean);
+  overriding procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Byte);
+  overriding procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Int32);
+  overriding procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Int16);
+  overriding procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Int64);
+  overriding procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Float32);
+  overriding procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Float64);
+  overriding procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out String_At);
+  overriding procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Serializable_Class_At);
 
-  function inout2( Self : in out ArchiverIn_Class; name : String; value : in out Serializable_Class_At) return Serializable_Class_At;
+  overriding function inout2( Self : in out ArchiverIn_Class; name : String; value : in out Serializable_Class_At) return Serializable_Class_At;
 
-  function inout( Self : in out ArchiverIn_Class; name : String; value : in out Serializable_Class_At; element : Integer) return Serializable_Class_At;
+  overriding function inout( Self : in out ArchiverIn_Class; name : String; value : in out Serializable_Class_At; element : Integer) return Serializable_Class_At;
 
-  procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Boolean_Arr_At);
-  procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Byte_Arr_At);
-  procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Int32_Arr_At);
-  procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Int16_Arr_At);
-  procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Int64_Arr_At);
-  procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Float32_Arr_At);
-  procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Float64_Arr_At);
-  procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out String_Arr_At);
+  overriding procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Boolean_Arr_At);
+  overriding procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Byte_Arr_At);
+  overriding procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Int32_Arr_At);
+  overriding procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Int16_Arr_At);
+  overriding procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Int64_Arr_At);
+  overriding procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Float32_Arr_At);
+  overriding procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Float64_Arr_At);
+  overriding procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out String_Arr_At);
 
-  procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Boolean_Arr);
-  procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Byte_Arr);
-  procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Int32_Arr);
-  procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Int16_Arr);
-  procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Int64_Arr);
-  procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Float32_Arr);
-  procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Float64_Arr);
-  procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out String_Arr);
+  overriding procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Boolean_Arr);
+  overriding procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Byte_Arr);
+  overriding procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Int32_Arr);
+  overriding procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Int16_Arr);
+  overriding procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Int64_Arr);
+  overriding procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Float32_Arr);
+  overriding procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Float64_Arr);
+  overriding procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out String_Arr);
 
 --  procedure inout( Self : in out ArchiverIn_Class; name : string; Value : in out Serializable_Class_Arr_At);
 
-  function beginList( Self : in out ArchiverIn_Class; name : String; size : Integer) return Integer;
-  procedure endList( Self : in out ArchiverIn_Class; name : String);
+  overriding function beginList( Self : in out ArchiverIn_Class; name : String; size : Integer) return Integer;
+  overriding procedure endList( Self : in out ArchiverIn_Class; name : String);
 
 private
 -- ==========================================================================

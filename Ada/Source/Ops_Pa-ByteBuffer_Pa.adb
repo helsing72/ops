@@ -305,7 +305,7 @@ package body Ops_Pa.ByteBuffer_Pa is
         arr : Byte_Arr(1..Integer(Len));
       begin
         Self.ReadChars( arr );
-        Value := new String(1..Integer(Len));
+        Value := new String(arr'Range);
         for I in Value'Range loop
           Value(I) := FromByte( arr(I) );
         end loop;
@@ -328,7 +328,7 @@ package body Ops_Pa.ByteBuffer_Pa is
   begin
     Self.ReadInt( Size );
     if Size > 0 then
-      Value := new Float32_Arr(1..Integer(Size));
+      Value := new Float32_Arr(0..Integer(Size-1));
       for I in Value.all'Range loop
         Self.ReadFloat( Value(I) );
       end loop;
@@ -364,7 +364,7 @@ package body Ops_Pa.ByteBuffer_Pa is
   begin
     Self.ReadInt( Size );
     if Size > 0 then
-      Value := new Int16_Arr(1..Integer(Size));
+      Value := new Int16_Arr(0..Integer(Size-1));
       for I in Value.all'Range loop
         Self.ReadShort( Value(I) );
       end loop;
@@ -400,7 +400,7 @@ package body Ops_Pa.ByteBuffer_Pa is
   begin
     Self.ReadInt( Size );
     if Size > 0 then
-      Value := new Int32_Arr(1..Integer(Size));
+      Value := new Int32_Arr(0..Integer(Size-1));
       for I in Value.all'Range loop
         Self.ReadInt( Value(I) );
       end loop;
@@ -436,7 +436,7 @@ package body Ops_Pa.ByteBuffer_Pa is
   begin
     Self.ReadInt( Size );
     if Size > 0 then
-      Value := new Int64_Arr(1..Integer(Size));
+      Value := new Int64_Arr(0..Integer(Size-1));
       for I in Value.all'Range loop
         Self.ReadLong( Value(I) );
       end loop;
@@ -472,7 +472,7 @@ package body Ops_Pa.ByteBuffer_Pa is
   begin
     Self.ReadInt( Size );
     if Size > 0 then
-      Value := new Float64_Arr(1..Integer(Size));
+      Value := new Float64_Arr(0..Integer(Size-1));
       for I in Value.all'Range loop
         Self.ReadDouble( Value(I) );
       end loop;
@@ -506,7 +506,7 @@ package body Ops_Pa.ByteBuffer_Pa is
   begin
     Self.ReadInt( Size );
     if Size > 0 then
-      Value := new Byte_Arr(1..Integer(Size));
+      Value := new Byte_Arr(0..Integer(Size-1));
       Self.ReadChars( Value.all );
     else
       Value := null;
@@ -538,7 +538,7 @@ package body Ops_Pa.ByteBuffer_Pa is
   begin
     Self.ReadInt( Size );
     if Size > 0 then
-      Value := new Boolean_Arr(1..Integer(Size));
+      Value := new Boolean_Arr(0..Integer(Size-1));
       for I in Value.all'Range loop
         Self.ReadBoolean( Value(I) );
       end loop;
@@ -574,7 +574,7 @@ package body Ops_Pa.ByteBuffer_Pa is
   begin
     Self.ReadInt( Size );
     if Size > 0 then
-      Value := new String_Arr(1..Integer(Size));
+      Value := new String_Arr(0..Integer(Size-1));
       for I in Value.all'Range loop
         Self.ReadString( Value(I) );
       end loop;

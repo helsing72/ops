@@ -19,7 +19,7 @@
 package body Ops_Pa.Error_Pa is
 
   -- Constructor
-  function Create(className, method, mess : String) return BasicError_Class_At is
+  function BasicError(className, method, mess : String) return BasicError_Class_At is
     Self : BasicError_Class_At := null;
   begin
     Self := new BasicError_Class;
@@ -29,7 +29,7 @@ package body Ops_Pa.Error_Pa is
     when others =>
       Free(Self);
       raise;
-  end Create;
+  end;
 
   overriding function GetErrorCode( Self : BasicError_Class ) return Integer is
   begin
@@ -66,7 +66,7 @@ package body Ops_Pa.Error_Pa is
   --------------------------------------------------------------------------
   --
   --------------------------------------------------------------------------
-  function Create(ClassName, Method, Mess : String; SocketError : Integer) return SocketError_Class_At is
+  function SocketError(ClassName, Method, Mess : String; SocketError : Integer) return SocketError_Class_At is
     Self : SocketError_Class_At := null;
   begin
     Self := new SocketError_Class;
@@ -82,7 +82,7 @@ package body Ops_Pa.Error_Pa is
     res : String := GetMessage( BasicError_Class(Self) );
   begin
     if Self.ErrorCode /= -1 then
-      return res & " [" & Integer'Image(Self.ErrorCode) & "]";
+      return res & " [error code:" & Integer'Image(Self.ErrorCode) & "]";
     end if;
     return res;
   end;
@@ -115,14 +115,24 @@ package body Ops_Pa.Error_Pa is
       raise;
   end;
 
-  procedure addListener( Self : in out ErrorService_Class; Proc : ErrorNotifier_Pa.OnNotifyEvent_T ) is
+  procedure addListener( Self : in out ErrorService_Class; Proc : ErrorNotifier_Pa.OnNotifyEvent_T; Arg : Ops_Class_At ) is
   begin
-    Self.Notifier.addListener( Proc );
+    Self.Notifier.addListener( Proc, Arg );
   end;
 
-  procedure removeListener( Self : in out ErrorService_Class; Proc : ErrorNotifier_Pa.OnNotifyEvent_T ) is
+  procedure removeListener( Self : in out ErrorService_Class; Proc : ErrorNotifier_Pa.OnNotifyEvent_T; Arg : Ops_Class_At ) is
   begin
-    raise Not_Yet_Implemented;
+    Self.Notifier.removeListener( Proc, Arg );
+  end;
+
+  procedure addListener( Self : in out ErrorService_Class; Client : ErrorNotifier_Pa.Listener_Interface_At ) is
+  begin
+    Self.Notifier.addListener( Client );
+  end;
+
+  procedure removeListener( Self : in out ErrorService_Class; Client : ErrorNotifier_Pa.Listener_Interface_At ) is
+  begin
+    Self.Notifier.removeListener( Client );
   end;
 
   -- The ErrorService takes over ownership of error objects from the caller
@@ -136,6 +146,13 @@ package body Ops_Pa.Error_Pa is
         null;
     end;
     Free(Error);
+  end;
+
+    -- Helpers
+  procedure Report( Self : in out ErrorService_Class; ClassName, Method, Mess : String) is
+    error : BasicError_Class_At := BasicError( ClassName, Method, Mess );
+  begin
+    Self.Report( Error_Class_At(error) );
   end;
 
   procedure InitInstance( Self : in out ErrorService_Class; SelfAt : ErrorService_Class_At ) is

@@ -71,6 +71,17 @@ package body Ops_Pa.OpsObject_pa is
   end SpareBytes;
 
   --------------------------------------------------------------------------
+  --
+  --------------------------------------------------------------------------
+  procedure SetSpareBytes( Self : in out OpsObject_Class; arr : Byte_Arr_At ) is
+  begin
+    if Self.SpareBytes /= null then
+      Dispose(Self.SpareBytes);
+    end if;
+    Self.SpareBytes := arr;
+  end;
+  
+  --------------------------------------------------------------------------
   -- Returns a newely allocated deep copy/clone of this object.
   --------------------------------------------------------------------------
   function Clone( Self : OpsObject_Class ) return OpsObject_Class_At is

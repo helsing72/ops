@@ -37,8 +37,8 @@ package Ops_Pa.Transport_Pa.Sender_Pa.Udp_Pa is
   -- Interface used to send data
   overriding function sendTo( Self : in out UdpSender_Class; buf : Byte_Arr_At; size : Integer; ip : string; port : Integer) return Boolean;
 
-  overriding function getPort( Self : UdpSender_Class ) return Integer;
-  overriding function getAddress( Self : UdpSender_Class ) return String;
+  overriding function getPort( Self : in out UdpSender_Class ) return Integer;
+  overriding function getAddress( Self : in out UdpSender_Class ) return String;
 
   overriding procedure Open( Self : in out UdpSender_Class );
   overriding procedure Close( Self : in out UdpSender_Class );

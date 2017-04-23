@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -38,41 +38,125 @@ package body Ops_Pa.Notifier_Pa is
   --------------------------------------------------------------------------
   procedure doNotify( Self : in out Notifier_Class; Item : in Item_T ) is
   begin
-    for i in 1..Self.NumListeners loop
-      if Self.Listeners(i).ClassAt /= null then
-        OnNotify( Self.Listeners(i).ClassAt.all, Self.Owner, Item );
-      else
-        Self.Listeners(i).Proc.all( Self.Owner, Item );
-      end if;
-    end loop;
+    Self.Mutex.Acquire;
+    begin
+      for i in 1..Self.NumListeners loop
+        if Self.Listeners(i).ClassAt /= null then
+          OnNotify( Self.Listeners(i).ClassAt.all, Self.Owner, Item );
+        else
+          Self.Listeners(i).Proc.all( Self.Owner, Item, Self.Listeners(i).Arg );
+        end if;
+      end loop;
+      Self.Mutex.Release;
+    exception
+      when others =>
+        Self.Mutex.Release;
+    end;
   end;
 
   --------------------------------------------------------------------------
   -- Register a Listener for callback via a procedure call
   --------------------------------------------------------------------------
   procedure addListener( Self  : in out Notifier_Class; 
-                         proc  : in OnNotifyEvent_T ) is
+                         Proc  : in OnNotifyEvent_T;
+                         Arg   : in Ops_Class_At ) is
   begin
-    if Self.NumListeners < MaxListeners then
-      Self.NumListeners := Self.NumListeners + 1;
-      Self.Listeners(Self.NumListeners).Proc := Proc;
-    else
-      raise ETooManyListeners;
-    end if;
+    Self.Mutex.Acquire;
+    begin
+      if Self.NumListeners < MaxListeners then
+        Self.NumListeners := Self.NumListeners + 1;
+        Self.Listeners(Self.NumListeners).Proc := Proc;
+        Self.Listeners(Self.NumListeners).Arg := Arg;
+      else
+        raise ETooManyListeners;
+      end if;
+      Self.Mutex.Release;
+    exception
+      when others =>
+        Self.Mutex.Release;
+    end;
+  end;
+
+  --------------------------------------------------------------------------
+  --
+  --------------------------------------------------------------------------
+  procedure removeListener( Self  : in out Notifier_Class;
+                            Proc  : in OnNotifyEvent_T;
+                            Arg   : in Ops_Class_At ) is
+  begin
+    Self.Mutex.Acquire;
+    begin
+      for i in Self.Listeners'Range loop
+        if Self.Listeners(i).Proc = Proc and Self.Listeners(i).Arg = Arg then
+          -- Compact list
+          for j in i+1..Self.Listeners'Last loop
+            Self.Listeners(j-1) := Self.Listeners(j);  
+          end loop;
+          Self.Listeners(Self.Listeners'Last) := Listener_T'(null, null, null);
+          Self.NumListeners := Self.NumListeners - 1;
+          exit;
+        end if;
+      end loop;
+      Self.Mutex.Release;
+    exception
+      when others =>
+        Self.Mutex.Release;
+    end;
   end;
 
   --------------------------------------------------------------------------
   -- Register a Listener for callback using a "listener" class
   --------------------------------------------------------------------------
   procedure addListener( Self     : in out Notifier_Class; 
-                         Listener : in Listener_Class_At) is
+                         Listener : in Listener_Interface_At) is
   begin
-    if Self.NumListeners < MaxListeners then
-      Self.NumListeners := Self.NumListeners + 1;
-      Self.Listeners(Self.NumListeners).ClassAt := Listener;
-    else
-      raise ETooManyListeners;
-    end if;
+    Self.Mutex.Acquire;
+    begin
+      if Self.NumListeners < MaxListeners then
+        Self.NumListeners := Self.NumListeners + 1;
+        Self.Listeners(Self.NumListeners).ClassAt := Listener;
+      else
+        raise ETooManyListeners;
+      end if;
+      Self.Mutex.Release;
+    exception
+      when others =>
+        Self.Mutex.Release;
+    end;
+  end;
+
+  --------------------------------------------------------------------------
+  --
+  --------------------------------------------------------------------------
+  procedure removeListener( Self     : in out Notifier_Class;
+                            Listener : in Listener_Interface_At ) is
+  begin
+    Self.Mutex.Acquire;
+    begin
+      for i in Self.Listeners'Range loop
+        if Self.Listeners(i).ClassAt = Listener then
+          -- Compact list
+          for j in i+1..Self.Listeners'Last loop
+            Self.Listeners(j-1) := Self.Listeners(j);  
+          end loop;
+          Self.Listeners(Self.Listeners'Last) := Listener_T'(null, null, null);
+          Self.NumListeners := Self.NumListeners - 1;
+          exit;
+        end if;
+      end loop;
+      Self.Mutex.Release;
+    exception
+      when others =>
+        Self.Mutex.Release;
+    end;
+  end;
+
+  --------------------------------------------------------------------------
+  --
+  --------------------------------------------------------------------------
+  function numListeners(Self : in out Notifier_Class) return Integer is
+  begin
+    return Self.NumListeners;
   end;
 
   --------------------------------------------------------------------------

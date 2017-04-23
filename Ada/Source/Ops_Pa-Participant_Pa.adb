@@ -16,27 +16,29 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
-with Ada.Containers.Ordered_Maps;
+with Ada.Containers.Indefinite_Ordered_Maps;
 
 with Com_Mutex_Pa;
 
-with OPs_Pa.Error_Pa;
-use  Ops_Pa.Error_Pa;
+with Ops_Pa.Error_Pa,
+     Ops_Pa.SerializableFactory_Pa.CompFactory_Pa;
+use  Ops_Pa.Error_Pa,
+     Ops_Pa.SerializableFactory_Pa.CompFactory_Pa;
 
 package body Ops_Pa.Participant_Pa is
 
   -- ===========================================================================
 
-  function Less (Left, Right : String_At) return Boolean;
+  function Less (Left, Right : String) return Boolean;
   function Equal (Left, Right : Participant_Class_At) return Boolean;
 
-  package MyMap is new Ada.Containers.Ordered_Maps(String_At, Participant_Class_At, Less, Equal);
+  package MyMap is new Ada.Containers.Indefinite_Ordered_Maps(String, Participant_Class_At, Less, Equal);
 
   use type MyMap.cursor;
 
-  function Less (Left, Right : String_At) return Boolean is
+  function Less (Left, Right : String) return Boolean is
   begin
-    return Left.all < Right.all;
+    return Left < Right;
   end;
 
   function Equal (Left, Right : Participant_Class_At) return Boolean is
@@ -60,10 +62,9 @@ package body Ops_Pa.Participant_Pa is
   end;
 
   function getInstance(domainID : String; participantID : String; configFile : String) return Participant_Class_At is
-    key : String_At := new String'(domainID & "::" & participantID);
+    key : String := domainID & "::" & participantID;
     result : Participant_Class_At := null;
     pos : MyMap.Cursor;
-    error : BasicError_Class_At := null;
   begin
     gMutex.Acquire;
     begin
@@ -73,28 +74,42 @@ package body Ops_Pa.Participant_Pa is
         begin
           Result := Create(domainID, participantID, configFile);
           gInstances.Insert(key, Result);
-          key := null;
         exception
           when others =>
-            error := Create("Participant", "Participant", "Unknown Exception");
-            StaticErrorService.Report( Error_Class_At(error) );
+            StaticErrorService.Report( "Participant", "Participant", "Unknown Exception" );
         end;
       else
         Result := MyMap.Element(pos);
       end if;
+      gMutex.Release;
     exception
       when others =>
         gMutex.Release;
-        if key /= null then
-          Dispose(key);
-        end if;
         raise;
     end;
-    gMutex.Release;
-    if key /= null then
-      Dispose(key);
-    end if;
     return Result;
+  end;
+
+  procedure releaseInstance( part : Participant_Class_At ) is
+    key : String := part.domainID.all & "::" & part.participantID.all;
+    pos : MyMap.Cursor;
+  begin
+    gMutex.Acquire;
+    begin
+      pos := gInstances.Find( key );
+
+      if pos /= MyMap.No_Element then
+        gInstances.Delete(pos);
+      end if;
+
+      Free(part);
+
+      gMutex.Release;
+    exception
+      when others =>
+        gMutex.Release;
+        raise;
+    end;
   end;
 
   -- ===========================================================================
@@ -111,6 +126,11 @@ package body Ops_Pa.Participant_Pa is
       Free(Self);
       raise;
   end Create;
+
+  procedure addTypeSupport( Self: in out Participant_Class; typeSupport : SerializableFactory_Class_At ) is
+  begin
+    Self.ObjectFactory.Add( typeSupport );
+  end;
 
   function getSendDataHandler( Self: in out Participant_Class; top : Topic_Class_At) return SendDataHandler_Class_At is
     Result : SendDataHandler_Class_At := null;
@@ -142,8 +162,45 @@ package body Ops_Pa.Participant_Pa is
 --      end;
   end;
 
+  -- Should only be used by Subscribers
+  function getReceiveDataHandler( Self : in out Participant_Class; top : Topic_Class_At) return ReceiveDataHandler_Class_At is
+    Result : ReceiveDataHandler_Class_At := null;
+  begin
+    Result := Self.ReceiveDataHandlerFactory.getReceiveDataHandler( top, Self.Domain, SerializableInheritingTypeFactory_Class_At(Self.ObjectFactory) );
 
+    --///TODO partinfo stuff
 
+    return Result;
+  end;
+
+  procedure releaseReceiveDataHandler( Self: in out Participant_Class; top : Topic_Class_At ) is
+  begin
+    Self.ReceiveDataHandlerFactory.releaseReceiveDataHandler( top );
+
+    --///TODO partinfo stuff
+
+  end;
+
+  function getErrorService( Self : in out Participant_Class ) return ErrorService_Class_At is
+  begin
+    return Self.ErrorService;
+  end;
+
+  procedure ReportError( Self : in out Participant_Class; Error : Error_Class_At ) is
+  begin
+    Self.ErrorService.Report( Error );
+  end;
+
+  function getTopic( Self: Participant_Class; name : string) return Topic_Class_At is
+    top : Topic_Class_At;
+  begin
+    top := Self.Domain.getTopic(name);
+    if top /= null then
+      top.SetParticipantID( Self.ParticipantID.all);
+      top.SetDomainID( Self.DomainID.all );
+    end if;
+    return top;
+  end;
 
   procedure InitInstance( Self : in out Participant_Class; domainID : String; participantID : String; configFile : String ) is
   begin
@@ -154,29 +211,62 @@ package body Ops_Pa.Participant_Pa is
     Self.ErrorService := Create;
 
     -- Read configFile
-    --TODO
+    if configFile = "" then
+      -- This gets a reference to a singleton instance and should NOT be deleted.
+      -- It may be shared between several Participants.
+      Self.Config := getConfig;
+    else
+      -- This gets a reference to a unique instance and should eventually be deleted.
+      -- Note however that the getDomain() call below returns a reference to an
+      -- object internally in config.
+      Self.Config := getConfig(configFile);
+    end if;
+    if Self.Config = null then
+      StaticErrorService.Report( "Participant", "InitInstance", "getConfig() returned null" );
+      raise EConfigException;
+    end if;
 
     -- Get the domain from config. Note should not be deleted, owned by config.
-    --TODO Self.Domain := FConfig.getDomain(domainID);
-    --if Self.Domain = null then
-    --  raise ECommException.Create('Domain "' + domainID + '" missing in config-file');
-    --end if;
-    Self.Domain := Create;
+    Self.Domain := Self.Config.getDomain(domainID);
+    if Self.Domain = null then
+      StaticErrorService.Report( "Participant", "InitInstance", "Domain '" & domainID & "' missing in config-file" );
+      raise EConfigException;
+    end if;
 
+    -- Create a fatory instance for each participant
+    Self.ObjectFactory := OPSObjectFactory_Class_At(Ops_Pa.SerializableFactory_Pa.CompFactory_Pa.OpsObjectFactory_Pa.Create);
 
+    -- Initialize static data in partInfoData
+    --TODO
+
+    --
     Self.SendDataHandlerFactory := Create(Self.Domain, Self.ErrorService);
 
+    declare
+      temp : TOnUdpTransportInfoProc := 0;
+    begin
+      Self.ReceiveDataHandlerFactory := Create(temp, Self.ErrorService);
+    end;
+
+    -- Partinfo topic / Listener
+    --TODO
+
+    -- Start our thread
+    --TODO
   end;
 
   procedure Finalize( Self : in out Participant_Class ) is
   begin
+    if Self.ReceiveDataHandlerFactory /= null then
+      Free(Self.ReceiveDataHandlerFactory);
+    end if;
+
     if Self.SendDataHandlerFactory /= null then
       Free(Self.SendDataHandlerFactory);
     end if;
 
-    -- TODO inte tas bort då config finns då den äger domain
-    if Self.Domain /= null then
-      Free(Self.Domain);
+    if Self.ObjectFactory /= null then
+      Free(Self.ObjectFactory);
     end if;
 
     if Self.ErrorService /= null then

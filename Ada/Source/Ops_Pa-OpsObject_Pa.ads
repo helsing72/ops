@@ -39,6 +39,7 @@ package Ops_Pa.OpsObject_Pa is
   function TypesString( Self : OpsObject_Class ) return String;
 
   function SpareBytes( Self : OpsObject_Class ) return Byte_Arr_At;
+  procedure SetSpareBytes( Self : in out OpsObject_Class; arr : Byte_Arr_At );
   
   -- Returns a newely allocated deep copy/clone of this object.
   function Clone( Self : OpsObject_Class ) return OpsObject_Class_At; 

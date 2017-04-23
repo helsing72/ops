@@ -88,12 +88,11 @@ package Ops_Pa is
 --  Is_Network_Byte_Order : constant Boolean := System.Default_Bit_Order = System.High_Order_First;
 
   -- Exceptions
-  TODO : exception;
   Not_Yet_Implemented : exception;
 
   EConfigException : exception;
   ENoSuchTopicException : exception;
-  --  ECommException : exception;
+  ECommException : exception;
   --  EReceiveTimedOutException : Exception;
   Illegal_Array_Length : exception;
   Null_Object_In_Array : exception;

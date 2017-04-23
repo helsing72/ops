@@ -28,7 +28,7 @@ package body Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
     Self : OPSMessage_Class_At := null;
   begin
     Self := new OPSMessage_Class;
-    InitInstance( Self.all );
+    InitInstance( Self.all, Self );
     return Self;
   exception
     when others =>
@@ -56,9 +56,10 @@ package body Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
   end;
 
   procedure UnReserve( Self : in out OPSMessage_Class ) is
+    pragma Suppress(Accessibility_Check);
   begin
     if InterlockedDecrement(Self.NrOfReservations'Access) = 0 then
-      Free(Self'Access);
+      Free(Self.SelfAt);
     end if;
   end;
 
@@ -162,9 +163,10 @@ package body Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
     end if;
   end;
 
-  procedure InitInstance( Self : in out OPSMessage_Class ) is
+  procedure InitInstance( Self : in out OPSMessage_Class; SelfAt : OPSMessage_Class_At ) is
   begin
     InitInstance( OpsObject_Class(Self) );
+    Self.SelfAt := SelfAt;
     AppendType( OpsObject_Class(Self), "ops.protocol.OPSMessage" );
     Self.DataOwner := True;
   end;
@@ -174,7 +176,7 @@ package body Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
     -- Validation
     if Self.NrOfReservations /= 0 then
       StaticErrorService.
-        Report(Error_Class_At(Create("OPSMessage", "Finalize", "Invalid reserve value @ delete. Mismatched Reserve/Unreserve calls!")));
+        Report( "OPSMessage", "Finalize", "Invalid reserve value @ delete. Mismatched Reserve/Unreserve calls!" );
     end if;
 
     if Self.publisherName /= null then
