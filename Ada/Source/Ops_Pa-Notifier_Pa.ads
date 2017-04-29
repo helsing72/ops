@@ -78,7 +78,7 @@ private
   type Notifier_Class is new Ops_Class with
     record
       Owner        : Ops_Class_At := null;
-      Mutex        : Com_Mutex_Pa.Mutex;
+      Mutex        : aliased Com_Mutex_Pa.Mutex;
       Listeners    : ListenerArray_T;
       NumListeners : Integer := 0;
     end record;

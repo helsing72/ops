@@ -56,7 +56,7 @@ private
       Users : MyVector_Pa.Vector;
 
       Sender : Sender_Class_At;
-      Mutex : Com_Mutex_Pa.Mutex;
+      Mutex : aliased Com_Mutex_Pa.Mutex;
     end record;
 
   procedure InitInstance( Self : in out SendDataHandler_Class );

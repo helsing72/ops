@@ -37,21 +37,21 @@ package body Ops_Pa.Notifier_Pa is
   -- Called by "owner" that wishes to notify its listeners.
   --------------------------------------------------------------------------
   procedure doNotify( Self : in out Notifier_Class; Item : in Item_T ) is
+    S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
-    Self.Mutex.Acquire;
-    begin
-      for i in 1..Self.NumListeners loop
+    for i in 1..Self.NumListeners loop
+      -- We don't allow a client to stop us from notify all clients
+      begin
         if Self.Listeners(i).ClassAt /= null then
           OnNotify( Self.Listeners(i).ClassAt.all, Self.Owner, Item );
         else
           Self.Listeners(i).Proc.all( Self.Owner, Item, Self.Listeners(i).Arg );
         end if;
-      end loop;
-      Self.Mutex.Release;
-    exception
-      when others =>
-        Self.Mutex.Release;
-    end;
+      exception
+        when others =>
+          null;  
+      end;
+    end loop;
   end;
 
   --------------------------------------------------------------------------
@@ -60,21 +60,15 @@ package body Ops_Pa.Notifier_Pa is
   procedure addListener( Self  : in out Notifier_Class; 
                          Proc  : in OnNotifyEvent_T;
                          Arg   : in Ops_Class_At ) is
+    S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
-    Self.Mutex.Acquire;
-    begin
-      if Self.NumListeners < MaxListeners then
-        Self.NumListeners := Self.NumListeners + 1;
-        Self.Listeners(Self.NumListeners).Proc := Proc;
-        Self.Listeners(Self.NumListeners).Arg := Arg;
-      else
-        raise ETooManyListeners;
-      end if;
-      Self.Mutex.Release;
-    exception
-      when others =>
-        Self.Mutex.Release;
-    end;
+    if Self.NumListeners < MaxListeners then
+      Self.NumListeners := Self.NumListeners + 1;
+      Self.Listeners(Self.NumListeners).Proc := Proc;
+      Self.Listeners(Self.NumListeners).Arg := Arg;
+    else
+      raise ETooManyListeners;
+    end if;
   end;
 
   --------------------------------------------------------------------------
@@ -83,25 +77,19 @@ package body Ops_Pa.Notifier_Pa is
   procedure removeListener( Self  : in out Notifier_Class;
                             Proc  : in OnNotifyEvent_T;
                             Arg   : in Ops_Class_At ) is
+    S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
-    Self.Mutex.Acquire;
-    begin
-      for i in Self.Listeners'Range loop
-        if Self.Listeners(i).Proc = Proc and Self.Listeners(i).Arg = Arg then
-          -- Compact list
-          for j in i+1..Self.Listeners'Last loop
-            Self.Listeners(j-1) := Self.Listeners(j);  
-          end loop;
-          Self.Listeners(Self.Listeners'Last) := Listener_T'(null, null, null);
-          Self.NumListeners := Self.NumListeners - 1;
-          exit;
-        end if;
-      end loop;
-      Self.Mutex.Release;
-    exception
-      when others =>
-        Self.Mutex.Release;
-    end;
+    for i in Self.Listeners'Range loop
+      if Self.Listeners(i).Proc = Proc and Self.Listeners(i).Arg = Arg then
+        -- Compact list
+        for j in i+1..Self.Listeners'Last loop
+          Self.Listeners(j-1) := Self.Listeners(j);  
+        end loop;
+        Self.Listeners(Self.Listeners'Last) := Listener_T'(null, null, null);
+        Self.NumListeners := Self.NumListeners - 1;
+        exit;
+      end if;
+    end loop;
   end;
 
   --------------------------------------------------------------------------
@@ -109,20 +97,14 @@ package body Ops_Pa.Notifier_Pa is
   --------------------------------------------------------------------------
   procedure addListener( Self     : in out Notifier_Class; 
                          Listener : in Listener_Interface_At) is
+    S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
-    Self.Mutex.Acquire;
-    begin
-      if Self.NumListeners < MaxListeners then
-        Self.NumListeners := Self.NumListeners + 1;
-        Self.Listeners(Self.NumListeners).ClassAt := Listener;
-      else
-        raise ETooManyListeners;
-      end if;
-      Self.Mutex.Release;
-    exception
-      when others =>
-        Self.Mutex.Release;
-    end;
+    if Self.NumListeners < MaxListeners then
+      Self.NumListeners := Self.NumListeners + 1;
+      Self.Listeners(Self.NumListeners).ClassAt := Listener;
+    else
+      raise ETooManyListeners;
+    end if;
   end;
 
   --------------------------------------------------------------------------
@@ -130,25 +112,19 @@ package body Ops_Pa.Notifier_Pa is
   --------------------------------------------------------------------------
   procedure removeListener( Self     : in out Notifier_Class;
                             Listener : in Listener_Interface_At ) is
+    S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
-    Self.Mutex.Acquire;
-    begin
-      for i in Self.Listeners'Range loop
-        if Self.Listeners(i).ClassAt = Listener then
-          -- Compact list
-          for j in i+1..Self.Listeners'Last loop
-            Self.Listeners(j-1) := Self.Listeners(j);  
-          end loop;
-          Self.Listeners(Self.Listeners'Last) := Listener_T'(null, null, null);
-          Self.NumListeners := Self.NumListeners - 1;
-          exit;
-        end if;
-      end loop;
-      Self.Mutex.Release;
-    exception
-      when others =>
-        Self.Mutex.Release;
-    end;
+    for i in Self.Listeners'Range loop
+      if Self.Listeners(i).ClassAt = Listener then
+        -- Compact list
+        for j in i+1..Self.Listeners'Last loop
+          Self.Listeners(j-1) := Self.Listeners(j);  
+        end loop;
+        Self.Listeners(Self.Listeners'Last) := Listener_T'(null, null, null);
+        Self.NumListeners := Self.NumListeners - 1;
+        exit;
+      end if;
+    end loop;
   end;
 
   --------------------------------------------------------------------------

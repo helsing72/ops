@@ -48,7 +48,7 @@ package body Ops_Pa.Participant_Pa is
 
   -- By Singelton, one Participant per 'domainId + participantID'
   gInstances : MyMap.Map;
-  gMutex : Com_Mutex_Pa.Mutex;
+  gMutex : aliased Com_Mutex_Pa.Mutex;
 
   -- Get a Participant instance
   function getInstance(domainID : String) return Participant_Class_At is
@@ -65,51 +65,36 @@ package body Ops_Pa.Participant_Pa is
     key : String := domainID & "::" & participantID;
     result : Participant_Class_At := null;
     pos : MyMap.Cursor;
+    S : Com_Mutex_Pa.Scope_Lock(gMutex'Access);
   begin
-    gMutex.Acquire;
-    begin
-      pos := gInstances.Find( key );
+    pos := gInstances.Find( key );
 
-      if pos = MyMap.No_Element then
-        begin
-          Result := Create(domainID, participantID, configFile);
-          gInstances.Insert(key, Result);
-        exception
-          when others =>
-            StaticErrorService.Report( "Participant", "Participant", "Unknown Exception" );
-        end;
-      else
-        Result := MyMap.Element(pos);
-      end if;
-      gMutex.Release;
-    exception
-      when others =>
-        gMutex.Release;
-        raise;
-    end;
+    if pos = MyMap.No_Element then
+      begin
+        Result := Create(domainID, participantID, configFile);
+        gInstances.Insert(key, Result);
+      exception
+        when others =>
+          StaticErrorService.Report( "Participant", "Participant", "Unknown Exception" );
+      end;
+    else
+      Result := MyMap.Element(pos);
+    end if;
     return Result;
   end;
 
   procedure releaseInstance( part : Participant_Class_At ) is
     key : String := part.domainID.all & "::" & part.participantID.all;
     pos : MyMap.Cursor;
+    S : Com_Mutex_Pa.Scope_Lock(gMutex'Access);
   begin
-    gMutex.Acquire;
-    begin
-      pos := gInstances.Find( key );
+    pos := gInstances.Find( key );
 
-      if pos /= MyMap.No_Element then
-        gInstances.Delete(pos);
-      end if;
+    if pos /= MyMap.No_Element then
+      gInstances.Delete(pos);
+    end if;
 
-      Free(part);
-
-      gMutex.Release;
-    exception
-      when others =>
-        gMutex.Release;
-        raise;
-    end;
+    Free(part);
   end;
 
   -- ===========================================================================

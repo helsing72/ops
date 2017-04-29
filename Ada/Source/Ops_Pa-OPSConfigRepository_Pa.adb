@@ -78,18 +78,9 @@ package body Ops_Pa.OPSConfigRepository_Pa is
   -- if "domain" == '', all domains will be added otherwise only the specified "domain"
   -- Returns true if at least one domain added
   function Add( Self : in out OPSConfigRepository_Class; filename : string; domainID : string := "" ) return Boolean is
-    Status : Boolean;
+    S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
-    Self.Mutex.Acquire;
-    begin
-      Status := Self.LocalAdd( filename, domainID );
-      Self.Mutex.Release;
-      return Status;
-    exception
-      when others =>
-        Self.Mutex.Release;
-        raise;
-    end;
+    return Self.LocalAdd( filename, domainID );
   end;
 
   -- Must only be called while holding the Self.Mutex
@@ -150,33 +141,17 @@ package body Ops_Pa.OPSConfigRepository_Pa is
   end;
 
   procedure Clear( Self : in out OPSConfigRepository_Class ) is
+    S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
-    Self.Mutex.Acquire;
-    begin
-      -- Since we just borrow the references to domains (they are owned by file cache)
-      -- we can just clear the domain list in our OPSConfig object
-      ExtendedOPSConfig_Class_At(Self.Config).Clear;
-      Self.Mutex.Release;
-    exception
-      when others =>
-        Self.Mutex.Release;
-        raise;
-    end;
+    -- Since we just borrow the references to domains (they are owned by file cache)
+    -- we can just clear the domain list in our OPSConfig object
+    ExtendedOPSConfig_Class_At(Self.Config).Clear;
   end;
 
   function domainExist( Self : in out OPSConfigRepository_Class; domainID : string ) return Boolean is
-    Status : Boolean;
+    S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
-    Self.Mutex.Acquire;
-    begin
-      Status := Self.LocalDomainExist( domainID );
-      Self.Mutex.Release;
-      return Status;
-    exception
-      when others =>
-        Self.Mutex.Release;
-        raise;
-    end;
+    return Self.LocalDomainExist( domainID );
   end;
 
   -- Must only be called while holding the Self.Mutex
@@ -196,35 +171,25 @@ package body Ops_Pa.OPSConfigRepository_Pa is
   end;
 
   function getConfig( Self : in out OPSConfigRepository_Class; domainID : string := "" ) return OPSConfig_Class_At is
-    domains : Domain_Class_At_Arr_At := null;
+    domains : Domain_Class_At_Arr_At;
+    S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
-    Self.Mutex.Acquire;
-    begin
-      -- If no domain have been added, we try to add the default file
-      -- This is for backward compatibility
-      domains := Self.Config.getDomains;
-      if domains = null or else domains.all'Length = 0 then
-        if not Self.LocalAdd("ops_config.xml") then
-          Self.Mutex.Release;
-          return null;
-        end if;
+    -- If no domain have been added, we try to add the default file
+    -- This is for backward compatibility
+    domains := Self.Config.getDomains;
+    if domains = null or else domains.all'Length = 0 then
+      if not Self.LocalAdd("ops_config.xml") then
+        return null;
       end if;
+    end if;
 
-      if domainID /= "" then
-        if not Self.LocalDomainExist( domainID ) then
-          Self.Mutex.Release;
-          return null;
-        end if;
+    if domainID /= "" then
+      if not Self.LocalDomainExist( domainID ) then
+        return null;
       end if;
+    end if;
 
-      Self.Mutex.Release;
-
-      return Self.Config;
-    exception
-      when others =>
-        Self.Mutex.Release;
-        raise;
-    end;
+    return Self.Config;
   end;
 
   gInstance : OPSConfigRepository_Class_At := Create;

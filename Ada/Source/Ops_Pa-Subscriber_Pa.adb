@@ -68,17 +68,14 @@ package body Ops_Pa.Subscriber_Pa is
     end loop;
 
     -- Remove the filters we still own
-    Self.FilterQoSPolicyMutex.Acquire;
+    declare
+      S : Com_Mutex_Pa.Scope_Lock(Self.FilterQoSPolicyMutex'Access);
     begin
       for i in Self.FilterQoSPolicies.First_Index .. Self.FilterQoSPolicies.Last_Index loop
         if Self.FilterQoSPolicies.Element(i) /= null then
           Free(Self.FilterQoSPolicies.Element(i));
         end if;
       end loop;
-      Self.FilterQoSPolicyMutex.Release;
-    exception
-      when others =>
-        Self.FilterQoSPolicyMutex.Release;
     end;
 
 --///TODO    FreeAndNil(FDeadlineNotifier);
@@ -160,14 +157,10 @@ package body Ops_Pa.Subscriber_Pa is
   procedure AddFilterQoSPolicy( Self : in out Subscriber_Class; fqos : FilterQoSPolicy_Class_At ) is
   begin
     if fqos /= null then
-      Self.FilterQoSPolicyMutex.Acquire;
+      declare
+        S : Com_Mutex_Pa.Scope_Lock(Self.FilterQoSPolicyMutex'Access);
       begin
         Self.FilterQoSPolicies.Append(fqos);
-        Self.FilterQoSPolicyMutex.Release;
-      exception
-        when others =>
-          Self.FilterQoSPolicyMutex.Release;
-          raise;
       end;
     end if;
   end;
@@ -176,41 +169,29 @@ package body Ops_Pa.Subscriber_Pa is
     Idx : MyVector_Pa.Extended_Index;
   begin
     if fqos /= null then
-      Self.FilterQoSPolicyMutex.Acquire;
+      declare
+        S : Com_Mutex_Pa.Scope_Lock(Self.FilterQoSPolicyMutex'Access);
       begin
         Idx := Self.FilterQoSPolicies.Find_Index(fqos);
         if Idx /= MyVector_Pa.No_Index then
           -- Remove from list without freeing object
           Self.FilterQoSPolicies.Delete(Idx);
         end if;
-        Self.FilterQoSPolicyMutex.Release;
-      exception
-        when others =>
-          Self.FilterQoSPolicyMutex.Release;
-          raise;
       end;
     end if;
   end;
 
   function ApplyFilterQoSPolicies( Self : in out Subscriber_Class; o : OpsObject_Class_At ) return Boolean is
     fqos : FilterQoSPolicy_Class_At;
+    S : Com_Mutex_Pa.Scope_Lock(Self.FilterQoSPolicyMutex'Access);
   begin
-    Self.FilterQoSPolicyMutex.Acquire;
-    begin
-      for i in Self.FilterQoSPolicies.First_Index .. Self.FilterQoSPolicies.Last_Index loop
-        fqos := Self.FilterQoSPolicies.Element(i);
-        if not fqos.ApplyFilter(o) then
-          Self.FilterQoSPolicyMutex.Release;
-          return False;
-        end if;
-      end loop;
-      Self.FilterQoSPolicyMutex.Release;
-      return True;
-    exception
-      when others =>
-        Self.FilterQoSPolicyMutex.Release;
-        raise;
-    end;
+    for i in Self.FilterQoSPolicies.First_Index .. Self.FilterQoSPolicies.Last_Index loop
+      fqos := Self.FilterQoSPolicies.Element(i);
+      if not fqos.ApplyFilter(o) then
+        return False;
+      end if;
+    end loop;
+    return True;
   end;
 
   -- ---------------------------------------------------------------------------
@@ -258,9 +239,9 @@ package body Ops_Pa.Subscriber_Pa is
     Self.DataNotifier.removeListener(Client);
   end;
 
-  function acquireMessageLock( Self : in out Subscriber_Class ) return Boolean is
+  procedure acquireMessageLock( Self : in out Subscriber_Class ) is
   begin
-    return Self.ReceiveDataHandler.acquireMessageLock;
+    Self.ReceiveDataHandler.acquireMessageLock;
   end;
 
   procedure releaseMessageLock( Self : in out Subscriber_Class ) is
@@ -373,6 +354,16 @@ package body Ops_Pa.Subscriber_Pa is
       end if;
     end if;
     return False;
+  end;
+
+  procedure Initialize(Self : in out Scope_MessageLock) is
+  begin
+    Self.Sub.acquireMessageLock;
+  end;
+
+  procedure Finalize(Self : in out Scope_MessageLock) is
+  begin
+    Self.Sub.releaseMessageLock;
   end;
 
 end Ops_Pa.Subscriber_Pa;

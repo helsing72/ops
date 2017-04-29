@@ -68,17 +68,10 @@ package body Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa is
       end if;
     end;
 
+    S : Com_Mutex_Pa.Scope_Lock(Self.Lock'Access);
   begin
     -- Cleanup/Free all receivedatahandlers under protection
-    Self.Lock.Acquire;
-    begin
-      Self.ReceiveDataHandlerInstances.Iterate(Process'Access);
-      Self.Lock.Release;
-    exception
-      when others =>
-        Self.Lock.Release;
-        raise;
-    end;
+    Self.ReceiveDataHandlerInstances.Iterate(Process'Access);
   end;
 
 
@@ -115,35 +108,34 @@ package body Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa is
     pos : MyMap.Cursor;
     info : HandlerInfo;
 
+    S : Com_Mutex_Pa.Scope_Lock(Self.Lock'Access);
   begin
-    Self.Lock.Acquire;
-    begin
-      pos := Self.ReceiveDataHandlerInstances.Find( key );
+    pos := Self.ReceiveDataHandlerInstances.Find( key );
 
-      if pos /= MyMap.No_Element then
-        -- If we already have a ReceiveDataHandler for this topic, use it.
-        info := MyMap.Element(pos);
-        Result := info.handler;
+    if pos /= MyMap.No_Element then
+      -- If we already have a ReceiveDataHandler for this topic, use it.
+      info := MyMap.Element(pos);
+      Result := info.handler;
 
-        -- Check if any of the topics have a sample size larger than MAX_SEGMENT_SIZE
-        -- This will lead to a problem when using the same port or using UDP, if samples becomes > MAX_SEGMENT_SIZE
-        if ((Result.GetSampleMaxSize > PACKET_MAX_SIZE) or (top.SampleMaxSize > PACKET_MAX_SIZE)) then
-          if top.Transport = TRANSPORT_UDP then
-            Report("Warning: UDP Transport is used with Topics with 'sampleMaxSize' > " & Integer'Image(PACKET_MAX_SIZE));
-          else
-            Report("Warning: Same port (" & Int32'Image(top.Port) &
-                     ") is used with Topics with 'sampleMaxSize' > " & Integer'Image(PACKET_MAX_SIZE));
-          end if;
+      -- Check if any of the topics have a sample size larger than MAX_SEGMENT_SIZE
+      -- This will lead to a problem when using the same port or using UDP, if samples becomes > MAX_SEGMENT_SIZE
+      if ((Result.GetSampleMaxSize > PACKET_MAX_SIZE) or (top.SampleMaxSize > PACKET_MAX_SIZE)) then
+        if top.Transport = TRANSPORT_UDP then
+          Report("Warning: UDP Transport is used with Topics with 'sampleMaxSize' > " & Integer'Image(PACKET_MAX_SIZE));
+        else
+          Report("Warning: Same port (" & Int32'Image(top.Port) &
+                   ") is used with Topics with 'sampleMaxSize' > " & Integer'Image(PACKET_MAX_SIZE));
         end if;
+      end if;
 
-      elsif (top.Transport = TRANSPORT_MC) or (top.Transport = TRANSPORT_TCP) then
-        Result := Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa.Create(top, dom, opsObjectFactory, Self.ErrorService);
-        info.handler := Result;
-        --info.numUsers := 1;
-        Self.ReceiveDataHandlerInstances.Insert(key, info);
+    elsif (top.Transport = TRANSPORT_MC) or (top.Transport = TRANSPORT_TCP) then
+      Result := Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa.Create(top, dom, opsObjectFactory, Self.ErrorService);
+      info.handler := Result;
+      --info.numUsers := 1;
+      Self.ReceiveDataHandlerInstances.Insert(key, info);
 
-      elsif top.Transport = TRANSPORT_UDP then
-        Result := Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa.Create(top, dom, opsObjectFactory, Self.ErrorService);
+    elsif top.Transport = TRANSPORT_UDP then
+      Result := Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa.Create(top, dom, opsObjectFactory, Self.ErrorService);
 
 --///TODO        if Assigned(FOnUdpTransportInfoProc) then
 --          FOnUdpTransportInfoProc(
@@ -151,20 +143,15 @@ package body Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa is
 --                                  (Result.getReceiver as TUDPReceiver).Port);
 --        end if;
 
-        info.handler := Result;
-        --info.numUsers := 1;
-        Self.ReceiveDataHandlerInstances.Insert(key, info);
+      info.handler := Result;
+      --info.numUsers := 1;
+      Self.ReceiveDataHandlerInstances.Insert(key, info);
 
-      else  -- For now we can not handle more transports
-        Report("Unknown transport for Topic: " & top.Name);
-        -- Signal an error by returning nil.
+    else  -- For now we can not handle more transports
+      Report("Unknown transport for Topic: " & top.Name);
+      -- Signal an error by returning nil.
 
-      end if;
-      Self.Lock.Release;
-    exception
-      when others =>
-        Self.Lock.Release;
-    end;
+    end if;
     return Result;
   end;
 
@@ -178,33 +165,27 @@ package body Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa is
     pos : MyMap.Cursor;
     info : HandlerInfo;
 
+    S : Com_Mutex_Pa.Scope_Lock(Self.Lock'Access);
   begin
-    Self.Lock.Acquire;
-    begin
-      pos := Self.ReceiveDataHandlerInstances.Find( key );
+    pos := Self.ReceiveDataHandlerInstances.Find( key );
 
-      if pos /= MyMap.No_Element then
-        info := MyMap.Element(pos);
-        rdh := info.handler;
-        if rdh.GetNumListeners = 0 then
-          -- Start by removing it from the active list
-          -- Remove it from the dictionary and then delete it
-          Self.ReceiveDataHandlerInstances.Delete(pos);
+    if pos /= MyMap.No_Element then
+      info := MyMap.Element(pos);
+      rdh := info.handler;
+      if rdh.GetNumListeners = 0 then
+        -- Start by removing it from the active list
+        -- Remove it from the dictionary and then delete it
+        Self.ReceiveDataHandlerInstances.Delete(pos);
 
-          Free(rdh);
+        Free(rdh);
 
 --///TODO          if top.Transport = TRANSPORT_UDP then
 --            if FOnUdpTransportInfoProc /= null then
 --              FOnUdpTransportInfoProc("", 0);
 --            end if;
 --          end if;
-        end if;
       end if;
-      Self.Lock.Release;
-    exception
-      when others =>
-        Self.Lock.Release;
-    end;
+    end if;
   end;
 
 end Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa;

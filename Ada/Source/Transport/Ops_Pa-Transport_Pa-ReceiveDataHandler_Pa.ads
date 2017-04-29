@@ -46,7 +46,7 @@ package Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa is
                   opsObjectFactory : Ops_Pa.SerializableFactory_Pa.CompFactory_Pa.SerializableInheritingTypeFactory_Class_At;
                   Reporter : Ops_Pa.Error_Pa.ErrorService_Class_At) return ReceiveDataHandler_Class_At;
 
-  function acquireMessageLock( Self : in out ReceiveDataHandler_Class ) return Boolean;
+  procedure acquireMessageLock( Self : in out ReceiveDataHandler_Class );
   procedure releaseMessageLock( Self : in out ReceiveDataHandler_Class );
 
   procedure Stop( Self : in out ReceiveDataHandler_Class );
@@ -98,7 +98,7 @@ private
       CurrentMessageSize : Integer := 0;
 
       --
-      MessageLock : Com_Mutex_Pa.Mutex;
+      MessageLock : aliased Com_Mutex_Pa.Mutex;
 
       -- Status variables for the reception
       ExpectedSegment : UInt32 := 0;

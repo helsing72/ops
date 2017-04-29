@@ -20,14 +20,11 @@ package body __subUnitName is
     Result : Boolean := False;
   begin
     if Self.Data /= null then
-      Result := Self.aquireMessageLock;
+      declare
+        -- Hold MessageLock during cloning of object
+        S : Scope_MessageLock( Self.SelfAt );
       begin
         getData( Subscriber_Class(Self) ).FillClone( OPSObject_Class_At( d ));
-        Self.releaseMessageLock;
-      exception
-        when others =>
-          Self.releaseMessageLock;
-          raise;
       end;
       Result := True;
     end if;
@@ -36,7 +33,7 @@ package body __subUnitName is
 
   -- Returns a reference to the latest received data object.
   -- Clears the "new data" flag (see newDataExist()).
-  -- NOTE: MessageLock should be hold while working with the data object, to
+  -- NOTE: MessageLock should be held while working with the data object, to
   -- prevent a new incoming message to delete the current one while in use.
   function getTypedDataReference( Self : in out __classNameSubscriber_Class ) return __className_Class_At is
   begin

@@ -72,9 +72,8 @@ package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
     -- Make a key with the transport info that uniquely defines the receiver.
     key : String := getKey(top);
 
+    S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
-    Self.Mutex.Acquire;
-
     pos := Self.SendDataHandlers.Find( key );
 
     if pos /= MyMap.No_Element then
@@ -82,7 +81,6 @@ package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
       Self.SendDataHandlers.Update_Element(pos, Process => Inc'Access);
       -- Return found handler
       info := MyMap.Element(pos);
-      Self.Mutex.Release;
       return info.handler;
     end if;
 
@@ -119,15 +117,7 @@ package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
 
       raise Not_Yet_Implemented;
     end if;
-
-    Self.Mutex.Release;
-
     return result;
-
-  exception
-    when others =>
-      Self.Mutex.Release;
-      raise;
   end;
 
   procedure releaseSendDataHandler( Self : in out SendDataHandlerFactory_Class; top : Topic_Class_At) is
@@ -141,9 +131,8 @@ package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
     pos : MyMap.Cursor;
     info : HandlerInfo;
 
+    S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
-    Self.Mutex.Acquire;
-
     if top.Transport = TRANSPORT_UDP then
 --///TODO      if Assigned(FOnUdpConnectDisconnectProc) then FOnUdpConnectDisconnectProc(top, FUdpSendDataHandler, False); end if;
       Self.UdpUsers := Self.UdpUsers - 1;
@@ -170,13 +159,6 @@ package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
         end if;
       end if;
     end if;
-
-    Self.Mutex.Release;
-
-  exception
-    when others =>
-      Self.Mutex.Release;
-      raise;
   end;
 
   procedure InitInstance( Self : in out SendDataHandlerFactory_Class;
@@ -209,8 +191,9 @@ package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
     end;
 
   begin
-    -- Cleanup/Free all senddatahandlers under protection
-    Self.Mutex.Acquire;
+    declare
+      -- Cleanup/Free all senddatahandlers under protection
+      S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
     begin
       if Self.UdpUsers /= 0 then
         handlerExist := True;
@@ -219,13 +202,6 @@ package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
 --///TODO      FreeAndNil(FUdpSendDataHandler);
 
       Self.SendDataHandlers.Iterate(Process'Access);
-
-      Self.Mutex.Release;
-
-    exception
-      when others =>
-        Self.Mutex.Release;
-        raise;
     end;
 
     if handlerExist then

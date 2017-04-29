@@ -48,14 +48,14 @@ package body Ops_Pa.Transport_Pa.SendDataHandler_Pa.Mc_Pa is
 
   procedure Finalize( Self : in out McSendDataHandler_Class ) is
   begin
-    Self.Mutex.Acquire;
+    declare
+      S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
     begin
       Free(Self.Sender);
     exception
       when others =>
         null;
     end;
-    Self.Mutex.Release;
 
     Finalize( SendDataHandler_Class(Self) );
   end;

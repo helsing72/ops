@@ -15,4 +15,14 @@ package body Com_Mutex_Pa is
 
   end Mutex;
 
+  procedure Initialize(Self : in out Scope_Lock) is
+  begin
+    Self.Lock.Acquire;
+  end;
+
+  procedure Finalize(Self : in out Scope_Lock) is
+  begin
+    Self.Lock.Release;
+  end;
+
 end Com_Mutex_Pa;

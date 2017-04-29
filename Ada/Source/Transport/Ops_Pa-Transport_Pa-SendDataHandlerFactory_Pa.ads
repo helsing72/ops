@@ -85,7 +85,7 @@ private
 
       -- Dictionary with all SendDataHandlers except for UDP-transport
       SendDataHandlers : MyMap.Map;
-      Mutex : Com_Mutex_Pa.Mutex;
+      Mutex : aliased Com_Mutex_Pa.Mutex;
     end record;
 
   -- Generate the key used in the dictionary

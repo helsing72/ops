@@ -245,7 +245,7 @@ package body Ops_Pa.OpsObject_Pa.OPSConfig_Pa is
 -- ---------------------------------------------------------------------------
 
   gConfiguration : OPSConfig_Class_At := null;
-  gMutex : Com_Mutex_Pa.Mutex;
+  gMutex : aliased Com_Mutex_Pa.Mutex;
 
 
   function ReadFile(Name : String) return String_At is
@@ -313,18 +313,11 @@ package body Ops_Pa.OpsObject_Pa.OPSConfig_Pa is
   -- Returns a reference to a singleton instance and should NOT be deleted.
   -- See also releaseConfig below
   function getConfig return OPSConfig_Class_At is
+    S : Com_Mutex_Pa.Scope_Lock(gMutex'Access);
   begin
-    gMutex.Acquire;
-    begin
-      if gConfiguration = null then
-        gConfiguration := Ops_Pa.OPSConfigRepository_Pa.Instance.getConfig;
-      end if;
-      gMutex.Release;
-    exception
-      when others =>
-        gMutex.Release;
-        raise;
-    end;
+    if gConfiguration = null then
+      gConfiguration := Ops_Pa.OPSConfigRepository_Pa.Instance.getConfig;
+    end if;
     return gConfiguration;
   end;
 

@@ -72,7 +72,7 @@ private
       -- File cache with all added config files and their domains
       ConfigFiles : MyMap.Map;
 
-      Mutex : Com_Mutex_Pa.Mutex;
+      Mutex : aliased Com_Mutex_Pa.Mutex;
     end record;
 
   -- Must only be called while holding the Self.Mutex

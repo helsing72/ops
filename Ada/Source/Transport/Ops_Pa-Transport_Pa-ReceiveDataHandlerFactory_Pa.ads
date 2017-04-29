@@ -81,7 +81,7 @@ private
 
       -- By Singelton, one ReceiveDataHandler per 'key' on this Participant
       ReceiveDataHandlerInstances : MyMap.Map;
-      Lock : Com_Mutex_Pa.Mutex;
+      Lock : aliased Com_Mutex_Pa.Mutex;
     end record;
 
   function makeKey( top : Ops_Pa.OpsObject_Pa.Topic_Pa.Topic_Class_At ) return String;

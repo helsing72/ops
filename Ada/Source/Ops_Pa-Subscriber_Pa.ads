@@ -18,7 +18,8 @@
 
 with Ada.Containers.Vectors,
      Ada.Containers.Synchronized_Queue_Interfaces,
-     Ada.Containers.Unbounded_Synchronized_Queues;
+     Ada.Containers.Unbounded_Synchronized_Queues,
+     Ada.Finalization;
 
 with Com_Signal_Pa,
      Com_Mutex_Pa,
@@ -90,8 +91,10 @@ package Ops_Pa.Subscriber_Pa is
   --   public method getMessage()
   --   public method getDataReference()
   --   public method getHistory()
-  function acquireMessageLock( Self : in out Subscriber_Class ) return Boolean;
+  procedure acquireMessageLock( Self : in out Subscriber_Class );
   procedure releaseMessageLock( Self : in out Subscriber_Class );
+
+  type Scope_MessageLock( Sub : Subscriber_Class_At ) is tagged limited private;
 
   -- Returns a reference to the latest received OPSMessage (including the latest data object).
   -- Clears the "new data" flag.
@@ -178,7 +181,7 @@ private
       -- Receiver side filters that will be applied to data from receiveDataHandler
       -- before delivery to application layer.
       FilterQoSPolicies : MyVector_Pa.Vector;
-      FilterQoSPolicyMutex : Com_Mutex_Pa.Mutex;
+      FilterQoSPolicyMutex : aliased Com_Mutex_Pa.Mutex;
 
       MessageBuffer : MyQ.Queue;
       MessageBufferMaxSize : Integer := 1;
@@ -221,6 +224,15 @@ private
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
   procedure Finalize( Self : in out Subscriber_Class );
+
+-- ==========================================================================
+--
+-- ==========================================================================
+  type Scope_MessageLock( Sub : Subscriber_Class_At ) is
+    new Ada.Finalization.Limited_Controlled with null record;
+
+  overriding procedure Initialize(Self : in out Scope_MessageLock);
+  overriding procedure Finalize(Self : in out Scope_MessageLock);
 
 end Ops_Pa.Subscriber_Pa;
 

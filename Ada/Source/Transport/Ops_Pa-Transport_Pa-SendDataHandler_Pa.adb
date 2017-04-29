@@ -22,13 +22,11 @@ package body Ops_Pa.Transport_Pa.SendDataHandler_Pa is
 
   procedure addUser( Self : in out SendDataHandler_Class; client : Ops_Class_At ) is
     Idx : MyVector_Pa.Extended_Index;
+    S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
-    Self.Mutex.Acquire;
-
     -- Check that it isn't already in the list
     Idx := Self.Users.Find_Index(client);
     if Idx /= MyVector_Pa.No_Index then
-      Self.Mutex.Release;
       return;
     end if;
 
@@ -39,20 +37,12 @@ package body Ops_Pa.Transport_Pa.SendDataHandler_Pa is
     if Self.Users.Length = 1 then
       Self.Sender.Open;
     end if;
-
-    Self.Mutex.Release;
-
-  exception
-    when others =>
-      Self.Mutex.Release;
-      raise;
   end;
 
   procedure removeUser( Self : in out SendDataHandler_Class; client : Ops_Class_At ) is
     Idx : MyVector_Pa.Extended_Index;
+    S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
-    Self.Mutex.Acquire;
-
     Idx := Self.Users.Find_Index(client);
     if Idx /= MyVector_Pa.No_Index then
       -- Remove from list without freeing object
@@ -63,13 +53,6 @@ package body Ops_Pa.Transport_Pa.SendDataHandler_Pa is
     if Self.Users.Length = 0 then
       Self.Sender.Close;
     end if;
-
-    Self.Mutex.Release;
-
-  exception
-    when others =>
-      Self.Mutex.Release;
-      raise;
   end;
 
   function Equal( Left, Right : Ops_Class_At ) return Boolean is
