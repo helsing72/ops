@@ -72,7 +72,6 @@ set(LIB_OPS_PUBLIC_HEADERS
   ${OPS_HEADER_PATH}/Subscriber.h
   ${OPS_HEADER_PATH}/Thread.h
   ${OPS_HEADER_PATH}/ThreadPool.h
-  ${OPS_HEADER_PATH}/ThreadSupport.h
   ${OPS_HEADER_PATH}/TimeHelper.h
   ${OPS_HEADER_PATH}/Topic.h
   ${OPS_HEADER_PATH}/TopicInfoData.h
@@ -127,6 +126,7 @@ set(LIB_OPS_CORE_SRCS
   ${OPS_SRC_PATH}/TCPSendDataHandler.h
   ${OPS_SRC_PATH}/TCPServerBase.h
   ${OPS_SRC_PATH}/Thread.cpp
+  ${OPS_SRC_PATH}/ThreadSupport.h
   ${OPS_SRC_PATH}/Topic.cpp
   ${OPS_SRC_PATH}/Transport.cpp
   ${OPS_SRC_PATH}/xml/xmlParser.cpp
