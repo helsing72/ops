@@ -72,6 +72,7 @@ set(LIB_OPS_PUBLIC_HEADERS
   ${OPS_HEADER_PATH}/Subscriber.h
   ${OPS_HEADER_PATH}/Thread.h
   ${OPS_HEADER_PATH}/ThreadPool.h
+  ${OPS_HEADER_PATH}/ThreadSupport.h
   ${OPS_HEADER_PATH}/TimeHelper.h
   ${OPS_HEADER_PATH}/Topic.h
   ${OPS_HEADER_PATH}/TopicInfoData.h

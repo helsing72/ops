@@ -22,6 +22,7 @@ set(LIB_BOTTOM_LAYER_SRC
   TCPClient.cpp
   TCPClient.h
   TCPServer.h
+  ThreadSupport.cpp
   TimeHelper.cpp
   UDPReceiver.cpp
   UDPReceiver.h

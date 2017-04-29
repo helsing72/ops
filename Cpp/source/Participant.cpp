@@ -38,6 +38,7 @@
 #include "Publisher.h"
 #include "BasicError.h"
 #include "NetworkSupport.h"
+#include "ThreadSupport.h"
 
 namespace ops
 {
@@ -311,6 +312,9 @@ namespace ops
 	// This will be called by our threadpool (started in the constructor())
 	void Participant::run()
 	{
+		// Set name of current thread for debug purpose
+		std::string name("OPSP_" + domainID);
+		thread_support::SetThreadName(name.c_str());
 		// Start our timer. Calls onNewEvent(Notifier<int>* sender, int message) on timeout
 		aliveDeadlineTimer->start(aliveTimeout);
 		ioService->run();	

@@ -354,6 +354,7 @@
     <ClInclude Include="..\..\..\source\TCPSendDataHandler.h" />
     <ClInclude Include="..\..\..\source\TCPServer.h" />
     <ClInclude Include="..\..\..\source\TCPServerBase.h" />
+    <ClInclude Include="..\..\..\source\ThreadSupport.h" />
     <ClInclude Include="..\..\..\source\UDPReceiver.h" />
     <ClInclude Include="..\..\..\source\UDPSender.h" />
     <ClInclude Include="..\..\..\include\ArchiverInOut.h" />
@@ -449,6 +450,7 @@
     <ClCompile Include="..\..\..\source\Subscriber.cpp" />
     <ClCompile Include="..\..\..\source\TCPClient.cpp" />
     <ClCompile Include="..\..\..\source\Thread.cpp" />
+    <ClCompile Include="..\..\..\source\ThreadSupport.cpp" />
     <ClCompile Include="..\..\..\source\TimeHelper.cpp" />
     <ClCompile Include="..\..\..\source\Topic.cpp" />
     <ClCompile Include="..\..\..\source\Transport.cpp" />
