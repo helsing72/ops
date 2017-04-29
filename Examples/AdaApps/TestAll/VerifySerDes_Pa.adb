@@ -923,7 +923,7 @@ package body VerifySerDes_Pa is
       declare
         sub : Ops_Pa.Subscriber_Pa.TestAll_ChildData.ChildDataSubscriber_Class_At := null;
         pub : Ops_Pa.PublisherAbs_Pa.Publisher_Pa.TestAll_ChildData.ChildDataPublisher_Class_At := null;
-        flag, dummy : Boolean;
+        flag : Boolean;
         use type Ops_Pa.OpsObject_Pa.OPSMessage_Pa.OPSMessage_Class_At;
       begin
         -- Setup & start subscriber w polling
@@ -944,13 +944,15 @@ package body VerifySerDes_Pa is
         AssertEQ(sub.waitForNewData(100), True, "No data received");
         flag := AssertEQ(sub.getData(cd3), True, "No received data");
 
-        dummy := sub.acquireMessageLock;
-        if sub.getMessage /= null then
-          AssertPtrEQ(sub.getMessage.SpareBytes, null, "spareBytes");
-        else
-          Log("### Failed: sub.getMessage() == NULL");
-        end if;
-        sub.releaseMessageLock;
+        declare
+          s : Ops_Pa.Subscriber_Pa.Scope_MessageLock( Subscriber_Class_At(sub) );
+        begin
+          if sub.getMessage /= null then
+            AssertPtrEQ(sub.getMessage.SpareBytes, null, "spareBytes");
+          else
+            Log("### Failed: sub.getMessage() == NULL");
+          end if;
+        end;
 
         if flag then
           checkObjects(cd1, cd3);
@@ -961,9 +963,11 @@ package body VerifySerDes_Pa is
           if (sub.waitForNewData(100)) then
             Log("Received new data. Checking...");
             flag := sub.getData(cd3);
-            dummy := sub.acquireMessageLock;
-            AssertPtrEQ(sub.getMessage.SpareBytes, null, "spareBytes");
-            sub.releaseMessageLock;
+            declare
+              s : Ops_Pa.Subscriber_Pa.Scope_MessageLock( Subscriber_Class_At(sub) );
+            begin
+              AssertPtrEQ(sub.getMessage.SpareBytes, null, "spareBytes");
+            end;
             checkObjects(cd1, cd3);
             Log("Data check OK");
           end if;
