@@ -176,14 +176,19 @@ namespace ops
 					message = dynamic_cast<OPSMessage*> (archiver.inout(std::string("message"), message));
 				} catch (ops::ArchiverException& e) {
 					ReportError(participant, "Invalid data on network. Exception: " + e.GetMessage(), addr, port);
+				} catch (std::exception& e) {
+					ReportError(participant, "Invalid data on network. Exception: " + std::string(e.what()), addr, port);
 				}
-                if (message)
+				if (message)
                 {
 					//Check that we succeded in creating the actual data message
 					if (message->getData()) 
 					{
 						//Put spare bytes in data of message
-						calculateAndSetSpareBytes(buf, segmentPaddingSize);
+						if (!calculateAndSetSpareBytes(buf, segmentPaddingSize)) {
+							//Message has consumed more bytes than received
+							ReportError(participant, "Invalid data on network. Wrong message length.", addr, port);
+						}
 
 						// Add IP and port for source as meta data into OPSMessage
 						message->setSource(addr, port);
@@ -220,7 +225,6 @@ namespace ops
 					expectedSegment = 0;
 					currentMessageSize = 0;
 				}
-
             }
             receiver->asynchWait(memMap.getSegment(expectedSegment), memMap.getSegmentSize());
         }
@@ -257,7 +261,7 @@ namespace ops
         messageLock.unlock();
     }
 
-    void ReceiveDataHandler::calculateAndSetSpareBytes(ByteBuffer &buf, int segmentPaddingSize)
+    bool ReceiveDataHandler::calculateAndSetSpareBytes(ByteBuffer &buf, int segmentPaddingSize)
     {
         //We must calculate how many unserialized segment headers we have and substract that total header size from the size of spareBytes.
         int nrOfSerializedBytes = buf.GetSize();
@@ -267,16 +271,16 @@ namespace ops
 
         int nrOfSpareBytes = currentMessageSize - buf.GetSize() - (nrOfUnserializedSegments * segmentPaddingSize);
 
-        if (nrOfSpareBytes > 0)
-		{
-
+        if (nrOfSpareBytes > 0) {
             message->getData()->spareBytes.reserve(nrOfSpareBytes);
             message->getData()->spareBytes.resize(nrOfSpareBytes, 0);
 
             //This will read the rest of the bytes as raw bytes and put them into sparBytes field of data.
             buf.ReadChars(&(message->getData()->spareBytes[0]), nrOfSpareBytes);
+		}
 
-        }
+		//Return false if message has consumed more bytes than received (but still within our buffer size)
+		return (nrOfSpareBytes >= 0);
     }
 
 

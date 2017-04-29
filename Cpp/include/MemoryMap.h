@@ -22,10 +22,25 @@
 #define	ops_MemoryMap_h
 
 #include <string.h>
+#include <exception>
+
 #include "OPSExport.h"
 
 namespace ops
 {
+
+class MemoryMapException : public std::exception
+{
+private:
+	std::string message;
+public:
+	MemoryMapException(std::string m)
+	{
+		message = "MemoryMapException: " + m;
+	}
+	const char* what() const noexcept { return message.c_str(); }
+};
+
 
 class OPS_EXPORT MemoryMap
 {
@@ -52,6 +67,7 @@ public:
 
 	char* getSegment(int i)
 	{
+		if (i >= width) throw MemoryMapException("Allocated MemoryMap too small!!!");
 		return bytes[i];
 	}
 	int getSegmentSize()

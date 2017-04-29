@@ -78,7 +78,7 @@ namespace ops
 		///Override from Listener
 		///Called whenever the receiver has new data.
 		void onNewEvent(Notifier<BytesSizePair>* sender, BytesSizePair byteSizePair);
-		void calculateAndSetSpareBytes(ByteBuffer &buf, int segmentPaddingSize);
+		bool calculateAndSetSpareBytes(ByteBuffer &buf, int segmentPaddingSize);
 
 	private:
 		///The receiver used for this topic. 
