@@ -252,7 +252,7 @@ namespace Ops
 
             for (int j = 0; j < bip.Length; j++) bip[j] = (byte)((int)bip[j] & (int)bmask[j]);
 
-            System.Net.NetworkInformation.IPGlobalProperties computerProperties = System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties();
+//            System.Net.NetworkInformation.IPGlobalProperties computerProperties = System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties();
             System.Net.NetworkInformation.NetworkInterface[] nics = System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces();
 
             if (nics != null && nics.Length > 0)

@@ -294,6 +294,17 @@ namespace Ops
                 this.length = (uint)Marshal.SizeOf(typeof(MEMORYSTATUSEX));
             }
 
+            public uint Length
+            {
+                get { return this.length; }
+            }
+
+            public uint MemoryLoad
+            {
+                get { return this.memoryLoad; }
+                set { this.memoryLoad = value; }
+            }
+
             public ulong TotalPhys
             {
                 get { return this.totalPhys; }
@@ -304,6 +315,36 @@ namespace Ops
             {
                 get { return this.availPhys; }
                 set { this.availPhys = value; }
+            }
+
+            public ulong TotalPageFile
+            {
+                get { return this.totalPageFile; }
+                set { this.totalPageFile = value; }
+            }
+
+            public ulong AvailPageFile
+            {
+                get { return this.availPageFile; }
+                set { this.availPageFile = value; }
+            }
+
+            public ulong TotalVirtual
+            {
+                get { return this.totalVirtual; }
+                set { this.totalVirtual = value; }
+            }
+
+            public ulong AvailVirtual
+            {
+                get { return this.availVirtual; }
+                set { this.availVirtual = value; }
+            }
+
+            public ulong AvailExtendedVirtual
+            {
+                get { return this.availExtendedVirtual; }
+                set { this.availExtendedVirtual = value; }
             }
         }
     }

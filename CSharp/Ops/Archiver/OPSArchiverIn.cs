@@ -199,7 +199,7 @@ namespace Ops
             for (int i = 0; i < size; i++)
             {
                 // For each element
-                string dummy = readBuf.ReadString();
+                readBuf.ReadString();
                 ISerializable obj = (ISerializable)Activator.CreateInstance<T>();
                 obj.Serialize(this);
                 list.Add(obj);

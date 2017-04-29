@@ -14,7 +14,7 @@ namespace Ops
     {
 		private byte [] bytes;
 		private long currentPublicationID = 0;
-		private InProcessTransport inProcessTransport;
+		//private InProcessTransport inProcessTransport;
 		private string key = "";
 		private string name = "";
 		private Participant participant;
@@ -32,7 +32,7 @@ namespace Ops
             this.bytes = new byte[topic.GetSampleMaxSize()];
 
             this.participant = Participant.GetInstance(topic.GetDomainID(), topic.GetParticipantID());
-            this.inProcessTransport = participant.GetInProcessTransport();
+            //this.inProcessTransport = participant.GetInProcessTransport();
             Init();
         }
 

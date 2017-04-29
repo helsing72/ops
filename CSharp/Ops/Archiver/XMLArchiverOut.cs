@@ -21,7 +21,7 @@ namespace Ops
 		private static string LINE_CHANGE = "\n";
 		internal BinaryWriter bw = null;
         private Encoding encoding = new UTF8Encoding();
-        private string rootTag;
+        //private string rootTag;
 		private static string TAB = "    ";
 		private static string TYPE_ADD_BOOLEAN = " type = \"boolean\" ";
 		private static string TYPE_ADD_BYTE = " type = \"byte\" ";
@@ -60,7 +60,7 @@ namespace Ops
         {
             this.bw = bw;
             this.writeXMLHeader = writeXMLHeader;
-            this.rootTag = rootTag;
+            //this.rootTag = rootTag;
             if (writeXMLHeader)
             {
                 bw.Write(encoding.GetBytes(HEADER));

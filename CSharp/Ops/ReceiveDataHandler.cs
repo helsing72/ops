@@ -217,7 +217,7 @@ namespace Ops
                 // Here we will wait until new data arrives or the thread is terminated.
                 // This thread is a background thread and will automatically be terminated
                 // when all foreground threads has been terminated.
-                bool recOK = receiver.Receive(headerBytes, bytes, expectedFragment * (fragmentSize - FRAGMENT_HEADER_SIZE));
+                receiver.Receive(headerBytes, bytes, expectedFragment * (fragmentSize - FRAGMENT_HEADER_SIZE));
             }
             //Console.WriteLine("Leaving transport thread...");
         }
