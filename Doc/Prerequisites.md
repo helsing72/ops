@@ -33,9 +33,9 @@ Make sure you have boost installed, otherwise download pre-built binaries for bo
 OPS has been used with Boost versions 1.38, 1.48, 1.53, 1.55 and 1.60.
 
 ## CMake ##
-Version 3.0.0 or later is required to build OPS with CMake. Make sure the cmake command is in your path. CMake can be downloaded at https://cmake.org/.
+Version 3.1.0 or later is required to build OPS with CMake. Make sure the cmake command is in your path. CMake can be downloaded at https://cmake.org/.
 
-OPS has been used with CMake version 3.5.0.
+OPS has been used with CMake version 3.5.0 and later.
 
 ## Visual Studio (Windows) ##
 OPS has been used with VS2008, VS2010, VS2012, VS2013 and VS2015.
@@ -54,6 +54,10 @@ Experimental support exist for Python 2.7.
 
 ## Delphi ##
 OPS has been used with Delphi XE2 and Delphi 10.1 Berlin.
+
+## Ada ##
+The Ada implementation requires Ada 2012 support.
+OPS has been used with GNAT GPS 2016.
 
 ## gcovr ##
 TBD

@@ -36,3 +36,12 @@ To run a Python application that uses OPS and the generated IDL files, the Pytho
   * Copying the source directories into the test program directory
 
 See the 'run' script-file in the example directory for how to use the PYTHONPATH method.
+
+## Ada Examples ##
+TBD
+
+## Delphi Examples ##
+TBD
+
+## Java Examples ##
+TBD

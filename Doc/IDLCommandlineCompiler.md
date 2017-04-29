@@ -35,8 +35,8 @@ Current working directory: D:\OPS\OPS4
     -t <dir>          set template directory (overrides built-in templates)
 
   FEATURE
-    for generate: cpp, csharp, delphi, java, python, debug
-    for build:    csharp, java
+    for generate: ALL, ada, cpp, csharp, delphi, java, json, python, debug
+    for build:    ALL, csharp, java    
 
 ```
 
@@ -48,7 +48,7 @@ To compile IDL's for the TestAll example, run the following command:
 ```
 This creates a 'Generated' directory in the TestAll directory with all generated files.
 
-NOTE: For ***opsc*** to compile C# code with the 'correct' C# compiler, you may need to set the 
+NOTE: For ***opsc*** to compile C# code with the 'correct' C# compiler, you may need to set the
 environment symbol **OPS_CSC_PATH** to the directory where the wanted compiler binary exist.
 
 Example:

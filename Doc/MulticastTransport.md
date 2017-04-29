@@ -3,7 +3,7 @@
 
 ---
 
-_Note, this is the default transport of OPS 4 and is the only one fully supported by all platforms (i.e. C++, C# and Java)._
+_Note, this is the default transport of OPS 4 and is the only one fully supported by all platforms (i.e. C++, C#, Java, Delphi, Python and Ada)._
 
 ---
 
