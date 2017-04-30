@@ -21,40 +21,38 @@
 #ifndef XMLArchiverInH
 #define XMLArchiverInH
 
-#include "ArchiverInOut.h"
-#include "SerializableInheritingTypeFactory.h"
 #include <iostream>
 #include <sstream>
-#include "xml/xmlParser.h"
 #include <string>
+#include <exception>
+
+#include "ArchiverInOut.h"
+#include "SerializableInheritingTypeFactory.h"
+#include "xml/xmlParser.h"
 
 namespace ops
 {
-    using namespace std;
     namespace exceptions
     {
-
-        class XMLArchiverException
+        class XMLArchiverException : public std::exception
         {
         private:
             std::string message;
         public:
-
             XMLArchiverException()
             {
                 message = "XMLArchiverException: empty";
             }
-
             XMLArchiverException(std::string m)
             {
                 message = "XMLArchiverException: " + m;
             }
-
             std::string GetMessage()
             {
                 return message;
             }
-        };
+			const char* what() const noexcept { return message.c_str(); }
+		};
     }
     using namespace exceptions;
 
@@ -92,7 +90,7 @@ namespace ops
         {
             if (!currentNode.getChildNode(name.c_str()).isEmpty())
             {
-                string s(currentNode.getChildNode(name.c_str()).getText());
+                std::string s(currentNode.getChildNode(name.c_str()).getText());
                 if (s.compare("true") == 0) value = true;
                 if (s.compare("false") == 0) value = false;
                 if (s.compare("TRUE") == 0) value = true;
@@ -108,8 +106,8 @@ namespace ops
         {
             if (!currentNode.getChildNode(name.c_str()).isEmpty())
             {
-                string s(currentNode.getChildNode(name.c_str()).getText());
-                stringstream ss(s);
+				std::string s(currentNode.getChildNode(name.c_str()).getText());
+                std::stringstream ss(s);
 
                 int inVal;
                 ss >> inVal;
@@ -121,8 +119,8 @@ namespace ops
         {
             if (!currentNode.getChildNode(name.c_str()).isEmpty())
             {
-                string s(currentNode.getChildNode(name.c_str()).getText());
-                stringstream ss(s);
+                std::string s(currentNode.getChildNode(name.c_str()).getText());
+                std::stringstream ss(s);
 
                 int inVal;
                 ss >> inVal;
@@ -134,8 +132,8 @@ namespace ops
         {
             if (!currentNode.getChildNode(name.c_str()).isEmpty())
             {
-                string s(currentNode.getChildNode(name.c_str()).getText());
-                stringstream ss(s);
+                std::string s(currentNode.getChildNode(name.c_str()).getText());
+				std::stringstream ss(s);
 
                 int inVal;
                 ss >> inVal;
@@ -147,8 +145,8 @@ namespace ops
         {
             if (!currentNode.getChildNode(name.c_str()).isEmpty())
             {
-                string s(currentNode.getChildNode(name.c_str()).getText());
-                stringstream ss(s);
+				std::string s(currentNode.getChildNode(name.c_str()).getText());
+				std::stringstream ss(s);
 
                 __int64 inVal;
                 ss >> inVal;
@@ -160,8 +158,8 @@ namespace ops
         {
             if (!currentNode.getChildNode(name.c_str()).isEmpty())
             {
-                string s(currentNode.getChildNode(name.c_str()).getText());
-                stringstream ss(s);
+				std::string s(currentNode.getChildNode(name.c_str()).getText());
+				std::stringstream ss(s);
 
                 float inVal;
                 ss >> inVal;
@@ -173,8 +171,8 @@ namespace ops
         {
             if (!currentNode.getChildNode(name.c_str()).isEmpty())
             {
-                string s(currentNode.getChildNode(name.c_str()).getText());
-                stringstream ss(s);
+				std::string s(currentNode.getChildNode(name.c_str()).getText());
+				std::stringstream ss(s);
 
                 double inVal;
                 ss >> inVal;
@@ -188,7 +186,7 @@ namespace ops
             {
                 if (currentNode.getChildNode(name.c_str()).getText() != NULL)
                 {
-                    string s(currentNode.getChildNode(name.c_str()).getText());
+					std::string s(currentNode.getChildNode(name.c_str()).getText());
                     value = s;
                 }
                 else
@@ -213,7 +211,7 @@ namespace ops
 
             opsXML::XMLNode tempNode = currentNode;
             currentNode = currentNode.getChildNode(name.c_str()).getChildNode("element", element);
-            string types(currentNode.getAttribute("type"));
+			std::string types(currentNode.getAttribute("type"));
             Serializable* newSer = factory->create(types);
             if (newSer != NULL)
             {
@@ -238,7 +236,7 @@ namespace ops
             {
                 opsXML::XMLNode tempNode = currentNode;
                 currentNode = currentNode.getChildNode(name.c_str());
-                string types(currentNode.getAttribute("type"));
+				std::string types(currentNode.getAttribute("type"));
                 Serializable* newSer = factory->create(types);
                 if (newSer != NULL)
                 {
@@ -265,7 +263,7 @@ namespace ops
                 value.resize(size, false);
                 for (int i = 0; i < size; i++)
                 {
-                    string s(currentNode.getChildNode("element", i).getText());
+					std::string s(currentNode.getChildNode("element", i).getText());
                     if (s.compare("true") == 0) value[i] = true;
                     if (s.compare("false") == 0) value[i] = false;
                     if (s.compare("TRUE") == 0) value[i] = true;
@@ -292,8 +290,8 @@ namespace ops
                 value.resize(size, 0);
                 for (int i = 0; i < size; i++)
                 {
-                    string s(currentNode.getChildNode("element", i).getText());
-                    stringstream ss(s);
+					std::string s(currentNode.getChildNode("element", i).getText());
+					std::stringstream ss(s);
 
                     int inVal;
                     ss >> inVal;
@@ -316,8 +314,8 @@ namespace ops
                 value.resize(size, 0);
                 for (int i = 0; i < size; i++)
                 {
-                    string s(currentNode.getChildNode("element", i).getText());
-                    stringstream ss(s);
+					std::string s(currentNode.getChildNode("element", i).getText());
+					std::stringstream ss(s);
 
                     int inVal;
                     ss >> inVal;
@@ -340,8 +338,8 @@ namespace ops
                 value.resize(size, 0);
                 for (int i = 0; i < size; i++)
                 {
-                    string s(currentNode.getChildNode("element", i).getText());
-                    stringstream ss(s);
+					std::string s(currentNode.getChildNode("element", i).getText());
+					std::stringstream ss(s);
 
                     int inVal;
                     ss >> inVal;
@@ -364,8 +362,8 @@ namespace ops
                 value.resize(size, 0);
                 for (int i = 0; i < size; i++)
                 {
-                    string s(currentNode.getChildNode("element", i).getText());
-                    stringstream ss(s);
+					std::string s(currentNode.getChildNode("element", i).getText());
+					std::stringstream ss(s);
 
                     __int64 inVal;
                     ss >> inVal;
@@ -388,8 +386,8 @@ namespace ops
                 value.resize(size, 0.0);
                 for (int i = 0; i < size; i++)
                 {
-                    string s(currentNode.getChildNode("element", i).getText());
-                    stringstream ss(s);
+					std::string s(currentNode.getChildNode("element", i).getText());
+					std::stringstream ss(s);
 
                     float inVal;
                     ss >> inVal;
@@ -412,8 +410,8 @@ namespace ops
                 value.resize(size, 0.0);
                 for (int i = 0; i < size; i++)
                 {
-                    string s(currentNode.getChildNode("element", i).getText());
-                    stringstream ss(s);
+					std::string s(currentNode.getChildNode("element", i).getText());
+					std::stringstream ss(s);
 
                     double inVal;
                     ss >> inVal;
@@ -436,7 +434,7 @@ namespace ops
                 value.resize(size, "");
                 for (int i = 0; i < size; i++)
                 {
-                    string s(currentNode.getChildNode("element", i).getText());
+					std::string s(currentNode.getChildNode("element", i).getText());
                     value[i] = s;
                 }
 
@@ -484,5 +482,4 @@ namespace ops
 
     };
 }
-
 #endif

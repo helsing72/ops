@@ -1,34 +1,26 @@
+
 #ifndef ops_ConfigException_h
 #define ops_ConfigException_h
 
+#include <string.h>
 #include <exception> 
 
 namespace ops
 {
-
-    class ConfigException : std::exception
+    class ConfigException : public std::exception
     {
     public:
-
-        ConfigException(std::string mess)
-        : message(mess)
+        ConfigException(std::string mess) : message(mess)
         {
-
         }
 
-        const char* what()
-        {
-            return message.c_str();
-        }
+		const char* what() const noexcept { return message.c_str(); }
 
         virtual ~ConfigException() throw ()
         {
         }
     private:
         std::string message;
-
     };
-
 }
 #endif
-

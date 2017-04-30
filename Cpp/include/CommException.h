@@ -22,13 +22,14 @@
 #define CommException_h
 
 #include <string>
+#include <exception>
+
 namespace ops
 {
     namespace exceptions
     {
-        class CommException
+        class CommException : public std::exception
         {
-            
         private:
             std::string message;
         public:
@@ -44,7 +45,8 @@ namespace ops
             {
                 return message;
             }
-        };
+			const char* what() const noexcept { return message.c_str(); }
+		};
     }
 }
 #endif

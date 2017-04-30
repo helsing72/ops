@@ -24,16 +24,18 @@
 #ifndef ops_ArchiverInOutH
 #define ops_ArchiverInOutH
 
-#include "OPSTypeDefs.h"
-#include "Serializable.h"
 #include <vector>
 #include <string>
+#include <exception>
+
+#include "OPSTypeDefs.h"
+#include "Serializable.h"
 
 namespace ops
 {
     namespace exceptions
     {
-        class ArchiverException
+        class ArchiverException : public std::exception
         {
         private:
             std::string message;
@@ -50,7 +52,8 @@ namespace ops
             {
                 return message;
             }
-        };
+			const char* what() const noexcept { return message.c_str(); }
+		};
     }
     using namespace exceptions;
 

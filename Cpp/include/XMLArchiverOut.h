@@ -30,10 +30,6 @@
 
 namespace ops
 {
-    using namespace std;
-
-    //Pure virtual interface.
-
     class XMLArchiverOut : public ArchiverInOut
     {
         std::ostream& os;
@@ -53,14 +49,14 @@ namespace ops
 
         XMLArchiverOut(std::ostream& os_, std::string topNode_) : os(os_), currentTabDepth(0), topNode(topNode_)
         {
-            os << tab() << "<" << topNode << ">" << endl;
+            os << tab() << "<" << topNode << ">" << std::endl;
             currentTabDepth++;
         }
 
         void close()
         {
             currentTabDepth--;
-            os << tab() << "</" << topNode << ">" << endl;
+            os << tab() << "</" << topNode << ">" << std::endl;
         }
 
         virtual void inout(const std::string& name, bool& value)
@@ -161,7 +157,7 @@ namespace ops
 
         virtual void inout(const std::string& name, std::vector<bool>& value)
         {
-            os << tab() << "<" << name << ">" << endl;
+            os << tab() << "<" << name << ">" << std::endl;
             for (unsigned int i = 0; i < value.size(); i++)
             {
                 currentTabDepth++;
@@ -169,91 +165,91 @@ namespace ops
                 inout(std::string("element"), e);
                 currentTabDepth--;
             }
-            os << tab() << "</" << name << ">" << endl;
+            os << tab() << "</" << name << ">" << std::endl;
         }
 
         virtual void inout(const std::string& name, std::vector<char>& value)
         {
-            os << tab() << "<" << name << ">" << endl;
+            os << tab() << "<" << name << ">" << std::endl;
             for (unsigned int i = 0; i < value.size(); i++)
             {
                 currentTabDepth++;
                 inout(std::string("element"), value[i]);
                 currentTabDepth--;
             }
-            os << tab() << "</" << name << ">" << endl;
+            os << tab() << "</" << name << ">" << std::endl;
         }
 
         virtual void inout(const std::string& name, std::vector<int>& value)
         {
-            os << tab() << "<" << name << ">" << endl;
+            os << tab() << "<" << name << ">" << std::endl;
             for (unsigned int i = 0; i < value.size(); i++)
             {
                 currentTabDepth++;
                 inout(std::string("element"), value[i]);
                 currentTabDepth--;
             }
-            os << tab() << "</" << name << ">" << endl;
+            os << tab() << "</" << name << ">" << std::endl;
         }
 
         virtual void inout(const std::string& name, std::vector<__int16>& value)
         {
-            os << tab() << "<" << name << ">" << endl;
+            os << tab() << "<" << name << ">" << std::endl;
             for (unsigned int i = 0; i < value.size(); i++)
             {
                 currentTabDepth++;
                 inout(std::string("element"), value[i]);
                 currentTabDepth--;
             }
-            os << tab() << "</" << name << ">" << endl;
+            os << tab() << "</" << name << ">" << std::endl;
         }
 
         virtual void inout(const std::string& name, std::vector<__int64>& value)
         {
-            os << tab() << "<" << name << ">" << endl;
+            os << tab() << "<" << name << ">" << std::endl;
             for (unsigned int i = 0; i < value.size(); i++)
             {
                 currentTabDepth++;
                 inout(std::string("element"), value[i]);
                 currentTabDepth--;
             }
-            os << tab() << "</" << name << ">" << endl;
+            os << tab() << "</" << name << ">" << std::endl;
         }
 
         virtual void inout(const std::string& name, std::vector<float>& value)
         {
-            os << tab() << "<" << name << ">" << endl;
+            os << tab() << "<" << name << ">" << std::endl;
             for (unsigned int i = 0; i < value.size(); i++)
             {
                 currentTabDepth++;
                 inout(std::string("element"), value[i]);
                 currentTabDepth--;
             }
-            os << tab() << "</" << name << ">" << endl;
+            os << tab() << "</" << name << ">" << std::endl;
         }
 
         virtual void inout(const std::string& name, std::vector<double>& value)
         {
-            os << tab() << "<" << name << ">" << endl;
+            os << tab() << "<" << name << ">" << std::endl;
             for (unsigned int i = 0; i < value.size(); i++)
             {
                 currentTabDepth++;
                 inout(std::string("element"), value[i]);
                 currentTabDepth--;
             }
-            os << tab() << "</" << name << ">" << endl;
+            os << tab() << "</" << name << ">" << std::endl;
         }
 
         virtual void inout(const std::string& name, std::vector<std::string>& value)
         {
-            os << tab() << "<" << name << ">" << endl;
+            os << tab() << "<" << name << ">" << std::endl;
             for (unsigned int i = 0; i < value.size(); i++)
             {
                 currentTabDepth++;
                 inout(std::string("element"), value[i]);
                 currentTabDepth--;
             }
-            os << tab() << "</" << name << ">" << endl;
+            os << tab() << "</" << name << ">" << std::endl;
         }
 
         void inoutfixarr(const std::string& name, void* value, int numElements, int totalSize)
@@ -278,7 +274,7 @@ namespace ops
         int beginList(const std::string& name, int size)
         {
             //buf->WriteInt(size);
-            os << tab() << "<" << name << ">" << endl;
+            os << tab() << "<" << name << ">" << std::endl;
             currentTabDepth++;
             return size;
         }
@@ -286,11 +282,10 @@ namespace ops
         void endList(const std::string& name)
         {
             currentTabDepth--;
-            os << tab() << "</" << name << ">" << endl;
+            os << tab() << "</" << name << ">" << std::endl;
 
         }
 
     };
-
 }
 #endif

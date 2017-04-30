@@ -1,30 +1,25 @@
+
 #ifndef ops_NoSuchTopicException_h
 #define ops_NoSuchTopicException_h
 
+#include <string.h>
 #include <exception> 
 
 namespace ops
 {
-	class NoSuchTopicException : std::exception
+	class NoSuchTopicException : public std::exception
 	{
 	public:
-		NoSuchTopicException(std::string mess) 
-			: message(mess)
+		NoSuchTopicException(std::string mess) : message(mess)
 		{
+		}
+		const char* what() const noexcept { return message.c_str(); }
 
-		}
-		const char* what()
-		{
-			return message.c_str();
-		}
-                ~NoSuchTopicException() throw()
-                {
-                    
-                }
+		~NoSuchTopicException() throw()
+        {
+        }
 	private:
 		std::string message;
-
 	};
-
 }
 #endif

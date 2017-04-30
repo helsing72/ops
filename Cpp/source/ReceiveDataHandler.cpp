@@ -45,7 +45,7 @@ namespace ops
 
         if (receiver == NULL)
         {
-            throw exceptions::CommException("Could not crete receiver");
+            throw exceptions::CommException("Could not create receiver");
         }
 
         receiver->addListener(this);
