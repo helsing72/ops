@@ -75,6 +75,8 @@ public class PythonCompiler extends opsc.CompilerSupport
 
     private static String StringJoin(String a,ArrayList<String> list)
     {
+        if (list.size() == 0) return "";
+
         String str = list.get(0);
 
         for (int i=1;i<list.size();i++)
