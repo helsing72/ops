@@ -638,8 +638,10 @@ public class CppCompiler extends opsc.Compiler
                         // idl = type[size] name;
                         ret += "archive->inoutfixarr(std::string(\"" + field.getName() + "\"), ";
                         if (!field.getType().equals("string[]")) {
-                            //void inoutfixarr(const std::string& name, void* value, int numElements, int totalSize);
-                            ret += "(void*)&" + field.getName() + "[0], " + field.getArraySize() + ", sizeof(" + field.getName() + "));" + endl();
+                            //void inoutfixarr(const std::string& name, bool* value, int numElements, int totalSize);
+                            //void inoutfixarr(const std::string& name, ...* value, int numElements, int totalSize);
+                            //void inoutfixarr(const std::string& name, double* value, int numElements, int totalSize);
+                            ret += "&" + field.getName() + "[0], " + field.getArraySize() + ", sizeof(" + field.getName() + "));" + endl();
                         } else {
                             //void inoutfixarr(const std::string& name, std::string* value, int numElements)
                             ret += "&" + field.getName() + "[0], " + field.getArraySize() + ");" + endl();

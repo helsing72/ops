@@ -227,9 +227,50 @@ namespace ops
                 os << tab() << name << "(size = " << value.size() << ") = [ " << value[0] << " ... " << value[value.size() - 1] << " ]" << endl;
         }
 
-        int beginList(const std::string& name, int size)
+		virtual void inoutfixarr(const std::string& name, bool* value, int numElements, int totalSize)
+		{
+			std::string value0 = value[0] ? "true" : "false";
+			std::string valueX = value[numElements - 1] ? "true" : "false";
+			os << tab() << name << "(size = " << numElements << ") = [ " << value0 << " ... " << valueX << " ]" << endl;
+		}
+
+		virtual void inoutfixarr(const std::string& name, char* value, int numElements, int totalSize)
+		{
+			os << tab() << name << "(size = " << numElements << ") = [ " << (int)value[0] << " ... " << (int)value[numElements - 1] << " ]" << endl;
+		}
+
+		virtual void inoutfixarr(const std::string& name, int* value, int numElements, int totalSize)
+		{
+			os << tab() << name << "(size = " << numElements << ") = [ " << value[0] << " ... " << value[numElements - 1] << " ]" << endl;
+		}
+
+		virtual void inoutfixarr(const std::string& name, __int16* value, int numElements, int totalSize)
+		{
+			os << tab() << name << "(size = " << numElements << ") = [ " << value[0] << " ... " << value[numElements - 1] << " ]" << endl;
+		}
+
+		virtual void inoutfixarr(const std::string& name, __int64* value, int numElements, int totalSize)
+		{
+			os << tab() << name << "(size = " << numElements << ") = [ " << value[0] << " ... " << value[numElements - 1] << " ]" << endl;
+		}
+
+		virtual void inoutfixarr(const std::string& name, float* value, int numElements, int totalSize)
+		{
+			os << tab() << name << "(size = " << numElements << ") = [ " << value[0] << " ... " << value[numElements - 1] << " ]" << endl;
+		}
+
+		virtual void inoutfixarr(const std::string& name, double* value, int numElements, int totalSize)
+		{
+			os << tab() << name << "(size = " << numElements << ") = [ " << value[0] << " ... " << value[numElements - 1] << " ]" << endl;
+		}
+
+		virtual void inoutfixarr(const std::string& name, std::string* value, int numElements)
+		{
+			os << tab() << name << "(size = " << numElements << ") = [ " << value[0] << " ... " << value[numElements - 1] << " ]" << endl;
+		}
+		
+		int beginList(const std::string& name, int size)
         {
-            //buf->WriteInt(size);
             os << tab() << name << " = " << endl;
             currentTabDepth++;
             return size;
@@ -238,8 +279,6 @@ namespace ops
         void endList(const std::string& name)
         {
             currentTabDepth--;
-
-
         }
 
     };

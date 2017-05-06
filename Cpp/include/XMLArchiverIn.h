@@ -442,17 +442,77 @@ namespace ops
             }
         }
 
-        void inoutfixarr(const std::string& name, void* value, int numElements, int totalSize)
-        {
-            UNUSED(name)
-            UNUSED(value)
-            UNUSED(numElements);
-            UNUSED(totalSize);
-            ///TODO
-            throw ops::ArchiverException("XMLArchiverIn.inoutfixarr NYI");
-        }
+		void inoutfixarr(const std::string& name, bool* value, int numElements, int totalSize)
+		{
+			UNUSED(name)
+			UNUSED(value)
+			UNUSED(numElements);
+			UNUSED(totalSize);
+			///TODO
+			throw ops::ArchiverException("XMLArchiverIn.inoutfixarr NYI");
+		}
 
-        void inoutfixarr(const std::string& name, std::string* value, int numElements)
+		void inoutfixarr(const std::string& name, char* value, int numElements, int totalSize)
+		{
+			UNUSED(name)
+			UNUSED(value)
+			UNUSED(numElements);
+			UNUSED(totalSize);
+			///TODO
+			throw ops::ArchiverException("XMLArchiverIn.inoutfixarr NYI");
+		}
+
+		void inoutfixarr(const std::string& name, int* value, int numElements, int totalSize)
+		{
+			UNUSED(name)
+			UNUSED(value)
+			UNUSED(numElements);
+			UNUSED(totalSize);
+			///TODO
+			throw ops::ArchiverException("XMLArchiverIn.inoutfixarr NYI");
+		}
+
+		void inoutfixarr(const std::string& name, __int16* value, int numElements, int totalSize)
+		{
+			UNUSED(name)
+			UNUSED(value)
+			UNUSED(numElements);
+			UNUSED(totalSize);
+			///TODO
+			throw ops::ArchiverException("XMLArchiverIn.inoutfixarr NYI");
+		}
+
+		void inoutfixarr(const std::string& name, __int64* value, int numElements, int totalSize)
+		{
+			UNUSED(name)
+			UNUSED(value)
+			UNUSED(numElements);
+			UNUSED(totalSize);
+			///TODO
+			throw ops::ArchiverException("XMLArchiverIn.inoutfixarr NYI");
+		}
+
+		void inoutfixarr(const std::string& name, float* value, int numElements, int totalSize)
+		{
+			UNUSED(name)
+			UNUSED(value)
+			UNUSED(numElements);
+			UNUSED(totalSize);
+			///TODO
+			throw ops::ArchiverException("XMLArchiverIn.inoutfixarr NYI");
+		}
+
+		void inoutfixarr(const std::string& name, double* value, int numElements, int totalSize)
+		{
+			UNUSED(name)
+			UNUSED(value)
+			UNUSED(numElements);
+			UNUSED(totalSize);
+			///TODO
+			throw ops::ArchiverException("XMLArchiverIn.inoutfixarr NYI");
+		}
+
+		void inoutfixarr(const std::string& name, std::string* value, int numElements)
         {
             UNUSED(name)
             UNUSED(value)

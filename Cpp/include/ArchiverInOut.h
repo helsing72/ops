@@ -87,8 +87,15 @@ namespace ops
         virtual void inout(const std::string& name, std::vector<double>& value) = 0;
         virtual void inout(const std::string& name, std::vector<std::string>& value) = 0;
 
-        virtual void inoutfixarr(const std::string& name, void* value, int numElements, int totalSize) = 0;
-        virtual void inoutfixarr(const std::string& name, std::string* value, int numElements) = 0;
+		virtual void inoutfixarr(const std::string& name, bool* value, int numElements, int totalSize) = 0;
+		virtual void inoutfixarr(const std::string& name, char* value, int numElements, int totalSize) = 0;
+		virtual void inoutfixarr(const std::string& name, int* value, int numElements, int totalSize) = 0;
+		virtual void inoutfixarr(const std::string& name, __int16* value, int numElements, int totalSize) = 0;
+		virtual void inoutfixarr(const std::string& name, __int64* value, int numElements, int totalSize) = 0;
+		virtual void inoutfixarr(const std::string& name, float* value, int numElements, int totalSize) = 0;
+		virtual void inoutfixarr(const std::string& name, double* value, int numElements, int totalSize) = 0;
+
+		virtual void inoutfixarr(const std::string& name, std::string* value, int numElements) = 0;
 
         template <class SerializableType> void inout(const std::string& name, std::vector<SerializableType>& vec, SerializableType prototype)
         {
