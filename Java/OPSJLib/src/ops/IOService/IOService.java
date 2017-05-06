@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 public class IOService implements Runnable
 {
     private Selector selector;
-    private HashMap<SelectionKey, AsynchReceiveWork> callbackHandlersMap = new HashMap();
+    private HashMap<SelectionKey, AsynchReceiveWork> callbackHandlersMap = new HashMap<SelectionKey, AsynchReceiveWork>();
     private Thread thread;
     private String name;
     private boolean keepRunning;

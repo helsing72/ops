@@ -1,6 +1,9 @@
 package configlib;
 
-import com.sun.org.apache.xerces.internal.parsers.DOMParser;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import configlib.Deserializable;
 import configlib.exception.FormatException;
 import java.io.IOException;
@@ -41,14 +44,14 @@ public class XMLArchiverIn implements ArchiverInOut
         try
         {
             this.is = is;
-            DOMParser parser = new DOMParser();
-
-            // Parse the document.
-            parser.parse(new InputSource(is));
-            // Obtain the document.
-            doc = parser.getDocument();
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            doc = db.parse(is);
 
             currentNode = doc;
+        } catch (ParserConfigurationException ex)
+        {
+            throw new FormatException("Caused by underlying ParserConfigurationException: " + ex.getMessage());
         } catch (SAXException ex)
         {
             throw new FormatException("Caused by underlying SAXException: " + ex.getMessage());
@@ -63,15 +66,15 @@ public class XMLArchiverIn implements ArchiverInOut
         try
         {
             this.is = is;
-            DOMParser parser = new DOMParser();
-
-            // Parse the document.
-            parser.parse(new InputSource(is));
-            // Obtain the document.
-            doc = parser.getDocument();
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            doc = db.parse(is);
 
             currentNode = doc;
             currentNode = getNode(rootNode);
+        } catch (ParserConfigurationException ex)
+        {
+            throw new FormatException("Caused by underlying ParserConfigurationException: " + ex.getMessage());
         } catch (SAXException ex)
         {
             throw new FormatException("Caused by underlying SAXException: " + ex.getMessage());
@@ -86,14 +89,14 @@ public class XMLArchiverIn implements ArchiverInOut
         try
         {
             this.is = is;
-            DOMParser parser = new DOMParser();
-
-            // Parse the document.
-            parser.parse(new InputSource(is));
-            // Obtain the document.
-            doc = parser.getDocument();
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            doc = db.parse(is);
 
             currentNode = doc;
+        } catch (ParserConfigurationException ex)
+        {
+            throw new FormatException("Caused by underlying ParserConfigurationException: " + ex.getMessage());
         } catch (SAXException ex)
         {
             throw new FormatException("Caused by underlying SAXException: " + ex.getMessage());

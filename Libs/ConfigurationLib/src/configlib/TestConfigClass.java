@@ -17,8 +17,8 @@ public class TestConfigClass
     private String pfilename = "";
     public int aIjhhvvnt;
     public double aDouble;
-    public Vector strings = new Vector();
-    
+    public Vector<String> strings = new Vector<String>();
+
     public byte b;
     public TestClass2 class2 = new TestClass2();
     public Vector<TestClass2> node = new Vector<TestClass2>();
@@ -28,10 +28,9 @@ public class TestConfigClass
         strings.add(new String("Ett"));
         strings.add("Två");
         strings.add("osv...");
-        
+
         node.add(class2);
         node.add(class2);
     }
-    
-    
+
 }

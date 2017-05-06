@@ -29,7 +29,7 @@ import ops.protocol.OPSMessage;
  */
 public class MessageFilterSet implements MessageFilter
 {
-    Vector<MessageFilter> filters = new Vector();
+    Vector<MessageFilter> filters = new Vector<MessageFilter>();
     public synchronized void addFilter(MessageFilter filter)
     {
         filters.add(filter);

@@ -8,12 +8,13 @@
  */
 package configlib;
 
-import com.sun.org.apache.xerces.internal.parsers.DOMParser;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import java.io.File;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
-
 
 import java.util.Vector;
 import org.w3c.dom.DOMException;
@@ -33,23 +34,17 @@ public class XMLConfigLoader extends DefaultHandler
     {
         try
         {
-            // Get an instance of the parser
-            DOMParser parser = new DOMParser();
-
             // Generate a URL from the filename.
             String fileName = "TestXML.xml";
 
-            // Parse the document.
-            parser.parse(new InputSource(fileName));          
+            // Get an instance of the parser
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            Document doc = db.parse(new File(fileName));
 
-            // Obtain the document.
-            Document doc = parser.getDocument();
-            
             TestConfigClass t2 = new TestConfigClass();
 
             applyXMLNode(t2, null, doc);
-
-            parser.reset();
         }
         catch (Exception e)
         {
@@ -75,10 +70,10 @@ public class XMLConfigLoader extends DefaultHandler
     public static String applyXMLNode(Object o, String name, Node node)
     {
         String ret = "";
-        
-            ret += "<" + name + "\">\n";
-            
-            try
+
+        ret += "<" + name + "\">\n";
+
+        try
         {
             NodeList nl = node.getChildNodes();
             for (int i = 0; i < nl.getLength(); i++)
@@ -90,11 +85,8 @@ public class XMLConfigLoader extends DefaultHandler
                 {
                     field.set(o, n.getNodeValue());
                 }
-                
             }
-            
             ret += "</" + name + ">\n";
-
             return ret;
         }
         catch (NoSuchFieldException noSuchFieldException)
@@ -117,7 +109,5 @@ public class XMLConfigLoader extends DefaultHandler
         {
             return null;
         }
-        
-
     }
 }
