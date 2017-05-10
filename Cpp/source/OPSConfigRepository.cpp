@@ -86,7 +86,7 @@ bool OPSConfigRepository::Add( std::string filename, std::string domain )
             if (config == NULL) return retVal;
             m_configFiles[filename] = config;
         }
-    } catch (ops::ConfigException ex)
+    } catch (ops::ConfigException& ex)
     {
         BasicError err("OPSConfigRepository", "Add", std::string("Exception: ") + ex.what());
         Participant::reportStaticError(&err);

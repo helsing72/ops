@@ -86,13 +86,13 @@ namespace ops
 				Participant* newInst = new Participant(domainID_, participantID, configFile);
 				instances[key] = newInst;
 			}
-			catch(ops::ConfigException ex)
+			catch(ops::ConfigException& ex)
 			{
 				BasicError err("Participant", "Participant", std::string("Exception: ") + ex.what());
 				reportStaticError(&err);
 				return NULL;
 				}
-			catch (ops::exceptions::CommException ex)
+			catch (ops::exceptions::CommException& ex)
 			{
 				BasicError err("Participant", "Participant", ex.GetMessage());
 				reportStaticError(&err);
@@ -304,7 +304,7 @@ namespace ops
 			while(it !=instances.end())
 			{
 				it->second->getErrorService()->report(err);
-				it++;
+				++it;
 			}
 		}
 	}
@@ -340,7 +340,7 @@ namespace ops
 					SafeLock lock(&partInfoDataMutex);
 					partInfoPub->writeOPSObject(&partInfoData);
 				}
-			} catch (std::exception ex)
+			} catch (std::exception& ex)
 			{
 				std::string errMessage;
 				if (partInfoPub == NULL) {
@@ -348,6 +348,7 @@ namespace ops
 				} else {
 					errMessage = "Failed to publish ParticipantInfoTopic data.";
 				}
+				errMessage += std::string(" Exception: ") + ex.what();
 				BasicError err("Participant", "onNewEvent", errMessage);
 				reportStaticError(&err);
 			}
@@ -417,7 +418,7 @@ namespace ops
 		SafeLock lock(&partInfoDataMutex);
 		// Remove topic from partInfoData.subscribeTopics (TODO the same topic, ref count?)
 		std::vector<TopicInfoData>::iterator it;
-		for (it = partInfoData.subscribeTopics.begin(); it != partInfoData.subscribeTopics.end(); it++) {
+		for (it = partInfoData.subscribeTopics.begin(); it != partInfoData.subscribeTopics.end(); ++it) {
 			if (it->name == top.getName()) {
 				partInfoData.subscribeTopics.erase(it);
 				break;
@@ -443,7 +444,7 @@ namespace ops
 		SafeLock lock(&partInfoDataMutex);
 		// Remove topic from partInfoData.publishTopics (TODO the same topic, ref count?)
 		std::vector<TopicInfoData>::iterator it;
-		for (it = partInfoData.publishTopics.begin(); it != partInfoData.publishTopics.end(); it++) {
+		for (it = partInfoData.publishTopics.begin(); it != partInfoData.publishTopics.end(); ++it) {
 			if (it->name == top.getName()) {
 				partInfoData.publishTopics.erase(it);
 				break;

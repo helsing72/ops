@@ -60,10 +60,10 @@ namespace ops
         boost::asio::ip::udp::socket* socket;           //<-- The socket that sends data.
         boost::asio::io_service* io_service;            //<-- Required for boost sockets.
 
-		std::string localInterface;
-		int ttl;
-		__int64 outSocketBufferSize;
-		bool multicastSocket;
+		std::string _localInterface;
+		int _ttl;
+		__int64 _outSocketBufferSize;
+		bool _multicastSocket;
 
     };
 

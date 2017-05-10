@@ -268,11 +268,12 @@ char myIsTextWideChar(const void *b, int len) { return FALSE; }
     #else
         char *myWideCharToMultiByte(const wchar_t *s)
         {
+			std::mbstate_t state = std::mbstate_t();
             const wchar_t *ss=s;
-            int i=(int)wcsrtombs(NULL,&ss,0,NULL);
+            int i=(int)wcsrtombs(NULL,&ss,0,&state);
             if (i<0) return NULL;
             char *d=(char *)malloc(i+1);
-            wcsrtombs(d,&s,i,NULL);
+            wcsrtombs(d,&s,i,&state);
             d[i]=0;
             return d;
         }
@@ -280,11 +281,12 @@ char myIsTextWideChar(const void *b, int len) { return FALSE; }
     #ifdef _XMLWIDECHAR
         wchar_t *myMultiByteToWideChar(const char *s, XMLNode::XMLCharEncoding ce)
         {
-            const char *ss=s;
-            int i=(int)mbsrtowcs(NULL,&ss,0,NULL);
+			std::mbstate_t state = std::mbstate_t();
+			const char *ss=s;
+            int i=(int)mbsrtowcs(NULL,&ss,0,&state);
             if (i<0) return NULL;
             wchar_t *d=(wchar_t *)malloc((i+1)*sizeof(wchar_t));
-            mbsrtowcs(d,&s,i,NULL);
+            mbsrtowcs(d,&s,i,&state);
             d[i]=0;
             return d;
         }
@@ -532,16 +534,22 @@ typedef enum Status
 
 XMLError XMLNode::writeToFile(XMLCSTR filename, const char *encoding, char nFormat) const
 {
-    if (!d) return eXMLErrorNone;
+	if (!d) return eXMLErrorNone;
     FILE *f=xfopen(filename,_CXML("wb"));
     if (!f) return eXMLErrorCannotOpenWriteFile;
 #ifdef _XMLWIDECHAR
     unsigned char h[2]={ 0xFF, 0xFE };
-    if (!fwrite(h,2,1,f)) return eXMLErrorCannotWriteFile;
+	if (!fwrite(h, 2, 1, f)) {
+		fclose(f);
+		return eXMLErrorCannotWriteFile;
+	}
     if ((!isDeclaration())&&((d->lpszName)||(!getChildNode().isDeclaration())))
     {
-        if (!fwrite(L"<?xml version=\"1.0\" encoding=\"utf-16\"?>\n",sizeof(wchar_t)*40,1,f))
-            return eXMLErrorCannotWriteFile;
+		const wchar_t enc[] = L"<?xml version=\"1.0\" encoding=\"utf-16\"?>\n";
+		if (!fwrite(enc, sizeof(enc), 1, f)) {
+			fclose(f);
+			return eXMLErrorCannotWriteFile;
+		}
     }
 #else
     if ((!isDeclaration())&&((d->lpszName)||(!getChildNode().isDeclaration())))
@@ -549,23 +557,37 @@ XMLError XMLNode::writeToFile(XMLCSTR filename, const char *encoding, char nForm
         if (characterEncoding==encoding_UTF8)
         {
             // header so that windows recognize the file as UTF-8:
-            unsigned char h[3]={0xEF,0xBB,0xBF}; if (!fwrite(h,3,1,f)) return eXMLErrorCannotWriteFile;
+			unsigned char h[3] = { 0xEF,0xBB,0xBF }; 
+			if (!fwrite(h, 3, 1, f)) {
+				fclose(f);
+				return eXMLErrorCannotWriteFile;
+			}
             encoding="utf-8";
         } else if (characterEncoding==encoding_ShiftJIS) encoding="SHIFT-JIS";
 
         if (!encoding) encoding="ISO-8859-1";
-        if (fprintf(f,"<?xml version=\"1.0\" encoding=\"%s\"?>\n",encoding)<0) return eXMLErrorCannotWriteFile;
+		if (fprintf(f, "<?xml version=\"1.0\" encoding=\"%s\"?>\n", encoding) < 0) {
+			fclose(f);
+			return eXMLErrorCannotWriteFile;
+		}
     } else
     {
         if (characterEncoding==encoding_UTF8)
         {
-            unsigned char h[3]={0xEF,0xBB,0xBF}; if (!fwrite(h,3,1,f)) return eXMLErrorCannotWriteFile;
+            unsigned char h[3]={0xEF,0xBB,0xBF}; 
+			if (!fwrite(h, 3, 1, f)) {
+				fclose(f);
+				return eXMLErrorCannotWriteFile;
+			}
         }
     }
 #endif
     int i;
     XMLSTR t=createXMLString(nFormat,&i);
-    if (!fwrite(t,sizeof(XMLCHAR)*i,1,f)) return eXMLErrorCannotWriteFile;
+	if (!fwrite(t, sizeof(XMLCHAR)*i, 1, f)) {
+		fclose(f);
+		return eXMLErrorCannotWriteFile;
+	}
     if (fclose(f)!=0) return eXMLErrorCannotWriteFile;
     free(t);
     return eXMLErrorNone;
@@ -808,7 +830,7 @@ static NextToken GetNextToken(XML *pXML, int *pcbToken, enum XMLTokenTypeTag *pT
     NextToken        result;
     XMLCHAR            ch;
     XMLCHAR            chTemp;
-    int              indexStart,nFoundMatch,nIsText=FALSE;
+    int              indexStart,nIsText=FALSE;
     result.pClr=NULL; // prevent warning
 
     // Find next non-white space character
@@ -835,101 +857,102 @@ static NextToken GetNextToken(XML *pXML, int *pcbToken, enum XMLTokenTypeTag *pT
         } while(ctag->lpszOpen);
 
         // If we didn't find a clear tag then check for standard tokens
-        switch(ch)
-        {
-        // Check for quotes
-        case _CXML('\''):
-        case _CXML('\"'):
-            // Type of token
-            *pType = eTokenQuotedText;
-            chTemp = ch;
+		switch (ch)
+		{
+			// Check for quotes
+		case _CXML('\''):
+		case _CXML('\"'):
+		{
+			// Type of token
+			*pType = eTokenQuotedText;
+			chTemp = ch;
 
-            // Set the size
-            nFoundMatch = FALSE;
+			// Set the size
+			int nFoundMatch = FALSE;
 
-            // Search through the string to find a matching quote
-            while((ch = getNextChar(pXML)))
-            {
-                if (ch==chTemp) { nFoundMatch = TRUE; break; }
-                if (ch==_CXML('<')) break;
-            }
+			// Search through the string to find a matching quote
+			while ((ch = getNextChar(pXML)))
+			{
+				if (ch == chTemp) { nFoundMatch = TRUE; break; }
+				if (ch == _CXML('<')) break;
+			}
 
-            // If we failed to find a matching quote
-            if (nFoundMatch == FALSE)
-            {
-                pXML->nIndex=indexStart+1;
-                nIsText=TRUE;
-                break;
-            }
+			// If we failed to find a matching quote
+			if (nFoundMatch == FALSE)
+			{
+				pXML->nIndex = indexStart + 1;
+				nIsText = TRUE;
+				break;
+			}
 
-//  4.02.2002
-//            if (FindNonWhiteSpace(pXML)) pXML->nIndex--;
+			//  4.02.2002
+			//            if (FindNonWhiteSpace(pXML)) pXML->nIndex--;
+			break;
+		}
 
-            break;
+		// Equals (used with attribute values)
+		case _CXML('='):
+			*pType = eTokenEquals;
+			break;
 
-        // Equals (used with attribute values)
-        case _CXML('='):
-            *pType = eTokenEquals;
-            break;
+			// Close tag
+		case _CXML('>'):
+			*pType = eTokenCloseTag;
+			break;
 
-        // Close tag
-        case _CXML('>'):
-            *pType = eTokenCloseTag;
-            break;
+			// Check for tag start and tag end
+		case _CXML('<'):
 
-        // Check for tag start and tag end
-        case _CXML('<'):
+			// Peek at the next character to see if we have an end tag '</',
+			// or an xml declaration '<?'
+			chTemp = pXML->lpXML[pXML->nIndex];
 
-            // Peek at the next character to see if we have an end tag '</',
-            // or an xml declaration '<?'
-            chTemp = pXML->lpXML[pXML->nIndex];
+			// If we have a tag end...
+			if (chTemp == _CXML('/'))
+			{
+				// Set the type and ensure we point at the next character
+				getNextChar(pXML);
+				*pType = eTokenTagEnd;
+			}
 
-            // If we have a tag end...
-            if (chTemp == _CXML('/'))
-            {
-                // Set the type and ensure we point at the next character
-                getNextChar(pXML);
-                *pType = eTokenTagEnd;
-            }
+			// If we have an XML declaration tag
+			else if (chTemp == _CXML('?'))
+			{
 
-            // If we have an XML declaration tag
-            else if (chTemp == _CXML('?'))
-            {
+				// Set the type and ensure we point at the next character
+				getNextChar(pXML);
+				*pType = eTokenDeclaration;
+			}
 
-                // Set the type and ensure we point at the next character
-                getNextChar(pXML);
-                *pType = eTokenDeclaration;
-            }
+			// Otherwise we must have a start tag
+			else
+			{
+				*pType = eTokenTagStart;
+			}
+			break;
 
-            // Otherwise we must have a start tag
-            else
-            {
-                *pType = eTokenTagStart;
-            }
-            break;
+			// Check to see if we have a short hand type end tag ('/>').
+		case _CXML('/'):
 
-        // Check to see if we have a short hand type end tag ('/>').
-        case _CXML('/'):
+			// Peek at the next character to see if we have a short end tag '/>'
+			chTemp = pXML->lpXML[pXML->nIndex];
 
-            // Peek at the next character to see if we have a short end tag '/>'
-            chTemp = pXML->lpXML[pXML->nIndex];
+			// If we have a short hand end tag...
+			if (chTemp == _CXML('>'))
+			{
+				// Set the type and ensure we point at the next character
+				getNextChar(pXML);
+				*pType = eTokenShortHandClose;
+				break;
+			}
 
-            // If we have a short hand end tag...
-            if (chTemp == _CXML('>'))
-            {
-                // Set the type and ensure we point at the next character
-                getNextChar(pXML);
-                *pType = eTokenShortHandClose;
-                break;
-            }
+			// If we haven't found a short hand closing tag then drop into the
+			// text process
 
-            // If we haven't found a short hand closing tag then drop into the
-            // text process
-
-        // Other characters
-        default:
-            nIsText = TRUE;
-        }
+		// Other characters
+		default:
+			nIsText = TRUE;
+		}
 
         // If this is a TEXT node
         if (nIsText)
@@ -1124,7 +1147,6 @@ char XMLNode::parseClearTag(void *px, void *_pClear)
 {
     XML *pXML=(XML *)px;
     ALLXMLClearTag pClear=*((ALLXMLClearTag*)_pClear);
-    int cbTemp=0;
     XMLCSTR lpszTemp=NULL;
     XMLCSTR lpXML=&pXML->lpXML[pXML->nIndex];
     static XMLCSTR docTypeEnd=_CXML("]>");
@@ -1149,7 +1171,7 @@ char XMLNode::parseClearTag(void *px, void *_pClear)
     if (lpszTemp)
     {
         // Cache the size and increment the index
-        cbTemp = (int)(lpszTemp - lpXML);
+        int cbTemp = (int)(lpszTemp - lpXML);
 
         pXML->nIndex += cbTemp+(int)xstrlen(pClear.lpszClose);
 
@@ -1784,7 +1806,7 @@ int XMLNode::CreateXMLStringR(XMLNodeData *pEntry, XMLSTR lpszMarker, int nForma
     int cbElement;
     int nChildFormat=-1;
     int nElementI=pEntry->nChild+pEntry->nText+pEntry->nClear;
-    int i,j;
+    int i;
     if ((nFormat>=0)&&(nElementI==1)&&(pEntry->nText==1)&&(!pEntry->isDeclaration)) nFormat=-2;
 
     assert(pEntry);
@@ -1879,7 +1901,7 @@ int XMLNode::CreateXMLStringR(XMLNodeData *pEntry, XMLSTR lpszMarker, int nForma
     // Enumerate through remaining children
     for (i=0; i<nElementI; i++)
     {
-        j=pEntry->pOrder[i];
+        int j=pEntry->pOrder[i];
         switch((XMLElementType)(j&3))
         {
         // Text nodes
@@ -2090,10 +2112,10 @@ void XMLNode::emptyTheNode(char force)
     {
         if (d->pParent) detachFromParent(d);
         int i;
-        XMLNode *pc;
         for(i=0; i<dd->nChild; i++)
         {
-            pc=dd->pChild+i;
+			XMLNode *pc;
+			pc=dd->pChild+i;
             pc->d->pParent=NULL;
             pc->d->ref_count--;
             pc->emptyTheNode(force);
@@ -2709,10 +2731,10 @@ unsigned int XMLParserBase64Tool::decodeSize(XMLCSTR data,XMLError *xe)
 {
      if (xe) *xe=eXMLErrorNone;
     int size=0;
-    unsigned char c;
     //skip any extra characters (e.g. newlines or spaces)
     while (*data)
     {
+		unsigned char c;
 #ifdef _XMLWIDECHAR
         if (*data>255) { if (xe) *xe=eXMLErrorBase64DecodeIllegalCharacter; return 0; }
 #endif

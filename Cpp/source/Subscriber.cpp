@@ -230,7 +230,7 @@ namespace ops
                 ret = false;
                 break;
             }
-            p++;
+            ++p;
         }
        
         return ret;

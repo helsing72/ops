@@ -20,7 +20,7 @@ namespace ops
         Lockable mutex;
 
     public:
-        SendDataHandlerFactory(Participant* part);
+        explicit SendDataHandlerFactory(Participant* part);
  	    ~SendDataHandlerFactory();
 
         SendDataHandler* getSendDataHandler(Topic& top, Participant* participant);

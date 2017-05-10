@@ -50,7 +50,7 @@ namespace ops
 		void onNewEvent(Notifier<int>* sender, int message);
 
     public:
-        BoostDeadlineTimerImpl(boost::asio::io_service* boostIOService);
+        explicit BoostDeadlineTimerImpl(boost::asio::io_service* boostIOService);
         ~BoostDeadlineTimerImpl();
 
 		void start(__int64 timeoutMs);
@@ -63,7 +63,7 @@ namespace ops
 	{
 		boost::asio::deadline_timer deadlineTimer;
 	public:
-        impl(boost::asio::io_service* boostIOService) : deadlineTimer(*boostIOService)
+        explicit impl(boost::asio::io_service* boostIOService) : deadlineTimer(*boostIOService)
 		{
 		}
 

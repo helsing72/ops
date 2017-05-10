@@ -33,7 +33,7 @@ namespace ops
 							if ( (partInfo->subscribeTopics[i].transport == Topic::TRANSPORT_UDP) &&
 								 participant->hasPublisherOn(partInfo->subscribeTopics[i].name) ) {
 					            //Do an add sink here
-							    ((McUdpSendDataHandler*) sendDataHandler)->addSink(partInfo->subscribeTopics[i].name, partInfo->ip, partInfo->mc_udp_port);
+							    dynamic_cast<McUdpSendDataHandler*>(sendDataHandler)->addSink(partInfo->subscribeTopics[i].name, partInfo->ip, partInfo->mc_udp_port);
 							}
 						}
 					}

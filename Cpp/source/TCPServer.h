@@ -55,7 +55,7 @@ namespace ops
 			endpoint(NULL), sock(NULL), acceptor(NULL), _canceled(false),
 			_asyncCallActive(false), _working(false)
 		{
-			ioService = ((BoostIOServiceImpl*)ioServ)->boostIOService;
+			ioService = dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService;
 			//boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(serverIP));
 			endpoint = new boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), serverPort);
 			sock = new boost::asio::ip::tcp::socket(*ioService);
@@ -112,7 +112,7 @@ namespace ops
 		private:
 			boost::asio::ip::tcp::socket* _sock;
 		public:
-			boostSocketSender(boost::asio::ip::tcp::socket* sock) : _sock(sock) {}
+			explicit boostSocketSender(boost::asio::ip::tcp::socket* sock) : _sock(sock) {}
 			virtual ~boostSocketSender()
 			{
 				_sock->close();

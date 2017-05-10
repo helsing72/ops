@@ -34,7 +34,7 @@ namespace ops
 
 	DeadlineTimer* DeadlineTimer::create(IOService* ioService)
 	{
-		return new BoostDeadlineTimerImpl(((BoostIOServiceImpl*)ioService)->boostIOService);
+		return new BoostDeadlineTimerImpl(dynamic_cast<BoostIOServiceImpl*>(ioService)->boostIOService);
 	}
 
 }

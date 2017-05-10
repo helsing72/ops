@@ -11,15 +11,11 @@ namespace ops
 
     SendDiscoveryModule::SendDiscoveryModule(std::string domainAddress) : mcReceiver(domainAddress, ops::constants::DISCOVERY_PORT), keepRunning(false)
     {
-
-
-
     }
 
     SendDiscoveryModule::~SendDiscoveryModule()
     {
         //delete interfaceSubscriber;
-
     }
 
     void SendDiscoveryModule::run()
@@ -39,7 +35,7 @@ namespace ops
                     updateInterfaces(*data);
                     delete data;
                 }
-                delete bytes;
+                delete[] bytes;
             }
             else
             {
@@ -50,8 +46,6 @@ namespace ops
 
     void SendDiscoveryModule::updateInterfaces(TopicInterfaceData interfac)
     {
-
-
         removeInactiveInterfaces();
         for (unsigned int i = 0; i < topicInterfaces.size(); i++)
         {

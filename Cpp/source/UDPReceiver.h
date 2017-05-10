@@ -44,7 +44,7 @@ namespace ops
 	        sock(NULL), localEndpoint(NULL), max_length(65535), 
 			cancelled(false), m_asyncCallActive(false), m_working(false)
         {
-            boost::asio::io_service* ioService = ((BoostIOServiceImpl*) ioServ)->boostIOService;
+            boost::asio::io_service* ioService = dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService;
 
             if (localInterface == "0.0.0.0")
             {
@@ -61,7 +61,7 @@ namespace ops
                         localEndpoint = new udp::endpoint(addr, bindPort);
                         break;
                     }
-                    it++;
+                    ++it;
                 }
             }
             else

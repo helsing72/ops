@@ -39,13 +39,9 @@ namespace ops
 {
     using boost::asio::ip::udp;
 	UDPSender::UDPSender(IOService* ioServ, std::string localInterface, int ttl, __int64 outSocketBufferSize, bool multicastSocket):
-		socket(NULL), io_service(((BoostIOServiceImpl*)ioServ)->boostIOService)
+		socket(NULL), io_service(dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService),
+		_localInterface(localInterface), _ttl(ttl), _outSocketBufferSize(outSocketBufferSize), _multicastSocket(multicastSocket)
     {
-		this->localInterface = localInterface;
-		this->ttl = ttl;
-		this->outSocketBufferSize = outSocketBufferSize;
-		this->multicastSocket = multicastSocket;
-
 		boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(localInterface));
 
 		localEndpoint = new boost::asio::ip::udp::endpoint(ipAddr, 0);
@@ -65,13 +61,13 @@ namespace ops
 
         socket = new boost::asio::ip::udp::socket(*io_service, localEndpoint->protocol());
 
-		if(outSocketBufferSize > 0)
+		if(_outSocketBufferSize > 0)
 		{
-			boost::asio::socket_base::send_buffer_size option((int)outSocketBufferSize);
+			boost::asio::socket_base::send_buffer_size option((int)_outSocketBufferSize);
 			boost::system::error_code ec;
 			ec = socket->set_option(option, ec);
 			socket->get_option(option);
-			if(ec != 0 || option.value() != outSocketBufferSize)
+			if(ec != 0 || option.value() != _outSocketBufferSize)
 			{
 				//std::cout << "Socket buffer size could not be set" << std::endl;
 				ops::BasicError err("UDPSender", "UDPSender", "Socket buffer size could not be set");
@@ -79,12 +75,12 @@ namespace ops
 			}
 		}
 
-		if(multicastSocket)
+		if(_multicastSocket)
 		{
-			boost::asio::ip::multicast::hops ttlOption(ttl);
+			boost::asio::ip::multicast::hops ttlOption(_ttl);
 			socket->set_option(ttlOption);
 
-			boost::asio::ip::address_v4 local_interface = boost::asio::ip::address_v4::from_string(localInterface);
+			boost::asio::ip::address_v4 local_interface = boost::asio::ip::address_v4::from_string(_localInterface);
 			boost::asio::ip::multicast::outbound_interface ifOption(local_interface);
 			socket->set_option(ifOption);
 		}

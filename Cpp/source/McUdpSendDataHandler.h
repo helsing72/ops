@@ -57,7 +57,7 @@ namespace ops
 
             std::stack<std::string> sinksToDelete;
 
-            for (it = topicSinks.begin(); it != topicSinks.end(); it++)
+            for (it = topicSinks.begin(); it != topicSinks.end(); ++it)
             {
                 //Check if this sink is alive
                 if (it->second.isAlive())
@@ -151,17 +151,15 @@ namespace ops
         class IpPortPair
         {
         public:
-
-            IpPortPair(std::string ip, int port)
+            IpPortPair(std::string ipp, int portt):
+				ip(ipp), port(portt)
             {
-                this->ip = ip;
-                this->port = port;
                 this->lastTimeAlive = TimeHelper::currentTimeMillis();
             }
 
-            IpPortPair()
+            IpPortPair():
+				port(0), lastTimeAlive(0)
             {
-
             }
 
             bool isAlive()
@@ -180,7 +178,8 @@ namespace ops
                 ss << ip << ":" << port;
                 return ss.str();
             }
-            std::string ip;
+
+			std::string ip;
             int port;
             __int64 lastTimeAlive;
             const static int ALIVE_TIMEOUT = 3000;

@@ -15,14 +15,15 @@ namespace ops
 {
 
 	SendDataHandlerFactory::SendDataHandlerFactory(Participant* part):
-		participant(part)
+		participant(part), udpSendDataHandler(NULL)
 	{	
 		// There is only one McUdpSendDataHandler for each participant
-		udpSendDataHandler = NULL;
 	}
 
 	SendDataHandlerFactory::~SendDataHandlerFactory()
 	{
+		if (udpSendDataHandler) delete udpSendDataHandler;
+
 		///TODO cleanup
 	}
 	

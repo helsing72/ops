@@ -26,7 +26,7 @@ namespace ops
 		inline std::string makeKey(Topic& top);
 
     public:
-        ReceiveDataHandlerFactory(Participant* participant);
+        explicit ReceiveDataHandlerFactory(Participant* participant);
         ReceiveDataHandler* getReceiveDataHandler(Topic& top, Participant* participant);
         void cleanUpReceiveDataHandlers();
         void releaseReceiveDataHandler(Topic& top, Participant* participant);

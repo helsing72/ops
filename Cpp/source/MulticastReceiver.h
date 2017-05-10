@@ -41,14 +41,16 @@ namespace ops
 	{
 	public:
 		MulticastReceiver(std::string mcAddress, int bindPort, IOService* ioServ, std::string localInterface = "0.0.0.0", __int64 inSocketBufferSizent = 16000000):
-		  sock(NULL), localEndpoint(NULL), max_length(65535),
+		  _port(0),
+		  _ipaddress(mcAddress),
+		  _localInterface(localInterface),
+		  _inSocketBufferSizent(inSocketBufferSizent),
+		  sock(NULL), localEndpoint(NULL),
+		  max_length(65535),
+		  data(NULL),
 		  cancelled(false), m_asyncCallActive(false), m_working(false)
 		{
-			ipaddress = mcAddress;
-			this->localInterface = localInterface;
-			this->inSocketBufferSizent = inSocketBufferSizent;
-
-			boost::asio::io_service* ioService = ((BoostIOServiceImpl*)ioServ)->boostIOService;
+			boost::asio::io_service* ioService = dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService;
 			//udp::resolver resolver(*ioService);
 			//udp::resolver::query query(boost::asio::ip::host_name(),"");
 			//udp::resolver::iterator it=resolver.resolve(query);
@@ -68,13 +70,13 @@ namespace ops
 		{
 			sock->open(localEndpoint->protocol());
 
-			if(inSocketBufferSizent > 0)
+			if(_inSocketBufferSizent > 0)
 			{
-				boost::asio::socket_base::receive_buffer_size option((int)inSocketBufferSizent);
+				boost::asio::socket_base::receive_buffer_size option((int)_inSocketBufferSizent);
 				boost::system::error_code ec;
 				ec = sock->set_option(option, ec);
 				sock->get_option(option);
-				if(ec != 0 || option.value() != inSocketBufferSizent)
+				if(ec != 0 || option.value() != _inSocketBufferSizent)
 				{
 					//std::cout << "Socket buffer size could not be set" << std::endl;
 					ops::BasicError err("MulticastReceiver", "Start", "Socket buffer size could not be set");
@@ -87,8 +89,8 @@ namespace ops
 				sock->bind(*localEndpoint);
 			
 				// Join the multicast group.
-				const boost::asio::ip::address_v4 multicastAddress = boost::asio::ip::address_v4::from_string(ipaddress);
-				const boost::asio::ip::address_v4 networkInterface(boost::asio::ip::address_v4::from_string(localInterface));
+				const boost::asio::ip::address_v4 multicastAddress = boost::asio::ip::address_v4::from_string(_ipaddress);
+				const boost::asio::ip::address_v4 networkInterface(boost::asio::ip::address_v4::from_string(_localInterface));
 				sock->set_option(boost::asio::ip::multicast::join_group(multicastAddress,networkInterface));
 
 #ifndef _WIN32
@@ -107,7 +109,7 @@ namespace ops
 				}
 #endif
 
-				port = sock->local_endpoint().port();
+				_port = sock->local_endpoint().port();
 			} catch (...) {
 				ops::BasicError err("MulticastReceiver", "Start", "Failed to setup Multicast socket. Check MC address");
 				Participant::reportStaticError(&err);
@@ -252,23 +254,23 @@ namespace ops
 
 		int getLocalPort()
 		{
-			return port;
+			return _port;
 		}
 
 		std::string getLocalAddress()
 		{
-			return ipaddress;
+			return _ipaddress;
 		}
 
 	private:
-		int port;
-		std::string ipaddress;
-		std::string localInterface;
-		__int64 inSocketBufferSizent;
+		int _port;
+		std::string _ipaddress;
+		std::string _localInterface;
+		__int64 _inSocketBufferSizent;
 		boost::asio::ip::udp::socket* sock;
 		boost::asio::ip::udp::endpoint* localEndpoint;
 		boost::asio::ip::udp::endpoint lastEndpoint;
-		boost::asio::io_service* ioService;
+		//boost::asio::io_service* ioService;
 
 		boost::asio::ip::udp::endpoint sendingEndPoint;
 

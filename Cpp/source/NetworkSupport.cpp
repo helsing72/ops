@@ -58,7 +58,7 @@ std::string doSubnetTranslation(std::string addr, IOService* ioServ)
 		subnetMask = boost::asio::ip::address_v4::from_string(mask).to_ulong();
 	}
 
-	boost::asio::io_service* ioService = ((BoostIOServiceImpl*) ioServ)->boostIOService;
+	boost::asio::io_service* ioService = dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService;
 
 	// Note: The resolver requires that the hostname can be used to resolve to an ip
 	// e.g due to the hostname beeing listed with an ipv4 address in /etc/hosts.
@@ -74,7 +74,7 @@ std::string doSubnetTranslation(std::string addr, IOService* ioServ)
 			if ((Ip & subnetMask) == (subnetIp & subnetMask)) 
 				return ipaddr.to_string();
 		}
-		it++;
+		++it;
 	}
 
 	return subnet;
