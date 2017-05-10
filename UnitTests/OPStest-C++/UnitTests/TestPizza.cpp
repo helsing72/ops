@@ -47,8 +47,8 @@ void testExtraAlltNormal(pizza::special::ExtraAllt &extraAllt) {
 	EXPECT_EQ((extraAllt.ints).at(1), 123);
 	EXPECT_EQ((extraAllt.ints).at(2), -523);
 	EXPECT_EQ((extraAllt.ints).at(3), 62860);
-	EXPECT_EQ((extraAllt.ints).at(4), -2147483648);
-	EXPECT_EQ((extraAllt.ints).at(5), 2147483647);
+	EXPECT_EQ((extraAllt.ints).at(4), std::numeric_limits<int32_t>::min());//  -2147483648);
+	EXPECT_EQ((extraAllt.ints).at(5), std::numeric_limits<int32_t>::max());//  2147483647);
 
 	//test shorts
 	EXPECT_EQ((extraAllt.shorts).size(), 6) << "size of the shorts vector are not correct";
@@ -83,8 +83,8 @@ void testExtraAlltNormal(pizza::special::ExtraAllt &extraAllt) {
 	EXPECT_EQ((extraAllt.longs).at(1), 123);
 	EXPECT_EQ((extraAllt.longs).at(2), -523);
 	EXPECT_EQ((extraAllt.longs).at(3), 3951379600);
-	EXPECT_EQ((extraAllt.longs).at(4), -9223372036854775808);
-	EXPECT_EQ((extraAllt.longs).at(5), 9223372036854775807);
+	EXPECT_EQ((extraAllt.longs).at(4), std::numeric_limits<int64_t>::min());//  -9223372036854775808);
+	EXPECT_EQ((extraAllt.longs).at(5), std::numeric_limits<int64_t>::max());//  9223372036854775807);
 
 	//test cheeses
 	EXPECT_EQ((extraAllt.cheeses).size(), 6) << "size of the cheeses vector are not correct";
@@ -170,6 +170,8 @@ void testExtraAlltLarge(pizza::special::ExtraAllt &extraAllt, SendType sendType)
 			break;
 		case UDP:
 			EXPECT_EQ(extraAllt.strings.at(i), "UDP_LARGE");
+			break;
+		case NORMAL:
 			break;
 		}
 
