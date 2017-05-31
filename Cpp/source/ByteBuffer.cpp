@@ -359,25 +359,17 @@ namespace ops
 
     void ByteBuffer::ReadBytes(std::vector<char>& out, int offset, int length)
     {
-        //int bytesLeftInSegment = nextSegmentAt - index;
         int bytesLeftInSegment = memMap->getSegmentSize() - index;
         std::vector<char>::iterator it = out.begin();
         it += offset;
-        if (bytesLeftInSegment > length)
+        if (bytesLeftInSegment >= length)
         {
-            //memcpy((void*)(buffer + index), chars, length);
-            //index += length;
             std::copy(memMap->getSegment(currentSegment) + index, memMap->getSegment(currentSegment) + index + length, it);
             index += length;
             totalSize += length;
         }
         else
         {
-            //memcpy((void*)(buffer + index), chars, bytesLeftInSegment);
-            //index += bytesLeftInSegment;
-
-            //ReadBytes(out, offset, bytesLeftInSegment);
-
             std::copy(memMap->getSegment(currentSegment) + index, memMap->getSegment(currentSegment) + index + bytesLeftInSegment, it);
             index += bytesLeftInSegment;
             totalSize += bytesLeftInSegment;
@@ -386,7 +378,6 @@ namespace ops
             readNewSegment();
 
             ReadBytes(out, offset + bytesLeftInSegment, length - bytesLeftInSegment);
-            //WriteChars(chars + bytesLeftInSegment, length - bytesLeftInSegment);
         }
     }
 
