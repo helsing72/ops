@@ -88,7 +88,7 @@ private
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out PrintArchiverOut_Class );
+  overriding procedure Finalize( Self : in out PrintArchiverOut_Class );
 
 end Ops_Pa.ArchiverInOut_Pa.PrintArchiverOut_Pa;
 

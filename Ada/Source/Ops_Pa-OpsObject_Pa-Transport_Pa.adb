@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -31,7 +31,7 @@ package body Ops_Pa.OpsObject_Pa.Transport_Pa is
       raise;
   end Create;
 
-  procedure Serialize( Self : in out Transport_Class; archiver : ArchiverInOut_Class_At) is
+  overriding procedure Serialize( Self : in out Transport_Class; archiver : ArchiverInOut_Class_At) is
   begin
     Serialize( OpsObject_Class(Self), archiver );
     archiver.Inout("channelID", Self.ChannelID);
@@ -39,7 +39,7 @@ package body Ops_Pa.OpsObject_Pa.Transport_Pa is
   end;
 
   -- Returns a newely allocated deep copy/clone of Self.
-  function Clone( Self : Transport_Class ) return OpsObject_Class_At is
+  overriding function Clone( Self : Transport_Class ) return OpsObject_Class_At is
     Result : Transport_Class_At := null;
   begin
     Result := Create;
@@ -48,7 +48,7 @@ package body Ops_Pa.OpsObject_Pa.Transport_Pa is
   end Clone;
 
   -- Fills the parameter obj with all values from Self.
-  procedure FillClone( Self : Transport_Class; obj : OpsObject_Class_At ) is
+  overriding procedure FillClone( Self : Transport_Class; obj : OpsObject_Class_At ) is
   begin
     FillClone( OpsObject_Class(Self), obj );
     if obj.all in Transport_Class'Class then
@@ -73,7 +73,7 @@ package body Ops_Pa.OpsObject_Pa.Transport_Pa is
     AppendType( OpsObject_Class(Self), "Transport" );
   end;
 
-  procedure Finalize( Self : in out Transport_Class ) is
+  overriding procedure Finalize( Self : in out Transport_Class ) is
   begin
     if Self.ChannelID /= null then
       Dispose(Self.ChannelID);

@@ -73,7 +73,7 @@ private
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out KeyFilterQoSPolicy_Class );
+  overriding procedure Finalize( Self : in out KeyFilterQoSPolicy_Class );
 
 end Ops_Pa.FilterQoSPolicy_Pa.KeyFilterQoSPolicy_Pa;
 

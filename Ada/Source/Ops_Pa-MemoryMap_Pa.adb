@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -116,7 +116,7 @@ package body Ops_Pa.MemoryMap_Pa is
     Self.Segments := new Segment_Arr'(0..Self.Width-1 => Segment);
   end InitInstance;
 
-  procedure Finalize( Self : in out MemoryMap_Class ) is
+  overriding procedure Finalize( Self : in out MemoryMap_Class ) is
   begin
     -- Delete all data.
     if Self.DataCreator then

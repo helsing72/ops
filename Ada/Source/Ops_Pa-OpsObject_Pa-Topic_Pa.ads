@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -41,13 +41,13 @@ package Ops_Pa.OpsObject_Pa.Topic_Pa is
   function Create(namee : String; portt : Int32; typeIDd : String; domainAddresss : String) return Topic_Class_At;
   function Create return Topic_Class_At;
 
-  procedure Serialize( Self : in out Topic_Class; archiver : ArchiverInOut_Class_At);
+  overriding procedure Serialize( Self : in out Topic_Class; archiver : ArchiverInOut_Class_At);
 
   -- Returns a newely allocated deep copy/clone of this object.
-  function Clone( Self : Topic_Class ) return OpsObject_Class_At;
+  overriding function Clone( Self : Topic_Class ) return OpsObject_Class_At;
 
   -- Fills the parameter obj with all values from this object.
-  procedure FillClone( Self : Topic_Class; obj : OpsObject_Class_At );
+  overriding procedure FillClone( Self : Topic_Class; obj : OpsObject_Class_At );
 
   -- Getters/Setters
   function Name( Self : Topic_Class ) return String;
@@ -112,7 +112,7 @@ private
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out Topic_Class );
+  overriding procedure Finalize( Self : in out Topic_Class );
 
 end Ops_Pa.OpsObject_Pa.Topic_Pa;
 

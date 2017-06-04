@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -71,7 +71,7 @@ package body Ops_Pa.SerializableFactory_Pa.CompFactory_Pa is
     null;
   end;
 
-  procedure Finalize( Self : in out SerializableCompositeFactory_Class ) is
+  overriding procedure Finalize( Self : in out SerializableCompositeFactory_Class ) is
   begin
     -- Free all objects in the list
     for i in Self.ChildFactories.First_Index .. Self.ChildFactories.Last_Index loop
@@ -127,7 +127,7 @@ package body Ops_Pa.SerializableFactory_Pa.CompFactory_Pa is
     InitInstance( SerializableCompositeFactory_Class(Self) );
   end;
 
-  procedure Finalize( Self : in out SerializableInheritingTypeFactory_Class ) is
+  overriding procedure Finalize( Self : in out SerializableInheritingTypeFactory_Class ) is
   begin
     Finalize( SerializableCompositeFactory_Class(Self) );
   end;

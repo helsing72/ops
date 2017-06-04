@@ -15,7 +15,7 @@ package body __unitName is
       raise;
   end Create;
 
-  procedure Serialize( Self : in out __className_Class; archiver : ArchiverInOut_Class_At) is
+  overriding procedure Serialize( Self : in out __className_Class; archiver : ArchiverInOut_Class_At) is
     val : Int32;
   begin
     Serialize( OpsObject_Class(Self), archiver );
@@ -27,7 +27,7 @@ package body __unitName is
   end;
 
   -- Returns a newely allocated deep copy/clone of Self.
-  function Clone( Self : __className_Class ) return OpsObject_Class_At is
+  overriding function Clone( Self : __className_Class ) return OpsObject_Class_At is
     Result : __className_Class_At := null;
   begin
     Result := Create;
@@ -36,7 +36,7 @@ package body __unitName is
   end Clone;
 
   -- Fills the parameter obj with all values from Self.
-  procedure FillClone( Self : __className_Class; obj : OpsObject_Class_At ) is
+  overriding procedure FillClone( Self : __className_Class; obj : OpsObject_Class_At ) is
   begin
     FillClone( OpsObject_Class(Self), obj );
     if obj.all in __className_Class'Class then
@@ -50,7 +50,7 @@ package body __unitName is
     AppendType( OpsObject_Class(Self), TypeName_C );
   end;
 
-  procedure Finalize( Self : in out __className_Class ) is
+  overriding procedure Finalize( Self : in out __className_Class ) is
   begin
     Finalize( OpsObject_Class(Self) );
   end;

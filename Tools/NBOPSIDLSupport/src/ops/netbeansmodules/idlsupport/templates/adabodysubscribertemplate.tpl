@@ -47,7 +47,7 @@ package body __subUnitName is
     InitInstance( Subscriber_Class(Self), Subscriber_Class_At(SelfAt), t );
   end;
 
-  procedure Finalize( Self : in out __classNameSubscriber_Class ) is
+  overriding procedure Finalize( Self : in out __classNameSubscriber_Class ) is
   begin
     Finalize( Subscriber_Class(Self) );
   end;

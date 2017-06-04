@@ -26,7 +26,7 @@ package body __pubUnitName is
     InitInstance( Publisher_Class(Self), Publisher_Class_At(SelfAt), t );
   end;
 
-  procedure Finalize( Self : in out __classNamePublisher_Class ) is
+  overriding procedure Finalize( Self : in out __classNamePublisher_Class ) is
   begin
     Finalize( Publisher_Class(Self) );
   end;

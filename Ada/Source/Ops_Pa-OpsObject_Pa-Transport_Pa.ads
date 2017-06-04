@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -40,13 +40,13 @@ package Ops_Pa.OpsObject_Pa.Transport_Pa is
   -- Constructors
   function Create return Transport_Class_At;
 
-  procedure Serialize( Self : in out Transport_Class; archiver : ArchiverInOut_Class_At);
+  overriding procedure Serialize( Self : in out Transport_Class; archiver : ArchiverInOut_Class_At);
 
   -- Returns a newely allocated deep copy/clone of this object.
-  function Clone( Self : Transport_Class ) return OpsObject_Class_At;
+  overriding function Clone( Self : Transport_Class ) return OpsObject_Class_At;
 
   -- Fills the parameter obj with all values from this object.
-  procedure FillClone( Self : Transport_Class; obj : OpsObject_Class_At );
+  overriding procedure FillClone( Self : Transport_Class; obj : OpsObject_Class_At );
 
 private
 -- ==========================================================================
@@ -59,7 +59,7 @@ private
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out Transport_Class );
+  overriding procedure Finalize( Self : in out Transport_Class );
 
 end Ops_Pa.OpsObject_Pa.Transport_Pa;
 

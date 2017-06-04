@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -34,7 +34,7 @@ package Ops_Pa.Transport_Pa.SendDataHandler_Pa is
   type SendDataHandler_Class    is abstract new Ops_Class with private;
   type SendDataHandler_Class_At is access all SendDataHandler_Class'Class;
 
-  function sendData( Self : SendDataHandler_Class; buf : Byte_Arr_At; bufSize : Integer; topic : Topic_Class_At) return Boolean is abstract;
+  function sendData( Self : in out SendDataHandler_Class; buf : Byte_Arr_At; bufSize : Integer; topic : Topic_Class_At) return Boolean is abstract;
 
   procedure addUser( Self : in out SendDataHandler_Class; client : Ops_Class_At );
   procedure removeUser( Self : in out SendDataHandler_Class; client : Ops_Class_At );
@@ -65,7 +65,7 @@ private
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out SendDataHandler_Class );
+  overriding procedure Finalize( Self : in out SendDataHandler_Class );
 
 end Ops_Pa.Transport_Pa.SendDataHandler_Pa;
 

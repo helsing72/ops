@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -29,7 +29,7 @@ package Ops_Pa.Transport_Pa.SendDataHandler_Pa.Mc_Pa is
 
   function Create(topic : Topic_Class_At; localInterface : String; ttl : Integer; Reporter : ErrorService_Class_At) return McSendDataHandler_Class_At;
 
-  overriding function sendData( Self : McSendDataHandler_Class; buf : Byte_Arr_At; bufSize : Integer; topic : Topic_Class_At) return Boolean;
+  overriding function sendData( Self : in out McSendDataHandler_Class; buf : Byte_Arr_At; bufSize : Integer; topic : Topic_Class_At) return Boolean;
 
 private
 -- ==========================================================================
@@ -46,7 +46,7 @@ private
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out McSendDataHandler_Class );
+  overriding procedure Finalize( Self : in out McSendDataHandler_Class );
 
 
 end Ops_Pa.Transport_Pa.SendDataHandler_Pa.Mc_Pa;

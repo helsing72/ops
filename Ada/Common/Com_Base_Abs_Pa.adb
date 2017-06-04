@@ -8,13 +8,13 @@ package body Com_Base_Abs_Pa is
 -- ===========================================================================    
 --          L o c a l   T y p e s   A n d   C o n s t a n t s
 -- ===========================================================================    
-  Count         : aliased Integer32 := 0;
+  Count         : aliased Interfaces.Integer_32 := 0;
   TraceRoutine  : TraceRoutine_At   := null;
 
 -- ===========================================================================    
 --          P u b l i c   R o u t i n e s
 -- ===========================================================================    
-  function NumActiveObjects return Integer32 is
+  function NumActiveObjects return Interfaces.Integer_32 is
   begin
     return Count;
   end;
@@ -39,7 +39,7 @@ package body Com_Base_Abs_Pa is
   ----------------------------------------------------------------------
   procedure Free(Self : access Com_Base_Abs_Class) is
     Dummy : Com_Base_Abs_Class_At;
-    tmp : Integer32;
+    tmp : Interfaces.Integer_32;
   begin
     Dummy := Com_Base_Abs_Class_At(Self);
     if Dummy /= null then
@@ -56,8 +56,8 @@ package body Com_Base_Abs_Pa is
   ----------------------------------------------------------------------
   -- Initialize object (Only used to trace allocation of object)
   ----------------------------------------------------------------------
-  procedure Initialize(Self : in out Com_Base_Abs_Class) is
-    tmp : Integer32;
+  overriding procedure Initialize(Self : in out Com_Base_Abs_Class) is
+    tmp : Interfaces.Integer_32;
   begin
     tmp := Com_SyncPrimitives_Pa.InterlockedIncrement(Count'Access);
     if TraceRoutine /= null then

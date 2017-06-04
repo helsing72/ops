@@ -16,7 +16,7 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
-with Win32.Winsock;
+with Com_Socket_Pa;
 
 package Ops_Pa.Transport_Pa.Receiver_Pa.MulticastReceiver_Pa is
 
@@ -55,32 +55,28 @@ package Ops_Pa.Transport_Pa.Receiver_Pa.MulticastReceiver_Pa is
 
   function available( Self : MulticastReceiver_Class ) return Boolean;
 
-  function Port( Self : MulticastReceiver_Class ) return Integer;
-  function Address( Self : MulticastReceiver_Class ) return String;
+  overriding function Port( Self : MulticastReceiver_Class ) return Integer;
+  overriding function Address( Self : MulticastReceiver_Class ) return String;
 
 private
 -- ==========================================================================
 --
 -- ==========================================================================
   type MulticastReceiver_Class is new Receiver_Class with
-    record
-      Port : Integer := 0;
-      IpAddress : String_At := null;
-      LocalInterface : String_At := null;
-      InSocketBufferSize : Int64 := 0;
+     record
+       Port : Integer := 0;
+       IpAddress : String_At := null;
+       LocalInterface : String_At := null;
+       InSocketBufferSize : Int64 := 0;
 
-      SocketId : Win32.Winsock.SOCKET := Win32.Winsock.INVALID_SOCKET;
+       UdpSocket : Com_Socket_Pa.UDPSocket_Class_At := null;
 
-      -- Current read buffer from user
-      Buffer : Byte_Arr_At := null;
-      BufferSize : Integer := 0;
+       -- Current read buffer from user
+       Buffer : Byte_Arr_At := null;
+       BufferSize : Integer := 0;
+     end record;
 
-      -- Last source for data
-      FromAddress : aliased Win32.Winsock.SOCKADDR;
-      FromAddressLen : aliased Win32.INT;
-    end record;
-
-  function ReceiveMessage( Self : in out MulticastReceiver_Class; o: Byte_Arr_At; size: Integer; fromAddr : access Win32.Winsock.SOCKADDR; len : access Win32.INT) return Integer;
+  function ReceiveMessage( Self : in out MulticastReceiver_Class; o: Byte_Arr_At; size: Integer ) return Integer;
 
   overriding procedure Run( Self : in out MulticastReceiver_Class );
 
@@ -97,7 +93,7 @@ private
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out MulticastReceiver_Class );
+  overriding procedure Finalize( Self : in out MulticastReceiver_Class );
 
 end Ops_Pa.Transport_Pa.Receiver_Pa.MulticastReceiver_Pa;
 

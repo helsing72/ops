@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -46,7 +46,7 @@ private
       null;
     end record;
 
-  procedure Finalize( Self : in out OPSObjectFactory_Class );
+  overriding procedure Finalize( Self : in out OPSObjectFactory_Class );
 
 -- ==========================================================================
 --
@@ -62,7 +62,7 @@ private
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out OPSObjectFactoryImpl_Class );
+  overriding procedure Finalize( Self : in out OPSObjectFactoryImpl_Class );
 
 end Ops_Pa.SerializableFactory_Pa.CompFactory_Pa.OpsObjectFactory_Pa;
 

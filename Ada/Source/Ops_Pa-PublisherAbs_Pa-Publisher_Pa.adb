@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -127,7 +127,7 @@ package body Ops_Pa.PublisherAbs_Pa.Publisher_Pa is
     Start( Self );
   end;
 
-  procedure Finalize( Self : in out Publisher_Class ) is
+  overriding procedure Finalize( Self : in out Publisher_Class ) is
   begin
     Stop( Self );
 

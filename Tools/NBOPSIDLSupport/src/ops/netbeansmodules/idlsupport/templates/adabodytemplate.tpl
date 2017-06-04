@@ -15,14 +15,14 @@ package body __unitName is
       raise;
   end Create;
 
-  procedure Serialize( Self : in out __className_Class; archiver : ArchiverInOut_Class_At) is
+  overriding procedure Serialize( Self : in out __className_Class; archiver : ArchiverInOut_Class_At) is
   begin
     Serialize( __baseClassName_Class(Self), archiver );
 __serialize
   end;
 
   -- Returns a newely allocated deep copy/clone of Self.
-  function Clone( Self : __className_Class ) return OpsObject_Class_At is
+  overriding function Clone( Self : __className_Class ) return OpsObject_Class_At is
     Result : __className_Class_At := null;
   begin
     Result := Create;
@@ -31,7 +31,7 @@ __serialize
   end Clone;
 
   -- Fills the parameter obj with all values from Self.
-  procedure FillClone( Self : __className_Class; obj : OpsObject_Class_At ) is
+  overriding procedure FillClone( Self : __className_Class; obj : OpsObject_Class_At ) is
   begin
     FillClone( __baseClassName_Class(Self), obj );
     if obj.all in __className_Class'Class then
@@ -46,7 +46,7 @@ __fillCloneBody
 __constructorBody
   end;
 
-  procedure Finalize( Self : in out __className_Class ) is
+  overriding procedure Finalize( Self : in out __className_Class ) is
   begin
 __destructorBody
     Finalize( __baseClassName_Class(Self) );

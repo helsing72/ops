@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -56,13 +56,13 @@ package Ops_Pa.OpsObject_Pa.ParticipantInfoData_Pa is
   -- Constructors
   function Create return ParticipantInfoData_Class_At;
 
-  procedure Serialize( Self : in out ParticipantInfoData_Class; archiver : ArchiverInOut_Class_At);
+  overriding procedure Serialize( Self : in out ParticipantInfoData_Class; archiver : ArchiverInOut_Class_At);
 
   -- Returns a newely allocated deep copy/clone of Self.
-  function Clone( Self : ParticipantInfoData_Class ) return OpsObject_Class_At;
+  overriding function Clone( Self : ParticipantInfoData_Class ) return OpsObject_Class_At;
 
   -- Fills the parameter obj with all values from Self.
-  procedure FillClone( Self : ParticipantInfoData_Class; obj : OpsObject_Class_At );
+  overriding procedure FillClone( Self : ParticipantInfoData_Class; obj : OpsObject_Class_At );
 
   -- Help routines for updating the dynamic arrays with TopicInfoData
   procedure addTopic( arr : in out TopicInfoData_Class_At_Arr_At; top : Topic_Class_At);
@@ -79,7 +79,7 @@ private
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out ParticipantInfoData_Class );
+  overriding procedure Finalize( Self : in out ParticipantInfoData_Class );
 
 end Ops_Pa.OpsObject_Pa.ParticipantInfoData_Pa;
 

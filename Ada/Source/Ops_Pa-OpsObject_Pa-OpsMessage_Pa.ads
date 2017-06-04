@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -16,7 +16,7 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
-with Ctv, Ops_Pa.ArchiverInOut_Pa;
+with Ops_Pa.ArchiverInOut_Pa;
 use  Ops_Pa.ArchiverInOut_Pa;
 
 package Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
@@ -36,17 +36,19 @@ package Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
   -- Constructors
   function Create return OPSMessage_Class_At;
 
-  procedure Serialize( Self : in out OPSMessage_Class; archiver : ArchiverInOut_Class_At);
+  overriding procedure Serialize( Self : in out OPSMessage_Class; archiver : ArchiverInOut_Class_At);
 
   -- Returns a newely allocated deep copy/clone of Self.
-  function Clone( Self : OPSMessage_Class ) return OpsObject_Class_At;
+  overriding function Clone( Self : OPSMessage_Class ) return OpsObject_Class_At;
 
   -- Fills the parameter obj with all values from Self.
-  procedure FillClone( Self : OPSMessage_Class; obj : OpsObject_Class_At );
+  overriding procedure FillClone( Self : OPSMessage_Class; obj : OpsObject_Class_At );
 
   --
   procedure setSource( Self : in out OPSMessage_Class; addr : string; port : Integer);
-  procedure getSource( Self : OPSMessage_Class; addr : in out string; port : in out Integer);
+
+  function getSourceIP( Self : OPSMessage_Class ) return String;
+  function getSourcePort( Self : OPSMessage_Class ) return Integer;
 
   -- Reservation handling
   -- --------------------
@@ -57,7 +59,7 @@ package Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
   -- the Unreserve() call will do that for you.
   procedure Reserve( Self : in out OPSMessage_Class );
   procedure UnReserve( Self : in out OPSMessage_Class );
-  function NrOfReservations( Self : OPSMessage_Class ) return Ctv.Integer32;
+  function NrOfReservations( Self : OPSMessage_Class ) return Int32;
 
   -- Getters/Setters
   function DataOwner( Self : OPSMessage_Class ) return Boolean;
@@ -95,7 +97,7 @@ private
       SourceIP : String_At := new String'("");
 
       -- Reservation handling
-      NrOfReservations : aliased Ctv.Integer32 := 0;
+      NrOfReservations : aliased Int32 := 0;
     end record;
 
   procedure InitInstance( Self : in out OPSMessage_Class; SelfAt : OPSMessage_Class_At );
@@ -104,7 +106,7 @@ private
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out OPSMessage_Class );
+  overriding procedure Finalize( Self : in out OPSMessage_Class );
 
 end Ops_Pa.OpsObject_Pa.OPSMessage_Pa;
 

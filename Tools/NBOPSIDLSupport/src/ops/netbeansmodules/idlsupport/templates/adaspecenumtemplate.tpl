@@ -24,13 +24,13 @@ package __unitName is
   -- Constructors
   function Create return __className_Class_At;
 
-  procedure Serialize( Self : in out __className_Class; archiver : ArchiverInOut_Class_At);
+  overriding procedure Serialize( Self : in out __className_Class; archiver : ArchiverInOut_Class_At);
 
   -- Returns a newely allocated deep copy/clone of Self.
-  function Clone( Self : __className_Class ) return OpsObject_Class_At;
+  overriding function Clone( Self : __className_Class ) return OpsObject_Class_At;
 
   -- Fills the parameter obj with all values from Self.
-  procedure FillClone( Self : __className_Class; obj : OpsObject_Class_At );
+  overriding procedure FillClone( Self : __className_Class; obj : OpsObject_Class_At );
 
 --private
 
@@ -40,7 +40,7 @@ package __unitName is
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out __className_Class );
+  overriding procedure Finalize( Self : in out __className_Class );
 
   -- Helpers
   procedure Dispose is new Ada.Unchecked_Deallocation( __className_Class_Arr, __className_Class_Arr_At );

@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -35,15 +35,25 @@ package Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
 -- ==========================================================================
 --      C l a s s    D e c l a r a t i o n.
 -- ==========================================================================
+  type OnUdpTransport_Interface is limited interface;
+  type OnUdpTransport_Interface_At is access all OnUdpTransport_Interface'Class;
+
+  -- Method prototype to call when we connect/disconnect UDP topics with the participant info data listener
+  -- Override this to react on the UDP setup callback
+  procedure OnUdpTransport( Self : in out OnUdpTransport_Interface;
+                            topic : Topic_Class_At;
+                            sdh : SendDataHandler_Class_At;
+                            Connect : Boolean ) is abstract;
+
+-- ==========================================================================
+--      C l a s s    D e c l a r a t i o n.
+-- ==========================================================================
   type SendDataHandlerFactory_Class    is new Ops_Class with private;
   type SendDataHandlerFactory_Class_At is access all SendDataHandlerFactory_Class'Class;
 
-  -- Method prototype to call when we connect/disconnect UDP topics with the participant info data listener
---TODO  TOnUdpConnectDisconnectProc = procedure(top : TTopic; sdh : TSendDataHandler; connect : Boolean) of object;
-
   -- Constructors
   function Create(Dom : Domain_Class_At;
-                  --TODO Proc : TOnUdpConnectDisconnectProc;
+                  Client : OnUdpTransport_Interface_At;
                   Reporter : ErrorService_Class_At) return SendDataHandlerFactory_Class_At;
 
   function getSendDataHandler( Self : in out SendDataHandlerFactory_Class; top : Topic_Class_At) return SendDataHandler_Class_At;
@@ -75,12 +85,12 @@ private
       -- The Domain to which this Factory belongs (NOTE: we don't own the object)
       Domain : Domain_Class_At := null;
 
-      -- Method to call when we connect/disconnect UDP topics with the participant info data listener
+      -- Client to call when we connect/disconnect UDP topics with the participant info data listener
       -- normally handled by the participant
-      --TODO OnUdpConnectDisconnectProc : TOnUdpConnectDisconnectProc;
+      OnUdpConnectDisconnectClient : OnUdpTransport_Interface_At := null;
 
       -- There is only one McUdpSendDataHandler for each participant
-      --TODO FUdpSendDataHandler : TSendDataHandler;
+      UdpSendDataHandler : SendDataHandler_Class_At := null;
       UdpUsers : Integer := 0;
 
       -- Dictionary with all SendDataHandlers except for UDP-transport
@@ -89,18 +99,18 @@ private
     end record;
 
   -- Generate the key used in the dictionary
-  function getKey(top : Topic_Class_At) return String;
+  function getKey( top : Topic_Class_At ) return String;
 
   procedure InitInstance( Self : in out SendDataHandlerFactory_Class;
                           Dom : Domain_Class_At;
-                          --TODO Proc : TOnUdpConnectDisconnectProc;
-                          Reporter : ErrorService_Class_At);
+                          Client : OnUdpTransport_Interface_At;
+                          Reporter : ErrorService_Class_At );
 
   --------------------------------------------------------------------------
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out SendDataHandlerFactory_Class );
+  overriding procedure Finalize( Self : in out SendDataHandlerFactory_Class );
 
 end Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa;
 

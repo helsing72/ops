@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -102,7 +102,7 @@ private
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out BasicError_Class );
+  overriding procedure Finalize( Self : in out BasicError_Class );
 
 -- ==========================================================================
 --
@@ -115,7 +115,7 @@ private
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out SocketError_Class );
+  overriding procedure Finalize( Self : in out SocketError_Class );
 
 -- ==========================================================================
 --
@@ -131,7 +131,7 @@ private
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out ErrorService_Class );
+  overriding procedure Finalize( Self : in out ErrorService_Class );
 
 end Ops_Pa.Error_Pa;
 

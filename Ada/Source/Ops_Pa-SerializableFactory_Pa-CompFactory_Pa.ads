@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -70,7 +70,7 @@ private
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out SerializableCompositeFactory_Class );
+  overriding procedure Finalize( Self : in out SerializableCompositeFactory_Class );
 
 -- ==========================================================================
 --
@@ -86,6 +86,6 @@ private
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out SerializableInheritingTypeFactory_Class );
+  overriding procedure Finalize( Self : in out SerializableInheritingTypeFactory_Class );
 
 end Ops_Pa.SerializableFactory_Pa.CompFactory_Pa;

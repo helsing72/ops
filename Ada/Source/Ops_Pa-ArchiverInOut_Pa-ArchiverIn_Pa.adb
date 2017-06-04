@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -241,7 +241,7 @@ package body Ops_Pa.ArchiverInOut_Pa.ArchiverIn_Pa is
     Self.Factory := fact;
   end;
 
-  procedure Finalize( Self : in out ArchiverIn_Class ) is
+  overriding procedure Finalize( Self : in out ArchiverIn_Class ) is
   begin
     null;
   end;

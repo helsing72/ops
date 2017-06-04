@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -16,7 +16,7 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
-with Win32.Winsock;
+with Com_Socket_Pa;
 
 package Ops_Pa.Transport_Pa.Sender_Pa.Udp_Pa is
 
@@ -44,17 +44,20 @@ package Ops_Pa.Transport_Pa.Sender_Pa.Udp_Pa is
   overriding procedure Close( Self : in out UdpSender_Class );
 
 private
+-- ==========================================================================
+--
+-- ==========================================================================
   type UdpSender_Class is new Sender_Class with
-    record
-      LocalInterface : String_At := null;
-      Ttl : Integer := 1;
-      OutSocketBufferSize : Int64 := -1;
-      MulticastSocket : Boolean := True;
+     record
+       LocalInterface : String_At := null;
+       Ttl : Integer := 1;
+       OutSocketBufferSize : Int64 := -1;
+       MulticastSocket : Boolean := True;
 
-      SocketId : Win32.Winsock.SOCKET := Win32.Winsock.INVALID_SOCKET;
+       UdpSocket : Com_Socket_Pa.UDPSocket_Class_At := null;
     end record;
 
-  procedure Report( Self : in out UdpSender_Class; method : string; mess : string);
+  procedure Report( Self : in out UdpSender_Class; method : String; mess : String );
 
   procedure InitInstance( Self : in out UdpSender_Class;
                           localInterface : String;
@@ -66,7 +69,7 @@ private
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out UdpSender_Class );
+  overriding procedure Finalize( Self : in out UdpSender_Class );
 
 end Ops_Pa.Transport_Pa.Sender_Pa.Udp_Pa;
 

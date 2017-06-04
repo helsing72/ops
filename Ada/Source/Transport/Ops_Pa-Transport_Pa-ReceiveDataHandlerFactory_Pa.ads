@@ -36,13 +36,20 @@ package Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa is
 -- ==========================================================================
 --      C l a s s    D e c l a r a t i o n.
 -- ==========================================================================
+  type OnUdpTransport_Interface is limited interface;
+  type OnUdpTransport_Interface_At is access all OnUdpTransport_Interface'Class;
+
+  -- Method prototype to call when we want to set UDP transport info for the participant info data
+  -- Override this to react on the UDP setup callback
+  procedure OnUdpTransport( Self : in out OnUdpTransport_Interface; ipaddress : String; port : Int32 ) is abstract;
+
+-- ==========================================================================
+--      C l a s s    D e c l a r a t i o n.
+-- ==========================================================================
   type ReceiveDataHandlerFactory_Class    is new Ops_Class with private;
   type ReceiveDataHandlerFactory_Class_At is access all ReceiveDataHandlerFactory_Class'Class;
 
-  -- Method prototype to call when we want to set UDP transport info for the participant info data
-  type TOnUdpTransportInfoProc is new Integer; --///TODO procedure(ipaddress : string; port : Integer) of object;
-
-  function Create( Proc : TOnUdpTransportInfoProc;
+  function Create( Client : OnUdpTransport_Interface_At;
                    Reporter : Ops_Pa.Error_Pa.ErrorService_Class_At )
                   return ReceiveDataHandlerFactory_Class_At;
 
@@ -76,7 +83,7 @@ private
   type ReceiveDataHandlerFactory_Class is new Ops_Class with
     record
       -- Borrowed references
-      OnUdpTransportInfoProc : TOnUdpTransportInfoProc;
+      OnUdpTransportInfoClient : OnUdpTransport_Interface_At := null;
       ErrorService : Ops_Pa.Error_Pa.ErrorService_Class_At := null;
 
       -- By Singelton, one ReceiveDataHandler per 'key' on this Participant
@@ -88,14 +95,14 @@ private
 
 
   procedure InitInstance( Self : in out ReceiveDataHandlerFactory_Class;
-                          Proc : TOnUdpTransportInfoProc;
+                          Client : OnUdpTransport_Interface_At;
                           Reporter : Ops_Pa.Error_Pa.ErrorService_Class_At );
 
   --------------------------------------------------------------------------
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out ReceiveDataHandlerFactory_Class );
+  overriding procedure Finalize( Self : in out ReceiveDataHandlerFactory_Class );
 
 
 end Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa;

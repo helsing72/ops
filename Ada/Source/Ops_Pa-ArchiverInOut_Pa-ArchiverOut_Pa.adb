@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -254,7 +254,7 @@ package body Ops_Pa.ArchiverInOut_Pa.ArchiverOut_Pa is
     Self.FBuf := buf;
   end;
 
-  procedure Finalize( Self : in out ArchiverOut_Class ) is
+  overriding procedure Finalize( Self : in out ArchiverOut_Class ) is
   begin
     null;
   end;

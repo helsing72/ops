@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -49,7 +49,7 @@ package body Ops_Pa.Error_Pa is
     Self.ErrorCode := ERROR_CODE;
   end;
 
-  procedure Finalize( Self : in out BasicError_Class ) is
+  overriding procedure Finalize( Self : in out BasicError_Class ) is
   begin
     if Self.Message /= null then
       Dispose(Self.Message);
@@ -93,7 +93,7 @@ package body Ops_Pa.Error_Pa is
     Self.ErrorCode := SocketError;
   end;
 
-  procedure Finalize( Self : in out SocketError_Class ) is
+  overriding procedure Finalize( Self : in out SocketError_Class ) is
   begin
     Finalize( BasicError_Class(Self) );
   end;
@@ -164,7 +164,7 @@ package body Ops_Pa.Error_Pa is
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out ErrorService_Class ) is
+  overriding procedure Finalize( Self : in out ErrorService_Class ) is
   begin
     ErrorNotifier_Pa.Free(Self.Notifier);
   end;

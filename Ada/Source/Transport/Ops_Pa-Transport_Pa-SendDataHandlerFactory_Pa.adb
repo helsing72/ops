@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -16,21 +16,24 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
-with Ops_Pa.Transport_Pa.SendDataHandler_Pa.Mc_Pa;
+with Ops_Pa.Transport_Pa.SendDataHandler_Pa.Mc_Pa,
+     Ops_Pa.Transport_Pa.SendDataHandler_Pa.McUdp_Pa,
+     Ops_Pa.Transport_Pa.SendDataHandler_Pa.TCP_Pa;
+
+with Com_Socket_Pa;
 
 package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
 
   use type MyMap.cursor;
 
-
   -- Constructors
   function Create(Dom : Domain_Class_At;
-                  --TODO Proc : TOnUdpConnectDisconnectProc;
+                  Client : OnUdpTransport_Interface_At;
                   Reporter : ErrorService_Class_At) return SendDataHandlerFactory_Class_At is
      Self : SendDataHandlerFactory_Class_At := null;
   begin
     Self := new SendDataHandlerFactory_Class;
-    InitInstance( Self.all, Dom, Reporter );
+    InitInstance( Self.all, Dom, Client, Reporter );
     return Self;
   exception
     when others =>
@@ -61,7 +64,7 @@ package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
       element.numUsers := element.numUsers + 1;
     end;
 
-    localIf : string := doSubnetTranslation(top.LocalInterface);
+    localIf : string := Com_Socket_Pa.doSubnetTranslation(top.LocalInterface);
     ttl : Integer := Integer(top.TimeToLive);
     result : SendDataHandler_Class_At := null;
     pos : MyMap.Cursor;
@@ -91,33 +94,35 @@ package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
       Self.SendDataHandlers.Insert(key, info);
 
     elsif top.Transport = TRANSPORT_UDP then
---///TODO      if not Assigned(FUdpSendDataHandler) then
+      if Self.UdpSendDataHandler = null then
         -- We have only one sender for all topics, so use the domain value for buffer size
---        FUdpSendDataHandler := TMcUdpSendDataHandler.Create(localIf,
---                                 ttl,
---                                 FDomain.OutSocketBufferSize,
---                                 FErrorService);
---      end if;
+        Self.UdpSendDataHandler :=
+          SendDataHandler_Class_At(Ops_Pa.Transport_Pa.SendDataHandler_Pa.McUdp_Pa.Create(
+                                   localIf,
+                                   ttl,
+                                   Int64(Self.Domain.OutSocketBufferSize),
+                                   Self.ErrorService));
+      end if;
 
       -- Setup a listener on the participant info data published by participants on our domain.
       -- We use the information for topics with UDP as transport, to know the destination for UDP sends
       -- ie. we extract ip and port from the information and add it to our McUdpSendDataHandler
---///TODO      if Assigned(FOnUdpConnectDisconnectProc) then FOnUdpConnectDisconnectProc(top, FUdpSendDataHandler, True); end if;
+      if Self.OnUdpConnectDisconnectClient /= null then
+        Self.OnUdpConnectDisconnectClient.OnUdpTransport(top, Self.UdpSendDataHandler, True);
+      end if;
 
       Self.UdpUsers := Self.UdpUsers + 1;
 
---///TODO      Result := FUdpSendDataHandler;
-      raise Not_Yet_Implemented;
+      Result := Self.UdpSendDataHandler;
 
     elsif top.Transport = TRANSPORT_TCP then
---///TODO      Result := TTCPSendDataHandler.Create(top, FErrorService);
---      info.handler := Result;
+      Result := SendDataHandler_Class_At(Ops_Pa.Transport_Pa.SendDataHandler_Pa.TCP_Pa.Create(top, Self.ErrorService));
+      info.handler := Result;
       info.numUsers := 1;
       Self.SendDataHandlers.Insert(key, info);
 
-      raise Not_Yet_Implemented;
     end if;
-    return result;
+    return Result;
   end;
 
   procedure releaseSendDataHandler( Self : in out SendDataHandlerFactory_Class; top : Topic_Class_At) is
@@ -134,13 +139,15 @@ package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
     S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
     if top.Transport = TRANSPORT_UDP then
---///TODO      if Assigned(FOnUdpConnectDisconnectProc) then FOnUdpConnectDisconnectProc(top, FUdpSendDataHandler, False); end if;
+      if self.OnUdpConnectDisconnectClient /= null then
+        Self.OnUdpConnectDisconnectClient.OnUdpTransport(top, Self.UdpSendDataHandler, False);
+      end if;
       Self.UdpUsers := Self.UdpUsers - 1;
       if Self.UdpUsers = 0 then
         -- This is the last matching call, so now no one is using the SendDataHandler
         -- Delete it
---///TODO        FreeAndNil(FUdpSendDataHandler);
-        null;
+        Free(Self.UdpSendDataHandler);
+        Self.UdpSendDataHandler := null;
       end if;
 
     else
@@ -163,19 +170,19 @@ package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
 
   procedure InitInstance( Self : in out SendDataHandlerFactory_Class;
                           Dom : Domain_Class_At;
-                          --TODO Proc : TOnUdpConnectDisconnectProc;
+                          Client : OnUdpTransport_Interface_At;
                           Reporter : ErrorService_Class_At) is
   begin
     Self.ErrorService := Reporter;
     Self.Domain := dom;
---TODO    FOnUdpConnectDisconnectProc := Proc;
+    Self.OnUdpConnectDisconnectClient := Client;
   end;
 
   --------------------------------------------------------------------------
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out SendDataHandlerFactory_Class ) is
+  overriding procedure Finalize( Self : in out SendDataHandlerFactory_Class ) is
 
     handlerExist : Boolean := False;
 
@@ -199,7 +206,9 @@ package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
         handlerExist := True;
       end if;
 
---///TODO      FreeAndNil(FUdpSendDataHandler);
+      if Self.UdpSendDataHandler /= null then
+        Free(Self.UdpSendDataHandler);
+      end if;
 
       Self.SendDataHandlers.Iterate(Process'Access);
     end;

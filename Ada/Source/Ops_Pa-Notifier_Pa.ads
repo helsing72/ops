@@ -89,7 +89,7 @@ private
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out Notifier_Class );
+  overriding procedure Finalize( Self : in out Notifier_Class );
 
 end Ops_Pa.Notifier_Pa;
 

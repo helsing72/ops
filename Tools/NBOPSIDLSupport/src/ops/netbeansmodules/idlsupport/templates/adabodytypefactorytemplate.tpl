@@ -22,7 +22,7 @@ package body __unitName is
   end Create;
 
   -- Create a serializable class instance from given type
-  function Make( Self : __className_Class; types : string) return Serializable_Class_At is
+  overriding function Make( Self : __className_Class; types : string) return Serializable_Class_At is
   begin
 __createMakeBody
     return null;
@@ -33,7 +33,7 @@ __createMakeBody
     null;
   end;
 
-  procedure Finalize( Self : in out __className_Class ) is
+  overriding procedure Finalize( Self : in out __className_Class ) is
   begin
     null;
   end;

@@ -1,8 +1,6 @@
 
-with  Ada.Finalization,
-      Ctv;
-      
-use   Ctv;
+with Ada.Finalization,
+     Interfaces;
       
 package Com_Base_Abs_Pa is
 
@@ -35,26 +33,26 @@ package Com_Base_Abs_Pa is
   ----------------------------------------------------------------------
   -- Destructor
   ----------------------------------------------------------------------
-  procedure Finalize(Self : in out Com_Base_Abs_Class) is abstract;
+  overriding procedure Finalize(Self : in out Com_Base_Abs_Class) is abstract;
   
   ----------------------------------------------------------------------
   -- Initialize object (Only used to trace allocation of object)
   ----------------------------------------------------------------------
-  procedure Initialize(Self : in out Com_Base_Abs_Class);
+  overriding procedure Initialize(Self : in out Com_Base_Abs_Class);
   
   ----------------------------------------------------------------------
   -- Install/Uninstall trace routine to catch allocation/deallocation
   -- of objects, when running.
   ----------------------------------------------------------------------
-  type CreateStatus_T is (Alloc,Dealloc);
+  type CreateStatus_T is (Alloc, Dealloc);
   type TraceRoutine_At is access procedure( Class         : String;
                                             CreateStatus  : CreateStatus_T;
-                                            TotalAllocObj : Integer32);
+                                            TotalAllocObj : Interfaces.Integer_32);
   procedure InstallTrace(   Routine : TraceRoutine_At);
   procedure UnInstallTrace( Routine : TraceRoutine_At);
   
   -- Debug
-  function NumActiveObjects return Integer32;
+  function NumActiveObjects return Interfaces.Integer_32;
   
 private
   ---------------------------------------------------------------------------

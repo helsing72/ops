@@ -50,14 +50,14 @@ package body Ops_Pa.OpsObject_Pa.OPSConfig_Pa is
   -- Helpers for handling [de]serializing of fixed arrays
   procedure Domain_Class_InoutDynArr is new inoutdynarr2(Domain_Class, Domain_Class_At, Domain_Class_At_Arr, Domain_Class_At_Arr_At);
 
-  procedure Serialize( Self : in out OPSConfig_Class; archiver : ArchiverInOut_Class_At) is
+  overriding procedure Serialize( Self : in out OPSConfig_Class; archiver : ArchiverInOut_Class_At) is
   begin
     Serialize( OpsObject_Class(Self), archiver );
     Domain_Class_InoutDynArr(archiver, "domains", Self.domains);
   end;
 
   -- Returns a newely allocated deep copy/clone of Self.
-  function Clone( Self : OPSConfig_Class ) return OpsObject_Class_At is
+  overriding function Clone( Self : OPSConfig_Class ) return OpsObject_Class_At is
     Result : OPSConfig_Class_At := null;
   begin
     Result := Create;
@@ -79,7 +79,7 @@ package body Ops_Pa.OpsObject_Pa.OPSConfig_Pa is
   end;
 
   -- Fills the parameter obj with all values from Self.
-  procedure FillClone( Self : OPSConfig_Class; obj : OpsObject_Class_At ) is
+  overriding procedure FillClone( Self : OPSConfig_Class; obj : OpsObject_Class_At ) is
   begin
     FillClone( OpsObject_Class(Self), obj );
     if obj.all in OPSConfig_Class'Class then
@@ -103,7 +103,7 @@ package body Ops_Pa.OpsObject_Pa.OPSConfig_Pa is
     InitInstance( OpsObject_Class(Self) );
   end;
 
-  procedure Finalize( Self : in out OPSConfig_Class ) is
+  overriding procedure Finalize( Self : in out OPSConfig_Class ) is
   begin
     if Self.domains /= null then
       Clear(Self.domains.all);
@@ -146,7 +146,7 @@ package body Ops_Pa.OpsObject_Pa.OPSConfig_Pa is
       raise;
   end;
 
-  procedure Serialize( Self : in out DefaultOPSConfigImpl_Class; archiver : ArchiverInOut_Class_At) is
+  overriding procedure Serialize( Self : in out DefaultOPSConfigImpl_Class; archiver : ArchiverInOut_Class_At) is
   begin
     Serialize( OPSConfig_Class(Self), archiver );
   end;
@@ -157,7 +157,7 @@ package body Ops_Pa.OpsObject_Pa.OPSConfig_Pa is
     AppendType( OPSConfig_Class(Self), "DefaultOPSConfigImpl" );
   end;
 
-  procedure Finalize( Self : in out DefaultOPSConfigImpl_Class ) is
+  overriding procedure Finalize( Self : in out DefaultOPSConfigImpl_Class ) is
   begin
     Finalize( OPSConfig_Class(Self) );
   end;
@@ -181,7 +181,7 @@ package body Ops_Pa.OpsObject_Pa.OPSConfig_Pa is
     InitInstance( DefaultOPSConfigImpl_Class(Self) );
   end;
 
-  procedure Finalize( Self : in out ExtendedOPSConfig_Class ) is
+  overriding procedure Finalize( Self : in out ExtendedOPSConfig_Class ) is
   begin
     Finalize( DefaultOPSConfigImpl_Class(Self) );
   end;

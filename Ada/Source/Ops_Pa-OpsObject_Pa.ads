@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --  
 -- This file is part of OPS (Open Publish Subscribe).
 --  
@@ -30,13 +30,13 @@ package Ops_Pa.OpsObject_Pa is
   -- Constructors
   function Create return OpsObject_Class_At;
 
-  procedure Serialize( Self : in out OpsObject_Class; archiver : ArchiverInOut_Class_At); 
+  overriding procedure Serialize( Self : in out OpsObject_Class; archiver : ArchiverInOut_Class_At); 
 
   -- Getters/Setters
   function Key( Self : OpsObject_Class ) return String;
   procedure Key( Self : in out OpsObject_Class; Value : String );
 
-  function TypesString( Self : OpsObject_Class ) return String;
+  overriding function TypesString( Self : OpsObject_Class ) return String;
 
   function SpareBytes( Self : OpsObject_Class ) return Byte_Arr_At;
   procedure SetSpareBytes( Self : in out OpsObject_Class; arr : Byte_Arr_At );
@@ -71,7 +71,7 @@ private
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out OpsObject_Class );
+  overriding procedure Finalize( Self : in out OpsObject_Class );
 
 end Ops_Pa.OpsObject_Pa;
 

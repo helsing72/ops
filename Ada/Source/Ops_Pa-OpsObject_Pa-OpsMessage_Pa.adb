@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -36,7 +36,7 @@ package body Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
       raise;
   end Create;
 
-  procedure Serialize( Self : in out OPSMessage_Class; archiver : ArchiverInOut_Class_At) is
+  overriding procedure Serialize( Self : in out OPSMessage_Class; archiver : ArchiverInOut_Class_At) is
   begin
     Serialize( OpsObject_Class(Self), archiver );
     archiver.Inout("messageType", Self.messageType);
@@ -50,7 +50,7 @@ package body Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
   end;
 
   procedure Reserve( Self : in out OPSMessage_Class ) is
-    tmp : Ctv.Integer32;
+    tmp : Int32;
   begin
     tmp := InterlockedIncrement(Self.NrOfReservations'Access);
   end;
@@ -63,7 +63,7 @@ package body Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
     end if;
   end;
 
-  function NrOfReservations( Self : OPSMessage_Class ) return Ctv.Integer32 is
+  function NrOfReservations( Self : OPSMessage_Class ) return Int32 is
   begin
     return Self.NrOfReservations;
   end;
@@ -74,10 +74,14 @@ package body Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
     Self.SourcePort := port;
   end;
 
-  procedure getSource( Self : OPSMessage_Class; addr : in out string; port : in out Integer) is
+  function getSourceIP( Self : OPSMessage_Class ) return String is
   begin
-    addr := Self.SourceIP.all;
-    port := Self.SourcePort;
+    return Self.SourceIP.all;
+  end;
+
+  function getSourcePort( Self : OPSMessage_Class ) return Integer is
+  begin
+    return Self.SourcePort;
   end;
 
   function DataOwner( Self : OPSMessage_Class ) return Boolean is
@@ -134,7 +138,7 @@ package body Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
   end;
 
   -- Returns a newely allocated deep copy/clone of Self.
-  function Clone( Self : OPSMessage_Class ) return OpsObject_Class_At is
+  overriding function Clone( Self : OPSMessage_Class ) return OpsObject_Class_At is
     Result : OPSMessage_Class_At := null;
   begin
     Result := Create;
@@ -143,7 +147,7 @@ package body Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
   end Clone;
 
   -- Fills the parameter obj with all values from Self.
-  procedure FillClone( Self : OPSMessage_Class; obj : OpsObject_Class_At ) is
+  overriding procedure FillClone( Self : OPSMessage_Class; obj : OpsObject_Class_At ) is
   begin
     FillClone( OpsObject_Class(Self), obj );
     if obj.all in OPSMessage_Class'Class then
@@ -171,7 +175,7 @@ package body Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
     Self.DataOwner := True;
   end;
 
-  procedure Finalize( Self : in out OPSMessage_Class ) is
+  overriding procedure Finalize( Self : in out OPSMessage_Class ) is
   begin
     -- Validation
     if Self.NrOfReservations /= 0 then

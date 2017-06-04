@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -163,7 +163,7 @@ package body Ops_Pa.OpsObject_Pa.Topic_Pa is
     Self.InSocketBufferSize := Value;
   end;
 
-  procedure Serialize( Self : in out Topic_Class; archiver : ArchiverInOut_Class_At) is
+  overriding procedure Serialize( Self : in out Topic_Class; archiver : ArchiverInOut_Class_At) is
     tSampleMaxSize : Int32;
   begin
     Serialize( OpsObject_Class(Self), archiver );
@@ -200,7 +200,7 @@ package body Ops_Pa.OpsObject_Pa.Topic_Pa is
   end;
 
   -- Returns a newely allocated deep copy/clone of Self.
-  function Clone( Self : Topic_Class ) return OpsObject_Class_At is
+  overriding function Clone( Self : Topic_Class ) return OpsObject_Class_At is
     Result : Topic_Class_At := null;
   begin
     Result := Create;
@@ -209,7 +209,7 @@ package body Ops_Pa.OpsObject_Pa.Topic_Pa is
   end Clone;
 
   -- Fills the parameter obj with all values from Self.
-  procedure FillClone( Self : Topic_Class; obj : OpsObject_Class_At ) is
+  overriding procedure FillClone( Self : Topic_Class; obj : OpsObject_Class_At ) is
   begin
     FillClone( OpsObject_Class(Self), obj );
     if obj.all in Topic_Class'Class then
@@ -255,7 +255,7 @@ package body Ops_Pa.OpsObject_Pa.Topic_Pa is
     Self.Transport := Copy("");
   end;
 
-  procedure Finalize( Self : in out Topic_Class ) is
+  overriding procedure Finalize( Self : in out Topic_Class ) is
   begin
     if Self.Name /= null then
       Dispose(Self.Name);

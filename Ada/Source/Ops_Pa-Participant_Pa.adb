@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -16,16 +16,25 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
-with Ada.Containers.Indefinite_Ordered_Maps;
+with Ada.Containers.Indefinite_Ordered_Maps,
+     Ada.Strings.Fixed;
 
-with Com_Mutex_Pa;
+with Win32,
+     Win32.Winbase,
+     Win32.Winsock;
+
+with Com_Socket_Pa;
 
 with Ops_Pa.Error_Pa,
-     Ops_Pa.SerializableFactory_Pa.CompFactory_Pa;
+     Ops_Pa.SerializableFactory_Pa.CompFactory_Pa,
+     Ops_Pa.PublisherAbs_Pa.Publisher_Pa;
 use  Ops_Pa.Error_Pa,
-     Ops_Pa.SerializableFactory_Pa.CompFactory_Pa;
+     Ops_Pa.SerializableFactory_Pa.CompFactory_Pa,
+     Ops_Pa.PublisherAbs_Pa.Publisher_Pa;
 
 package body Ops_Pa.Participant_Pa is
+
+  use type Com_Signal_Pa.Event_T;
 
   -- ===========================================================================
 
@@ -104,7 +113,7 @@ package body Ops_Pa.Participant_Pa is
     Self : Participant_Class_At := null;
   begin
     Self := new Participant_Class;
-    InitInstance( Self.all, domainID, participantID, configFile );
+    InitInstance( Self.all, Self, domainID, participantID, configFile );
     return Self;
   exception
     when others =>
@@ -117,53 +126,55 @@ package body Ops_Pa.Participant_Pa is
     Self.ObjectFactory.Add( typeSupport );
   end;
 
-  function getSendDataHandler( Self: in out Participant_Class; top : Topic_Class_At) return SendDataHandler_Class_At is
+  overriding function getSendDataHandler( Self: in out Participant_Class; top : Topic_Class_At) return SendDataHandler_Class_At is
     Result : SendDataHandler_Class_At := null;
   begin
     Result := Self.SendDataHandlerFactory.getSendDataHandler(top);
-
---TODO      if Result /= null then
---        FPartInfoDataMutex.Acquire;
---        begin
---        -- Need to add topic to partInfoData.publishTopics
---          FPartInfoData.addTopic(FPartInfoData.publishTopics, top);
---        finally
---          FPartInfoDataMutex.Release;
---        end;
---      end if;
+    if Result /= null then
+      declare
+        S : Com_Mutex_Pa.Scope_Lock(Self.PartInfoDataMutex'Access);
+      begin
+        -- Need to add topic to partInfoData.publishTopics
+        addTopic(Self.PartInfoData.publishTopics, top);
+      end;
+    end if;
     return Result;
   end;
 
-  procedure releaseSendDataHandler( Self: in out Participant_Class; top : Topic_Class_At ) is
+  overriding procedure releaseSendDataHandler( Self: in out Participant_Class; top : Topic_Class_At ) is
   begin
     Self.SendDataHandlerFactory.releaseSendDataHandler(top);
-
---TODO      FPartInfoDataMutex.Acquire;
---      try
---        -- Remove topic from partInfoData.publishTopics
---        FPartInfoData.removeTopic(FPartInfoData.publishTopics, top);
---      finally
---        FPartInfoDataMutex.Release;
---      end;
+    declare
+      S : Com_Mutex_Pa.Scope_Lock(Self.PartInfoDataMutex'Access);
+    begin
+      removeTopic(Self.PartInfoData.publishTopics, top);
+    end;
   end;
 
   -- Should only be used by Subscribers
-  function getReceiveDataHandler( Self : in out Participant_Class; top : Topic_Class_At) return ReceiveDataHandler_Class_At is
+  overriding function getReceiveDataHandler( Self : in out Participant_Class; top : Topic_Class_At) return ReceiveDataHandler_Class_At is
     Result : ReceiveDataHandler_Class_At := null;
   begin
     Result := Self.ReceiveDataHandlerFactory.getReceiveDataHandler( top, Self.Domain, SerializableInheritingTypeFactory_Class_At(Self.ObjectFactory) );
-
-    --///TODO partinfo stuff
-
+    if Result /= null then
+      declare
+        S : Com_Mutex_Pa.Scope_Lock(Self.PartInfoDataMutex'Access);
+      begin
+        -- Need to add topic to partInfoData.subscribeTopics
+        addTopic(Self.PartInfoData.subscribeTopics, top);
+      end;
+    end if;
     return Result;
   end;
 
-  procedure releaseReceiveDataHandler( Self: in out Participant_Class; top : Topic_Class_At ) is
+  overriding procedure releaseReceiveDataHandler( Self: in out Participant_Class; top : Topic_Class_At ) is
   begin
     Self.ReceiveDataHandlerFactory.releaseReceiveDataHandler( top );
-
-    --///TODO partinfo stuff
-
+    declare
+      S : Com_Mutex_Pa.Scope_Lock(Self.PartInfoDataMutex'Access);
+    begin
+      removeTopic(Self.PartInfoData.subscribeTopics, top);
+    end;
   end;
 
   function getErrorService( Self : in out Participant_Class ) return ErrorService_Class_At is
@@ -171,7 +182,7 @@ package body Ops_Pa.Participant_Pa is
     return Self.ErrorService;
   end;
 
-  procedure ReportError( Self : in out Participant_Class; Error : Error_Class_At ) is
+  overriding procedure ReportError( Self : in out Participant_Class; Error : Error_Class_At ) is
   begin
     Self.ErrorService.Report( Error );
   end;
@@ -187,11 +198,143 @@ package body Ops_Pa.Participant_Pa is
     return top;
   end;
 
-  procedure InitInstance( Self : in out Participant_Class; domainID : String; participantID : String; configFile : String ) is
+  -- Create a Topic for subscribing or publishing on ParticipantInfoData
+  function createParticipantInfoTopic( Self : Participant_Class ) return Topic_Class_At is
+    Result : Topic_Class_At;
+  begin
+    -- ops::Topic infoTopic("ops.bit.ParticipantInfoTopic", 9494, "ops.ParticipantInfoData", domain->getDomainAddress());
+    Result := Create("ops.bit.ParticipantInfoTopic", Self.Domain.MetaDataMcPort, "ops.ParticipantInfoData", Self.Domain.DomainAddress);
+    Result.SetLocalInterface( Self.Domain.LocalInterface );
+    Result.SetTimeToLive( Self.Domain.TimeToLive );
+    Result.SetDomainID( Self.DomainID.all );
+    Result.SetParticipantID( Self.ParticipantID.all );
+    Result.SetTransport( TRANSPORT_MC );
+    return Result;
+  end;
+
+  -- Returns a reference to the internal instance
+  function getConfig( Self: Participant_Class ) return OPSConfig_Class_At is
+  begin
+    return Self.Config;
+  end;
+
+  -- Returns a reference to the internal instance
+  function getDomain( Self: Participant_Class ) return Domain_Class_At is
+  begin
+    return Self.Domain;
+  end;
+
+  -- Get the name that this participant has set in its ParticipantInfoData
+  function getPartInfoName( Self : Participant_Class ) return string is
+  begin
+    return Self.PartInfoData.name.all;
+  end;
+
+  task body Participant_Pr_T is
+    Events : Com_Signal_Pa.Event_T;
+  begin
+    accept Start;
+    while not Self.TerminateFlag loop
+      begin
+        Self.EventsToTask.WaitForAny(Events);
+        exit when (Events and TerminateEvent_C) /= Com_Signal_Pa.NoEvent_C;
+        if (Events and StartEvent_C) /= Com_Signal_Pa.NoEvent_C then
+          Self.Run;
+        end if;
+      exception
+        when others =>
+          Self.ErrorService.Report( "Participant", "Part_Pr", "Got exception from Run()" );
+      end;
+    end loop;
+    accept Finish;
+  end Participant_Pr_T;
+
+  procedure Run( Self : in out Participant_Class ) is
+    partInfoTopic : Topic_Class_At := null;
+    partInfoPub : Publisher_Class_At := null;
+
+    function errMessage return String is
+    begin
+      if partInfoPub = null then
+        return "Failed to create publisher for ParticipantInfoTopic. Check localInterface and metaDataMcPort in configuration file.";
+      else
+        return "Failed to publish ParticipantInfoTopic data.";
+      end if;
+    end;
+
+  begin
+    while not Self.TerminateFlag loop
+      delay 1.0;
+      exit when Self.TerminateFlag;
+
+      -- Handle periodic publishing of metadata, i.e. Self.PartInfoData
+      begin
+        -- Create the meta data publisher if user hasn't disabled it for the domain.
+        -- The meta data publisher is only necessary if we have topics using transport UDP.
+        if partInfoPub = null and Self.Domain.MetaDataMcPort > 0 then
+          partInfoTopic := Self.createParticipantInfoTopic;
+          partInfoPub := Create(partInfoTopic);
+        end if;
+        if partInfoPub /= null then
+          declare
+            S : Com_Mutex_Pa.Scope_Lock(Self.PartInfoDataMutex'Access);
+          begin
+            partInfoPub.WriteOPSObject( Ops_Pa.OpsObject_Pa.OpsObject_Class_At(Self.PartInfoData) );
+          end;
+        end if;
+      exception
+        when others =>
+          StaticErrorService.Report("Participant", "Run", errMessage);
+      end;
+    end loop;
+
+    if partInfoPub /= null then
+      Free(partInfoPub);
+    end if;
+    if partInfoTopic /= null then
+      Free(partInfoTopic);
+    end if;
+  end;
+
+  -- Called from ReceiveDataHandlerFactory when an UDP Reciver is created/deleted, so
+  -- we can send the correct UDP transport info in the participant info data
+  procedure OnUdpTransport( Self : in out Participant_Class; ipaddress : String; port : Int32 ) is
+    S : Com_Mutex_Pa.Scope_Lock(Self.PartInfoDataMutex'Access);
+  begin
+    Self.PartInfoData.ip := Copy(ipaddress);
+    Self.PartInfoData.mc_udp_port := port;
+  end;
+
+  -- Method prototype to call when we connect/disconnect UDP topics with the participant info data listener
+  -- Override this to react on the UDP setup callback
+  procedure OnUdpTransport( Self : in out Participant_Class;
+                            topic : Topic_Class_At;
+                            sdh : SendDataHandler_Class_At;
+                            Connect : Boolean ) is
+  begin
+    -- FPartInfoListener is deleted before sendDataHandlerFactory (and it must be in that order
+    -- since FPartInfoListener uses a subscriber that uses the sendDataHandlerFactory).
+    -- Therefore we must check that it is assigned here
+    if Self.PartInfoListener = null then
+      return;
+    end if;
+
+    if Connect then
+      Self.PartInfoListener.connectUdp(topic, sdh);
+    else
+      Self.PartInfoListener.disconnectUdp(topic, sdh);
+    end if;
+  end;
+
+  procedure InitInstance( Self : in out Participant_Class;
+                          SelfAt : Participant_Class_At;
+                          domainID : String;
+                          participantID : String;
+                          configFile : String ) is
   begin
     Self.ParticipantID := Copy(participantID);
     Self.DomainID := Copy(domainID);
-    --TODO FAliveTimeout := 1000;
+    Self.SelfAt := SelfAt;
 
     Self.ErrorService := Create;
 
@@ -218,36 +361,54 @@ package body Ops_Pa.Participant_Pa is
       raise EConfigException;
     end if;
 
-    -- Create a fatory instance for each participant
+    -- Create a factory instance for each participant
     Self.ObjectFactory := OPSObjectFactory_Class_At(Ops_Pa.SerializableFactory_Pa.CompFactory_Pa.OpsObjectFactory_Pa.Create);
 
     -- Initialize static data in partInfoData
-    --TODO
+    Self.PartInfoData := Create;
+    Self.PartInfoData.name := Copy(Com_Socket_Pa.GetHostName & " (" & Win32.DWORD'Image(Win32.Winbase.GetCurrentProcessId) & ")");
+    Self.PartInfoData.languageImplementation := Copy("Ada");
+    Self.PartInfoData.id := Copy(participantID);
+    Self.PartInfoData.domain := Copy(domainID);
 
     --
-    Self.SendDataHandlerFactory := Create(Self.Domain, Self.ErrorService);
+    Self.SendDataHandlerFactory := Create(Self.Domain, Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa.OnUdpTransport_Interface_At(Self.SelfAt), Self.ErrorService);
 
-    declare
-      temp : TOnUdpTransportInfoProc := 0;
-    begin
-      Self.ReceiveDataHandlerFactory := Create(temp, Self.ErrorService);
-    end;
+    Self.ReceiveDataHandlerFactory := Create( Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa.OnUdpTransport_Interface_At(Self.SelfAt), Self.ErrorService);
 
     -- Partinfo topic / Listener
-    --TODO
+    Self.PartInfoTopic := Self.createParticipantInfoTopic;
+    Self.PartInfoListener := Create(Self.Domain, Self.PartInfoTopic, Self.ErrorService);
 
     -- Start our thread
-    --TODO
+    Self.Part_Pr.Start;
+    Self.EventsToTask.Signal(StartEvent_C);
   end;
 
-  procedure Finalize( Self : in out Participant_Class ) is
+  overriding procedure Finalize( Self : in out Participant_Class ) is
   begin
+    Self.TerminateFlag := True;
+    Self.EventsToTask.Signal(TerminateEvent_C);
+    Self.Part_Pr.Finish;
+
+    if Self.PartInfoListener /= null then
+      Free(Self.PartInfoListener);    -- Must be done before send/receive factory delete below
+    end if;
+
+    if Self.PartInfoTopic /= null then
+      Free(Self.PartInfoTopic);
+    end if;
+
     if Self.ReceiveDataHandlerFactory /= null then
       Free(Self.ReceiveDataHandlerFactory);
     end if;
 
     if Self.SendDataHandlerFactory /= null then
       Free(Self.SendDataHandlerFactory);
+    end if;
+
+    if Self.PartInfoData /= null then
+      Free(Self.PartInfoData);
     end if;
 
     if Self.ObjectFactory /= null then

@@ -26,13 +26,13 @@ package body Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa is
 
   use type MyMap.cursor;
 
-  function Create( Proc : TOnUdpTransportInfoProc;
+  function Create( Client : OnUdpTransport_Interface_At;
                    Reporter : Ops_Pa.Error_Pa.ErrorService_Class_At )
                   return ReceiveDataHandlerFactory_Class_At is
     Self : ReceiveDataHandlerFactory_Class_At := null;
   begin
     Self := new ReceiveDataHandlerFactory_Class;
-    InitInstance( Self.all, Proc, Reporter );
+    InitInstance( Self.all, Client, Reporter );
     return Self;
   exception
     when others =>
@@ -51,14 +51,14 @@ package body Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa is
   end;
 
   procedure InitInstance( Self : in out ReceiveDataHandlerFactory_Class;
-                          Proc : TOnUdpTransportInfoProc;
+                          Client : OnUdpTransport_Interface_At;
                           Reporter : Ops_Pa.Error_Pa.ErrorService_Class_At ) is
   begin
-    Self.OnUdpTransportInfoProc := Proc;
+    Self.OnUdpTransportInfoClient := Client;
     Self.ErrorService := Reporter;
   end;
 
-  procedure Finalize( Self : in out ReceiveDataHandlerFactory_Class ) is
+  overriding procedure Finalize( Self : in out ReceiveDataHandlerFactory_Class ) is
 
     procedure Process( Pos : in MyMap.Cursor ) is
       Value : HandlerInfo := MyMap.Element(Pos);
@@ -137,11 +137,10 @@ package body Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa is
     elsif top.Transport = TRANSPORT_UDP then
       Result := Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa.Create(top, dom, opsObjectFactory, Self.ErrorService);
 
---///TODO        if Assigned(FOnUdpTransportInfoProc) then
---          FOnUdpTransportInfoProc(
---                                  (Result.getReceiver as TUDPReceiver).Address,
---                                  (Result.getReceiver as TUDPReceiver).Port);
---        end if;
+      if Self.OnUdpTransportInfoClient /= null then
+        Self.OnUdpTransportInfoClient.
+          OnUdpTransport( Result.getReceiver.Address, Int32(Result.getReceiver.Port) );
+      end if;
 
       info.handler := Result;
       --info.numUsers := 1;
@@ -179,11 +178,11 @@ package body Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa is
 
         Free(rdh);
 
---///TODO          if top.Transport = TRANSPORT_UDP then
---            if FOnUdpTransportInfoProc /= null then
---              FOnUdpTransportInfoProc("", 0);
---            end if;
---          end if;
+        if top.Transport = TRANSPORT_UDP then
+          if Self.OnUdpTransportInfoClient /= null then
+            Self.OnUdpTransportInfoClient.OnUdpTransport("", 0);
+          end if;
+        end if;
       end if;
     end if;
   end;

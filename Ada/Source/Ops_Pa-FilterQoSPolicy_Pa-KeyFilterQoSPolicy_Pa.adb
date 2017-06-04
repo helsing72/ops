@@ -109,7 +109,7 @@ package body Ops_Pa.FilterQoSPolicy_Pa.KeyFilterQoSPolicy_Pa is
     Self.Keys.Add( Key );
   end;
 
-  procedure Finalize( Self : in out KeyFilterQoSPolicy_Class ) is
+  overriding procedure Finalize( Self : in out KeyFilterQoSPolicy_Class ) is
   begin
     Self.Keys.Dispose;
   end;

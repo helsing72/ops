@@ -38,13 +38,13 @@ package Ops_Pa.OpsObject_Pa.OPSConfig_Pa is
   -- Constructors
   function Create return OPSConfig_Class_At;
 
-  procedure Serialize( Self : in out OPSConfig_Class; archiver : ArchiverInOut_Class_At);
+  overriding procedure Serialize( Self : in out OPSConfig_Class; archiver : ArchiverInOut_Class_At);
 
   -- Returns a newely allocated deep copy/clone of Self.
-  function Clone( Self : OPSConfig_Class ) return OpsObject_Class_At;
+  overriding function Clone( Self : OPSConfig_Class ) return OpsObject_Class_At;
 
   -- Fills the parameter obj with all values from Self.
-  procedure FillClone( Self : OPSConfig_Class; obj : OpsObject_Class_At );
+  overriding procedure FillClone( Self : OPSConfig_Class; obj : OpsObject_Class_At );
 
   -- Returns a reference to a singleton instance and should NOT be deleted.
   -- See also releaseConfig below
@@ -75,7 +75,7 @@ package Ops_Pa.OpsObject_Pa.OPSConfig_Pa is
 
   function Create return DefaultOPSConfigImpl_Class_At;
 
-  procedure Serialize( Self : in out DefaultOPSConfigImpl_Class; archiver : ArchiverInOut_Class_At);
+  overriding procedure Serialize( Self : in out DefaultOPSConfigImpl_Class; archiver : ArchiverInOut_Class_At);
 
 -- ==========================================================================
 --      C l a s s    D e c l a r a t i o n.
@@ -104,7 +104,7 @@ private
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out OPSConfig_Class );
+  overriding procedure Finalize( Self : in out OPSConfig_Class );
 
 -- ==========================================================================
 --
@@ -117,7 +117,7 @@ private
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out DefaultOPSConfigImpl_Class );
+  overriding procedure Finalize( Self : in out DefaultOPSConfigImpl_Class );
 
 -- ==========================================================================
 --
@@ -126,7 +126,7 @@ private
 
   procedure InitInstance( Self : in out ExtendedOPSConfig_Class );
 
-  procedure Finalize( Self : in out ExtendedOPSConfig_Class );
+  overriding procedure Finalize( Self : in out ExtendedOPSConfig_Class );
 
 end Ops_Pa.OpsObject_Pa.OPSConfig_Pa;
 

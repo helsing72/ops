@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -19,8 +19,8 @@
 with System,
      Ada.Unchecked_Deallocation,
      Ada.Exceptions,
-     Com_Base_Abs_Pa,
-     Ctv;
+     Interfaces,
+     Com_Base_Abs_Pa;
 
 use  System;
 
@@ -34,19 +34,19 @@ package Ops_Pa is
   subtype NotifyParam_T is Com_Base_Abs_Pa.Com_Base_Abs_Class_At;
 
   -- Types
-  subtype Byte    is Ctv.Unsigned_Int8;
-  subtype UInt8   is Ctv.Unsigned_Int8;
-  subtype UInt16  is Ctv.Unsigned_Int16;
-  subtype UInt32  is Ctv.Unsigned_Int32;
-  subtype UInt64  is Ctv.Unsigned_Int64;
+  subtype Byte    is Interfaces.Unsigned_8;
+  subtype UInt8   is Interfaces.Unsigned_8;
+  subtype UInt16  is Interfaces.Unsigned_16;
+  subtype UInt32  is Interfaces.Unsigned_32;
+  subtype UInt64  is Interfaces.Unsigned_64;
 
-  subtype Int8    is Ctv.Integer8;
-  subtype Int16   is Ctv.Integer16;
-  subtype Int32   is Ctv.Integer32;
-  subtype Int64   is Ctv.Integer64;
+  subtype Int8    is Interfaces.Integer_8;
+  subtype Int16   is Interfaces.Integer_16;
+  subtype Int32   is Interfaces.Integer_32;
+  subtype Int64   is Interfaces.Integer_64;
 
-  subtype Float32 is Ctv.Float32;
-  subtype Float64 is Ctv.Float64;
+  subtype Float32 is Interfaces.IEEE_Float_32;
+  subtype Float64 is Interfaces.IEEE_Float_64;
 
   type String_At  is access all String;
 
@@ -69,18 +69,18 @@ package Ops_Pa is
   type String_Arr_At is access all String_Arr;
 
   -- Access to operations on types
-  use type Ctv.Unsigned_Int8;
-  use type Ctv.Unsigned_Int16;
-  use type Ctv.Unsigned_Int32;
-  use type Ctv.Unsigned_Int64;
+  use type Interfaces.Unsigned_8;
+  use type Interfaces.Unsigned_16;
+  use type Interfaces.Unsigned_32;
+  use type Interfaces.Unsigned_64;
 
-  use type Ctv.Integer8;
-  use type Ctv.Integer16;
-  use type Ctv.Integer32;
-  use type Ctv.Integer64;
+  use type Interfaces.Integer_8;
+  use type Interfaces.Integer_16;
+  use type Interfaces.Integer_32;
+  use type Interfaces.Integer_64;
 
-  use type Ctv.Float32;
-  use type Ctv.Float64;
+  use type Interfaces.IEEE_Float_32;
+  use type Interfaces.IEEE_Float_64;
 
   -- Constants
   PACKET_MAX_SIZE : constant := 60000;

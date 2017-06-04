@@ -54,7 +54,7 @@ package body Ops_Pa.OPSConfigRepository_Pa is
       raise;
   end Create;
 
-  procedure Finalize( Self : in out OPSConfigRepository_Class ) is
+  overriding procedure Finalize( Self : in out OPSConfigRepository_Class ) is
 
     procedure Process( Pos : in MyMap.Cursor ) is
       Value : OPSConfig_Class_At := MyMap.Element(Pos);

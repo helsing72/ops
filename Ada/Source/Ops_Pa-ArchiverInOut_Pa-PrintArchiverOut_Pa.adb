@@ -79,7 +79,7 @@ package body Ops_Pa.ArchiverInOut_Pa.PrintArchiverOut_Pa is
     Self.SelfAt := SelfAt;
   end;
 
-  procedure Finalize( Self : in out PrintArchiverOut_Class ) is
+  overriding procedure Finalize( Self : in out PrintArchiverOut_Class ) is
   begin
     null;
   end;

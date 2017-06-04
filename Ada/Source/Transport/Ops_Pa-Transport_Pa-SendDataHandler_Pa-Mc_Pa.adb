@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -30,7 +30,7 @@ package body Ops_Pa.Transport_Pa.SendDataHandler_Pa.Mc_Pa is
       raise;
   end Create;
 
-  overriding function sendData( Self : McSendDataHandler_Class; buf : Byte_Arr_At; bufSize : Integer; topic : Topic_Class_At) return Boolean is
+  overriding function sendData( Self : in out McSendDataHandler_Class; buf : Byte_Arr_At; bufSize : Integer; topic : Topic_Class_At) return Boolean is
   begin
     return Self.Sender.sendTo(buf, bufSize, topic.DomainAddress, Integer(topic.Port));
   end;
@@ -46,7 +46,7 @@ package body Ops_Pa.Transport_Pa.SendDataHandler_Pa.Mc_Pa is
     Self.Sender.SetErrorService( Reporter );
   end;
 
-  procedure Finalize( Self : in out McSendDataHandler_Class ) is
+  overriding procedure Finalize( Self : in out McSendDataHandler_Class ) is
   begin
     declare
       S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);

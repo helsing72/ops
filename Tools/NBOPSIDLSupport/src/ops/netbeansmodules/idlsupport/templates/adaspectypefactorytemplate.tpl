@@ -24,6 +24,6 @@ package __unitName is
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out __className_Class );
+  overriding procedure Finalize( Self : in out __className_Class );
 
 end;

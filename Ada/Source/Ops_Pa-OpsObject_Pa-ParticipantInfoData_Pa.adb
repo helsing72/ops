@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -34,7 +34,7 @@ package body Ops_Pa.OpsObject_Pa.ParticipantInfoData_Pa is
   -- Helpers for handling [de]serializing of fixed arrays
   procedure TopicInfoData_Class_InoutDynArr is new inoutdynarr2(TopicInfoData_Class, TopicInfoData_Class_At, TopicInfoData_Class_At_Arr, TopicInfoData_Class_At_Arr_At);
 
-  procedure Serialize( Self : in out ParticipantInfoData_Class; archiver : ArchiverInOut_Class_At) is
+  overriding procedure Serialize( Self : in out ParticipantInfoData_Class; archiver : ArchiverInOut_Class_At) is
   begin
     Serialize( OpsObject_Class(Self), archiver );
     archiver.Inout("name", Self.name);
@@ -51,7 +51,7 @@ package body Ops_Pa.OpsObject_Pa.ParticipantInfoData_Pa is
   end;
 
   -- Returns a newely allocated deep copy/clone of Self.
-  function Clone( Self : ParticipantInfoData_Class ) return OpsObject_Class_At is
+  overriding function Clone( Self : ParticipantInfoData_Class ) return OpsObject_Class_At is
     Result : ParticipantInfoData_Class_At := null;
   begin
     Result := Create;
@@ -73,7 +73,7 @@ package body Ops_Pa.OpsObject_Pa.ParticipantInfoData_Pa is
   end;
 
   -- Fills the parameter obj with all values from Self.
-  procedure FillClone( Self : ParticipantInfoData_Class; obj : OpsObject_Class_At ) is
+  overriding procedure FillClone( Self : ParticipantInfoData_Class; obj : OpsObject_Class_At ) is
   begin
     FillClone( OpsObject_Class(Self), obj );
     if obj.all in ParticipantInfoData_Class'Class then
@@ -123,10 +123,10 @@ package body Ops_Pa.OpsObject_Pa.ParticipantInfoData_Pa is
   procedure InitInstance( Self : in out ParticipantInfoData_Class ) is
   begin
     InitInstance( OpsObject_Class(Self) );
-    AppendType( OpsObject_Class(Self), "ParticipantInfoData" );
+    AppendType( OpsObject_Class(Self), "ops.ParticipantInfoData" );
   end;
 
-  procedure Finalize( Self : in out ParticipantInfoData_Class ) is
+  overriding procedure Finalize( Self : in out ParticipantInfoData_Class ) is
   begin
     if Self.name /= null then
       Dispose(Self.name);
@@ -202,7 +202,7 @@ package body Ops_Pa.OpsObject_Pa.ParticipantInfoData_Pa is
           tmp(arr'First..idx-1) := arr(arr'First..idx-1);
         end if;
         if idx < arr'Last then
-          tmp(idx+1..arr'Last) := arr(idx+1..arr'Last);
+          tmp(idx..arr'Last-1) := arr(idx+1..arr'Last);
         end if;
         arr := tmp;
       end if;

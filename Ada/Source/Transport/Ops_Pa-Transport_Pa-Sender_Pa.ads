@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -56,7 +56,7 @@ private
       -- Borrowed reference
       ErrorService : ErrorService_Class_At := null;
 
-      -- Result from WSAGetLastError() on error
+      -- Result from socket lib on error
       LastErrorCode : Integer := 0;
     end record;
 

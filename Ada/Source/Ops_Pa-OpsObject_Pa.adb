@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --  
 -- This file is part of OPS (Open Publish Subscribe).
 --  
@@ -36,7 +36,7 @@ package body Ops_Pa.OpsObject_pa is
   --------------------------------------------------------------------------
   --
   --------------------------------------------------------------------------
-  procedure Serialize( Self : in out OpsObject_Class; archiver : ArchiverInOut_Class_At) is
+  overriding procedure Serialize( Self : in out OpsObject_Class; archiver : ArchiverInOut_Class_At) is
   begin
     archiver.inout("key", Self.Key);
   end Serialize;
@@ -57,7 +57,7 @@ package body Ops_Pa.OpsObject_pa is
   --------------------------------------------------------------------------
   --
   --------------------------------------------------------------------------
-  function TypesString( Self : OpsObject_Class ) return String is
+  overriding function TypesString( Self : OpsObject_Class ) return String is
   begin
     return Self.TypesString.all;
   end TypesString;
@@ -133,7 +133,7 @@ package body Ops_Pa.OpsObject_pa is
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out OpsObject_Class ) is
+  overriding procedure Finalize( Self : in out OpsObject_Class ) is
   begin
     Dispose(Self.Key);
     Dispose(Self.TypesString);

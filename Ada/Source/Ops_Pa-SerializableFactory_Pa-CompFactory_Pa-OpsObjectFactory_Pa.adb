@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -39,7 +39,7 @@ package body Ops_Pa.SerializableFactory_Pa.CompFactory_Pa.OpsObjectFactory_Pa is
   -- Create a serializable class instance from given type
   function Make( Self : BuiltInFactory_Class; types : string) return Serializable_Class_At;
 
-  procedure Finalize( Self : in out BuiltInFactory_Class );
+  overriding procedure Finalize( Self : in out BuiltInFactory_Class );
 
   -- Constructors
   function Create return BuiltInFactory_Class_At is
@@ -81,7 +81,7 @@ package body Ops_Pa.SerializableFactory_Pa.CompFactory_Pa.OpsObjectFactory_Pa is
     return null;
   end;
 
-  procedure Finalize( Self : in out BuiltInFactory_Class ) is
+  overriding procedure Finalize( Self : in out BuiltInFactory_Class ) is
   begin
     null;
   end;
@@ -110,7 +110,7 @@ package body Ops_Pa.SerializableFactory_Pa.CompFactory_Pa.OpsObjectFactory_Pa is
     Self.Add(SerializableFactory_Class_At(fact));
   end;
 
-  procedure Finalize( Self : in out OPSObjectFactoryImpl_Class ) is
+  overriding procedure Finalize( Self : in out OPSObjectFactoryImpl_Class ) is
   begin
     Finalize( OPSObjectFactory_Class(Self) );
   end;
@@ -128,7 +128,7 @@ package body Ops_Pa.SerializableFactory_Pa.CompFactory_Pa.OpsObjectFactory_Pa is
     return OPSObjectFactory_Class_At(gInstance);
   end;
 
-  procedure Finalize( Self : in out OPSObjectFactory_Class ) is
+  overriding procedure Finalize( Self : in out OPSObjectFactory_Class ) is
   begin
     Finalize( SerializableInheritingTypeFactory_Class(Self) );
   end;

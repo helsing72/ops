@@ -147,7 +147,7 @@ package body Ops_Pa.Notifier_Pa is
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out Notifier_Class ) is
+  overriding procedure Finalize( Self : in out Notifier_Class ) is
   begin
     null;
   end Finalize;

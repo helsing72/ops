@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -45,13 +45,13 @@ package Ops_Pa.OpsObject_Pa.Domain_Pa is
   -- Constructors
   function Create return Domain_Class_At;
 
-  procedure Serialize( Self : in out Domain_Class; archiver : ArchiverInOut_Class_At);
+  overriding procedure Serialize( Self : in out Domain_Class; archiver : ArchiverInOut_Class_At);
 
   -- Returns a newely allocated deep copy/clone of Self.
-  function Clone( Self : Domain_Class ) return OpsObject_Class_At;
+  overriding function Clone( Self : Domain_Class ) return OpsObject_Class_At;
 
   -- Fills the parameter obj with all values from Self.
-  procedure FillClone( Self : Domain_Class; obj : OpsObject_Class_At );
+  overriding procedure FillClone( Self : Domain_Class; obj : OpsObject_Class_At );
 
   -- Returns references to the internal topics
   -- NOTE: The Domain still owns them
@@ -71,8 +71,6 @@ package Ops_Pa.OpsObject_Pa.Domain_Pa is
   function LocalInterface( Self : Domain_Class ) return String;
   function InSocketBufferSize( Self : Domain_Class ) return Int32;
   function OutSocketBufferSize( Self : Domain_Class ) return Int32;
-
-  function doSubnetTranslation( addr : String ) return String;
 
 private
 -- ==========================================================================
@@ -103,7 +101,7 @@ private
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out Domain_Class );
+  overriding procedure Finalize( Self : in out Domain_Class );
 
 end Ops_Pa.OpsObject_Pa.Domain_Pa;
 

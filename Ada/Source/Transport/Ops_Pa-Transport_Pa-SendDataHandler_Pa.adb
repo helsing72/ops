@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -65,7 +65,7 @@ package body Ops_Pa.Transport_Pa.SendDataHandler_Pa is
     null;
   end;
 
-  procedure Finalize( Self : in out SendDataHandler_Class ) is
+  overriding procedure Finalize( Self : in out SendDataHandler_Class ) is
   begin
     null;
   end;

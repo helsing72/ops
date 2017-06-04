@@ -83,7 +83,7 @@ package body Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa is
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out ReceiveDataHandler_Class ) is
+  overriding procedure Finalize( Self : in out ReceiveDataHandler_Class ) is
   begin
     Stop( Self );
     Free(Self.Receiver);

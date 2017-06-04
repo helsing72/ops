@@ -18,7 +18,8 @@
 
 with Ada.Strings.Fixed;
 
-with Ops_pa.Error_Pa;
+with Ops_pa.Error_Pa,
+     Ops_Pa.Participant_Pa;
 
 use Ops_Pa.Error_Pa;
 
@@ -49,11 +50,11 @@ package body Ops_Pa.Subscriber_Pa is
 
 --///TODO    FDeadlineNotifier := TDeadlineTimer.Create(Self);
 
-    Self.Participant := getInstance(t.DomainID, t.ParticipantID);
+    Self.Participant := Participant_Interface_At(Ops_Pa.Participant_Pa.getInstance(t.DomainID, t.ParticipantID));
     Self.TimeLastData := GetTimeInMs;
   end;
 
-  procedure Finalize( Self : in out Subscriber_Class ) is
+  overriding procedure Finalize( Self : in out Subscriber_Class ) is
     o : OPSMessage_Class_At;
   begin
 --///TODO    FDeadlineNotifier.Cancel;

@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -77,7 +77,7 @@ package body Ops_Pa.OpsObject_Pa.Domain_Pa is
   procedure Channel_Class_InoutDynArr is new inoutdynarr2(Channel_Class, Channel_Class_At, Channel_Class_At_Arr, Channel_Class_At_Arr_At);
   procedure Transport_Class_InoutDynArr is new inoutdynarr2(Transport_Class, Transport_Class_At, Transport_Class_At_Arr, Transport_Class_At_Arr_At);
 
-  procedure Serialize( Self : in out Domain_Class; archiver : ArchiverInOut_Class_At) is
+  overriding procedure Serialize( Self : in out Domain_Class; archiver : ArchiverInOut_Class_At) is
   begin
     Serialize( OpsObject_Class(Self), archiver );
     archiver.Inout("domainID", Self.domainID);
@@ -317,89 +317,6 @@ package body Ops_Pa.OpsObject_Pa.Domain_Pa is
     end if;
   end;
 
---  /// ------------------------------------------
---  /// Helper to get all IP interfaces
---
---  procedure VVGetIpAddrTable(var p: PMibIpAddrTable; var Size: Cardinal; const bOrder: BOOL);
---  var
---    Res: DWORD;
---  begin
---    p := nil;
---    Size := 0;
---    if @GetIpAddrTable = nil then Exit;   //Not implemented in this windows version
---    Res := GetIpAddrTable(p,Size,bOrder);
---    if Res=ERROR_INSUFFICIENT_BUFFER then begin
---      Getmem(p,Size);
---      // Caller must free this buffer when it is no longer used
---      FillChar(p^,Size,#0);
---      Res := GetIpAddrTable(p,Size,bOrder);
---    end;
---    if Res <> NO_ERROR then begin
---      if Assigned(p) then FreeMem(p);
---      p := nil;
---      Size := 0;
---    end;
---  end;
---
---  function IpAddressToString(Addr: DWORD): AnsiString;
---  var
---    InAddr: TInAddr;
---  begin
---    InAddr.S_addr := Addr;
---    Result := AnsiString(inet_ntoa(InAddr));
---  end;
-
--- If argument contains a "/" we assume it is on the form:  subnet-address/subnet-mask
--- e.g "192.168.10.0/255.255.255.0" or "192.168.10.0/24"
--- In that case we loop over all interfaces and take the first one that matches
--- i.e. the one whos interface address is on the subnet
-  function doSubnetTranslation(addr : String) return String is
---      Idx : Integer;
---      subnet, mask : AnsiString;
---      subnetIp, subnetMask : DWORD;
---      Size: ULONG;
---      p: PMibIpAddrTable;
---      i: integer;
-  begin
-    return addr;
---    Result := addr;
---
---      -- If no '/' we just return the given address
---      Idx := Pos('/', string(addr));
---      if Idx = 0 then Exit;
---
---        subnet := Copy(addr, 1, Idx-1);
---        mask   := Copy(addr, Idx+1, MaxInt);
---
---    subnetIp := inet_addr(PAnsiChar(subnet));
---    if Length(mask) <= 2 then begin
---      // Expand to the number of bits given
---      subnetMask := StrToInt(string(mask));
---      subnetMask := (((1 shl subnetMask)-1) shl (32 - subnetMask)) and $FFFFFFFF;
---      subnetMask := ntohl(subnetMask);
---    end else begin
---      subnetMask := inet_addr(PAnsiChar(mask));
---    end;
---
---    VVGetIpAddrTable(p, Size, False);
---    if Assigned(p) then begin
---      try
---        with p^ do begin
---          for i := 0 to dwNumEntries - 1 do begin
---            with table[i] do begin
---              if (dwAddr and subnetMask) = (subnetIp and subnetMask) then begin
---                Result := IpAddressToString(dwAddr);
---                Break;
---              end;
---            end;
---          end;
---        end;
---      finally
---        FreeMem(p);
---      end;
---    end;
-  end;
-
   procedure InitInstance( Self : in out Domain_Class ) is
   begin
     InitInstance( OpsObject_Class(Self) );
@@ -408,7 +325,7 @@ package body Ops_Pa.OpsObject_Pa.Domain_Pa is
     Self.DomainID := Copy("");
   end;
 
-  procedure Finalize( Self : in out Domain_Class ) is
+  overriding procedure Finalize( Self : in out Domain_Class ) is
   begin
     if Self.domainAddress /= null then
       Dispose(Self.domainAddress);

@@ -72,6 +72,8 @@ package Ops_Pa.Transport_Pa.Receiver_Pa is
 
   function LastErrorCode( Self : Receiver_Class ) return Integer;
 
+  function Port( Self : Receiver_Class ) return Integer is abstract;
+  function Address( Self : Receiver_Class ) return String is abstract;
 
   -- ========================================================================
 
@@ -83,8 +85,6 @@ private
 --
 -- ==========================================================================
   task type Receiver_Pr_T( Self : access Receiver_Class'Class ) is
---    pragma Priority(Prio_zzz_C);
---    pragma Storage_Size(Stack_zzz_C);
     entry Start;
     entry Finish;
   end Receiver_Pr_T;
@@ -125,7 +125,7 @@ private
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out Receiver_Class );
+  overriding procedure Finalize( Self : in out Receiver_Class );
 
 end Ops_Pa.Transport_Pa.Receiver_Pa;
 

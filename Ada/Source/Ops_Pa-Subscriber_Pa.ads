@@ -29,14 +29,14 @@ with Com_Signal_Pa,
      Ops_Pa.OpsObject_Pa.Topic_Pa,
      Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa,
      Ops_Pa.FilterQoSPolicy_Pa,
-     Ops_Pa.Participant_Pa;
+     Ops_Pa.Participant_Interface_Pa;
 
 use Ops_Pa.OpsObject_Pa,
     Ops_Pa.OpsObject_Pa.OPSMessage_Pa,
     Ops_Pa.OpsObject_Pa.Topic_Pa,
     Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa,
     Ops_Pa.FilterQoSPolicy_Pa,
-    Ops_Pa.Participant_Pa;
+    Ops_Pa.Participant_Interface_Pa;
 
 package Ops_Pa.Subscriber_Pa is
 
@@ -173,7 +173,7 @@ private
 --///TODO      FDeadlineNotifier : TDeadlineTimer;
 
       -- The Participant to which this Subscriber belongs (NOTE: we don't own the object)
-      Participant : Participant_Class_At := null;
+      Participant : Participant_Interface_At := null;
 
       -- ReceiveDataHandler delivering new data samples to this Subscriber (NOTE: we don't own the object)
       ReceiveDataHandler : ReceiveDataHandler_Class_At := null;
@@ -223,7 +223,7 @@ private
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out Subscriber_Class );
+  overriding procedure Finalize( Self : in out Subscriber_Class );
 
 -- ==========================================================================
 --

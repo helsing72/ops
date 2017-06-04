@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016 Lennart Andersson.
+-- Copyright (C) 2016-2017 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -16,7 +16,8 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
-with Ops_Pa.Transport_Pa.Sender_Pa.Udp_Pa;
+with Ops_Pa.Transport_Pa.Sender_Pa.Udp_Pa,
+     Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa;
 
 package body Ops_Pa.Transport_Pa.Sender_Pa is
 
@@ -49,9 +50,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa is
 
   function createTCPServer(ip : string; port : Integer; outSocketBufferSize : Int64 := 16000000) return Sender_Class_At is
   begin
-    raise Not_Yet_Implemented;
-    return null;
---  Result := Ops_Pa.Transport_Pa.Sender_Pa.Tcp_Pa.Create(ip, port, outSocketBufferSize);
+   return Sender_Class_At(Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa.Create(ip, port, outSocketBufferSize));
   end;
 
 end Ops_Pa.Transport_Pa.Sender_Pa;

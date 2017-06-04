@@ -85,7 +85,7 @@ private
   --  Finalize the object
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
-  procedure Finalize( Self : in out OPSConfigRepository_Class );
+  overriding procedure Finalize( Self : in out OPSConfigRepository_Class );
 
 end Ops_Pa.OPSConfigRepository_Pa;
 

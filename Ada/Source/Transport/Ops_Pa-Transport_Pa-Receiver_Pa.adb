@@ -16,9 +16,15 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
-with Ops_Pa.Transport_Pa.Receiver_Pa.MulticastReceiver_Pa;
+with Ops_Pa.Transport_Pa.Receiver_Pa.MulticastReceiver_Pa,
+     Ops_Pa.Transport_Pa.Receiver_Pa.UDPReceiver_Pa,
+     Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa;
 
-use Ops_Pa.Transport_Pa.Receiver_Pa.MulticastReceiver_Pa;
+use Ops_Pa.Transport_Pa.Receiver_Pa.MulticastReceiver_Pa,
+    Ops_Pa.Transport_Pa.Receiver_Pa.UDPReceiver_Pa,
+    Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa;
+
+with Com_Socket_Pa;
 
 package body Ops_Pa.Transport_Pa.Receiver_Pa is
 
@@ -45,7 +51,7 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa is
     Self.Receiver_Pr.Start;
   end;
 
-  procedure Finalize( Self : in out Receiver_Class ) is
+  overriding procedure Finalize( Self : in out Receiver_Class ) is
   begin
     Self.TerminateFlag := True;
     Self.EventsToTask.Signal(TerminateEvent_C);
@@ -91,24 +97,23 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa is
 
   function getReceiver(top : Topic_Class_At; dom : Domain_Class_At; Reporter : ErrorService_Class_At) return Receiver_Class_At is
     Result : Receiver_Class_At := null;
-    localif : String := doSubnetTranslation(top.LocalInterface);
+    localif : String := Com_Socket_Pa.doSubnetTranslation(top.LocalInterface);
   begin
     if top.Transport = TRANSPORT_MC then
       Result := Receiver_Class_At(Ops_Pa.Transport_Pa.Receiver_Pa.MulticastReceiver_Pa.
-        Create( string(top.DomainAddress),
+        Create( top.DomainAddress,
                 Integer(top.Port),
                 localIf,
                 top.InSocketBufferSize));
 
     elsif top.Transport = TRANSPORT_TCP then
-      raise Not_Yet_Implemented;
-      return null;
-      --Result := TTCPClientReceiver.Create(string(top.DomainAddress), top.Port, top.InSocketBufferSize);
+      Result := Receiver_Class_At(Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa.
+        Create( top.DomainAddress, Integer(top.Port), top.InSocketBufferSize));
 
     elsif top.Transport = TRANSPORT_UDP then
-      raise Not_Yet_Implemented;
-      return null;
-      --Result := TUDPReceiver.Create(0, localIf, top.InSocketBufferSize);
+      Result := Receiver_Class_At(Ops_Pa.Transport_Pa.Receiver_Pa.UDPReceiver_Pa.
+        Create(0, localIf, top.InSocketBufferSize));
+
     end if;
 
     if Result /= null then
