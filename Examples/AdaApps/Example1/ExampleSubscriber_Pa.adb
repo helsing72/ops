@@ -40,7 +40,6 @@ package body ExampleSubscriber_Pa is
     topic : Topic_Class_At;
     sub : ChildDataSubscriber_Class_At;
     data : ChildData_Class_At;
-    dummy : Boolean;
   begin
     -- Setup the OPS static error service (common for all participants, reports
     -- errors during participant creation)
@@ -90,7 +89,7 @@ package body ExampleSubscriber_Pa is
         -- existing message in the OPS core
         if sub.waitForNewData(100) then
           -- Need to lock message while using it's data via the reference
-          dummy := sub.acquireMessageLock;
+          sub.acquireMessageLock;
           begin
             data := sub.getTypedDataReference;
             Put_Line("New data found: Received ChildTopic with " & Int64'Image(data.l));

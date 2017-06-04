@@ -18,6 +18,8 @@
 
 with Ada.Text_IO; use Ada.Text_IO;
 
+with Interfaces;
+
 with Ops_Pa.MemoryMap_Pa;
 with Ops_Pa.ByteBuffer_Pa;
 with Ops_Pa.ArchiverInOut_Pa;
@@ -54,7 +56,6 @@ use Ops_Pa.Subscriber_Pa.TestAll_ChildData;
 with Ops_Pa.ArchiverInOut_Pa.PrintArchiverOut_Pa;
 use Ops_Pa.ArchiverInOut_Pa.PrintArchiverOut_Pa;
 
-with Ctv;
 with Ops_Pa; use Ops_Pa;
 with Com_Base_Abs_Pa;
 with Ops_Pa.Error_Pa;
@@ -63,29 +64,21 @@ with Ops_Pa.Participant_Pa;
 package body VerifySerDes_Pa is
 
   -- Access to operations on types
-  use type Ctv.Unsigned_Int8;
-  use type Ctv.Unsigned_Int16;
-  use type Ctv.Unsigned_Int32;
-  use type Ctv.Unsigned_Int64;
-
-  use type Ctv.Integer8;
-  use type Ctv.Integer16;
-  use type Ctv.Integer32;
-  use type Ctv.Integer64;
-
-  use type Ctv.Float32;
-  use type Ctv.Float64;
+  use type Ops_Pa.UInt32;
+  use type Ops_Pa.Int16;
+  use type Ops_Pa.Int32;
+  use type Ops_Pa.Float64;
 
   use type Com_Base_Abs_Pa.CreateStatus_T;
 
   procedure MyTrace( Class : String;
              CreateStatus  : Com_Base_Abs_Pa.CreateStatus_T;
-             TotalAllocObj : Ctv.Integer32) is
+             TotalAllocObj : Interfaces.Integer_32) is
   begin
     if CreateStatus = Com_Base_Abs_Pa.Alloc then
-      Put_Line("Debug: Alloc: " & Class & ", Total= " & Ctv.Integer32'Image(TotalAllocObj));
+      Put_Line("Debug: Alloc: " & Class & ", Total= " & Interfaces.Integer_32'Image(TotalAllocObj));
     else
-      Put_Line("Debug: Dealloc: " & Class & ", Total= " & Ctv.Integer32'Image(TotalAllocObj));
+      Put_Line("Debug: Dealloc: " & Class & ", Total= " & Interfaces.Integer_32'Image(TotalAllocObj));
     end if;
   end;
 
@@ -101,10 +94,13 @@ package body VerifySerDes_Pa is
 
   -- ---------------------
 
+  gErrorCount : Integer := 0;
+
   function AssertEQ(val, exp : Boolean; str : string := "") return Boolean is
   begin
     if val /= exp then
       Log("### Failed: " & str & ", value= " & Boolean'Image(val) & ", expected= " & Boolean'Image(exp));
+      gErrorCount := gErrorCount + 1;
     end if;
     return val;
   end;
@@ -113,6 +109,7 @@ package body VerifySerDes_Pa is
   begin
     if val /= exp then
       Log("### Failed: " & str & ", value= " & Boolean'Image(val) & ", expected= " & Boolean'Image(exp));
+      gErrorCount := gErrorCount + 1;
     end if;
   end;
 
@@ -123,13 +120,16 @@ package body VerifySerDes_Pa is
       if val = null then
         if exp.all /= "" then
           Log("### Failed: " & str & ", value= (null)" & ", expected= " & exp.all);
+          gErrorCount := gErrorCount + 1;
         end if;
       elsif exp = null then
         if val.all /= "" then
           Log("### Failed: " & str & ", value= " & val.all & ", expected= (null)");
+          gErrorCount := gErrorCount + 1;
         end if;
       elsif val.all /= exp.all then
         Log("### Failed: " & str & ", value= " & val.all & ", expected= " & exp.all);
+        gErrorCount := gErrorCount + 1;
       end if;
     end if;
   end;
@@ -144,6 +144,7 @@ package body VerifySerDes_Pa is
   begin
     if val /= exp then
       Log("### Failed: " & str & ", value= " & Item'Image(val) & ", expected= " & Item'Image(exp));
+      gErrorCount := gErrorCount + 1;
     end if;
   end;
 
@@ -165,6 +166,7 @@ package body VerifySerDes_Pa is
   begin
     if val /= exp then
       Log("### Failed: " & str & ", value= " & Item'Image(val) & ", expected= " & Item'Image(exp));
+      gErrorCount := gErrorCount + 1;
     end if;
   end;
 
@@ -183,6 +185,7 @@ package body VerifySerDes_Pa is
   begin
     if val /= exp then
       Log("### Failed: " & str & ", Pointers are different");
+      gErrorCount := gErrorCount + 1;
     end if;
   end;
 
@@ -207,9 +210,11 @@ package body VerifySerDes_Pa is
     if val /= null or exp /= null then
       if val = null or exp = null then
         Log("### Failed: " & str & ", A Pointer is null");
+        gErrorCount := gErrorCount + 1;
       else
         if val'length /= exp'length then
           Log("### Failed: " & str & ", Arrays have different sizes");
+          gErrorCount := gErrorCount + 1;
         else
           for i in val'range loop
             AssertItem(val(i), exp(i), str);
@@ -239,6 +244,7 @@ package body VerifySerDes_Pa is
   begin
     if val /= exp then
       Log("### Failed: " & str & ", Pointers are different");
+      gErrorCount := gErrorCount + 1;
     end if;
   end;
 
@@ -254,6 +260,7 @@ package body VerifySerDes_Pa is
   begin
     if val = exp and val /= null then
       Log("### Failed: " & str & ", Pointers are equal");
+      gErrorCount := gErrorCount + 1;
       return False;
     end if;
     return True;
@@ -273,6 +280,7 @@ package body VerifySerDes_Pa is
   begin
     if val /= exp then
       Log("### Failed: " & str & ", Pointers are different");
+      gErrorCount := gErrorCount + 1;
     end if;
   end;
 
@@ -292,9 +300,11 @@ package body VerifySerDes_Pa is
     if val /= null or exp /= null then
       if val = null or exp = null then
         Log("### Failed: " & str & ", A Pointer is null");
+        gErrorCount := gErrorCount + 1;
       else
         if val.all'length /= exp.all'length then
           Log("### Failed: " & str & ", Arrays have different sizes");
+          gErrorCount := gErrorCount + 1;
         else
           for i in val.all'range loop
             AssertItem(val.all(i), exp.all(i), str & "(" & Integer'Image(i) & ")");
@@ -314,6 +324,7 @@ package body VerifySerDes_Pa is
   begin
     if val /= exp then
       Log("### Failed: " & str & ", Pointers are different");
+      gErrorCount := gErrorCount + 1;
     end if;
   end;
 
@@ -332,9 +343,11 @@ package body VerifySerDes_Pa is
     if val /= null or exp /= null then
       if val = null or exp = null then
         Log("### Failed: " & str & ", A Pointer is null");
+        gErrorCount := gErrorCount + 1;
       else
         if val'length /= exp'length then
           Log("Failed: " & str & ", Arrays have different sizes");
+          gErrorCount := gErrorCount + 1;
         else
           for i in val'range loop
             AssertItem(val(i), exp(i), str);
@@ -350,6 +363,7 @@ package body VerifySerDes_Pa is
   begin
     if not val then
       Log("### Failed: " & str);
+      gErrorCount := gErrorCount + 1;
     end if;
   end;
 
@@ -907,6 +921,7 @@ package body VerifySerDes_Pa is
       part := Ops_Pa.Participant_Pa.getInstance("TestAllDomain");
       if part = null then
         Put_Line("#### Failed to create Participant");
+        gErrorCount := gErrorCount + 1;
         return;
       end if;
       declare
@@ -951,6 +966,7 @@ package body VerifySerDes_Pa is
             AssertPtrEQ(sub.getMessage.SpareBytes, null, "spareBytes");
           else
             Log("### Failed: sub.getMessage() == NULL");
+            gErrorCount := gErrorCount + 1;
           end if;
         end;
 
@@ -958,20 +974,24 @@ package body VerifySerDes_Pa is
           checkObjects(cd1, cd3);
         end if;
 
-        Log("Waiting for more data... (Press Ctrl-C to terminate)");
-        while not gTerminate loop
-          if (sub.waitForNewData(100)) then
-            Log("Received new data. Checking...");
-            flag := sub.getData(cd3);
-            declare
-              s : Ops_Pa.Subscriber_Pa.Scope_MessageLock( Subscriber_Class_At(sub) );
-            begin
-              AssertPtrEQ(sub.getMessage.SpareBytes, null, "spareBytes");
-            end;
-            checkObjects(cd1, cd3);
-            Log("Data check OK");
-          end if;
-        end loop;
+        Log("  Waiting for more data for 60 seconds ... (Press Ctrl-C to terminate)");
+        declare
+          stopTime : Ops_Pa.TimeMs_T := Ops_Pa.GetTimeInMs + 60000;
+        begin
+          while not gTerminate and Ops_Pa.GetTimeInMs < stopTime loop
+            if (sub.waitForNewData(100)) then
+              Log("Received new data. Checking...");
+              flag := sub.getData(cd3);
+              declare
+                s : Ops_Pa.Subscriber_Pa.Scope_MessageLock( Subscriber_Class_At(sub) );
+              begin
+                AssertPtrEQ(sub.getMessage.SpareBytes, null, "spareBytes");
+              end;
+              checkObjects(cd1, cd3);
+              Log("Data check OK");
+            end if;
+          end loop;
+        end;
 
         pub.Stop;
         sub.Stop;
@@ -993,6 +1013,15 @@ package body VerifySerDes_Pa is
     Free(FBuf);
     Free(FMap);
     Log("Freeing finished");
+
+    Log("");
+    if gErrorCount > 0 then
+      Log("  !!!! " & Integer'Image(gErrorCount) & " ERRORS occurred !!!! ");
+    else
+      Log("  VERFIFY == OK ");
+    end if;
+    Log("");
+
   end;
 
 end;
