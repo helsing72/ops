@@ -17,8 +17,10 @@
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
 with Ada.Text_IO; use Ada.Text_IO;
+with Ops_Pa;
 
 with Interfaces;
+with GNAT.Ctrl_C;
 
 with Ops_Pa.MemoryMap_Pa;
 with Ops_Pa.ByteBuffer_Pa;
@@ -190,13 +192,28 @@ package body VerifySerDes_Pa is
   end;
 
   procedure AssertPtrEQ is new AssertAccessEQ0(Boolean, Boolean_Arr, Boolean_Arr_At);
-  procedure AssertPtrEQ is new AssertAccessEQ0(Byte,  Byte_Arr,  Byte_Arr_At);
   procedure AssertPtrEQ is new AssertAccessEQ0(Int16, Int16_Arr, Int16_Arr_At);
   procedure AssertPtrEQ is new AssertAccessEQ0(Int32, Int32_Arr, Int32_Arr_At);
   procedure AssertPtrEQ is new AssertAccessEQ0(Int64, Int64_Arr, Int64_Arr_At);
   procedure AssertPtrEQ is new AssertAccessEQ0(Float32, Float32_Arr, Float32_Arr_At);
   procedure AssertPtrEQ is new AssertAccessEQ0(Float64, Float64_Arr, Float64_Arr_At);
   procedure AssertPtrEQ is new AssertAccessEQ0(String_At, String_Arr, String_Arr_At);
+
+  generic
+    type Item is private;
+    type Item_Arr is array(Byte_Arr_Index_T range <>) of Item;
+    type Item_Arr_At is access all Item_Arr;
+  procedure AssertAccessEQ10(val, exp : Item_Arr_At; str : string := "");
+
+  procedure AssertAccessEQ10(val, exp : Item_Arr_At; str : string := "") is
+  begin
+    if val /= exp then
+      Log("### Failed: " & str & ", Pointers are different");
+      gErrorCount := gErrorCount + 1;
+    end if;
+  end;
+
+  procedure AssertPtrEQ is new AssertAccessEQ10(Byte,  Byte_Arr,  Byte_Arr_At);
 
   generic
     type Item is private;
@@ -225,13 +242,40 @@ package body VerifySerDes_Pa is
   end;
 
   procedure AssertArrEQ is new AssertArrayEQ0(Boolean, Boolean_Arr, Boolean_Arr_At, AssertEQ);
-  procedure AssertArrEQ is new AssertArrayEQ0(Byte,  Byte_Arr,  Byte_Arr_At, AssertEQ);
   procedure AssertArrEQ is new AssertArrayEQ0(Int16, Int16_Arr, Int16_Arr_At, AssertEQ);
   procedure AssertArrEQ is new AssertArrayEQ0(Int32, Int32_Arr, Int32_Arr_At, AssertEQ);
   procedure AssertArrEQ is new AssertArrayEQ0(Int64, Int64_Arr, Int64_Arr_At, AssertEQ);
   procedure AssertArrEQ is new AssertArrayEQ0(Float32, Float32_Arr, Float32_Arr_At, AssertEQ);
   procedure AssertArrEQ is new AssertArrayEQ0(Float64, Float64_Arr, Float64_Arr_At, AssertEQ);
   procedure AssertArrEQ is new AssertArrayEQ0(String_At, String_Arr, String_Arr_At, AssertEQ);
+
+  generic
+    type Item is private;
+    type Item_Arr is array(Byte_Arr_Index_T range <>) of Item;
+    type Item_Arr_At is access all Item_Arr;
+    with procedure AssertItem(val, exp : Item; str : string);
+  procedure AssertArrayEQ10(val, exp : Item_Arr_At; str : string := "");
+
+  procedure AssertArrayEQ10(val, exp : Item_Arr_At; str : string := "") is
+  begin
+    if val /= null or exp /= null then
+      if val = null or exp = null then
+        Log("### Failed: " & str & ", A Pointer is null");
+        gErrorCount := gErrorCount + 1;
+      else
+        if val'length /= exp'length then
+          Log("### Failed: " & str & ", Arrays have different sizes");
+          gErrorCount := gErrorCount + 1;
+        else
+          for i in val'range loop
+            AssertItem(val(i), exp(i), str);
+          end loop;
+        end if;
+      end if;
+    end if;
+  end;
+
+  procedure AssertArrEQ is new AssertArrayEQ10(Byte,  Byte_Arr,  Byte_Arr_At, AssertEQ);
 
   -- ---------------------
 
@@ -824,8 +868,15 @@ package body VerifySerDes_Pa is
   end;
 
   gTerminate : Boolean := False;
+  pragma Volatile(gTerminate);
 
-  procedure VerifySerDes is
+  procedure My_Ctrl_C_Handler is
+  begin
+    gTerminate := True;
+  end;
+
+
+  procedure VerifySerDes_Internal is
     cd1, cd2, cd3 : Ops_Pa.OpsObject_Pa.TestAll_ChildData.ChildData_Class_At;
     FMap : MemoryMap_Class_At := null;
     FBuf : ByteBuffer_Class_At := null;
@@ -1021,7 +1072,16 @@ package body VerifySerDes_Pa is
       Log("  VERFIFY == OK ");
     end if;
     Log("");
+  end;
 
+  procedure VerifySerDes is
+  begin
+    GNAT.Ctrl_C.Install_Handler(My_Ctrl_C_Handler'Access);
+    VerifySerDes_Internal;
+    GNAT.Ctrl_C.Uninstall_Handler;
+  exception
+    when others =>
+    GNAT.Ctrl_C.Uninstall_Handler;
   end;
 
 end;

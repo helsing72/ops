@@ -1,5 +1,10 @@
 Debug
 *.ncb
 *.suo
+*.sdf
 *.vcproj.*
+*.vcxproj.*
 *.sln.cache
+*.ipch
+*.VC.db
+UpgradeLog.htm
