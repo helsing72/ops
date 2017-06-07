@@ -170,9 +170,9 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
       begin
         if Self.ConnectedSockets.Element(i) /= null then
           -- Send prepared size info
-          if Self.ConnectedSockets.Element(i).SendBuf(sizeInfo'Address, 22) = 22 then
+          if Self.ConnectedSockets.Element(i).SendBuf(sizeInfo) = 22 then
             -- Send the actual data
-            if Self.ConnectedSockets.Element(i).SendBuf(buf.all'Address, size) /= size then
+            if Self.ConnectedSockets.Element(i).SendBuf(buf.all(buf'first..buf'first+Byte_Arr_Index_T(size)-1)) /= size then
               ErrorFlag := True;
             end if;
           else

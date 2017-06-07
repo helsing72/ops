@@ -17,15 +17,13 @@
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
 with System;
-with Win32.Winsock;
+with Ada.Streams;
+with Ada.Exceptions;
+with GNAT.Sockets;
 
 with Com_Base_Abs_Pa;
 
 package Com_Socket_Pa is
-
---temp  subtype SocketID_T is Integer;
-  subtype SocketID_T is Win32.Winsock.SOCKET;
-  Invalid_SocketID_C : constant SocketID_T;
 
   SOCKET_ERROR_C : constant Integer := -1;
 
@@ -38,15 +36,13 @@ package Com_Socket_Pa is
   type Socket_Class    is new Com_Base_Abs_Pa.Com_Base_Abs_Class with private;
   type Socket_Class_At is access all Socket_Class'Class;
 
-  function Create( SocketType : Integer; Protocol : Integer ) return Socket_Class_At;
+  function Create( SocketType : GNAT.Sockets.Mode_Type ) return Socket_Class_At;
 
   function Open( Self : in out Socket_Class ) return Boolean;
   function IsOpen( Self : in out Socket_Class ) return Boolean;
 
   function Shutdown( Self : in out Socket_Class ) return Boolean;
   function Close( Self : in out Socket_Class ) return Boolean;
-
-  function SocketID( Self : Socket_Class ) return SocketID_T;
 
   function GetLatestError( Self : Socket_Class ) return Integer;
 
@@ -64,15 +60,15 @@ package Com_Socket_Pa is
   function GetSendBufferSize( Self : in out Socket_Class ) return Integer;
 
   -- Saves from address internally and it is available via API GetSourceIP/Port
-  function ReceiveFrom( Self : in out Socket_Class; Buf : System.Address; BufSize : Integer ) return Integer;
+  function ReceiveFrom( Self : in out Socket_Class; Buf : out Ada.Streams.Stream_Element_Array ) return Integer;
   function GetSourceIP( Self : in out Socket_Class ) return String;
   function GetSourcePort( Self : in out Socket_Class ) return Integer;
 
-  function ReceiveBuf( Self : in out Socket_Class; Buf : System.Address; BufSize : Integer) return Integer;
+  function ReceiveBuf( Self : in out Socket_Class; Buf : out Ada.Streams.Stream_Element_Array ) return Integer;
 
-  function SendTo( Self : in out Socket_Class; Buf : System.Address; Size : Integer; Ip : String; Port : Integer ) return Integer;
+  function SendTo( Self : in out Socket_Class; Buf : Ada.Streams.Stream_Element_Array; Ip : String; Port : Integer ) return Integer;
 
-  function SendBuf( Self : in out Socket_Class; Buf : System.Address; BufSize : Integer) return Integer;
+  function SendBuf( Self : in out Socket_Class; Buf : Ada.Streams.Stream_Element_Array ) return Integer;
 
 
 -- ==========================================================================
@@ -134,26 +130,25 @@ private
 -- ==========================================================================
 --
 -- ==========================================================================
---temp  Invalid_SocketID_C : constant SocketID_T := -1;
-  Invalid_SocketID_C : constant SocketID_T := Win32.Winsock.INVALID_SOCKET;
-
   type Socket_Class is new Com_Base_Abs_Pa.Com_Base_Abs_Class with
      record
        SelfAt : Socket_Class_At := null;
-       SocketType : Integer := 0;
-       Protocol : Integer := 0;
-       SocketID : SocketID_T := Invalid_SocketID_C;
+       SocketType : GNAT.Sockets.Mode_Type := GNAT.Sockets.Socket_Datagram;
+       SocketID : GNAT.Sockets.Socket_Type := GNAT.Sockets.No_Socket;
        StartupOK : Boolean := False;
 
+       -- Latest error
+       LatestErrorCode : Integer := 0;
+
        -- Last source for read data
-       FromAddress : aliased Win32.Winsock.SOCKADDR;
-       FromAddressLen : aliased Win32.INT;
+       FromAddress : GNAT.Sockets.Sock_Addr_Type := GNAT.Sockets.No_Sock_Addr;
      end record;
+
+  procedure ExtractErrorCode( Self : in out Socket_Class; e : Ada.Exceptions.Exception_Occurrence );
 
   procedure InitInstance( Self : in out Socket_Class;
                           SelfAt : Socket_Class_At;
-                          SocketType : Integer;
-                          Protocol : Integer );
+                          SocketType : GNAT.Sockets.Mode_Type );
 
   overriding procedure Finalize( Self : in out Socket_Class );
 
@@ -196,7 +191,7 @@ private
      end record;
 
   procedure Initialize( Self : in out TCPClientSocket_Class;
-                        SocketId : SocketID_T;
+                        SocketId : GNAT.Sockets.Socket_Type;
                         Connected : Boolean );
 
   procedure InitInstance( Self : in out TCPClientSocket_Class;

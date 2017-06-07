@@ -19,6 +19,7 @@
 with System,
      Ada.Unchecked_Deallocation,
      Ada.Exceptions,
+     Ada.Streams,
      Interfaces,
      Com_Base_Abs_Pa;
 
@@ -34,7 +35,7 @@ package Ops_Pa is
   subtype NotifyParam_T is Com_Base_Abs_Pa.Com_Base_Abs_Class_At;
 
   -- Types
-  subtype Byte    is Interfaces.Unsigned_8;
+  subtype Byte    is Ada.Streams.Stream_Element;
   subtype UInt8   is Interfaces.Unsigned_8;
   subtype UInt16  is Interfaces.Unsigned_16;
   subtype UInt32  is Interfaces.Unsigned_32;
@@ -53,8 +54,6 @@ package Ops_Pa is
   -- Types used for implementing OPS static and dynamic arrays
   type Boolean_Arr is array(Integer range <>) of Boolean;
   type Boolean_Arr_At is access all Boolean_Arr;
-  type Byte_Arr is array(Integer range <>) of aliased Byte;
-  type Byte_Arr_At is access all Byte_Arr;
   type Int16_Arr is array(Integer range <>) of Int16;
   type Int16_arr_At is access all Int16_Arr;
   type Int32_Arr is array(Integer range <>) of Int32;
@@ -67,6 +66,10 @@ package Ops_Pa is
   type Float64_Arr_At is access all Float64_Arr;
   type String_Arr is array(Integer range <>) of String_At;
   type String_Arr_At is access all String_Arr;
+
+  subtype Byte_Arr is Ada.Streams.Stream_Element_Array;
+  type Byte_Arr_At is access all Byte_Arr;
+  subtype Byte_Arr_Index_T is Ada.Streams.Stream_Element_Offset;
 
   -- Access to operations on types
   use type Interfaces.Unsigned_8;
@@ -81,6 +84,10 @@ package Ops_Pa is
 
   use type Interfaces.IEEE_Float_32;
   use type Interfaces.IEEE_Float_64;
+
+  use type Ada.Streams.Stream_Element_Offset;
+  use type Ada.Streams.Stream_Element;
+  use type Ada.Streams.Stream_Element_Array;
 
   -- Constants
   PACKET_MAX_SIZE : constant := 60000;

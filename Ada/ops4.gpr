@@ -1,4 +1,3 @@
-with "win32ada.gpr";
 with "xmlada";
 
 project Ops4 is
@@ -82,4 +81,3 @@ project Ops4 is
    end Compiler;
 
 end Ops4;
-

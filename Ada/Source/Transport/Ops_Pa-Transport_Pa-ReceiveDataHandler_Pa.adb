@@ -335,7 +335,7 @@ package body Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa is
 
     if nrOfSpareBytes > 0 then
       declare
-        arr : Byte_Arr_At := new Byte_Arr(1..nrOfSpareBytes);
+        arr : Byte_Arr_At := new Byte_Arr(1..Byte_Arr_Index_T(nrOfSpareBytes));
       begin
         -- This will read the rest of the bytes as raw bytes and put them into spareBytes field of data.
         Self.Buffer.ReadChars( arr.all );

@@ -156,9 +156,9 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.Udp_Pa is
       return False;
     end if;
 
-    if Self.UdpSocket.SendTo( buf.all'Address, Size, Ip, Port ) /= Size then
+    if Self.UdpSocket.SendTo( buf.all(buf'First..buf'First+Byte_Arr_Index_T(Size)-1), Ip, Port ) /= Size then
       Self.LastErrorCode := Self.UdpSocket.GetLatestError;
-      Report(Self, "sendTo", "sendto() failed");
+      Report(Self, "sendTo", "sendto() failed. IP: " & ip & ", port: " & Integer'Image(port));
       return False;
     end if;
 

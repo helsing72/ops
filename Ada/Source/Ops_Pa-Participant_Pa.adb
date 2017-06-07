@@ -19,9 +19,7 @@
 with Ada.Containers.Indefinite_Ordered_Maps,
      Ada.Strings.Fixed;
 
-with Win32,
-     Win32.Winbase,
-     Win32.Winsock;
+with GNAT.OS_Lib;
 
 with Com_Socket_Pa;
 
@@ -366,7 +364,7 @@ package body Ops_Pa.Participant_Pa is
 
     -- Initialize static data in partInfoData
     Self.PartInfoData := Create;
-    Self.PartInfoData.name := Copy(Com_Socket_Pa.GetHostName & " (" & Win32.DWORD'Image(Win32.Winbase.GetCurrentProcessId) & ")");
+    Self.PartInfoData.name := Copy(Com_Socket_Pa.GetHostName & " (" & Integer'Image(GNAT.OS_Lib.Pid_To_Integer(GNAT.OS_Lib.Current_Process_Id)) & ")");
     Self.PartInfoData.languageImplementation := Copy("Ada");
     Self.PartInfoData.id := Copy(participantID);
     Self.PartInfoData.domain := Copy(domainID);

@@ -211,7 +211,7 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.UDPReceiver_Pa is
   begin
     if Self.UdpSocket.IsOpen then
       Self.LastErrorCode := 0;
-      Result := Self.UdpSocket.ReceiveFrom(o.all'address, size);
+      Result := Self.UdpSocket.ReceiveFrom(o.all(o'First..o'First+Byte_Arr_Index_T(size)-1));
       if Result < 0 then
         Self.LastErrorCode := Self.UdpSocket.GetLatestError;
       end if;

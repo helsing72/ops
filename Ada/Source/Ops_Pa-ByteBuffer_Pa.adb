@@ -118,18 +118,18 @@ package body Ops_Pa.ByteBuffer_Pa is
     bytesLeftInSegment := Self.MemMap.SegmentSize - Self.Index;
     length := chars'Length;
     if bytesLeftInSegment >= length then
-      Self.MemMap.GetSegment(Self.CurrentSegment).all(Integer(Self.Index)..Integer(Self.Index+length-1)) := chars;
+      Self.MemMap.GetSegment(Self.CurrentSegment).all(Byte_Arr_Index_T(Self.Index)..Byte_Arr_Index_T(Self.Index+length-1)) := chars;
       Self.Index := Self.Index + length;
       Self.TotalSize := Self.TotalSize + length;
     else
-      Self.MemMap.GetSegment(Self.CurrentSegment).all(Integer(Self.Index)..Integer(Self.Index+bytesLeftInSegment-1)) :=
-        chars(chars'First..chars'First+Integer(bytesLeftInSegment-1));
+      Self.MemMap.GetSegment(Self.CurrentSegment).all(Byte_Arr_Index_T(Self.Index)..Byte_Arr_Index_T(Self.Index+bytesLeftInSegment-1)) :=
+        chars(chars'First..chars'First+Byte_Arr_Index_T(bytesLeftInSegment-1));
       Self.Index := Self.Index + bytesLeftInSegment;
       Self.TotalSize := Self.TotalSize + bytesLeftInSegment;
       Self.NextSegmentAt := Self.NextSegmentAt + Self.MemMap.SegmentSize;
       Self.CurrentSegment := Self.CurrentSegment + 1;
       Self.WriteNewSegment;
-      Self.WriteChars( chars(chars'First+Integer(bytesLeftInSegment)..chars'Last) );
+      Self.WriteChars( chars(chars'First+Byte_Arr_Index_T(bytesLeftInSegment)..chars'Last) );
     end if;
   end WriteChars;
 
@@ -140,17 +140,17 @@ package body Ops_Pa.ByteBuffer_Pa is
     bytesLeftInSegment := Self.MemMap.SegmentSize - Self.Index;
     length := chars'Length;
     if bytesLeftInSegment >= length then
-      chars := Self.MemMap.GetSegment(Self.CurrentSegment).all(Integer(Self.Index)..Integer(Self.Index+length-1));
+      chars := Self.MemMap.GetSegment(Self.CurrentSegment).all(Byte_Arr_Index_T(Self.Index)..Byte_Arr_Index_T(Self.Index+length-1));
       Self.Index := Self.Index + length;
       Self.TotalSize := Self.TotalSize + length;
     else
-      chars(chars'First..chars'First+Integer(bytesLeftInSegment-1)) :=
-        Self.MemMap.GetSegment(Self.CurrentSegment).all(Integer(Self.Index)..Integer(Self.Index+bytesLeftInSegment-1));
+      chars(chars'First..chars'First+Byte_Arr_Index_T(bytesLeftInSegment-1)) :=
+        Self.MemMap.GetSegment(Self.CurrentSegment).all(Byte_Arr_Index_T(Self.Index)..Byte_Arr_Index_T(Self.Index+bytesLeftInSegment-1));
       Self.Index := Self.Index + bytesLeftInSegment;
       Self.TotalSize := Self.TotalSize + bytesLeftInSegment;
       Self.CurrentSegment := Self.CurrentSegment + 1;
       Self.ReadNewSegment;
-      Self.ReadChars( chars(chars'First+Integer(bytesLeftInSegment)..chars'Last) );
+      Self.ReadChars( chars(chars'First+Byte_Arr_Index_T(bytesLeftInSegment)..chars'Last) );
     end if;
   end;
 
@@ -282,11 +282,11 @@ package body Ops_Pa.ByteBuffer_Pa is
       Self.WriteInt( 0 );
     else
       declare
-        arr : Byte_Arr(1..s.all'Length);
+        arr : Byte_Arr(1..Byte_Arr_Index_T(s.all'Length));
       begin
         Self.WriteInt( s.all'Length );
-        for I in s.all'range loop
-          arr(I) := ToByte( s.all(I) );
+        for I in arr'range loop
+          arr(I) := ToByte( s.all(Integer(I)) );
         end loop;
         Self.WriteChars( arr );
       end;
@@ -302,12 +302,12 @@ package body Ops_Pa.ByteBuffer_Pa is
       Value := null;
     else
       declare
-        arr : Byte_Arr(1..Integer(Len));
+        arr : Byte_Arr(1..Byte_Arr_Index_T(Len));
       begin
         Self.ReadChars( arr );
-        Value := new String(arr'Range);
-        for I in Value'Range loop
-          Value(I) := FromByte( arr(I) );
+        Value := new String(1..Integer(arr'Last));
+        for I in arr'Range loop
+          Value(Integer(I)) := FromByte( arr(I) );
         end loop;
       end;
     end if;
@@ -506,7 +506,7 @@ package body Ops_Pa.ByteBuffer_Pa is
   begin
     Self.ReadInt( Size );
     if Size > 0 then
-      Value := new Byte_Arr(0..Integer(Size-1));
+      Value := new Byte_Arr(0..Byte_Arr_Index_T(Size-1));
       Self.ReadChars( Value.all );
     else
       Value := null;

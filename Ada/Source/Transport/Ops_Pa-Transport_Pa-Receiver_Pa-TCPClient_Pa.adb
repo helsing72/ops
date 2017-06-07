@@ -165,34 +165,44 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
   end;
 
   overriding procedure Run( Self : in out TCPClientReceiver_Class ) is
-    SizeInfoSize_C : constant Integer := 22;
+    SizeInfoSize_C : constant Byte_Arr_Index_T := 22;
     type TPhase is (phSize, phPayload);
 
     Res : Integer := 0;
-    BufferIdx : Integer := 0;
-    BytesToRead : Integer := 0;
+    BufferIdx : Byte_Arr_Index_T := 0;
+    BufferIdxLast : Byte_Arr_Index_T := 0;
     Phase : TPhase := phSize;
     ErrorDetected : Boolean := False;
     dummy : Boolean;
 
+    procedure SetupForReadingSize is
+    begin
+      Phase := phSize;
+      BufferIdx := Self.Buffer'First;
+      BufferIdxLast := BufferIdx + SizeInfoSize_C - 1;
+    end;
+
     procedure HandleSizeInfo is
+      BytesToRead : Byte_Arr_Index_T;
     begin
       -- Get size of data packet from the received size packet
       BytesToRead :=
-        16#0000_0001# * Integer(Self.Buffer(18)) +
-        16#0000_0100# * Integer(Self.Buffer(19)) +
-        16#0001_0000# * Integer(Self.Buffer(20)) +
-        16#0100_0000# * Integer(Self.Buffer(21)) ;
+        16#0000_0001# * Byte_Arr_Index_T(Self.Buffer(Self.Buffer'First+18)) +
+        16#0000_0100# * Byte_Arr_Index_T(Self.Buffer(Self.Buffer'First+19)) +
+        16#0001_0000# * Byte_Arr_Index_T(Self.Buffer(Self.Buffer'First+20)) +
+        16#0100_0000# * Byte_Arr_Index_T(Self.Buffer(Self.Buffer'First+21));
 
-      if BytesToRead > Self.BufferSize then
+      if BytesToRead > Byte_Arr_Index_T(Self.BufferSize) then
         -- This is an error, we are not able to receive more than the buffer size
         Self.LastErrorCode := Com_Socket_Pa.SOCKET_ERROR_C;
         Self.Report("HandleSizeInfo", "Error in read size info");
         --notifyNewEvent(BytesSizePair(NULL, -1));
         ErrorDetected := True;
       end if;
+
       Phase := phPayload;
-      BufferIdx := 0;
+      BufferIdx := Self.Buffer'First;
+      BufferIdxLast := BufferIdx + BytesToRead - 1;
     end;
 
     procedure HandlePayload is
@@ -201,9 +211,7 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
       Self.DataNotifier.DoNotify(BytesSizePair_T'(Self.Buffer, Res));
 
       -- Set up for reading a new size info
-      Phase := phSize;
-      BytesToRead := SizeInfoSize_C;
-      BufferIdx := 0;
+      SetupForReadingSize;
     end;
 
     procedure OpenAndConnect is
@@ -245,14 +253,14 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
 
 --      notifyNewEvent(BytesSizePair(NULL, -5)); //Connection was down but has been reastablished.
 
-        BufferIdx := 0;
-        Phase := phSize;
-        BytesToRead := SizeInfoSize_C;
+        -- Set up for reading a new size info
+        SetupForReadingSize;
+
         ErrorDetected := False;
 
         -- Read data loop
         while (not Self.StopFlag) and (Self.TcpClient.IsConnected) loop
-          Res := Self.TcpClient.ReceiveBuf(Self.Buffer(BufferIdx)'Address, BytesToRead - BufferIdx);
+          Res := Self.TcpClient.ReceiveBuf( Self.Buffer(BufferIdx..BufferIdxLast) );
           exit when Self.StopFlag;
           if Res = 0 then
             -- Connection closed gracefully
@@ -269,8 +277,8 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
 
           else
             -- Read OK
-            BufferIdx := BufferIdx + Res;
-            if BufferIdx = BytesToRead then
+            BufferIdx := BufferIdx + Byte_Arr_Index_T(Res);
+            if BufferIdx > BufferIdxLast then
               -- Expected number of bytes read
               case Phase is
                 when phSize => HandleSizeInfo;

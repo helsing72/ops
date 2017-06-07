@@ -18,61 +18,30 @@
 
 with Ada.Characters.Latin_1,
      Ada.Text_IO,
+     Ada.Integer_Text_IO,
      Ada.Strings.Fixed;
 
-with Ada.Unchecked_Conversion;
 with Interfaces; use Interfaces;
 with Interfaces.C;
-with Interfaces.C.Strings;
 
-with Win32.Winsock;
+with GNAT.Sockets;
 
 package body Com_Socket_Pa is
 
-  function FromSocket is new Ada.Unchecked_Conversion(Win32.Winsock.SOCKET, SocketID_T);
-  function ToSocket is new Ada.Unchecked_Conversion(SocketID_T, Win32.Winsock.SOCKET);
-
-  use type Win32.Winsock.SOCKET;
-  use type Interfaces.C.int;
-
-  function To_PSTR is new Ada.Unchecked_Conversion(System.Address, Win32.PSTR);
-
-  function ToAddr is new Ada.Unchecked_Conversion(Win32.Winsock.SOCKADDR_IN, Win32.Winsock.SOCKADDR);
-  function ToAddr is new Ada.Unchecked_Conversion(Win32.Winsock.SOCKADDR, Win32.Winsock.SOCKADDR_IN);
-
-  function MakeSockAddr(ip : String; port : Integer) return Win32.Winsock.SOCKADDR_IN is
-    addr : Win32.Winsock.SOCKADDR_IN;
-  begin
-    addr.sin_family := Win32.Winsock.AF_INET;
-    --function htons(hostshort: u_short): u_short; stdcall;
-    addr.sin_port := Win32.Winsock.htons(Win32.Winsock.u_short(Port));
-    --function inet_addr(cp: PAnsiChar): u_long; stdcall;
-    addr.sin_addr.S_Un.s_addr := Win32.Winsock.inet_addr(Win32.Addr(ip & ASCII.NUL));
-    addr.sin_zero := (others => Interfaces.C.nul);
-    return addr;
-  end;
+  use type GNAT.Sockets.Socket_Type;
 
   function GetHostName return String is
-    hname: String(1..1024) := (1 => Ada.Characters.Latin_1.NUL, others => ' ');
-    Status : Win32.Int;
   begin
-    --function gethostname(name: Win32.PSTR; namelen : Win32.INT) return Win32.INT;
-    Status := Win32.Winsock.gethostname(name => Win32.Addr(hname), namelen => hname'Length);
-
-    declare
-      host : String := Ada.Strings.Fixed.Trim(hname, Ada.Strings.Both);
-    begin
-      -- Skip trailing nul on host name
-      return host(host'First..host'Last-1);
-    end;
+    return GNAT.Sockets.Host_Name;
   end;
 
+  -- ===========================================================================
 
-  function Create( SocketType : Integer; Protocol : Integer )  return Socket_Class_At is
+  function Create( SocketType : GNAT.Sockets.Mode_Type )  return Socket_Class_At is
      Self : Socket_Class_At := null;
   begin
     Self := new Socket_Class;
-    InitInstance( Self.all, Self, SocketType, Protocol );
+    InitInstance( Self.all, Self, SocketType );
     return Self;
   exception
     when others =>
@@ -82,12 +51,10 @@ package body Com_Socket_Pa is
 
   procedure InitInstance( Self : in out Socket_Class;
                           SelfAt : Socket_Class_At;
-                          SocketType : Integer;
-                          Protocol : Integer ) is
+                          SocketType : GNAT.Sockets.Mode_Type ) is
   begin
     Self.SelfAt := SelfAt;
     Self.SocketType := SocketType;
-    Self.Protocol := Protocol;
   end;
 
   overriding procedure Finalize( Self : in out Socket_Class ) is
@@ -99,24 +66,57 @@ package body Com_Socket_Pa is
     end if;
   end;
 
+  procedure ExtractErrorCode( Self : in out Socket_Class; e : Ada.Exceptions.Exception_Occurrence ) is
+    Msg : constant String := Ada.Exceptions.Exception_Message( e );
+    First : Natural;
+    Last  : Natural;
+  begin
+    --  When Socket_Error or Host_Error are raised, the exception message
+    --  contains the error code between brackets and a string describing the
+    --  error code. Resolve_Error extracts the error code from an exception
+    --  message and translate it into an enumeration value.
+
+    First := Msg'First;
+    while First <= Msg'Last and then Msg(First) not in '0' .. '9' loop
+      First := First + 1;
+    end loop;
+    if First > Msg'Last then
+      return; --Cannot_Resolve_Error;
+    end if;
+
+    Last := First;
+    while Last < Msg'Last and then Msg(Last+1) in '0' .. '9' loop
+      Last := Last + 1;
+    end loop;
+
+    Self.LatestErrorCode := Integer'Value(Msg(First..Last));
+  end;
+
   function Open( Self : in out Socket_Class ) return Boolean is
   begin
-    Self.SocketId := FromSocket(Win32.Winsock.socket_func(Win32.Winsock.AF_INET, Interfaces.C.int(Self.SocketType), Interfaces.C.int(Self.Protocol)));
+    GNAT.Sockets.Create_Socket( Self.SocketId, GNAT.Sockets.Family_Inet, Self.SocketType );
     return Self.IsOpen;
+  exception
+    when e: others =>
+      Self.ExtractErrorCode( e );
+      return False;
   end;
 
   function IsOpen( Self : in out Socket_Class ) return Boolean is
   begin
-    return ToSocket(Self.SocketId) /= Win32.Winsock.INVALID_SOCKET;
+    return Self.SocketId /= GNAT.Sockets.No_Socket;
   end;
 
   function Shutdown( Self : in out Socket_Class ) return Boolean is
-    res : Win32.INT;
-    SD_BOTH : Win32.INT := 2;
   begin
     if Self.IsOpen then
-      --function shutdown(s: TSocket; how: Integer): Integer; stdcall;
-      res := Win32.Winsock.shutdown(ToSocket(Self.SocketId), SD_BOTH);
+      begin
+        GNAT.Sockets.Shutdown_Socket( Self.SocketID );
+      exception
+        when e: others =>
+          Self.ExtractErrorCode( e );
+          return False;
+      end;
     end if;
     return True;
   end;
@@ -124,242 +124,188 @@ package body Com_Socket_Pa is
   function Close( Self : in out Socket_Class ) return Boolean is
   begin
     if Self.IsOpen then
-      --function closesocket(s: TSocket): Integer; stdcall;
-      if Win32.Winsock.closesocket(ToSocket(Self.SocketId)) = Win32.Winsock.SOCKET_ERROR then
-        return False;
-      end if;
-      Self.SocketId := Invalid_SocketID_C;
+      begin
+        GNAT.Sockets.Close_Socket( Self.SocketID );
+      exception
+        when e: others =>
+          Self.ExtractErrorCode( e );
+          return False;
+      end;
     end if;
+    Self.SocketId := GNAT.Sockets.No_Socket;
     return True;
-  end;
-
-  function SocketID( Self : Socket_Class ) return SocketID_T is
-  begin
-    return Self.SocketID;
   end;
 
   function GetLatestError( Self : Socket_Class ) return Integer is
   begin
-    return Integer(Win32.Winsock.WSAGetLastError);
+    return Self.LatestErrorCode;
   end;
 
   function SetNonBlocking( Self : in out Socket_Class; Value : Boolean ) return Boolean is
-    NonBlock : aliased Win32.ULONG := 0;
+    Req : GNAT.Sockets.Request_Type := (Name => GNAT.Sockets.Non_Blocking_IO, Enabled => Value);
   begin
-    if Value then
-      NonBlock := 1;
-    end if;
-    --function ioctlsocket(s: TSocket; cmd: DWORD; var arg: u_long): Integer; stdcall;
-    if Win32.Winsock.ioctlsocket(ToSocket(Self.SocketId), Win32.Winsock.FIONBIO, NonBlock'Access) = Win32.Winsock.SOCKET_ERROR then
-      return False;
-    end if;
+    GNAT.Sockets.Control_Socket( Self.SocketID, Request => Req );
     return True;
+  exception
+    when e: others =>
+      Self.ExtractErrorCode( e );
+      return False;
   end;
 
   function SetReuseAddress( Self : in out Socket_Class; Value : Boolean ) return Boolean is
-    OptVal : Win32.ULONG := 0;
-    OptLen : aliased Win32.INT := 4;
+    Option : GNAT.Sockets.Option_Type := (Name => GNAT.Sockets.Reuse_Address, Enabled => Value);
   begin
-    if Value then
-      OptVal := 1;
-    end if;
-    --function setsockopt(s: TSocket; level, optname: Integer; optval: PAnsiChar; optlen: Integer): Integer; stdcall;
-    if Win32.Winsock.setsockopt(ToSocket(Self.SocketId),
-                                Win32.Winsock.SOL_SOCKET,
-                                Win32.Winsock.SO_REUSEADDR,
-                                Win32.To_PCSTR(OptVal'Address),
-                                OptLen) = Win32.Winsock.SOCKET_ERROR
-    then
-      return False;
-    end if;
+    GNAT.Sockets.Set_Socket_Option( Self.SocketID, GNAT.Sockets.Socket_Level, Option );
     return True;
+  exception
+    when e: others =>
+      Self.ExtractErrorCode( e );
+      return False;
   end;
 
   function Bind( Self : in out Socket_Class; Ip : String; Port : Integer ) return Boolean is
-    addr : aliased Win32.winsock.SOCKADDR := ToAddr(MakeSockAddr(Ip, Port));
+    addr : GNAT.Sockets.Sock_Addr_Type :=
+      (Family => GNAT.Sockets.Family_Inet,
+       Addr => GNAT.Sockets.Inet_Addr( Ip ),
+       Port => GNAT.Sockets.Port_Type( Port ));
   begin
-    --function bind(s: TSocket; var addr: TSockAddr; namelen: Integer): Integer; stdcall;
-    if Win32.WinSock.bind(Self.SocketId, addr'Unchecked_Access, 16) = Win32.Winsock.SOCKET_ERROR then
-      return False;
-    end if;
+    GNAT.Sockets.Bind_Socket( Self.SocketID, addr );
     return True;
+  exception
+    when e: others =>
+      Self.ExtractErrorCode( e );
+      return False;
   end;
 
   function GetBoundIP( Self : in out Socket_Class ) return String is
-    Address : aliased Win32.Winsock.SOCKADDR;
-    AddressLen : aliased Win32.INT := 16;
+    addr : GNAT.Sockets.Sock_Addr_Type;
   begin
-    -- function getsockname(s : SOCKET; name : access SOCKADDR; namelen : access Win32.INT) return Win32.INT;
-    if Win32.Winsock.getsockname( s => Self.SocketId,
-                                  name => Address'Access,
-                                  namelen => AddressLen'Access) = Win32.Winsock.SOCKET_ERROR
-    then
-      return "";
-    end if;
-    return Interfaces.C.Strings.Value(Win32.To_Chars_Ptr(Win32.Winsock.inet_ntoa( ToAddr(Address).sin_addr )));
+    addr := GNAT.Sockets.Get_Socket_Name( Self.SocketID );
+    return GNAT.Sockets.Image(addr.Addr);
   end;
 
   function GetBoundPort( Self : in out Socket_Class; Port : in out Integer ) return Boolean is
-    Address : aliased Win32.Winsock.SOCKADDR;
-    AddressLen : aliased Win32.INT := 16;
+    addr : GNAT.Sockets.Sock_Addr_Type;
   begin
-    -- function getsockname(s : SOCKET; name : access SOCKADDR; namelen : access Win32.INT) return Win32.INT;
-    if Win32.Winsock.getsockname( s => Self.SocketId,
-                                  name => Address'Access,
-                                  namelen => AddressLen'Access) = Win32.Winsock.SOCKET_ERROR
-    then
-      return False;
-    end if;
-    Port := Integer(Win32.Winsock.ntohs(ToAddr(Address).sin_port));
+    addr := GNAT.Sockets.Get_Socket_Name( Self.SocketID );
+    Port := Integer(addr.Port);
     return True;
   end;
 
   function SetReceiveBufferSize( Self : in out Socket_Class; Value : Integer ) return Boolean is
-    OptVal : Win32.ULONG := Win32.ULONG(Value);
-    OptLen : aliased Win32.INT := 4;
+    Option : GNAT.Sockets.Option_Type := (Name => GNAT.Sockets.Receive_Buffer, Size => Natural(Value));
   begin
-    --function setsockopt(s: TSocket; level, optname: Integer; optval: PAnsiChar; optlen: Integer): Integer; stdcall;
-    if Win32.Winsock.setsockopt(ToSocket(Self.SocketId),
-                                Win32.Winsock.SOL_SOCKET,
-                                Win32.Winsock.SO_RCVBUF,
-                                Win32.To_PCSTR(OptVal'Address),
-                                OptLen) = Win32.Winsock.SOCKET_ERROR
-    then
-      return False;
-    end if;
+    GNAT.Sockets.Set_Socket_Option( Self.SocketID, GNAT.Sockets.Socket_Level, Option );
     return True;
+  exception
+    when e: others =>
+      Self.ExtractErrorCode( e );
+      return False;
   end;
 
   function GetReceiveBufferSize( Self : in out Socket_Class ) return Integer is
-    OptVal : Win32.ULONG := 0;
-    OptLen : aliased Win32.INT  := 4;
+    Option : GNAT.Sockets.Option_Type;
   begin
-    --function getsockopt(s: TSocket; level, optname: Integer; optval: PAnsiChar; var optlen: Integer): Integer; stdcall;
-    if Win32.Winsock.getsockopt(ToSocket(Self.SocketId),
-                                Win32.Winsock.SOL_SOCKET,
-                                Win32.Winsock.SO_RCVBUF,
-                                To_PSTR(OptVal'Address),
-                                OptLen'Access) = Win32.Winsock.SOCKET_ERROR
-    then
+    Option := GNAT.Sockets.Get_Socket_Option( Self.SocketID, GNAT.Sockets.Socket_Level, GNAT.Sockets.Receive_Buffer );
+    return Integer(Option.Size);
+  exception
+    when e: others =>
+      Self.ExtractErrorCode( e );
       return -1;
-    end if;
-    return Integer(OptVal);
   end;
 
   function SetSendBufferSize( Self : in out Socket_Class; Value : Integer ) return Boolean is
-    OptVal : Win32.ULONG := win32.ULONG(Value);
-    OptLen : aliased Win32.INT := 4;
+    Option : GNAT.Sockets.Option_Type := (Name => GNAT.Sockets.Send_Buffer, Size => Natural(Value));
   begin
-    --function setsockopt(s: TSocket; level, optname: Integer; optval: PAnsiChar; optlen: Integer): Integer; stdcall;
-    if Win32.Winsock.setsockopt(ToSocket(Self.SocketId),
-                                Win32.Winsock.SOL_SOCKET,
-                                Win32.Winsock.SO_SNDBUF,
-                                Win32.To_PCSTR(OptVal'Address),
-                                OptLen) = Win32.Winsock.SOCKET_ERROR
-    then
-      return False;
-    end if;
+    GNAT.Sockets.Set_Socket_Option( Self.SocketID, GNAT.Sockets.Socket_Level, Option );
     return True;
+  exception
+    when e: others =>
+      Self.ExtractErrorCode( e );
+      return False;
   end;
 
   function GetSendBufferSize( Self : in out Socket_Class ) return Integer is
-    OptVal : Win32.ULONG := 0;
-    OptLen : aliased Win32.INT  := 4;
+    Option : GNAT.Sockets.Option_Type;
   begin
-    --function getsockopt(s: TSocket; level, optname: Integer; optval: PAnsiChar; var optlen: Integer): Integer; stdcall;
-    if Win32.Winsock.getsockopt(ToSocket(Self.SocketId),
-                                Win32.Winsock.SOL_SOCKET,
-                                Win32.Winsock.SO_SNDBUF,
-                                To_PSTR(OptVal'Address),
-                                OptLen'Access) = Win32.Winsock.SOCKET_ERROR
-    then
+    Option := GNAT.Sockets.Get_Socket_Option( Self.SocketID, GNAT.Sockets.Socket_Level, GNAT.Sockets.Send_Buffer );
+    return Integer(Option.Size);
+  exception
+    when others =>
       return -1;
-    end if;
-    return Integer(OptVal);
   end;
 
-  function SendBuf( Self : in out Socket_Class; Buf : System.Address; BufSize : Integer) return Integer is
-    res : Win32.INT;
+  function SendBuf( Self : in out Socket_Class; Buf : Ada.Streams.Stream_Element_Array ) return Integer is
+    Last : Ada.Streams.Stream_Element_Offset;
   begin
-    res := Win32.Winsock.send(ToSocket(Self.SocketID),
-                              Win32.To_PCSTR(Buf),
-                              Win32.INT(BufSize),
-                              0);
-    if res = Win32.Winsock.SOCKET_ERROR then
+    GNAT.Sockets.Send_Socket( Self.SocketID,
+                              Buf,
+                              Last );
+    -- Last is the index to the last element sent, but we want to return the number of elements so add 1
+    return Integer(Last)-Integer(Buf'First)+1;
+  exception
+    when e: others =>
+      Self.ExtractErrorCode( e );
       return -1;
-    end if;
-    return Integer(res);
   end;
 
-  function ReceiveBuf( Self : in out Socket_Class; Buf : System.Address; BufSize : Integer ) return Integer is
-    res : Win32.INT;
+  function ReceiveBuf( Self : in out Socket_Class; Buf : out Ada.Streams.Stream_Element_Array ) return Integer is
+    Last : Ada.Streams.Stream_Element_Offset;
   begin
-    res := Win32.Winsock.recv(ToSocket(Self.SocketID),
-                              To_PSTR(Buf),
-                              Win32.INT(BufSize),
-                              0);
-    if res = Win32.Winsock.SOCKET_ERROR then
+    GNAT.Sockets.Receive_Socket( Self.SocketID,
+                                 Buf,
+                                 Last );
+    -- Last is the index to the last element read, but we want to return the number of elements so add 1
+    return Integer(Last)-Integer(Buf'First)+1;
+  exception
+    when e: others =>
+      Self.ExtractErrorCode( e );
       return -1;
-    end if;
-    return Integer(res);
   end;
 
   -- Saves from address internally and it is available via API
-  function ReceiveFrom( Self : in out Socket_Class; Buf : System.Address; BufSize : Integer ) return Integer is
-    res : Win32.INT;
+  function ReceiveFrom( Self : in out Socket_Class; Buf : out Ada.Streams.Stream_Element_Array ) return Integer is
+    Last : Ada.Streams.Stream_Element_Offset;
   begin
-    Self.FromAddressLen := 16;
-
-    -- function recvfrom(s : SOCKET; buf : Win32.PSTR; len : Win32.INT; flags : Win32.INT; from : access SOCKADDR; fromlen : access Win32.INT) return Win32.INT;
-    res := Win32.Winsock.recvfrom(s       => Self.SocketId,
-                                  buf     => To_PSTR(Buf),
-                                  len     => Win32.INT(BufSize),
-                                  flags   => 0,
-                                  from    => Self.FromAddress'Access,
-                                  fromlen => Self.FromAddressLen'Access);
-    if res = Win32.Winsock.SOCKET_ERROR then
+    GNAT.Sockets.Receive_Socket( Self.SocketID,
+                                 Buf,
+                                 Last,
+                                 Self.FromAddress );
+    -- Last is the index to the last element read, but we want to return the number of elements so add 1
+    return Integer(Last)-Integer(Buf'First)+1;
+  exception
+    when e: others =>
+      Self.ExtractErrorCode( e );
       return -1;
-    end if;
-    return Integer(res);
   end;
 
   function GetSourceIP( Self : in out Socket_Class ) return String is
-    addr : Win32.Winsock.SOCKADDR_IN := ToAddr(Self.FromAddress);
   begin
-    --function inet_ntoa(inaddr: TInAddr): PAnsiChar; stdcall;
-    return Interfaces.C.Strings.Value(Win32.To_Chars_Ptr(Win32.Winsock.inet_ntoa( c_in => addr.sin_addr )));
+    return GNAT.Sockets.Image(Self.FromAddress.Addr);
   end;
 
   function GetSourcePort( Self : in out Socket_Class ) return Integer is
-    addr : Win32.Winsock.SOCKADDR_IN := ToAddr(Self.FromAddress);
   begin
-    return Integer(Win32.Winsock.ntohs(addr.sin_port));
+    return Integer(Self.FromAddress.Port);
   end;
 
-  function SendTo( Self : in out Socket_Class; Buf : System.Address; Size : Integer; Ip : String; Port : Integer ) return Integer is
-    DstAddr : aliased Win32.Winsock.SOCKADDR := ToAddr(MakeSockAddr(Ip, Port));
-    res : Win32.INT := 0;
+  function SendTo( Self : in out Socket_Class; Buf : Ada.Streams.Stream_Element_Array; Ip : String; Port : Integer ) return Integer is
+    addr : GNAT.Sockets.Sock_Addr_Type :=
+      (Family => GNAT.Sockets.Family_Inet,
+       Addr => GNAT.Sockets.Inet_Addr( Ip ),
+       Port => GNAT.Sockets.Port_Type( Port ));
+    Last : Ada.Streams.Stream_Element_Offset;
   begin
-    --    function To_PCSTR is new Ada.Unchecked_Conversion (System.Address, PCSTR);
-
-    --      function sendto
-    --       (s     : SOCKET;
-    --        buf   : Win32.PCSTR;
-    --        len   : Win32.INT;
-    --        flags : Win32.INT;
-    --        to    : ac_SOCKADDR_t;
-    --        tolen : Win32.INT)
-    --        return Win32.INT;
-    res := Win32.WinSock.sendto(ToSocket(Self.SocketId),
-                                Win32.To_PCSTR(Buf),
-                                Win32.INT(Size),
-                                0,
-                                DstAddr'Unchecked_Access,
-                                16);
-    if res = Win32.Winsock.SOCKET_ERROR then
+    GNAT.Sockets.Send_Socket( Self.SocketID,
+                              Buf,
+                              Last,
+                              addr );
+    -- Last is the index to the last element sent, but we want to return the number of elements so add 1
+    return Integer(Last)-Integer(Buf'First)+1;
+  exception
+    when e: others =>
+      Self.ExtractErrorCode( e );
       return -1;
-    end if;
-    return Integer(res);
   end;
 
   --------------------------------------------------------------------------
@@ -379,7 +325,7 @@ package body Com_Socket_Pa is
   procedure InitInstance( Self : in out UDPSocket_Class;
                           SelfAt : UDPSocket_Class_At ) is
   begin
-    InitInstance( Socket_Class(Self), Socket_Class_At(SelfAt), Win32.Winsock.SOCK_DGRAM, Win32.Winsock.IPPROTO_UDP );
+    InitInstance( Socket_Class(Self), Socket_Class_At(SelfAt), GNAT.Sockets.Socket_Datagram );
   end;
 
   overriding procedure Finalize( Self : in out UDPSocket_Class ) is
@@ -388,72 +334,55 @@ package body Com_Socket_Pa is
   end;
 
   function SetMulticastTtl( Self : in out UDPSocket_Class; Ttl : Integer ) return Boolean is
-    OptVal : Win32.ULONG := Win32.ULONG(Ttl);
-    OptLen : Win32.INT  := 4;
+    Option : GNAT.Sockets.Option_Type := (Name => GNAT.Sockets.Multicast_TTL, Time_To_Live => Natural(Ttl));
   begin
-    --function setsockopt(s: TSocket; level, optname: Integer; optval: PAnsiChar; optlen: Integer): Integer; stdcall;
-    return Win32.Winsock.setsockopt(ToSocket(Self.SocketId),
-                                    Win32.Winsock.IPPROTO_IP,
-                                    Win32.Winsock.IP_MULTICAST_TTL,
-                                    Win32.To_PCSTR(OptVal'Address),
-                                    OptLen) /= Win32.Winsock.SOCKET_ERROR;
+    GNAT.Sockets.Set_Socket_Option( Self.SocketID, GNAT.Sockets.IP_Protocol_For_IP_Level, Option );
+    return True;
+  exception
+    when e: others =>
+      Self.ExtractErrorCode( e );
+      return False;
   end;
 
   function SetMulticastInterface( Self : in out UDPSocket_Class; Ifc : String ) return Boolean is
-    OptVal : Win32.ULONG := Win32.ULONG(Win32.winsock.inet_addr( Win32.Addr( Ifc )));
-    OptLen : Win32.INT  := 4;
+    Option : GNAT.Sockets.Option_Type :=
+      (Name => GNAT.Sockets.Multicast_If,
+       Outgoing_If => GNAT.Sockets.Inet_Addr( Ifc ));
   begin
-    --function setsockopt(s: TSocket; level, optname: Integer; optval: PAnsiChar; optlen: Integer): Integer; stdcall;
-    return Win32.Winsock.setsockopt(ToSocket(Self.SocketId),
-                                    Win32.Winsock.IPPROTO_IP,
-                                    Win32.Winsock.IP_MULTICAST_IF,
-                                    Win32.To_PCSTR(OptVal'Address),
-                                    OptLen) /= Win32.Winsock.SOCKET_ERROR;
+    GNAT.Sockets.Set_Socket_Option( Self.SocketID, GNAT.Sockets.IP_Protocol_For_IP_Level, Option );
+    return True;
+  exception
+    when e: others =>
+      Self.ExtractErrorCode( e );
+      return False;
   end;
 
   function AddMulticastMembership( Self : in out UDPSocket_Class; McAddr : String; McIfc : String ) return Boolean is
-    OptVal : Win32.Winsock.ip_mreq;
-    OptLen : aliased Win32.INT := 8;
-    addr : Win32.Winsock.IN_ADDR;
-    ifc : Win32.Winsock.IN_ADDR;
-
-    -- When linking with Ws2_32.lib the IP_ADD_MEMBERSHIP should be = 12 instead of 5 (Win32.Winsock.IP_ADD_MEMBERSHIP)
-    IP_ADD_MEMBERSHIP : constant := 12;
+    Option : GNAT.Sockets.Option_Type :=
+      (Name              => GNAT.Sockets.Add_Membership,
+       Multicast_Address => GNAT.Sockets.Inet_Addr( McAddr ),
+       Local_Interface   => GNAT.Sockets.Inet_Addr( McIfc ));
   begin
-    addr.S_Un.s_addr :=  Win32.Winsock.inet_addr(Win32.Addr( McAddr & ASCII.NUL ));
-    ifc.S_Un.s_addr := Win32.Winsock.inet_addr(Win32.Addr( McIfc & ASCII.NUL ));
-    OptVal.imr_multiaddr := addr;
-    OptVal.imr_interface := ifc;
-    if Win32.Winsock.setsockopt(Self.SocketId,
-                                Win32.Winsock.IPPROTO_IP,
-                                IP_ADD_MEMBERSHIP,
-                                Win32.To_PCSTR(OptVal'Address),
-                                OptLen) = Win32.Winsock.SOCKET_ERROR
-    then
-      return False;
-    end if;
+    GNAT.Sockets.Set_Socket_Option( Self.SocketID, GNAT.Sockets.IP_Protocol_For_IP_Level, Option );
     return True;
+  exception
+    when e: others =>
+      Self.ExtractErrorCode( e );
+      return False;
   end;
 
   function DropMulticastMembership( Self : in out UDPSocket_Class; McAddr : String; McIfc : String ) return Boolean is
-    OptVal : Win32.Winsock.ip_mreq;
-    OptLen : aliased Win32.INT := 8;
-    addr : Win32.Winsock.IN_ADDR;
-    ifc : Win32.Winsock.IN_ADDR;
+    Option : GNAT.Sockets.Option_Type :=
+      (Name              => GNAT.Sockets.Drop_Membership,
+       Multicast_Address => GNAT.Sockets.Inet_Addr( McAddr ),
+       Local_Interface   => GNAT.Sockets.Inet_Addr( McIfc ));
   begin
-    addr.S_Un.s_addr :=  Win32.Winsock.inet_addr(Win32.Addr( McAddr & ASCII.NUL ));
-    ifc.S_Un.s_addr := Win32.Winsock.inet_addr(Win32.Addr( McIfc & ASCII.NUL ));
-    OptVal.imr_multiaddr := addr;
-    OptVal.imr_interface := ifc;
-    if Win32.Winsock.setsockopt(Self.SocketId,
-                                Win32.Winsock.IPPROTO_IP,
-                                Win32.Winsock.IP_DROP_MEMBERSHIP,
-                                Win32.To_PCSTR(OptVal'Address),
-                                OptLen) = Win32.Winsock.SOCKET_ERROR
-    then
-      return False;
-    end if;
+    GNAT.Sockets.Set_Socket_Option( Self.SocketID, GNAT.Sockets.IP_Protocol_For_IP_Level, Option );
     return True;
+  exception
+    when e: others =>
+      Self.ExtractErrorCode( e );
+      return False;
   end;
 
   --------------------------------------------------------------------------
@@ -473,7 +402,7 @@ package body Com_Socket_Pa is
   procedure InitInstance( Self : in out TCPSocket_Class;
                           SelfAt : TCPSocket_Class_At ) is
   begin
-    InitInstance( Socket_Class(Self), Socket_Class_At(SelfAt), Win32.Winsock.SOCK_STREAM, Win32.Winsock.IPPROTO_TCP );
+    InitInstance( Socket_Class(Self), Socket_Class_At(SelfAt), GNAT.Sockets.Socket_Stream );
   end;
 
   overriding procedure Finalize( Self : in out TCPSocket_Class ) is
@@ -482,18 +411,14 @@ package body Com_Socket_Pa is
   end;
 
   function SetTcpNoDelay( Self : in out TCPSocket_Class; Value : Boolean ) return Boolean is
-    OptVal : Win32.ULONG := 0;
-    OptLen : Win32.INT  := 4;
+    Option : GNAT.Sockets.Option_Type := (Name => GNAT.Sockets.No_Delay, Enabled => Value);
   begin
-    if Value then
-      OptVal := 1;
-    end if;
-    --function setsockopt(s: TSocket; level, optname: Integer; optval: PAnsiChar; optlen: Integer): Integer; stdcall;
-    return Win32.Winsock.setsockopt(ToSocket(Self.SocketId),
-                                    Win32.Winsock.IPPROTO_TCP,
-                                    Win32.Winsock.TCP_NODELAY,
-                                    Win32.To_PCSTR(OptVal'Address),
-                                    OptLen) /= Win32.Winsock.SOCKET_ERROR;
+    GNAT.Sockets.Set_Socket_Option( Self.SocketID, GNAT.Sockets.IP_Protocol_For_TCP_Level, Option );
+    return True;
+  exception
+    when e: others =>
+      Self.ExtractErrorCode( e );
+      return False;
   end;
 
   --------------------------------------------------------------------------
@@ -522,7 +447,7 @@ package body Com_Socket_Pa is
   end;
 
   procedure Initialize( Self : in out TCPClientSocket_Class;
-                        SocketId : SocketID_T;
+                        SocketId : GNAT.Sockets.Socket_Type;
                         Connected : Boolean ) is
   begin
     Self.SocketID := SocketId;
@@ -542,12 +467,20 @@ package body Com_Socket_Pa is
   end;
 
   function Connect( Self : in out TCPClientSocket_Class; Ip : String; Port : Integer ) return Boolean is
-    addr : aliased Win32.winsock.SOCKADDR := ToAddr(MakeSockAddr(Ip, Port));
-    res : Win32.INT := 0;
   begin
     if Self.IsOpen and not Self.Connected then
-      res := Win32.Winsock.connect(ToSocket(Self.SocketID), addr'Unchecked_Access, 16);
-      Self.Connected := (res /= Win32.Winsock.SOCKET_ERROR);
+      declare
+        addr : GNAT.Sockets.Sock_Addr_Type :=
+          (Family => GNAT.Sockets.Family_Inet,
+           Addr => GNAT.Sockets.Inet_Addr( Ip ),
+           Port => GNAT.Sockets.Port_Type( Port ));
+      begin
+        GNAT.Sockets.Connect_Socket( Self.SocketID, addr );
+        Self.Connected := True;
+      exception
+        when e: others =>
+          Self.ExtractErrorCode( e );
+      end;
     end if;
     return Self.Connected;
   end;
@@ -595,11 +528,15 @@ package body Com_Socket_Pa is
   end;
 
   function Listen( Self : in out TCPServerSocket_Class; MaxBackLog : Integer ) return Boolean is
-    res : Win32.INT := 0;
   begin
     if Self.IsOpen and not Self.Listening then
-      res := Win32.Winsock.listen(ToSocket(Self.SocketID), Win32.INT(MaxBacklog));
-      Self.Listening := (res /= Win32.Winsock.SOCKET_ERROR);
+      begin
+        GNAT.Sockets.Listen_Socket( Self.SocketID, Natural(MaxBackLog) );
+        Self.Listening := True;
+      exception
+        when e: others =>
+          Self.ExtractErrorCode( e );
+      end;
     end if;
     return Self.Listening;
   end;
@@ -610,55 +547,62 @@ package body Com_Socket_Pa is
   end;
 
   function AcceptClient( Self : in out TCPServerSocket_Class; Client : TCPClientSocket_Class_At ) return Boolean is
-    Address : aliased Win32.Winsock.SOCKADDR;
-    AddressLen : aliased Win32.INT := 16;
-    res : Win32.Winsock.SOCKET := 0;
+    Address : GNAT.Sockets.Sock_Addr_Type;
+    Socket : GNAT.Sockets.Socket_Type;
   begin
-    res := Win32.Winsock.c_accept(ToSocket(Self.SocketID),
-                                  Address'Access,
-                                  AddressLen'Access);
-
-    if res /= Win32.Winsock.INVALID_SOCKET then
-      client.Initialize(res, true);
-      return True;
-    end if;
-    return False;
+    GNAT.Sockets.Accept_Socket( Self.SocketID,
+                                Socket,
+                                Address );
+    client.Initialize( Socket, True );
+    return True;
+  exception
+    when e: others =>
+      Self.ExtractErrorCode( e );
+      return False;
   end;
 
-
---  /// ------------------------------------------
---  /// Helper to get all IP interfaces
---
---  procedure VVGetIpAddrTable(var p: PMibIpAddrTable; var Size: Cardinal; const bOrder: BOOL);
---  var
---    Res: DWORD;
---  begin
---    p := nil;
---    Size := 0;
---    if @GetIpAddrTable = nil then Exit;   //Not implemented in this windows version
---    Res := GetIpAddrTable(p,Size,bOrder);
---    if Res=ERROR_INSUFFICIENT_BUFFER then begin
---      Getmem(p,Size);
---      // Caller must free this buffer when it is no longer used
---      FillChar(p^,Size,#0);
---      Res := GetIpAddrTable(p,Size,bOrder);
---    end;
---    if Res <> NO_ERROR then begin
---      if Assigned(p) then FreeMem(p);
---      p := nil;
---      Size := 0;
---    end;
---  end;
---
---  function IpAddressToString(Addr: DWORD): AnsiString;
---  var
---    InAddr: TInAddr;
---  begin
---    InAddr.S_addr := Addr;
---    Result := AnsiString(inet_ntoa(InAddr));
---  end;
-
   package x is new Ada.Text_IO.Modular_IO(Unsigned_32);
+
+  function part(str : String; f : in Natural; Last : in out Natural) return Integer is
+    First : Natural := f;
+  begin
+    while First <= str'Last and then str(First) not in '0' .. '9' loop
+      First := First + 1;
+    end loop;
+    if First > str'Last then
+      return -1; --Cannot_Resolve_Error;
+    end if;
+    Last := First;
+    while Last < str'Last and then str(Last+1) in '0' .. '9' loop
+      Last := Last + 1;
+    end loop;
+    return Integer'Value(str(First..Last));
+  end;
+
+  function To_Unsigned_32(str : String) return Unsigned_32 is
+    Last  : Natural := str'First;
+    tmp : Integer;
+    res : Unsigned_32 := 0;
+  begin
+    tmp := part(str, Last, Last);
+    if tmp >= 0 and tmp <= 255 then
+      res := res + Shift_Left(Unsigned_32(tmp), 24);
+      tmp := part(str, Last+1, Last);
+      if tmp >= 0 and tmp <= 255 then
+        res := res + Shift_Left(Unsigned_32(tmp), 16);
+        tmp := part(str, Last+1, Last);
+        if tmp >= 0 and tmp <= 255 then
+          res := res + Shift_Left(Unsigned_32(tmp), 8);
+          tmp := part(str, Last+1, Last);
+          if tmp >= 0 and tmp <= 255 then
+            res := res + Shift_Left(Unsigned_32(tmp), 0);
+          end if;
+        end if;
+      end if;
+    end if;
+    return res;
+  end;
+
 
 -- If argument contains a "/" we assume it is on the form:  subnet-address/subnet-mask
 -- e.g "192.168.10.0/255.255.255.0" or "192.168.10.0/24"
@@ -667,6 +611,7 @@ package body Com_Socket_Pa is
   function doSubnetTranslation(addr : String) return String is
     Idx : Natural;
   begin
+    --Ada.Text_IO.Put_Line("Translate(), addr: " & addr);
     -- If no '/' we just return the given address
     Idx := Ada.Strings.Fixed.Index( addr, "/" );
     if Idx = 0 then
@@ -679,48 +624,43 @@ package body Com_Socket_Pa is
       numBits : Unsigned_32 := 0;
       subnetIp, subnetMask : Unsigned_32;
       dummy : Positive := 1;
---      Size: ULONG;
---      p: PMibIpAddrTable;
---      i: integer;
     begin
-      subnetIp := Unsigned_32(Win32.Winsock.inet_addr(Win32.Addr(subnet & ASCII.NUL)));
+      --Ada.Text_IO.Put_Line("Translate(), subnet: " & subnet);
+      --Ada.Text_IO.Put_Line("Translate(), mask: " & mask);
+      subnetIp := To_Unsigned_32(subnet);
       if mask'Length <= 2 then
         -- Expand to the number of bits given
         x.Get(mask, numBits, dummy);
         subnetMask := Shift_Left(1, Natural(numBits)) - 1;
         subnetMask := Shift_Left(subnetMask, Natural(32 - numBits));
-        subnetMask := Unsigned_32(Win32.Winsock.htonl(Interfaces.C.unsigned_long(subnetMask)));
+        subnetMask := Unsigned_32(Interfaces.C.unsigned_long(subnetMask));
       else
-        subnetMask := Unsigned_32(Win32.Winsock.inet_addr(Win32.Addr(mask & ASCII.NUL)));
+        subnetMask := To_Unsigned_32(mask);
       end if;
 
---TODO    VVGetIpAddrTable(p, Size, False);
---    if Assigned(p) then begin
---      try
---        with p^ do begin
---          for i := 0 to dwNumEntries - 1 do begin
---            with table[i] do begin
---              if (dwAddr and subnetMask) = (subnetIp and subnetMask) then begin
---                Result := IpAddressToString(dwAddr);
---                Break;
---              end;
---            end;
---          end;
---        end;
---      finally
---        FreeMem(p);
---      end;
---    end;
+      --Ada.Text_IO.Put("Translate(), subnetIp: "); x.Put(subnetIp, 12, 16); Ada.Text_IO.New_Line;
+      --Ada.Text_IO.Put("Translate(), subnetMask: "); x.Put(subnetMask, 12, 16); Ada.Text_IO.New_Line;
+
+      declare
+        he : GNAT.Sockets.Host_Entry_Type := GNAT.Sockets.Get_Host_By_Name(GNAT.Sockets.Host_Name);
+        addr : GNAT.Sockets.Inet_Addr_Type;
+        addrNum : Unsigned_32;
+      begin
+        for i in 1 .. GNAT.Sockets.Addresses_Length( he ) loop
+          addr := GNAT.Sockets.Addresses( he, i );
+          addrNum := To_Unsigned_32(GNAT.Sockets.Image(addr));
+          --Ada.Text_IO.Put_Line("  Address: " & GNAT.Sockets.Image(addr));
+          --Ada.Text_IO.Put("Translate(), addrnum: "); x.Put(addrnum, 12, 16); Ada.Text_IO.New_Line;
+
+          if (addrnum and subnetMask) = (subnetip and subnetmask) then
+            --Ada.Text_IO.Put_Line("Translate()  ----> " & GNAT.Sockets.Image(addr));
+            return GNAT.Sockets.Image(addr);
+          end if;
+        end loop;
+      end;
       return subnet;
     end;
   end;
-
-
-  WSA : Win32.INT;
-  wVersionRequired : Win32.WORD := 16#0101#;
-  WSAData : aliased Win32.Winsock.WSADATA;
-begin
-  WSA := Win32.Winsock.WSAStartup( wVersionRequired, WSAData'Unchecked_Access );
 
 end Com_Socket_Pa;
 

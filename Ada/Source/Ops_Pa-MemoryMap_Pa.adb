@@ -102,7 +102,7 @@ package body Ops_Pa.MemoryMap_Pa is
 
     -- Allocate all segments
     for i in Self.Segments'Range loop
-      Self.Segments(i) := new Byte_Arr'(0..Integer(Height)-1 => 0);
+      Self.Segments(i) := new Byte_Arr'(0..Byte_Arr_Index_T(Height)-1 => 0);
     end loop;
   end InitInstance;
 
