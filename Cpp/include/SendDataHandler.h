@@ -28,6 +28,8 @@ namespace ops
 	class SendDataHandler
 	{
 	public:
+		virtual ~SendDataHandler() {}
+
 		virtual bool sendData(char* buf, int bufSize, Topic& topic) = 0;
 
 		virtual void addPublisher(void* client) 

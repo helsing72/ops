@@ -268,7 +268,7 @@ char myIsTextWideChar(const void *b, int len) { return FALSE; }
     #else
         char *myWideCharToMultiByte(const wchar_t *s)
         {
-			std::mbstate_t state = std::mbstate_t();
+            mbstate_t state = mbstate_t();
             const wchar_t *ss=s;
             int i=(int)wcsrtombs(NULL,&ss,0,&state);
             if (i<0) return NULL;
@@ -281,8 +281,8 @@ char myIsTextWideChar(const void *b, int len) { return FALSE; }
     #ifdef _XMLWIDECHAR
         wchar_t *myMultiByteToWideChar(const char *s, XMLNode::XMLCharEncoding ce)
         {
-			std::mbstate_t state = std::mbstate_t();
-			const char *ss=s;
+            mbstate_t state = mbstate_t();
+            const char *ss=s;
             int i=(int)mbsrtowcs(NULL,&ss,0,&state);
             if (i<0) return NULL;
             wchar_t *d=(wchar_t *)malloc((i+1)*sizeof(wchar_t));
