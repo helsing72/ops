@@ -22,6 +22,7 @@
 #include <ops.h>
 #include "Lockable.h"
 #include "ParticipantInfoData.h"
+#include "PubIdChecker.h"
 
 #include "COpsConfigHelper.h"
 #include "SdsSystemTime.h"
@@ -49,15 +50,17 @@ void ShowUsage()
 	std::cout << "              [-a arg_file [-a arg_file [...]]]" << std::endl;
 	std::cout << "              [-IA | -I domain [-I domain [...]] [-O]]" << std::endl;
 	std::cout << "              [-SA | -S domain [-S domain [...]]]" << std::endl;
-	std::cout << "              [-D default_domain] Topic [Topic ...]" << std::endl;
+	std::cout << "              [-D default_domain] [-C [-E]] Topic [Topic ...]" << std::endl;
 	std::cout << std::endl;
 	std::cout << "    -?                 Shows a short description" << std::endl;
 	std::cout << "    -a arg_file        File with command line arguments" << std::endl;
 	std::cout << "    -c ops_config_file Specifies an OPS configuration file to use" << std::endl;
 	std::cout << "                       If none given, the default 'ops_config.xml' is used" << std::endl;
+	std::cout << "    -C                 Do a publication ID check" << std::endl;
 	std::cout << "    -D default_domain  Default domain name to use for topics given without domain name" << std::endl;
 	std::cout << "                       If none given, the default 'SDSDomain' is used" << std::endl;
 	std::cout << "                       A new default can be given between topics" << std::endl;
+	std::cout << "    -E                 If -C given, minimize normal output" << std::endl;
 	std::cout << "    -I domain          Subscribe to Participant Info Data from given domain" << std::endl;
 	std::cout << "    -IA                Subscribe to Participant Info Data from all domains in given configuration files" << std::endl;
 	std::cout << "    -O                 if -I or -IA given, only show arriving and timed out participants" << std::endl;
@@ -113,9 +116,12 @@ public:
 	bool allInfoDomains;
 	bool allTopics;
 	bool onlyArrivingLeaving;
+	bool doPubIdCheck;
+	bool doMinimizeOutput;
 
 	CArguments() : indent(""), printFormat(""), defaultDomain(getDefaultDomain()),
-		verboseOutput(false), logTime(false), allInfoDomains(false), allTopics(false), onlyArrivingLeaving(false)
+		verboseOutput(false), logTime(false), allInfoDomains(false), allTopics(false), onlyArrivingLeaving(false),
+		doPubIdCheck(false), doMinimizeOutput(false)
 	{
 		// Create a map with all valid format chars, used for validating -p<...> argument
 		validFormatChars = getValidFormatChars();
@@ -166,6 +172,12 @@ public:
 				continue;
 			}
 
+			// PuIdChecker
+			if (argument == "-C") {
+				doPubIdCheck = true;
+				continue;
+			}
+
 			// Default domain
 			if (argument == "-D") {
 				if (argIdx >= nArgs) {
@@ -173,6 +185,12 @@ public:
 					return false;
 				}
 				defaultDomain = toAnsi(szArglist[argIdx++]);
+				continue;
+			}
+
+			// minimize output
+			if (argument == "-E") {
+				doMinimizeOutput = true;
 				continue;
 			}
 
@@ -364,6 +382,8 @@ public:
 			}
 		}
 
+		if (!doPubIdCheck) doMinimizeOutput = false;
+
 		if (verboseOutput) {
 			//std::vector<std::string> cfgFiles;
 			std::cout << "" << std::endl;
@@ -474,18 +494,22 @@ std::string typeString(ops::OPSMessage* mess, ops::OPSObject* opsData)
 
 // ---------------------------------------------------------------------------------------
 //Create a class to act as a listener for OPS data and deadlines
-class Main : ops::DataListener
+class Main : ops::DataListener, ops::Listener<ops::PublicationIdNotification_T>
 {
 	bool logTime;
 	MyLogger logger;
 	COpsConfigHelper opsHelper;
 	std::string printFormat;
 	bool onlyArrivingLeaving;
+	bool doPubIdCheck;
+	bool doMinimizeOutput;
 
 	std::vector<ops::Subscriber*> vSubs;
+	std::map<ops::Subscriber*, ops::PublicationIdChecker*> pubIdMap;
 
 	typedef struct {
 		int64_t time;
+		ops::Subscriber* sub;
 		ops::OPSMessage* mess;
 	} TEntry;
 	std::deque<TEntry> List;
@@ -496,6 +520,9 @@ class Main : ops::DataListener
 	std::vector<std::string> ownPartInfoNames;
 
 	std::map<std::string, int64_t> partMap;
+
+	// local storage of current worked on entry time
+	int64_t _messageTime;
 
 public:
 	int messDataCounter;
@@ -508,6 +535,8 @@ public:
 		opsHelper(&logger, &logger, args.defaultDomain),
 		printFormat(args.printFormat),
 		onlyArrivingLeaving(args.onlyArrivingLeaving),
+		doPubIdCheck(args.doPubIdCheck),
+		doMinimizeOutput(args.doMinimizeOutput),
 		messDataCounter(0)
 	{
 		using namespace ops;
@@ -641,6 +670,11 @@ public:
 			sub->start();
 
 			vSubs.push_back(sub);
+			if (doPubIdCheck) {
+				// We don't use the subscriber to do the checking due to performance, instead we do it "off-line"
+				pubIdMap[sub] = new ops::PublicationIdChecker();
+				pubIdMap[sub]->addListener(this);
+			}
 		}
 
 		// Create subscribers to all ParticipantInfoData
@@ -668,6 +702,11 @@ public:
 				sub->start();
 
 				vSubs.push_back(sub);
+				if (doPubIdCheck) {
+					// We don't use the subscriber to do the checking due to performance, instead we do it "off-line"
+					pubIdMap[sub] = new ops::PublicationIdChecker();
+					pubIdMap[sub]->addListener(this);
+				}
 			}
 			catch(...)
 			{
@@ -684,10 +723,17 @@ public:
 	//
 	virtual ~Main()
 	{
+		// Delete PubIdCheckers
+		for (auto it = pubIdMap.begin(); it != pubIdMap.end(); ++it) {
+			delete it->second;
+		}
+		pubIdMap.clear();
+		// Delete subscribers
 		for (unsigned int i = 0; i < vSubs.size(); i++) {
 			vSubs[i]->stop();
 			delete vSubs[i];
 		}
+		vSubs.clear();
 	}
 	//
 	///Override from ops::DataListener, called whenever new data arrives.
@@ -704,7 +750,7 @@ public:
 			TEntry ent;
 			ent.time = sds::sdsSystemTime();
 			ent.mess = mess;
-			//sub->getTopic().getDomainID();	 could print domain::topic in case topics have the same name in different domains
+			ent.sub = dynamic_cast<ops::Subscriber*>(subscriber);		// Save subscriber so we can lookup the pubIdChecker
 
 			ListLock.lock();
 
@@ -713,6 +759,29 @@ public:
 
 			ListLock.unlock();
 		}
+	}
+	//
+	void onNewEvent(ops::Notifier<ops::PublicationIdNotification_T>* sender, ops::PublicationIdNotification_T arg)
+	{
+		UNUSED(sender);
+		std::string address;
+		int port;
+		arg.mess->getSource(address, port);
+
+		std::string newPub = (arg.newPublisher) ? "NEW Publisher" : "SEQ ERROR";
+
+		std::string str = "";
+		if (logTime) {
+			str += "[" + sds::sdsSystemTimeToLocalTime(_messageTime) + "] ";
+		}
+		std::cout << str << 
+			"PubIdChecker(): " << newPub <<
+			" on Topic: " << arg.mess->getTopicName() <<
+			", Addr: " << address <<
+			", Port: " << port <<
+			", Expected: " << arg.expectedPubID <<
+			", Got: " << arg.mess->getPublicationID() <<
+			std::endl;
 	}
 	//
 	void WorkOnList(int numMess)
@@ -757,8 +826,14 @@ public:
 				for(unsigned int i = 0; i < printFormat.size(); i++) {
 					str += formatMap[printFormat[i]](mess, opsData) + ", ";
 				}
-				if (str != "") {
+				if ((str != "") && (!doMinimizeOutput)) {
 					std::cout << str << std::endl;
+				}
+				if (doPubIdCheck) {
+					// This may call our "onNewEvent(ops::Notifier<ops::PublicationIdNotification_T>* ...") method
+					// We may need the time in that method so save it in a member variable
+					_messageTime = ent.time;
+					pubIdMap[ent.sub]->Check(mess);
 				}
 			} else {
 				// Show Participant Info
@@ -859,7 +934,7 @@ int _kbhit() {
 
 int main(int argc, char* argv[])
 {
-	std::cout << std::endl << "OPSListener Version 2016-12-10" << std::endl << std::endl;
+	std::cout << std::endl << "OPSListener Version 2017-06-11" << std::endl << std::endl;
 
 	sds::sdsSystemTimeInit();
 
