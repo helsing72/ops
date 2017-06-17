@@ -393,7 +393,7 @@ namespace ops
         int bytesLeftInSegment = memMap->getSegmentSize() - index;
         std::vector<char>::iterator it = out.begin();
         it += offset;
-        if (bytesLeftInSegment > length)
+        if (bytesLeftInSegment >= length)
         {
             std::copy(it, out.end(), memMap->getSegment(currentSegment) + index);
             index += length;
