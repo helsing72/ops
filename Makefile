@@ -1,12 +1,19 @@
-BUILD_DEBUG?=build.debug
-BUILD_OPT?=build.opt
+## COMMON defines
+BUILD_ROOT?=build
+BUILD_SUFFIX?=
+DEPLOY_SUFFIX?=
+
+BUILD_DEBUG?=$(BUILD_ROOT).debug$(BUILD_SUFFIX)
+BUILD_OPT?=$(BUILD_ROOT).opt$(BUILD_SUFFIX)
 
 CC?=$(shell which gcc)
 CXX?=$(shell which g++)
-INSTALL_PREFIX?=$(CURDIR)/deploy
+INSTALL_PREFIX?=$(CURDIR)/deploy$(DEPLOY_SUFFIX)
 
 CCV=$(shell $(CC) -dumpversion)
 CXXV=$(shell $(CXX) -dumpversion)
+
+## Rules
 
 .PHONY : all
 all: debug opt
@@ -82,7 +89,7 @@ $(INSTALL_PREFIX)/lib/README :
 .PHONY : clean_deploy
 
 clean_deploy :
-	rm -rf deploy
+	rm -rf $(INSTALL_PREFIX)
 
 # Help Target
 help:
