@@ -18,7 +18,6 @@ import java.util.Vector;
 import parsing.AbstractTemplateBasedIDLCompiler;
 import parsing.IDLClass;
 import parsing.IDLField;
-import parsing.TopicInfo;
 
 /**
  *
@@ -52,11 +51,12 @@ public class JavaCompiler extends opsc.Compiler
         //this.projectDirectory = projectDirectory;
         try
         {
-            for (IDLClass iDLClass : _idlClasses)
-            {
+            if (!_onlyGenTypeSupport) {
+              for (IDLClass iDLClass : _idlClasses)
+              {
                 if (iDLClass.getType() == IDLClass.ENUM_TYPE)
                 {
-                    System.out.println("Compile enum");
+                    //System.out.println("Compile enum");
                     compileEnum(iDLClass);
                 }
                 else
@@ -65,6 +65,7 @@ public class JavaCompiler extends opsc.Compiler
                     compileSubscriber(iDLClass);
                     compilePublisher(iDLClass);
                 }
+              }
             }
             compileTypeSupport(idlClasses, _projectName);
         }
@@ -73,10 +74,6 @@ public class JavaCompiler extends opsc.Compiler
             System.out.println("Generating Java failed with the following exception: " + iOException.getMessage());
         }
 
-    }
-
-    public void compileTopicConfig(Vector<TopicInfo> topics, String name, String packageString, String projectDirectory)
-    {
     }
 
     protected void compileEnum(IDLClass idlClass) throws IOException
@@ -192,8 +189,9 @@ public class JavaCompiler extends opsc.Compiler
         createdFiles += "\"" + getOutputFileName() + "\"\n";
     }
 
-    protected void compileTypeSupport(Vector<IDLClass> idlClasses, String projectName) throws IOException
+    protected void compileTypeSupport(Vector<IDLClass> idlClasses, String projectName)
     {
+      try {
         String className = projectName + "TypeFactory";
         String packageName = projectName;
 
@@ -228,6 +226,11 @@ public class JavaCompiler extends opsc.Compiler
         saveOutputText(templateText);
 
         createdFiles += "\"" + getOutputFileName() + "\"\n";
+      }
+      catch (IOException iOException)
+      {
+          System.out.println("Generating Java Factory failed with the following exception: " + iOException.getMessage());
+      }
     }
 
     protected String getConstructorBody(IDLClass idlClass)
@@ -500,7 +503,6 @@ public class JavaCompiler extends opsc.Compiler
 
                 manifestJarDepString += jarToBeCopied.getName() + " ";
             }
-//        manifestJarDepString += "\nTopic-config: " + theProject.getTopicConfigPackage() + "." + theProject.getName() + "TopicConfig";
             manifestJarDepString += endl();
         } else {
             System.out.println("WARN: no jar dependencies");

@@ -24,6 +24,7 @@ Current working directory: D:\OPS\OPS4
     -B <feature>      don't build given feature
     -d                verbose output
     -dump             print all parsed objects
+    -fac              only generate factories for given features
     -g <feature>      generate given feature
     -G <feature>      don't generate given feature
     -o <dir>          set output directory

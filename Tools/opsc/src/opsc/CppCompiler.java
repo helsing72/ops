@@ -25,7 +25,6 @@ import java.util.Vector;
 import parsing.AbstractTemplateBasedIDLCompiler;
 import parsing.IDLClass;
 import parsing.IDLField;
-import parsing.TopicInfo;
 
 /**
  *
@@ -33,7 +32,6 @@ import parsing.TopicInfo;
  */
 public class CppCompiler extends opsc.Compiler
 {
-
     final static String CONSTRUCTOR_BODY_REGEX = "__constructorBody";
     final static String CONSTRUCTOR_HEAD_REGEX = "__constructorHead";
     final static String DESTRUCTOR_BODY_REGEX = "__destructorBody";
@@ -50,7 +48,7 @@ public class CppCompiler extends opsc.Compiler
     private static String BASE_CLASS_NAME_REGEX = "__baseClassName";
     private static String CREATE_BODY_REGEX = "__createBody";
 
-    private String projectDirectory;
+    //private String projectDirectory;
     String createdFiles = "";
 
     public CppCompiler(String projectName) {
@@ -59,25 +57,13 @@ public class CppCompiler extends opsc.Compiler
 
     public void compileDataClasses(Vector<IDLClass> idlClasses, String projectDirectory)
     {
-        try {
-            this.projectDirectory = projectDirectory;
-            for (IDLClass iDLClass : idlClasses) {
-                compileIDLClass(iDLClass);
-            }
-
-            compileTypeSupport(_idlClasses, _projectName);
-
-        } catch (IOException iOException) {
-            System.out.println("Generating C++ failed with the following exception: " + iOException.getMessage());
+        //this.projectDirectory = projectDirectory;
+        for (IDLClass iDLClass : idlClasses) {
+            if (!_onlyGenTypeSupport) compileIDLClass(iDLClass);
+            _idlClasses.add(iDLClass);
         }
-    }
 
-    public void compileTypeSupport() {
-        try {
-            compileTypeSupport(_idlClasses, _projectName);
-        } catch (IOException ioe) {
-            System.out.println("Generating C++ Factory code failed with the following exception: " + ioe.getMessage());
-        }
+        compileTypeSupport(_idlClasses, _projectName);
     }
 
     public void compileIDLClass(IDLClass idlClass)
@@ -91,17 +77,10 @@ public class CppCompiler extends opsc.Compiler
                 compileSubscriber(idlClass);
                 compilePublisher(idlClass);
             }
-
-            _idlClasses.add(idlClass);
-
         } catch (IOException ioe) {
             System.out.println("Failed to generate code for " + idlClass.getClassName());
             System.out.println("  Generating C++ failed with the following exception: " + ioe.getMessage());
         }
-    }
-
-    public void compileTopicConfig(Vector<TopicInfo> topics, String name, String packageString, String projectDirectory)
-    {
     }
 
     public void compileDataClass(IDLClass idlClass) throws IOException
@@ -143,36 +122,6 @@ public class CppCompiler extends opsc.Compiler
         saveOutputText(templateText);
 
         createdFiles += "\"" + getOutputFileName() + "\"\n";
-    }
-
-    /**
-     * @override
-     * */
-    protected void saveOutputText(String templateText)
-    {
-        FileOutputStream fos = null;
-        try {
-            //System.out.println(">>>>: " + outputFileName);
-            File outFile = new File(outputFileName);
-            //System.out.println(">>>>: " + outFile.getAbsolutePath());
-            File outFilePath = new File(outputFileName.substring(0, outputFileName.lastIndexOf(File.separator)));
-            //System.out.println(">>>>: " + outFilePath.getAbsolutePath());
-
-            outFilePath.mkdirs();
-            outFile.createNewFile();
-
-            fos = new FileOutputStream(outFile);
-            fos.write(templateText.getBytes());
-        } catch (IOException ex) {
-            //System.out.println(">>>>: IOException");
-            Logger.getLogger(AbstractTemplateBasedIDLCompiler.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                fos.close();
-            } catch (IOException ex) {
-                //Logger.getLogger(CppFactoryIDLCompiler.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
     }
 
     protected void compileEnum(IDLClass idlClass) throws IOException
@@ -270,8 +219,9 @@ public class CppCompiler extends opsc.Compiler
         createdFiles += "\"" + getOutputFileName() + "\"\n";
     }
 
-    protected void compileTypeSupport(Vector<IDLClass> idlClasses, String projectName) throws IOException
+    protected void compileTypeSupport(Vector<IDLClass> idlClasses, String projectName)
     {
+      try {
         String className = projectName + "TypeFactory";
         String packageName = projectName;
 
@@ -311,6 +261,9 @@ public class CppCompiler extends opsc.Compiler
         saveOutputText(templateText);
 
         createdFiles += "\"" + getOutputFileName() + "\"\n";
+      } catch (IOException iOException) {
+          System.out.println("Generating C++ Factory failed with the following exception: " + iOException.getMessage());
+      }
     }
 
     private String elementType(String type)
@@ -318,12 +271,12 @@ public class CppCompiler extends opsc.Compiler
         return languageType(type.replace("[]", ""));
     }
 
-    private String extractProjectName(String projectDirectory)
-    {
-        String projectName = projectDirectory.substring(0, projectDirectory.lastIndexOf("/Generated/"));
-        projectName = projectDirectory.substring(projectName.lastIndexOf("/") + 1, projectName.length());
-        return projectName;
-    }
+//    private String extractProjectName(String projectDirectory)
+//    {
+//        String projectName = projectDirectory.substring(0, projectDirectory.lastIndexOf("/Generated/"));
+//        projectName = projectDirectory.substring(projectName.lastIndexOf("/") + 1, projectName.length());
+//        return projectName;
+//    }
 
     private String getClone(IDLClass idlClass)
     {

@@ -37,6 +37,7 @@ public class OpsCompiler
     String _strProjectName = "";
     String _strProjectDir = "";
     boolean _bOnlyParse = false;
+    boolean _bOnlyGenFactories = false;
 
     /** An instance of ProjectProperties is used to hold defaults
      *  as well is modifications to defaults either read from the
@@ -74,6 +75,7 @@ public class OpsCompiler
         System.out.println("  -B <feature>      don't build given feature");
         System.out.println("  -d                verbose output");
         System.out.println("  -dump             print all parsed objects");
+        System.out.println("  -fac              only generate factories for given features");
         System.out.println("  -g <feature>      generate given feature");
         System.out.println("  -G <feature>      don't generate given feature");
         System.out.println("  -o <dir>          set output directory");
@@ -261,6 +263,8 @@ public class OpsCompiler
                 _verbose = 2;
             } else if (arg.equals("-dump")) {
                 _dumpFlag = true;
+            } else if (arg.equals("-fac")) {
+                _bOnlyGenFactories = true;
             } else if((arg.equals("-g") || arg.equals("-G")) && (i < extraArgs.size())) {
                 i++;
                 updateGenerateProp(extraArgs.elementAt(i), arg.equals("-g"));
@@ -338,6 +342,7 @@ public class OpsCompiler
         // create the compiler and set parameters
         opsc.CppCompiler compiler = new opsc.CppCompiler(_strProjectName);
         compiler.setVerbose(_verbose);
+        compiler.setGenOnlyTypeSupport(_bOnlyGenFactories);
         Property propTemplatePath = _props.getProperty("templatePath");
         if(propTemplatePath != null)
             compiler.setTemplateDir(propTemplatePath.value);
@@ -346,7 +351,7 @@ public class OpsCompiler
             compiler.setOutputDir(propOutPath.value + File.separator + "Cpp");
 
         compiler.compileDataClasses(_parser._idlClasses, "baba");
-        compiler.compileTypeSupport();
+        //compiler.compileTypeSupport();
 
         return true;
     }
@@ -355,6 +360,7 @@ public class OpsCompiler
         // create the compiler and set parameters
         _javaCompiler = new opsc.JavaCompiler(_strProjectName);
         _javaCompiler.setVerbose(_verbose);
+        _javaCompiler.setGenOnlyTypeSupport(_bOnlyGenFactories);
         Property propTemplatePath = _props.getProperty("templatePath");
         if(propTemplatePath != null)
             _javaCompiler.setTemplateDir(propTemplatePath.value);
@@ -363,7 +369,7 @@ public class OpsCompiler
             _javaCompiler.setOutputDir(propOutPath.value + File.separator + "Java");
 
         _javaCompiler.compileDataClasses(_parser._idlClasses, "baba");
-        _javaCompiler.compileTypeSupport();
+        //_javaCompiler.compileTypeSupport();
 
         return true;
     }
@@ -386,6 +392,7 @@ public class OpsCompiler
         // create the compiler and set parameters
         _CSharpCompiler = new opsc.CSharpCompiler(_strProjectName);
         _CSharpCompiler.setVerbose(_verbose);
+        _CSharpCompiler.setGenOnlyTypeSupport(_bOnlyGenFactories);
         Property propTemplatePath = _props.getProperty("templatePath");
         if(propTemplatePath != null)
             _CSharpCompiler.setTemplateDir(propTemplatePath.value);
@@ -394,7 +401,7 @@ public class OpsCompiler
             _CSharpCompiler.setOutputDir(propOutPath.value + File.separator + "CSharp");
 
         _CSharpCompiler.compileDataClasses(_parser._idlClasses, "baba");
-        _CSharpCompiler.compileTypeSupport();
+        //_CSharpCompiler.compileTypeSupport();
 
         return true;
     }
@@ -416,6 +423,7 @@ public class OpsCompiler
         // create the compiler and set parameters
         _DelphiCompiler = new opsc.DelphiCompiler(_strProjectName);
         _DelphiCompiler.setVerbose(_verbose);
+        _DelphiCompiler.setGenOnlyTypeSupport(_bOnlyGenFactories);
         Property propTemplatePath = _props.getProperty("templatePath");
         if(propTemplatePath != null)
             _DelphiCompiler.setTemplateDir(propTemplatePath.value);
@@ -424,7 +432,7 @@ public class OpsCompiler
             _DelphiCompiler.setOutputDir(propOutPath.value + File.separator + "Delphi");
 
         _DelphiCompiler.compileDataClasses(_parser._idlClasses, "baba");
-        _DelphiCompiler.compileTypeSupport();
+        //_DelphiCompiler.compileTypeSupport();
 
         return true;
     }
@@ -433,6 +441,7 @@ public class OpsCompiler
         // create the compiler and set parameters
         _AdaCompiler = new opsc.AdaCompiler(_strProjectName);
         _AdaCompiler.setVerbose(_verbose);
+        _AdaCompiler.setGenOnlyTypeSupport(_bOnlyGenFactories);
         Property propTemplatePath = _props.getProperty("templatePath");
         if(propTemplatePath != null)
             _AdaCompiler.setTemplateDir(propTemplatePath.value);
@@ -441,7 +450,7 @@ public class OpsCompiler
             _AdaCompiler.setOutputDir(propOutPath.value + File.separator + "Ada");
 
         _AdaCompiler.compileDataClasses(_parser._idlClasses, "baba");
-        _AdaCompiler.compileTypeSupport();
+        //_AdaCompiler.compileTypeSupport();
 
         return true;
     }

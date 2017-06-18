@@ -28,7 +28,7 @@ import java.util.Collections;
 import java.util.Vector;
 import parsing.IDLClass;
 import parsing.IDLField;
-import parsing.TopicInfo;
+//import parsing.TopicInfo;
 
 
 
@@ -594,10 +594,10 @@ public class PythonCompiler extends opsc.CompilerSupport
         saveOutputText(templateText);
     }
 
-    public void compileTopicConfig(Vector<TopicInfo> topics, String name, String packageString, String projectDirectory)
-    {
-        System.out.println("PythonCompiler::compileTopicConfig NOT IMPLEMENTED");
-    }
+//    public void compileTopicConfig(Vector<TopicInfo> topics, String name, String packageString, String projectDirectory)
+//    {
+//        System.out.println("PythonCompiler::compileTopicConfig NOT IMPLEMENTED");
+//    }
 
     private String getEnumDeclarations(IDLClass idlClass) {
         String ret = "";

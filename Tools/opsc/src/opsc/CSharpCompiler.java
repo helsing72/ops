@@ -21,7 +21,6 @@ import java.util.Vector;
 import parsing.AbstractTemplateBasedIDLCompiler;
 import parsing.IDLClass;
 import parsing.IDLField;
-import parsing.TopicInfo;
 
 /**
  *
@@ -55,8 +54,9 @@ public class CSharpCompiler extends opsc.Compiler
         this.projectDirectory = projectDirectory;
         try
         {
-            for (IDLClass iDLClass : idlClasses)
-            {
+            if (!_onlyGenTypeSupport) {
+              for (IDLClass iDLClass : idlClasses)
+              {
                 if (iDLClass.getType() == IDLClass.ENUM_TYPE)
                 {
                     //System.out.println("Compile enum");
@@ -64,11 +64,12 @@ public class CSharpCompiler extends opsc.Compiler
                 }
                 else
                 {
-                compileDataClass(iDLClass);
-                // We put these in the same file as the data class
-                //compileSubscriber(iDLClass);
-                //compilePublisher(iDLClass);
+                    compileDataClass(iDLClass);
+                    // We put these in the same file as the data class
+                    //compileSubscriber(iDLClass);
+                    //compilePublisher(iDLClass);
                 }
+              }
             }
 
             compileTypeSupport(idlClasses, _projectName);
@@ -76,12 +77,6 @@ public class CSharpCompiler extends opsc.Compiler
             //JOptionPane.showMessageDialog(null, "Generating C# failed with the following exception: " + iOException.getMessage());
             System.out.println( "Error: Generating C# failed with the following exception: " + iOException.getMessage());
         }
-
-    }
-
-    public void compileTopicConfig(Vector<TopicInfo> topics, String name, String packageString, String projectDirectory)
-    {
-
     }
 
     protected void compilePublisher(IDLClass cl) {}
@@ -206,8 +201,9 @@ public class CSharpCompiler extends opsc.Compiler
 //        createdFiles += "\"" + getOutputFileName() + "\"\n";
 //    }
 
-    protected void compileTypeSupport(Vector<IDLClass> idlClasses, String projectName) throws IOException
+    protected void compileTypeSupport(Vector<IDLClass> idlClasses, String projectName)
     {
+      try {
         String className = projectName + "TypeFactory";
         String packageName = projectName;
 
@@ -250,6 +246,10 @@ public class CSharpCompiler extends opsc.Compiler
         saveOutputText(templateText);
 
         createdFiles += "\"" + getOutputFileName() + "\"\n";
+      } catch (IOException iOException)  {
+          //JOptionPane.showMessageDialog(null, "Generating C# failed with the following exception: " + iOException.getMessage());
+          System.out.println( "Error: Generating C# Factory failed with the following exception: " + iOException.getMessage());
+      }
     }
 
     protected String getConstructorBody(IDLClass idlClass)

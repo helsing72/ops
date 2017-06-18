@@ -16,7 +16,6 @@ import java.util.Vector;
 import parsing.AbstractTemplateBasedIDLCompiler;
 import parsing.IDLClass;
 import parsing.IDLField;
-import parsing.TopicInfo;
 
 /**
  *
@@ -55,9 +54,6 @@ public class JSONCompiler extends CompilerSupport
         saveOutputText(res);
         System.out.println("Info: Saved JSON description to file: " + outputFileName);
     }
-
-    public void compileTopicConfig(Vector<TopicInfo> topics, String name, String packageString, String projectDirectory)
-    {}
 
     protected String Example_For_describing_alternative_interpretation_for_a_variable(int t)
     {

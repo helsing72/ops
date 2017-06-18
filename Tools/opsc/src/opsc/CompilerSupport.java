@@ -1,6 +1,6 @@
 /** -*-java-*- Copyright (C) 2014 Saab Dynamics AB
  ***************************************************************************
- *  @file   opsc/Compiler.java
+ *  @file   opsc/CompilerSupport.java
  *  @author Mattias Helsing <mattias.helsing@saabgroup.com>
  *
  * Baseclass for my specialized compilers in this package
@@ -36,12 +36,10 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
     Vector<IDLClass> _idlClasses = new Vector<IDLClass>();
     protected Vector<String> _generatedFiles;
 
+    protected boolean _onlyGenTypeSupport = false;
+
     /** A verbosity flag. Currently supports 0 or not 0 */
     protected int _verbose = 0;
-
-    public void setVerbose(int value) {
-      _verbose = value;
-    }
 
     public CompilerSupport(String projectName) {
         // set projectname
@@ -50,6 +48,24 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
         setTabString("    ");
         // endl is platform specific
         setEndlString(System.getProperty("line.separator"));
+    }
+
+    /**
+     * @Override from IDLCompiler interface
+     * */
+    // This is currently not used for our compilers
+    // Declare it here so specific compilers don't need to
+    public void compileTopicConfig(Vector<TopicInfo> topics, String name, String packageString, String projectDirectory)
+    {
+    }
+
+    public void setVerbose(int value) {
+        _verbose = value;
+    }
+
+    public void setGenOnlyTypeSupport(boolean value)
+    {
+        _onlyGenTypeSupport = value;
     }
 
     public void setTemplateDir(String templatedir) {
@@ -71,7 +87,6 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
         stream.read(templateBytes);
         setTemplateText(new String(templateBytes));
     }
-
 
     protected java.io.InputStream findTemplateFile(String templateName) throws IOException {
         // search for a file called templateName
@@ -132,17 +147,20 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
         FileOutputStream fos = null;
         try
         {
+            //System.out.println(">>>>: " + outputFileName);
             File outFile = new File(outputFileName);
+            //System.out.println(">>>>: " + outFile.getAbsolutePath());
             File outFilePath = new File(outputFileName.substring(0, outputFileName.lastIndexOf(File.separator)));
+            //System.out.println(">>>>: " + outFilePath.getAbsolutePath());
 
             outFilePath.mkdirs();
             outFile.createNewFile();
 
-
             fos = new FileOutputStream(outFile);
             fos.write(templateText.getBytes());
         } catch (IOException ex) {
-            Logger.getLogger(AbstractTemplateBasedIDLCompiler.class.getName()).log(Level.SEVERE, null, ex);
+            //System.out.println(">>>>: IOException");
+            Logger.getLogger(CompilerSupport.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
                 fos.close();

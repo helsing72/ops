@@ -16,7 +16,6 @@ import java.util.Vector;
 import parsing.AbstractTemplateBasedIDLCompiler;
 import parsing.IDLClass;
 import parsing.IDLField;
-import parsing.TopicInfo;
 
 /**
  *
@@ -38,7 +37,7 @@ public class DelphiCompiler extends opsc.Compiler
     final static String VALIDATE_BODY_REGEX = "__validateBody";
     final static String SIZE_REGEX = "__size";
     final static String CS_DIR = "Delphi";
-    private String projectDirectory;
+//    private String projectDirectory;
     private static String BASE_CLASS_NAME_REGEX = "__baseClassName";
     private static String CREATE_MAKE_BODY_REGEX = "__createMakeBody";
 
@@ -55,26 +54,23 @@ public class DelphiCompiler extends opsc.Compiler
     {
         createdFiles = "";
         this._idlClasses = idlClasses;
-        this.projectDirectory = projectDirectory;
+        //this.projectDirectory = projectDirectory;
         try {
-            for (IDLClass iDLClass : idlClasses) {
+            if (!_onlyGenTypeSupport) {
+              for (IDLClass iDLClass : idlClasses) {
                 if (iDLClass.getType() == IDLClass.ENUM_TYPE) {
                     compileEnum(iDLClass);
                 } else {
                   compileDataClass(iDLClass);
                   // We put the publisher and subscriber in the same file as the data class
                 }
+              }
             }
 
             compileTypeSupport(idlClasses, _projectName);
         } catch (IOException iOException)  {
             System.out.println( "Error: Generating Delphi failed with the following exception: " + iOException.getMessage());
         }
-
-    }
-
-    public void compileTopicConfig(Vector<TopicInfo> topics, String name, String packageString, String projectDirectory)
-    {
     }
 
     protected void compilePublisher(IDLClass cl) {}
@@ -154,8 +150,9 @@ public class DelphiCompiler extends opsc.Compiler
         return "DelphiFactoryIDLCompiler";
     }
 
-    protected void compileTypeSupport(Vector<IDLClass> idlClasses, String projectName) throws IOException
+    protected void compileTypeSupport(Vector<IDLClass> idlClasses, String projectName)
     {
+      try {
         String className = projectName + "TypeFactory";
         String packageName = projectName;
 
@@ -190,6 +187,9 @@ public class DelphiCompiler extends opsc.Compiler
         saveOutputText(templateText);
 
         createdFiles += "\"" + getOutputFileName() + "\"\n";
+      } catch (IOException iOException)  {
+          System.out.println( "Error: Generating Delphi factory failed with the following exception: " + iOException.getMessage());
+      }
     }
 
     private String elementType(String type)

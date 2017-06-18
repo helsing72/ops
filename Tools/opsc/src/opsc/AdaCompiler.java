@@ -16,7 +16,6 @@ import java.util.Vector;
 import parsing.AbstractTemplateBasedIDLCompiler;
 import parsing.IDLClass;
 import parsing.IDLField;
-import parsing.TopicInfo;
 
 /**
  *
@@ -40,7 +39,7 @@ public class AdaCompiler extends opsc.Compiler
     final static String VALIDATE_BODY_REGEX = "__validateBody";
     final static String SIZE_REGEX = "__size";
     final static String CS_DIR = "Ada";
-    private String projectDirectory;
+//    private String projectDirectory;
     private static String BASE_CLASS_NAME_REGEX = "__baseClassName";
     private static String CREATE_MAKE_BODY_REGEX = "__createMakeBody";
     private static String PROJNAME_REGEX = "__projName";
@@ -66,9 +65,10 @@ public class AdaCompiler extends opsc.Compiler
     {
         createdFiles = "";
         this._idlClasses = idlClasses;
-        this.projectDirectory = projectDirectory;
+//        this.projectDirectory = projectDirectory;
         try {
-            for (IDLClass iDLClass : idlClasses) {
+            if (!_onlyGenTypeSupport) {
+              for (IDLClass iDLClass : idlClasses) {
                 if (iDLClass.getType() == IDLClass.ENUM_TYPE) {
                     compileEnum(iDLClass);
                 } else {
@@ -76,18 +76,13 @@ public class AdaCompiler extends opsc.Compiler
                     compileSubscriber(iDLClass);
                     compilePublisher(iDLClass);
                 }
+              }
             }
-
             compileTypeSupport(idlClasses, _projectName);
-            compileProjectFile(_projectName);
+            if (!_onlyGenTypeSupport) compileProjectFile(_projectName);
         } catch (IOException iOException)  {
             System.out.println( "Error: Generating Ada failed with the following exception: " + iOException.getMessage());
         }
-
-    }
-
-    public void compileTopicConfig(Vector<TopicInfo> topics, String name, String packageString, String projectDirectory)
-    {
     }
 
     protected void compilePubSubHelper(String className, String templateName, String fileName) throws IOException
@@ -221,8 +216,9 @@ public class AdaCompiler extends opsc.Compiler
         createdFiles += "\"" + getOutputFileName() + "\"\n";
     }
 
-    protected void compileTypeSupport(Vector<IDLClass> idlClasses, String projectName) throws IOException
+    protected void compileTypeSupport(Vector<IDLClass> idlClasses, String projectName)
     {
+      try {
         String className = projectName + "TypeFactory";
         String packageName = projectName;
         String unitNamePart = "Ops_Pa.SerializableFactory_Pa." + packageName + "_" + className;
@@ -272,6 +268,9 @@ public class AdaCompiler extends opsc.Compiler
 
         saveOutputText(templateText);
         createdFiles += "\"" + getOutputFileName() + "\"\n";
+      } catch (IOException iOException)  {
+          System.out.println( "Error: Generating Ada Factory failed with the following exception: " + iOException.getMessage());
+      }
     }
 
     protected void compileProjectFile(String projectName) throws IOException

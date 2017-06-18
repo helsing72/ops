@@ -13,7 +13,6 @@ import opsc.ProjectProperties;
 import parsing.AbstractTemplateBasedIDLCompiler;
 import parsing.IDLField;
 import parsing.IDLClass;
-import parsing.TopicInfo;
 
 /**
  *
@@ -60,11 +59,6 @@ public class VisualStudio2008CppExampleCompiler extends opsc.Compiler
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public void compileTopicConfig(Vector<TopicInfo> arg0, String arg1, String arg2, String arg3)
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
     public String getName()
     {
         return "VisualStudio2008CppExampleCompiler";
@@ -97,7 +91,7 @@ public class VisualStudio2008CppExampleCompiler extends opsc.Compiler
     protected void compileEnum(IDLClass idlClass) throws IOException {}
     protected void compilePublisher(IDLClass idlClass) throws IOException {}
     protected void compileSubscriber(IDLClass idlClass) throws IOException {}
-    protected void compileTypeSupport(Vector<IDLClass> idlClasses, String projectName) throws IOException {}
+    protected void compileTypeSupport(Vector<IDLClass> idlClasses, String projectName) {}
     protected String getConstructorBody(IDLClass idlClass) { return ""; }
     protected String getDeclarations(IDLClass idlClass) { return ""; }
     protected String getDeclareVector(IDLField field) { return ""; }
