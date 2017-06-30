@@ -83,6 +83,9 @@ namespace ops
 		///Resets the internal offset pointer to 0 (zero)
 		void ResetIndex();
 
+		///Get the internal offset pointer
+		int GetIndex();
+
 		int getNrOfSegments();
 		int getSegmentSize(int i);
 		char* getSegment(int i);

@@ -678,6 +678,11 @@ namespace ops
         WriteChar(versionHigh);
     }
 
+    int ByteBuffer::GetIndex()
+    {
+        return index;
+    }
+
     void ByteBuffer::ResetIndex()
     {
         index = 0;
