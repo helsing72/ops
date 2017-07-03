@@ -140,10 +140,10 @@ if(Boost_FOUND)
   add_subdirectory(Cpp)
 
   option(OPS_BUILD_UNITTESTS "Enable to build the UnitTest app(s)" ON)
-  if(OPS_BUILD_UNITTESTS AND GTest_FOUND AND CMAKE_BUILD_TYPE MATCHES "Debug")
-    add_subdirectory(UnitTests) #pane added
+  if(OPS_BUILD_UNITTESTS AND GTEST_FOUND AND CMAKE_BUILD_TYPE MATCHES "Debug")
+    add_subdirectory(UnitTests)
   endif()
-
+  
 else()
   message(WARNING "install Boost to build OPS C++ libraries")
 endif()
