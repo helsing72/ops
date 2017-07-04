@@ -185,6 +185,7 @@ public:
 
 	void onDeadlineMissed(ops::DeadlineMissedEvent* evt)
 	{
+	        UNUSED(evt)
 		std::cout << "Deadline Missed for topic " << sub->getTopic().getName() << std::endl;
 	}
 
@@ -222,13 +223,22 @@ class MyListener :
 		public CHelperListener<pizza::special::ExtraAllt>
 {
 public:
-	void onData(ops::Subscriber* sub, pizza::special::ExtraAllt* data){}
-	void onData(ops::Subscriber* sub, pizza::VessuvioData* data){}
+	void onData(ops::Subscriber* sub, pizza::special::ExtraAllt* data)
+	{
+	  UNUSED(sub)
+	  UNUSED(data)
+	}
+	void onData(ops::Subscriber* sub, pizza::VessuvioData* data)
+	{
+	  UNUSED(sub)
+	  UNUSED(data)
+	}
 };
 
 int main(int argc, char**argv)
 {
-
+	UNUSED(argc)
+	UNUSED(argv)
 	// --------------------------------------------------------------------
 	MyListener myListener;
 

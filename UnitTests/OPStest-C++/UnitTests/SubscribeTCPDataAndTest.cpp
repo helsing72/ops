@@ -173,6 +173,7 @@ public:
 	///Override from ops::DeadlineMissedListener, called if no new data has arrived within deadlineQoS.
 	void onDeadlineMissed(ops::DeadlineMissedEvent* evt)
 	{
+		UNUSED(evt)
 		std::cout << "Deadline Missed for topic " << sub->getTopic().getName() << std::endl;
 	}
 };
@@ -210,6 +211,7 @@ class MyListener :
 public:
 
 	void onData(ops::Subscriber* sub, pizza::special::ExtraAllt* data){
+		UNUSED(sub)
 		receivedPizzaVec.push_back(*data);
 		std::cout << "GETS EXTRA_ALLT TCP DATAs, size = " << receivedPizzaVec.size() << std::endl;
 	}
