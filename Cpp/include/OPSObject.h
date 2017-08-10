@@ -25,7 +25,6 @@
 #if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
 #include <atomic>
 #endif
-#include <string>
 
 #include "OPSExport.h"
 #include "Serializable.h"
@@ -33,7 +32,6 @@
 
 namespace ops
 {
-
     ///Base class for object that can be serialized with OPSArchivers
     class OPS_EXPORT OPSObject : public Serializable
     {
@@ -45,19 +43,23 @@ namespace ops
         friend class ByteBuffer;
         friend class OPSArchiverIn;
 
-    protected:
+	protected:
         //Should only be set by the Publisher at publication time and by ByteBuffer at deserialization time.
-        std::string key;
-        std::string typesString;
+		ObjectKey_T key;
+        TypeId_T typesString;
 
-		void appendType(const std::string& type)
+		void appendType(const TypeId_T& type)
 		{
-			typesString = type + " " + typesString;
+			TypeId_T old = typesString;
+			typesString = type;
+			typesString += ' ';
+			typesString += old;
 		}
+
     public:
-        std::string getKey();
-		const std::string& getTypeString();
-		void setKey(std::string k);
+		ObjectKey_T getKey();
+		const TypeId_T& getTypeString();
+		void setKey(ObjectKey_T k);
 		virtual void serialize(ArchiverInOut* archive);
 
 		///Bytes that hold unserialized data for this object.

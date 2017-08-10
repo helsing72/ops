@@ -24,8 +24,10 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <stack>
 #include <exception>
 
+#include "OPSTypeDefs.h"
 #include "ArchiverInOut.h"
 #include "SerializableInheritingTypeFactory.h"
 #include "xml/xmlParser.h"
@@ -37,17 +39,18 @@ namespace ops
         class XMLArchiverException : public std::exception
         {
         private:
-            std::string message;
+			ExceptionMessage_T message;
         public:
             XMLArchiverException()
             {
                 message = "XMLArchiverException: empty";
             }
-            XMLArchiverException(std::string m)
+            XMLArchiverException(ExceptionMessage_T m)
             {
-                message = "XMLArchiverException: " + m;
+				message = "XMLArchiverException: ";
+				message += m;
             }
-            std::string GetMessage()
+			ExceptionMessage_T GetMessage()
             {
                 return message;
             }
@@ -56,7 +59,11 @@ namespace ops
     }
     using namespace exceptions;
 
-    ///
+#ifdef USE_FIXED_LENGTH_STRINGS
+#define NAME(x) x
+#else
+#define NAME(x) x.c_str()
+#endif
 
     class XMLArchiverIn : public ArchiverInOut
     {
@@ -66,6 +73,21 @@ namespace ops
         std::string xmlString;
         std::string parseString;
         std::stringstream ss;
+
+		std::stack<opsXML::XMLNode> _stack;
+
+		void PushNode(opsXML::XMLNode& node) 
+		{
+			_stack.push(node);
+		}
+
+		void PopNode(opsXML::XMLNode& node)
+		{
+			if (_stack.size() == 0) throw ops::ArchiverException("XMLArchiverIn: Mismatched Push/Pop");
+			node = _stack.top();
+			_stack.pop();
+		}
+
     public:
 
 		XMLArchiverIn(std::istream& is_, std::string topNode_, SerializableInheritingTypeFactory* factory) : is(is_)
@@ -86,11 +108,14 @@ namespace ops
         {
         }
 
-        virtual void inout(const std::string& name, bool& value)
+		// Returns true if it's an output archiver
+		virtual bool isOut() { return false; }
+
+		virtual void inout(InoutName_T name, bool& value)
         {
-            if (!currentNode.getChildNode(name.c_str()).isEmpty())
+            if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
-                std::string s(currentNode.getChildNode(name.c_str()).getText());
+                std::string s(currentNode.getChildNode(NAME(name)).getText());
                 if (s.compare("true") == 0) value = true;
                 if (s.compare("false") == 0) value = false;
                 if (s.compare("TRUE") == 0) value = true;
@@ -102,11 +127,11 @@ namespace ops
             }
         }
 
-        virtual void inout(const std::string& name, char& value)
+        virtual void inout(InoutName_T name, char& value)
         {
-            if (!currentNode.getChildNode(name.c_str()).isEmpty())
+            if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
-				std::string s(currentNode.getChildNode(name.c_str()).getText());
+				std::string s(currentNode.getChildNode(NAME(name)).getText());
                 std::stringstream ss(s);
 
                 int inVal;
@@ -115,11 +140,11 @@ namespace ops
             }
         }
 
-        virtual void inout(const std::string& name, int& value)
+        virtual void inout(InoutName_T name, int& value)
         {
-            if (!currentNode.getChildNode(name.c_str()).isEmpty())
+            if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
-                std::string s(currentNode.getChildNode(name.c_str()).getText());
+                std::string s(currentNode.getChildNode(NAME(name)).getText());
                 std::stringstream ss(s);
 
                 int inVal;
@@ -128,11 +153,11 @@ namespace ops
             }
         }
 
-        virtual void inout(const std::string& name, __int16& value)
+        virtual void inout(InoutName_T name, __int16& value)
         {
-            if (!currentNode.getChildNode(name.c_str()).isEmpty())
+            if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
-                std::string s(currentNode.getChildNode(name.c_str()).getText());
+                std::string s(currentNode.getChildNode(NAME(name)).getText());
 				std::stringstream ss(s);
 
                 int inVal;
@@ -141,11 +166,11 @@ namespace ops
             }
         }
 
-        virtual void inout(const std::string& name, __int64& value)
+        virtual void inout(InoutName_T name, __int64& value)
         {
-            if (!currentNode.getChildNode(name.c_str()).isEmpty())
+            if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
-				std::string s(currentNode.getChildNode(name.c_str()).getText());
+				std::string s(currentNode.getChildNode(NAME(name)).getText());
 				std::stringstream ss(s);
 
                 __int64 inVal;
@@ -154,11 +179,11 @@ namespace ops
             }
         }
 
-        virtual void inout(const std::string& name, float& value)
+        virtual void inout(InoutName_T name, float& value)
         {
-            if (!currentNode.getChildNode(name.c_str()).isEmpty())
+            if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
-				std::string s(currentNode.getChildNode(name.c_str()).getText());
+				std::string s(currentNode.getChildNode(NAME(name)).getText());
 				std::stringstream ss(s);
 
                 float inVal;
@@ -167,11 +192,11 @@ namespace ops
             }
         }
 
-        virtual void inout(const std::string& name, double& value)
+        virtual void inout(InoutName_T name, double& value)
         {
-            if (!currentNode.getChildNode(name.c_str()).isEmpty())
+            if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
-				std::string s(currentNode.getChildNode(name.c_str()).getText());
+				std::string s(currentNode.getChildNode(NAME(name)).getText());
 				std::stringstream ss(s);
 
                 double inVal;
@@ -180,13 +205,13 @@ namespace ops
             }
         }
 
-        virtual void inout(const std::string& name, std::string& value)
+        virtual void inout(InoutName_T name, std::string& value)
         {
-            if (!currentNode.getChildNode(name.c_str()).isEmpty())
+            if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
-                if (currentNode.getChildNode(name.c_str()).getText() != NULL)
+                if (currentNode.getChildNode(NAME(name)).getText() != NULL)
                 {
-					std::string s(currentNode.getChildNode(name.c_str()).getText());
+					std::string s(currentNode.getChildNode(NAME(name)).getText());
                     value = s;
                 }
                 else
@@ -196,7 +221,27 @@ namespace ops
             }
         }
 
-        virtual void inout(const std::string& name, char* buffer, int bufferSize)
+		virtual void inoutfixstring(InoutName_T name, char* value, int& size, int max_size, int idx)
+		{
+			if (!currentNode.getChildNode(NAME(name), idx).isEmpty())
+			{
+				if (currentNode.getChildNode(NAME(name), idx).getText() != NULL)
+				{
+					std::string s(currentNode.getChildNode(NAME(name), idx).getText());
+					int len = (int)s.size();
+					if (len > max_size) throw ops::ArchiverException("Illegal size of fix string received. name: ", name);
+					if (len > 0) memcpy(value, s.c_str(), len);
+					size = len;
+				}
+				else
+				{
+					size = 0;
+				}
+				value[size] = '\0';
+			}
+		}
+		
+		virtual void inout(InoutName_T name, char* buffer, int bufferSize)
         {
             UNUSED(name);
             UNUSED(buffer);
@@ -205,58 +250,56 @@ namespace ops
             throw ops::ArchiverException("XMLArchiverIn.inout(name, char*, int) NYI");
         }
 
-        virtual Serializable* inout(const std::string& name, Serializable* value, int element)
+        virtual Serializable* inout(InoutName_T name, Serializable* value, int element)
         {
             UNUSED(value);
 
-            opsXML::XMLNode tempNode = currentNode;
-            currentNode = currentNode.getChildNode(name.c_str()).getChildNode("element", element);
-			std::string types(currentNode.getAttribute("type"));
+            PushNode(currentNode);
+            currentNode = currentNode.getChildNode("element", element);
+			TypeId_T types(currentNode.getAttribute("type"));
             Serializable* newSer = factory->create(types);
             if (newSer != NULL)
             {
                 newSer->serialize(this);
-
             }
 
-            currentNode = tempNode; 
+			PopNode(currentNode);
 
             return newSer;
         }
 
-        virtual void inout(const std::string& name, Serializable& value)
+        virtual void inout(InoutName_T name, Serializable& value)
         {
             UNUSED(name);
             UNUSED(value);
         }
 
-        virtual Serializable* inout(const std::string& name, Serializable* value)
+        virtual Serializable* inout(InoutName_T name, Serializable* value)
         {
-            if (!currentNode.getChildNode(name.c_str()).isEmpty())
+            if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
-                opsXML::XMLNode tempNode = currentNode;
-                currentNode = currentNode.getChildNode(name.c_str());
-				std::string types(currentNode.getAttribute("type"));
+				PushNode(currentNode);
+				currentNode = currentNode.getChildNode(NAME(name));
+				TypeId_T types(currentNode.getAttribute("type"));
                 Serializable* newSer = factory->create(types);
                 if (newSer != NULL)
                 {
                     newSer->serialize(this);
-
                 }
 
-                currentNode = tempNode;
+				PopNode(currentNode);
 
                 return newSer;
             }
             return value;
         }
 
-        virtual void inout(const std::string& name, std::vector<bool>& value)
+        virtual void inout(InoutName_T name, std::vector<bool>& value)
         {
-            if (!currentNode.getChildNode(name.c_str()).isEmpty())
+            if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
-                opsXML::XMLNode tempNode = currentNode;
-                currentNode = currentNode.getChildNode(name.c_str());
+				PushNode(currentNode);
+				currentNode = currentNode.getChildNode(NAME(name));
 
                 int size = currentNode.nChildNode("element");
                 value.reserve(size);
@@ -274,16 +317,16 @@ namespace ops
                     if (s.compare("False") == 0) value[i] = false;
                 }
 
-                currentNode = tempNode;
-            }
+				PopNode(currentNode);
+			}
         }
 
-        virtual void inout(const std::string& name, std::vector<char>& value)
+        virtual void inout(InoutName_T name, std::vector<char>& value)
         {
-            if (!currentNode.getChildNode(name.c_str()).isEmpty())
+            if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
-                opsXML::XMLNode tempNode = currentNode;
-                currentNode = currentNode.getChildNode(name.c_str());
+				PushNode(currentNode);
+				currentNode = currentNode.getChildNode(NAME(name));
 
                 int size = currentNode.nChildNode("element");
                 value.reserve(size);
@@ -298,16 +341,16 @@ namespace ops
                     value[i] = inVal;
                 }
 
-                currentNode = tempNode;
-            }
+				PopNode(currentNode);
+			}
         }
 
-        virtual void inout(const std::string& name, std::vector<int>& value)
+        virtual void inout(InoutName_T name, std::vector<int>& value)
         {
-            if (!currentNode.getChildNode(name.c_str()).isEmpty())
+            if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
-                opsXML::XMLNode tempNode = currentNode;
-                currentNode = currentNode.getChildNode(name.c_str());
+				PushNode(currentNode);
+				currentNode = currentNode.getChildNode(NAME(name));
 
                 int size = currentNode.nChildNode("element");
                 value.reserve(size);
@@ -322,16 +365,16 @@ namespace ops
                     value[i] = inVal;
                 }
 
-                currentNode = tempNode;
-            }
+				PopNode(currentNode);
+			}
         }
 
-        virtual void inout(const std::string& name, std::vector<__int16>& value)
+        virtual void inout(InoutName_T name, std::vector<__int16>& value)
         {
-            if (!currentNode.getChildNode(name.c_str()).isEmpty())
+            if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
-                opsXML::XMLNode tempNode = currentNode;
-                currentNode = currentNode.getChildNode(name.c_str());
+				PushNode(currentNode);
+				currentNode = currentNode.getChildNode(NAME(name));
 
                 int size = currentNode.nChildNode("element");
                 value.reserve(size);
@@ -346,16 +389,16 @@ namespace ops
                     value[i] = inVal;
                 }
 
-                currentNode = tempNode;
-            }
+				PopNode(currentNode);
+			}
         }
 
-        virtual void inout(const std::string& name, std::vector<__int64>& value)
+        virtual void inout(InoutName_T name, std::vector<__int64>& value)
         {
-            if (!currentNode.getChildNode(name.c_str()).isEmpty())
+            if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
-                opsXML::XMLNode tempNode = currentNode;
-                currentNode = currentNode.getChildNode(name.c_str());
+				PushNode(currentNode);
+				currentNode = currentNode.getChildNode(NAME(name));
 
                 int size = currentNode.nChildNode("element");
                 value.reserve(size);
@@ -370,16 +413,16 @@ namespace ops
                     value[i] = inVal;
                 }
 
-                currentNode = tempNode;
-            }
+				PopNode(currentNode);
+			}
         }
 
-        virtual void inout(const std::string& name, std::vector<float>& value)
+        virtual void inout(InoutName_T name, std::vector<float>& value)
         {
-            if (!currentNode.getChildNode(name.c_str()).isEmpty())
+            if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
-                opsXML::XMLNode tempNode = currentNode;
-                currentNode = currentNode.getChildNode(name.c_str());
+				PushNode(currentNode);
+				currentNode = currentNode.getChildNode(NAME(name));
 
                 int size = currentNode.nChildNode("element");
                 value.reserve(size);
@@ -394,16 +437,16 @@ namespace ops
                     value[i] = inVal;
                 }
 
-                currentNode = tempNode;
-            }
+				PopNode(currentNode);
+			}
         }
 
-        virtual void inout(const std::string& name, std::vector<double>& value)
+        virtual void inout(InoutName_T name, std::vector<double>& value)
         {
-            if (!currentNode.getChildNode(name.c_str()).isEmpty())
+            if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
-                opsXML::XMLNode tempNode = currentNode;
-                currentNode = currentNode.getChildNode(name.c_str());
+				PushNode(currentNode);
+				currentNode = currentNode.getChildNode(NAME(name));
 
                 int size = currentNode.nChildNode("element");
                 value.reserve(size);
@@ -418,16 +461,16 @@ namespace ops
                     value[i] = inVal;
                 }
 
-                currentNode = tempNode;
-            }
+				PopNode(currentNode);
+			}
         }
 
-        virtual void inout(const std::string& name, std::vector<std::string>& value)
+        virtual void inout(InoutName_T name, std::vector<std::string>& value)
         {
-            if (!currentNode.getChildNode(name.c_str()).isEmpty())
+            if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
-                opsXML::XMLNode tempNode = currentNode;
-                currentNode = currentNode.getChildNode(name.c_str());
+				PushNode(currentNode);
+				currentNode = currentNode.getChildNode(NAME(name));
 
                 int size = currentNode.nChildNode("element");
                 value.reserve(size);
@@ -438,11 +481,11 @@ namespace ops
                     value[i] = s;
                 }
 
-                currentNode = tempNode;
-            }
+				PopNode(currentNode);
+			}
         }
 
-		void inoutfixarr(const std::string& name, bool* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, bool* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			UNUSED(value)
@@ -452,7 +495,7 @@ namespace ops
 			throw ops::ArchiverException("XMLArchiverIn.inoutfixarr NYI");
 		}
 
-		void inoutfixarr(const std::string& name, char* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, char* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			UNUSED(value)
@@ -462,7 +505,7 @@ namespace ops
 			throw ops::ArchiverException("XMLArchiverIn.inoutfixarr NYI");
 		}
 
-		void inoutfixarr(const std::string& name, int* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, int* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			UNUSED(value)
@@ -472,7 +515,7 @@ namespace ops
 			throw ops::ArchiverException("XMLArchiverIn.inoutfixarr NYI");
 		}
 
-		void inoutfixarr(const std::string& name, __int16* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, __int16* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			UNUSED(value)
@@ -482,7 +525,7 @@ namespace ops
 			throw ops::ArchiverException("XMLArchiverIn.inoutfixarr NYI");
 		}
 
-		void inoutfixarr(const std::string& name, __int64* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, __int64* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			UNUSED(value)
@@ -492,7 +535,7 @@ namespace ops
 			throw ops::ArchiverException("XMLArchiverIn.inoutfixarr NYI");
 		}
 
-		void inoutfixarr(const std::string& name, float* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, float* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			UNUSED(value)
@@ -502,7 +545,7 @@ namespace ops
 			throw ops::ArchiverException("XMLArchiverIn.inoutfixarr NYI");
 		}
 
-		void inoutfixarr(const std::string& name, double* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, double* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			UNUSED(value)
@@ -512,7 +555,7 @@ namespace ops
 			throw ops::ArchiverException("XMLArchiverIn.inoutfixarr NYI");
 		}
 
-		void inoutfixarr(const std::string& name, std::string* value, int numElements)
+		void inoutfixarr(InoutName_T name, std::string* value, int numElements)
         {
             UNUSED(name)
             UNUSED(value)
@@ -521,21 +564,24 @@ namespace ops
             throw ops::ArchiverException("XMLArchiverIn.inoutfixarr NYI");
         }
 
-        int beginList(const std::string& name, int size)
+        int beginList(InoutName_T name, int size)
         {
             UNUSED(size);
-            if (!currentNode.getChildNode(name.c_str()).isEmpty())
+			PushNode(currentNode);
+			currentNode = currentNode.getChildNode(NAME(name));
+			
+			if (!currentNode.isEmpty())
             {
-                return currentNode.getChildNode(name.c_str()).nChildNode("element");
+                return currentNode.nChildNode("element");
             }
             return 0;
         }
 
-        void endList(const std::string& name)
+        void endList(InoutName_T name)
         {
             UNUSED(name);
-            //Nothing to do in this implementation
-        }
+			PopNode(currentNode);
+		}
 
     private:
         SerializableInheritingTypeFactory* factory;

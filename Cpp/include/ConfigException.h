@@ -2,15 +2,16 @@
 #ifndef ops_ConfigException_h
 #define ops_ConfigException_h
 
-#include <string.h>
 #include <exception> 
+
+#include "OPSTypeDefs.h"
 
 namespace ops
 {
     class ConfigException : public std::exception
     {
     public:
-        ConfigException(std::string mess) : message(mess)
+        ConfigException(ExceptionMessage_T mess) : message(mess)
         {
         }
 
@@ -20,7 +21,7 @@ namespace ops
         {
         }
     private:
-        std::string message;
+		ExceptionMessage_T message;
     };
 }
 #endif

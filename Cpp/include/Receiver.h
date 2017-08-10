@@ -21,7 +21,7 @@
 #ifndef ops_ReceiverH
 #define ops_ReceiverH
 
-#include <string>
+#include "OPSTypeDefs.h"
 #include "Notifier.h"
 #include "IOService.h" 
 #include "BytesSizePair.h"
@@ -34,9 +34,9 @@ namespace ops
 	public:
 		virtual ~Receiver() {}
 
-		static Receiver* create(std::string ip, int bindPort, IOService* ioService, std::string localInterface = "0.0.0.0", __int64 inSocketBufferSize = 16000000);
-		static Receiver* createTCPClient(std::string ip, int port, IOService* ioService, __int64 inSocketBufferSize = 16000000);
-		static Receiver* createUDPReceiver(int port, IOService* ioService,  std::string localInterface = "0.0.0.0", __int64 inSocketBufferSize = 16000000);
+		static Receiver* create(Address_T ip, int bindPort, IOService* ioService, Address_T localInterface = "0.0.0.0", __int64 inSocketBufferSize = 16000000);
+		static Receiver* createTCPClient(Address_T ip, int port, IOService* ioService, __int64 inSocketBufferSize = 16000000);
+		static Receiver* createUDPReceiver(int port, IOService* ioService, Address_T localInterface = "0.0.0.0", __int64 inSocketBufferSize = 16000000);
 		
 		// Set the receive buffer to use
 		virtual void asynchWait(char* bytes, int size) = 0;
@@ -44,11 +44,11 @@ namespace ops
 		virtual void stop() = 0;
 
 		virtual int getLocalPort() = 0;
-		virtual std::string getLocalAddress() = 0;
+		virtual Address_T getLocalAddress() = 0;
 
 		// Used to get the sender IP and port for a received message
 		// Only safe to call in callback, before a new asynchWait() is called.
-		virtual void getSource(std::string& address, int& port) = 0;
+		virtual void getSource(Address_T& address, int& port) = 0;
 		
 	};
 }

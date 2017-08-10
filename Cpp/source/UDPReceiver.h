@@ -21,7 +21,6 @@
 #ifndef ops_UDPReceiverH
 #define ops_UDPReceiverH
 
-#include <string>
 #include "Participant.h"
 #include "Receiver.h"
 #include <boost/asio.hpp>
@@ -40,7 +39,7 @@ namespace ops
     {
     public:
 
-        UDPReceiver(int bindPort, IOService* ioServ, std::string localInterface = "0.0.0.0", __int64 inSocketBufferSizent = 16000000) :
+        UDPReceiver(int bindPort, IOService* ioServ, Address_T localInterface = "0.0.0.0", __int64 inSocketBufferSizent = 16000000) :
 	        sock(NULL), localEndpoint(NULL), max_length(65535), 
 			cancelled(false), m_asyncCallActive(false), m_working(false)
         {
@@ -57,7 +56,7 @@ namespace ops
                     boost::asio::ip::address addr = it->endpoint().address();
                     if (addr.is_v4())
                     {
-                        ipaddress = addr.to_string();
+                        ipaddress = addr.to_string().c_str();
                         localEndpoint = new udp::endpoint(addr, bindPort);
                         break;
                     }
@@ -66,7 +65,7 @@ namespace ops
             }
             else
             {
-                boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(localInterface));
+                boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(localInterface.c_str()));
                 localEndpoint = new boost::asio::ip::udp::endpoint(ipAddr, bindPort);
 				ipaddress = localInterface;
             }
@@ -118,9 +117,9 @@ namespace ops
 
 		// Used to get the sender IP and port for a received message
 		// Only safe to call in callback, before a new asynchWait() is called.
-		void getSource(std::string& address, int& port) 
+		void getSource(Address_T& address, int& port)
 		{
-			address = sendingEndPoint.address().to_string();
+			address = sendingEndPoint.address().to_string().c_str();
 			port = sendingEndPoint.port();
 		}
 
@@ -233,7 +232,7 @@ namespace ops
             return port;
         }
 
-        std::string getLocalAddress()
+		Address_T getLocalAddress()
         {
             return ipaddress;
         }
@@ -263,7 +262,7 @@ namespace ops
 
     private:
         int port;
-        std::string ipaddress;
+		Address_T ipaddress;
         boost::asio::ip::udp::socket* sock;
         boost::asio::ip::udp::endpoint* localEndpoint;
         boost::asio::ip::udp::endpoint lastEndpoint;

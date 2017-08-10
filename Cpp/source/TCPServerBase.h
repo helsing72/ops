@@ -27,7 +27,6 @@
 
 #pragma once
 
-#include <string>
 #include <iostream>
 #include <mutex>
 
@@ -61,7 +60,7 @@ namespace ops
 		}
 
 		///Sends buf to any Receiver connected to this Sender, ip and port are discarded and can be left blank.
-        virtual bool sendTo(char* buf, int size, const std::string& ip, int port)
+        virtual bool sendTo(char* buf, int size, const Address_T& ip, int port)
 		{
 			UNUSED(ip);
 			UNUSED(port);

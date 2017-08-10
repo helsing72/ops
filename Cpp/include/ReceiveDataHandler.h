@@ -21,8 +21,9 @@
 #ifndef ops_ReceiveDataHandler_h
 #define ops_ReceiveDataHandler_h
 
-#include <string>
 #include <map>
+#include <iostream>
+
 #include "Topic.h"
 #include "ByteBuffer.h"
 #include "OPSConstants.h"
@@ -30,11 +31,9 @@
 #include "OPSMessage.h"
 #include "Notifier.h"
 #include "Listener.h"
-#include <iostream>
 #include "BytesSizePair.h"
 #include "ReferenceHandler.h"
 #include "OPSExport.h"
-
 
 namespace ops
 {	//Forward declaration
@@ -43,7 +42,6 @@ namespace ops
 	class OPS_EXPORT ReceiveDataHandler : public Notifier<OPSMessage*>, Listener<BytesSizePair>
 	{
 	public:
-		
 		///Constructor.
 		ReceiveDataHandler(Topic top, Participant* part);
 		///Destructor

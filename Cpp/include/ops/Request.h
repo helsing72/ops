@@ -25,24 +25,24 @@
 
 namespace ops
 {
-class Request : public OPSObject
-{
-public:
-	std::string requestId;
-
-	void serialize(ops::ArchiverInOut* archiver)
+	class Request : public OPSObject
 	{
-		OPSObject::serialize(archiver);
-		archiver->inout(std::string("requestId"), requestId);
-	}
-	
-	virtual void fillClone(OPSObject* obj) const
-	{
-        Request* narrRet = (Request*)obj;
-        OPSObject::fillClone(narrRet);
-		narrRet->requestId =requestId;
-	}
+	public:
+		std::string requestId;
 
-};
+		void serialize(ops::ArchiverInOut* archiver)
+		{
+			OPSObject::serialize(archiver);
+			archiver->inout("requestId", requestId);
+		}
+
+		virtual void fillClone(OPSObject* obj) const
+		{
+			Request* narrRet = (Request*)obj;
+			OPSObject::fillClone(narrRet);
+			narrRet->requestId = requestId;
+		}
+
+	};
 }
 #endif

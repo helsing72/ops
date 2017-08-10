@@ -28,7 +28,7 @@
 #ifndef ops_SenderH
 #define	ops_SenderH
 
-#include <string>
+#include "OPSTypeDefs.h"
 #include "ByteBuffer.h"
 #include "IOService.h" 
 #include "OPSExport.h"
@@ -39,15 +39,15 @@ namespace ops
     class Sender
     {
     public:
-        virtual bool sendTo(char* buf, int size, const std::string& ip, int port) = 0;
+        virtual bool sendTo(char* buf, int size, const Address_T& ip, int port) = 0;
         virtual int getPort() = 0;
-        virtual std::string getAddress() = 0;
+        virtual Address_T getAddress() = 0;
 		virtual void open() = 0;
 		virtual void close() = 0;
 
-        static OPS_EXPORT Sender* create(IOService* ioService, std::string localInterface = "0.0.0.0", int ttl = 1, __int64 outSocketBufferSize = 16000000);
-        static OPS_EXPORT Sender* createUDPSender(IOService* ioService, std::string localInterface = "0.0.0.0", int ttl = 1, __int64 outSocketBufferSize = 16000000);
-        static OPS_EXPORT Sender* createTCPServer(IOService* ioService, std::string ip, int port, __int64 outSocketBufferSize = 16000000);
+        static OPS_EXPORT Sender* create(IOService* ioService, Address_T localInterface = "0.0.0.0", int ttl = 1, __int64 outSocketBufferSize = 16000000);
+        static OPS_EXPORT Sender* createUDPSender(IOService* ioService, Address_T localInterface = "0.0.0.0", int ttl = 1, __int64 outSocketBufferSize = 16000000);
+        static OPS_EXPORT Sender* createTCPServer(IOService* ioService, Address_T ip, int port, __int64 outSocketBufferSize = 16000000);
 
         virtual ~Sender() {}
     };

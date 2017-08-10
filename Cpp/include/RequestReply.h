@@ -21,12 +21,13 @@
 #ifndef ops_RequestReplyH
 #define ops_RequestReplyH
 
+#include <sstream>
+
+#include "OPSTypeDefs.h"
 #include "Topic.h"
 #include "Subscriber.h"
 #include "Publisher.h"
 #include "KeyFilterQoSPolicy.h"
-#include <sstream>
-
 
 namespace ops
 {
@@ -35,19 +36,18 @@ namespace ops
     class RequestReply
     {
     public:
-		RequestReply(Topic reqTopic, Topic repTopic, std::string key_) :keyFilter(key_), key(key_)	  
+		RequestReply(Topic reqTopic, Topic repTopic, ObjectKey_T key_) :keyFilter(key_), key(key_)
 		{
 			sub = new Subscriber(repTopic);
 			sub->addFilterQoSPolicy(&keyFilter);
 
 			pub = new Publisher(reqTopic);
 			sub->start();
-
 		}
 	    RepType* request(ReqType* req, int timeout)
 		{
 			static int reqInt = 0;
-			reqInt ++;
+			reqInt++;
 			req->setKey(key);
 			std::stringstream ss;
 			ss << key << reqInt;
@@ -67,7 +67,6 @@ namespace ops
 				}
 			}
 			return NULL;
-
 		}
 		~RequestReply()
 		{
@@ -78,8 +77,7 @@ namespace ops
 		Subscriber* sub;
 		Publisher* pub;
 		KeyFilterQoSPolicy keyFilter;
-		std::string key;
-        
+		ObjectKey_T key;
     };
 }
 #endif

@@ -21,9 +21,12 @@
 #ifndef ops_ByteBufferH
 #define ops_ByteBufferH
 
-#include "OPSExport.h"
 #include <string>
 #include <vector>
+#include <exception>
+
+#include "OPSTypeDefs.h"
+#include "OPSExport.h"
 #include "MemoryMap.h"
 #include "OPSObject.h"
 
@@ -69,6 +72,9 @@ namespace ops
 		void ReadBytes(std::vector<char>& out, int offset, int length);
      
     public:
+		struct fixed_string_to_small : public std::exception {
+			const char* what() const noexcept { return "Fixed string to small"; }
+		};
 
         ///The Write Policy is default to preserve all written data (see description above).
         ByteBuffer(MemoryMap* mMap, bool _preserveWrittenData = true);
@@ -110,6 +116,14 @@ namespace ops
         void WriteChar(char c);
         ///Writes s.size() followed by s to the buffer as a c-string (8-bit chars) and increments the buffer by s.size() + 4.
         void WriteString(std::string& s);
+		///Writes s.size() followed by s to the buffer as a c-string (8-bit chars) and increments the buffer by s.size() + 4.
+		template<size_t N>
+		void WriteString(fixed_string<N>& s)
+		{
+			int siz = (int)s.size();
+			WriteInt(siz);
+			WriteChars((char*)s.c_str(), siz);
+		}
 
         ///Writes size(o) followed by the bytes making up o to the buffer and increments index by size(o) + 4
         ///IMPORTANT: oh must be an OPSObjectHelper for sub type of o. No check that this is the case is performed.
@@ -136,11 +150,23 @@ namespace ops
         __int64 ReadLong();
         ///Reads 1 byte from the buffer and returns it as a char. Index is increased by 1.
         char ReadChar();
-        ///Reads an int (length) from the buffer followed by length number of chars returned as a sdt::string. Index is increased by length + 4.
+        ///Reads an int (length) from the buffer followed by length number of chars returned as a std::string. Index is increased by length + 4.
         std::string ReadString();
+		void ReadString(std::string& value);
+		///Reads an int (length) from the buffer followed by length number of chars returned as a fixed_string. Index is increased by length + 4.
+		template<size_t N>
+		void ReadString(fixed_string<N>& value)
+		{
+			int length = ReadInt();
+			if (length > (int)N) throw fixed_string_to_small();
+			char* Ptr = &value[0];
+			ReadChars(Ptr, length);
+			Ptr[length] = '\0';
+			value.resize();
+		}
+
         //void ReadOPSObjectFields(ops::OPSObject* o);
         //void WriteOPSObjectFields(OPSObject* o);
-
 
 		///Reads std::vector of corresponding type and increments index accordingly
 		void ReadBooleans(std::vector<bool>& out);

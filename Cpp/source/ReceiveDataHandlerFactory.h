@@ -3,7 +3,8 @@
 
 #include <map>
 #include <vector>
-#include <string>
+
+#include "OPSTypeDefs.h"
 #include "Lockable.h"
 
 namespace ops
@@ -17,13 +18,13 @@ namespace ops
     {
     private:
         ///By Singelton, one ReceiveDataHandler per Topic (name) on this Participant
-        std::map<std::string, ReceiveDataHandler*> receiveDataHandlerInstances;
+        std::map<InternalKey_T, ReceiveDataHandler*> receiveDataHandlerInstances;
 
         ///Garbage vector for ReceiveDataHandlers, these can safely be deleted.
         std::vector<ReceiveDataHandler*> garbageReceiveDataHandlers;
         ops::Lockable garbageLock;
 
-		inline std::string makeKey(Topic& top);
+		inline InternalKey_T makeKey(Topic& top);
 
     public:
         explicit ReceiveDataHandlerFactory(Participant* participant);

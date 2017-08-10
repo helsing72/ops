@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2017 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -21,7 +21,7 @@
 #ifndef ops_transport_h
 #define ops_transport_h
 
-#include <string>
+#include "OPSTypeDefs.h"
 #include "OPSObject.h"
 #include "OPSExport.h"
 
@@ -30,8 +30,8 @@ namespace ops
     class OPS_EXPORT Transport : public OPSObject
     {
     public:
-        std::string channelID;
-        std::vector<std::string> topics;
+        ChannelId_T channelID;
+        std::vector<ObjectName_T> topics;
 
         Transport();
 

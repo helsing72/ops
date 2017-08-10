@@ -1,4 +1,3 @@
-#include <sstream>
 
 #include "OPSTypeDefs.h"
 #include "ReceiveDataHandlerFactory.h"
@@ -16,25 +15,28 @@ namespace ops
         UNUSED(participant);
     }
 
-	std::string ReceiveDataHandlerFactory::makeKey(Topic& top)
+	InternalKey_T ReceiveDataHandlerFactory::makeKey(Topic& top)
 	{
 		// Since topics can use the same port for transports multicast & tcp, or 
 		// use transport udp which always use a single ReceiveDataHandler, 
 		// we need to return the same ReceiveDataHandler in these cases.
 		// Make a key with the transport info that uniquely defines the receiver.
+		InternalKey_T key(top.getTransport());
 		if (top.getTransport() == Topic::TRANSPORT_UDP) {
-			return top.getTransport();
+			// Key is fine as is
 		} else {
-			std::ostringstream myPort;
-			myPort << top.getPort() << std::ends;
-			return top.getTransport() + "::" + top.getDomainAddress() + "::" + myPort.str();
+			key += "::";
+			key += top.getDomainAddress();
+			key += "::";
+			key += NumberToString(top.getPort());
 		}
+		return key;
 	}
 
     ReceiveDataHandler* ReceiveDataHandlerFactory::getReceiveDataHandler(Topic& top, Participant* participant)
     {
 		// Make a key with the transport info that uniquely defines the receiver.
-		std::string key = makeKey(top);
+		InternalKey_T key = makeKey(top);
 
         SafeLock lock(&garbageLock);
         if (receiveDataHandlerInstances.find(key) != receiveDataHandlerInstances.end())
@@ -46,16 +48,17 @@ namespace ops
             // This will lead to a problem when using the same port or using UDP, if samples becomes > MAX_SEGMENT_SIZE
 			if ((rdh->getSampleMaxSize() > OPSConstants::PACKET_MAX_SIZE) || (top.getSampleMaxSize() > OPSConstants::PACKET_MAX_SIZE))
             {
-				std::ostringstream myMessage;
+				ErrorMessage_T msg;
 				if (top.getTransport() == Topic::TRANSPORT_UDP) {
-					myMessage <<
-						"Warning: UDP Transport is used with Topics with 'sampleMaxSize' > " << OPSConstants::PACKET_MAX_SIZE << std::ends;
+					msg = "Warning: UDP Transport is used with Topics with 'sampleMaxSize' > ";
+					msg += NumberToString(OPSConstants::PACKET_MAX_SIZE);
 				} else {
-					myMessage <<
-						"Warning: Same port (" << top.getPort() << 
-						") is used with Topics with 'sampleMaxSize' > " << OPSConstants::PACKET_MAX_SIZE << std::ends;
+					msg += "Warning: Same port (";
+					msg += NumberToString(top.getPort());
+					msg += ") is used with Topics with 'sampleMaxSize' > ";
+					msg += NumberToString(OPSConstants::PACKET_MAX_SIZE);
 				}
-				BasicError err("ReceiveDataHandlerFactory", "getReceiveDataHandler", myMessage.str());
+				BasicError err("ReceiveDataHandlerFactory", "getReceiveDataHandler", msg);
 				participant->reportError(&err);
             }
             return rdh;
@@ -79,7 +82,9 @@ namespace ops
         else //For now we can not handle more transports
         {
             //Signal an error by returning NULL.
-			BasicError err("ReceiveDataHandlerFactory", "getReceiveDataHandler", "Unknown transport for Topic: " + top.getName());
+			ErrorMessage_T msg = "Unknown transport for Topic: ";
+			msg += top.getName();
+			BasicError err("ReceiveDataHandlerFactory", "getReceiveDataHandler", msg);
 			participant->reportError(&err);
             return NULL;
         }
@@ -88,7 +93,7 @@ namespace ops
     void ReceiveDataHandlerFactory::releaseReceiveDataHandler(Topic& top, Participant* participant)
     {
 		// Make a key with the transport info that uniquely defines the receiver.
-		std::string key = makeKey(top);
+		InternalKey_T key = makeKey(top);
 
 		SafeLock lock(&garbageLock);
         if (receiveDataHandlerInstances.find(key) != receiveDataHandlerInstances.end())
@@ -134,6 +139,5 @@ namespace ops
     ReceiveDataHandlerFactory::~ReceiveDataHandlerFactory()
     {
     }
-
 
 }

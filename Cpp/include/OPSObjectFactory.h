@@ -22,7 +22,6 @@
 #define ops_OPSObjectFactoryH
 
 #include "SerializableInheritingTypeFactory.h"
-#include <string>
 #include "OPSExport.h"
 
 namespace ops
@@ -30,17 +29,13 @@ namespace ops
 
 class OPS_EXPORT OPSObjectFactory : public SerializableInheritingTypeFactory
 {
-    
 public:
     /**
      * Create singelton instance of OPSObjectFactory.
      * @return
      */
     static OPSObjectFactory* getInstance();
-    
 };
-	
 
 }
-
 #endif

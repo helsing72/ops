@@ -28,7 +28,6 @@
 #ifndef ops_TCPServerH
 #define	ops_TCPServerH
 
-#include <string>
 #include "TCPServerBase.h"
 #include "IOService.h" 
 #include "BytesSizePair.h"
@@ -49,7 +48,7 @@ namespace ops
 	class TCPServer : public TCPServerBase
     {
     public:
-		TCPServer(IOService* ioServ, std::string serverIP, int serverPort, __int64 outSocketBufferSize = 16000000) :
+		TCPServer(IOService* ioServ, Address_T serverIP, int serverPort, __int64 outSocketBufferSize = 16000000) :
 			TCPServerBase(),
 			_serverPort(serverPort), _serverIP(serverIP), _outSocketBufferSize(outSocketBufferSize),
 			endpoint(NULL), sock(NULL), acceptor(NULL), _canceled(false),
@@ -101,7 +100,7 @@ namespace ops
 			return _serverPort;
 		}
         
-		virtual std::string getAddress()
+		virtual Address_T getAddress()
 		{
 			return _serverIP;
 		}
@@ -124,9 +123,9 @@ namespace ops
 					// Send the data
 					return (int)_sock->send(boost::asio::buffer(buf, size));
 				} catch (std::exception& e) {
-					std::stringstream ss;
-					ss << "Socket closed, exception in TCPServer::sendTo():" << e.what() << std::endl;
-					ops::BasicError err("TCPServer", "TCPServer", ss.str());
+					ErrorMessage_T msg("Socket closed, exception in TCPServer::sendTo():");
+					msg += e.what();
+					ops::BasicError err("TCPServer", "TCPServer", msg);
 					Participant::reportStaticError(&err);
 				}
 				return -1;
@@ -172,7 +171,7 @@ namespace ops
 		}
 
 		int _serverPort;
-		std::string _serverIP;
+		Address_T _serverIP;
 		__int64 _outSocketBufferSize;
 		boost::asio::ip::tcp::endpoint* endpoint;		//<-- The local port to bind to.
         boost::asio::ip::tcp::socket* sock;				//<-- The socket that handles next accept.

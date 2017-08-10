@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #include "OPSTypeDefs.h"
 #include "Publisher.h"
 #include "Participant.h"
@@ -24,7 +25,6 @@
 
 namespace ops
 {
-
     Publisher::Publisher(Topic t) :
     topic(t),
     memMap(t.getSampleMaxSize() / OPSConstants::PACKET_MAX_SIZE + 1, OPSConstants::PACKET_MAX_SIZE),
@@ -68,22 +68,22 @@ namespace ops
         return this->topic;
     }
 
-    void Publisher::setName(std::string name)
+    void Publisher::setName(ObjectName_T name)
     {
         this->name = name;
     }
 
-    void Publisher::setKey(std::string key)
+    void Publisher::setKey(ObjectKey_T key)
     {
         this->key = key;
     }
 
-    std::string Publisher::getKey()
+    ObjectKey_T Publisher::getKey()
     {
         return this->key;
     }
 
-    std::string Publisher::getName()
+	ObjectName_T Publisher::getName()
     {
         return this->name;
     }
@@ -111,7 +111,7 @@ namespace ops
 
         OPSArchiverOut archive(&buf);
 
-        archive.inout(std::string("message"), &message);
+        archive.inout("message", &message);
 
         //If data has spare bytes, write them to the end of the buf
         if (message.getData()->spareBytes.size() > 0)
@@ -139,11 +139,6 @@ namespace ops
         IncCurrentPublicationID();
     }
 
-/*    void Publisher::setTopic(Topic topic)
-    {
-        this->topic = topic;
-    }
-*/
     void Publisher::IncCurrentPublicationID()
     {
         currentPublicationID++;

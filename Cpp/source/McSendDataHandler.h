@@ -20,8 +20,7 @@
 #ifndef ops_McSendDataHandler_h
 #define	ops_McSendDataHandler_h
 
-
-//#include "Participant.h"
+#include "OPSTypeDefs.h"
 #include "SendDataHandler.h"
 
 #include "OPSObject.h"
@@ -34,7 +33,7 @@ namespace ops
     {
     public:
 
-        McSendDataHandler(IOService* ioService, Topic& topic, std::string localInterface, int ttl)
+        McSendDataHandler(IOService* ioService, Topic& topic, Address_T localInterface, int ttl)
         {
             sender = Sender::create(ioService, localInterface, ttl, topic.getOutSocketBufferSize());
         }
@@ -53,7 +52,6 @@ namespace ops
         }
 
     };
-
 
 }
 

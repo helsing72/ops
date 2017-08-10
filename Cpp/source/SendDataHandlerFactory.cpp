@@ -27,14 +27,22 @@ namespace ops
 		///TODO cleanup
 	}
 	
-	SendDataHandler* SendDataHandlerFactory::getSendDataHandler(Topic& top, Participant* participant)
+	InternalKey_T getKey(Topic& top)
 	{
 		// We need to store SendDataHandlers with more than just the name as key.
 		// Since topics can use the same port, we need to return the same SendDataHandler.
 		// Make a key with the transport info that uniquely defines the receiver.
-		std::ostringstream myStream;
-		myStream << top.getPort() << std::ends;
-		std::string key = top.getTransport() + "::" + top.getDomainAddress() + "::" + myStream.str();
+		InternalKey_T key = top.getTransport();
+		key += "::";
+		key += top.getDomainAddress();
+		key += "::";
+		key += NumberToString(top.getPort());
+		return key;
+	}
+
+	SendDataHandler* SendDataHandlerFactory::getSendDataHandler(Topic& top, Participant* participant)
+	{
+		InternalKey_T key = getKey(top);
 
 		SafeLock lock(&mutex);
 
@@ -43,7 +51,7 @@ namespace ops
 			return sendDataHandlers[key];
 		}			
 
-		std::string localIf = doSubnetTranslation(top.getLocalInterface(), participant->getIOService());
+		Address_T localIf = doSubnetTranslation(top.getLocalInterface(), participant->getIOService());
 
 		int ttl = top.getTimeToLive();
 
@@ -84,6 +92,8 @@ namespace ops
 
 	void SendDataHandlerFactory::releaseSendDataHandler(Topic& top, Participant* participant)
 	{
+//		InternalKey_T key = getKey(top);
+
 		SafeLock lock(&mutex);
 		
 		if(top.getTransport() == Topic::TRANSPORT_UDP) {

@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2017 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -20,9 +20,10 @@
 
 #pragma once
 
-#include <string>
 #include <map>
-#include <OPSConfig.h>
+
+#include "OPSTypeDefs.h"
+#include "OPSConfig.h"
 
 namespace ops
 {
@@ -36,7 +37,7 @@ namespace ops
         // Add one or more domains from OPS configuration file "filename"
         // if 'domainID' == "", all domains will be added otherwise only the specified 'domainID'
         // Returns true if at least one domain was added
-        bool Add( std::string filename, std::string domainID = "" );
+        bool Add( FileName_T filename, ObjectName_T domainID = "" );
 
         // Remove all domains from repository (Note does not clear the file-cache)
         void Clear();
@@ -44,9 +45,9 @@ namespace ops
         // ======================================================
         // Get a reference to the internal OPSConfig object
         // if 'domainID' != "", the domain 'domainID' must exist otherwise NULL is returned.
-        OPSConfig* getConfig( std::string domainID = "" );
+        OPSConfig* getConfig(ObjectName_T domainID = "" );
 
-        bool domainExist( std::string domainID );
+        bool domainExist(ObjectName_T domainID );
 
         // Just for Test
         void DebugTotalClear();
@@ -58,7 +59,7 @@ namespace ops
         OPSConfig* m_config;
 
         // File cache with all added config files and their domains
-        std::map<std::string, OPSConfig*> m_configFiles;
+        std::map<FileName_T, OPSConfig*> m_configFiles;
     };
 
 }

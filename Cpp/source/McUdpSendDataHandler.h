@@ -20,18 +20,16 @@
 #ifndef ops_McUdpSendDataHandler_h
 #define	ops_McUdpSendDataHandler_h
 
-
-//#include "Participant.h"
-#include "SendDataHandler.h"
 #include <map>
+#include <stack>
+
+#include "SendDataHandler.h"
 #include "Sender.h"
 #include "OPSObject.h"
 #include "Lockable.h"
 #include "MemoryMap.h"
 #include "TimeHelper.h"
-#include <iostream>
-#include <sstream>
-#include <stack>
+
 
 namespace ops
 {
@@ -40,7 +38,7 @@ namespace ops
     {
     public:
 
-        McUdpSendDataHandler(IOService* ioService, std::string localInterface, int ttl, __int64 outSocketBufferSize = 16000000)
+        McUdpSendDataHandler(IOService* ioService, Address_T localInterface, int ttl, __int64 outSocketBufferSize = 16000000)
         {
             sender = Sender::createUDPSender(ioService, localInterface, ttl, outSocketBufferSize);
         }
@@ -49,13 +47,13 @@ namespace ops
         {
             SafeLock lock(&mutex);
 
-            std::map<std::string, IpPortPair> topicSinks = topicSinkMap[topic.getName()];
-            std::map<std::string, IpPortPair>::iterator it;
+            std::map<InternalKey_T, IpPortPair> topicSinks = topicSinkMap[topic.getName()];
+            std::map<InternalKey_T, IpPortPair>::iterator it;
 
             bool result = true;
             //Loop over all sinks and send data, remove items that isn't "alive".
 
-            std::stack<std::string> sinksToDelete;
+            std::stack<InternalKey_T> sinksToDelete;
 
             for (it = topicSinks.begin(); it != topicSinks.end(); ++it)
             {
@@ -79,9 +77,8 @@ namespace ops
             return result;
         }
 
-        void addSink(std::string& topic, std::string& ip, int& port)
+        void addSink(ObjectName_T& topic, Address_T& ip, int& port)
         {
-
             SafeLock lock(&mutex);
             //TODO: decide what class will handle serialization.
             //First, check if the MemoryMap we have allocated is big enough to deal with this topic.
@@ -99,11 +96,10 @@ namespace ops
             if (topicSinkMap.find(topic) == topicSinkMap.end())
             {
                 //We have no sinks for this topic. Lets add a new sink map
-                std::map<std::string, IpPortPair> newIpPortMap;
+                std::map<InternalKey_T, IpPortPair> newIpPortMap;
 
                 //And add the new sink to the map.
                 newIpPortMap[ipPort.getKey()] = ipPort;
-
 
                 topicSinkMap[topic] = newIpPortMap;
 
@@ -113,10 +109,8 @@ namespace ops
             }
             else
             {
-
                 if (topicSinkMap[topic].find(ipPort.getKey()) == topicSinkMap[topic].end())
                 {
-
                     //We already have a map of sinks for this topic lets just add the new sink to the map.
                     topicSinkMap[topic][ipPort.getKey()] = ipPort;
                     //std::cout << topic << " added to existing sink " << ipPort.getKey() << std::endl;
@@ -128,7 +122,6 @@ namespace ops
                     topicSinkMap[topic][ipPort.getKey()].feedWatchdog();
                     return;
                 }
-
             }
         }
 
@@ -140,18 +133,10 @@ namespace ops
         }
 
     private:
-        //Participant* participant;
-        //std::map<std::string, Sender*> senders;
-        //moved to base class Sender* sender;
-
-        // MemoryMap* memMap;
-
-        //moved to base class Lockable mutex;
-
         class IpPortPair
         {
         public:
-            IpPortPair(std::string ipp, int portt):
+            IpPortPair(Address_T ipp, int portt):
 				ip(ipp), port(portt)
             {
                 this->lastTimeAlive = TimeHelper::currentTimeMillis();
@@ -172,25 +157,22 @@ namespace ops
                 lastTimeAlive = TimeHelper::currentTimeMillis();
             }
 
-            std::string getKey()
+			InternalKey_T getKey()
             {
-                std::stringstream ss;
-                ss << ip << ":" << port;
-                return ss.str();
+				InternalKey_T key(ip.c_str());
+				key += ':';
+				key += NumberToString(port);
+                return key;
             }
 
-			std::string ip;
+			Address_T ip;
             int port;
             __int64 lastTimeAlive;
             const static int ALIVE_TIMEOUT = 3000;
         };
 
-        std::map<std::string, std::map<std::string, IpPortPair> > topicSinkMap;
-
+        std::map<ObjectName_T, std::map<InternalKey_T, IpPortPair> > topicSinkMap;
 
     };
-
-
 }
-
 #endif

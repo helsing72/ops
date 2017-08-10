@@ -43,7 +43,7 @@
 namespace ops
 {
 	//static
-	std::map<std::string, Participant*> Participant::instances;
+	std::map<ParticipantKey_T, Participant*> Participant::instances;
 	Lockable Participant::creationMutex;
 
 
@@ -66,19 +66,27 @@ namespace ops
 
 	// --------------------------------------------------------------------------------
 
-	Participant* Participant::getInstance(std::string domainID_)
+	Participant* Participant::getInstance(ObjectName_T domainID_)
 	{
 		return getInstance(domainID_, "DEFAULT_PARTICIPANT");
 	}
 
-	Participant* Participant::getInstance(std::string domainID_, std::string participantID)
+	Participant* Participant::getInstance(ObjectName_T domainID_, ObjectName_T participantID)
 	{
 		return getInstance(domainID_, participantID, "");
 	}
 
-	Participant* Participant::getInstance(std::string domainID_, std::string participantID, std::string configFile)
+	ParticipantKey_T getKey(ObjectName_T domainID_, ObjectName_T participantID)
 	{
-		std::string key = domainID_ + "::" + participantID;
+		ParticipantKey_T key = domainID_;
+		key += "::";
+		key += participantID;
+		return key;
+	}
+
+	Participant* Participant::getInstance(ObjectName_T domainID_, ObjectName_T participantID, FileName_T configFile)
+	{
+		ParticipantKey_T key = getKey(domainID_, participantID);
 		SafeLock lock(&creationMutex);
 		if (instances.find(key) == instances.end()) {
 			try
@@ -88,13 +96,15 @@ namespace ops
 			}
 			catch(ops::ConfigException& ex)
 			{
-				BasicError err("Participant", "Participant", std::string("Exception: ") + ex.what());
+				ErrorMessage_T msg("Exception: ");
+				msg += ex.what();
+				BasicError err("Participant", "Participant", msg);
 				reportStaticError(&err);
 				return NULL;
-				}
+			}
 			catch (ops::exceptions::CommException& ex)
 			{
-				BasicError err("Participant", "Participant", ex.GetMessage());
+				BasicError err("Participant", "Participant", ex.what());
 				reportStaticError(&err);
 				return NULL;
 			}
@@ -111,13 +121,13 @@ namespace ops
 	///Remove this instance from the static instance map
 	void Participant::RemoveInstance()
 	{
-		std::string key = domainID + "::" + participantID;
+		ParticipantKey_T key = getKey(domainID, participantID);
 		SafeLock lock(&creationMutex);
 		instances.erase(key);		
 	}
 
 
-	Participant::Participant(std::string domainID_, std::string participantID_, std::string configFile_):
+	Participant::Participant(ObjectName_T domainID_, ObjectName_T participantID_, FileName_T configFile_):
 		ioService(NULL),
 		config(NULL),
 		errorService(NULL), 
@@ -133,10 +143,9 @@ namespace ops
 		keepRunning(true),
 		aliveTimeout(1000),
 		objectFactory(NULL)
-	{
-		
+	{	
 		ioService = IOService::create();
-		
+
 		if(!ioService)
 		{
 			//Error, should never happen, throw?
@@ -165,7 +174,10 @@ namespace ops
 		domain = config->getDomain(domainID);
 		if(!domain) 
 		{
-			exceptions::CommException ex(std::string("Domain '") + domainID + std::string("' missing in config-file"));
+			ExceptionMessage_T msg("Domain '");
+			msg += domainID;
+			msg += "' missing in config-file";
+			exceptions::CommException ex(msg);
 			throw ex;
 		}
 
@@ -173,14 +185,14 @@ namespace ops
 		objectFactory = new OPSObjectFactoryImpl();
 		
 		// Initialize static data in partInfoData (ReceiveDataHandlerFactory() will set some more fields)
-		std::string Name = GetHostName();
+		InternalString_T Name = GetHostName();
 		std::ostringstream myStream;
 #ifdef _WIN32
 		myStream << Name << " (" << _getpid() << ")" << std::ends;
 #else
 		myStream << Name << " (" << getpid() << ")" << std::ends;
 #endif
-		Name = myStream.str();
+		Name = myStream.str().c_str();
 		partInfoData.name = Name;
         partInfoData.languageImplementation = "C++";
         partInfoData.id = participantID;
@@ -300,7 +312,7 @@ namespace ops
 			staticErrorService->report(err);
 
 		} else {
-			std::map<std::string, Participant*>::iterator it = instances.begin();
+			std::map<ParticipantKey_T, Participant*>::iterator it = instances.begin();
 			while(it !=instances.end())
 			{
 				it->second->getErrorService()->report(err);
@@ -313,7 +325,8 @@ namespace ops
 	void Participant::run()
 	{
 		// Set name of current thread for debug purpose
-		std::string name("OPSP_" + domainID);
+		InternalString_T name("OPSP_");
+		name += domainID;
 		thread_support::SetThreadName(name.c_str());
 		// Start our timer. Calls onNewEvent(Notifier<int>* sender, int message) on timeout
 		aliveDeadlineTimer->start(aliveTimeout);
@@ -342,13 +355,14 @@ namespace ops
 				}
 			} catch (std::exception& ex)
 			{
-				std::string errMessage;
+				ErrorMessage_T errMessage;
 				if (partInfoPub == NULL) {
 					errMessage = "Failed to create publisher for ParticipantInfoTopic. Check localInterface and metaDataMcPort in configuration file.";
 				} else {
 					errMessage = "Failed to publish ParticipantInfoTopic data.";
 				}
-				errMessage += std::string(" Exception: ") + ex.what();
+				errMessage += " Exception: ";
+				errMessage += ex.what();
 				BasicError err("Participant", "onNewEvent", errMessage);
 				reportStaticError(&err);
 			}
@@ -358,7 +372,7 @@ namespace ops
 		aliveDeadlineTimer->start(aliveTimeout);
 	}
 
-	void Participant::setUdpTransportInfo(std::string ip, int port)
+	void Participant::setUdpTransportInfo(Address_T ip, int port)
 	{
 		SafeLock lock(&partInfoDataMutex);
 		partInfoData.ip = ip;
@@ -370,7 +384,7 @@ namespace ops
 		objectFactory->add(typeSupport);
 	}
 
-	Topic Participant::createTopic(std::string name)
+	Topic Participant::createTopic(ObjectName_T name)
 	{
 		Topic topic = domain->getTopic(name);
 		topic.setParticipantID(participantID);
@@ -392,7 +406,7 @@ namespace ops
 		errorService->removeListener(listener);
 	}
 
-	bool Participant::hasPublisherOn(std::string topicName)
+	bool Participant::hasPublisherOn(ObjectName_T topicName)
 	{
 		UNUSED(topicName);
 		///TODO

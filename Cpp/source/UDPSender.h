@@ -36,20 +36,20 @@ namespace ops
         ///and a dynamically allocated local port.
 		///This class accepts synchronous write operations through sendTo().
 
-        UDPSender(IOService* ioServ, std::string localInterface = "0.0.0.0", int ttl = 1, __int64 outSocketBufferSize = 16000000, bool multicastSocket = false);
+        UDPSender(IOService* ioServ, Address_T localInterface = "0.0.0.0", int ttl = 1, __int64 outSocketBufferSize = 16000000, bool multicastSocket = false);
         ~UDPSender();
         
 		void open();
 		void close();
 
         ///Override from Sender
-        bool sendTo(char* buf, int size, const std::string& ip, int port);
+        bool sendTo(char* buf, int size, const Address_T& ip, int port);
 		///Override from Sender
 		///int receiveReply(char* buf, int size);
         ///Override from Sender
         int getPort() {return socket->local_endpoint().port();};
         ///Override from Sender
-        std::string getAddress() {return socket->local_endpoint().address().to_string();};
+		Address_T getAddress() {return socket->local_endpoint().address().to_string().c_str();};
 
 		///bool waitForReply(int timeout);
 
@@ -60,7 +60,7 @@ namespace ops
         boost::asio::ip::udp::socket* socket;           //<-- The socket that sends data.
         boost::asio::io_service* io_service;            //<-- Required for boost sockets.
 
-		std::string _localInterface;
+		Address_T _localInterface;
 		int _ttl;
 		__int64 _outSocketBufferSize;
 		bool _multicastSocket;

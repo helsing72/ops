@@ -22,9 +22,10 @@
 #define ops_DefaultOPSConfigImpl_h
 
 #include <vector>
-#include "Topic.h"
+
+#include "OPSTypeDefs.h"
 #include "OPSConfig.h"
-#include "NoSuchTopicException.h"
+#include "ArchiverInOut.h"
 
 namespace ops
 {
@@ -32,17 +33,15 @@ namespace ops
     class DefaultOPSConfigImpl : public OPSConfig
     {
     public:
-
         DefaultOPSConfigImpl()
         {
-            appendType(std::string("DefaultOPSConfigImpl"));
+            appendType(TypeId_T("DefaultOPSConfigImpl"));
         }
 
         void serialize(ArchiverInOut* archiver)
         {
             OPSConfig::serialize(archiver);
         }
-
 
     };
 }

@@ -21,40 +21,29 @@
 #include "OPSTypeDefs.h"
 #include "SerializableInheritingTypeFactory.h"
 
-#ifndef REPLACE_TRANSPORT_LAYER
-#include <boost/algorithm/string/split.hpp> 
-#include <boost/algorithm/string/classification.hpp>
-#endif
-
 namespace ops
 {
 
-#ifdef REPLACE_TRANSPORT_LAYER
-	void split(const std::string& s, char c, std::vector<std::string>& v)
+	void split(const TypeId_T& s, char c, std::vector<TypeId_T>& v)
 	{
-		std::string::size_type i = 0;
-		std::string::size_type j = s.find(c);
+		TypeId_T::size_type i = 0;
+		TypeId_T::size_type j = s.find(c);
 
-		while (j != std::string::npos) {
+		while (j != TypeId_T::npos) {
 			v.push_back(s.substr(i, j - i));
 			i = ++j;
 			j = s.find(c, j);
 		}
 		v.push_back(s.substr(i, s.length()));
 	}
-#endif
 
 	/**
      * Tries to construct the most specialized object in the given typeString list
  	 */
-	Serializable* SerializableInheritingTypeFactory::create(std::string& typeString)
+	Serializable* SerializableInheritingTypeFactory::create(TypeId_T& typeString)
 	{
-		std::vector<std::string> types;
-#ifdef REPLACE_TRANSPORT_LAYER
+		std::vector<TypeId_T> types;
 		split(typeString, ' ', types);
-#else
-		boost::algorithm::split(types, typeString, boost::algorithm::is_any_of(" "));
-#endif
 
 		for (unsigned int i = 0; i < types.size(); i++) {
 			Serializable* serializable = SerializableCompositeFactory::create(types[i]);

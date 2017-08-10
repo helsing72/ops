@@ -1,6 +1,5 @@
 
 
-#include "OPSTypeDefs.h"
 #include "Topic.h"
 #include "OPSConstants.h"
 #include "Participant.h"
@@ -8,7 +7,7 @@
 
 namespace ops
 {
-	Topic::Topic(std::string namee, int portt, std::string typeIDd, std::string domainAddresss)
+	Topic::Topic(ObjectName_T namee, int portt, TypeId_T typeIDd, Address_T domainAddresss)
 		: name(namee), 
 		port(portt), 
 		timeToLive(-1),
@@ -22,7 +21,7 @@ namespace ops
 		outSocketBufferSize(-1),
 		inSocketBufferSize(-1)
 	{
-		appendType(std::string("Topic"));
+		appendType(TypeId_T("Topic"));
 
 	}
 	Topic::Topic()
@@ -39,52 +38,52 @@ namespace ops
 		outSocketBufferSize(-1),
 		inSocketBufferSize(-1)
 	{
-		appendType(std::string("Topic"));
-
+		appendType(TypeId_T("Topic"));
 	}
-	void Topic::setParticipantID(std::string partID)
+
+	void Topic::setParticipantID(ObjectName_T partID)
 	{
 		participantID = partID;
 	}
 
-	std::string Topic::getParticipantID()
+	ObjectName_T Topic::getParticipantID()
 	{
 		return participantID;
 	}
 
-	void Topic::setDomainID(std::string domID)
+	void Topic::setDomainID(ObjectName_T domID)
 	{
 		domainID = domID;
 	}
-	std::string Topic::getDomainID()
+	ObjectName_T Topic::getDomainID()
 	{
 		return domainID;
 	}
-	std::string Topic::getName()
+	ObjectName_T Topic::getName()
 	{
 		return name;
 	}
-	std::string Topic::getTypeID()
+	TypeId_T Topic::getTypeID()
 	{
 		return typeID;
 	}
-	void Topic::setDomainAddress(std::string domainAddr)
+	void Topic::setDomainAddress(Address_T domainAddr)
 	{
 		domainAddress = domainAddr;
 	}
-	void Topic::setTransport(std::string transp)
+	void Topic::setTransport(Transport_T transp)
 	{
 		transport = transp;
 	}
-	std::string Topic::getDomainAddress()
+	Address_T Topic::getDomainAddress()
 	{
 		return domainAddress;
 	}
-	void Topic::setLocalInterface(std::string localIf)
+	void Topic::setLocalInterface(Address_T localIf)
 	{
 		localInterface = localIf;
 	}
-	std::string Topic::getLocalInterface()
+	Address_T Topic::getLocalInterface()
 	{
 		return localInterface;
 	}
@@ -119,7 +118,7 @@ namespace ops
 	{
 		return timeToLive;
 	}
-	std::string Topic::getTransport()
+	Transport_T Topic::getTransport()
 	{
 		return transport;
 	}
@@ -144,36 +143,36 @@ namespace ops
 	void Topic::serialize(ArchiverInOut* archiver)
 	{
 		OPSObject::serialize(archiver);
-		archiver->inout(std::string("name"), name);
-		archiver->inout(std::string("dataType"), typeID);
-		archiver->inout(std::string("port"), port);		
-		archiver->inout(std::string("address"), domainAddress);
+		archiver->inout("name", name);
+		archiver->inout("dataType", typeID);
+		archiver->inout("port", port);		
+		archiver->inout("address", domainAddress);
 
-		archiver->inout(std::string("outSocketBufferSize"), outSocketBufferSize);
-		archiver->inout(std::string("inSocketBufferSize"), inSocketBufferSize);
+		archiver->inout("outSocketBufferSize", outSocketBufferSize);
+		archiver->inout("inSocketBufferSize", inSocketBufferSize);
 	
 
 		//Limit this value 
 		int tSampleMaxSize = getSampleMaxSize();
-		archiver->inout(std::string("sampleMaxSize"), tSampleMaxSize);
+		archiver->inout("sampleMaxSize", tSampleMaxSize);
 		setSampleMaxSize(tSampleMaxSize);
 
-		archiver->inout(std::string("transport"), transport);
+		archiver->inout("transport", transport);
 		if(transport == "")
 		{
 			transport = TRANSPORT_MC;
 		}
 		else if (transport != TRANSPORT_MC && transport != TRANSPORT_TCP && transport != TRANSPORT_UDP)
 		{
-			throw ops::ConfigException(
-				std::string("Illegal transport: '") + transport +
-				std::string("'. Transport for topic must be either 'multicast', 'tcp', 'udp' or left blank( = multicast)"));
+			ExceptionMessage_T msg("Illegal transport: '");
+			msg += transport;
+			msg += "'. Transport for topic must be either 'multicast', 'tcp', 'udp' or left blank( = multicast)";
+			throw ops::ConfigException(msg);
 		}
 	}
 
-	std::string Topic::TRANSPORT_MC = "multicast";
-	std::string Topic::TRANSPORT_TCP = "tcp";
-	std::string Topic::TRANSPORT_UDP = "udp";
-
+	Transport_T Topic::TRANSPORT_MC = "multicast";
+	Transport_T Topic::TRANSPORT_TCP = "tcp";
+	Transport_T Topic::TRANSPORT_UDP = "udp";
 
 }

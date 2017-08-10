@@ -22,7 +22,6 @@
 #define ops_SerializableInheritingTypeFactoryH
 
 #include "SerializableCompositeFactory.h"
-#include <string>
 #include "OPSExport.h"
 
 namespace ops
@@ -34,7 +33,7 @@ public:
     /**
      * Tries to construct the most specialized object in the given typeString list
      */
-	virtual Serializable* create(std::string& typeString);
+	virtual Serializable* create(TypeId_T& typeString);
     
 };
 

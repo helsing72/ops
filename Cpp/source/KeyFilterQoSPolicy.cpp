@@ -6,28 +6,28 @@ namespace ops
 	KeyFilterQoSPolicy::KeyFilterQoSPolicy()
 	{
 	}
-	KeyFilterQoSPolicy::KeyFilterQoSPolicy(std::string keyString)
+	KeyFilterQoSPolicy::KeyFilterQoSPolicy(ObjectKey_T keyString)
 	{
 		keyStrings.push_back(keyString);
 	}
-	KeyFilterQoSPolicy::KeyFilterQoSPolicy(std::vector<std::string> keyStrings)
+	KeyFilterQoSPolicy::KeyFilterQoSPolicy(std::vector<ObjectKey_T> keyStrings)
 	{
 		this->keyStrings = keyStrings;
 	}
-	void KeyFilterQoSPolicy::setKeys(std::vector<std::string> keyStrings)
+	void KeyFilterQoSPolicy::setKeys(std::vector<ObjectKey_T> keyStrings)
 	{
 		SafeLock lock(this);
 
 		this->keyStrings = keyStrings;
 	}
-	void KeyFilterQoSPolicy::setKey(std::string key)
+	void KeyFilterQoSPolicy::setKey(ObjectKey_T key)
 	{
 		SafeLock lock(this);
 
 		this->keyStrings.clear();
 		this->keyStrings.push_back(key);
 	}
-	std::vector<std::string> KeyFilterQoSPolicy::getKeys()
+	std::vector<ObjectKey_T> KeyFilterQoSPolicy::getKeys()
 	{
 		SafeLock lock(this);
 

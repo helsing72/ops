@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <sstream>
+
 #include "OPSTypeDefs.h"
 #include "ReceiveDataHandler.h"
 #include "OPSArchiverIn.h"
@@ -26,10 +26,10 @@
 #include "Participant.h"
 #include "ReceiverFactory.h"
 #include "CommException.h"
+
 namespace ops
 {
     ///Constructor.
-
     ReceiveDataHandler::ReceiveDataHandler(Topic top, Participant* part) :
     memMap(top.getSampleMaxSize() / OPSConstants::PACKET_MAX_SIZE + 1, OPSConstants::PACKET_MAX_SIZE),
 	sampleMaxSize(top.getSampleMaxSize()),
@@ -40,7 +40,6 @@ namespace ops
         message = NULL;
         participant = part;
 
-
         receiver = ReceiverFactory::getReceiver(top, participant);
 
         if (receiver == NULL)
@@ -49,10 +48,9 @@ namespace ops
         }
 
         receiver->addListener(this);
-
     }
-    ///Destructor
 
+	///Destructor
     ReceiveDataHandler::~ReceiveDataHandler()
     {
         delete receiver;
@@ -79,11 +77,13 @@ namespace ops
 		if (getNrOfListeners() == 0) receiver->stop();
 	}
 
-	void ReportError(Participant* participant, std::string message, std::string addr, int port)
+	void ReportError(Participant* participant, ErrorMessage_T message, Address_T addr, int port)
 	{
-		std::ostringstream errPort;
-		errPort << port;
-		message += " [" + addr + "::" + errPort.str() + "]";
+		message += " [";
+		message += addr;
+		message += "::";
+		message += NumberToString(port);
+		message += ']';
 		BasicError err("ReceiveDataHandler", "onNewEvent", message);
 		participant->reportError(&err);
 	}
@@ -115,7 +115,7 @@ namespace ops
         }
 
 		///TODO Check that all segments come from the same source (IP and port)
-		std::string addr;
+		Address_T addr;
 		int port;
 		receiver->getSource(addr, port);
 
@@ -126,8 +126,6 @@ namespace ops
         //Check protocol
         if (tBuf.checkProtocol())
         {
-            //Read of message ID and fragmentation info, this is ignored so far.
-            //std::string messageID = tBuf.ReadString();
             int nrOfFragments = tBuf.ReadInt();
             int currentFragment = tBuf.ReadInt();
 
@@ -173,11 +171,15 @@ namespace ops
 
                 message = NULL;
 				try {
-					message = dynamic_cast<OPSMessage*> (archiver.inout(std::string("message"), message));
+					message = dynamic_cast<OPSMessage*> (archiver.inout("message", message));
 				} catch (ops::ArchiverException& e) {
-					ReportError(participant, "Invalid data on network. Exception: " + e.GetMessage(), addr, port);
+					ErrorMessage_T msg("Invalid data on network. Exception: ");
+					msg += e.GetMessage();
+					ReportError(participant, msg, addr, port);
 				} catch (std::exception& e) {
-					ReportError(participant, "Invalid data on network. Exception: " + std::string(e.what()), addr, port);
+					ErrorMessage_T msg("Invalid data on network. Exception: ");
+					msg += e.what();
+					ReportError(participant, msg, addr, port);
 				}
 				if (message)
                 {
@@ -282,7 +284,5 @@ namespace ops
 		//Return false if message has consumed more bytes than received (but still within our buffer size)
 		return (nrOfSpareBytes >= 0);
     }
-
-
 
 }

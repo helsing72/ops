@@ -25,30 +25,30 @@
 
 namespace ops
 {
-class Reply : public OPSObject
-{
-public:
-	std::string requestId;
-	bool requestAccepted;
-	std::string message;	
-
-	void serialize(ops::ArchiverInOut* archiver)
+	class Reply : public OPSObject
 	{
-		OPSObject::serialize(archiver);
-		archiver->inout(std::string("requestId"), requestId);
-		archiver->inout(std::string("requestAccepted"), requestAccepted);
-		archiver->inout(std::string("message"), message);
-	}
+	public:
+		std::string requestId;
+		bool requestAccepted;
+		std::string message;
 
-	virtual void fillClone(OPSObject* obj) const
-	{
-        Reply* narrRet = (Reply*)obj;
-        OPSObject::fillClone(narrRet);
-		narrRet->requestId =requestId;
-		narrRet->requestAccepted = requestAccepted;
-		narrRet->message = message;
-	}
-        
-};
+		void serialize(ops::ArchiverInOut* archiver)
+		{
+			OPSObject::serialize(archiver);
+			archiver->inout("requestId", requestId);
+			archiver->inout("requestAccepted", requestAccepted);
+			archiver->inout("message", message);
+		}
+
+		virtual void fillClone(OPSObject* obj) const
+		{
+			Reply* narrRet = (Reply*)obj;
+			OPSObject::fillClone(narrRet);
+			narrRet->requestId = requestId;
+			narrRet->requestAccepted = requestAccepted;
+			narrRet->message = message;
+		}
+
+	};
 }
 #endif

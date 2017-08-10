@@ -25,6 +25,8 @@ set(LIB_OPS_PUBLIC_HEADERS
   ${OPS_HEADER_PATH}/ErrorService.h
   ${OPS_HEADER_PATH}/ErrorWriter.h
   ${OPS_HEADER_PATH}/FilterQoSPolicy.h
+  ${OPS_HEADER_PATH}/fixed_string.h
+  ${OPS_HEADER_PATH}/fixed_string_support.h
   ${OPS_HEADER_PATH}/IOService.h
   ${OPS_HEADER_PATH}/KeyFilterQoSPolicy.h
   ${OPS_HEADER_PATH}/Listener.h

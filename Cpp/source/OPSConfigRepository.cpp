@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2017 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -45,7 +45,7 @@ OPSConfigRepository::OPSConfigRepository()
     m_config = new DefaultOPSConfigImpl();
 }
 
-bool OPSConfigRepository::domainExist( std::string domainID )
+bool OPSConfigRepository::domainExist(ObjectName_T domainID )
 {
     SafeLock lock(&repoLock);
     std::vector<Domain*>& doms = m_config->getRefToDomains();
@@ -58,7 +58,7 @@ bool OPSConfigRepository::domainExist( std::string domainID )
 // Add domains from OPS configuration file "filename"
 // if 'domain' == "", all domains will be added otherwise only the specified 'domain'
 // Returns true if at least one domain added
-bool OPSConfigRepository::Add( std::string filename, std::string domain )
+bool OPSConfigRepository::Add( FileName_T filename, ObjectName_T domain )
 {
     bool retVal = false;
 
@@ -67,7 +67,10 @@ bool OPSConfigRepository::Add( std::string filename, std::string domain )
     if (domain != "") {
         // Check if domain already exist
         if (domainExist( domain )) {
-    		BasicError err("OPSConfigRepository", "Add", "domain '" + domain + "' already exist");
+			ErrorMessage_T msg("domain '");
+			msg += domain;
+			msg += "' already exist";
+    		BasicError err("OPSConfigRepository", "Add", msg );
             Participant::reportStaticError(&err);
             return retVal;
         }
@@ -88,7 +91,9 @@ bool OPSConfigRepository::Add( std::string filename, std::string domain )
         }
     } catch (ops::ConfigException& ex)
     {
-        BasicError err("OPSConfigRepository", "Add", std::string("Exception: ") + ex.what());
+		ErrorMessage_T msg("Exception: ");
+		msg += ex.what();
+        BasicError err("OPSConfigRepository", "Add", msg);
         Participant::reportStaticError(&err);
         return retVal;
     }
@@ -99,7 +104,10 @@ bool OPSConfigRepository::Add( std::string filename, std::string domain )
     for (unsigned int i = 0; i < domains.size(); i++) {
         if ( (domain == "") || (domains[i]->getDomainID() == domain) ) {
             if (domainExist( domains[i]->getDomainID() )) {
-	    		BasicError err("OPSConfigRepository", "Add", "domain '" + domains[i]->getDomainID() + "' already exist");
+				ErrorMessage_T msg("domain '");
+				msg += domains[i]->getDomainID();
+				msg += "' already exist";
+	    		BasicError err("OPSConfigRepository", "Add", msg);
                 Participant::reportStaticError(&err);
             } else {
                 // Add unique domains to our list
@@ -135,7 +143,7 @@ void OPSConfigRepository::DebugTotalClear()
 
 // Get a reference to the OPSConfig object
 // if 'domainID' != "", the domain must exist otherwise NULL is returned.
-OPSConfig* OPSConfigRepository::getConfig( std::string domainID )
+OPSConfig* OPSConfigRepository::getConfig(ObjectName_T domainID )
 {
     SafeLock lock(&repoLock);
 

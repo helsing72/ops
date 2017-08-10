@@ -21,12 +21,13 @@
 #ifndef ops_ParticipantH
 #define	ops_ParticipantH
 
-#include <string>
+#include <map>
+
+#include "OPSTypeDefs.h"
 #include "ThreadPool.h"
 #include "Runnable.h"
 #include "IOService.h"
 #include "SerializableFactory.h"
-#include <map>
 #include "Topic.h"
 #include "OPSConfig.h"
 #include "OPSObjectFactory.h"
@@ -58,10 +59,10 @@ namespace ops
 	public:
 
 		///By Singelton, one Participant per participantID
-		static std::map<std::string, Participant*> instances;
-		static Participant* getInstance(std::string domainID);
-		static Participant* getInstance(std::string domainID, std::string participantID);
-		static Participant* getInstance(std::string domainID, std::string participantID, std::string configFile);
+		static std::map<ParticipantKey_T, Participant*> instances;
+		static Participant* getInstance(ObjectName_T domainID);
+		static Participant* getInstance(ObjectName_T domainID, ObjectName_T participantID);
+		static Participant* getInstance(ObjectName_T domainID, ObjectName_T participantID, FileName_T configFile);
 		
 		//Report an error via all participants ErrorServices or the static ErrorService if it exists
 		static void reportStaticError(Error* err);
@@ -70,7 +71,7 @@ namespace ops
 		ops::Topic createParticipantInfoTopic();
 
 		//Get the name that this participant has set in its ParticipantInfoData
-		std::string getPartInfoName() {
+		InternalString_T getPartInfoName() {
 			return partInfoData.name;
 		}
 
@@ -79,7 +80,7 @@ namespace ops
 		void addTypeSupport(ops::SerializableFactory* typeSupport);
 
 		//Create a From the ops config. See config below.
-		Topic createTopic(std::string name);
+		Topic createTopic(ObjectName_T name);
 
 		void run();
 
@@ -137,7 +138,7 @@ namespace ops
 	private:
 
 		///Constructor is private instance are acquired through getInstance()
-		Participant(std::string domainID_, std::string participantID_, std::string configFile_);
+		Participant(ObjectName_T domainID_, ObjectName_T participantID_, FileName_T configFile_);
 
 		///Remove this instance from the static instance map
 		void RemoveInstance();
@@ -164,8 +165,8 @@ namespace ops
 		Lockable partInfoDataMutex;
 
 		//Visible to friends only
-		void setUdpTransportInfo(std::string ip, int port);
-		bool hasPublisherOn(std::string topicName);
+		void setUdpTransportInfo(Address_T ip, int port);
+		bool hasPublisherOn(ObjectName_T topicName);
 
 		Domain* domain;		
 
@@ -192,9 +193,9 @@ namespace ops
 		Lockable serviceMutex;
 
 		///The domainID for this Participant
-		std::string domainID;
+		ObjectName_T domainID;
 		///The id of this participant, must be unique in process
-		std::string participantID;
+		ObjectName_T participantID;
 
 		///As long this is true, we keep on running this participant
 		bool keepRunning;

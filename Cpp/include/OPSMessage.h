@@ -21,8 +21,6 @@
 #ifndef OPSMessageH
 #define OPSMessageH
 
-#include <string>
-
 #include "OPSTypeDefs.h"
 #include "OPSObject.h"
 #ifndef OPSSLIM_NORESERVE
@@ -51,7 +49,7 @@ namespace ops
         qosMask(0),
         publicationID(0)
         {
-            std::string typeName("ops.protocol.OPSMessage");
+            TypeId_T typeName("ops.protocol.OPSMessage");
             OPSObject::appendType(typeName);
             data = NULL;
         }
@@ -79,17 +77,16 @@ namespace ops
         char publisherPriority;		// Serialized (not used, always 0)
         bool dataOwner;
         int sourcePort;
-		std::string sourceIP;
+		Address_T sourceIP;
         __int64 qosMask;
         __int64 publicationID;		// Serialized
-        std::string publisherName;	// Serialized
-        std::string topicName;		// Serialized
-        std::string topLevelKey;	// Serialized (not used, empty string)
-        std::string address;		// Serialized (not used, empty string)
+		ObjectName_T publisherName;	// Serialized
+        ObjectName_T topicName;		// Serialized
+        ObjectKey_T topLevelKey;	// Serialized (not used, empty string)
+		Address_T address;			// Serialized (not used, empty string)
         OPSObject* data;			// Serialized
 
     public:
-
         __int64 getPublicationID()
         {
             return publicationID;
@@ -100,22 +97,22 @@ namespace ops
             publicationID = pubID;
         }
 
-        std::string getPublisherName()
+		ObjectName_T getPublisherName()
         {
             return publisherName;
         }
 
-        void setPublisherName(std::string pubName)
+        void setPublisherName(ObjectName_T pubName)
         {
             publisherName = pubName;
         }
 
-        std::string getTopicName()
+        ObjectName_T getTopicName()
         {
             return topicName;
         }
 
-        void setTopicName(std::string topName)
+        void setTopicName(ObjectName_T topName)
         {
             topicName = topName;
         }
@@ -133,13 +130,13 @@ namespace ops
             return data;
         }
 
-		void setSource(std::string addr, int port)
+		void setSource(Address_T addr, int port)
 		{
 			sourceIP = addr;
 			sourcePort = port;
 		}
 
-		void getSource(std::string& addr, int& port)
+		void getSource(Address_T& addr, int& port)
 		{
 			addr = sourceIP;
 			port = sourcePort;
@@ -150,14 +147,14 @@ namespace ops
             OPSObject::serialize(archive);
 			
 			// Can't change/addto these without breaking compatbility
-            archive->inout(std::string("messageType"), messageType);
-            archive->inout(std::string("publisherPriority"), publisherPriority);
-            archive->inout(std::string("publicationID"), publicationID);
-            archive->inout(std::string("publisherName"), publisherName);
-            archive->inout(std::string("topicName"), topicName);
-            archive->inout(std::string("topLevelKey"), topLevelKey);
-            archive->inout(std::string("address"), address);
-            data = (OPSObject*) archive->inout(std::string("data"), data);
+            archive->inout("messageType", messageType);
+            archive->inout("publisherPriority", publisherPriority);
+            archive->inout("publicationID", publicationID);
+            archive->inout("publisherName", publisherName);
+            archive->inout("topicName", topicName);
+            archive->inout("topLevelKey", topLevelKey);
+            archive->inout("address", address);
+            data = (OPSObject*) archive->inout("data", data);
 
         }
     };

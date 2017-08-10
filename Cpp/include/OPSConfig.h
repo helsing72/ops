@@ -22,6 +22,8 @@
 #define ops_OPSConfig_h
 
 #include <vector>
+
+#include "OPSTypeDefs.h"
 #include "Topic.h"
 #include "Domain.h"
 
@@ -31,12 +33,12 @@ namespace ops
 	{
 	public:
 		static OPSConfig* getConfig();
-		static OPSConfig* getConfig(std::string configFile);
+		static OPSConfig* getConfig(FileName_T configFile);
 
 		// Should be used with care, since the above methods may return a singleton
 		virtual ~OPSConfig();
 
-		virtual Domain* getDomain(std::string domainID)
+		virtual Domain* getDomain(ObjectName_T domainID)
 		{
 			for(unsigned int i = 0; i < domains.size(); i++)
 			{
@@ -52,7 +54,7 @@ namespace ops
 		{
 			OPSObject::serialize(archiver);
 		
-			archiver->inout<Domain>(std::string("domains"), domains);
+			archiver->inout<Domain>("domains", domains);
 		}
 
 		std::vector<Domain*> getDomains()

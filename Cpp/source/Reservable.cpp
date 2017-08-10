@@ -1,7 +1,8 @@
-#include <string>
+
 #include "OPSTypeDefs.h"
 #include "Reservable.h"
 #include "ReferenceHandler.h"
+
 namespace ops
 {
 
@@ -55,10 +56,6 @@ namespace ops
 	}
 	Reservable::~Reservable()
 	{
-		//TODO: Should we do a check here?
-		//SafeLock lock(&incLock);
 	}
-
-
 
 }

@@ -323,6 +323,11 @@ namespace ops
         return ret;
     }
 
+	void ByteBuffer::ReadString(std::string& value)
+	{
+		value = ReadString();
+	}
+
 	// -----------------------------------------------------------------
 
 
@@ -639,18 +644,16 @@ namespace ops
         }
     }
 
-    bool ByteBuffer::checkProtocol()
+	const char versionHigh = 0;
+	const char versionLow = 5;
+	const char protocolID[] = "opsp";
+
+	bool ByteBuffer::checkProtocol()
     {
-        static char versionHigh = 0;
-        static char versionLow = 5;
-        static std::string protocolID("opsp");
+		char inProtocolID[4];
+        ReadChars(&inProtocolID[0], 4);
 
-        char inProtocolIDChars[5];
-        ReadChars(&inProtocolIDChars[0], 4);
-        inProtocolIDChars[4] = '\0';
-        std::string inProtocolId(inProtocolIDChars);
-
-        if (inProtocolId != protocolID)
+		if (memcmp(inProtocolID, protocolID, 4) != 0)
         {
             return false;
         }
@@ -668,12 +671,7 @@ namespace ops
 
     void ByteBuffer::writeProtocol()
     {
-        static char versionHigh = 0;
-        static char versionLow = 5;
-        static std::string protocolID("opsp");
-
-        WriteChars((char*) protocolID.c_str(), 4);
-
+        WriteChars((char*)protocolID, 4);
         WriteChar(versionLow);
         WriteChar(versionHigh);
     }

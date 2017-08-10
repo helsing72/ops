@@ -99,8 +99,10 @@ namespace ops
 			if (!setupSubscriber()) {
 				// Generate an error message if we come here with domain->getMetaDataMcPort() == 0,
 				// it means that we have UDP topics that require meta data but user has disabled it.
-				BasicError err("ParticipantInfoDataListener", "connectUdp",
-					std::string("UDP topic '") + top.getName() + std::string("' won't work since Meta Data disabled in config-file"));
+				ErrorMessage_T msg("UDP topic '");
+				msg += top.getName();
+				msg += "' won't work since Meta Data disabled in config-file";
+				BasicError err("ParticipantInfoDataListener", "connectUdp", msg);
 				participant->reportError(&err);
 				return;
 			}
@@ -138,8 +140,10 @@ namespace ops
 			if (!setupSubscriber()) {
 				// Generate an error message if we come here with domain->getMetaDataMcPort() == 0,
 				// it means that we have TCP topics that require meta data but user has disabled it.
-				BasicError err("ParticipantInfoDataListener", "connectTcp", 
-					std::string("TCP topic '") + top.getName() + std::string("' won't work since Meta Data disabled in config-file"));
+				ErrorMessage_T msg("TCP topic '");
+				msg += top.getName();
+				msg += "' won't work since Meta Data disabled in config-file";
+				BasicError err("ParticipantInfoDataListener", "connectTcp", msg);
 				participant->reportError(&err);
 				return;
 			}

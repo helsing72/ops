@@ -1,6 +1,6 @@
 /**
-* 
-* Copyright (C) 2006-2009 Anton Gravestam.
+*
+* Copyright (C) 2017 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -18,33 +18,20 @@
 * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef CommException_h
-#define CommException_h
+#pragma once
 
-#include <exception>
+#include <sstream>
 
-#include "OPSTypeDefs.h"
+#include "fixed_string.h"
 
-namespace ops
-{
-    namespace exceptions
-    {
-        class CommException : public std::exception
-        {
-        private:
-			ExceptionMessage_T message;
-        public:
-            CommException()
-            {
-                message = "CommException: empty";
-            }
-            CommException(ExceptionMessage_T m)
-            {
-				message = "CommException: ";
-				message += m;
-            }
-			const char* what() const noexcept { return message.c_str(); }
-		};
-    }
-}
-#endif
+namespace ops {
+
+	// Stream operator
+	template<size_t M>
+	std::ostream& operator<< (std::ostream& os, const fixed_string<M>& str)
+	{
+		os << str.c_str();
+		return os;
+	}
+
+} //namespace

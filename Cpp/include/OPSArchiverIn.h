@@ -48,73 +48,87 @@ namespace ops
         {
         }
 
-        void inout(const std::string& name, bool& value)
+		// Returns true if it's an output archiver
+		virtual bool isOut() { return false; }
+
+		void inout(InoutName_T name, bool& value)
         {
             UNUSED(name)
             value = buf->ReadChar() > 0;
         }
 
-        void inout(const std::string& name, char& value)
+        void inout(InoutName_T name, char& value)
         {
             UNUSED(name)
             value = buf->ReadChar();
         }
 
-        void inout(const std::string& name, int& value)
+        void inout(InoutName_T name, int& value)
         {
             UNUSED(name)
             value = buf->ReadInt();
         }
 
-        void inout(const std::string& name, __int16& value)
+        void inout(InoutName_T name, __int16& value)
         {
             UNUSED(name)
             value = buf->ReadShort();
         }
 
-        void inout(const std::string& name, __int64& value)
+        void inout(InoutName_T name, __int64& value)
         {
             UNUSED(name)
             value = buf->ReadLong();
         }
 
-        void inout(const std::string& name, float& value)
+        void inout(InoutName_T name, float& value)
         {
             UNUSED(name)
             value = buf->ReadFloat();
         }
 
-        void inout(const std::string& name, double& value)
+        void inout(InoutName_T name, double& value)
         {
             UNUSED(name)
             value = buf->ReadDouble();
         }
 
-        void inout(const std::string& name, std::string& value)
+        void inout(InoutName_T name, std::string& value)
         {
             UNUSED(name)
             value = buf->ReadString();
         }
 
-		void inout(const std::string& name, char* buffer, int bufferSize)
+		virtual void inoutfixstring(InoutName_T name, char* value, int& size, int max_size, int idx)
+		{
+			UNUSED(name)
+			UNUSED(idx)
+			size = buf->ReadInt();
+			if (size > max_size) throw ops::ArchiverException("Illegal size of fix string received. name: ", name);
+			buf->ReadChars(value, size);
+			value[size] = '\0';
+		}
+
+		void inout(InoutName_T name, char* buffer, int bufferSize)
 		{
             UNUSED(name)
 			buf->ReadChars(buffer, bufferSize);
 		}
 
-		void inout(const std::string& name, Serializable& value)
+		void inout(InoutName_T name, Serializable& value)
         {
             UNUSED(name)
-            std::string types = buf->ReadString();
+            /*std::string types =*/ buf->ReadString();		///TODO Check that types is the expected Serializable Object?
             value.serialize(this);
         }
 
-        Serializable* inout(const std::string& name, Serializable* value, int element)
+        Serializable* inout(InoutName_T name, Serializable* value, int element)
         {
             UNUSED(name)
             UNUSED(element)
             if (value) delete value;
-            std::string types = buf->ReadString();
+			TypeId_T types;
+			buf->ReadString(types);
             Serializable* newSer = factory->create(types);
             if (newSer != NULL) {
                 newSer->serialize(this);
@@ -122,14 +136,15 @@ namespace ops
             return newSer;
         }
 
-        Serializable* inout(const std::string& name, Serializable* value)
+        Serializable* inout(InoutName_T name, Serializable* value)
         {
             UNUSED(name)
             if (value != NULL)//Either we do this or we initiialize object to NULL in generated code.
             {
                 delete value;
             }
-            std::string types = buf->ReadString();
+			TypeId_T types;
+			buf->ReadString(types);
             Serializable* newSer = factory->create(types);
             if (newSer != NULL) {
                 //Do this to preserve type information even if slicing has occured.
@@ -140,129 +155,129 @@ namespace ops
             return newSer;
         }
 
-        void inout(const std::string& name, std::vector<bool>& value)
+        void inout(InoutName_T name, std::vector<bool>& value)
         {
             UNUSED(name)
             buf->ReadBooleans(value);
         }
 
-        void inout(const std::string& name, std::vector<char>& value)
+        void inout(InoutName_T name, std::vector<char>& value)
         {
             UNUSED(name)
             buf->ReadBytes(value);
         }
 
-        void inout(const std::string& name, std::vector<int>& value)
+        void inout(InoutName_T name, std::vector<int>& value)
         {
             UNUSED(name)
             buf->ReadInts(value);
         }
 
-        void inout(const std::string& name, std::vector<__int16>& value)
+        void inout(InoutName_T name, std::vector<__int16>& value)
         {
             UNUSED(name)
             buf->ReadShorts(value);
         }
 
-        void inout(const std::string& name, std::vector<__int64>& value)
+        void inout(InoutName_T name, std::vector<__int64>& value)
         {
             UNUSED(name)
             buf->ReadLongs(value);
         }
 
-        void inout(const std::string& name, std::vector<float>& value)
+        void inout(InoutName_T name, std::vector<float>& value)
         {
             UNUSED(name)
             buf->ReadFloats(value);
         }
 
-        void inout(const std::string& name, std::vector<double>& value)
+        void inout(InoutName_T name, std::vector<double>& value)
         {
             UNUSED(name)
             buf->ReadDoubles(value);
         }
 
-        void inout(const std::string& name, std::vector<std::string>& value)
+        void inout(InoutName_T name, std::vector<std::string>& value)
         {
             UNUSED(name)
             buf->ReadStrings(value);
         }
 
 		///TODO all inoutfixarr methods need to handle byte order on BIG ENDIAN SYSTEMS
-		void inoutfixarr(const std::string& name, bool* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, bool* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			int num = buf->ReadInt();
-			if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: " + name);
+			if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
 			buf->ReadChars((char *)value, totalSize);
 		}
 
-		void inoutfixarr(const std::string& name, char* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, char* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			int num = buf->ReadInt();
-			if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: " + name);
+			if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
 			buf->ReadChars((char *)value, totalSize);
 		}
 
-		void inoutfixarr(const std::string& name, int* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, int* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			int num = buf->ReadInt();
-			if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: " + name);
+			if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
 			buf->ReadChars((char *)value, totalSize);
 		}
 
-		void inoutfixarr(const std::string& name, __int16* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, __int16* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			int num = buf->ReadInt();
-			if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: " + name);
+			if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
 			buf->ReadChars((char *)value, totalSize);
 		}
 
-		void inoutfixarr(const std::string& name, __int64* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, __int64* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			int num = buf->ReadInt();
-			if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: " + name);
+			if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
 			buf->ReadChars((char *)value, totalSize);
 		}
 
-		void inoutfixarr(const std::string& name, float* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, float* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			int num = buf->ReadInt();
-			if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: " + name);
+			if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
 			buf->ReadChars((char *)value, totalSize);
 		}
 
-		void inoutfixarr(const std::string& name, double* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, double* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			int num = buf->ReadInt();
-			if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: " + name);
+			if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
 			buf->ReadChars((char *)value, totalSize);
 		}
 
-		void inoutfixarr(const std::string& name, std::string* value, int numElements)
+		void inoutfixarr(InoutName_T name, std::string* value, int numElements)
         {
             UNUSED(name)
             int num = buf->ReadInt();
-            if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: " + name);
+            if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
             for(int i = 0; i < numElements; i++) {
                 value[i] = buf->ReadString();
             }
         }
 
-        int beginList(const std::string& name, int size)
+        int beginList(InoutName_T name, int size)
         {
             UNUSED(name)
             UNUSED(size)
             return buf->ReadInt();
         }
 
-        void endList(const std::string& name)
+        void endList(InoutName_T name)
         {
             UNUSED(name)
             //Nothing to do in this implementation

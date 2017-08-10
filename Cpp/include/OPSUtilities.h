@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2017 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -31,30 +31,30 @@ namespace ops
 	// Methods that work on Topic names that use the syntax 'Domain::TopicName'
 
 	// Returns a full topic name on the format 'Domain::TopicName'
-	std::string fullTopicName(std::string domainName, std::string topicName)
+	ObjectName_T fullTopicName(ObjectName_T domainName, ObjectName_T topicName)
 	{
-		return domainName + "::" + topicName;
+		ops::ObjectName_T name = domainName;
+		name += "::";
+		name += topicName;
+		return name;
 	}
 
 	// Returns the topic name part
-	std::string topicName(std::string name)
+	ObjectName_T topicName(ObjectName_T name)
 	{
-		std::basic_string <char>::size_type index1;
-		std::string s = name;
-		if ((index1 = s.find("::")) != std::string::npos) {
-			s.erase(0, index1+2);
+		ObjectName_T::size_type index1;
+		if ((index1 = name.find("::")) != ObjectName_T::npos) {
+			return name.substr(index1 + 2);
 		}
-		return s;
+		return name;
 	}
 
 	// Returns the domain name part
-	std::string domainName(std::string name)
+	ObjectName_T domainName(ObjectName_T name)
 	{
-		std::basic_string <char>::size_type index1;
-		std::string s = name;
-		if ((index1 = s.find("::")) != std::string::npos) {
-			s.erase(index1, std::string::npos);
-			if (s != "") return s;
+		ObjectName_T::size_type index1;
+		if ((index1 = name.find("::")) != ObjectName_T::npos) {
+			return name.substr(0, index1);
 		}
 		return "";
 	}
@@ -62,7 +62,7 @@ namespace ops
 	// -------------------------------------------------------------------------------
 	// Misc methods
 
-	bool verifyTopicType(ops::Topic& top, std::string typeName)
+	bool verifyTopicType(ops::Topic& top, TypeId_T typeName)
 	{
 		return (top.getTypeID() == typeName);
 	}
@@ -70,4 +70,3 @@ namespace ops
   }
 
 }
-

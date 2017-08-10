@@ -55,7 +55,7 @@ public:
 		if (o) childFactories.push_back(o);
 	}
 
-	virtual Serializable* create(std::string& type)
+	virtual Serializable* create(TypeId_T& type)
 	{
         Serializable* obj = NULL;
 

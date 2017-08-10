@@ -88,24 +88,24 @@ namespace ops
 		if (len > 0) memcpy((void*)&obj->spareBytes[0], (void*)&spareBytes[0], len);
 	}
 
-    std::string OPSObject::getKey()
+	ObjectKey_T OPSObject::getKey()
     {
          return key;
     }
 
-	const std::string& OPSObject::getTypeString()
+	const TypeId_T& OPSObject::getTypeString()
 	{
 		return typesString;
 	}
 
-	void OPSObject::setKey(std::string k)
+	void OPSObject::setKey(ObjectKey_T k)
 	{
 		key = k;
 	}
 
 	void OPSObject::serialize(ArchiverInOut* archive)
 	{
-		archive->inout(std::string("key"), key);
+		archive->inout("key", key);
 	}
 	
     OPSObject::~OPSObject()

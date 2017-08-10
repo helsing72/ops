@@ -19,21 +19,39 @@
 */
 
 #include <fstream>
+#ifdef _WIN32
+	#include <direct.h>
+#endif
+
 #include "OPSTypeDefs.h"
 #include "OPSConfig.h"
 #include "OPSConfigRepository.h"
 #include "XMLArchiverIn.h"
 #include "OPSObjectFactory.h"
+#include "Participant.h"
 
 namespace ops
 {
 
 #ifndef REPLACE_OPS_CONFIG
-	OPSConfig* OPSConfig::getConfig(std::string configFile)
+	OPSConfig* OPSConfig::getConfig(FileName_T configFile)
 	{
 		std::ifstream inStream(configFile.c_str());
 		if (inStream.is_open()) {
 			return getConfig(inStream);
+		} else {
+#ifdef _WIN32
+			char* buffer = NULL;
+			buffer = _getcwd(NULL, 0);
+			if (buffer) {
+				ErrorMessage_T msg("Failed to open ");
+				msg += configFile;
+				msg += ". Working Dir: ";
+				msg += buffer;
+				Participant::getStaticErrorService()->report("OPSConfig", "getConfig", msg);
+				free(buffer);
+			}
+#endif
 		}
 		return NULL;
 	}
@@ -49,7 +67,7 @@ namespace ops
 	{
 		XMLArchiverIn archiver(inStream, "root", OPSObjectFactory::getInstance());
 		OPSConfig* theConfig = NULL;
-		return (OPSConfig*)archiver.inout(std::string("ops_config"), theConfig);
+		return (OPSConfig*)archiver.inout("ops_config", theConfig);
 	}
 
 	OPSConfig::~OPSConfig()

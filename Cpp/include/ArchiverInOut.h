@@ -25,8 +25,8 @@
 #define ops_ArchiverInOutH
 
 #include <vector>
-#include <string>
 #include <exception>
+#include <string>
 
 #include "OPSTypeDefs.h"
 #include "Serializable.h"
@@ -38,17 +38,24 @@ namespace ops
         class ArchiverException : public std::exception
         {
         private:
-            std::string message;
+			ExceptionMessage_T message;
         public:
             ArchiverException()
             {
                 message = "ArchiverException: empty";
             }
-            ArchiverException(std::string m)
+            ArchiverException(ExceptionMessage_T m)
             {
-                message = "ArchiverException: " + m;
+				message = "ArchiverException: ";
+				message += m;
             }
-            std::string GetMessage()
+			ArchiverException(ExceptionMessage_T m, InoutName_T name)
+			{
+				message = "ArchiverException: ";
+				message += m;
+				message += name;
+			}
+			ExceptionMessage_T GetMessage()
             {
                 return message;
             }
@@ -62,42 +69,80 @@ namespace ops
     public:
         virtual ~ArchiverInOut();
 
-        virtual void inout(const std::string& name, bool& value) = 0;
-        virtual void inout(const std::string& name, char& value) = 0;
-        virtual void inout(const std::string& name, int& value) = 0;
-        virtual void inout(const std::string& name, __int16& value) = 0;
-        virtual void inout(const std::string& name, __int64& value) = 0;
-        virtual void inout(const std::string& name, float& value) = 0;
-        virtual void inout(const std::string& name, double& value) = 0;
-        virtual void inout(const std::string& name, std::string& value) = 0;
-        virtual void inout(const std::string& name, Serializable& value) = 0;
+		// Returns true if it's an output archiver
+		virtual bool isOut() = 0;
 
-		virtual void inout(const std::string& name, char* buffer, int bufferSize) = 0;
+        virtual void inout(InoutName_T name, bool& value) = 0;
+        virtual void inout(InoutName_T name, char& value) = 0;
+        virtual void inout(InoutName_T name, int& value) = 0;
+        virtual void inout(InoutName_T name, __int16& value) = 0;
+        virtual void inout(InoutName_T name, __int64& value) = 0;
+        virtual void inout(InoutName_T name, float& value) = 0;
+        virtual void inout(InoutName_T name, double& value) = 0;
+        virtual void inout(InoutName_T name, std::string& value) = 0;
+        virtual void inout(InoutName_T name, Serializable& value) = 0;
 
-		virtual Serializable* inout(const std::string& name, Serializable* value) = 0;
+		virtual void inoutfixstring(InoutName_T name, char* value, int& size, int max_size, int idx) = 0;
 
-        virtual Serializable* inout(const std::string& name, Serializable* value, int element) = 0;
+		template<size_t N>
+		void inout(InoutName_T name, fixed_string<N>& value, int idx = 0)
+		{
+			int size = (int)value.size();
+			inoutfixstring(name, &value[0], size, (int)value.max_size(), idx);
+			if (!isOut()) value.resize(); // recalculate size for an input archiver
+		}
 
-        virtual void inout(const std::string& name, std::vector<bool>& value) = 0;
-        virtual void inout(const std::string& name, std::vector<char>& value) = 0;
-        virtual void inout(const std::string& name, std::vector<int>& value) = 0;
-        virtual void inout(const std::string& name, std::vector<__int16>& value) = 0;
-        virtual void inout(const std::string& name, std::vector<__int64>& value) = 0;
-        virtual void inout(const std::string& name, std::vector<float>& value) = 0;
-        virtual void inout(const std::string& name, std::vector<double>& value) = 0;
-        virtual void inout(const std::string& name, std::vector<std::string>& value) = 0;
+		virtual void inout(InoutName_T name, char* buffer, int bufferSize) = 0;
 
-		virtual void inoutfixarr(const std::string& name, bool* value, int numElements, int totalSize) = 0;
-		virtual void inoutfixarr(const std::string& name, char* value, int numElements, int totalSize) = 0;
-		virtual void inoutfixarr(const std::string& name, int* value, int numElements, int totalSize) = 0;
-		virtual void inoutfixarr(const std::string& name, __int16* value, int numElements, int totalSize) = 0;
-		virtual void inoutfixarr(const std::string& name, __int64* value, int numElements, int totalSize) = 0;
-		virtual void inoutfixarr(const std::string& name, float* value, int numElements, int totalSize) = 0;
-		virtual void inoutfixarr(const std::string& name, double* value, int numElements, int totalSize) = 0;
+		virtual Serializable* inout(InoutName_T name, Serializable* value) = 0;
 
-		virtual void inoutfixarr(const std::string& name, std::string* value, int numElements) = 0;
+        virtual Serializable* inout(InoutName_T name, Serializable* value, int element) = 0;
 
-        template <class SerializableType> void inout(const std::string& name, std::vector<SerializableType>& vec, SerializableType prototype)
+        virtual void inout(InoutName_T name, std::vector<bool>& value) = 0;
+        virtual void inout(InoutName_T name, std::vector<char>& value) = 0;
+        virtual void inout(InoutName_T name, std::vector<int>& value) = 0;
+        virtual void inout(InoutName_T name, std::vector<__int16>& value) = 0;
+        virtual void inout(InoutName_T name, std::vector<__int64>& value) = 0;
+        virtual void inout(InoutName_T name, std::vector<float>& value) = 0;
+        virtual void inout(InoutName_T name, std::vector<double>& value) = 0;
+        virtual void inout(InoutName_T name, std::vector<std::string>& value) = 0;
+
+		template<size_t N>
+		void inout(InoutName_T name, std::vector<fixed_string<N>>& vec)
+		{
+			int size = beginList(name, (int)vec.size());
+			if ((int)vec.size() != size)
+			{
+				vec.clear();
+				vec.reserve(size);
+				vec.resize(size);
+				for (int i = 0; i < size; i++)
+				{
+					inout("element", vec[i], i);
+				}
+			}
+			else
+			{
+				for (int i = 0; i < size; i++)
+				{
+					inout("element", vec[i], i);
+				}
+			}
+			endList(name);
+		}
+
+		virtual void inoutfixarr(InoutName_T name, bool* value, int numElements, int totalSize) = 0;
+		virtual void inoutfixarr(InoutName_T name, char* value, int numElements, int totalSize) = 0;
+		virtual void inoutfixarr(InoutName_T name, int* value, int numElements, int totalSize) = 0;
+		virtual void inoutfixarr(InoutName_T name, __int16* value, int numElements, int totalSize) = 0;
+		virtual void inoutfixarr(InoutName_T name, __int64* value, int numElements, int totalSize) = 0;
+		virtual void inoutfixarr(InoutName_T name, float* value, int numElements, int totalSize) = 0;
+		virtual void inoutfixarr(InoutName_T name, double* value, int numElements, int totalSize) = 0;
+
+		virtual void inoutfixarr(InoutName_T name, std::string* value, int numElements) = 0;
+
+        template <class SerializableType> 
+		void inout(InoutName_T name, std::vector<SerializableType>& vec, SerializableType prototype)
         {
             int size = beginList(name, (int)vec.size());
             if ((int) vec.size() < size)
@@ -107,20 +152,21 @@ namespace ops
                 vec.resize(size, prototype);
                 for (int i = 0; i < size; i++)
                 {
-                    inout(std::string("element"), vec[i]);
+                    inout("element", vec[i]);
                 }
             }
             else
             {
                 for (int i = 0; i < size; i++)
                 {
-                    inout(std::string("element"), vec[i]);
+                    inout("element", vec[i]);
                 }
             }
             endList(name);
         }
 
-        template <class SerializableType> void inout(const std::string& name, std::vector<SerializableType*>& vec)
+        template <class SerializableType> 
+		void inout(InoutName_T name, std::vector<SerializableType*>& vec)
         {
             int size = beginList(name, (int)vec.size());
             if ((int) vec.size() < size)
@@ -129,42 +175,44 @@ namespace ops
                 vec.reserve(size);
                 for (int i = 0; i < size; i++)
                 {
-                    vec.push_back((SerializableType*) inout(std::string(name), (Serializable*) NULL, i));
+                    vec.push_back((SerializableType*) inout(name, (Serializable*) NULL, i));
                 }
             }
             else
             {
                 for (int i = 0; i < size; i++)
                 {
-                    vec[i] = (SerializableType*) inout(std::string(name), vec[i], i);
+                    vec[i] = (SerializableType*) inout(name, vec[i], i);
                 }
             }
             endList(name);
         }
 
-        template <class SerializableType> void inoutfixarr(const std::string& name, SerializableType** value, int numElements)
+        template <class SerializableType> 
+		void inoutfixarr(InoutName_T name, SerializableType** value, int numElements)
         {
             int size = beginList(name, numElements);
-            if (size != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: " + name);
+            if (size != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
             for (int i = 0; i < size; i++) {
-                value[i] = (SerializableType*) inout(std::string(name), value[i], i);
+                value[i] = (SerializableType*) inout(name, value[i], i);
             }
             endList(name);
         }
 
-        template <class SerializableType> void inoutfixarr(const std::string& name, SerializableType* value, int numElements)
+        template <class SerializableType> 
+		void inoutfixarr(InoutName_T name, SerializableType* value, int numElements)
         {
             int size = beginList(name, numElements);
-            if (size != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: " + name);
+            if (size != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
             for (int i = 0; i < size; i++) {
-                inout(std::string(name), value[i]);
+                inout(name, value[i]);
             }
             endList(name);
         }
 
     protected:
-        virtual int beginList(const std::string& name, int i) = 0;
-        virtual void endList(const std::string& name) = 0;
+        virtual int beginList(InoutName_T name, int i) = 0;
+        virtual void endList(InoutName_T name) = 0;
     };
 }
 

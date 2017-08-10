@@ -21,7 +21,6 @@
 #ifndef ops_TCPCLientH
 #define ops_TCPClientH
 
-#include <string>
 #include "TCPClientBase.h"
 #include "IOService.h" 
 
@@ -40,14 +39,14 @@ namespace ops
     class TCPClient : public TCPClientBase
     {
     public:
-        TCPClient(std::string serverIP, int serverPort, IOService* ioServ, __int64 inSocketBufferSizent = 16000000) : 
+        TCPClient(Address_T serverIP, int serverPort, IOService* ioServ, __int64 inSocketBufferSizent = 16000000) :
 			_serverPort(serverPort), ipaddress(serverIP),
 			sock(NULL), endpoint(NULL), _connected(false), 
 			tryToConnect(false),
 			m_asyncCallActive(false), m_working(false)
         {
             boost::asio::io_service* ioService = dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService;
-            boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(serverIP));
+            boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(serverIP.c_str()));
             endpoint = new boost::asio::ip::tcp::endpoint(ipAddr, serverPort);
 			this->inSocketBufferSizent = inSocketBufferSizent;
 
@@ -128,12 +127,12 @@ namespace ops
 
 		// Used to get the sender IP and port for a received message
 		// Only safe to call in callback, before a new asynchWait() is called.
-		void getSource(std::string& address, int& port) 
+		void getSource(Address_T& address, int& port)
 		{
 		    boost::system::error_code error;
 			boost::asio::ip::tcp::endpoint sendingEndPoint;
 			sendingEndPoint = sock->remote_endpoint( error );
-			address = sendingEndPoint.address().to_string();
+			address = sendingEndPoint.address().to_string().c_str();
 			port = sendingEndPoint.port();
 		}
 
@@ -185,14 +184,14 @@ namespace ops
 			return _serverPort;
 		}
 
-		std::string getLocalAddress()
+		Address_T getLocalAddress()
 		{
 			return ipaddress;
 		}
 
 	private:
         int _serverPort;
-        std::string ipaddress;
+		Address_T ipaddress;
 		__int64 inSocketBufferSizent;
         boost::asio::ip::tcp::socket* sock;
         boost::asio::ip::tcp::endpoint* endpoint;

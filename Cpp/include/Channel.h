@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2017 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -21,7 +21,7 @@
 #ifndef ops_channel_h
 #define ops_channel_h
 
-#include <string>
+#include "OPSTypeDefs.h"
 #include "Topic.h"
 #include "OPSObject.h"
 #include "OPSExport.h"
@@ -31,10 +31,10 @@ namespace ops
     class OPS_EXPORT Channel : public OPSObject
     {
     public:
-        std::string channelID;
-        std::string linktype;
-        std::string localInterface;     // If multicast, this specifies interface to use
-        std::string domainAddress;
+		ChannelId_T channelID;
+        Transport_T linktype;
+        Address_T localInterface;     // If multicast, this specifies interface to use
+        Address_T domainAddress;
         int timeToLive;                 // if multicast, this specifies the ttl parameter
         int port;
         __int64 outSocketBufferSize;
@@ -46,9 +46,9 @@ namespace ops
 
         void populateTopic(Topic* top);
 
-        static std::string LINKTYPE_MC;
-        static std::string LINKTYPE_TCP;
-        static std::string LINKTYPE_UDP;
+        static Transport_T LINKTYPE_MC;
+        static Transport_T LINKTYPE_TCP;
+        static Transport_T LINKTYPE_UDP;
     };
 }
 #endif

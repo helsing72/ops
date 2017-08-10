@@ -20,6 +20,7 @@
 #ifndef ops_ParticipantInfoData_h
 #define	ops_ParticipantInfoData_h
 
+#include "OPSTypeDefs.h"
 #include "OPSObject.h"
 #include "TopicInfoData.h"
 
@@ -31,48 +32,44 @@ namespace ops
 	public:
 		ParticipantInfoData()
 		{
-			appendType(std::string("ops.ParticipantInfoData"));
+			appendType(TypeId_T("ops.ParticipantInfoData"));
 			mc_udp_port = 0;
 			mc_tcp_port = 0;
 		}
-
 		
 		void serialize(ArchiverInOut* archiver)
 		{
 			OPSObject::serialize(archiver);
 
-			archiver->inout(std::string("name"), name);
-			archiver->inout(std::string("domain"), domain);
-			archiver->inout(std::string("id"), id);
-			archiver->inout(std::string("ip"), ip);
-			archiver->inout(std::string("languageImplementation"), languageImplementation);
-			archiver->inout(std::string("opsVersion"), opsVersion);
-			archiver->inout(std::string("mc_udp_port"), mc_udp_port);
-			archiver->inout(std::string("mc_tcp_port"), mc_tcp_port);
-			archiver->inout<TopicInfoData>(std::string("subscribeTopics"), subscribeTopics, TopicInfoData());
-			archiver->inout<TopicInfoData>(std::string("publishTopics"), publishTopics, TopicInfoData());
-			archiver->inout(std::string("knownTypes"), knownTypes);
-			
+			archiver->inout("name", name);
+			archiver->inout("domain", domain);
+			archiver->inout("id", id);
+			archiver->inout("ip", ip);
+			archiver->inout("languageImplementation", languageImplementation);
+			archiver->inout("opsVersion", opsVersion);
+			archiver->inout("mc_udp_port", mc_udp_port);
+			archiver->inout("mc_tcp_port", mc_tcp_port);
+			archiver->inout<TopicInfoData>("subscribeTopics", subscribeTopics, TopicInfoData());
+			archiver->inout<TopicInfoData>("publishTopics", publishTopics, TopicInfoData());
+			archiver->inout("knownTypes", knownTypes);
 		}
+
 		virtual ~ParticipantInfoData(){}
 
 	public:
-		std::string name;
-		std::string id;
-		std::string domain;
-		std::string ip;
-		std::string languageImplementation;
-		std::string opsVersion;
+		InternalString_T name;
+		ObjectName_T id;
+		ObjectName_T domain;
+		Address_T ip;
+		InternalString_T languageImplementation;
+		InternalString_T opsVersion;
 		int mc_udp_port;
 		int mc_tcp_port;
 
 		std::vector<TopicInfoData> subscribeTopics;
 		std::vector<TopicInfoData> publishTopics;
-		std::vector<std::string> knownTypes;
-		
+		std::vector<TypeId_T> knownTypes;		// Currently not used
 	};
 
-
 }
-
 #endif

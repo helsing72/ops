@@ -21,7 +21,6 @@
 */
 
 #include <map>
-#include <sstream>
 #include "OPSMessage.h"
 #include "Notifier.h"
 
@@ -38,12 +37,12 @@ namespace ops {
 	private:
 		typedef struct
 		{
-			std::string Addr;
+			Address_T Addr;
 			int Port;
 			__int64 expectedPubID;
 		} Entry_T;
 
-		std::map<std::string, Entry_T> _map;
+		std::map<InternalKey_T, Entry_T> _map;
 		Entry_T* _prev;
 
 	public:
@@ -56,16 +55,16 @@ namespace ops {
 		virtual void Check(OPSMessage* message)
 		{
 			// Get sender info
-			std::string addr;
+			Address_T addr;
 			int port;
 			message->getSource(addr, port);
 
 			if ((_prev == nullptr) || (_prev->Port != port) || (_prev->Addr != addr)) {
 				// First or Another sender
 				// Make key
-				std::ostringstream myPort;
-				myPort << port << std::ends;
-				std::string key = addr + "::" + myPort.str();
+				InternalKey_T key = addr;
+				key += "::";
+				key += NumberToString(port); 
 				
 				// Look up entry
 				auto result = _map.find(key);

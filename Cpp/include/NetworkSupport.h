@@ -20,12 +20,12 @@
 
 #pragma once
 
-#include <string>
-#include <IOService.h>
+#include "OPSTypeDefs.h"
+#include "IOService.h"
 
 namespace ops
 {
-	extern std::string doSubnetTranslation(std::string addr, IOService* ioServ);
+	extern Address_T doSubnetTranslation(Address_T addr, IOService* ioServ);
 
-	extern std::string GetHostName();
+	extern InternalString_T GetHostName();
 }

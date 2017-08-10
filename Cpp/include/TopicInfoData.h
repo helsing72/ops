@@ -31,49 +31,41 @@ namespace ops
 	public:
 		TopicInfoData()
 		{
-			appendType(std::string("TopicInfoData"));
+			appendType(TypeId_T("TopicInfoData"));
 		}
+
 		TopicInfoData(Topic& topic)
 		{
-			appendType(std::string("TopicInfoData"));
+			appendType(TypeId_T("TopicInfoData"));
 			name = topic.getName();
 			type = topic.getTypeID();
 			transport = topic.getTransport();
 			address = topic.getDomainAddress();
 			port = topic.getPort();
-			//keys;
 		}
-
 		
 		void serialize(ArchiverInOut* archiver)
 		{
 			OPSObject::serialize(archiver);
 
-			archiver->inout(std::string("name"), name);
-			archiver->inout(std::string("type"), type);
-			archiver->inout(std::string("transport"), transport);
-			archiver->inout(std::string("address"), address);
-			archiver->inout(std::string("port"), port);
-			archiver->inout(std::string("keys"), keys);
-			//archiver->inout(std::string("filters"), filters);
-			
-			
+			archiver->inout("name", name);
+			archiver->inout("type", type);
+			archiver->inout("transport", transport);
+			archiver->inout("address", address);
+			archiver->inout("port", port);
+			archiver->inout("keys", keys);
 		}
-		virtual ~TopicInfoData(){}
+
+		virtual ~TopicInfoData() {}
 
 	public:
-		std::string name;
-		std::string type;
-		std::string transport;
-		std::string address;
+		ObjectName_T name;
+		TypeId_T type;
+		Transport_T transport;
+		Address_T address;
 		int port;
-		std::vector<std::string> keys;
-		//std::vector<OPSObject*> filters;
-		
-		
+		std::vector<ObjectKey_T> keys;		// Currently not used
 	};
 
-
 }
-
 #endif

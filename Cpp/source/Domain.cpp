@@ -34,10 +34,10 @@ Domain::Domain() :
 	outSocketBufferSize(-1),	// Use OS default, Topics may override
 	metaDataMcPort(9494)		// Default port 
 {
-	appendType(std::string("Domain"));
+	appendType(TypeId_T("Domain"));
 }
 
-std::string Domain::getDomainAddress()
+Address_T Domain::getDomainAddress()
 {
 	return domainAddress;
 }
@@ -60,7 +60,7 @@ std::vector<Topic* > Domain::getTopics()
 	return topics;
 }
 
-Topic Domain::getTopic(std::string name)
+Topic Domain::getTopic(ObjectName_T name)
 {
 	for(unsigned int i = 0 ; i < topics.size(); i++)
 	{
@@ -70,10 +70,13 @@ Topic Domain::getTopic(std::string name)
 			return *topics[i];
 		}
 	}
-	throw NoSuchTopicException("Topic " + name + " does not exist in ops config file.");
+	ExceptionMessage_T msg = "Topic ";
+	msg += name;
+	msg += " does not exist in ops config file.";
+	throw NoSuchTopicException(msg);
 }
 
-bool Domain::existsTopic(std::string name)
+bool Domain::existsTopic(ObjectName_T name)
 {
 	for(unsigned int i = 0 ; i < topics.size(); i++)
 	{
@@ -85,7 +88,7 @@ bool Domain::existsTopic(std::string name)
 	return false;
 }
 
-std::string Domain::getDomainID()
+ObjectName_T Domain::getDomainID()
 {
 	return domainID;
 }
@@ -93,25 +96,25 @@ std::string Domain::getDomainID()
 void Domain::serialize(ArchiverInOut* archiver)
 {
 	OPSObject::serialize(archiver);
-	archiver->inout(std::string("domainID"), domainID);
-	archiver->inout<Topic>(std::string("topics"), topics);
-	archiver->inout(std::string("domainAddress"), domainAddress);
-	archiver->inout(std::string("localInterface"), localInterface);
-	archiver->inout(std::string("timeToLive"), timeToLive);
-	archiver->inout(std::string("inSocketBufferSize"), inSocketBufferSize);
-	archiver->inout(std::string("outSocketBufferSize"), outSocketBufferSize);
-	archiver->inout(std::string("metaDataMcPort"), metaDataMcPort);
+	archiver->inout("domainID", domainID);
+	archiver->inout<Topic>("topics", topics);
+	archiver->inout("domainAddress", domainAddress);
+	archiver->inout("localInterface", localInterface);
+	archiver->inout("timeToLive", timeToLive);
+	archiver->inout("inSocketBufferSize", inSocketBufferSize);
+	archiver->inout("outSocketBufferSize", outSocketBufferSize);
+	archiver->inout("metaDataMcPort", metaDataMcPort);
 
 	// To not break binary compatibility we only do this when we know we are
 	// reading from an XML-file
 	if (dynamic_cast<XMLArchiverIn*>(archiver) != NULL) { 
-		archiver->inout<Channel>(std::string("channels"), channels);
-		archiver->inout<Transport>(std::string("transports"), transports);
+		archiver->inout<Channel>("channels", channels);
+		archiver->inout<Transport>("transports", transports);
 		checkTransports();
 	}
 }
 
-Channel* Domain::findChannel(std::string id)
+Channel* Domain::findChannel(ChannelId_T id)
 {
 	if (id != "") {
 		for (unsigned int i = 0; i < channels.size(); i++) {
@@ -121,7 +124,7 @@ Channel* Domain::findChannel(std::string id)
 	return NULL;
 }
 
-Topic* Domain::findTopic(std::string id)
+Topic* Domain::findTopic(ObjectName_T id)
 {
 	if (id != "") {
 		for (unsigned int i = 0; i < topics.size(); i++) {
@@ -139,16 +142,18 @@ void Domain::checkTransports()
 		// Get channel
 		Channel* channel = findChannel(transports[i]->channelID);
 		if (channel == NULL) {
-			throw ops::ConfigException(
-				std::string("Non existing channelID: '") + transports[i]->channelID +
-				std::string("' used in transport spcification."));
+			ExceptionMessage_T msg("Non existing channelID: '");
+			msg += transports[i]->channelID;
+			msg += "' used in transport specification.";
+			throw ops::ConfigException(msg);
 		} else {
 			for (unsigned int j = 0; j < transports[i]->topics.size(); j++) {
 				Topic* top = findTopic(transports[i]->topics[j]);
 				if (top == NULL) {
-					throw ops::ConfigException(
-						std::string("Non existing topicID: '") + transports[i]->topics[j] +
-						std::string("' used in transport spcification."));
+					ExceptionMessage_T msg("Non existing topicID: '");
+					msg += transports[i]->topics[j];
+					msg += "' used in transport specification.";
+					throw ops::ConfigException(msg);
 				} else {
 					channel->populateTopic(top);
 				}
@@ -162,7 +167,7 @@ int Domain::getTimeToLive()
 	return timeToLive;
 }
 
-std::string Domain::getLocalInterface()
+Address_T Domain::getLocalInterface()
 {
 	return localInterface;
 }

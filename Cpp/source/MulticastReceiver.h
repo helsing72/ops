@@ -21,7 +21,6 @@
 #ifndef ops_MulticastReceiverH
 #define ops_MulticastReceiverH
 
-#include <string>
 #include "Participant.h"
 #include "Receiver.h"
 #include <boost/asio.hpp>
@@ -40,7 +39,7 @@ namespace ops
 	class MulticastReceiver : public Receiver
 	{
 	public:
-		MulticastReceiver(std::string mcAddress, int bindPort, IOService* ioServ, std::string localInterface = "0.0.0.0", __int64 inSocketBufferSizent = 16000000):
+		MulticastReceiver(Address_T mcAddress, int bindPort, IOService* ioServ, Address_T localInterface = "0.0.0.0", __int64 inSocketBufferSizent = 16000000):
 		  _port(0),
 		  _ipaddress(mcAddress),
 		  _localInterface(localInterface),
@@ -89,8 +88,8 @@ namespace ops
 				sock->bind(*localEndpoint);
 			
 				// Join the multicast group.
-				const boost::asio::ip::address_v4 multicastAddress = boost::asio::ip::address_v4::from_string(_ipaddress);
-				const boost::asio::ip::address_v4 networkInterface(boost::asio::ip::address_v4::from_string(_localInterface));
+				const boost::asio::ip::address_v4 multicastAddress = boost::asio::ip::address_v4::from_string(_ipaddress.c_str());
+				const boost::asio::ip::address_v4 networkInterface(boost::asio::ip::address_v4::from_string(_localInterface.c_str()));
 				sock->set_option(boost::asio::ip::multicast::join_group(multicastAddress,networkInterface));
 
 #ifndef _WIN32
@@ -145,9 +144,9 @@ namespace ops
 
 		// Used to get the sender IP and port for a received message
 		// Only safe to call in callback, before a new asynchWait() is called.
-		void getSource(std::string& address, int& port)
+		void getSource(Address_T& address, int& port)
 		{
-			address = sendingEndPoint.address().to_string();
+			address = sendingEndPoint.address().to_string().c_str();
 			port = sendingEndPoint.port();
 		}
 
@@ -257,15 +256,15 @@ namespace ops
 			return _port;
 		}
 
-		std::string getLocalAddress()
+		Address_T getLocalAddress()
 		{
 			return _ipaddress;
 		}
 
 	private:
 		int _port;
-		std::string _ipaddress;
-		std::string _localInterface;
+		Address_T _ipaddress;
+		Address_T _localInterface;
 		__int64 _inSocketBufferSizent;
 		boost::asio::ip::udp::socket* sock;
 		boost::asio::ip::udp::endpoint* localEndpoint;

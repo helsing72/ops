@@ -21,9 +21,9 @@
 #ifndef ops_MemoryMap_h
 #define	ops_MemoryMap_h
 
-#include <string.h>
 #include <exception>
 
+#include "OPSTypeDefs.h"
 #include "OPSExport.h"
 
 namespace ops
@@ -32,11 +32,12 @@ namespace ops
 class MemoryMapException : public std::exception
 {
 private:
-	std::string message;
+	ExceptionMessage_T message;
 public:
-	MemoryMapException(std::string m)
+	MemoryMapException(ExceptionMessage_T m)
 	{
-		message = "MemoryMapException: " + m;
+		message = "MemoryMapException: ";
+		message += m;
 	}
 	const char* what() const noexcept { return message.c_str(); }
 };

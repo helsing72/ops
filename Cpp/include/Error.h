@@ -1,7 +1,7 @@
 #ifndef ops_Error_h
 #define ops_Error_h
 
-#include <string>
+#include "OPSTypeDefs.h"
 
 namespace ops
 {
@@ -10,10 +10,8 @@ namespace ops
 	{
 	public:
 		virtual int getErrorCode() = 0;
-		virtual std::string getMessage() = 0;
+		virtual ErrorMessage_T getMessage() = 0;
 		virtual ~Error(){}
 	};
-
-
 }
 #endif

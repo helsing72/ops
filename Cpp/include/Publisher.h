@@ -28,19 +28,15 @@
 #include "SendDataHandler.h"
 #include "OPSConstants.h"
 #include "TimeHelper.h"
-#include <string>
 #include "MemoryMap.h"
 #include "Participant.h"
 #include "OPSExport.h"
-
-//#include "DataHeaderHelper.h"
 
 namespace ops
 {
 class OPS_EXPORT Publisher
 {
 public:
-
 	Publisher(Topic t);
     virtual ~Publisher();
 
@@ -49,40 +45,31 @@ public:
 
     Topic getTopic();
 
-    void setName(std::string name);
-    void setKey(std::string name);
-    std::string getKey();
-    std::string getName();
+    void setName(ObjectName_T name);
+    void setKey(ObjectKey_T key);
+    ObjectKey_T getKey();
+	ObjectName_T getName();
 
 	void writeOPSObject(OPSObject* obj);
 
 protected:
 	void write(OPSObject* data);
 
-//    void setTopic(Topic topic);
- 
-
 private:
-
-
-	//char bytes[Participant::MESSAGE_MAX_SIZE / Participant::PACKET_MAX_SIZE][Participant::PACKET_MAX_SIZE];
-
     Topic topic;
 
 	MemoryMap memMap;
 
 	SendDataHandler* sendDataHandler;
-	//Sender* udpSender;
 
 	OPSMessage message;
  
 	Participant* participant;
 
     __int64 currentPublicationID;
-    std::string name;
-    std::string key;
+	ObjectName_T name;
+    ObjectKey_T key;
     char priority;
-
 	
     void IncCurrentPublicationID();
 
@@ -91,8 +78,6 @@ public:
 	__int64 sendSleepTime;
 	int sleepEverySendPacket;
 	bool sleepOnSendFailed;
-
-
 };
 
 }

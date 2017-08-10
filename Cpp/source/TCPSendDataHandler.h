@@ -67,7 +67,6 @@ namespace ops
 
     };
 
-
 }
 
 #endif

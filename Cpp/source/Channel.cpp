@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2017 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -35,20 +35,20 @@ namespace ops
         outSocketBufferSize(-1),
         inSocketBufferSize(-1)
     {
-        appendType(std::string("Channel"));
+        appendType(TypeId_T("Channel"));
     }
 
     void Channel::serialize(ArchiverInOut* archiver)
     {
         OPSObject::serialize(archiver);
-        archiver->inout(std::string("name"), channelID);
-        archiver->inout(std::string("linktype"), linktype);
-        archiver->inout(std::string("localInterface"), localInterface);
-        archiver->inout(std::string("address"), domainAddress);
-        archiver->inout(std::string("timeToLive"), timeToLive);
-        archiver->inout(std::string("port"), port);
-        archiver->inout(std::string("outSocketBufferSize"), outSocketBufferSize);
-        archiver->inout(std::string("inSocketBufferSize"), inSocketBufferSize);
+        archiver->inout("name", channelID);
+        archiver->inout("linktype", linktype);
+        archiver->inout("localInterface", localInterface);
+        archiver->inout("address", domainAddress);
+        archiver->inout("timeToLive", timeToLive);
+        archiver->inout("port", port);
+        archiver->inout("outSocketBufferSize", outSocketBufferSize);
+        archiver->inout("inSocketBufferSize", inSocketBufferSize);
     
         if (linktype == "")
         {
@@ -56,9 +56,10 @@ namespace ops
         }
         else if (linktype != LINKTYPE_MC && linktype != LINKTYPE_TCP && linktype != LINKTYPE_UDP)
         {
-            throw ops::ConfigException(
-                std::string("Illegal linktype: '") + linktype +
-                std::string("'. Linktype for Channel must be either 'multicast', 'tcp', 'udp' or left blank( = multicast)"));
+			ExceptionMessage_T msg("Illegal linktype: '");
+			msg += linktype;
+			msg += "'. Linktype for Channel must be either 'multicast', 'tcp', 'udp' or left blank( = multicast)";
+			throw ops::ConfigException(msg);
         }
     }
 
@@ -77,7 +78,7 @@ namespace ops
         top->setTimeToLive(timeToLive);
     }
 
-    std::string Channel::LINKTYPE_MC = "multicast";
-    std::string Channel::LINKTYPE_TCP = "tcp";
-    std::string Channel::LINKTYPE_UDP = "udp";
+	Transport_T Channel::LINKTYPE_MC = "multicast";
+	Transport_T Channel::LINKTYPE_TCP = "tcp";
+	Transport_T Channel::LINKTYPE_UDP = "udp";
 }

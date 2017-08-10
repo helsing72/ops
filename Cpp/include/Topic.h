@@ -21,13 +21,12 @@
 #ifndef ops_topic_h
 #define ops_topic_h
 
-#include <string>
+#include "OPSTypeDefs.h"
 #include "OPSObject.h"
 #include "OPSExport.h"
 
-
 namespace ops
-{   /*template<class DataType = OPSObject>*/
+{
 	class Participant;
 
 	class OPS_EXPORT Topic : public OPSObject
@@ -36,26 +35,26 @@ namespace ops
 		friend class Participant;
     
 	public:
-        Topic(std::string namee, int portt, std::string typeIDd, std::string domainAddresss);
+        Topic(ObjectName_T namee, int portt, TypeId_T typeIDd, Address_T domainAddresss);
 		Topic();
 
-		void setDomainID(std::string domID);
-		std::string getDomainID();
+		void setDomainID(ObjectName_T domID);
+		ObjectName_T getDomainID();
 
-        void setParticipantID(std::string partID);
-		std::string getParticipantID();
+        void setParticipantID(ObjectName_T partID);
+		ObjectName_T getParticipantID();
 
-		void setTransport(std::string transp);
-		std::string getTransport();
+		void setTransport(Transport_T transp);
+		Transport_T getTransport();
 
-		std::string getName();
-        std::string getTypeID();
+		ObjectName_T getName();
+		TypeId_T getTypeID();
 
-		void setDomainAddress(std::string domainAddr);
-		std::string getDomainAddress();
+		void setDomainAddress(Address_T domainAddr);
+		Address_T getDomainAddress();
 
-		void setLocalInterface(std::string localIf);
-		std::string getLocalInterface();
+		void setLocalInterface(Address_T localIf);
+		Address_T getLocalInterface();
 
 		void setSampleMaxSize(int size);
 		int getSampleMaxSize();
@@ -79,35 +78,29 @@ namespace ops
 			return participant;
 		}
 
-		static std::string TRANSPORT_MC;
-		static std::string TRANSPORT_TCP;
-		static std::string TRANSPORT_UDP;
-
+		static Transport_T TRANSPORT_MC;
+		static Transport_T TRANSPORT_TCP;
+		static Transport_T TRANSPORT_UDP;
 
 	private:
-        std::string name;
+        ObjectName_T name;
 
 		int port;
 		int timeToLive;
-		std::string typeID;
-        std::string domainAddress;
-		std::string localInterface;
-		std::string participantID;
-		std::string domainID;
+		TypeId_T typeID;
+		Address_T domainAddress;
+		Address_T localInterface;
+		ObjectName_T participantID;
+		ObjectName_T domainID;
 		bool reliable;
 		int sampleMaxSize;
 		__int64 deadline;
 		__int64 minSeparation;
-		std::string transport;
+		Transport_T transport;
 		__int64 outSocketBufferSize;
 		__int64 inSocketBufferSize;
 
 		Participant* participant;
-        
-
-		
-        
-        
     };
 }
 #endif

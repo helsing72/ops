@@ -21,6 +21,7 @@
 #ifndef ops_OPSObjectFactoryImpl_h
 #define ops_OPSObjectFactoryImpl_h
 
+#include "OPSTypeDefs.h"
 #include "OPSMessage.h"
 #include "Channel.h"
 #include "Topic.h"
@@ -36,7 +37,7 @@ namespace ops
     {
     public:
 
-        Serializable* create(std::string& type)
+        Serializable* create(TypeId_T& type)
         {
             if (type == ("ops.protocol.OPSMessage"))
             {
@@ -77,12 +78,10 @@ namespace ops
     class OPSObjectFactoryImpl : public OPSObjectFactory
     {
     public:
-
         OPSObjectFactoryImpl()
         {
             add(new BuiltInFactory());
         }
-
     };
 
 }

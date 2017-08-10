@@ -22,7 +22,7 @@ namespace ops
             return receiver;
         }
 
-		std::string localIf = doSubnetTranslation(top.getLocalInterface(), participant->getIOService());
+		Address_T localIf = doSubnetTranslation(top.getLocalInterface(), participant->getIOService());
 
         if (top.getTransport() == Topic::TRANSPORT_MC)
         {

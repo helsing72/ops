@@ -53,13 +53,16 @@ namespace ops
             currentTabDepth++;
         }
 
-        void close()
+		// Returns true if it's an output archiver
+		virtual bool isOut() { return true; }
+
+		void close()
         {
             currentTabDepth--;
             os << tab() << "</" << topNode << ">" << std::endl;
         }
 
-        virtual void inout(const std::string& name, bool& value)
+        virtual void inout(InoutName_T name, bool& value)
         {
             if (value)
             {
@@ -71,42 +74,53 @@ namespace ops
             }
         }
 
-        virtual void inout(const std::string& name, char& value)
+        virtual void inout(InoutName_T name, char& value)
         {
             os << tab() << "<" << name << ">" << (int) value << "</" << name << ">\n";
         }
 
-        virtual void inout(const std::string& name, int& value)
+        virtual void inout(InoutName_T name, int& value)
         {
             os << tab() << "<" << name << ">" << value << "</" << name << ">\n";
         }
 
-        virtual void inout(const std::string& name, __int16& value)
+        virtual void inout(InoutName_T name, __int16& value)
         {
             os << tab() << "<" << name << ">" << value << "</" << name << ">\n";
         }
 
-        virtual void inout(const std::string& name, __int64& value)
+        virtual void inout(InoutName_T name, __int64& value)
         {
             os << tab() << "<" << name << ">" << value << "</" << name << ">\n";
         }
 
-        virtual void inout(const std::string& name, float& value)
+        virtual void inout(InoutName_T name, float& value)
         {
             os << tab() << "<" << name << ">" << value << "</" << name << ">\n";
         }
 
-        virtual void inout(const std::string& name, double& value)
+        virtual void inout(InoutName_T name, double& value)
         {
             os << tab() << "<" << name << ">" << value << "</" << name << ">\n";
         }
 
-        virtual void inout(const std::string& name, std::string& value)
+        virtual void inout(InoutName_T name, std::string& value)
         {
             os << tab() << "<" << name << ">" << value << "</" << name << ">\n";
         }
 
-        virtual void inout(const std::string& name, char* buffer, int bufferSize)
+		virtual void inoutfixstring(InoutName_T name, char* value, int& size, int max_size, int idx)
+		{
+			UNUSED(name)
+			UNUSED(value)
+			UNUSED(size)
+			UNUSED(max_size)
+			UNUSED(idx)
+			///TODO
+			throw ops::ArchiverException("XMLArchiverOut.inout(name, char*, int&, int) NYI");
+		}
+
+		virtual void inout(InoutName_T name, char* buffer, int bufferSize)
         {
             UNUSED(name);
             UNUSED(buffer);
@@ -115,7 +129,7 @@ namespace ops
             throw ops::ArchiverException("XMLArchiverOut.inout(name, char*, int) NYI");
         }
 
-        virtual Serializable* inout(const std::string& name, Serializable* value, int element)
+        virtual Serializable* inout(InoutName_T name, Serializable* value, int element)
         {
             UNUSED(name);
             UNUSED(element);
@@ -133,7 +147,7 @@ namespace ops
 
         }
 
-        virtual Serializable* inout(const std::string& name, Serializable* value)
+        virtual Serializable* inout(InoutName_T name, Serializable* value)
         {
             OPSObject* opsO = dynamic_cast<OPSObject*> (value);
 
@@ -149,110 +163,110 @@ namespace ops
 
         }
 
-        virtual void inout(const std::string& name, Serializable& value)
+        virtual void inout(InoutName_T name, Serializable& value)
         {
             UNUSED(name);
             UNUSED(value);
         }
 
-        virtual void inout(const std::string& name, std::vector<bool>& value)
+        virtual void inout(InoutName_T name, std::vector<bool>& value)
         {
             os << tab() << "<" << name << ">" << std::endl;
             for (unsigned int i = 0; i < value.size(); i++)
             {
                 currentTabDepth++;
                 bool e = value[i];
-                inout(std::string("element"), e);
+                inout("element", e);
                 currentTabDepth--;
             }
             os << tab() << "</" << name << ">" << std::endl;
         }
 
-        virtual void inout(const std::string& name, std::vector<char>& value)
+        virtual void inout(InoutName_T name, std::vector<char>& value)
         {
             os << tab() << "<" << name << ">" << std::endl;
             for (unsigned int i = 0; i < value.size(); i++)
             {
                 currentTabDepth++;
-                inout(std::string("element"), value[i]);
+                inout("element", value[i]);
                 currentTabDepth--;
             }
             os << tab() << "</" << name << ">" << std::endl;
         }
 
-        virtual void inout(const std::string& name, std::vector<int>& value)
+        virtual void inout(InoutName_T name, std::vector<int>& value)
         {
             os << tab() << "<" << name << ">" << std::endl;
             for (unsigned int i = 0; i < value.size(); i++)
             {
                 currentTabDepth++;
-                inout(std::string("element"), value[i]);
+                inout("element", value[i]);
                 currentTabDepth--;
             }
             os << tab() << "</" << name << ">" << std::endl;
         }
 
-        virtual void inout(const std::string& name, std::vector<__int16>& value)
+        virtual void inout(InoutName_T name, std::vector<__int16>& value)
         {
             os << tab() << "<" << name << ">" << std::endl;
             for (unsigned int i = 0; i < value.size(); i++)
             {
                 currentTabDepth++;
-                inout(std::string("element"), value[i]);
+                inout("element", value[i]);
                 currentTabDepth--;
             }
             os << tab() << "</" << name << ">" << std::endl;
         }
 
-        virtual void inout(const std::string& name, std::vector<__int64>& value)
+        virtual void inout(InoutName_T name, std::vector<__int64>& value)
         {
             os << tab() << "<" << name << ">" << std::endl;
             for (unsigned int i = 0; i < value.size(); i++)
             {
                 currentTabDepth++;
-                inout(std::string("element"), value[i]);
+                inout("element", value[i]);
                 currentTabDepth--;
             }
             os << tab() << "</" << name << ">" << std::endl;
         }
 
-        virtual void inout(const std::string& name, std::vector<float>& value)
+        virtual void inout(InoutName_T name, std::vector<float>& value)
         {
             os << tab() << "<" << name << ">" << std::endl;
             for (unsigned int i = 0; i < value.size(); i++)
             {
                 currentTabDepth++;
-                inout(std::string("element"), value[i]);
+                inout("element", value[i]);
                 currentTabDepth--;
             }
             os << tab() << "</" << name << ">" << std::endl;
         }
 
-        virtual void inout(const std::string& name, std::vector<double>& value)
+        virtual void inout(InoutName_T name, std::vector<double>& value)
         {
             os << tab() << "<" << name << ">" << std::endl;
             for (unsigned int i = 0; i < value.size(); i++)
             {
                 currentTabDepth++;
-                inout(std::string("element"), value[i]);
+                inout("element", value[i]);
                 currentTabDepth--;
             }
             os << tab() << "</" << name << ">" << std::endl;
         }
 
-        virtual void inout(const std::string& name, std::vector<std::string>& value)
+        virtual void inout(InoutName_T name, std::vector<std::string>& value)
         {
             os << tab() << "<" << name << ">" << std::endl;
             for (unsigned int i = 0; i < value.size(); i++)
             {
                 currentTabDepth++;
-                inout(std::string("element"), value[i]);
+                inout("element", value[i]);
                 currentTabDepth--;
             }
             os << tab() << "</" << name << ">" << std::endl;
         }
 
-		void inoutfixarr(const std::string& name, bool* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, bool* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			UNUSED(value)
@@ -262,7 +276,7 @@ namespace ops
 			throw ops::ArchiverException("XMLArchiverOut.inoutfixarr NYI");
 		}
 
-		void inoutfixarr(const std::string& name, char* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, char* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			UNUSED(value)
@@ -272,7 +286,7 @@ namespace ops
 			throw ops::ArchiverException("XMLArchiverOut.inoutfixarr NYI");
 		}
 
-		void inoutfixarr(const std::string& name, int* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, int* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			UNUSED(value)
@@ -282,7 +296,7 @@ namespace ops
 			throw ops::ArchiverException("XMLArchiverOut.inoutfixarr NYI");
 		}
 
-		void inoutfixarr(const std::string& name, __int16* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, __int16* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			UNUSED(value)
@@ -292,7 +306,7 @@ namespace ops
 			throw ops::ArchiverException("XMLArchiverOut.inoutfixarr NYI");
 		}
 
-		void inoutfixarr(const std::string& name, __int64* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, __int64* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			UNUSED(value)
@@ -302,7 +316,7 @@ namespace ops
 			throw ops::ArchiverException("XMLArchiverOut.inoutfixarr NYI");
 		}
 
-		void inoutfixarr(const std::string& name, float* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, float* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			UNUSED(value)
@@ -312,7 +326,7 @@ namespace ops
 			throw ops::ArchiverException("XMLArchiverOut.inoutfixarr NYI");
 		}
 
-		void inoutfixarr(const std::string& name, double* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, double* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			UNUSED(value)
@@ -322,7 +336,7 @@ namespace ops
 			throw ops::ArchiverException("XMLArchiverOut.inoutfixarr NYI");
 		}
 
-		void inoutfixarr(const std::string& name, std::string* value, int numElements)
+		void inoutfixarr(InoutName_T name, std::string* value, int numElements)
         {
             UNUSED(name)
             UNUSED(value)
@@ -331,7 +345,7 @@ namespace ops
             throw ops::ArchiverException("XMLArchiverOut.inoutfixarr NYI");
         }
 
-        int beginList(const std::string& name, int size)
+        int beginList(InoutName_T name, int size)
         {
             //buf->WriteInt(size);
             os << tab() << "<" << name << ">" << std::endl;
@@ -339,7 +353,7 @@ namespace ops
             return size;
         }
 
-        void endList(const std::string& name)
+        void endList(InoutName_T name)
         {
             currentTabDepth--;
             os << tab() << "</" << name << ">" << std::endl;

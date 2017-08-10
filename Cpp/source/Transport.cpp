@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2017 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -26,14 +26,14 @@ namespace ops
     Transport::Transport()
         : channelID("")
     {
-        appendType(std::string("Transport"));
+        appendType(TypeId_T("Transport"));
     }
 
     void Transport::serialize(ArchiverInOut* archiver)
     {
         OPSObject::serialize(archiver);
-        archiver->inout(std::string("channelID"), channelID);
-        archiver->inout(std::string("topics"), topics);
+        archiver->inout("channelID", channelID);
+        archiver->inout("topics", topics);
     }
 
 }

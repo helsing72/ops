@@ -20,26 +20,26 @@
 #ifndef ops_Domain_h
 #define	ops_Domain_h
 
-#include "OPSObject.h"
-#include <string>
 #include <vector>
+
+#include "OPSTypeDefs.h"
+#include "OPSObject.h"
 #include "IOService.h"
 #include "Topic.h"
 #include "Channel.h"
 #include "Transport.h"
-#include "OPSObject.h"
 
 namespace ops
 {
 	class OPS_EXPORT Domain : public OPSObject
 	{
-		std::string domainAddress;
+		Address_T domainAddress;
 		int timeToLive;
-		std::string localInterface;
+		Address_T localInterface;
 		int inSocketBufferSize;
 		int outSocketBufferSize;
 		std::vector<Topic* > topics;
-		std::string domainID;
+		ObjectName_T domainID;
 		int metaDataMcPort;
 
 		std::vector<Channel* > channels;
@@ -47,22 +47,22 @@ namespace ops
 
 		void checkTopicValues(Topic* top);
 		void checkTransports();
-		Channel* findChannel(std::string id);
-		Topic* findTopic(std::string id);
+		Channel* findChannel(ChannelId_T id);
+		Topic* findTopic(ObjectName_T id);
 
 	public:
 		Domain();
-		std::string getDomainAddress();
+		Address_T getDomainAddress();
 		virtual std::vector<Topic* > getTopics();
-		virtual Topic getTopic(std::string name);
-		bool existsTopic(std::string name);
-		std::string getDomainID();
+		virtual Topic getTopic(ObjectName_T name);
+		bool existsTopic(ObjectName_T name);
+		ObjectName_T getDomainID();
 		int getMetaDataMcPort();
 		
 		void serialize(ArchiverInOut* archiver);
 		int getTimeToLive();
 
-		std::string getLocalInterface();
+		Address_T getLocalInterface();
 
 		int getInSocketBufferSize();
 		int getOutSocketBufferSize();

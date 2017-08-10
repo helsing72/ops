@@ -1,7 +1,6 @@
 #ifndef ops_BasicError_h
 #define ops_BasicError_h
 
-#include <string>
 #include "Error.h"
 
 namespace ops
@@ -11,23 +10,25 @@ namespace ops
 	{
 	public:
 		static const int ERROR_CODE = 1;
-		BasicError(std::string className, std::string method, std::string mess):
-			_message(mess), _className(className), _method(method)
+		BasicError(ErrorMessage_T className, ErrorMessage_T method, ErrorMessage_T mess)
 		{
+			_message = className;
+			_message += "::";
+			_message += method;
+			_message += "(): ";
+			_message += mess;
 		}
 		virtual int getErrorCode()
 		{
 			return ERROR_CODE;
 		}
-		virtual std::string getMessage()
+		virtual ErrorMessage_T getMessage()
 		{
-			return _className + "::" + _method + "(): " + _message;
+			return _message;
 		}
 		virtual ~BasicError(){}
 	private:
-		std::string _message;
-		std::string _className;
-		std::string _method;
+		ErrorMessage_T _message;
 	};
 }
 #endif

@@ -44,7 +44,10 @@ namespace ops
         {
         }
 
-        void inout(const std::string& name, bool& value)
+		// Returns true if it's an output archiver
+		virtual bool isOut() { return true; }
+
+		void inout(InoutName_T name, bool& value)
         {
             UNUSED(name)
             char ch = 0;
@@ -52,180 +55,189 @@ namespace ops
             buf->WriteChar(ch);
         }
 
-        void inout(const std::string& name, char& value)
+        void inout(InoutName_T name, char& value)
         {
             UNUSED(name)
             buf->WriteChar(value);
         }
 
-        void inout(const std::string& name, int& value)
+        void inout(InoutName_T name, int& value)
         {
             UNUSED(name)
             buf->WriteInt(value);
         }
 
-        void inout(const std::string& name, __int16& value)
+        void inout(InoutName_T name, __int16& value)
         {
             UNUSED(name)
             buf->WriteShort(value);
         }
 
-        void inout(const std::string& name, __int64& value)
+        void inout(InoutName_T name, __int64& value)
         {
             UNUSED(name)
             buf->WriteLong(value);
         }
 
-        void inout(const std::string& name, float& value)
+        void inout(InoutName_T name, float& value)
         {
             UNUSED(name)
             buf->WriteFloat(value);
         }
 
-        void inout(const std::string& name, double& value)
+        void inout(InoutName_T name, double& value)
         {
             UNUSED(name)
             buf->WriteDouble(value);
         }
 
-        void inout(const std::string& name, std::string& value)
+        void inout(InoutName_T name, std::string& value)
         {
             UNUSED(name)
             buf->WriteString(value);
         }
 
-        void inout(const std::string& name, char* buffer, int bufferSize)
+		virtual void inoutfixstring(InoutName_T name, char* value, int& size, int max_size, int idx)
+		{
+			UNUSED(name)
+			UNUSED(max_size)
+			UNUSED(idx)
+			buf->WriteInt(size);
+			buf->WriteChars(value, size);
+		}
+		
+		void inout(InoutName_T name, char* buffer, int bufferSize)
         {
             UNUSED(name)
             buf->WriteChars(buffer, bufferSize);
         }
 
-        void inout(const std::string& name, Serializable& value)
+        void inout(InoutName_T name, Serializable& value)
         {
             UNUSED(name)
-            std::string typeS = ((OPSObject&) value).getTypeString();
+            TypeId_T typeS = ((OPSObject&) value).getTypeString();
             buf->WriteString(typeS);
             value.serialize(this);
         }
 
-        Serializable* inout(const std::string& name, Serializable* value, int element)
+        Serializable* inout(InoutName_T name, Serializable* value, int element)
         {
             UNUSED(name)
             UNUSED(element)
-            std::string typeS = ((OPSObject*) value)->getTypeString();
+            TypeId_T typeS = ((OPSObject*) value)->getTypeString();
             buf->WriteString(typeS);
             value->serialize(this);
             return value;
         }
 
-        Serializable* inout(const std::string& name, Serializable* value)
+        Serializable* inout(InoutName_T name, Serializable* value)
         {
             UNUSED(name)
-            std::string typeS = ((OPSObject*) value)->getTypeString();
+            TypeId_T typeS = ((OPSObject*) value)->getTypeString();
             buf->WriteString(typeS);
             value->serialize(this);
             return value;
         }
 
-        void inout(const std::string& name, std::vector<bool>& value)
+        void inout(InoutName_T name, std::vector<bool>& value)
         {
             UNUSED(name)
             buf->WriteBooleans(value);
         }
 
-        void inout(const std::string& name, std::vector<char>& value)
+        void inout(InoutName_T name, std::vector<char>& value)
         {
             UNUSED(name)
             buf->WriteBytes(value);
         }
 
-        void inout(const std::string& name, std::vector<int>& value)
+        void inout(InoutName_T name, std::vector<int>& value)
         {
             UNUSED(name)
             buf->WriteInts(value);
         }
 
-        void inout(const std::string& name, std::vector<__int16>& value)
+        void inout(InoutName_T name, std::vector<__int16>& value)
         {
             UNUSED(name)
             buf->WriteShorts(value);
         }
 
-        void inout(const std::string& name, std::vector<__int64>& value)
+        void inout(InoutName_T name, std::vector<__int64>& value)
         {
             UNUSED(name)
             buf->WriteLongs(value);
         }
 
-        void inout(const std::string& name, std::vector<float>& value)
+        void inout(InoutName_T name, std::vector<float>& value)
         {
             UNUSED(name)
             buf->WriteFloats(value);
         }
 
-        void inout(const std::string& name, std::vector<double>& value)
+        void inout(InoutName_T name, std::vector<double>& value)
         {
             UNUSED(name)
             buf->WriteDoubles(value);
         }
 
-        void inout(const std::string& name, std::vector<std::string>& value)
+        void inout(InoutName_T name, std::vector<std::string>& value)
         {
             UNUSED(name)
             buf->WriteStrings(value);
         }
 
 		///TODO all inoutfixarr methods need to handle byte order on BIG ENDIAN SYSTEMS
-		void inoutfixarr(const std::string& name, bool* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, bool* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			buf->WriteInt(numElements);
 			buf->WriteChars((char *)value, totalSize);
 		}
 
-		void inoutfixarr(const std::string& name, char* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, char* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			buf->WriteInt(numElements);
 			buf->WriteChars((char *)value, totalSize);
 		}
 
-		void inoutfixarr(const std::string& name, int* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, int* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			buf->WriteInt(numElements);
 			buf->WriteChars((char *)value, totalSize);
 		}
 
-		void inoutfixarr(const std::string& name, __int16* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, __int16* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			buf->WriteInt(numElements);
 			buf->WriteChars((char *)value, totalSize);
 		}
 
-		void inoutfixarr(const std::string& name, __int64* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, __int64* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			buf->WriteInt(numElements);
 			buf->WriteChars((char *)value, totalSize);
 		}
 
-		void inoutfixarr(const std::string& name, float* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, float* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			buf->WriteInt(numElements);
 			buf->WriteChars((char *)value, totalSize);
 		}
 
-		void inoutfixarr(const std::string& name, double* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, double* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			buf->WriteInt(numElements);
 			buf->WriteChars((char *)value, totalSize);
 		}
 
-		void inoutfixarr(const std::string& name, std::string* value, int numElements)
+		void inoutfixarr(InoutName_T name, std::string* value, int numElements)
         {
             UNUSED(name)
             buf->WriteInt(numElements);
@@ -234,14 +246,14 @@ namespace ops
             }
         }
 
-        int beginList(const std::string& name, int size)
+        int beginList(InoutName_T name, int size)
         {
             UNUSED(name)
             buf->WriteInt(size);
             return size;
         }
 
-        void endList(const std::string& name)
+        void endList(InoutName_T name)
         {
             //Nothing to do in this implementation
             UNUSED(name)

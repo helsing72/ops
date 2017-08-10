@@ -28,12 +28,12 @@
 #ifndef _KEYFILTERQOSPOLICY_H
 #define	_KEYFILTERQOSPOLICY_H
 
+#include <vector>
+
+#include "OPSTypeDefs.h"
 #include "OPSExport.h"
 #include "FilterQoSPolicy.h"
 #include "Lockable.h"
-#include <string>
-#include <vector>
-
 
 namespace ops
 {
@@ -48,21 +48,21 @@ namespace ops
         KeyFilterQoSPolicy();
 
         // Creates a filter with one key, that must match for objects to come thru
-        KeyFilterQoSPolicy(std::string keyString);
+        KeyFilterQoSPolicy(ObjectKey_T keyString);
 
         // Creates a filter with N keys, if any matches the object come thru
         // If the provided vector is empty, all objects come thru
-        KeyFilterQoSPolicy(std::vector<std::string> keyStrings);
+        KeyFilterQoSPolicy(std::vector<ObjectKey_T> keyStrings);
 
         // Replaces current key[s] with the new keys provided
         // If the provided vector is empty, all objects come thru
-        void setKeys(std::vector<std::string> keyStrings);
+        void setKeys(std::vector<ObjectKey_T> keyStrings);
 
         // Replaces current key[s] with the new single key provided
-        void setKey(std::string key);
+        void setKey(ObjectKey_T key);
 
         // Returns the current keys
-        std::vector<std::string> getKeys();
+        std::vector<ObjectKey_T> getKeys();
 
         virtual ~KeyFilterQoSPolicy();
 
@@ -70,7 +70,7 @@ namespace ops
         bool applyFilter(OPSObject* o);
 
     private:
-        std::vector<std::string> keyStrings;
+        std::vector<ObjectKey_T> keyStrings;
     };
 
 }

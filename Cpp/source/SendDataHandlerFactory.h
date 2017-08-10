@@ -2,8 +2,11 @@
 #define ops_SendDataHandlerFactory_h
 
 #include <map>
+
+#include "OPSTypeDefs.h"
 #include "Topic.h"
 #include "Lockable.h"
+
 namespace ops
 {
     class SendDataHandler;
@@ -15,7 +18,7 @@ namespace ops
 		Participant* participant;
         SendDataHandler* udpSendDataHandler;
 
-        std::map<std::string, SendDataHandler*> sendDataHandlers;
+        std::map<InternalKey_T, SendDataHandler*> sendDataHandlers;
 
         Lockable mutex;
 
