@@ -4,7 +4,7 @@
 #include <vector>
 #include <map>
 
-#include <ops.h>
+#include "ops.h"
 
 class ILogInterface
 {
@@ -17,12 +17,12 @@ class COpsConfigHelper
 private:
 	ILogInterface* pInfoLog;
 	ILogInterface* pErrorLog;
-	std::string sDefaultDomain;					// Default domain if not specified for a topic
+	ops::ObjectName_T sDefaultDomain;					// Default domain if not specified for a topic
 
 public:
 	COpsConfigHelper( ILogInterface* infoLogHandler,
 		ILogInterface* errorLogHandler,
-		std::string defaultDomain) :
+		ops::ObjectName_T defaultDomain) :
 		pInfoLog(infoLogHandler),
 		pErrorLog(errorLogHandler),
 		sDefaultDomain(defaultDomain)
@@ -30,14 +30,14 @@ public:
 
 	// -----------------------------------------------------------------------------------------
 	// Map with Domain --> ops configuration file
-	std::map<std::string, std::string> domainMap;
+	std::map<ops::ObjectName_T, ops::FileName_T> domainMap;
 
-	bool existsDomain(std::string domain)
+	bool existsDomain(ops::ObjectName_T domain)
 	{
 		return (domainMap.find(domain) != domainMap.end());
 	}
 
-	bool DomainMapAdd(std::string domain, std::string cfgFile)
+	bool DomainMapAdd(ops::ObjectName_T domain, ops::FileName_T cfgFile)
 	{
 		if (domainMap.find(domain) == domainMap.end()) {
 			domainMap[domain] = cfgFile;
@@ -49,7 +49,7 @@ public:
 		}
 	}
 
-	void DomainMapAdd(std::string cfgFile)
+	void DomainMapAdd(ops::FileName_T cfgFile)
 	{
 		ops::OPSConfig* cfg = NULL;
 		try {
@@ -69,15 +69,15 @@ public:
 		if (cfg) delete cfg;
 	}
 
-	void getAvailableDomains(std::vector<std::string>& domains) 
+	void getAvailableDomains(std::vector<ops::ObjectName_T>& domains)
 	{
 		domains.clear();
-		for (std::map<std::string, std::string>::iterator it = domainMap.begin(); it != domainMap.end(); ++it) {
+		for (std::map<ops::ObjectName_T, ops::FileName_T>::iterator it = domainMap.begin(); it != domainMap.end(); ++it) {
 			domains.push_back(it->first);
 		}
 	}
 
-	ops::Participant* getDomainParticipant(std::string name)
+	ops::Participant* getDomainParticipant(ops::ObjectName_T name)
 	{
 		if (domainMap.find(name) == domainMap.end()) {
 			// Not found so, use default
@@ -90,11 +90,11 @@ public:
 
 	// -----------------------------------------------------------------------------------------
 	// Domains specified with topics (added with method below)
-	std::vector<std::string> vDomains;
+	std::vector<ops::ObjectName_T> vDomains;
 
-	void checkTopicDomain(std::string topicName)
+	void checkTopicDomain(ops::ObjectName_T topicName)
 	{
-		std::string s = domainName(topicName);
+		ops::ObjectName_T s = ops::utilities::domainName(topicName);
 		for (unsigned int i = 0; i < vDomains.size(); i++) {
 			if (s == vDomains[i]) return;
 		}
@@ -102,46 +102,15 @@ public:
 	}
 
 	// -----------------------------------------------------------------------------------------
-	// Parses a topic name that includes domain name using syntax 'Domain::TopicName'
-	//
-	static std::string topicName(std::string name)
-	{
-		std::basic_string <char>::size_type index1;
-		std::string s = name;
-		if ((index1 = s.find("::")) != std::string::npos) {
-			s.erase(0, index1+2);
-		}
-		return s;
-	}
-
-	// If no domain given, the default domain is returned
-	std::string domainName(std::string name)
-	{
-		std::basic_string <char>::size_type index1;
-		std::string s = name;
-		if ((index1 = s.find("::")) != std::string::npos) {
-			s.erase(index1, std::string::npos);
-			if (s != "") return s;
-		}
-		return sDefaultDomain;
-	}
-
-	// Builds a full topicname on the format 'Domain::TopicName'
-	static std::string fullTopicName(std::string domainName, std::string topicName)
-	{
-		return domainName + "::" + topicName;
-	}
-
-	// -----------------------------------------------------------------------------------------
 	// Check if topic name exists in the domain
-	bool existsTopic(std::string name)
+	bool existsTopic(ops::ObjectName_T name)
 	{
 		bool exist = false;
 		try {
-			ops::Participant* part = getDomainParticipant(domainName(name));
+			ops::Participant* part = getDomainParticipant(ops::utilities::domainName(name));
 			if (part) {
 				ops::Domain* domain = part->getDomain();
-				if (domain) exist = domain->existsTopic(topicName(name));
+				if (domain) exist = domain->existsTopic(ops::utilities::topicName(name));
 			}
 		}
 		catch (...) {
@@ -155,7 +124,7 @@ public:
 
 	// -----------------------------------------------------------------------------------------
 	//
-	bool verifyTopicType(ops::Topic& top, std::string typeName)
+	bool verifyTopicType(ops::Topic& top, ops::TypeId_T typeName)
 	{
 		bool expected = (top.getTypeID() == typeName);
 		if (!expected) {

@@ -19,7 +19,8 @@
 #include <stdarg.h>
 #endif
 
-#include <ops.h>
+#include "ops.h"
+#include "OPSUtilities.h"
 #include "Lockable.h"
 #include "ParticipantInfoData.h"
 #include "PubIdChecker.h"
@@ -50,7 +51,7 @@ void ShowUsage()
 	std::cout << "              [-a arg_file [-a arg_file [...]]]" << std::endl;
 	std::cout << "              [-IA | -I domain [-I domain [...]] [-O]]" << std::endl;
 	std::cout << "              [-SA | -S domain [-S domain [...]]]" << std::endl;
-	std::cout << "              [-D default_domain] [-C [-E]] Topic [Topic ...]" << std::endl;
+	std::cout << "              [-D default_domain] [-C [-E]] [-n] Topic [Topic ...]" << std::endl;
 	std::cout << std::endl;
 	std::cout << "    -?                 Shows a short description" << std::endl;
 	std::cout << "    -a arg_file        File with command line arguments" << std::endl;
@@ -63,6 +64,7 @@ void ShowUsage()
 	std::cout << "    -E                 If -C given, minimize normal output" << std::endl;
 	std::cout << "    -I domain          Subscribe to Participant Info Data from given domain" << std::endl;
 	std::cout << "    -IA                Subscribe to Participant Info Data from all domains in given configuration files" << std::endl;
+	std::cout << "    -n                 Don't subscribe to topics following" << std::endl;
 	std::cout << "    -O                 if -I or -IA given, only show arriving and timed out participants" << std::endl;
 	std::cout << "    -p<option_chars>   Defines for received messages, which fields to print and in which order" << std::endl;
 	std::cout << "                 n       Publisher Name" << std::endl;
@@ -103,14 +105,15 @@ private:
 
 public:
 	static std::string getValidFormatChars() { return "TknisyS"; }
-	static std::string getDefaultDomain() { return "SDSDomain"; }
+	static ops::ObjectName_T getDefaultDomain() { return "SDSDomain"; }
 
-	std::vector<std::string> cfgFiles;
-	std::vector<std::string> topicNames;
-	std::vector<std::string> subscribeDomains;
-	std::vector<std::string> infoDomains;
+	std::vector<ops::FileName_T> cfgFiles;
+	std::vector<ops::ObjectName_T> topicNames;
+	std::vector<ops::ObjectName_T> subscribeDomains;
+	std::vector<ops::ObjectName_T> infoDomains;
+	std::vector<ops::ObjectName_T> skipTopicNames;
 	std::string printFormat;
-	std::string defaultDomain;
+	ops::ObjectName_T defaultDomain;
 	bool verboseOutput;
 	bool logTime;
 	bool allInfoDomains;
@@ -118,10 +121,11 @@ public:
 	bool onlyArrivingLeaving;
 	bool doPubIdCheck;
 	bool doMinimizeOutput;
+	bool skipTopics;
 
 	CArguments() : indent(""), printFormat(""), defaultDomain(getDefaultDomain()),
 		verboseOutput(false), logTime(false), allInfoDomains(false), allTopics(false), onlyArrivingLeaving(false),
-		doPubIdCheck(false), doMinimizeOutput(false)
+		doPubIdCheck(false), doMinimizeOutput(false), skipTopics(false)
 	{
 		// Create a map with all valid format chars, used for validating -p<...> argument
 		validFormatChars = getValidFormatChars();
@@ -168,7 +172,7 @@ public:
 					std::cout << "Argument '-c' is missing value" << std::endl;
 					return false;
 				}
-				cfgFiles.push_back(toAnsi(szArglist[argIdx++]));
+				cfgFiles.push_back(toAnsi(szArglist[argIdx++]).c_str());
 				continue;
 			}
 
@@ -184,7 +188,7 @@ public:
 					std::cout << "Argument '-D' is missing value" << std::endl;
 					return false;
 				}
-				defaultDomain = toAnsi(szArglist[argIdx++]);
+				defaultDomain = toAnsi(szArglist[argIdx++]).c_str();
 				continue;
 			}
 
@@ -200,7 +204,7 @@ public:
 					std::cout << "Argument '-I' is missing value" << std::endl;
 					return false;
 				}
-				infoDomains.push_back(toAnsi(szArglist[argIdx++]));
+				infoDomains.push_back(toAnsi(szArglist[argIdx++]).c_str());
 				continue;
 			}
 
@@ -220,12 +224,17 @@ public:
 					std::cout << "Argument '-S' is missing value" << std::endl;
 					return false;
 				}
-				subscribeDomains.push_back(toAnsi(szArglist[argIdx++]));
+				subscribeDomains.push_back(toAnsi(szArglist[argIdx++]).c_str());
 				continue;
 			}
 
 			if (argument == "-SA") {
 				allTopics = true;
+				continue;
+			}
+
+			if (argument == "-n") {
+				skipTopics = true;
 				continue;
 			}
 
@@ -261,18 +270,29 @@ public:
 
 			// The rest is topic names
 			if (argument != "") {
+				ops::ObjectName_T topname = argument.c_str();
 				/// If no domain given, set the default domain
-				if (COpsConfigHelper::topicName(argument) == argument) {
-					argument = COpsConfigHelper::fullTopicName(defaultDomain, argument);
+				if (ops::utilities::topicName(topname) == topname) {
+					topname = ops::utilities::fullTopicName(defaultDomain, topname);
 				}
 				bool found = false;
-				for (unsigned int i = 0; i < topicNames.size(); i++) {
-					if (topicNames[i] == argument) {
-						found = true;
-						break;
+				if (skipTopics) {
+					for (unsigned int i = 0; i < skipTopicNames.size(); i++) {
+						if (skipTopicNames[i] == topname) {
+							found = true;
+							break;
+						}
 					}
+					if (!found) skipTopicNames.push_back(topname);
+				} else {
+					for (unsigned int i = 0; i < topicNames.size(); i++) {
+						if (topicNames[i] == topname) {
+							found = true;
+							break;
+						}
+					}
+					if (!found) topicNames.push_back(topname);
 				}
-				if (!found) topicNames.push_back(argument);
 			}
 		}
 
@@ -407,7 +427,7 @@ public:
 class AllOpsTypeFactory : public ops::SerializableFactory
 {
 public:
-  ops::Serializable* create(std::string& type)
+  ops::Serializable* create(ops::TypeId_T& type)
   {
 		if (type != "") {
 			return new ops::OPSObject();
@@ -440,7 +460,7 @@ std::string publisherName(ops::OPSMessage* mess, ops::OPSObject* opsData)
 {
 	UNUSED(opsData);
 	if (!mess) return "";
-	return "Pub: " + mess->getPublisherName();
+	return "Pub: " + std::string(mess->getPublisherName().c_str());
 }
 std::string publicationId(ops::OPSMessage* mess, ops::OPSObject* opsData)
 {
@@ -455,18 +475,18 @@ std::string topicName(ops::OPSMessage* mess, ops::OPSObject* opsData)
 {
 	UNUSED(opsData);
 	if (!mess) return "";
-	return "Topic: " + mess->getTopicName();
+	return "Topic: " + std::string(mess->getTopicName().c_str());
 }
 std::string source(ops::OPSMessage* mess, ops::OPSObject* opsData)
 {
 	UNUSED(opsData);
 	if (!mess) return "";
-	std::string srcIP;
+	ops::Address_T srcIP;
 	int srcPort;
 	mess->getSource(srcIP, srcPort);
 	std::ostringstream myPort;
 	myPort << srcPort << std::ends;
-	return "Source: " + srcIP + "::" + myPort.str();
+	return "Source: " + std::string(srcIP.c_str()) + "::" + myPort.str();
 }
 
 // ---------------------------------------------------------------------------------------
@@ -483,13 +503,13 @@ std::string key(ops::OPSMessage* mess, ops::OPSObject* opsData)
 {
 	UNUSED(mess);
 	if (!opsData) return "";
-	return "Key: " + opsData->getKey();
+	return "Key: " + std::string(opsData->getKey().c_str());
 }
 std::string typeString(ops::OPSMessage* mess, ops::OPSObject* opsData)
 {
 	UNUSED(mess);
 	if (!opsData) return "";
-	return "Type: " + opsData->getTypeString();
+	return "Type: " + std::string(opsData->getTypeString().c_str());
 }
 
 // ---------------------------------------------------------------------------------------
@@ -517,9 +537,9 @@ class Main : ops::DataListener, ops::Listener<ops::PublicationIdNotification_T>
 
 	std::map<char, TFormatFunc> formatMap;
 
-	std::vector<std::string> ownPartInfoNames;
+	std::vector<ops::InternalString_T> ownPartInfoNames;
 
-	std::map<std::string, int64_t> partMap;
+	std::map<ops::InternalString_T, int64_t> partMap;
 
 	// local storage of current worked on entry time
 	int64_t _messageTime;
@@ -575,9 +595,10 @@ public:
 
 		// Check given subscribe domains and make sure they exist and ev. add them to the unique list
 		for (unsigned int i = 0; i < args.subscribeDomains.size(); i++) {
-			std::string domainName = args.subscribeDomains[i];
+			ops::ObjectName_T domainName = args.subscribeDomains[i];
 			if (opsHelper.existsDomain(domainName)) {
-				opsHelper.checkTopicDomain(domainName + "::");
+				domainName += "::";		// use domain syntax for routine below
+				opsHelper.checkTopicDomain(domainName);
 			} else {
 				std::cout << "##### Domain '" << domainName << "' not found. Have you forgot configuration file(s) ?" << std::endl;
 				args.subscribeDomains[i] = "";
@@ -592,9 +613,10 @@ public:
 
 		// Check given info domains and make sure they exist and ev. add them to the unique list
 		for (unsigned int i = 0; i < args.infoDomains.size(); i++) {
-			std::string domainName = args.infoDomains[i];
+			ops::ObjectName_T domainName = args.infoDomains[i];
 			if (opsHelper.existsDomain(domainName)) {
-				opsHelper.checkTopicDomain(domainName + "::");
+				domainName += "::";		// use domain syntax for routine below
+				opsHelper.checkTopicDomain(domainName);
 			} else {
 				std::cout << "##### Domain '" << domainName << "' not found. Have you forgot configuration file(s) ?" << std::endl;
 				args.infoDomains[i] = "";
@@ -621,7 +643,7 @@ public:
 
 		// Now we can get the domain object for the 'subscribe domains' and add their topics to the topic list
 		for (unsigned int i = 0; i < args.subscribeDomains.size(); i++) {
-			std::string domainName = args.subscribeDomains[i];
+			ops::ObjectName_T domainName = args.subscribeDomains[i];
 			if (domainName == "") continue;
 
 			ops::Participant* part = opsHelper.getDomainParticipant(domainName);
@@ -632,7 +654,7 @@ public:
 			std::vector<ops::Topic*> topics = dom->getTopics();
 
 			for (unsigned int t = 0; t < topics.size(); t++) {
-				std::string topName = opsHelper.fullTopicName(domainName, topics[t]->getName());
+				ops::ObjectName_T topName = ops::utilities::fullTopicName(domainName, topics[t]->getName());
 				bool found = false;
 				for (unsigned int j = 0; j < args.topicNames.size(); j++) {
 					if (args.topicNames[j] == topName) {
@@ -648,16 +670,26 @@ public:
 
 		// Create subscribers for all existing topics
 		for (unsigned int i = 0; i < args.topicNames.size(); i++) {
-			std::string topName = args.topicNames[i];
+			ops::ObjectName_T topName = args.topicNames[i];
 			if (topName == "") continue;
 
-			ops::Participant* part = opsHelper.getDomainParticipant(opsHelper.domainName(topName));
+			// if skip topic, continue
+			bool found = false;
+			for (unsigned int j = 0; j < args.skipTopicNames.size(); j++) {
+				if (args.skipTopicNames[j] == topName) {
+					found = true;
+					break;
+				}
+			}
+			if (found) continue;
+
+			ops::Participant* part = opsHelper.getDomainParticipant(ops::utilities::domainName(topName));
 			if (!part) continue;
 
-			Topic topic = part->createTopic(opsHelper.topicName(topName));
+			Topic topic = part->createTopic(ops::utilities::topicName(topName));
 
 			std::cout <<
-				"Subscribing to Topic: " << opsHelper.fullTopicName(opsHelper.domainName(topName), opsHelper.topicName(topName)) <<
+				"Subscribing to Topic: " << ops::utilities::fullTopicName(ops::utilities::domainName(topName), ops::utilities::topicName(topName)) <<
 				" [ " << topic.getTransport() <<
 				"::" << topic.getDomainAddress() <<
 				"::" <<topic.getPort() <<
@@ -680,7 +712,7 @@ public:
 		// Create subscribers to all ParticipantInfoData
 		for (unsigned int i = 0; i < args.infoDomains.size(); i++) {
 			try {
-				std::string domainName = args.infoDomains[i];
+				ops::ObjectName_T domainName = args.infoDomains[i];
 				if (domainName == "") continue;
 
 				ops::Participant* part = opsHelper.getDomainParticipant(domainName);
@@ -690,7 +722,7 @@ public:
 				if (top.getPort() == 0) continue;
 
 				std::cout <<
-					"Subscribing to Topic: " << opsHelper.fullTopicName(domainName, top.getName()) <<
+					"Subscribing to Topic: " << ops::utilities::fullTopicName(domainName, top.getName()) <<
 					" [ " << top.getTransport() <<
 					"::" << top.getDomainAddress() <<
 					"::" <<top.getPort() <<
@@ -764,7 +796,7 @@ public:
 	void onNewEvent(ops::Notifier<ops::PublicationIdNotification_T>* sender, ops::PublicationIdNotification_T arg)
 	{
 		UNUSED(sender);
-		std::string address;
+		ops::Address_T address;
 		int port;
 		arg.mess->getSource(address, port);
 
@@ -858,7 +890,7 @@ public:
 						", mcudp: " << piData->mc_udp_port <<
 						", mctcp: " << piData->mc_tcp_port <<
 						std::endl;
-					std::string srcIP;
+					ops::Address_T srcIP;
 					int srcPort;
 					mess->getSource(srcIP, srcPort);
 					std::cout <<
@@ -895,7 +927,7 @@ public:
 	{
 		// Check for disappering participants
 		int64_t limit = sds::sdsSystemTime() - sds::msToSdsSystemTimeUnits(5000);
-		for (std::map<std::string, int64_t>::iterator it = partMap.begin(); it != partMap.end(); ++it) {
+		for (std::map<ops::InternalString_T, int64_t>::iterator it = partMap.begin(); it != partMap.end(); ++it) {
 			if (it->second < limit) {
 				std::cout << "[" << partMap.size() - 1 << "] <<<<< Participant '" << it->first << "' has left" << std::endl;
 				partMap.erase(it);
@@ -934,7 +966,7 @@ int _kbhit() {
 
 int main(int argc, char* argv[])
 {
-	std::cout << std::endl << "OPSListener Version 2017-06-11" << std::endl << std::endl;
+	std::cout << std::endl << "OPSListener Version 2017-06-30" << std::endl << std::endl;
 
 	sds::sdsSystemTimeInit();
 
