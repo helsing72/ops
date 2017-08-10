@@ -23,8 +23,8 @@ The following table shows a listing of all available OPS IDL types and their cor
 
 | OPS IDL | C++ | Java | C#  | Delphi | Serialized on the network |
 | ------- | --- | ---- | --- | ------ | ------------------------- |
-| class   | class | class | class | Class | -                    |
 | package | namespace | package | namespace | Unit | -          |
+| class   | class | class | class | Class | -                    |
 | boolean | bool | boolean | bool | Boolean | 1 byte                   |
 | byte    | char | byte | byte | Byte | 1  byte                  |
 | short   | int16 | short | short | Int16 | 2 bytes                  |
@@ -33,6 +33,7 @@ The following table shows a listing of all available OPS IDL types and their cor
 | float   | float | float| float | Single | 4 byte                   |
 | double  | double | double | double | Double | 8 bytes                  |
 | string  | std::string | String | string | AnsiString | 4 bytes (size) + 1 byte per character (8-bit) |
+| string`<size>` | fixed_string`<size>` | String | string | AnsiString | 4 bytes (size) + 1 byte per character (8-bit) |
 | T       | T  | T  | T | T | sizeof( T )              |
 | T`[]` | std::vector< T > | java.util.Vector< T > | List< T > | array of T | 4 bytes (size) + sizeof( T ) per element |
 | T`[size]` | T`[size]` | java.util.Vector< T > | List< T > | array`[0..size-1]` of T | 4 bytes (size) + sizeof( T ) per element |
@@ -51,6 +52,7 @@ class SampleData
    float f;
    double d;
    string s;
+   string<25> s25;
    UserData uData;
 
    boolean[] boos;
@@ -61,8 +63,8 @@ class SampleData
    float[] floats;
    double[] doubles;
    string[] strings;
+   string<43>[] s43vect;
    UserData[] uDatas;
-
 }
 ```
 
@@ -123,11 +125,31 @@ To see a useful situation when, how and why to use inheritance in OPS, have a lo
 Two types of comments are allowed in OPS IDL:
 
 1. `//This is a comment for the rest of the line...`
-
-and
-
-2. `/* This is an ended comment, max one line though... */`
+2. `/* This is an ended comment, that can stretch over several lines */`
 
 More than just beeing two ways of accomplishing the same thing, comment as in 1. stays in IDL and will not be visible in the generated code while comments like in 2. will be.
 
-See also, [Tools - IDL Builder](IDLCompilerTutorial.md) to see how to edit and compile OPS IDL files.
+## Compile directives ##
+
+There is a special form of comments that is used to give instructions to the OPS code generators. These starts with *//@* followed by a key word and optionally a value and look like this:  
+
+`//@ directive [ = value ]`
+
+| Directive | Values | Default | Description |
+|-----------|--------|---------|-------------|
+| toplevel  | true / false | true | Publishers/Subscribers are only generated for toplevel classes |
+
+Example of usage:
+
+```
+package samples;
+//@ toplevel = false
+class UserData
+{
+}
+```
+
+#### see also ####
+[IDL Builder](IDLCompilerTutorial.md) for how to edit and compile OPS IDL files.
+
+[IDL Compiler](IDLCommandlineCompiler.md) for how to use the command line compiler to compile OPS IDL files.

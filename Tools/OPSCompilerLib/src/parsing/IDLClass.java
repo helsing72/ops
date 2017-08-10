@@ -25,6 +25,8 @@ public class IDLClass
     private String packageName;
     private String className;
     private String baseClassName;
+    private String comment;
+    private String directive;
     private ArrayList<IDLField> fields;
 
     private ArrayList<String> enumNames = new ArrayList<String>();
@@ -35,7 +37,7 @@ public class IDLClass
         this.packageName = packageName;
         this.fields = fields;
     }
-    
+
     public IDLClass(String className, String packageName)
     {
         this(className, packageName, new ArrayList<IDLField>());
@@ -67,6 +69,26 @@ public class IDLClass
     public void setClassName(String className)
     {
         this.className = className;
+    }
+
+    public String getDirective()
+    {
+        return directive;
+    }
+
+    public void setDirective(String directive)
+    {
+        this.directive = directive;
+    }
+
+    public String getComment()
+    {
+        return comment;
+    }
+
+    public void setComment(String comment)
+    {
+        this.comment = comment;
     }
 
     public ArrayList<IDLField> getFields()
@@ -108,10 +130,4 @@ public class IDLClass
         this.enumNames = enumNames;
     }
 
-    
-
-
-
-
-    
 }

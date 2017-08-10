@@ -511,6 +511,8 @@ public class OpsCompiler
         System.out.println("idlClass.getPackageName()   : " + idlClass.getPackageName());
         System.out.println("idlClass.getClassName()     : " + idlClass.getClassName());
         System.out.println("idlClass.getBaseClassName() : " + idlClass.getBaseClassName());
+        System.out.println("idlClass.getDirective()     : " + idlClass.getDirective());
+        System.out.println("idlClass.getComment()       : " + idlClass.getComment());
 
         if (idlClass.getType() == IDLClass.ENUM_TYPE) {
           for (String str : idlClass.getEnumNames()) {
@@ -519,15 +521,16 @@ public class OpsCompiler
           System.out.println("");
         } else {
           for (IDLField field : idlClass.getFields()) {
-            System.out.println("  field.getName()       : " + field.getName());
-            System.out.println("    field.getArraySize(): " + field.getArraySize());
-            System.out.println("    field.getType()     : " + field.getType());
-            System.out.println("    field.getComment()  : " + field.getComment());
-            System.out.println("    field.getValue()    : " + field.getValue());
-            System.out.println("    field.isIdlType()   : " + field.isIdlType());
-            System.out.println("    field.isArray()     : " + field.isArray());
-            System.out.println("    field.isStatic()    : " + field.isStatic());
-            System.out.println("    field.isAbstract()  : " + field.isAbstract());
+            System.out.println("  field.getName()        : " + field.getName());
+            System.out.println("    field.getArraySize() : " + field.getArraySize());
+            System.out.println("    field.getStringSize(): " + field.getStringSize());
+            System.out.println("    field.getType()      : " + field.getType());
+            System.out.println("    field.getComment()   : " + field.getComment());
+            System.out.println("    field.getValue()     : " + field.getValue());
+            System.out.println("    field.isIdlType()    : " + field.isIdlType());
+            System.out.println("    field.isArray()      : " + field.isArray());
+            System.out.println("    field.isStatic()     : " + field.isStatic());
+            System.out.println("    field.isAbstract()   : " + field.isAbstract());
             System.out.println("");
           }
         }
@@ -553,7 +556,7 @@ public class OpsCompiler
         }
 
         if(opsc._listInputFiles.isEmpty()) {
-            System.out.println("Error: No input files.");
+            System.out.println("Error: No input files. Run command with -h for help.");
             return;
         }
 

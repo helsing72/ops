@@ -23,8 +23,9 @@ public class IDLField
     private boolean _static;
     private boolean array;
     private boolean _abstract;
-    private int arraySize;
-    
+    private int arraySize = 0;
+    private int stringSize = 0;
+
     /** Creates a new instance of IDLField */
     public IDLField(String name, String type, String comment, String value)
     {
@@ -36,17 +37,17 @@ public class IDLField
     public IDLField(String name, String type, String comment)
     {
         this(name, type, comment, "");
-        
+
     }
     public IDLField(String name, String type)
     {
         this(name, type, "", "");
-        
+
     }
     public IDLField()
     {
         this(null, "", "", "");
-        
+
     }
 
     public String getName()
@@ -64,8 +65,15 @@ public class IDLField
         this.arraySize = arraySize;
     }
 
+    public int getStringSize()
+    {
+        return stringSize;
+    }
 
-    
+    public void setStringSize(int stringSize)
+    {
+        this.stringSize = stringSize;
+    }
 
     public void setName(String name)
     {
@@ -141,6 +149,4 @@ public class IDLField
         this._abstract = _abstract;
     }
 
-
-    
 }

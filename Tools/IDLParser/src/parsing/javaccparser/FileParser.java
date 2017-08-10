@@ -21,6 +21,7 @@ public class FileParser implements IDLFileParser
     boolean parseComplete = false;
     IDLClass idlClass = new IDLClass();
     private String pendingComment = "";
+    private String pendingDirective = "";
 
     public IDLClass parse(String content) throws ParseException
     {
@@ -32,8 +33,11 @@ public class FileParser implements IDLFileParser
         {
             public void onEvent(String eventData, ParserEvent e)
             {
+                idlClass.setComment(pendingComment);
                 idlClass.setClassName(eventData);
+                idlClass.setDirective(pendingDirective);
                 pendingComment = "";
+                pendingDirective = "";
             }
         });
 
@@ -43,6 +47,7 @@ public class FileParser implements IDLFileParser
             {
                 parseComplete = true;
                 pendingComment = "";
+                pendingDirective = "";
             }
         });
 
@@ -52,6 +57,7 @@ public class FileParser implements IDLFileParser
             {
                 idlClass.setPackageName(eventData);
                 pendingComment = "";
+                pendingDirective = "";
             }
         });
 
@@ -63,6 +69,7 @@ public class FileParser implements IDLFileParser
                 idlClass.setClassName(eventData);
                 idlClass.setType(IDLClass.ENUM_TYPE);
                 pendingComment = "";
+                pendingDirective = "";
             }
         });
 
@@ -73,6 +80,7 @@ public class FileParser implements IDLFileParser
                 ///System.out.println("enum close");
                 parseComplete = true;
                 pendingComment = "";
+                pendingDirective = "";
             }
         });
 
@@ -83,6 +91,7 @@ public class FileParser implements IDLFileParser
                 ///System.out.println("enum element = " + eventData);
                 idlClass.getEnumNames().add(eventData);
                 pendingComment = "";
+                pendingDirective = "";
             }
         });
 
@@ -93,6 +102,7 @@ public class FileParser implements IDLFileParser
                 eventData.setComment(pendingComment);
                 idlClass.addIDLField(eventData);
                 pendingComment = "";
+                pendingDirective = "";
             }
         });
 
@@ -112,6 +122,18 @@ public class FileParser implements IDLFileParser
                     pendingComment = eventData;
                 } else {
                     pendingComment += "\n" + eventData;
+                }
+            }
+        });
+
+        parser.directiveEvent.add(new ParserEventCallback<String>()
+        {
+            public void onEvent(String eventData, ParserEvent e)
+            {
+                if (pendingDirective.isEmpty()) {
+                    pendingDirective = eventData;
+                } else {
+                    pendingDirective += ", " + eventData;
                 }
             }
         });

@@ -83,6 +83,23 @@ public class CppCompiler extends opsc.Compiler
         }
     }
 
+    private String getClassComment(IDLClass idlClass)
+    {
+        String ret = "";
+        if (idlClass.getComment() != null) {
+            if (!idlClass.getComment().equals("")) {
+                String comment = idlClass.getComment();
+                int idx;
+                while ((idx = comment.indexOf('\n')) >= 0) {
+                    ret += tab(0) + "///" + comment.substring(0,idx).replace("/*", "").replace("*/", "").replace("\r", "") + endl();
+                    comment = comment.substring(idx+1);
+                }
+                ret += tab(0) + "///" + comment.replace("/*", "").replace("*/", "") + endl();
+            }
+        }
+        return ret;
+    }
+
     public void compileDataClass(IDLClass idlClass) throws IOException
     {
         String className = idlClass.getClassName();
@@ -103,7 +120,7 @@ public class CppCompiler extends opsc.Compiler
 
         //Replace regular expressions in the template file.
         templateText = templateText.replace(CLASS_NAME_REGEX, className);
-        templateText = templateText.replace(CLASS_COMMENT_REGEX, "");
+        templateText = templateText.replace(CLASS_COMMENT_REGEX, getClassComment(idlClass));
         templateText = templateText.replace(PACKAGE_NAME_REGEX, packageName);
         templateText = templateText.replace(BASE_CLASS_NAME_REGEX, applyLanguagePackageSeparator(baseClassName));
         templateText = templateText.replace(UNDERSCORED_PACK_NAME_REGEX, getUnderscoredPackName(packageName));
@@ -139,7 +156,7 @@ public class CppCompiler extends opsc.Compiler
         String templateText = getTemplateText();
         //Replace regular expressions in the template file.
         templateText = templateText.replace(CLASS_NAME_REGEX, className);
-        templateText = templateText.replace(CLASS_COMMENT_REGEX, "");
+        templateText = templateText.replace(CLASS_COMMENT_REGEX, getClassComment(idlClass));
         templateText = templateText.replace(PACKAGE_DECLARATION_REGEX, getPackageDeclaration(packageName));
         templateText = templateText.replace(PACKAGE_CLOSER_REGEX, getPackageCloser(packageName));
         templateText = templateText.replace(PACKAGE_NAME_REGEX, packageName);
@@ -266,11 +283,6 @@ public class CppCompiler extends opsc.Compiler
       }
     }
 
-    private String elementType(String type)
-    {
-        return languageType(type.replace("[]", ""));
-    }
-
 //    private String extractProjectName(String projectDirectory)
 //    {
 //        String projectName = projectDirectory.substring(0, projectDirectory.lastIndexOf("/Generated/"));
@@ -280,7 +292,7 @@ public class CppCompiler extends opsc.Compiler
 
     private String getClone(IDLClass idlClass)
     {
-        String ret = tab(2) + idlClass.getClassName() + "* ret = new " + languageType(idlClass.getClassName()) + ";" + endl();
+        String ret = tab(2) + idlClass.getClassName() + "* ret = new " + applyLanguagePackageSeparator(idlClass.getClassName()) + ";" + endl();
         ret += tab(2) + "this->fillClone(ret);" + endl();
         ret += tab(2) + "return ret;" + endl();
 
@@ -289,10 +301,10 @@ public class CppCompiler extends opsc.Compiler
 
     private String getFillClone(IDLClass idlClass)
     {
-        String ret = tab(2) + idlClass.getClassName() + "* narrRet = (" + languageType(idlClass.getClassName()) + "*)obj;" + endl();
+        String ret = tab(2) + idlClass.getClassName() + "* narrRet = (" + applyLanguagePackageSeparator(idlClass.getClassName()) + "*)obj;" + endl();
 
         if (idlClass.getBaseClassName() != null) {
-            ret += tab(2) + languageType(idlClass.getBaseClassName()) + "::fillClone(narrRet);" + endl();
+            ret += tab(2) + applyLanguagePackageSeparator(idlClass.getBaseClassName()) + "::fillClone(narrRet);" + endl();
         } else {
             ret += tab(2) + "ops::OPSObject::fillClone(narrRet);" + endl();
         }
@@ -301,7 +313,7 @@ public class CppCompiler extends opsc.Compiler
                 if (!field.isArray()) {
                     if (field.isAbstract()) {
                         ret += tab(2) + "if(narrRet->" + field.getName() + ") delete narrRet->" + field.getName() + ";" + endl();
-                        ret += tab(2) + "narrRet->" + field.getName() + " = (" + languageType(field.getType()) + "*)" + field.getName() + "->clone();" + endl();
+                        ret += tab(2) + "narrRet->" + field.getName() + " = (" + languageType(field) + "*)" + field.getName() + "->clone();" + endl();
                     } else {
                         ret += tab(2) + "narrRet->" + field.getName() + " = " + field.getName() + ";" + endl();
                     }
@@ -319,15 +331,15 @@ public class CppCompiler extends opsc.Compiler
                         if (field.getArraySize() > 0) {
                             ret += tab(2) + "for(unsigned int __i = 0; __i < " + field.getArraySize() + "; __i++) {" + endl();
                             ret += tab(3) +   "if(" + "narrRet->" + field.getName() + "[__i])" + " delete " + "narrRet->" + field.getName() + "[__i];" + endl();
-                            ret += tab(3) +   "narrRet->" + field.getName() + "[__i] = " + "(" + elementType(field.getType()) + "*)" + field.getName() + "[__i]->clone();" + endl();
+                            ret += tab(3) +   "narrRet->" + field.getName() + "[__i] = " + "(" + elementType(field) + "*)" + field.getName() + "[__i]->clone();" + endl();
                             ret += tab(2) + "}" + endl();
                         } else {
                             ret += tab(2) + "for(unsigned int __i = 0; __i < " + "" + field.getName() + ".size(); __i++) {" + endl();
                             ret += tab(3) +   "if(" + "narrRet->" + field.getName() + ".size() >= __i + 1) {" + endl();
                             ret += tab(4) +     "if(" + "narrRet->" + field.getName() + "[__i])" + " delete " + "narrRet->" + field.getName() + "[__i];" + endl();
-                            ret += tab(4) +     "narrRet->" + field.getName() + "[__i] = " + "(" + elementType(field.getType()) + "*)" + field.getName() + "[__i]->clone();" + endl();
+                            ret += tab(4) +     "narrRet->" + field.getName() + "[__i] = " + "(" + elementType(field) + "*)" + field.getName() + "[__i]->clone();" + endl();
                             ret += tab(3) +   "} else {" + endl();
-                            ret += tab(4) +     "narrRet->" + field.getName() + ".push_back((" + elementType(field.getType()) + "*)" + field.getName() + "[__i]->clone()); " + endl();
+                            ret += tab(4) +     "narrRet->" + field.getName() + ".push_back((" + elementType(field) + "*)" + field.getName() + "[__i]->clone()); " + endl();
                             ret += tab(3) +   "}" + endl();
                             ret += tab(2) + "}" + endl();
                         }
@@ -360,7 +372,7 @@ public class CppCompiler extends opsc.Compiler
         String ret = "";
         for (IDLField field : idlClass.getFields()) {
             if (field.isIdlType() && !field.isArray() && field.isAbstract()) {
-                ret += tab(2) + field.getName() + " = new " + languageType(field.getType()).replace("*", "()") + ";" + endl();
+                ret += tab(2) + field.getName() + " = new " + languageType(field).replace("*", "()") + ";" + endl();
             }
             if (field.isArray() && (field.getArraySize() > 0)) {
                 if (!field.isIdlType()) {
@@ -371,7 +383,7 @@ public class CppCompiler extends opsc.Compiler
                 } else {
                     if (field.isAbstract()) {
                         ret += tab(2) + "for(unsigned int __i = 0; __i < " + field.getArraySize() + "; __i++) {" + endl();
-                        ret += tab(3) +   field.getName() + "[__i] = new " + languageType(field.getType().replace("[]", "")).replace("*", "()") + ";" + endl();
+                        ret += tab(3) +   field.getName() + "[__i] = new " + languageType(field).replace("*", "()") + ";" + endl();
                         ret += tab(2) + "}" + endl();
                     }
                 }
@@ -406,7 +418,7 @@ public class CppCompiler extends opsc.Compiler
                 String comment = field.getComment();
                 int idx;
                 while ((idx = comment.indexOf('\n')) >= 0) {
-                  ret += tab(1) + "///" + comment.substring(0,idx).replace("/*", "").replace("*/", "") + endl();
+                  ret += tab(1) + "///" + comment.substring(0,idx).replace("/*", "").replace("*/", "").replace("\r", "") + endl();
                   comment = comment.substring(idx+1);
                 }
                 ret += tab(1) + "///" + comment.replace("/*", "").replace("*/", "") + endl();
@@ -415,17 +427,17 @@ public class CppCompiler extends opsc.Compiler
                 ret += tab(1) + "" + getDeclareVector(field);
             } else {
                 if (field.getType().equals("string")) {
-                    ret += tab(1) + "" + languageType(field.getType()) + " " + field.getName() + ";" + endl();
+                    ret += tab(1) + "" + languageType(field) + " " + field.getName() + ";" + endl();
                 } else {
                     if (field.isIdlType()) {
                         if (field.isAbstract()) {
-                            ret += tab(1) + "" + languageType(field.getType()) + "* " + field.getName() + ";" + endl();
+                            ret += tab(1) + "" + languageType(field) + "* " + field.getName() + ";" + endl();
                         } else {
-                            ret += tab(1) + "" + languageType(field.getType()) + " " + field.getName() + ";" + endl();
+                            ret += tab(1) + "" + languageType(field) + " " + field.getName() + ";" + endl();
                         }
                     } else {
                         //Simple primitive type
-                        ret += tab(1) + "" + languageType(field.getType()) + " " + field.getName() + ";" + endl();
+                        ret += tab(1) + "" + languageType(field) + " " + field.getName() + ";" + endl();
                     }
                 }
             }
@@ -438,38 +450,61 @@ public class CppCompiler extends opsc.Compiler
         String ret = "";
         if (field.getArraySize() == 0) {
           // idl = type[] name;
-          ret += "std::vector<" + languageType(elementType(field.getType()));
+          ret += "std::vector<" + elementType(field);
           if (field.isAbstract()) ret += "*";
           ret += "> " + field.getName() + ";" + endl();
         } else {
           // idl = type[size] name;
-          ret += languageType(elementType(field.getType()));
+          ret += elementType(field);
           if (field.isAbstract()) ret += "*";
           ret += " " + field.getName() + "[" + field.getArraySize() + "];" + endl();
         }
         return ret;
     }
 
+    private String elementType(IDLField field)
+    {
+        return languageType(field);
+    }
+
+    protected String languageType(IDLField field)
+    {
+        String s = field.getType().replace("[]", "");
+        if (s.equals("string") && (field.getStringSize() > 0))  return "ops::fixed_string<" + field.getStringSize() + ">";
+        if (s.equals("string") && (field.getStringSize() == 0)) return "std::string";
+        if (s.equals("boolean"))                                return "bool";
+        if (s.equals("int"))                                    return "int";
+        if (s.equals("short"))                                  return "short";
+        if (s.equals("long"))                                   return "__int64";
+        if (s.equals("double"))                                 return "double";
+        if (s.equals("float"))                                  return "float";
+        if (s.equals("byte"))                                   return "char";
+        return applyLanguagePackageSeparator(s);
+    }
+
     protected String languageType(String s)
     {
-      if (s.equals("string"))    return "std::string";
-      if (s.equals("boolean"))   return "bool";
-      if (s.equals("int"))       return "int";
-      if (s.equals("short"))     return "short";
-      if (s.equals("long"))      return "__int64";
-      if (s.equals("double"))    return "double";
-      if (s.equals("float"))     return "float";
-      if (s.equals("byte"))      return "char";
-      if (s.equals("string[]"))  return "std::vector<std::string>";
-      if (s.equals("int[]"))     return "std::vector<int>";
-      if (s.equals("short[]"))   return "std::vector<short>";
-      if (s.equals("long[]"))    return "std::vector<__int64>";
-      if (s.equals("double[]"))  return "std::vector<double>";
-      if (s.equals("float[]"))   return "std::vector<float>";
-      if (s.equals("byte[]"))    return "std::vector<char>";
-      if (s.equals("boolean[]")) return "std::vector<bool>";
-      if (s.endsWith("[]"))      return "std::vector<" + applyLanguagePackageSeparator(s.substring(0, s.indexOf('['))) + "*>";
-      return applyLanguagePackageSeparator(s) + "";
+//      if (s.equals("string"))    return "std::string_XXX";
+//      if (s.equals("boolean"))   return "bool_XXX";
+//      if (s.equals("int"))       return "int_XXX";
+//      if (s.equals("short"))     return "short_XXX";
+//      if (s.equals("long"))      return "__int64_XXX";
+//      if (s.equals("double"))    return "double_XXX";
+//      if (s.equals("float"))     return "float_XXX";
+//      if (s.equals("byte"))      return "char_XXX";
+//
+//      if (s.equals("string[]"))  return "std::vector<std::string>_XXX";
+//      if (s.equals("int[]"))     return "std::vector<int>_XXX";
+//      if (s.equals("short[]"))   return "std::vector<short>_XXX";
+//      if (s.equals("long[]"))    return "std::vector<__int64>_XXX";
+//      if (s.equals("double[]"))  return "std::vector<double>_XXX";
+//      if (s.equals("float[]"))   return "std::vector<float>_XXX";
+//      if (s.equals("byte[]"))    return "std::vector<char>_XXX";
+//      if (s.equals("boolean[]")) return "std::vector<bool>_XXX";
+//
+//      if (s.endsWith("[]"))      return "XXX_std::vector<" + applyLanguagePackageSeparator(s.substring(0, s.indexOf('['))) + "*>";
+//      return applyLanguagePackageSeparator(s) + "_XXX";
+        return "...NYI...";
     }
 
     protected String applyLanguagePackageSeparator(String packageName)
@@ -554,7 +589,7 @@ public class CppCompiler extends opsc.Compiler
     {
         String ret = tab(2);
         if (idlClass.getBaseClassName() != null) {
-            ret += languageType(idlClass.getBaseClassName()).replace("*", "") + "::serialize(archive);" + endl();
+            ret += applyLanguagePackageSeparator(idlClass.getBaseClassName()).replace("*", "") + "::serialize(archive);" + endl();
         } else {
             ret += "ops::OPSObject::serialize(archive);" + endl();
         }
@@ -563,24 +598,24 @@ public class CppCompiler extends opsc.Compiler
             if (field.isIdlType()) {
                 if (!field.isArray()) {
                     if (field.isAbstract()) {
-                        ret += field.getName() + " = (" + languageType(field.getType()) + "*) ";
+                        ret += field.getName() + " = (" + languageType(field) + "*) ";
                     }
-                    ret += "archive->inout(std::string(\"" + field.getName() + "\"), " + field.getName() + ");" + endl();
+                    ret += "archive->inout(\"" + field.getName() + "\", " + field.getName() + ");" + endl();
                 } else {
                     // isArray()
                     if (field.getArraySize() > 0) {
                         // idl = type[size] name;
-                        // template <class SerializableType> void inoutfixarr(const std::string& name, SerializableType** value, int numElements) // for virtual
-                        // template <class SerializableType> void inoutfixarr(const std::string& name, SerializableType* value, int numElements)  // for non virtual
-                        ret += "archive->inoutfixarr<" + languageType(elementType(field.getType())) +
-                              ">(std::string(\"" + field.getName() + "\"), &" + field.getName() + "[0], " + field.getArraySize() + ");" + endl();
+                        // template <class SerializableType> void inoutfixarr(InoutName_T name, SerializableType** value, int numElements) // for virtual
+                        // template <class SerializableType> void inoutfixarr(InoutName_T name, SerializableType* value, int numElements)  // for non virtual
+                        ret += "archive->inoutfixarr<" + elementType(field) +
+                              ">(\"" + field.getName() + "\", &" + field.getName() + "[0], " + field.getArraySize() + ");" + endl();
                     } else {
                         // idl = type[] name;
-                        ret += "archive->inout<" + languageType(elementType(field.getType())) + ">(std::string(\"" + field.getName() + "\"), " + field.getName();
+                        ret += "archive->inout<" + elementType(field) + ">(\"" + field.getName() + "\", " + field.getName();
                         if (field.isAbstract()) {
                             ret += ");" + endl();
                         } else {
-                            ret += ", " + languageType(elementType(field.getType())) + "());" + endl();
+                            ret += ", " + elementType(field) + "());" + endl();
                         }
                     }
                 }
@@ -589,22 +624,22 @@ public class CppCompiler extends opsc.Compiler
                 if (field.isArray()) {
                     if (field.getArraySize() > 0) {
                         // idl = type[size] name;
-                        ret += "archive->inoutfixarr(std::string(\"" + field.getName() + "\"), ";
+                        ret += "archive->inoutfixarr(\"" + field.getName() + "\", ";
                         if (!field.getType().equals("string[]")) {
-                            //void inoutfixarr(const std::string& name, bool* value, int numElements, int totalSize);
-                            //void inoutfixarr(const std::string& name, ...* value, int numElements, int totalSize);
-                            //void inoutfixarr(const std::string& name, double* value, int numElements, int totalSize);
+                            //void inoutfixarr(InoutName_T name, bool* value, int numElements, int totalSize);
+                            //void inoutfixarr(InoutName_T name, ...* value, int numElements, int totalSize);
+                            //void inoutfixarr(InoutName_T name, double* value, int numElements, int totalSize);
                             ret += "&" + field.getName() + "[0], " + field.getArraySize() + ", sizeof(" + field.getName() + "));" + endl();
                         } else {
-                            //void inoutfixarr(const std::string& name, std::string* value, int numElements)
+                            //void inoutfixarr(InoutName_T name, std::string* value, int numElements)
                             ret += "&" + field.getName() + "[0], " + field.getArraySize() + ");" + endl();
                         }
                     } else {
                         // idl = type[] name;
-                        ret += "archive->inout(std::string(\"" + field.getName() + "\"), " + field.getName() + ");" + endl();
+                        ret += "archive->inout(\"" + field.getName() + "\", " + field.getName() + ");" + endl();
                     }
                 } else {
-                    ret += "archive->inout(std::string(\"" + field.getName() + "\"), " + field.getName() + ");" + endl();
+                    ret += "archive->inout(\"" + field.getName() + "\", " + field.getName() + ");" + endl();
                 }
             }
         }

@@ -5,7 +5,6 @@
 #include "Topic.h"
 #include "OPSObject.h"
 #include "__className.h"
-#include <string>
 
 __packageDeclaration
 

@@ -5,7 +5,6 @@
 
 #include "OPSObject.h"
 #include "ArchiverInOut.h"
-#include <string>
 
 __packageDeclaration
 
@@ -14,7 +13,7 @@ class __className :
 	public ops::OPSObject
 {
 public:
-   static std::string getTypeName(){return std::string("__packageName.__className");}
+   static ops::TypeId_T getTypeName(){return ops::TypeId_T("__packageName.__className");}
 
 __declarations
     int value;
@@ -32,10 +31,8 @@ __declarations
     void serialize(ops::ArchiverInOut* archive)
     {
         ops::OPSObject::serialize(archive);
-        archive->inout(std::string("value"), value);
+        archive->inout("value", value);
     }
-
-
 
 };
 

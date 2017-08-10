@@ -55,7 +55,6 @@ public:
 
 };
 
-
 __packageCloser
 
 #endif

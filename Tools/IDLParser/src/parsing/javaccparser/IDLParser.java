@@ -8,7 +8,6 @@ import java.util.logging.Logger;
 import parsing.IDLField;
 
 public class IDLParser implements IDLParserConstants {
-
     private IDLField currentIDLField;
 
     public ParserEvent<String> packageDeclareEvent = new ParserEvent<String>();
@@ -20,6 +19,7 @@ public class IDLParser implements IDLParserConstants {
     public ParserEvent<String> extendsEvent = new ParserEvent<String>();
     public ParserEvent<String> enumElementEvent = new ParserEvent<String>();
     public ParserEvent<String> commentEvent = new ParserEvent<String>();
+    public ParserEvent<String> directiveEvent = new ParserEvent<String>();
 
   public static void main(String args[])
   {
@@ -76,15 +76,16 @@ public class IDLParser implements IDLParserConstants {
 
                 public void onEvent(IDLField eventData, ParserEvent e)
                 {
-                    System.out.println("  eventData.getName()     : " + eventData.getName());
-                    System.out.println("  eventData.getArraySize(): " + eventData.getArraySize());
-                    System.out.println("  eventData.getType()     : " + eventData.getType());
-                    System.out.println("  eventData.getComment()  : " + eventData.getComment());
-                    System.out.println("  eventData.getValue()    : " + eventData.getValue());
-                    System.out.println("  eventData.isIdlType()   : " + eventData.isIdlType());
-                    System.out.println("  eventData.isArray()     : " + eventData.isArray());
-                    System.out.println("  eventData.isStatic()    : " + eventData.isStatic());
-                    System.out.println("  eventData.isAbstract()  : " + eventData.isAbstract());
+                    System.out.println("  eventData.getName()      : " + eventData.getName());
+                    System.out.println("  eventData.getArraySize() : " + eventData.getArraySize());
+                    System.out.println("  eventData.getStringSize(): " + eventData.getStringSize());
+                    System.out.println("  eventData.getType()      : " + eventData.getType());
+                    System.out.println("  eventData.getComment()   : " + eventData.getComment());
+                    System.out.println("  eventData.getValue()     : " + eventData.getValue());
+                    System.out.println("  eventData.isIdlType()    : " + eventData.isIdlType());
+                    System.out.println("  eventData.isArray()      : " + eventData.isArray());
+                    System.out.println("  eventData.isStatic()     : " + eventData.isStatic());
+                    System.out.println("  eventData.isAbstract()   : " + eventData.isAbstract());
                     System.out.println("");
                 }
             });
@@ -93,6 +94,13 @@ public class IDLParser implements IDLParserConstants {
                 public void onEvent(String eventData, ParserEvent e)
                 {
                     System.out.println("extends  " + eventData + ".");
+                }
+            });
+        parser.directiveEvent.add(new ParserEventCallback<String>() {
+
+                public void onEvent(String eventData, ParserEvent e)
+                {
+                    System.out.println("directive:  " + eventData + ".");
                 }
             });
 
@@ -150,8 +158,9 @@ void definition() throws ParseException {
     while (true) {
       body_declare();
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case 10:
-      case 11:
+      case 9:
+      case 12:
+      case 13:
       case ANOTATION:{
         ;
         break;
@@ -164,15 +173,17 @@ void definition() throws ParseException {
     jj_consume_token(0);
   }
 
-  final public void body_declare() throws ParseException {
+  final public void body_declare() throws ParseException {String comment = "";
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-    case 10:
-    case 11:{
+    case 9:
+    case 12:
+    case 13:{
       type_declare();
       break;
       }
     case ANOTATION:{
-      jj_consume_token(ANOTATION);
+      comment = jj_consume_token(ANOTATION).image;
+commentEvent.fireEvent(comment);
       break;
       }
     default:
@@ -184,19 +195,81 @@ void definition() throws ParseException {
 
   final public void type_declare() throws ParseException {
     if (jj_2_1(2)) {
+      label_3:
+      while (true) {
+        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+        case 9:{
+          ;
+          break;
+          }
+        default:
+          jj_la1[4] = jj_gen;
+          break label_3;
+        }
+        directive_declare();
+      }
       struct_type();
     } else {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case 11:{
+      case 13:{
         enum_type();
         break;
         }
       default:
-        jj_la1[4] = jj_gen;
+        jj_la1[5] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
     }
+  }
+
+  final public void directive_declare() throws ParseException {String directive = ""; String tName = "";
+    jj_consume_token(9);
+    tName = identifier();
+directive += tName;
+    switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+    case 10:{
+      jj_consume_token(10);
+directive += " = ";
+      tName = directive_value();
+directive += tName;
+      break;
+      }
+    default:
+      jj_la1[6] = jj_gen;
+      ;
+    }
+directiveEvent.fireEvent(directive);
+  }
+
+  final public String directive_value() throws ParseException {String value = "";
+    switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+    case ID:{
+      value = jj_consume_token(ID).image;
+{if ("" != null) return value;}
+      break;
+      }
+    case OCTALINT:{
+      value = jj_consume_token(OCTALINT).image;
+{if ("" != null) return value;}
+      break;
+      }
+    case DECIMALINT:{
+      value = jj_consume_token(DECIMALINT).image;
+{if ("" != null) return value;}
+      break;
+      }
+    case HEXADECIMALINT:{
+      value = jj_consume_token(HEXADECIMALINT).image;
+{if ("" != null) return value;}
+      break;
+      }
+    default:
+      jj_la1[7] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+    throw new Error("Missing return statement in function");
   }
 
 /* Production 3 */
@@ -204,18 +277,18 @@ void definition() throws ParseException {
 String module() throws ParseException {String packName = ""; String tName = "";
     tName = identifier();
 packName += tName;
-    label_3:
+    label_4:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case 9:{
+      case 11:{
         ;
         break;
         }
       default:
-        jj_la1[5] = jj_gen;
-        break label_3;
+        jj_la1[8] = jj_gen;
+        break label_4;
       }
-      jj_consume_token(9);
+      jj_consume_token(11);
 packName += ".";
       tName = identifier();
 packName += tName;
@@ -227,7 +300,7 @@ packageDeclareEvent.fireEvent(packName);
 
   final public String struct_type() throws ParseException {String name = "";
     String parName = "";
-    jj_consume_token(10);
+    jj_consume_token(12);
     name = identifier();
 idlDeclareEvent.fireEvent(name);
     member_list();
@@ -238,12 +311,12 @@ idlDeclareEvent.fireEvent(name);
   }
 
   final public String enum_type() throws ParseException {String name = "";
-    jj_consume_token(11);
+    jj_consume_token(13);
     name = identifier();
 enumDeclareEvent.fireEvent(name);
-    jj_consume_token(12);
+    jj_consume_token(14);
     enum_body();
-    jj_consume_token(13);
+    jj_consume_token(15);
 enumCloseEvent.fireEvent(name);
         {if ("" != null) return name;}
     throw new Error("Missing return statement in function");
@@ -252,18 +325,18 @@ enumCloseEvent.fireEvent(name);
   final public void enum_body() throws ParseException {String tName = "";String ANOTATION = ""; String tANOTATION = "";
     tName = identifier();
 enumElementEvent.fireEvent(tName);
-    label_4:
+    label_5:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case 14:{
+      case 16:{
         ;
         break;
         }
       default:
-        jj_la1[6] = jj_gen;
-        break label_4;
+        jj_la1[9] = jj_gen;
+        break label_5;
       }
-      jj_consume_token(14);
+      jj_consume_token(16);
       tName = identifier();
 enumElementEvent.fireEvent(tName);
     }
@@ -273,16 +346,14 @@ enumElementEvent.fireEvent(tName);
   final public 
 void member_list() throws ParseException {String tName = "";
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-    case 15:{
-      jj_consume_token(15);
+    case 17:{
+      jj_consume_token(17);
       tName = idl_type();
 extendsEvent.fireEvent(tName);
-      jj_consume_token(12);
-      label_5:
+      jj_consume_token(14);
+      label_6:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case 18:
-        case 19:
         case 20:
         case 21:
         case 22:
@@ -290,29 +361,29 @@ extendsEvent.fireEvent(tName);
         case 24:
         case 25:
         case 26:
+        case 27:
+        case 28:
         case ID:
         case ANOTATION:{
           ;
           break;
           }
         default:
-          jj_la1[7] = jj_gen;
-          break label_5;
+          jj_la1[10] = jj_gen;
+          break label_6;
         }
         member();
       }
-      jj_consume_token(13);
+      jj_consume_token(15);
       break;
       }
     default:
-      jj_la1[9] = jj_gen;
+      jj_la1[12] = jj_gen;
       if (jj_2_2(2)) {
-        jj_consume_token(12);
-        label_6:
+        jj_consume_token(14);
+        label_7:
         while (true) {
           switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-          case 18:
-          case 19:
           case 20:
           case 21:
           case 22:
@@ -320,18 +391,20 @@ extendsEvent.fireEvent(tName);
           case 24:
           case 25:
           case 26:
+          case 27:
+          case 28:
           case ID:
           case ANOTATION:{
             ;
             break;
             }
           default:
-            jj_la1[8] = jj_gen;
-            break label_6;
+            jj_la1[11] = jj_gen;
+            break label_7;
           }
           member();
         }
-        jj_consume_token(13);
+        jj_consume_token(15);
       } else {
         jj_consume_token(-1);
         throw new ParseException();
@@ -343,8 +416,6 @@ extendsEvent.fireEvent(tName);
   final public 
 void member() throws ParseException {String typeName = ""; String fieldName = "";String comment = ""; String tComment = "";
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-    case 18:
-    case 19:
     case 20:
     case 21:
     case 22:
@@ -352,22 +423,24 @@ void member() throws ParseException {String typeName = ""; String fieldName = ""
     case 24:
     case 25:
     case 26:
+    case 27:
+    case 28:
     case ID:{
 currentIDLField = new IDLField(fieldName, "");
       typeName = type_spec();
       fieldName = declarators(currentIDLField);
       jj_consume_token(8);
 if(fieldName.contains("[") && fieldName.contains("]"))
-    {
-        typeName = typeName.trim() + fieldName.substring(fieldName.indexOf("["), fieldName.indexOf("]") + 1);
-        fieldName = fieldName.replace("[", "").trim();
-        fieldName = fieldName.replace("]", "").trim();
-        //currentIDLField.setArray(true);
-    }
+        {
+            typeName = typeName.trim() + fieldName.substring(fieldName.indexOf("["), fieldName.indexOf("]") + 1);
+            fieldName = fieldName.replace("[", "").trim();
+            fieldName = fieldName.replace("]", "").trim();
+            //currentIDLField.setArray(true);
+        }
 
-    currentIDLField.setName(fieldName);
-    currentIDLField.setType(typeName);
-    fieldDeclareEvent.fireEvent(currentIDLField);
+        currentIDLField.setName(fieldName);
+        currentIDLField.setType(typeName);
+        fieldDeclareEvent.fireEvent(currentIDLField);
       break;
       }
     case ANOTATION:{
@@ -376,7 +449,7 @@ commentEvent.fireEvent(comment);
       break;
       }
     default:
-      jj_la1[10] = jj_gen;
+      jj_la1[13] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -396,18 +469,18 @@ commentEvent.fireEvent(comment);
 {if ("" != null) return ret;}
       break;
       }
-    case 16:{
-      jj_consume_token(16);
+    case 18:{
+      jj_consume_token(18);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case DECIMALINT:{
         size = jj_consume_token(DECIMALINT).image;
         break;
         }
       default:
-        jj_la1[11] = jj_gen;
+        jj_la1[14] = jj_gen;
         ;
       }
-      jj_consume_token(17);
+      jj_consume_token(19);
       ret = declarator();
 if(!size.equals(""))
      {
@@ -418,7 +491,7 @@ if(!size.equals(""))
       break;
       }
     default:
-      jj_la1[12] = jj_gen;
+      jj_la1[15] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -454,26 +527,26 @@ String declarator() throws ParseException {String ret = "";
 
   final public String base_type_spec() throws ParseException {String typeName = "";
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-    case 19:
-    case 20:{
+    case 21:
+    case 22:{
       typeName = floating_pt_type();
 {if ("" != null) return typeName;}
       break;
       }
-    case 21:
-    case 22:
     case 23:
-    case 24:{
+    case 24:
+    case 25:
+    case 26:{
       typeName = integer_type();
 {if ("" != null) return typeName;}
       break;
       }
-    case 25:{
+    case 27:{
       typeName = boolean_type();
 {if ("" != null) return typeName;}
       break;
       }
-    case 26:{
+    case 28:{
       typeName = string_type();
 {if ("" != null) return typeName;}
       break;
@@ -484,7 +557,7 @@ currentIDLField.setIdlType(true);
     {if ("" != null) return typeName;}
       break;
       }
-    case 18:{
+    case 20:{
       typeName = abs_idl_type();
 currentIDLField.setIdlType(true);
     currentIDLField.setAbstract(true);
@@ -492,7 +565,7 @@ currentIDLField.setIdlType(true);
       break;
       }
     default:
-      jj_la1[13] = jj_gen;
+      jj_la1[16] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -502,18 +575,18 @@ currentIDLField.setIdlType(true);
   final public String idl_type() throws ParseException {String className = ""; String tName = ""; String fieldName = "";
     tName = identifier();
 className += tName;
-    label_7:
+    label_8:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case 9:{
+      case 11:{
         ;
         break;
         }
       default:
-        jj_la1[14] = jj_gen;
-        break label_7;
+        jj_la1[17] = jj_gen;
+        break label_8;
       }
-      jj_consume_token(9);
+      jj_consume_token(11);
 className += ".";
       tName = identifier();
 className += tName;
@@ -523,21 +596,21 @@ className += tName;
   }
 
   final public String abs_idl_type() throws ParseException {String className = ""; String tName = ""; String fieldName = "";
-    jj_consume_token(18);
+    jj_consume_token(20);
     tName = identifier();
 className += tName;
-    label_8:
+    label_9:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case 9:{
+      case 11:{
         ;
         break;
         }
       default:
-        jj_la1[15] = jj_gen;
-        break label_8;
+        jj_la1[18] = jj_gen;
+        break label_9;
       }
-      jj_consume_token(9);
+      jj_consume_token(11);
 className += ".";
       tName = identifier();
 className += tName;
@@ -548,8 +621,8 @@ className += tName;
 
   final public String idl_type_array() throws ParseException {String className = ""; String tName = ""; String fieldName = "";
     className = idl_type();
-    jj_consume_token(16);
-    jj_consume_token(17);
+    jj_consume_token(18);
+    jj_consume_token(19);
 {if ("" != null) return className;}
     throw new Error("Missing return statement in function");
   }
@@ -576,26 +649,26 @@ className += tName;
 /* Production 64 */
   final public 
 void fixed_array_size() throws ParseException {
-    jj_consume_token(16);
-    jj_consume_token(17);
+    jj_consume_token(18);
+    jj_consume_token(19);
   }
 
 /* Production 38 */
   final public 
 String floating_pt_type() throws ParseException {
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-    case 19:{
-      jj_consume_token(19);
+    case 21:{
+      jj_consume_token(21);
 {if ("" != null) return "float" ;}
       break;
       }
-    case 20:{
-      jj_consume_token(20);
+    case 22:{
+      jj_consume_token(22);
 {if ("" != null) return "double" ;}
       break;
       }
     default:
-      jj_la1[16] = jj_gen;
+      jj_la1[19] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -606,28 +679,28 @@ String floating_pt_type() throws ParseException {
   final public 
 String integer_type() throws ParseException {
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-    case 21:{
-      jj_consume_token(21);
-{if ("" != null) return "int" ;}
-      break;
-      }
-    case 22:{
-      jj_consume_token(22);
-{if ("" != null) return "short" ;}
-      break;
-      }
     case 23:{
       jj_consume_token(23);
-{if ("" != null) return "long" ;}
+{if ("" != null) return "int" ;}
       break;
       }
     case 24:{
       jj_consume_token(24);
+{if ("" != null) return "short" ;}
+      break;
+      }
+    case 25:{
+      jj_consume_token(25);
+{if ("" != null) return "long" ;}
+      break;
+      }
+    case 26:{
+      jj_consume_token(26);
 {if ("" != null) return "byte" ;}
       break;
       }
     default:
-      jj_la1[17] = jj_gen;
+      jj_la1[20] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -637,20 +710,34 @@ String integer_type() throws ParseException {
 /* Production 47 */
   final public 
 String boolean_type() throws ParseException {
-    jj_consume_token(25);
+    jj_consume_token(27);
 {if ("" != null) return "boolean" ;}
     throw new Error("Missing return statement in function");
   }
 
-  final public String string_type() throws ParseException {
-    jj_consume_token(26);
-{if ("" != null) return "string" ;}
+  final public String string_type() throws ParseException {String size = "";
+    jj_consume_token(28);
+    switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+    case 29:{
+      jj_consume_token(29);
+      size = jj_consume_token(DECIMALINT).image;
+      jj_consume_token(30);
+      break;
+      }
+    default:
+      jj_la1[21] = jj_gen;
+      ;
+    }
+if(!size.equals(""))
+    {
+      currentIDLField.setStringSize(Integer.parseInt(size));
+    }
+    {if ("" != null) return "string" ;}
     throw new Error("Missing return statement in function");
   }
 
 /* Production 48 */
   final public 
-
 void integer_literal() throws ParseException {
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case OCTALINT:{
@@ -666,7 +753,7 @@ void integer_literal() throws ParseException {
       break;
       }
     default:
-      jj_la1[18] = jj_gen;
+      jj_la1[22] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -691,7 +778,7 @@ void integer_literal() throws ParseException {
       break;
       }
     default:
-      jj_la1[19] = jj_gen;
+      jj_la1[23] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -713,21 +800,110 @@ void integer_literal() throws ParseException {
     finally { jj_save(1, xla); }
   }
 
-  private boolean jj_3R_11()
+  private boolean jj_3R_18()
  {
-    if (jj_scan_token(ID)) return true;
+    if (jj_3R_19()) return true;
     return false;
   }
 
-  private boolean jj_3R_35()
+  private boolean jj_3R_10()
  {
-    if (jj_scan_token(24)) return true;
+    if (jj_3R_13()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_29()
+ {
+    if (jj_scan_token(27)) return true;
+    return false;
+  }
+
+  private boolean jj_3_1()
+ {
+    Token xsp;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_10()) { jj_scanpos = xsp; break; }
+    }
+    if (jj_3R_11()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_11()
+ {
+    if (jj_scan_token(12)) return true;
+    if (jj_3R_14()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_12()
+ {
+    if (jj_3R_15()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_26()
+ {
+    if (jj_3R_32()) return true;
     return false;
   }
 
   private boolean jj_3R_15()
  {
-    if (jj_3R_16()) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_16()) {
+    jj_scanpos = xsp;
+    if (jj_3R_17()) return true;
+    }
+    return false;
+  }
+
+  private boolean jj_3R_16()
+ {
+    if (jj_3R_18()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_38()
+ {
+    if (jj_scan_token(26)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_25()
+ {
+    if (jj_3R_31()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_37()
+ {
+    if (jj_scan_token(25)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_24()
+ {
+    if (jj_3R_30()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_36()
+ {
+    if (jj_scan_token(24)) return true;
+    return false;
+  }
+
+  private boolean jj_3_2()
+ {
+    if (jj_scan_token(14)) return true;
+    Token xsp;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_12()) { jj_scanpos = xsp; break; }
+    }
+    if (jj_scan_token(15)) return true;
     return false;
   }
 
@@ -737,27 +913,26 @@ void integer_literal() throws ParseException {
     return false;
   }
 
-  private boolean jj_3R_34()
+  private boolean jj_3R_35()
  {
     if (jj_scan_token(23)) return true;
     return false;
   }
 
-  private boolean jj_3_1()
+  private boolean jj_3R_28()
  {
-    if (jj_3R_9()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_33()
- {
-    if (jj_scan_token(22)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_14()
- {
-    if (jj_scan_token(ANOTATION)) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_35()) {
+    jj_scanpos = xsp;
+    if (jj_3R_36()) {
+    jj_scanpos = xsp;
+    if (jj_3R_37()) {
+    jj_scanpos = xsp;
+    if (jj_3R_38()) return true;
+    }
+    }
+    }
     return false;
   }
 
@@ -767,23 +942,23 @@ void integer_literal() throws ParseException {
     return false;
   }
 
-  private boolean jj_3R_32()
- {
-    if (jj_scan_token(21)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_25()
+  private boolean jj_3R_20()
  {
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_3R_32()) {
+    if (jj_3R_21()) {
     jj_scanpos = xsp;
-    if (jj_3R_33()) {
+    if (jj_3R_22()) {
     jj_scanpos = xsp;
-    if (jj_3R_34()) {
+    if (jj_3R_23()) {
     jj_scanpos = xsp;
-    if (jj_3R_35()) return true;
+    if (jj_3R_24()) {
+    jj_scanpos = xsp;
+    if (jj_3R_25()) {
+    jj_scanpos = xsp;
+    if (jj_3R_26()) return true;
+    }
+    }
     }
     }
     }
@@ -796,139 +971,69 @@ void integer_literal() throws ParseException {
     return false;
   }
 
-  private boolean jj_3R_20()
+  private boolean jj_3R_34()
  {
-    if (jj_3R_26()) return true;
+    if (jj_scan_token(22)) return true;
     return false;
   }
 
-  private boolean jj_3R_19()
+  private boolean jj_3R_14()
  {
-    if (jj_3R_25()) return true;
+    if (jj_scan_token(ID)) return true;
     return false;
   }
 
-  private boolean jj_3R_17()
+  private boolean jj_3R_33()
  {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_18()) {
-    jj_scanpos = xsp;
-    if (jj_3R_19()) {
-    jj_scanpos = xsp;
-    if (jj_3R_20()) {
-    jj_scanpos = xsp;
-    if (jj_3R_21()) {
-    jj_scanpos = xsp;
-    if (jj_3R_22()) {
-    jj_scanpos = xsp;
-    if (jj_3R_23()) return true;
-    }
-    }
-    }
-    }
-    }
-    return false;
-  }
-
-  private boolean jj_3R_18()
- {
-    if (jj_3R_24()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_31()
- {
-    if (jj_scan_token(20)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_30()
- {
-    if (jj_scan_token(19)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_24()
- {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_30()) {
-    jj_scanpos = xsp;
-    if (jj_3R_31()) return true;
-    }
-    return false;
-  }
-
-  private boolean jj_3R_29()
- {
-    if (jj_scan_token(18)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_13()
- {
-    if (jj_3R_15()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_12()
- {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_13()) {
-    jj_scanpos = xsp;
-    if (jj_3R_14()) return true;
-    }
-    return false;
-  }
-
-  private boolean jj_3R_9()
- {
-    if (jj_scan_token(10)) return true;
-    if (jj_3R_11()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_10()
- {
-    if (jj_3R_12()) return true;
+    if (jj_scan_token(21)) return true;
     return false;
   }
 
   private boolean jj_3R_27()
  {
-    if (jj_scan_token(26)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_28()
- {
-    if (jj_3R_11()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_26()
- {
-    if (jj_scan_token(25)) return true;
-    return false;
-  }
-
-  private boolean jj_3_2()
- {
-    if (jj_scan_token(12)) return true;
     Token xsp;
-    while (true) {
-      xsp = jj_scanpos;
-      if (jj_3R_10()) { jj_scanpos = xsp; break; }
+    xsp = jj_scanpos;
+    if (jj_3R_33()) {
+    jj_scanpos = xsp;
+    if (jj_3R_34()) return true;
     }
-    if (jj_scan_token(13)) return true;
     return false;
   }
 
-  private boolean jj_3R_16()
+  private boolean jj_3R_32()
  {
-    if (jj_3R_17()) return true;
+    if (jj_scan_token(20)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_17()
+ {
+    if (jj_scan_token(ANOTATION)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_19()
+ {
+    if (jj_3R_20()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_13()
+ {
+    if (jj_scan_token(9)) return true;
+    if (jj_3R_14()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_31()
+ {
+    if (jj_3R_14()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_30()
+ {
+    if (jj_scan_token(28)) return true;
     return false;
   }
 
@@ -943,7 +1048,7 @@ void integer_literal() throws ParseException {
   private Token jj_scanpos, jj_lastpos;
   private int jj_la;
   private int jj_gen;
-  final private int[] jj_la1 = new int[20];
+  final private int[] jj_la1 = new int[24];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static {
@@ -951,10 +1056,10 @@ void integer_literal() throws ParseException {
       jj_la1_init_1();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x0,0x80,0xc00,0xc00,0x800,0x200,0x4000,0xffc0000,0xffc0000,0x8000,0xffc0000,0x20000000,0x8010000,0xffc0000,0x200,0x200,0x180000,0x1e00000,0x70000000,0x80000000,};
+      jj_la1_0 = new int[] {0x0,0x80,0x3200,0x3200,0x200,0x2000,0x400,0x80000000,0x800,0x10000,0x9ff00000,0x9ff00000,0x20000,0x9ff00000,0x0,0x80040000,0x9ff00000,0x800,0x800,0x600000,0x7800000,0x20000000,0x0,0x0,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0x8,0x8,0x8,0x8,0x0,0x0,0x0,0x8,0x8,0x0,0x8,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,};
+      jj_la1_1 = new int[] {0x80,0x80,0x80,0x80,0x0,0x0,0x0,0x7,0x0,0x0,0x80,0x80,0x0,0x80,0x2,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x7,0x18,};
    }
   final private JJCalls[] jj_2_rtns = new JJCalls[2];
   private boolean jj_rescan = false;
@@ -971,7 +1076,7 @@ void integer_literal() throws ParseException {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 20; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 24; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -986,7 +1091,7 @@ void integer_literal() throws ParseException {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 20; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 24; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -997,7 +1102,7 @@ void integer_literal() throws ParseException {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 20; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 24; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1008,7 +1113,7 @@ void integer_literal() throws ParseException {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 20; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 24; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1018,7 +1123,7 @@ void integer_literal() throws ParseException {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 20; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 24; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1028,7 +1133,7 @@ void integer_literal() throws ParseException {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 20; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 24; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1141,12 +1246,12 @@ void integer_literal() throws ParseException {
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[36];
+    boolean[] la1tokens = new boolean[40];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < 24; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {
@@ -1158,7 +1263,7 @@ void integer_literal() throws ParseException {
         }
       }
     }
-    for (int i = 0; i < 36; i++) {
+    for (int i = 0; i < 40; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

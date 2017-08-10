@@ -6,7 +6,6 @@
 #include "OPSObject.h"
 #include "ArchiverInOut.h"
 #include <string.h>		// for memset() on Linux
-#include <string>
 #include <vector>
 
 __imports
@@ -18,7 +17,7 @@ class __className :
 	public __baseClassName
 {
 public:
-   static std::string getTypeName(){return std::string("__packageName.__className");}
+   static ops::TypeId_T getTypeName(){return ops::TypeId_T("__packageName.__className");}
 
 __declarations
     ///Default constructor.
@@ -26,7 +25,7 @@ __declarations
         : __baseClassName()
 __constructorHead
     {
-        OPSObject::appendType(std::string("__packageName.__className"));
+        OPSObject::appendType(ops::TypeId_T("__packageName.__className"));
 __constructorBody
 
     }
@@ -35,7 +34,7 @@ __constructorBody
        : __baseClassName()
 __constructorHead
     {
-        OPSObject::appendType(std::string("__packageName.__className"));
+        OPSObject::appendType(ops::TypeId_T("__packageName.__className"));
 __constructorBody
         __c.fillClone((__className*)this);
 
@@ -73,5 +72,4 @@ __destructorBody
 };
 
 __packageCloser
-
 #endif

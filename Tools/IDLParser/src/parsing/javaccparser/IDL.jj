@@ -1,13 +1,8 @@
 
 options
 {
-
   STATIC = false;
-
 }
-
-
-
 
 PARSER_BEGIN(IDLParser)
 package parsing.javaccparser;
@@ -19,7 +14,6 @@ import parsing.IDLField;
 
 public class IDLParser
 {
-
     private IDLField currentIDLField;
 
     public ParserEvent<String> packageDeclareEvent = new ParserEvent<String>();
@@ -31,6 +25,7 @@ public class IDLParser
     public ParserEvent<String> extendsEvent = new ParserEvent<String>();
     public ParserEvent<String> enumElementEvent = new ParserEvent<String>();
     public ParserEvent<String> commentEvent = new ParserEvent<String>();
+    public ParserEvent<String> directiveEvent = new ParserEvent<String>();
 
   public static void main(String args[])
   {
@@ -87,15 +82,16 @@ public class IDLParser
 
                 public void onEvent(IDLField eventData, ParserEvent e)
                 {
-                    System.out.println("  eventData.getName()     : " + eventData.getName());
-                    System.out.println("  eventData.getArraySize(): " + eventData.getArraySize());
-                    System.out.println("  eventData.getType()     : " + eventData.getType());
-                    System.out.println("  eventData.getComment()  : " + eventData.getComment());
-                    System.out.println("  eventData.getValue()    : " + eventData.getValue());
-                    System.out.println("  eventData.isIdlType()   : " + eventData.isIdlType());
-                    System.out.println("  eventData.isArray()     : " + eventData.isArray());
-                    System.out.println("  eventData.isStatic()    : " + eventData.isStatic());
-                    System.out.println("  eventData.isAbstract()  : " + eventData.isAbstract());
+                    System.out.println("  eventData.getName()      : " + eventData.getName());
+                    System.out.println("  eventData.getArraySize() : " + eventData.getArraySize());
+                    System.out.println("  eventData.getStringSize(): " + eventData.getStringSize());
+                    System.out.println("  eventData.getType()      : " + eventData.getType());
+                    System.out.println("  eventData.getComment()   : " + eventData.getComment());
+                    System.out.println("  eventData.getValue()     : " + eventData.getValue());
+                    System.out.println("  eventData.isIdlType()    : " + eventData.isIdlType());
+                    System.out.println("  eventData.isArray()      : " + eventData.isArray());
+                    System.out.println("  eventData.isStatic()     : " + eventData.isStatic());
+                    System.out.println("  eventData.isAbstract()   : " + eventData.isAbstract());
                     System.out.println("");
                 }
             });
@@ -104,6 +100,13 @@ public class IDLParser
                 public void onEvent(String eventData, ParserEvent e)
                 {
                     System.out.println("extends  " + eventData + ".");
+                }
+            });
+        parser.directiveEvent.add(new ParserEventCallback<String>() {
+
+                public void onEvent(String eventData, ParserEvent e)
+                {
+                    System.out.println("directive:  " + eventData + ".");
                 }
             });
 
@@ -134,7 +137,7 @@ SKIP :
 | < "\t" >
 | < "\n" >
 | < "\r" >
-| < "//" (~["\n"])* "\n" >
+| < "//" (~["@"]) (~["\n"])* "\n" >
 | < "#" ([" ","\t"])* (["0"-"9"])+
     (([" ","\t"])* "\"" (~["\""])+ "\""
            ([" ","\t"])* (["0"-"9"])* ([" ","\t"])* (["0"-"9"])*)? "\n" >
@@ -145,10 +148,9 @@ SKIP :
 void specification() :
 {}
 {
-   definition()
+    definition()
 |
     (<ANOTATION>)+
-
 }
 
 /* Production 2 */
@@ -157,25 +159,47 @@ void definition() :
 {}
 {
   "package" module() ";" (body_declare())+ <EOF>
-
 }
+
 void body_declare():
-{}
+{String comment = ""; }
 {
     type_declare()
 |
-    <ANOTATION>
-
+    comment = <ANOTATION>.image
+    {commentEvent.fireEvent(comment);}
 }
 
 void type_declare():
 {}
 {
     LOOKAHEAD(2)
+    ( directive_declare() )*
+
     struct_type()
 |
     enum_type()
+}
 
+void directive_declare():
+{ String directive = ""; String tName = "";}
+{
+    "//@" tName = identifier() {directive += tName;} [ "=" {directive += " = ";} tName = directive_value() {directive += tName;} ]
+    {
+      directiveEvent.fireEvent(directive);
+    }
+}
+
+String directive_value():
+{ String value = "";}
+{
+    value = <ID>.image {return value;}
+|
+    value = <OCTALINT>.image {return value;}
+|
+    value = <DECIMALINT>.image {return value;}
+|
+    value = <HEXADECIMALINT>.image {return value;}
 }
 
 /* Production 3 */
@@ -184,7 +208,6 @@ String module() :
 { String packName = ""; String tName = "";}
 {
    tName = identifier() {packName += tName;} (  "." {packName += ".";} tName = identifier() {packName += tName;} )*
-
    {
         packageDeclareEvent.fireEvent(packName);
         return packName;
@@ -197,17 +220,13 @@ String struct_type() :
     String parName = "";
 }
 {
-
   "class" name=identifier() {idlDeclareEvent.fireEvent(name);}  member_list()
   {
     {idlCloseEvent.fireEvent(name);}
     ///System.out.println("struct " + name);
     return name;
   }
-
-
 }
-
 
 String enum_type() :
 {String name = "";}
@@ -217,13 +236,12 @@ String enum_type() :
         enumCloseEvent.fireEvent(name);
         return name;
     }
-
 }
+
 void enum_body() :
 {String tName = "";String ANOTATION = ""; String tANOTATION = ""; }
 {
   tName = identifier() {enumElementEvent.fireEvent(tName);} ( "," tName = identifier() {enumElementEvent.fireEvent(tName);})*
-
 }
 
 
@@ -232,13 +250,12 @@ void enum_body() :
 void member_list() :
 {String tName = "";}
 {
-  "extends" tName = idl_type() {extendsEvent.fireEvent(tName);} "{"( member() )* "}"
+    "extends" tName = idl_type() {extendsEvent.fireEvent(tName);} "{"( member() )* "}"
 |
-LOOKAHEAD(2)
-(
-  "{" ( member() )* "}"
-)
-
+    LOOKAHEAD(2)
+    (
+        "{" ( member() )* "}"
+    )
 }
 
 /* Production 52 */
@@ -246,43 +263,38 @@ LOOKAHEAD(2)
 void member() :
 {String typeName = ""; String fieldName = "";String comment = ""; String tComment = ""; }
 {
-  {currentIDLField = new IDLField(fieldName, "");}
+    {currentIDLField = new IDLField(fieldName, "");}
 
-  typeName = type_spec() fieldName = declarators(currentIDLField) ";"
-  {
-    if(fieldName.contains("[") && fieldName.contains("]"))
+    typeName = type_spec() fieldName = declarators(currentIDLField) ";"
     {
-        typeName = typeName.trim() + fieldName.substring(fieldName.indexOf("["), fieldName.indexOf("]") + 1);
-        fieldName = fieldName.replace("[", "").trim();
-        fieldName = fieldName.replace("]", "").trim();
-        //currentIDLField.setArray(true);
-    }
+        if(fieldName.contains("[") && fieldName.contains("]"))
+        {
+            typeName = typeName.trim() + fieldName.substring(fieldName.indexOf("["), fieldName.indexOf("]") + 1);
+            fieldName = fieldName.replace("[", "").trim();
+            fieldName = fieldName.replace("]", "").trim();
+            //currentIDLField.setArray(true);
+        }
 
-    currentIDLField.setName(fieldName);
-    currentIDLField.setType(typeName);
-    fieldDeclareEvent.fireEvent(currentIDLField);
-}
+        currentIDLField.setName(fieldName);
+        currentIDLField.setType(typeName);
+        fieldDeclareEvent.fireEvent(currentIDLField);
+    }
 |
     comment = <ANOTATION>.image
     {commentEvent.fireEvent(comment);}
-
-
-
 }
 
 String identifier() :
 { String name = ""; }
 {
     name = <ID>.image
-  { return name; }
-
+    { return name; }
 }
 
 String declarators(IDLField currentIDLField) :
 {String ret = "";
  String size = ""; }
 {
-
   ret = declarator()
   {return ret;}
 |
@@ -294,11 +306,6 @@ String declarators(IDLField currentIDLField) :
      }
 
      return "[] " + ret;}
-
-
-
-
-
 }
 
 /* Production 35 */
@@ -306,47 +313,34 @@ String declarators(IDLField currentIDLField) :
 String declarator() :
 {String ret = "";}
 {
-
-  ret = simple_declarator()
-  {return ret;}
+    ret = simple_declarator()
+    {return ret;}
 }
-
 
 String type_spec() :
 {String ret = "";}
 {
-
     ret = simple_type_spec()
-
- {return ret;}
-
+    {return ret;}
 }
 
 String simple_type_spec() :
 {String ret = "";}
 {
-
-  ret = base_type_spec()
-
-  {return ret;}
-
-
+    ret = base_type_spec()
+    {return ret;}
 }
 
 String complex_type_spec() :
 {String ret = "";}
 {
-
     (ret = base_type_spec() fixed_array_size())
-
-
-{return ret;}
+    {return ret;}
 }
 
 String base_type_spec() :
 {String typeName = "";}
 {
-
   typeName = floating_pt_type()
   {return typeName;}
 |
@@ -371,8 +365,6 @@ String base_type_spec() :
     currentIDLField.setAbstract(true);
     return typeName;
   }
-
-
 }
 
 String idl_type() :
@@ -383,6 +375,7 @@ String idl_type() :
         return className;
    }
 }
+
 String abs_idl_type() :
 { String className = ""; String tName = ""; String fieldName = "";}
 {
@@ -391,12 +384,12 @@ String abs_idl_type() :
         return className;
    }
 }
+
 String idl_type_array() :
 { String className = ""; String tName = ""; String fieldName = "";}
 {
     ( className = idl_type() "[" "]")
-
-   {
+    {
         return className;
     }
 }
@@ -404,22 +397,22 @@ String idl_type_array() :
 String simple_declarator() :
 {String ret = "";}
 {
-  ret = identifier()
-  {return ret;}
+    ret = identifier()
+    {return ret;}
 }
 
 String complex_declarator() :
 {String ret = "";}
 {
-  ret = array_declarator()
-   {return ret;}
+    ret = array_declarator()
+    {return ret;}
 }
 
 String array_declarator() :
 {String ret = "";}
 {
-  ( fixed_array_size() ) ret = identifier()
-   {return ret ;}
+    ( fixed_array_size() ) ret = identifier()
+    {return ret ;}
 }
 
 /* Production 64 */
@@ -429,7 +422,6 @@ void fixed_array_size() :
 {
   "[" "]"
 }
-
 
 /* Production 38 */
 
@@ -442,8 +434,6 @@ String floating_pt_type() :
   "double"
   {return "double" ;}
 }
-
-
 
 /* Production 39 */
 
@@ -463,7 +453,6 @@ String integer_type() :
   {return "byte" ;}
 }
 
-
 /* Production 47 */
 
 String boolean_type() :
@@ -474,14 +463,20 @@ String boolean_type() :
 }
 
 String string_type() :
-{}
+{String size = ""; }
 {
-  "string"
-  {return "string" ;}
+  "string" [ "<" size = <DECIMALINT>.image ">" ]
+  {
+    if(!size.equals(""))
+    {
+      currentIDLField.setStringSize(Integer.parseInt(size));
+    }
+    return "string" ;
+  }
 }
 
-/* Production 48 */
 
+/* Production 48 */
 
 void integer_literal() :
 {}
@@ -553,7 +548,4 @@ TOKEN :
    "\"" >
 |
     < ANOTATION: "/*" (~["*"])* "*" (~["/"] (~["*"])* "*")* "/">
-
-
-
 }
