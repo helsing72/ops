@@ -11,6 +11,7 @@
 #include <math.h>
 #include <iostream>
 #include <fstream>
+#include <signal.h>
 
 //Include a publisher for the data type we want to publish, generated from our IDL project TestAll.
 #include "TestAll/ChildDataPublisher.h"
@@ -19,18 +20,28 @@
 #include "TestAll/TestAllTypeFactory.h"
 #include <ops.h>
 #include <MemoryMap.h>
+#include <OPSConfigRepository.h>
+#include "PrintArchiverOut.h"
+
+bool gTestFailed = false;
 
 template <typename T>
 T AssertEQ(T val, T exp, std::string mess = "")
 {
-	if (val != exp) std::cout << "Failed: " << mess << ", value= " << val << ", expected= " << exp << std::endl;
+	if (val != exp) {
+		gTestFailed = true;
+		std::cout << "Failed: " << mess << ", value= " << val << ", expected= " << exp << std::endl;
+	}
 	return val;
 }
 
 template <typename T>
 T AssertNEQ(T val, T exp, std::string mess = "")
 {
-	if (val == exp) std::cout << "Failed: " << mess << ", value= " << val << std::endl;
+	if (val == exp) {
+		gTestFailed = true;
+		std::cout << "Failed: " << mess << ", value= " << val << std::endl;
+	}
 	return val;
 }
 
@@ -44,6 +55,21 @@ void checkEmpty(TestAll::ChildData& data)
 {
 	std::cout << "Checking empty object..." << std::endl;
 	
+	// BaseData
+	//   std::string baseText;
+	AssertEQ<std::string>(data.baseText, "");
+	//   std::vector<std::string> stringOpenArr;
+	AssertEQ<int>(data.stringOpenArr.size(), 0);
+	//   std::string stringFixArr[5];
+	for (int i = 0; i < 5; i++) AssertEQ<std::string>(data.stringFixArr[i], "");
+	//   ops::fixed_string<23> fixLengthString;
+	AssertEQ<ops::fixed_string<23>>(data.fixLengthString, "");
+	//   std::vector<ops::fixed_string<16>> fixLengthStringOpenArr;
+	AssertEQ<int>(data.fixLengthStringOpenArr.size(), 0);
+	//   ops::fixed_string<16> fixLengthStringFixArr[10];
+	for (int i = 0; i < 10; i++) AssertEQ<ops::fixed_string<16>>(data.fixLengthStringFixArr[i], "");
+
+	// ChildData
 	AssertEQ<bool>(data.bo, false, "data.bo");
     AssertEQ<char>(data.b, 0, "data.b");
     AssertEQ<short>(data.sh, 0);
@@ -118,7 +144,29 @@ void checkObjects(TestAll::TestData& data, TestAll::TestData& exp)
 void checkObjects(TestAll::ChildData& data, TestAll::ChildData& exp)
 {
 	std::cout << "Comparing objects object..." << std::endl;
-	
+
+	// Test fields in BaseData
+	//   std::string baseText;
+	AssertEQ<std::string>(data.baseText, exp.baseText, "baseText");
+
+	//   std::vector<std::string> stringOpenArr;
+	AssertEQ<int>(data.stringOpenArr.size(), exp.stringOpenArr.size(), "stringOpenArr");
+	for (size_t i = 0; i < data.stringOpenArr.size(); i++) AssertEQ<std::string>(data.stringOpenArr[i], exp.stringOpenArr[i], "stringOpenArr");
+
+	//   std::string stringFixArr[5];
+	for (int i = 0; i < 5; i++) AssertEQ<std::string>(data.stringFixArr[i], exp.stringFixArr[i], "stringFixArr");
+
+	//   ops::fixed_string<23> fixLengthString;
+	AssertEQ<ops::fixed_string<23>>(data.fixLengthString, exp.fixLengthString, "fixLengthString");
+
+	//   std::vector<ops::fixed_string<16>> fixLengthStringOpenArr;
+	AssertEQ<int>(data.fixLengthStringOpenArr.size(), exp.fixLengthStringOpenArr.size(), "fixLengthStringOpenArr");
+	for (size_t i = 0; i < data.fixLengthStringOpenArr.size(); i++) AssertEQ<ops::fixed_string<16>>(data.fixLengthStringOpenArr[i], exp.fixLengthStringOpenArr[i], "fixLengthStringOpenArr");
+
+	//   ops::fixed_string<16> fixLengthStringFixArr[10];
+	for (int i = 0; i < 10; i++) AssertEQ<ops::fixed_string<16>>(data.fixLengthStringFixArr[i], exp.fixLengthStringFixArr[i], "fixLengthStringFixArr");
+
+	// Test fields in ChildData
 	AssertEQ<bool>(data.bo, exp.bo, "data.bo");
     AssertEQ<char>(data.b, exp.b, "data.b");
     AssertEQ<short>(data.sh, exp.sh);
@@ -192,6 +240,36 @@ void checkObjects(TestAll::ChildData& data, TestAll::ChildData& exp)
 // Fill ChildData with fixed values used for tests between languages
 void fillChildData(TestAll::ChildData& data)
 {
+	// Data for fields in BaseData
+	//   std::string baseText;
+	data.baseText = "dynamic string";
+	//   std::vector<std::string> stringOpenArr;
+	data.stringOpenArr.push_back("dyn str 1");
+	data.stringOpenArr.push_back("dyn str 2");
+	//   std::string stringFixArr[5];
+	data.stringFixArr[0] = "dsf 0";
+	data.stringFixArr[1] = "dsf 1";
+	data.stringFixArr[2] = "dsf 2";
+	data.stringFixArr[3] = "dsf 3";
+	data.stringFixArr[4] = "dsf 4";
+	//   ops::fixed_string<23> fixLengthString;
+	data.fixLengthString = "fixed length string";
+	//   std::vector<ops::fixed_string<16>> fixLengthStringOpenArr;
+	data.fixLengthStringOpenArr.push_back("fix len str 1");
+	data.fixLengthStringOpenArr.push_back("fix len str 2");
+	//   ops::fixed_string<16> fixLengthStringFixArr[10];
+	data.fixLengthStringFixArr[0] = "fsf 0";
+	data.fixLengthStringFixArr[1] = "fsf 1";
+	data.fixLengthStringFixArr[2] = "fsf 2";
+	data.fixLengthStringFixArr[3] = "fsf 3";
+	data.fixLengthStringFixArr[4] = "fsf 4";
+	data.fixLengthStringFixArr[5] = "fsf 5";
+	data.fixLengthStringFixArr[6] = "fsf 6";
+	data.fixLengthStringFixArr[7] = "fsf 7";
+	data.fixLengthStringFixArr[8] = "fsf 8";
+	data.fixLengthStringFixArr[9] = "fsf 9";
+
+	// Data for fields in ChildData
 	data.bo = true;
     data.b = 7;
     data.sh = -99;
@@ -318,104 +396,191 @@ void fillChildData(TestAll::ChildData& data)
 	data.ffruitarr[14].value = TestAll::Fruit::PEAR;
 }
 
+volatile bool gTerminate = false;
+
+void SignalHandler(int signal)
+{
+	if (signal == SIGINT) gTerminate = true;
+}
+
 int main(int argc, const char* args[])
 {
-	UNUSED(argc);
-	UNUSED(args);
-	TestAll::ChildData cd1;
-	TestAll::ChildData cd2;
-	TestAll::ChildData cd3;
+#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+	std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
+#endif
+	try {
+		signal(SIGINT, SignalHandler);
 
-	std::cout << "Test initial state..." << std::endl;
-	checkEmpty(cd1);
-	checkEmpty(cd2);
-	checkEmpty(cd3);
+		UNUSED(argc);
+		UNUSED(args);
+		TestAll::ChildData cd1;
+		TestAll::ChildData cd2;
+		TestAll::ChildData cd3;
 
-	checkObjects(cd1, cd2);
-	std::cout << "Finished " << std::endl;
+#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+		std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
+#endif
+
+		// ==============================================================
+		std::cout << "Test initial state..." << std::endl;
+		checkEmpty(cd1);
+		checkEmpty(cd2);
+		checkEmpty(cd3);
+
+		checkObjects(cd1, cd2);
+		std::cout << "Finished " << std::endl;
+
+#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+		std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
+#endif
+
+		std::cout << "Test cloning..." << std::endl;
+		fillChildData(cd1);
+		cd1.fillClone(&cd2);
+		checkObjects(cd1, cd2);
+
+		// Delete first object, recreate it and compare again
+		// This to check that cd2 is really a deep clone (no common object)
+	///TODO
 
 
-	std::cout << "Test cloning..." << std::endl;
-	fillChildData(cd1);
-	cd1.fillClone(&cd2);
+		std::cout << "Finished " << std::endl;
 
-	checkObjects(cd1, cd2);
+		std::cout << "Test Print Archiver" << std::endl;
+		{
+			ops::PrintArchiverOut* prt = new ops::PrintArchiverOut(std::cout);
 
-	// Delete first object, recreate it and compare again
-	// This to check that cd2 is really a deep clone (no common object)
-///TODO
+			prt->printObject("data", &cd1);
 
-
-	std::cout << "Finished " << std::endl;
-
-
-	std::cout << "Serialize filled object" << std::endl;
-	ops::MemoryMap map(1, 65536);
-	ops::ByteBuffer buf(&map);
-	ops::OPSArchiverOut ao(&buf);
-
-	std::cout << "  GetSize()= " << buf.GetSize() << std::endl;
-    ao.inout("data", cd1);
-	std::cout << "  GetSize()= " << buf.GetSize() << std::endl;
-	std::cout << "Serialize finished" << std::endl;
-
-
-	std::cout << "Test publish/subscribe" << std::endl;
-
-	ops::Participant* participant = ops::Participant::getInstance("TestAllDomain");
-	if(!participant) {
-		std::cout << "Create participant failed. do you have ops_config.xml on your rundirectory?" << std::endl;
-		exit(1);
-	}
-	participant->addTypeSupport(new TestAll::TestAllTypeFactory());
-
-	// Add an errorwriter instance to the participant to catch ev. internal OPS errors
-	// We can easily write our own if we want to log data in another way.
-	ops::ErrorWriter* errorWriter = new ops::ErrorWriter(std::cout);
-	participant->addListener(errorWriter);
-
-	// Setup & start subscriber w polling
-	ops::Topic topic = participant->createTopic("ChildTopic");
-	TestAll::ChildDataSubscriber sub(topic);
-	sub.start();
-
-	// Setup & start publisher
-	TestAll::ChildDataPublisher pub(topic);
-	pub.start();
-
-	// Publish data
-	pub.write(cd1);
-
-	// Check that sent data isn't affected by publish
-	checkObjects(cd1, cd2);
-
-	// Check received values against sent values
-	AssertEQ<bool>(sub.waitForNewData(100), true, "No data received");
-	bool flag = AssertEQ<bool>(sub.getData(cd3), true, "No received data");
-
-	sub.aquireMessageLock();
-	if (sub.getMessage()) {
-		AssertEQ<int>(sub.getMessage()->spareBytes.size(), 0, "spareBytes");
-	} else {
-		std::cout << "Failed: sub.getMessage() == NULL" << std::endl;
-	}
-	sub.releaseMessageLock();
-
-	if (flag) checkObjects(cd1, cd3);
-
-	std::cout << "Finished " << std::endl;
-
-	std::cout << "Waiting for more data... (Press Ctrl-C to terminate)" << std::endl;
-	while(true) {
-		if (sub.waitForNewData(100)) {
-			std::cout << "Received new data. Checking..." << std::endl;
-			sub.getData(cd3);
-			sub.aquireMessageLock();
-			AssertEQ<int>(sub.getMessage()->spareBytes.size(), 0, "spareBytes");
-			sub.releaseMessageLock();
-			checkObjects(cd1, cd3);
-			std::cout << "Data check OK" << std::endl;
+			delete prt;
 		}
+		std::cout << "Print Archiver Test Finished " << std::endl;
+
+#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+		std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
+#endif
+
+		// ==============================================================
+		std::cout << "Serialize filled object" << std::endl;
+		ops::MemoryMap map(1, 65536);
+		ops::ByteBuffer buf(&map);
+		ops::OPSArchiverOut ao(&buf);
+
+		std::cout << "  GetSize()= " << buf.GetSize() << std::endl;
+		ao.inout("data", cd1);
+		std::cout << "  GetSize()= " << buf.GetSize() << std::endl;
+		std::cout << "Serialize finished" << std::endl;
+
+#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+		std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
+#endif
+
+		// ==============================================================
+		std::cout << "Test publish/subscribe" << std::endl;
+
+		ops::Participant::getStaticErrorService()->addListener(new ops::ErrorWriter(std::cout));
+
+		ops::Participant* participant = ops::Participant::getInstance("TestAllDomain");
+		if (!participant) {
+			std::cout << "Create participant failed. do you have ops_config.xml on your rundirectory?" << std::endl;
+			throw std::exception();
+		}
+		participant->addTypeSupport(new TestAll::TestAllTypeFactory());
+
+#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+		std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
+#endif
+
+		std::cout << "Dump of configuration" << std::endl;
+		{
+			ops::PrintArchiverOut* prt = new ops::PrintArchiverOut(std::cout);
+
+			prt->printObject("ops_config", participant->getConfig());
+
+			delete prt;
+		}
+		std::cout << "Dump of configuration Finished " << std::endl;
+
+		// Add an errorwriter instance to the participant to catch ev. internal OPS errors
+		// We can easily write our own if we want to log data in another way.
+		ops::ErrorWriter* errorWriter = new ops::ErrorWriter(std::cout);
+		participant->addListener(errorWriter);
+
+		{
+			// Setup & start subscriber w polling
+			ops::Topic topic = participant->createTopic("ChildTopic");
+			TestAll::ChildDataSubscriber sub(topic);
+			sub.start();
+
+			// Setup & start publisher
+			TestAll::ChildDataPublisher pub(topic);
+			pub.start();
+
+#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+			std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
+#endif
+			// Publish data
+			pub.write(cd1);
+
+			// Check that sent data isn't affected by publish
+			checkObjects(cd1, cd2);
+
+			
+			// Check received values against sent values
+			AssertEQ<bool>(sub.waitForNewData(100), true, "No data received");
+			bool flag = AssertEQ<bool>(sub.getData(cd3), true, "No received data");
+
+			sub.aquireMessageLock();
+			if (sub.getMessage()) {
+				AssertEQ<int>(sub.getMessage()->spareBytes.size(), 0, "spareBytes");
+			} else {
+				std::cout << "Failed: sub.getMessage() == NULL" << std::endl;
+				gTestFailed = true;
+			}
+			sub.releaseMessageLock();
+
+			if (flag) checkObjects(cd1, cd3);
+
+			std::cout << "Finished " << std::endl;
+
+#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+			std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
+#endif
+
+			std::cout << "Waiting for more data... (Press Ctrl-C to terminate)" << std::endl;
+			while (!gTerminate) {
+				if (sub.waitForNewData(100)) {
+					std::cout << "Received new data. Checking..." << std::endl;
+					sub.getData(cd3);
+					sub.aquireMessageLock();
+					AssertEQ<int>(sub.getMessage()->spareBytes.size(), 0, "spareBytes");
+					sub.releaseMessageLock();
+					checkObjects(cd3, cd1);
+					std::cout << "Data check done" << std::endl;
+				}
+			}
+		}
+		
+#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+		std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
+#endif
+
+		delete participant;
+		ops::OPSConfigRepository::Instance()->DebugTotalClear();
+
+	}
+	catch (std::exception& e) {
+		std::cout << "Caugth std:exception: " << e.what() << std::endl;
+		gTestFailed = true;
+	}
+#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+	std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
+#endif
+
+	if (gTestFailed) {
+		std::cout << std::endl << "T e s t   F a i l e d" << std::endl;
+	} else {
+		std::cout << std::endl << "T e s t   O k" << std::endl;
 	}
 
 	return 0;

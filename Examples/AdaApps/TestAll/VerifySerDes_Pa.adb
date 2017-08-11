@@ -98,11 +98,16 @@ package body VerifySerDes_Pa is
 
   gErrorCount : Integer := 0;
 
+  procedure ErrorLog(str : String) is
+  begin
+    Log("### Failed: " & str);
+    gErrorCount := gErrorCount + 1;
+  end;
+
   function AssertEQ(val, exp : Boolean; str : string := "") return Boolean is
   begin
     if val /= exp then
-      Log("### Failed: " & str & ", value= " & Boolean'Image(val) & ", expected= " & Boolean'Image(exp));
-      gErrorCount := gErrorCount + 1;
+      ErrorLog(str & ", value= " & Boolean'Image(val) & ", expected= " & Boolean'Image(exp));
     end if;
     return val;
   end;
@@ -110,8 +115,7 @@ package body VerifySerDes_Pa is
   procedure AssertEQ(val, exp : Boolean; str : string := "") is
   begin
     if val /= exp then
-      Log("### Failed: " & str & ", value= " & Boolean'Image(val) & ", expected= " & Boolean'Image(exp));
-      gErrorCount := gErrorCount + 1;
+      ErrorLog(str & ", value= " & Boolean'Image(val) & ", expected= " & Boolean'Image(exp));
     end if;
   end;
 
@@ -121,17 +125,14 @@ package body VerifySerDes_Pa is
     if val /= exp then
       if val = null then
         if exp.all /= "" then
-          Log("### Failed: " & str & ", value= (null)" & ", expected= " & exp.all);
-          gErrorCount := gErrorCount + 1;
+          ErrorLog(str & ", value= (null)" & ", expected= " & exp.all);
         end if;
       elsif exp = null then
         if val.all /= "" then
-          Log("### Failed: " & str & ", value= " & val.all & ", expected= (null)");
-          gErrorCount := gErrorCount + 1;
+          ErrorLog(str & ", value= " & val.all & ", expected= (null)");
         end if;
       elsif val.all /= exp.all then
-        Log("### Failed: " & str & ", value= " & val.all & ", expected= " & exp.all);
-        gErrorCount := gErrorCount + 1;
+        ErrorLog(str & ", value= " & val.all & ", expected= " & exp.all);
       end if;
     end if;
   end;
@@ -145,8 +146,7 @@ package body VerifySerDes_Pa is
   procedure AssertIntEQ(val, exp : Item; str : string := "") is
   begin
     if val /= exp then
-      Log("### Failed: " & str & ", value= " & Item'Image(val) & ", expected= " & Item'Image(exp));
-      gErrorCount := gErrorCount + 1;
+      ErrorLog(str & ", value= " & Item'Image(val) & ", expected= " & Item'Image(exp));
     end if;
   end;
 
@@ -167,8 +167,7 @@ package body VerifySerDes_Pa is
   procedure AssertFloatEQ(val, exp : Item; str : string := "") is
   begin
     if val /= exp then
-      Log("### Failed: " & str & ", value= " & Item'Image(val) & ", expected= " & Item'Image(exp));
-      gErrorCount := gErrorCount + 1;
+      ErrorLog(str & ", value= " & Item'Image(val) & ", expected= " & Item'Image(exp));
     end if;
   end;
 
@@ -186,8 +185,7 @@ package body VerifySerDes_Pa is
   procedure AssertAccessEQ0(val, exp : Item_Arr_At; str : string := "") is
   begin
     if val /= exp then
-      Log("### Failed: " & str & ", Pointers are different");
-      gErrorCount := gErrorCount + 1;
+      ErrorLog(str & ", Pointers are different");
     end if;
   end;
 
@@ -208,8 +206,7 @@ package body VerifySerDes_Pa is
   procedure AssertAccessEQ10(val, exp : Item_Arr_At; str : string := "") is
   begin
     if val /= exp then
-      Log("### Failed: " & str & ", Pointers are different");
-      gErrorCount := gErrorCount + 1;
+      ErrorLog(str & ", Pointers are different");
     end if;
   end;
 
@@ -226,12 +223,10 @@ package body VerifySerDes_Pa is
   begin
     if val /= null or exp /= null then
       if val = null or exp = null then
-        Log("### Failed: " & str & ", A Pointer is null");
-        gErrorCount := gErrorCount + 1;
+        ErrorLog(str & ", A Pointer is null");
       else
         if val'length /= exp'length then
-          Log("### Failed: " & str & ", Arrays have different sizes");
-          gErrorCount := gErrorCount + 1;
+          ErrorLog(str & ", Arrays have different sizes");
         else
           for i in val'range loop
             AssertItem(val(i), exp(i), str);
@@ -260,12 +255,10 @@ package body VerifySerDes_Pa is
   begin
     if val /= null or exp /= null then
       if val = null or exp = null then
-        Log("### Failed: " & str & ", A Pointer is null");
-        gErrorCount := gErrorCount + 1;
+        ErrorLog(str & ", A Pointer is null");
       else
         if val'length /= exp'length then
-          Log("### Failed: " & str & ", Arrays have different sizes");
-          gErrorCount := gErrorCount + 1;
+          ErrorLog(str & ", Arrays have different sizes");
         else
           for i in val'range loop
             AssertItem(val(i), exp(i), str);
@@ -287,8 +280,7 @@ package body VerifySerDes_Pa is
   procedure AssertAccessEQ(val, exp : Item_At; str : string := "") is
   begin
     if val /= exp then
-      Log("### Failed: " & str & ", Pointers are different");
-      gErrorCount := gErrorCount + 1;
+      ErrorLog(str & ", Pointers are different");
     end if;
   end;
 
@@ -303,8 +295,7 @@ package body VerifySerDes_Pa is
   function AssertAccessNEQ(val, exp : Item_At; str : string := "") return Boolean is
   begin
     if val = exp and val /= null then
-      Log("### Failed: " & str & ", Pointers are equal");
-      gErrorCount := gErrorCount + 1;
+      ErrorLog(str & ", Pointers are equal");
       return False;
     end if;
     return True;
@@ -323,8 +314,7 @@ package body VerifySerDes_Pa is
   procedure AssertAccessEQ3(val, exp : Item_At_Arr_At; str : string := "") is
   begin
     if val /= exp then
-      Log("### Failed: " & str & ", Pointers are different");
-      gErrorCount := gErrorCount + 1;
+      ErrorLog(str & ", Pointers are different");
     end if;
   end;
 
@@ -343,12 +333,10 @@ package body VerifySerDes_Pa is
   begin
     if val /= null or exp /= null then
       if val = null or exp = null then
-        Log("### Failed: " & str & ", A Pointer is null");
-        gErrorCount := gErrorCount + 1;
+        ErrorLog(str & ", A Pointer is null");
       else
         if val.all'length /= exp.all'length then
-          Log("### Failed: " & str & ", Arrays have different sizes");
-          gErrorCount := gErrorCount + 1;
+          ErrorLog(str & ", Arrays have different sizes");
         else
           for i in val.all'range loop
             AssertItem(val.all(i), exp.all(i), str & "(" & Integer'Image(i) & ")");
@@ -367,8 +355,7 @@ package body VerifySerDes_Pa is
   procedure AssertAccessEQ4(val, exp : Item_Arr_At; str : string := "") is
   begin
     if val /= exp then
-      Log("### Failed: " & str & ", Pointers are different");
-      gErrorCount := gErrorCount + 1;
+      ErrorLog(str & ", Pointers are different");
     end if;
   end;
 
@@ -386,12 +373,10 @@ package body VerifySerDes_Pa is
   begin
     if val /= null or exp /= null then
       if val = null or exp = null then
-        Log("### Failed: " & str & ", A Pointer is null");
-        gErrorCount := gErrorCount + 1;
+        ErrorLog(str & ", A Pointer is null");
       else
         if val'length /= exp'length then
-          Log("Failed: " & str & ", Arrays have different sizes");
-          gErrorCount := gErrorCount + 1;
+          ErrorLog(str & ", Arrays have different sizes");
         else
           for i in val'range loop
             AssertItem(val(i), exp(i), str);
@@ -406,8 +391,7 @@ package body VerifySerDes_Pa is
   procedure AssertEQ(val : Boolean; str : string := "") is
   begin
     if not val then
-      Log("### Failed: " & str);
-      gErrorCount := gErrorCount + 1;
+      ErrorLog(str);
     end if;
   end;
 
@@ -494,6 +478,27 @@ package body VerifySerDes_Pa is
   begin
     Log("  Checking empty object...");
 
+    -- BaseData
+    --   std::string baseText;
+    AssertEQ(data.baseText, null, "baseText");
+
+    --   std::vector<std::string> stringOpenArr;
+    AssertPtrEQ(data.stringOpenArr, null, "stringOpenArr");
+
+    --   std::string stringFixArr[5];
+    for i in data.stringFixArr'Range loop AssertEQ(data.stringFixArr(i), null, "stringFixArr"); end loop;
+
+    --   ops::fixed_string<23> fixLengthString;
+    AssertEQ(data.fixLengthString, null, "fixLengthString");
+
+    --   std::vector<ops::fixed_string<16>> fixLengthStringOpenArr;
+    AssertPtrEQ(data.fixLengthStringOpenArr, null, "fixLengthStringOpenArr");
+
+    --   ops::fixed_string<16> fixLengthStringFixArr[10];
+    for i in data.fixLengthStringFixArr'Range loop AssertEQ(data.fixLengthStringFixArr(i), null, "fixLengthStringFixArr"); end loop;
+
+
+    -- ChildData
     dummy := AssertEQ(data.bo, false, "data.bo");
     AssertEQ(data.b, 0, "data.b");
     AssertEQ(data.sh, 0);
@@ -579,6 +584,27 @@ package body VerifySerDes_Pa is
   begin
     Log("  Comparing objects...");
 
+    -- BaseData
+    --   std::string baseText;
+    AssertEQ(data.baseText, exp.baseText, "baseText");
+
+    --   std::vector<std::string> stringOpenArr;
+    AssertArrEQ(data.stringOpenArr, exp.stringOpenArr, "stringOpenArr");
+
+    --   std::string stringFixArr[5];
+    AssertArrEQ(data.stringFixArr, exp.stringFixArr, "stringFixArr");
+
+    --   ops::fixed_string<23> fixLengthString;
+    AssertEQ(data.fixLengthString, exp.fixLengthString, "fixLengthString");
+
+    --   std::vector<ops::fixed_string<16>> fixLengthStringOpenArr;
+    AssertArrEQ(data.fixLengthStringOpenArr, exp.fixLengthStringOpenArr, "fixLengthStringOpenArr");
+
+    --   ops::fixed_string<16> fixLengthStringFixArr[10];
+    AssertArrEQ(data.fixLengthStringFixArr, exp.fixLengthStringFixArr, "fixLengthStringFixArr");
+
+
+    -- ChildData
     AssertEQ(data.bo, exp.bo, "data.bo");
     AssertEQ(data.b, exp.b, "data.b");
     AssertEQ(data.sh, exp.sh);
@@ -664,6 +690,38 @@ package body VerifySerDes_Pa is
   -- Fill ChildData with fixed values used for tests between languages
   procedure fillChildData(data: in out ChildData_Class_At) is
   begin
+    -- BasedData
+    --   baseText : String_At := null;
+    data.baseText := Copy("dynamic string");
+    --   stringOpenArr : String_Arr_At := null;
+    data.stringOpenArr := new String_Arr(0..1);
+    data.stringOpenArr(0) := Copy("dyn str 1");
+    data.stringOpenArr(1) := Copy("dyn str 2");
+    --   stringFixArr : String_Arr_At := new String_Arr'(0..4 => null);
+    data.stringFixArr(0) := Copy("dsf 0");
+    data.stringFixArr(1) := Copy("dsf 1");
+    data.stringFixArr(2) := Copy("dsf 2");
+    data.stringFixArr(3) := Copy("dsf 3");
+    data.stringFixArr(4) := Copy("dsf 4");
+    --   fixLengthString : String_At := null;
+    data.fixLengthString := Copy("fixed length string");
+    --   fixLengthStringOpenArr : String_Arr_At := null;
+    data.fixLengthStringOpenArr := new String_Arr(0..1);
+    data.fixLengthStringOpenArr(0) := Copy("fix len str 1");
+    data.fixLengthStringOpenArr(1) := Copy("fix len str 2");
+    --   fixLengthStringFixArr : String_Arr_At := new String_Arr'(0..9 => null);
+    data.fixLengthStringFixArr(0) := Copy("fsf 0");
+    data.fixLengthStringFixArr(1) := Copy("fsf 1");
+    data.fixLengthStringFixArr(2) := Copy("fsf 2");
+    data.fixLengthStringFixArr(3) := Copy("fsf 3");
+    data.fixLengthStringFixArr(4) := Copy("fsf 4");
+    data.fixLengthStringFixArr(5) := Copy("fsf 5");
+    data.fixLengthStringFixArr(6) := Copy("fsf 6");
+    data.fixLengthStringFixArr(7) := Copy("fsf 7");
+    data.fixLengthStringFixArr(8) := Copy("fsf 8");
+    data.fixLengthStringFixArr(9) := Copy("fsf 9");
+
+    -- ChildData
     data.bo := true;
     data.b := 7;
     data.sh := -99;
@@ -971,8 +1029,7 @@ package body VerifySerDes_Pa is
     begin
       part := Ops_Pa.Participant_Pa.getInstance("TestAllDomain");
       if part = null then
-        Put_Line("#### Failed to create Participant");
-        gErrorCount := gErrorCount + 1;
+        ErrorLog("#### Failed to create Participant");
         return;
       end if;
       declare
@@ -1016,8 +1073,7 @@ package body VerifySerDes_Pa is
           if sub.getMessage /= null then
             AssertPtrEQ(sub.getMessage.SpareBytes, null, "spareBytes");
           else
-            Log("### Failed: sub.getMessage() == NULL");
-            gErrorCount := gErrorCount + 1;
+            ErrorLog("### Failed: sub.getMessage() == NULL");
           end if;
         end;
 
@@ -1038,8 +1094,8 @@ package body VerifySerDes_Pa is
               begin
                 AssertPtrEQ(sub.getMessage.SpareBytes, null, "spareBytes");
               end;
-              checkObjects(cd1, cd3);
-              Log("Data check OK");
+              checkObjects(cd3, cd1);
+              Log("Data check done");
             end if;
           end loop;
         end;
@@ -1064,7 +1120,12 @@ package body VerifySerDes_Pa is
     Free(FBuf);
     Free(FMap);
     Log("Freeing finished");
+  end;
 
+  procedure VerifySerDes is
+  begin
+    GNAT.Ctrl_C.Install_Handler(My_Ctrl_C_Handler'Access);
+    VerifySerDes_Internal;
     Log("");
     if gErrorCount > 0 then
       Log("  !!!! " & Integer'Image(gErrorCount) & " ERRORS occurred !!!! ");
@@ -1072,16 +1133,10 @@ package body VerifySerDes_Pa is
       Log("  VERFIFY == OK ");
     end if;
     Log("");
-  end;
-
-  procedure VerifySerDes is
-  begin
-    GNAT.Ctrl_C.Install_Handler(My_Ctrl_C_Handler'Access);
-    VerifySerDes_Internal;
     GNAT.Ctrl_C.Uninstall_Handler;
   exception
     when others =>
-    GNAT.Ctrl_C.Uninstall_Handler;
+      GNAT.Ctrl_C.Uninstall_Handler;
   end;
 
 end;

@@ -76,6 +76,26 @@ var
 begin
   Log('Checking empty object...');
 
+  //BaseData
+  //   std::string baseText;
+  AssertEQ(data.baseText, '', 'baseText');
+
+  //   std::vector<std::string> stringOpenArr;
+  AssertEQ(Length(data.stringOpenArr), 0, 'stringOpenArr');
+
+  //   std::string stringFixArr[5];
+  for i := 0 to 4 do AssertEQ(data.stringFixArr[i], '', 'stringFixArr');
+
+  //   ops::fixed_string<23> fixLengthString;
+  AssertEQ(data.fixLengthString, '', 'fixLengthString');
+
+  //   std::vector<ops::fixed_string<16>> fixLengthStringOpenArr;
+  AssertEQ(Length(data.fixLengthStringOpenArr), 0, 'fixLengthStringOpenArr');
+
+  //   ops::fixed_string<16> fixLengthStringFixArr[10];
+  for i := 0 to 9 do AssertEQ(data.fixLengthStringFixArr[i], '', 'fixLengthStringFixArr');
+
+  // ChildData
   AssertEQ(data.bo, false, 'data.bo');
   AssertEQ(data.b, 0, 'data.b');
   AssertEQ(data.sh, 0);
@@ -157,6 +177,28 @@ var
 begin
   Log('Comparing objects...');
 
+  //BaseData
+  //   std::string baseText;
+  AssertEQ(data.baseText, exp.baseText, 'baseText');
+
+  //   std::vector<std::string> stringOpenArr;
+  AssertEQ(Length(data.stringOpenArr), Length(exp.stringOpenArr), 'stringOpenArr');
+  for i := 0 to Length(data.stringOpenArr) - 1 do AssertEQ(data.stringOpenArr[i], exp.stringOpenArr[i], 'stringOpenArr');
+
+  //   std::string stringFixArr[5];
+  for i := 0 to 4 do AssertEQ(data.stringFixArr[i], exp.stringFixArr[i], 'stringFixArr');
+
+  //   ops::fixed_string<23> fixLengthString;
+  AssertEQ(data.fixLengthString, exp.fixLengthString, 'fixLengthString');
+
+  //   std::vector<ops::fixed_string<16>> fixLengthStringOpenArr;
+  AssertEQ(Length(data.fixLengthStringOpenArr), Length(exp.fixLengthStringOpenArr), 'fixLengthStringOpenArr');
+  for i := 0 to Length(data.fixLengthStringOpenArr) - 1 do AssertEQ(data.fixLengthStringOpenArr[i], exp.fixLengthStringOpenArr[i], 'fixLengthStringOpenArr');
+
+  //   ops::fixed_string<16> fixLengthStringFixArr[10];
+  for i := 0 to 9 do AssertEQ(data.fixLengthStringFixArr[i], exp.fixLengthStringFixArr[i], 'fixLengthStringFixArr');
+
+  // ChildData
   AssertEQ(data.bo, exp.bo, 'data.bo');
   AssertEQ(data.b, exp.b, 'data.b');
   AssertEQ(data.sh, exp.sh);
@@ -231,6 +273,44 @@ procedure fillChildData(data: TestAll.ChildData.ChildData);
 var
   i : Integer;
 begin
+  // BasedData
+  //   std::string baseText;
+  //   baseText : AnsiString;
+  data.baseText := 'dynamic string';
+  //   std::vector<std::string> stringOpenArr;
+  //   stringOpenArr : TDynAnsiStringArray;
+  SetLength(data.stringOpenArr, 2);
+  data.stringOpenArr[0] := 'dyn str 1';
+  data.stringOpenArr[1] := 'dyn str 2';
+  //   std::string stringFixArr[5];
+  //   stringFixArr : array [0..4] of AnsiString;
+  data.stringFixArr[0] := 'dsf 0';
+  data.stringFixArr[1] := 'dsf 1';
+  data.stringFixArr[2] := 'dsf 2';
+  data.stringFixArr[3] := 'dsf 3';
+  data.stringFixArr[4] := 'dsf 4';
+  //   ops::fixed_string<23> fixLengthString;
+  //   fixLengthString : AnsiString;
+  data.fixLengthString := 'fixed length string';
+  //   std::vector<ops::fixed_string<16>> fixLengthStringOpenArr;
+  //   fixLengthStringOpenArr : TDynAnsiStringArray;
+  SetLength(data.fixLengthStringOpenArr, 2);
+  data.fixLengthStringOpenArr[0] := 'fix len str 1';
+  data.fixLengthStringOpenArr[1] := 'fix len str 2';
+  //   ops::fixed_string<16> fixLengthStringFixArr[10];
+  //   fixLengthStringFixArr : array [0..9] of AnsiString;
+  data.fixLengthStringFixArr[0] := 'fsf 0';
+  data.fixLengthStringFixArr[1] := 'fsf 1';
+  data.fixLengthStringFixArr[2] := 'fsf 2';
+  data.fixLengthStringFixArr[3] := 'fsf 3';
+  data.fixLengthStringFixArr[4] := 'fsf 4';
+  data.fixLengthStringFixArr[5] := 'fsf 5';
+  data.fixLengthStringFixArr[6] := 'fsf 6';
+  data.fixLengthStringFixArr[7] := 'fsf 7';
+  data.fixLengthStringFixArr[8] := 'fsf 8';
+  data.fixLengthStringFixArr[9] := 'fsf 9';
+
+  // ChildData
   data.bo := true;
   data.b := 7;
   data.sh := -99;
@@ -476,8 +556,8 @@ begin
       sub.aquireMessageLock;
       AssertEQ(Length(sub.getMessage.spareBytes), 0, 'spareBytes');
       sub.releaseMessageLock;
-      checkObjects(cd1, cd3);
-      Log('Data check OK');
+      checkObjects(cd3, cd1);
+      Log('Data check done');
     end;
   end;
 

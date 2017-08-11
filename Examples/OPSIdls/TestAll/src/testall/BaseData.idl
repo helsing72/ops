@@ -1,7 +1,26 @@
 package TestAll;
 
+/* ========================================
+   The BaseData() is used as a test for ...
+
+   tetetete
+=========================================== */
+
+//
+//kalle
+
+//@ toplevel = false
+//@ kalle=true
+//@olle
+//@ pelle=  0x567
 class BaseData
 {
+    /* hej hopp */
     string baseText;
+    string[] stringOpenArr;
+    string[5] stringFixArr;
 
+    string<23> fixLengthString;
+    string<16>[] fixLengthStringOpenArr;
+    string<16>[10] fixLengthStringFixArr;
 }

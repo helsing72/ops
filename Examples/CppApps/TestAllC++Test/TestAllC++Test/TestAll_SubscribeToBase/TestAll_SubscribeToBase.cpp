@@ -6,6 +6,7 @@
   #include <stdlib.h>
 #endif
 #include <ops.h>
+#include "OPSTypeDefs.h"
 #include "TestAll/ChildDataSubscriber.h"
 #include "TestAll/BaseDataSubscriber.h"
 #include "TestAll/TestAllTypeFactory.h"
@@ -16,14 +17,13 @@
 class BaseTypeFactory : public ops::SerializableFactory
 {
 	public:
-    ops::Serializable* create(std::string& type)
+    ops::Serializable* create(ops::TypeId_T& type)
     {
 		if(type == "TestAll.BaseData")
 		{
 			return new TestAll::BaseData();
 		}
 		return NULL;
-
     }
 
 };
@@ -37,7 +37,7 @@ public:
 	long counter;
 
 public:
-	Main(std::string configFile): counter(0)
+	Main(ops::FileName_T configFile): counter(0)
 	{
 		using namespace TestAll;
 		using namespace ops;
@@ -106,7 +106,7 @@ int main(int argc, char* args[])
 	//Add support for our types from TestAll IDL project.
 	//ops::OPSObjectFactory::getInstance()->add(new TestAll::TestAllTypeFactory()); 
 
-	std::string configFile = "";
+	ops::FileName_T configFile = "";
 	if (argc > 1) configFile = args[1];
 	
 	//Create an object that will listen to OPS events

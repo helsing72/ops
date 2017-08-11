@@ -29,6 +29,7 @@
 #include "OPSConfigRepository.h"
 #include "OPSUtilities.h"
 #include "PubIdChecker.h"
+#include "PrintArchiverOut.h"
 
 #ifdef _WIN32
 #include "SdsSystemTime.h"
@@ -91,12 +92,12 @@ class IHelper
 public:
 	virtual bool HasPublisher() = 0;
 	virtual bool HasSubscriber() = 0;
-	virtual void CreatePublisher(ops::Participant* part, std::string topicName) = 0;
+	virtual void CreatePublisher(ops::Participant* part, ops::ObjectName_T topicName) = 0;
 	virtual void DeletePublisher(bool doLog = true) = 0;
 	virtual void StartPublisher() = 0;
 	virtual void StopPublisher() = 0;
 	virtual void Write() = 0;
-	virtual void CreateSubscriber(ops::Participant* part, std::string topicName) = 0;
+	virtual void CreateSubscriber(ops::Participant* part, ops::ObjectName_T topicName) = 0;
 	virtual void DeleteSubscriber(bool doLog = true) = 0;
 	virtual void StartSubscriber() = 0;
 	virtual void StopSubscriber() = 0;
@@ -132,7 +133,7 @@ public:
 	bool HasPublisher() { return pub != NULL; }
 	bool HasSubscriber() { return sub != NULL; }
 
-	void CreatePublisher(ops::Participant* part, std::string topicName)
+	void CreatePublisher(ops::Participant* part, ops::ObjectName_T topicName)
 	{
 		if (pub) {
 			std::cout << "Publisher already exist for topic " << pub->getTopic().getName() << std::endl;
@@ -161,7 +162,7 @@ public:
 #else
 				myStream << " Linux(" << getpid() << ")" << std::ends;
 #endif
-				pub->setName("C++Test " + myStream.str());
+				pub->setName(std::string("C++Test " + myStream.str()).c_str());
 			}
 			catch (...) {
 				std::cout << "Requested topic '" << topicName << "' does not exist!!" << std::endl;
@@ -202,14 +203,18 @@ public:
 	void Write()
 	{
 		if (pub) {
-			//pub->writeOPSObject(&data);		// Write using pointer
-			pub->write(data);					// Write using ref
+			try {
+				//pub->writeOPSObject(&data);		// Write using pointer
+				pub->write(data);					// Write using ref
+			} catch (std::exception& e) {
+				std::cout << "Write(): Got exception: " << e.what() << std::endl;
+			}
 		} else {
 			std::cout << "Publisher must be created first!!" << std::endl;
 		}
 	}
 
-	void CreateSubscriber(ops::Participant* part, std::string topicName)
+	void CreateSubscriber(ops::Participant* part, ops::ObjectName_T topicName)
 	{
 		if (sub) {
 			std::cout << "Subscriber already exist for topic " << sub->getTopic().getName() << std::endl;
@@ -292,7 +297,7 @@ public:
 	virtual void onNewEvent(ops::Notifier<ops::PublicationIdNotification_T>* sender, ops::PublicationIdNotification_T arg)
 	{
 		UNUSED(sender);
-		std::string address;
+		ops::Address_T address;
 		int port;
 		arg.mess->getSource(address, port);
 
@@ -341,15 +346,15 @@ typedef CHelper<pizza::VessuvioData, pizza::VessuvioDataPublisher, pizza::Vessuv
 typedef CHelper<pizza::special::ExtraAllt, pizza::special::ExtraAlltPublisher, pizza::special::ExtraAlltSubscriber> TExtraAlltHelper;
 
 struct ItemInfo {
-	std::string Domain;
-	std::string TopicName;
-	std::string TypeName;
+	ops::ObjectName_T Domain;
+	ops::ObjectName_T TopicName;
+	ops::TypeId_T TypeName;
 
 	bool selected;
 	IHelper* helper;
 	ops::Participant* part;
 
-	ItemInfo(std::string dom, std::string top, std::string typ)
+	ItemInfo(ops::ObjectName_T dom, ops::ObjectName_T top, ops::TypeId_T typ)
 	{
 		Domain = dom;
 		TopicName = top;
@@ -378,7 +383,7 @@ public:
 			return;
 		}
 
-		std::string addr = "";
+		ops::Address_T addr = "";
 		int port = 0;
 		sub->getMessage()->getSource(addr, port);
 
@@ -412,7 +417,7 @@ public:
 			return;
 		}
 
-		std::string addr = "";
+		ops::Address_T addr = "";
 		int port = 0;
 		sub->getMessage()->getSource(addr, port);
 
@@ -428,7 +433,7 @@ public:
 
 	void onData(ops::Subscriber* sub, pizza::special::ExtraAllt* data)
   {
-		std::string addr = "";
+		ops::Address_T addr = "";
 		int port = 0;
 		sub->getMessage()->getSource(addr, port);
 
@@ -529,6 +534,16 @@ void printDomainInfo(ops::Participant* part)
 		"  Port: " << top.getPort() << std::endl <<
 		"  InSocketBufferSize: " << top.getInSocketBufferSize() << std::endl <<
 		"  OutSocketBufferSize: " << top.getOutSocketBufferSize() << std::endl;
+
+	std::cout << std::endl << "Dump of configuration" << std::endl;
+	{
+		ops::PrintArchiverOut* prt = new ops::PrintArchiverOut(std::cout);
+
+		prt->printObject("ops_config", part->getDomain());
+
+		delete prt;
+	}
+	std::cout << std::endl << "Dump of configuration Finished " << std::endl;
 
 }
 
