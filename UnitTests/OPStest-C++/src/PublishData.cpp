@@ -96,7 +96,7 @@ public:
 		} else {
 			try {
 				//Create topic, might throw ops::NoSuchTopicException
-				ops::Topic topic = part->createTopic(topicName);
+				ops::Topic topic = part->createTopic(topicName.c_str());
 
 				//Create a publisher on that topic
 				pub = new DataTypePublisher(topic);
@@ -107,7 +107,7 @@ public:
 #else
 				myStream << " Linux(" << getpid() << ")" << std::ends;
 #endif
-				pub->setName("C++Test " + myStream.str());
+				pub->setName(std::string("C++Test " + myStream.str()).c_str());
 			}
 			catch (...) {
 				std::cout << "Requested topic '" << topicName << "' does not exist!!" << std::endl;
@@ -185,7 +185,6 @@ public:
 
 	void onDeadlineMissed(ops::DeadlineMissedEvent* evt)
 	{
-	        UNUSED(evt)
 		std::cout << "Deadline Missed for topic " << sub->getTopic().getName() << std::endl;
 	}
 
@@ -223,22 +222,13 @@ class MyListener :
 		public CHelperListener<pizza::special::ExtraAllt>
 {
 public:
-	void onData(ops::Subscriber* sub, pizza::special::ExtraAllt* data)
-	{
-	  UNUSED(sub)
-	  UNUSED(data)
-	}
-	void onData(ops::Subscriber* sub, pizza::VessuvioData* data)
-	{
-	  UNUSED(sub)
-	  UNUSED(data)
-	}
+	void onData(ops::Subscriber* sub, pizza::special::ExtraAllt* data){}
+	void onData(ops::Subscriber* sub, pizza::VessuvioData* data){}
 };
 
 int main(int argc, char**argv)
 {
-	UNUSED(argc)
-	UNUSED(argv)
+
 	// --------------------------------------------------------------------
 	MyListener myListener;
 

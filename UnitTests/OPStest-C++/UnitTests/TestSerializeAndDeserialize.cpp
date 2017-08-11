@@ -42,7 +42,7 @@ TEST_F(Test_OPS_Serialization_And_Deserialization, test_Vesuvio_OPSObject) {
 	ops::OPSArchiverOut out(&buf);
 	ops::OPSArchiverIn  in(&buf, &fact);
 
-	out.inout(std::string("data"), &vessuvio);
+	out.inout("data", &vessuvio);
 
 	EXPECT_EQ(buf.GetSize(), 89);
 
@@ -50,7 +50,7 @@ TEST_F(Test_OPS_Serialization_And_Deserialization, test_Vesuvio_OPSObject) {
 
 	EXPECT_EQ(buf.GetSize(), 0);
 
-	recreatedVessuvio = dynamic_cast<pizza::VessuvioData*>(in.inout(std::string("data"), recreatedVessuvio));
+	recreatedVessuvio = dynamic_cast<pizza::VessuvioData*>(in.inout("data", recreatedVessuvio));
 
 	EXPECT_TRUE(recreatedVessuvio) << "failed creating Vessuvio object";
 
@@ -78,7 +78,7 @@ TEST_F(Test_OPS_Serialization_And_Deserialization, test_Vesuvio_OPSMessage) {
 
 	EXPECT_EQ(buf.GetSize(), 0);
 
-	out.inout(std::string("data"), &mess);
+	out.inout("data", &mess);
 
 	EXPECT_EQ((int) buf.GetSize(), 148);
 
@@ -87,7 +87,7 @@ TEST_F(Test_OPS_Serialization_And_Deserialization, test_Vesuvio_OPSMessage) {
 
 	EXPECT_EQ((int) buf.GetSize(), 0);
 
-	vessuvioObject 		= dynamic_cast<ops::OPSObject*>(in.inout(std::string("data"), vessuvioObject));
+	vessuvioObject 		= dynamic_cast<ops::OPSObject*>(in.inout("data", vessuvioObject));
 	vessuvioMessage 	= dynamic_cast<ops::OPSMessage*>(vessuvioObject);
 	recreatedVessuvio 	= dynamic_cast<pizza::VessuvioData*>(vessuvioMessage->getData());
 
@@ -116,7 +116,7 @@ TEST_F(Test_OPS_Serialization_And_Deserialization, test_ExtraAllt_OPSObject) {
 
 	EXPECT_EQ(buf.GetSize(), 0);
 
-	out.inout(std::string("data"), &extraAllt);
+	out.inout("data", &extraAllt);
 
 	EXPECT_EQ(buf.GetSize(), 815);
 
@@ -125,7 +125,7 @@ TEST_F(Test_OPS_Serialization_And_Deserialization, test_ExtraAllt_OPSObject) {
 
 	EXPECT_EQ((int) buf.GetSize(), 0);
 
-	recreatedExtraAllt = dynamic_cast<pizza::special::ExtraAllt*>(in.inout(std::string("data"), recreatedExtraAllt));
+	recreatedExtraAllt = dynamic_cast<pizza::special::ExtraAllt*>(in.inout("data", recreatedExtraAllt));
 
 	EXPECT_TRUE(recreatedExtraAllt) << "Failed to create ExtraAllt object";
 
@@ -156,7 +156,7 @@ TEST_F(Test_OPS_Serialization_And_Deserialization, test_ExtraAllt_OPSMessage) {
 
 	EXPECT_EQ(buf.GetSize(), 0);
 
-	out.inout(std::string("data"), &mess);
+	out.inout("data", &mess);
 
 	EXPECT_EQ(buf.GetSize(), 874);
 
@@ -165,7 +165,7 @@ TEST_F(Test_OPS_Serialization_And_Deserialization, test_ExtraAllt_OPSMessage) {
 
 	EXPECT_EQ(buf.GetSize(), 0);
 
-	extraAlltObject 	= dynamic_cast<ops::OPSObject*>(in.inout(std::string("data"), extraAlltObject));
+	extraAlltObject 	= dynamic_cast<ops::OPSObject*>(in.inout("data", extraAlltObject));
 	extraAlltMessage 	= dynamic_cast<ops::OPSMessage*>(extraAlltObject);
 	recreatedExtraAllt 	= dynamic_cast<pizza::special::ExtraAllt*>(extraAlltMessage->getData());
 

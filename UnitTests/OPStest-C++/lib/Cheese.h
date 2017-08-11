@@ -17,8 +17,8 @@ class Cheese :
 	public ops::OPSObject
 {
 public:
-   static std::string getTypeName(){return std::string("pizza.special.Cheese");}
-	
+   static ops::TypeId_T getTypeName(){return ops::TypeId_T("pizza.special.Cheese");}
+
 	std::string name;
 	double age;
 
@@ -27,7 +27,7 @@ public:
         : ops::OPSObject()
 		, age(0)
     {
-        OPSObject::appendType(std::string("pizza.special.Cheese"));
+        OPSObject::appendType(ops::TypeId_T("pizza.special.Cheese"));
 
 
     }
@@ -36,7 +36,7 @@ public:
        : ops::OPSObject()
 		, age(0)
     {
-        OPSObject::appendType(std::string("pizza.special.Cheese"));
+        OPSObject::appendType(ops::TypeId_T("pizza.special.Cheese"));
 
         __c.fillClone((Cheese*)this);
 
@@ -53,8 +53,8 @@ public:
     void serialize(ops::ArchiverInOut* archive)
     {
 		ops::OPSObject::serialize(archive);
-		archive->inout(std::string("name"), name);
-		archive->inout(std::string("age"), age);
+		archive->inout("name", name);
+		archive->inout("age", age);
 
     }
     //Returns a deep copy of this object.
@@ -80,7 +80,7 @@ public:
     {
 
     }
-    
+
 };
 
 }}

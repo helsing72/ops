@@ -20,26 +20,26 @@ public:
 
 	std::string ham;
 
-	static std::string getTypeName()
+	static ops::TypeId_T getTypeName()
 	{
-	   return std::string("pizza.VessuvioData");
+	   return ops::TypeId_T("pizza.VessuvioData");
 	}
-	
+
     ///Default constructor.
     VessuvioData()
         : PizzaData()
-		
+
     {
-        OPSObject::appendType(std::string("pizza.VessuvioData"));
+        OPSObject::appendType(ops::TypeId_T("pizza.VessuvioData"));
 
 
     }
     ///Copy-constructor making full deep copy of a(n) VessuvioData object.
     VessuvioData(const VessuvioData& __c)
        : PizzaData()
-		
+
     {
-        OPSObject::appendType(std::string("pizza.VessuvioData"));
+        OPSObject::appendType(ops::TypeId_T("pizza.VessuvioData"));
 
         __c.fillClone((VessuvioData*)this);
 
@@ -56,7 +56,7 @@ public:
     void serialize(ops::ArchiverInOut* archive)
     {
 		PizzaData::serialize(archive);
-		archive->inout(std::string("ham"), ham);
+		archive->inout("ham", ham);
     }
 
     //Returns a deep copy of this object.
@@ -81,7 +81,7 @@ public:
     {
 
     }
-    
+
 };
 
 }

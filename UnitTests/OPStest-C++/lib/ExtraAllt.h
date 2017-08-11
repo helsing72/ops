@@ -19,8 +19,8 @@ class ExtraAllt :
 	public LHCData
 {
 public:
-   static std::string getTypeName(){return std::string("pizza.special.ExtraAllt");}
-	
+   static ops::TypeId_T getTypeName(){return ops::TypeId_T("pizza.special.ExtraAllt");}
+
     ///Does the order include extra cheese???
     bool extraCheese;
     ///@limits(0,INFINITY)
@@ -47,7 +47,7 @@ public:
         : LHCData()
         , extraCheese(false), nrOfMushRooms(0), meetQuality(0), timestamp(0), timeBakedHours(0), timeBakedSeconds(0), testingShort(0)
     {
-        OPSObject::appendType(std::string("pizza.special.ExtraAllt"));
+        OPSObject::appendType(ops::TypeId_T("pizza.special.ExtraAllt"));
         cheese_ = new pizza::special::Cheese;
 
 
@@ -57,7 +57,7 @@ public:
        : LHCData()
         , extraCheese(false), nrOfMushRooms(0), meetQuality(0), timestamp(0), timeBakedHours(0), timeBakedSeconds(0), testingShort(0)
     {
-        OPSObject::appendType(std::string("pizza.special.ExtraAllt"));
+        OPSObject::appendType(ops::TypeId_T("pizza.special.ExtraAllt"));
         cheese_ = new pizza::special::Cheese;
 
         __c.fillClone((ExtraAllt*)this);
@@ -75,24 +75,24 @@ public:
     void serialize(ops::ArchiverInOut* archive)
     {
         LHCData::serialize(archive);
-        archive->inout(std::string("extraCheese"), extraCheese);
-        archive->inout(std::string("nrOfMushRooms"), nrOfMushRooms);
-        archive->inout(std::string("meetQuality"), meetQuality);
-        archive->inout(std::string("timestamp"), timestamp);
-        archive->inout(std::string("timeBakedHours"), timeBakedHours);
-        archive->inout(std::string("timeBakedSeconds"), timeBakedSeconds);
-        archive->inout(std::string("description"), description);
-        archive->inout(std::string("testingShort"), testingShort);
-        cheese_ = (pizza::special::Cheese*) archive->inout(std::string("cheese_"), cheese_);
-        archive->inout(std::string("bools"), bools);
-        archive->inout(std::string("bytes"), bytes);
-        archive->inout(std::string("ints"), ints);
-        archive->inout(std::string("longs"), longs);
-        archive->inout(std::string("floats"), floats);
-        archive->inout(std::string("doubles"), doubles);
-        archive->inout(std::string("strings"), strings);
-        archive->inout(std::string("shorts"), shorts);
-        archive->inout<pizza::special::Cheese>(std::string("cheeses"), cheeses, pizza::special::Cheese());
+        archive->inout("extraCheese", extraCheese);
+        archive->inout("nrOfMushRooms", nrOfMushRooms);
+        archive->inout("meetQuality", meetQuality);
+        archive->inout("timestamp", timestamp);
+        archive->inout("timeBakedHours", timeBakedHours);
+        archive->inout("timeBakedSeconds", timeBakedSeconds);
+        archive->inout("description", description);
+        archive->inout("testingShort", testingShort);
+        cheese_ = (pizza::special::Cheese*) archive->inout("cheese_", cheese_);
+        archive->inout("bools", bools);
+        archive->inout("bytes", bytes);
+        archive->inout("ints", ints);
+        archive->inout("longs", longs);
+        archive->inout("floats", floats);
+        archive->inout("doubles", doubles);
+        archive->inout("strings", strings);
+        archive->inout("shorts", shorts);
+        archive->inout<pizza::special::Cheese>("cheeses", cheeses, pizza::special::Cheese());
 
     }
     //Returns a deep copy of this object.
@@ -136,7 +136,7 @@ public:
         if(cheese_) delete cheese_;
 
     }
-    
+
 };
 
 }}

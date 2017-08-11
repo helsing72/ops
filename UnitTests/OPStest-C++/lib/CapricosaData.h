@@ -18,25 +18,25 @@ class CapricosaData :
 	public VessuvioData
 {
 public:
-   static std::string getTypeName(){return std::string("pizza.CapricosaData");}
-	
+   static ops::TypeId_T getTypeName(){return ops::TypeId_T("pizza.CapricosaData");}
+
 	std::string mushrooms;
 
     ///Default constructor.
     CapricosaData()
         : VessuvioData()
-		
+
     {
-        OPSObject::appendType(std::string("pizza.CapricosaData"));
+        OPSObject::appendType(ops::TypeId_T("pizza.CapricosaData"));
 
 
     }
     ///Copy-constructor making full deep copy of a(n) CapricosaData object.
     CapricosaData(const CapricosaData& __c)
        : VessuvioData()
-		
+
     {
-        OPSObject::appendType(std::string("pizza.CapricosaData"));
+        OPSObject::appendType(ops::TypeId_T("pizza.CapricosaData"));
 
         __c.fillClone((CapricosaData*)this);
 
@@ -53,7 +53,7 @@ public:
     void serialize(ops::ArchiverInOut* archive)
     {
 		VessuvioData::serialize(archive);
-		archive->inout(std::string("mushrooms"), mushrooms);
+		archive->inout("mushrooms", mushrooms);
 
     }
     //Returns a deep copy of this object.
@@ -78,7 +78,7 @@ public:
     {
 
     }
-    
+
 };
 
 }

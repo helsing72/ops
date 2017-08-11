@@ -16,26 +16,26 @@ namespace pizza {
 class PizzaData : public ops::OPSObject
 {
 public:
-   static std::string getTypeName(){return std::string("pizza.PizzaData");}
-	
+   static ops::TypeId_T getTypeName(){return ops::TypeId_T("pizza.PizzaData");}
+
 	std::string cheese;
 	std::string tomatoSauce;
 
     ///Default constructor.
     PizzaData()
         : ops::OPSObject()
-		
+
     {
-        OPSObject::appendType(std::string("pizza.PizzaData"));
+        OPSObject::appendType(ops::TypeId_T("pizza.PizzaData"));
 
 
     }
     ///Copy-constructor making full deep copy of a(n) PizzaData object.
     PizzaData(const PizzaData& __c)
        : ops::OPSObject()
-		
+
     {
-        OPSObject::appendType(std::string("pizza.PizzaData"));
+        OPSObject::appendType(ops::TypeId_T("pizza.PizzaData"));
 
         __c.fillClone((PizzaData*)this);
 
@@ -52,8 +52,8 @@ public:
     void serialize(ops::ArchiverInOut* archive)
     {
 		ops::OPSObject::serialize(archive);
-		archive->inout(std::string("cheese"), cheese);
-		archive->inout(std::string("tomatoSauce"), tomatoSauce);
+		archive->inout("cheese", cheese);
+		archive->inout("tomatoSauce", tomatoSauce);
 
     }
     //Returns a deep copy of this object.
@@ -79,7 +79,7 @@ public:
     {
 
     }
-    
+
 };
 
 }

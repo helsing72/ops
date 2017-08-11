@@ -19,8 +19,8 @@ class LHCData :
 	public pizza::CapricosaData
 {
 public:
-   static std::string getTypeName(){return std::string("pizza.special.LHCData");}
-	
+   static ops::TypeId_T getTypeName(){return ops::TypeId_T("pizza.special.LHCData");}
+
 	std::string bearnaise;
 	std::string beef;
 	std::vector<pizza::PizzaData> p;
@@ -28,18 +28,18 @@ public:
     ///Default constructor.
     LHCData()
         : pizza::CapricosaData()
-		
+
     {
-        OPSObject::appendType(std::string("pizza.special.LHCData"));
+        OPSObject::appendType(ops::TypeId_T("pizza.special.LHCData"));
 
 
     }
     ///Copy-constructor making full deep copy of a(n) LHCData object.
     LHCData(const LHCData& __c)
        : pizza::CapricosaData()
-		
+
     {
-        OPSObject::appendType(std::string("pizza.special.LHCData"));
+        OPSObject::appendType(ops::TypeId_T("pizza.special.LHCData"));
 
         __c.fillClone((LHCData*)this);
 
@@ -56,9 +56,9 @@ public:
     void serialize(ops::ArchiverInOut* archive)
     {
 		pizza::CapricosaData::serialize(archive);
-		archive->inout(std::string("bearnaise"), bearnaise);
-		archive->inout(std::string("beef"), beef);
-		archive->inout<pizza::PizzaData>(std::string("p"), p, pizza::PizzaData());
+		archive->inout("bearnaise", bearnaise);
+		archive->inout("beef", beef);
+		archive->inout<pizza::PizzaData>("p", p, pizza::PizzaData());
 
     }
     //Returns a deep copy of this object.
@@ -85,7 +85,7 @@ public:
     {
 
     }
-    
+
 };
 
 }}

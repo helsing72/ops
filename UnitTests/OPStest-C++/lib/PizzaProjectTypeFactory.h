@@ -22,7 +22,7 @@ namespace PizzaProject {
 class PizzaProjectTypeFactory : public ops::SerializableFactory
 {
 public:
-    ops::Serializable* create(std::string& type)
+    ops::Serializable* create(ops::TypeId_T& type)
     {
 		if (type == ("ops.protocol.OPSMessage"))
 		{
