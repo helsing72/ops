@@ -6,6 +6,8 @@ package samples;
 
 import ops.OPSObject;
 import configlib.ArchiverInOut;
+import configlib.SerializableFactory;
+import configlib.Serializable;
 import java.io.IOException;
 
 public class SampleData extends OPSObject
@@ -30,7 +32,16 @@ public class SampleData extends OPSObject
     public java.util.Vector<String> strings = new java.util.Vector<String>();
     public java.util.Vector<String> s43vect = new java.util.Vector<String>();
     public java.util.Vector<UserData> uDatas = new java.util.Vector<UserData>();
+
+
+    private static SerializableFactory factory = new TypeFactory();
+
     public static String getTypeName(){return "samples.SampleData";}
+
+    public static SerializableFactory getTypeFactory()
+    {
+        return factory;
+    }
 
     public SampleData()
     {
@@ -76,7 +87,7 @@ public class SampleData extends OPSObject
     {
         super.fillClone(cloneO);
         SampleData cloneResult = (SampleData)cloneO;
-        cloneResult.boo = this.boo;
+                cloneResult.boo = this.boo;
         cloneResult.b = this.b;
         cloneResult.sh = this.sh;
         cloneResult.i = this.i;
@@ -97,6 +108,21 @@ public class SampleData extends OPSObject
         java.util.Collections.copy(cloneResult.s43vect, this.s43vect);
         java.util.Collections.copy(cloneResult.uDatas, this.uDatas);
 
+    }
+
+    private static class TypeFactory implements SerializableFactory
+    {
+        public Serializable create(String type)
+        {
+            if (type.equals(SampleData.getTypeName()))
+            {
+                return new SampleData();
+            }
+            else
+            {
+                return null;
+            }
+        }
     }
 }
 ```

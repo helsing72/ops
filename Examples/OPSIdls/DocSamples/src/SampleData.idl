@@ -1,0 +1,25 @@
+package samples;
+class SampleData
+{
+   boolean boo;
+   byte b;
+   short sh;
+   int i;
+   long l;
+   float f;
+   double d;
+   string s;
+   string<25> s25;
+   UserData uData;
+
+   boolean[] boos;
+   byte[] bytes;
+   short[] shorts;
+   int[] ints;
+   long[] longs;
+   float[] floats;
+   double[] doubles;
+   string[] strings;
+   string<43>[] s43vect;
+   UserData[] uDatas;
+}
