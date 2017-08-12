@@ -2,17 +2,11 @@ package TestAll;
 
 /* ========================================
    The BaseData() is used as a test for ...
-
-   tetetete
 =========================================== */
 
 //
 //kalle
 
-//@ toplevel = false
-//@ kalle=true
-//@olle
-//@ pelle=  0x567
 class BaseData
 {
     /* hej hopp */

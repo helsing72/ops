@@ -1,5 +1,17 @@
 package TestAll;
 
+/*
+   TestData() is not used on its own. It is only used from other idls.
+*/
+
+// Skip generation of publisher and subscriber for this class
+//@ toplevel = false
+
+// Test of more directives (currently not used for anything)
+//@ kalle=true
+//@olle
+//@ pelle=  0x567
+
 class TestData
 {
     string text;
