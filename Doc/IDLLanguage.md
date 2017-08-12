@@ -137,7 +137,7 @@ There is a special form of comments that is used to give instructions to the OPS
 
 | Directive | Values | Default | Description |
 |-----------|--------|---------|-------------|
-| toplevel  | true / false | true | Publishers/Subscribers are only generated for toplevel classes |
+| toplevel  | true / false | true | Publishers/Subscribers are only generated for toplevel classes. (only supported for Ada, C++, Java) |
 
 Example of usage:
 
