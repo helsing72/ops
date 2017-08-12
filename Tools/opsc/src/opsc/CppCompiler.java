@@ -74,8 +74,12 @@ public class CppCompiler extends opsc.Compiler
                 compileEnum(idlClass);
             } else {
                 compileDataClass(idlClass);
-                compileSubscriber(idlClass);
-                compilePublisher(idlClass);
+                if (!isTopLevel(idlClass)) {
+                    System.out.println("Info: Cpp, skipping generation of publisher/subscriber for " + idlClass.getClassName());
+                } else {
+                    compileSubscriber(idlClass);
+                    compilePublisher(idlClass);
+                }
             }
         } catch (IOException ioe) {
             System.out.println("Failed to generate code for " + idlClass.getClassName());

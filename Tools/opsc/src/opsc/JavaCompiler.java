@@ -62,8 +62,12 @@ public class JavaCompiler extends opsc.Compiler
                 else
                 {
                     compileDataClass(iDLClass);
-                    compileSubscriber(iDLClass);
-                    compilePublisher(iDLClass);
+                    if (!isTopLevel(iDLClass)) {
+                        System.out.println("Info: Java, skipping generation of publisher/subscriber for " + iDLClass.getClassName());
+                    } else {
+                        compileSubscriber(iDLClass);
+                        compilePublisher(iDLClass);
+                    }
                 }
               }
             }

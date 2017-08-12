@@ -73,8 +73,12 @@ public class AdaCompiler extends opsc.Compiler
                     compileEnum(iDLClass);
                 } else {
                     compileDataClass(iDLClass);
-                    compileSubscriber(iDLClass);
-                    compilePublisher(iDLClass);
+                    if (!isTopLevel(iDLClass)) {
+                      System.out.println("Info: Ada, skipping generation of publisher/subscriber for " + iDLClass.getClassName());
+                    } else {
+                      compileSubscriber(iDLClass);
+                      compilePublisher(iDLClass);
+                    }
                 }
               }
             }

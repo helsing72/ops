@@ -170,4 +170,27 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
         }
     }
 
+    // Directive helpers
+    // -----------------
+
+    // Returns true if class is a toplevel class
+    protected boolean isTopLevel(IDLClass idlClass)
+    {
+        String s = idlClass.getDirective();
+        int idx = s.indexOf("toplevel");
+        if (idx != -1) {
+            int idx2 = s.indexOf(",", idx);
+            String sub;
+            if (idx2 == -1) {
+                sub = s.substring(idx);
+            } else {
+                sub = s.substring(idx, idx2);
+            }
+            //System.out.println("Info: isTopLevel(), '" + sub + "',  " + idlClass.getClassName());
+
+            if (sub.toLowerCase().indexOf("false") != -1) return false;
+        }
+        return true;  //default
+    }
+
 }
