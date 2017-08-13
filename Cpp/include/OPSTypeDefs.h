@@ -153,4 +153,47 @@ typedef  int16_t __int16;
 
 #endif
 
+// ---------------------------------------------
+// Construct a compilation signature to be able to detect mismatched headers and compiled libraries.
+// The compile signature is compiled into libraries and are checked at runtime against the define.
+
+#ifdef FIXED_NO_STD_STRING
+	#define COMPILESIGNATURE_FIXED ""
+#else
+	#define COMPILESIGNATURE_FIXED "STD"
+#endif
+
+#ifdef USE_C11
+	#define COMPILESIGNATURE_CXX "C11"
+#else
+	#define COMPILESIGNATURE_CXX ""
+#endif
+
+#ifdef OPSSLIM_NORESERVE
+	#define COMPILESIGNATURE_SLIM "SLIM"
+#else
+	#define COMPILESIGNATURE_SLIM ""
+#endif
+
+#ifdef USE_FIXED_LENGTH_STRINGS
+	#define stringer(x) stringerx(x)
+	#define stringerx(a) #a
+	#define COMPILESIGNATURE_STRINGS \
+		stringer(FIXED_OBJECT_NAME_SIZE) " " \
+		stringer(FIXED_MESSAGE_KEY_SIZE) " " \
+		stringer(FIXED_TYPE_ID_SIZE) " " \
+		stringer(FIXED_CHANNEL_ID_SIZE) " " \
+		stringer(FIXED_FILENAME_SIZE) 
+#else
+	#define COMPILESIGNATURE_STRINGS "STD"
+#endif
+
+#ifdef DEBUG_OPSOBJECT_COUNTER
+	#define COMPILESIGNATURE_CTR "CTR"
+#else
+	#define COMPILESIGNATURE_CTR ""
+#endif
+
+#define OPS_COMPILESIGNATURE (COMPILESIGNATURE_FIXED COMPILESIGNATURE_CXX COMPILESIGNATURE_SLIM COMPILESIGNATURE_STRINGS COMPILESIGNATURE_CTR)
+
 #endif	/* _OPSTYPEDEFS_H */

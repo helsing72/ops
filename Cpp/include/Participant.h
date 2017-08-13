@@ -22,6 +22,7 @@
 #define	ops_ParticipantH
 
 #include <map>
+#include <exception>
 
 #include "OPSTypeDefs.h"
 #include "ThreadPool.h"
@@ -57,12 +58,29 @@ namespace ops
 		friend class SendDataHandlerFactory;
 		friend class ParticipantInfoDataListener;
 	public:
+		// Mismatched header and library detection
+		struct mismatched_headers_and_library : public std::exception {
+			const char* what() const noexcept { return "Mismatched headers and compiled library"; }
+		};
+		static InternalString_T LibraryCompileSignature();
+		static bool CheckCompileSignature() { return LibraryCompileSignature() == OPS_COMPILESIGNATURE; }
 
-		///By Singelton, one Participant per participantID
+		///By Singelton, one Participant per domainID::participantID
 		static std::map<ParticipantKey_T, Participant*> instances;
-		static Participant* getInstance(ObjectName_T domainID);
-		static Participant* getInstance(ObjectName_T domainID, ObjectName_T participantID);
-		static Participant* getInstance(ObjectName_T domainID, ObjectName_T participantID, FileName_T configFile);
+
+		static Participant* getInstance(ObjectName_T domainID) 
+		{
+			return getInstance(domainID, "DEFAULT_PARTICIPANT");
+		}
+		static Participant* getInstance(ObjectName_T domainID, ObjectName_T participantID)
+		{
+			return getInstance(domainID, participantID, "");
+		}
+		static Participant* getInstance(ObjectName_T domainID, ObjectName_T participantID, FileName_T configFile)
+		{
+			if (!CheckCompileSignature()) throw mismatched_headers_and_library();
+			return getInstanceInternal(domainID, participantID, configFile);
+		}
 		
 		//Report an error via all participants ErrorServices or the static ErrorService if it exists
 		static void reportStaticError(Error* err);
@@ -136,6 +154,8 @@ namespace ops
 		virtual ~Participant();
 
 	private:
+
+		static Participant* getInstanceInternal(ObjectName_T domainID, ObjectName_T participantID, FileName_T configFile);
 
 		///Constructor is private instance are acquired through getInstance()
 		Participant(ObjectName_T domainID_, ObjectName_T participantID_, FileName_T configFile_);

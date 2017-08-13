@@ -46,6 +46,11 @@ namespace ops
 	std::map<ParticipantKey_T, Participant*> Participant::instances;
 	Lockable Participant::creationMutex;
 
+	// Compile signature
+	InternalString_T Participant::LibraryCompileSignature()
+	{
+		return OPS_COMPILESIGNATURE;
+	}
 
 	// --------------------------------------------------------------------------------
 	// A static error service that user could create, by calling getStaticErrorService(), and connect to. 
@@ -66,16 +71,6 @@ namespace ops
 
 	// --------------------------------------------------------------------------------
 
-	Participant* Participant::getInstance(ObjectName_T domainID_)
-	{
-		return getInstance(domainID_, "DEFAULT_PARTICIPANT");
-	}
-
-	Participant* Participant::getInstance(ObjectName_T domainID_, ObjectName_T participantID)
-	{
-		return getInstance(domainID_, participantID, "");
-	}
-
 	ParticipantKey_T getKey(ObjectName_T domainID_, ObjectName_T participantID)
 	{
 		ParticipantKey_T key = domainID_;
@@ -84,7 +79,7 @@ namespace ops
 		return key;
 	}
 
-	Participant* Participant::getInstance(ObjectName_T domainID_, ObjectName_T participantID, FileName_T configFile)
+	Participant* Participant::getInstanceInternal(ObjectName_T domainID_, ObjectName_T participantID, FileName_T configFile)
 	{
 		ParticipantKey_T key = getKey(domainID_, participantID);
 		SafeLock lock(&creationMutex);

@@ -411,6 +411,24 @@ int main(int argc, const char* args[])
 	try {
 		signal(SIGINT, SignalHandler);
 
+		std::cout << "OPS Library Compile Signature: " << ops::Participant::LibraryCompileSignature() << std::endl;
+		std::cout << "OPS Header Compile Signature : " << OPS_COMPILESIGNATURE << std::endl;
+
+		if (!ops::Participant::CheckCompileSignature()) {
+			std::cout << "ERROR: Headers and compiled library are not consistent !!" << std::endl;
+		}
+
+//		TestAll::BaseData bd0;
+//		TestAll::ChildData cd0;
+
+//		TestAll::BaseData& pbd1 = bd0;
+//		TestAll::BaseData& pbd2 = cd0;
+
+//		pbd1 = pbd2;
+//		TestAll::BaseData bd1(pbd2);
+
+		// ===========================================
+
 		UNUSED(argc);
 		UNUSED(args);
 		TestAll::ChildData cd1;
