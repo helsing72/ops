@@ -135,6 +135,11 @@ namespace ops {
 		template<size_t M>
 		fixed_string& append(const fixed_string<M>& str) { return append(str.c_str(), str.size()); }
 
+#ifndef FIXED_NO_STD_STRING
+		// Implicit conversion operator
+		operator std::string() const { return std::string(_array); }
+#endif
+
 		// String operations
 		const char* data() const noexcept { return &_array[0]; }
 		const char* c_str() const noexcept { return &_array[0]; }
