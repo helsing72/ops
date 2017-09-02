@@ -31,13 +31,6 @@ public:
         ops::Publisher::write(&data);
     }
 
-    /*
-    ops::AckData writeReliable(__className* data, std::string destinationIdentity)
-    {
-        return ops::Publisher::writeReliable(data, destinationIdentity);
-    }
-    */
-
 };
 
 __packageCloser

@@ -27,8 +27,8 @@ __constructorHead
     {
         OPSObject::appendType(ops::TypeId_T("__packageName.__className"));
 __constructorBody
-
     }
+
     ///Copy-constructor making full deep copy of a(n) __className object.
     __className(const __className& __c)
        : __baseClassName()
@@ -36,9 +36,9 @@ __constructorHead
     {
         OPSObject::appendType(ops::TypeId_T("__packageName.__className"));
 __constructorBody
-        __c.fillClone((__className*)this);
-
+        __c.fillClone(this);
     }
+
     ///Assignment operator making full deep copy of a(n) __className object.
     __className& operator = (const __className& other)
     {
@@ -52,13 +52,14 @@ __constructorBody
     {
 __serialize
     }
+
     //Returns a deep copy of this object.
     virtual ops::OPSObject* clone()
     {
 __clone
     }
 
-    virtual void fillClone(ops::OPSObject* obj) const
+    void fillClone(__className* obj) const
     {
 __fillClone
     }

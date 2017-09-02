@@ -297,7 +297,7 @@ public class CppCompiler extends opsc.Compiler
     private String getClone(IDLClass idlClass)
     {
         String ret = tab(2) + idlClass.getClassName() + "* ret = new " + applyLanguagePackageSeparator(idlClass.getClassName()) + ";" + endl();
-        ret += tab(2) + "this->fillClone(ret);" + endl();
+        ret += tab(2) + "fillClone(ret);" + endl();
         ret += tab(2) + "return ret;" + endl();
 
         return ret;
@@ -305,45 +305,45 @@ public class CppCompiler extends opsc.Compiler
 
     private String getFillClone(IDLClass idlClass)
     {
-        String ret = tab(2) + idlClass.getClassName() + "* narrRet = (" + applyLanguagePackageSeparator(idlClass.getClassName()) + "*)obj;" + endl();
+        String ret = "";
 
         if (idlClass.getBaseClassName() != null) {
-            ret += tab(2) + applyLanguagePackageSeparator(idlClass.getBaseClassName()) + "::fillClone(narrRet);" + endl();
+            ret += tab(2) + applyLanguagePackageSeparator(idlClass.getBaseClassName()) + "::fillClone(obj);" + endl();
         } else {
-            ret += tab(2) + "ops::OPSObject::fillClone(narrRet);" + endl();
+            ret += tab(2) + "ops::OPSObject::fillClone(obj);" + endl();
         }
         for (IDLField field : idlClass.getFields()) {
             if (field.isIdlType()) {
                 if (!field.isArray()) {
                     if (field.isAbstract()) {
-                        ret += tab(2) + "if(narrRet->" + field.getName() + ") delete narrRet->" + field.getName() + ";" + endl();
-                        ret += tab(2) + "narrRet->" + field.getName() + " = (" + languageType(field) + "*)" + field.getName() + "->clone();" + endl();
+                        ret += tab(2) + "if(obj->" + field.getName() + ") delete obj->" + field.getName() + ";" + endl();
+                        ret += tab(2) + "obj->" + field.getName() + " = (" + languageType(field) + "*)" + field.getName() + "->clone();" + endl();
                     } else {
-                        ret += tab(2) + "narrRet->" + field.getName() + " = " + field.getName() + ";" + endl();
+                        ret += tab(2) + "obj->" + field.getName() + " = " + field.getName() + ";" + endl();
                     }
                 } else {
                     // isArray()
                     if (!field.isAbstract()) {
                         if (field.getArraySize() > 0) {
                             ret += tab(2) + "for(unsigned int __i = 0; __i < " + field.getArraySize() + "; __i++) {" + endl();
-                            ret += tab(3) +   "narrRet->" + field.getName() + "[__i] = " + field.getName() + "[__i];" + endl();
+                            ret += tab(3) +   "obj->" + field.getName() + "[__i] = " + field.getName() + "[__i];" + endl();
                             ret += tab(2) + "}" + endl();
                         } else {
-                            ret += tab(2) + "narrRet->" + field.getName() + " = " + field.getName() + ";" + endl();
+                            ret += tab(2) + "obj->" + field.getName() + " = " + field.getName() + ";" + endl();
                         }
                     } else {
                         if (field.getArraySize() > 0) {
                             ret += tab(2) + "for(unsigned int __i = 0; __i < " + field.getArraySize() + "; __i++) {" + endl();
-                            ret += tab(3) +   "if(" + "narrRet->" + field.getName() + "[__i])" + " delete " + "narrRet->" + field.getName() + "[__i];" + endl();
-                            ret += tab(3) +   "narrRet->" + field.getName() + "[__i] = " + "(" + elementType(field) + "*)" + field.getName() + "[__i]->clone();" + endl();
+                            ret += tab(3) +   "if(" + "obj->" + field.getName() + "[__i])" + " delete " + "obj->" + field.getName() + "[__i];" + endl();
+                            ret += tab(3) +   "obj->" + field.getName() + "[__i] = " + "(" + elementType(field) + "*)" + field.getName() + "[__i]->clone();" + endl();
                             ret += tab(2) + "}" + endl();
                         } else {
                             ret += tab(2) + "for(unsigned int __i = 0; __i < " + "" + field.getName() + ".size(); __i++) {" + endl();
-                            ret += tab(3) +   "if(" + "narrRet->" + field.getName() + ".size() >= __i + 1) {" + endl();
-                            ret += tab(4) +     "if(" + "narrRet->" + field.getName() + "[__i])" + " delete " + "narrRet->" + field.getName() + "[__i];" + endl();
-                            ret += tab(4) +     "narrRet->" + field.getName() + "[__i] = " + "(" + elementType(field) + "*)" + field.getName() + "[__i]->clone();" + endl();
+                            ret += tab(3) +   "if(" + "obj->" + field.getName() + ".size() >= __i + 1) {" + endl();
+                            ret += tab(4) +     "if(" + "obj->" + field.getName() + "[__i])" + " delete " + "obj->" + field.getName() + "[__i];" + endl();
+                            ret += tab(4) +     "obj->" + field.getName() + "[__i] = " + "(" + elementType(field) + "*)" + field.getName() + "[__i]->clone();" + endl();
                             ret += tab(3) +   "} else {" + endl();
-                            ret += tab(4) +     "narrRet->" + field.getName() + ".push_back((" + elementType(field) + "*)" + field.getName() + "[__i]->clone()); " + endl();
+                            ret += tab(4) +     "obj->" + field.getName() + ".push_back((" + elementType(field) + "*)" + field.getName() + "[__i]->clone()); " + endl();
                             ret += tab(3) +   "}" + endl();
                             ret += tab(2) + "}" + endl();
                         }
@@ -354,17 +354,17 @@ public class CppCompiler extends opsc.Compiler
                 if (field.isArray()) {
                     if (field.getArraySize() > 0) {
                         if (!field.getType().equals("string[]")) {
-                            ret += tab(2) + "memcpy(&narrRet->" + field.getName() + "[0], &" + field.getName() + "[0], sizeof(" + field.getName() + "));" + endl();
+                            ret += tab(2) + "memcpy(&obj->" + field.getName() + "[0], &" + field.getName() + "[0], sizeof(" + field.getName() + "));" + endl();
                         } else {
                             ret += tab(2) + "for(unsigned int __i = 0; __i < " + field.getArraySize() + "; __i++) {" + endl();
-                            ret += tab(3) +   "narrRet->" + field.getName() + "[__i] = " + field.getName() + "[__i];" + endl();
+                            ret += tab(3) +   "obj->" + field.getName() + "[__i] = " + field.getName() + "[__i];" + endl();
                             ret += tab(2) + "}" + endl();
                         }
                     } else {
-                        ret += tab(2) + "narrRet->" + field.getName() + " = " + field.getName() + ";" + endl();
+                        ret += tab(2) + "obj->" + field.getName() + " = " + field.getName() + ";" + endl();
                     }
                 } else {
-                    ret += tab(2) + "narrRet->" + field.getName() + " = " + field.getName() + ";" + endl();
+                    ret += tab(2) + "obj->" + field.getName() + " = " + field.getName() + ";" + endl();
                 }
             }
         }

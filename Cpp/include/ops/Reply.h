@@ -40,13 +40,12 @@ namespace ops
 			archiver->inout("message", message);
 		}
 
-		virtual void fillClone(OPSObject* obj) const
+		void fillClone(Reply* obj) const
 		{
-			Reply* narrRet = (Reply*)obj;
-			OPSObject::fillClone(narrRet);
-			narrRet->requestId = requestId;
-			narrRet->requestAccepted = requestAccepted;
-			narrRet->message = message;
+			OPSObject::fillClone(obj);
+			obj->requestId = requestId;
+			obj->requestAccepted = requestAccepted;
+			obj->message = message;
 		}
 
 	};

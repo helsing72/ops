@@ -24,7 +24,7 @@ public:
     {
         if(!data) return false;
         aquireMessageLock();
-        ops::Subscriber::getData()->fillClone(d);
+        getTypedDataReference()->fillClone(d);
         releaseMessageLock();
         return true;
     }
@@ -35,14 +35,14 @@ public:
     {
         if(!data) return false;
         aquireMessageLock();
-        ops::Subscriber::getData()->fillClone(&d);
+        getTypedDataReference()->fillClone(&d);
         releaseMessageLock();
         return true;
     }
 
     // Returns a reference to the latest received data object.
     // Clears the "new data" flag (see newDataExist()).
-    // NOTE: MessageLock should be hold while working with the data object, to
+    // NOTE: MessageLock should be held while working with the data object, to
     // prevent a new incoming message to delete the current one while in use.
     __className* getTypedDataReference()
     {

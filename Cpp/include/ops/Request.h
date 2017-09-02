@@ -36,11 +36,10 @@ namespace ops
 			archiver->inout("requestId", requestId);
 		}
 
-		virtual void fillClone(OPSObject* obj) const
+		void fillClone(Request* obj) const
 		{
-			Request* narrRet = (Request*)obj;
-			OPSObject::fillClone(narrRet);
-			narrRet->requestId = requestId;
+			OPSObject::fillClone(obj);
+			obj->requestId = requestId;
 		}
 
 	};

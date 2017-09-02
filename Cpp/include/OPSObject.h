@@ -70,7 +70,7 @@ namespace ops
 		virtual OPSObject* clone();
 
 		///Fills the parameter obj with all values from this object.
-		virtual void fillClone(OPSObject* obj) const;
+		void fillClone(OPSObject* obj) const;
 
     public:
         OPSObject();
