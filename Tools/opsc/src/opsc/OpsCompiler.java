@@ -12,6 +12,7 @@
 package opsc;
 
 import java.io.FileOutputStream;
+import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.File;
@@ -19,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.FileFilter;
 import java.io.FileWriter;
+import java.io.FileReader;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -78,6 +80,8 @@ public class OpsCompiler
         System.out.println("  -fac              only generate factories for given features");
         System.out.println("  -g <feature>      generate given feature");
         System.out.println("  -G <feature>      don't generate given feature");
+        System.out.println("  -idls <file>      get idl-filenames from given file");
+        System.out.println("                    (one filename per line in file, paths relative to <file>)");
         System.out.println("  -o <dir>          set output directory");
         System.out.println("  -P <IDL_proj_dir> use as project directory with pre-defined subdirectories");
         System.out.println("  -p <projname>     set project name");
@@ -120,6 +124,26 @@ public class OpsCompiler
       }
     }
 
+    // Add all idl-files listed in given file (one file per line in the given file)
+    protected void addFilesFromFile(File idlfile, Vector<String> extraArgs)
+    {
+      try {
+        if (idlfile.isFile()) {
+          //System.out.println("found... " + idlfile.getCanonicalPath());
+          String basedir = idlfile.getParent();
+          BufferedReader reader = new BufferedReader(new FileReader(idlfile.getCanonicalPath()));
+          String line = reader.readLine();
+          while (line != null) {
+            File f = new File(basedir + File.separator + line);
+            if (_verbose > 0) System.out.println("Debug: Adding arg: " + f.getAbsolutePath());
+            extraArgs.add(f.getAbsolutePath());
+            line = reader.readLine();
+          }
+        }
+      } catch (java.io.IOException ioe) {
+      }
+    }
+
     protected void updateGenerateProp(String feature, boolean value)
     {
       if(feature.equals("ALL") || feature.equals("ada")) _props.generateAda = value;
@@ -145,9 +169,30 @@ public class OpsCompiler
         Vector<String> extraArgs = new Vector<String>();
         boolean projDirGiven = false;
 
-        // first find out if we have a project directory given
+        // first step in handling arguments. Some of these will expand the command line.
         for (int i = 0 ; i < args.length ; i++) {
-          if (args[i].equals("-P") && (i < args.length)) {
+          if (args[i].equals("-d")) {
+            _verbose = 1;
+
+          } else if (args[i].equals("-dd")) {
+            _verbose = 2;
+
+          // find out if we have idls given using files
+          } else if (args[i].equals("-idls") && (i < args.length)) {
+            i++;
+            //System.out.println("idl-file: " + args[i]);
+            String path = args[i];
+            File idlfile = new File(path);
+
+            if (!idlfile.exists()) {
+              System.out.println("Error: failed to open file: " + path);
+              return false;
+            }
+
+            addFilesFromFile(idlfile, extraArgs);
+
+          // find out if we have a project directory given
+          } else if (args[i].equals("-P") && (i < args.length)) {
             if (projDirGiven) {
               System.out.println("Error: only one '-P' argument is allowed");
               return false;
@@ -174,7 +219,7 @@ public class OpsCompiler
             File projDir = new File(path + File.separator + "opsproject");
             File srcDir = new File(path + File.separator + "src");
             if ( (!projDir.isDirectory()) || (!srcDir.isDirectory()) ) {
-              System.out.println("Error: missing 'opsproject' or 'src' directories in: " + path);
+              System.out.println("Error: missing 'opsproject' and/or 'src' directories in: " + path);
               return false;
             }
             File projProp = new File(path + File.separator + "opsproject" + File.separator + "project.properties");
@@ -236,7 +281,7 @@ public class OpsCompiler
           }
         }
 
-        // parse arguments
+        // finally parse remaining arguments
         for(int i = 0 ; i < extraArgs.size() ; i++) {
             String arg = extraArgs.elementAt(i);
             if(arg.equals("-o") && i < extraArgs.size()) {
@@ -257,10 +302,10 @@ public class OpsCompiler
             } else if((arg.equals("-b") || arg.equals("-B")) && (i < extraArgs.size())) {
                 i++;
                 updateBuildProp(extraArgs.elementAt(i), arg.equals("-b"));
-            } else if(arg.equals("-d")) {
-                _verbose = 1;
-            } else if(arg.equals("-dd")) {
-                _verbose = 2;
+            //} else if(arg.equals("-d")) {
+            // -d is handled in first step above
+            //} else if(arg.equals("-dd")) {
+            // -dd is handled in first step above
             } else if (arg.equals("-dump")) {
                 _dumpFlag = true;
             } else if (arg.equals("-fac")) {
@@ -268,6 +313,8 @@ public class OpsCompiler
             } else if((arg.equals("-g") || arg.equals("-G")) && (i < extraArgs.size())) {
                 i++;
                 updateGenerateProp(extraArgs.elementAt(i), arg.equals("-g"));
+            //} else if(arg.equals("-idls")) {
+            // -idls are handled in first step above
             } else if(arg.equals("-parse")) {
                 _bOnlyParse = true;
             } else if(arg.equals("-?") || arg.equals("-h") || arg.equals("--help")) {
@@ -282,14 +329,19 @@ public class OpsCompiler
             } else if(arg.equals("-pp")) {
                 // ignore -pp here
                 i++;
-            } else if(arg.equals("-P")) {
-                // ignore -P here
-                i++;
+            //} else if(arg.equals("-P")) {
+            // -P is handled in first step above
             } else {
                 // not a known option - regard as input file
-                _listInputFiles.add(arg);
+                // Add file if not already in list
+                boolean found = false;
+                for(String input : _listInputFiles) {
+                  if(input.equals(arg)) found = true;
+                }
+                if(!found) _listInputFiles.add(arg);
             }
         }
+
         return true;
     }
 
