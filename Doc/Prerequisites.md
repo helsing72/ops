@@ -38,7 +38,7 @@ Version 3.1.0 or later is required to build OPS with CMake. Make sure the cmake 
 OPS has been used with CMake version 3.5.0 and later.
 
 ## Visual Studio (Windows) ##
-OPS has been used with VS2008, VS2010, VS2012, VS2013 and VS2015.
+OPS has been used with VS2008, VS2010, VS2012, VS2013, VS2015 and VS2017.
 
 ## Google Test (required for unit tests) ##
 Google Test can be downloaded at https://github.com/google/googletest.

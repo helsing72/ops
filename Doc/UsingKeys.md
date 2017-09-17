@@ -1,10 +1,10 @@
 # Using Keys #
 
-In addition to just subscribing or publishing on a topic, publishers and subscribers can choose to only subscribe or publish on that topic if the data has a certain _key_.
+In addition to just subscribing or publishing on a topic, publishers and subscribers can choose to only subscribe on that topic if the data has a certain _key_.
 
 Key is a field shared by all OPSObjects and can be accessed with getKey() and setKey() methods.
 
-Key can be seen as a way for applications to dynamically add instances on a topic and set up subscriptions and publications which are key specific.
+Key can be seen as a way for applications to dynamically add instances on a topic and set up subscriptions which are key specific.
 
 This is how you create a subscriber that will only receive data on a certain key:
 
