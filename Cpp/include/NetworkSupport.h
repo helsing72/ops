@@ -25,6 +25,9 @@
 
 namespace ops
 {
+	extern bool isValidNodeAddress(std::string addr);
+	extern bool isMyNodeAddress(std::string addr, IOService* ioServ);
+
 	extern std::string doSubnetTranslation(std::string addr, IOService* ioServ);
 
 	extern std::string GetHostName();

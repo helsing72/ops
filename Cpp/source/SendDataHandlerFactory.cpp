@@ -15,7 +15,7 @@ namespace ops
 {
 
 	SendDataHandlerFactory::SendDataHandlerFactory(Participant* part):
-		participant(part), udpSendDataHandler(NULL)
+		participant(part), udpSendDataHandler(nullptr)
 	{	
 		// There is only one McUdpSendDataHandler for each participant
 	}
@@ -55,19 +55,26 @@ namespace ops
 		}
 		else if(top.getTransport() == Topic::TRANSPORT_UDP)
 		{
-			if(udpSendDataHandler == NULL)
-			{
+			if(udpSendDataHandler == nullptr) {
 				// We have only one sender for all topics, so use the domain value for buffer size
 				udpSendDataHandler = new McUdpSendDataHandler(participant->getIOService(), localIf,
 															  ttl,
 															  participant->getDomain()->getOutSocketBufferSize()); 
 			}
 
-			// Setup a listener on the participant info data published by participants on our domain.
-			// We use the information for topics with UDP as transport, to know the destination for UDP sends
-			// ie. we extract ip and port from the information and add it to our McUdpSendDataHandler
-			participant->partInfoListener->connectUdp(top, udpSendDataHandler);
+			// If topic specifies a valid node address, add that as a static destination address for topic
+			if(isValidNodeAddress(top.getDomainAddress())) {
+				std::string topName = top.getName();
+				std::string destAddress = top.getDomainAddress();
+				int destPort = top.getPort();
+				((McUdpSendDataHandler*)udpSendDataHandler)->addSink(topName, destAddress, destPort, true);
 
+			} else {
+				// Setup a listener on the participant info data published by participants on our domain.
+				// We use the information for topics with UDP as transport, to know the destination for UDP sends
+				// ie. we extract ip and port from the information and add it to our McUdpSendDataHandler
+				participant->partInfoListener->connectUdp(top, udpSendDataHandler);
+			}
 			return udpSendDataHandler;
 		}
 		else if(top.getTransport() == Topic::TRANSPORT_TCP)
@@ -78,7 +85,7 @@ namespace ops
 		}
 		else
 		{
-			return NULL;
+			return nullptr;
 		}
 	}
 
@@ -87,7 +94,9 @@ namespace ops
 		SafeLock lock(&mutex);
 		
 		if(top.getTransport() == Topic::TRANSPORT_UDP) {
-			participant->partInfoListener->disconnectUdp(top, udpSendDataHandler);
+			if (!isValidNodeAddress(top.getDomainAddress())) {
+				participant->partInfoListener->disconnectUdp(top, udpSendDataHandler);
+			}
 		}
 
 ///TODO

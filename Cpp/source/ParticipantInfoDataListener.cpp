@@ -3,14 +3,15 @@
 #include "McUdpSendDataHandler.h"
 #include "Participant.h"
 #include "BasicError.h"
+#include "NetworkSupport.h"
 
 namespace ops
 {
 
 	ParticipantInfoDataListener::ParticipantInfoDataListener(Participant* part):
 		participant(part),
-		partInfoSub(NULL),
-		sendDataHandler(NULL),
+		partInfoSub(nullptr),
+		sendDataHandler(nullptr),
 		numUdpTopics(0)
     {
     }
@@ -19,21 +20,21 @@ namespace ops
     void ParticipantInfoDataListener::onNewData(DataNotifier* notifier)
     {
         Subscriber* sub = dynamic_cast<Subscriber*> (notifier);
-        if (sub)
-        {
+        if (sub) {
             ParticipantInfoData* partInfo = dynamic_cast<ParticipantInfoData*> (sub->getMessage()->getData());
-            if (partInfo)
-            {
+            if (partInfo) {
 				// Is it on our domain?
 				if (partInfo->domain == participant->domainID) {
 					SafeLock lock(&mutex);
-					if (sendDataHandler != NULL) {
-		                for (unsigned int i = 0; i < partInfo->subscribeTopics.size(); i++)
-			            {
-							if ( (partInfo->subscribeTopics[i].transport == Topic::TRANSPORT_UDP) &&
-								 participant->hasPublisherOn(partInfo->subscribeTopics[i].name) ) {
-					            //Do an add sink here
-							    dynamic_cast<McUdpSendDataHandler*>(sendDataHandler)->addSink(partInfo->subscribeTopics[i].name, partInfo->ip, partInfo->mc_udp_port);
+					if (sendDataHandler != nullptr) {
+						if (partInfo->mc_udp_port != 0) {
+							for (unsigned int i = 0; i < partInfo->subscribeTopics.size(); i++)	{
+								if ((partInfo->subscribeTopics[i].transport == Topic::TRANSPORT_UDP) &&
+									participant->hasPublisherOn(partInfo->subscribeTopics[i].name))
+								{
+									//Do an add sink here
+									dynamic_cast<McUdpSendDataHandler*>(sendDataHandler)->addSink(partInfo->subscribeTopics[i].name, partInfo->ip, partInfo->mc_udp_port);
+								}
 							}
 						}
 					}
@@ -89,7 +90,7 @@ namespace ops
 	void ParticipantInfoDataListener::removeSubscriber()
 	{
 		if (partInfoSub) delete partInfoSub;
-		partInfoSub = NULL;
+		partInfoSub = nullptr;
 	}
 
 	void ParticipantInfoDataListener::connectUdp(Topic& top, SendDataHandler* handler)
@@ -97,12 +98,13 @@ namespace ops
 		SafeLock lock(&mutex);
 		if (!partInfoSub) {
 			if (!setupSubscriber()) {
-				// Generate an error message if we come here with domain->getMetaDataMcPort() == 0,
-				// it means that we have UDP topics that require meta data but user has disabled it.
-				BasicError err("ParticipantInfoDataListener", "connectUdp",
-					std::string("UDP topic '") + top.getName() + std::string("' won't work since Meta Data disabled in config-file"));
-				participant->reportError(&err);
-				return;
+				if (!isValidNodeAddress(top.getDomainAddress())) {
+					// Generate an error message if we come here with domain->getMetaDataMcPort() == 0,
+					// it means that we have UDP topics that require meta data but user has disabled it.
+					BasicError err("ParticipantInfoDataListener", "connectUdp",
+						std::string("UDP topic '") + top.getName() + std::string("' won't work since Meta Data disabled in config-file"));
+					participant->reportError(&err);
+				}
 			}
 		}
 
@@ -122,7 +124,7 @@ namespace ops
 		numUdpTopics--;
 
 		if (numUdpTopics == 0) {
-			sendDataHandler = NULL;
+			sendDataHandler = nullptr;
 
 ///TODO			if (num tcp topics == 0) {
 				removeSubscriber();

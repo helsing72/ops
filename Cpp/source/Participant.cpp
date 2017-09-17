@@ -394,9 +394,13 @@ namespace ops
 
 	bool Participant::hasPublisherOn(std::string topicName)
 	{
-		UNUSED(topicName);
-		///TODO
-		return true;
+		SafeLock lock(&partInfoDataMutex);
+		// Check if topic exist in partInfoData.publishTopics
+		std::vector<TopicInfoData>::iterator it;
+		for (it = partInfoData.publishTopics.begin(); it != partInfoData.publishTopics.end(); ++it) {
+			if (it->name == topicName) return true;
+		}
+		return false;
 	}
 
 	ReceiveDataHandler* Participant::getReceiveDataHandler(Topic top)
@@ -408,7 +412,6 @@ namespace ops
             partInfoData.subscribeTopics.push_back(TopicInfoData(top));
 		}
 		return result;
-		
 	}
 
 	void Participant::releaseReceiveDataHandler(Topic top)
