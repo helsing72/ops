@@ -136,7 +136,7 @@ namespace ops
             }
 
             IpPortPair():
-				_port(0), _lastTimeAlive(0), _alwaysAlive(false)
+				_port(0), _alwaysAlive(false), _lastTimeAlive(0)
             {
             }
 
