@@ -7,7 +7,6 @@
 
 namespace ops
 {
-
     Receiver* ReceiverFactory::getReceiver(Topic& top, Participant* participant)
     {
         Receiver* receiver = NULL;
@@ -34,11 +33,15 @@ namespace ops
         }
         else if (top.getTransport() == Topic::TRANSPORT_UDP)
         {
-            receiver = Receiver::createUDPReceiver(0, ioService, localIf, top.getInSocketBufferSize());
+            int port = 0;
+            // If UDP topic is configured with my node address, we use the configured port, otherwise
+            // we use port 0 which will force the OS to create a unique port that we listen to.
+            if (isMyNodeAddress(top.getDomainAddress(), ioService)) {
+                localIf = top.getDomainAddress();
+                port = top.getPort();
+            }
+            receiver = Receiver::createUDPReceiver(port, ioService, localIf, top.getInSocketBufferSize());
         }
         return receiver;
     }
-
-
-
 }

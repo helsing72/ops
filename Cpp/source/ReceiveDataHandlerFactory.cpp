@@ -1,42 +1,41 @@
 
 #include "OPSTypeDefs.h"
 #include "ReceiveDataHandlerFactory.h"
-
 #include "ReceiveDataHandler.h"
 #include "Participant.h"
 #include "BasicError.h"
-
+#include "NetworkSupport.h"
 
 namespace ops
 {
-
     ReceiveDataHandlerFactory::ReceiveDataHandlerFactory(Participant* participant)
     {
         UNUSED(participant);
     }
 
-	InternalKey_T ReceiveDataHandlerFactory::makeKey(Topic& top)
+	InternalKey_T ReceiveDataHandlerFactory::makeKey(Topic& top, IOService* ioServ)
 	{
 		// Since topics can use the same port for transports multicast & tcp, or 
-		// use transport udp which always use a single ReceiveDataHandler, 
+		// use transport udp which in most cases use a single ReceiveDataHandler, 
 		// we need to return the same ReceiveDataHandler in these cases.
 		// Make a key with the transport info that uniquely defines the receiver.
 		InternalKey_T key(top.getTransport());
 		if (top.getTransport() == Topic::TRANSPORT_UDP) {
-			// Key is fine as is
-		} else {
-			key += "::";
-			key += top.getDomainAddress();
-			key += "::";
-			key += NumberToString(top.getPort());
-		}
+			if (!isMyNodeAddress(top.getDomainAddress(), ioServ)) {
+				return key;
+			}
+		} 
+		key += "::";
+		key += top.getDomainAddress();
+		key += "::";
+		key += NumberToString(top.getPort());
 		return key;
 	}
 
     ReceiveDataHandler* ReceiveDataHandlerFactory::getReceiveDataHandler(Topic& top, Participant* participant)
     {
 		// Make a key with the transport info that uniquely defines the receiver.
-		InternalKey_T key = makeKey(top);
+		InternalKey_T key = makeKey(top, participant->getIOService());
 
         SafeLock lock(&garbageLock);
         if (receiveDataHandlerInstances.find(key) != receiveDataHandlerInstances.end())
@@ -73,27 +72,29 @@ namespace ops
         {
 	        ReceiveDataHandler* udpReceiveDataHandler = new ReceiveDataHandler(top, participant);
 
-			Receiver* recv = udpReceiveDataHandler->getReceiver();
-			participant->setUdpTransportInfo(recv->getLocalAddress(), recv->getLocalPort() );
+			if (key == top.getTransport()) {
+				Receiver* recv = udpReceiveDataHandler->getReceiver();
+				participant->setUdpTransportInfo(recv->getLocalAddress(), recv->getLocalPort());
+			}
             
 			receiveDataHandlerInstances[key] = udpReceiveDataHandler;
             return udpReceiveDataHandler;
         }
         else //For now we can not handle more transports
         {
-            //Signal an error by returning NULL.
+			//Signal an error by returning nullptr.
 			ErrorMessage_T msg = "Unknown transport for Topic: ";
 			msg += top.getName();
 			BasicError err("ReceiveDataHandlerFactory", "getReceiveDataHandler", msg);
 			participant->reportError(&err);
-            return NULL;
+            return nullptr;
         }
     }
 
     void ReceiveDataHandlerFactory::releaseReceiveDataHandler(Topic& top, Participant* participant)
     {
 		// Make a key with the transport info that uniquely defines the receiver.
-		InternalKey_T key = makeKey(top);
+		InternalKey_T key = makeKey(top, participant->getIOService());
 
 		SafeLock lock(&garbageLock);
         if (receiveDataHandlerInstances.find(key) != receiveDataHandlerInstances.end())
@@ -106,7 +107,7 @@ namespace ops
 
                 rdh->stop();
 
-				if (top.getTransport() == Topic::TRANSPORT_UDP) {
+				if (key == Topic::TRANSPORT_UDP) {
 					participant->setUdpTransportInfo("", 0);
 				}
 

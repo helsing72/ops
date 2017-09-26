@@ -3,16 +3,16 @@
 
 ---
 
-**Note**, with topics that specify a sampleMaxSize > 60000 there can only be one publisher publishing at the same time. If two publishers write at the same time, there is a risk that messages will be lost and not delivered to the subscribers as expected.
+**Note**, with topics that specify a _sampleMaxSize_ > 60000 there can only be one publisher publishing at the same time. If two publishers write at the same time, there is a risk that messages will be lost and not delivered to the subscribers as expected.
 
-**Note also**, this feature requires the Topic to use its own port (See OpsConfig).
+**Note also**, this feature requires the Topic to use its own port, see [Defining Topics and Configuration](OpsConfig.md).
 
 **Note also**, this feature is NOT fully supported by the Java implementation of OPS.
 
 ---
 
 
-OPS is by default using a UDP multicast based transport (see MulticastTransport). UDP is a message based technology that fits well with the communication model of OPS. UDP does however put some restriction on the communication including the fact that UDP messages have a limited size. What this exact size is varies from platform to platform but a common size limit is 65535 bytes. Because of this, OPS has a default size limit for messages at 60000 bytes of user data in an OPS message. OPS allows you to increase this size limit if desirable.
+OPS is by default using a UDP multicast based transport. UDP is a message based technology that fits well with the communication model of OPS. UDP does however put some restriction on the communication including the fact that UDP messages have a limited size. What this exact size is varies from platform to platform but a common size limit is 65535 bytes. Because of this, OPS has a default size limit for messages at 60000 bytes of user data in an OPS message. OPS allows you to increase this size limit if desirable by specifying the topics _sampleMaxSize_.
 
 This is how to configure a topic on which you wish to send data samples larger than the default 60000 byte limit:
 
@@ -50,8 +50,6 @@ This is how to configure a topic on which you wish to send data samples larger t
 
 ```
 
-In the sample above, we have configured the topic to allow passing messages of a maximum size of 5 MB. Note also that the inSocketBufferSize and outSocketBufferSize have been adjusted to 10 MB (the exact value of the buffer sizes should depend on the rate of the topic and size of the messages, this is just an estimate).
+In the sample above, we have configured the topic to allow passing messages of a maximum size of almost 5 MB. Note also that the inSocketBufferSize and outSocketBufferSize have been adjusted to almost 10 MB (the exact value of the buffer sizes should depend on the rate of the topic and size of the messages, this is just an estimate for a fictive example).
 
 The configuration above is all that is necessary to send large messages.
-
-**Note however that at the moment doing so put limitation of the use of the topic. With topics that specify a sampleMaxSize > 60000 there can only be one publisher publishing at the same time. If two publishers write at the same time, there is a risk that messages will be lost and not delivered to the subscribers as expected.**

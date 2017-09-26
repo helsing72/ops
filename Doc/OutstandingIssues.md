@@ -1,6 +1,6 @@
-# Outstanding Issues #
+# Remaining Issues #
 
-OPS is far from complete. Outstanding Issues and shortcomings include:
+OPS is far from complete. Remaining Issues and shortcomings include:
 
   * Documentation is Poor, there is no API docs
   * TCP Transport only allow on publisher per Topic

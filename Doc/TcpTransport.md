@@ -45,5 +45,7 @@ To use the TCP transport for a topic, this is how to setup your [Topic Config](O
 
 ```
 
-As you can see, the field address and transport must be specified. The field transport must be set to "tcp" and address is the ip address of the machine running the publisher for the topic (once again note that the TCP Transport only support one-to-many communication).
+As you can see, the fields address and transport must be specified. The field transport must be set to "tcp" and address is the ip address of the machine running the publisher for the topic (once again note that the TCP Transport only support one-to-many communication).
 Other fields has the same impact as for the [Multicast Transport](MulticastTransport.md).
+
+See also, [Topic Config](OpsConfig.md).

@@ -18,6 +18,9 @@
 * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <iostream>
+
+#include "OPSTypeDefs.h"
 #include "NetworkSupport.h"
 
 #ifndef REPLACE_TRANSPORT_LAYER
@@ -30,6 +33,49 @@
 
 namespace ops
 {
+
+	// Return true if a valid node address
+	bool isValidNodeAddress(Address_T addr)
+	{
+		//std::cout << "isValidNodeAddress(): " << addr << std::endl;
+		if (addr == "") return false;
+		unsigned long Ip = boost::asio::ip::address_v4::from_string(addr.c_str()).to_ulong();
+		//std::cout << "isValidNodeAddress(): " << std::hex << Ip << std::dec << std::endl;
+		if (Ip == 0) return false;
+		if (Ip >= 0xE0000000) return false;  // Skip multicast and above
+		return true;
+	}
+
+	bool isMyNodeAddress(Address_T addr, IOService* ioServ)
+	{
+		//std::cout << "isMyNodeAddress(): " << addr << std::endl;
+		if (addr == "") return false;
+		unsigned long Ip = boost::asio::ip::address_v4::from_string(addr.c_str()).to_ulong();
+		//std::cout << "isMyNodeAddress(): " << std::hex << Ip << std::dec << std::endl;
+		if (Ip == 0x7F000001) return true;  // localhost
+
+		boost::asio::io_service* ioService = dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService;
+
+		using boost::asio::ip::udp;
+
+		// Note: The resolver requires that the hostname can be used to resolve to an ip
+		// e.g due to the hostname beeing listed with an ipv4 address in /etc/hosts.
+		// On linux this can be tested by using the command "hostname -i"
+		udp::resolver resolver(*ioService);
+		udp::resolver::query query(boost::asio::ip::host_name(), "");
+		udp::resolver::iterator it = resolver.resolve(query);
+		udp::resolver::iterator end;
+		while (it != end) {
+			boost::asio::ip::address ipaddr = it->endpoint().address();
+			if (ipaddr.is_v4()) {
+				unsigned long myIp = ipaddr.to_v4().to_ulong();
+				//std::cout << "isMyNodeAddress() avail: " << std::hex << myIp << std::dec << std::endl;
+				if (myIp == Ip) return true;
+			}
+			++it;
+		}
+		return false;
+	}
 
 // If argument contains a "/" we assume it is on the form:  subnet-address/subnet-mask
 // e.g "192.168.10.0/255.255.255.0" or "192.168.10.0/24"

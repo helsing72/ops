@@ -3,9 +3,11 @@
 
 #include <map>
 #include <vector>
+#include <string>
 
 #include "OPSTypeDefs.h"
 #include "Lockable.h"
+#include "IOService.h"
 
 namespace ops
 {
@@ -24,7 +26,7 @@ namespace ops
         std::vector<ReceiveDataHandler*> garbageReceiveDataHandlers;
         ops::Lockable garbageLock;
 
-		inline InternalKey_T makeKey(Topic& top);
+        inline InternalKey_T makeKey(Topic& top, IOService* ioServ);
 
     public:
         explicit ReceiveDataHandlerFactory(Participant* participant);
@@ -33,9 +35,7 @@ namespace ops
         void releaseReceiveDataHandler(Topic& top, Participant* participant);
 		bool cleanUpDone();
         ~ReceiveDataHandlerFactory();
-
     };
 
 }
-
 #endif

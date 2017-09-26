@@ -32,4 +32,4 @@
     * [Data class slicing and spareBytes](DataSlicing.md)
     * [Error Handling](HandlingErrors.md)
     * [Request Reply](RequestReply.md)
-  * [Outstanding Issues](OutstandingIssues.md)
+  * [Remaining Issues](OutstandingIssues.md)
