@@ -10,6 +10,9 @@ CC?=$(shell which gcc)
 CXX?=$(shell which g++)
 INSTALL_PREFIX?=$(CURDIR)/deploy$(DEPLOY_SUFFIX)
 
+OPS_BUILD_UNITTESTS?=ON
+OPS_BUILD_EXAMPLES?=ON
+
 CCV=$(shell $(CC) -dumpversion)
 CXXV=$(shell $(CXX) -dumpversion)
 
@@ -41,7 +44,7 @@ $(BUILD_OPT)/Makefile : %/Makefile :
 	export CXX=$(CXX) && \
 	mkdir -p $* && \
 	cd $* && \
-	cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_PREFIX) -DCMAKE_BUILD_TYPE=Release ..
+	cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_PREFIX) -DCMAKE_BUILD_TYPE=Release -DOPS_BUILD_UNITTESTS=$(OPS_BUILD_UNITTESTS) -DOPS_BUILD_EXAMPLES=$(OPS_BUILD_EXAMPLES) ..
 
 .PHONY : debug
 debug: $(BUILD_DEBUG)/Makefile
@@ -52,7 +55,7 @@ $(BUILD_DEBUG)/Makefile : %/Makefile :
 	export CXX=$(CXX) && \
 	mkdir -p $* && \
 	cd $* && \
-	cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_PREFIX) -DCMAKE_BUILD_TYPE=Debug ..
+	cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_PREFIX) -DCMAKE_BUILD_TYPE=Debug -DOPS_BUILD_UNITTESTS=$(OPS_BUILD_UNITTESTS) -DOPS_BUILD_EXAMPLES=$(OPS_BUILD_EXAMPLES) ..
 
 .PHONY : unittest-c++
 unittest-c++ : debug
