@@ -9,7 +9,7 @@
 
 #include "Configuration.h"
 
-const std::string sVersion = "Version 2017-09-10";
+const std::string sVersion = "Version 2017-10-14";
 
 
 bool gWarningGiven = false;
@@ -31,13 +31,13 @@ private:
 	std::vector<std::string> vTopics;
 	std::vector<std::string> vChannels;
 	std::vector<std::string> vTransportTopics;
-	bool udpTransportUsed;
+	bool bUdpRequireMetadata;
 
 public:
 	CVerifyOPSConfig(std::string filename, bool debug):
 	    bDebug(debug),
 		iNumDomains(0),
-		udpTransportUsed(false)
+		bUdpRequireMetadata(false)
 	{
 		try {
 			std::string s;
@@ -147,7 +147,7 @@ public:
 		int iNumTopics = 0;
 		vChannels.clear();
 		vTransportTopics.clear();
-		udpTransportUsed = false;
+		bUdpRequireMetadata = false;
 
 		//<element type = "MulticastDomain"> or <element type = "Domain">
         //    <domainID>SDSDomain</domainID>
@@ -244,7 +244,7 @@ public:
 		}
 
 		// Check if udp is used which require a metaDataMcPort
-		if (udpTransportUsed && (config.parseInt(metaDataMcPort, 9494) == 0)) {
+		if (bUdpRequireMetadata && (config.parseInt(metaDataMcPort, 9494) == 0)) {
 			LOG_WARN( ">>> UDP used as transport and '<metaDataMcPort>' set to 0. UDP requires metaDataMcPort != 0." << std::endl );
 		}
 
@@ -275,26 +275,41 @@ public:
 			}
 		}
 
-		// linktype
 		std::string linkType = config.getString("linktype");
+		std::string address = config.getString("address");
+		std::string port = config.getString("port");
+
+		// linktype
 		if (linkType == "") {
-			LOG_WARN( ">>> Missing <linktype> for channel '" << channelName << "' in domain '" << domainName << "'" << std::endl );
+			LOG_WARN( ">>> Missing <linktype> for channel '" << channelName << "' in domain '" << domainName << "', multicast assumed." << std::endl );
 		}
-		if (linkType == "udp") udpTransportUsed = true;
 
 		// address
-		s = config.getString("address");
-		if ((s == "") && (linkType != "udp")) {
+		if ((address == "") && (linkType != "udp")) {
 			LOG_WARN( ">>> Missing <address> for channel '" << channelName << "' in domain '" << domainName << "'" << std::endl );
 		}
 
 		// port
-		s = config.getString("port");
-		if (s == "") {
-			LOG_WARN( ">>> Missing <port> for channel '" << channelName << "' in domain '" << domainName << "'" << std::endl );
+		if (port == "") {
+			if (linkType != "udp") {
+				LOG_WARN(">>> Missing <port> for channel '" << channelName << "' in domain '" << domainName << "'" << std::endl);
+			}
 		} else {
-			if (config.parseInt(s, -1) > 65535) {
-				LOG_WARN(">>> port > 65535 for channel '" << channelName << "'" << std::endl);
+			if (config.parseInt(port, -1) > 65535) {
+				LOG_WARN(">>> port > 65535 for channel '" << channelName << "' in domain '" << domainName << "'" << std::endl);
+			}
+		}
+
+		if (linkType == "udp") {
+			if (address == "") {
+				bUdpRequireMetadata = true;
+				if (port != "") {
+					LOG_WARN(">>> Superfluous <port> given for channel '" << channelName << "' in domain '" << domainName << "'" << std::endl);
+				}
+			} else {
+				if (port == "") {
+					LOG_WARN(">>> Missing <port> for channel '" << channelName << "' in domain '" << domainName << "'. <port> is required if <address> specified" << std::endl);
+				}
 			}
 		}
 
@@ -366,29 +381,10 @@ public:
 			}
 		}
 
-		//
-		bool topicDefinedInTransports = EraseIfExist(topicName, vTransportTopics);
-
-		// port
-		s = config.getString("port");
-		if (s == "") {
-			if (!topicDefinedInTransports) {
-				LOG_WARN( ">>> Missing <port> for topic: " << topicName << ", in domain: " << domainName << std::endl );
-			}
-		} else {
-			if (topicDefinedInTransports) {
-				LOG_WARN( ">>> <port> specified for topic: " << topicName << ", in domain: " << domainName << ". Transport/Channel values will override." << std::endl );
-			} else {
-				if (config.parseInt(s, -1) > 65535) {
-					LOG_WARN(">>> port > 65535 for topic '" << topicName << "'" << std::endl);
-				}
-			}
-		}
-
 		// dataType
 		dataType = config.getString("dataType");
 		if (dataType == "") {
-			LOG_WARN( ">>> Missing <dataType> for topic: " << topicName << ", in domain: " << domainName << std::endl );
+			LOG_WARN(">>> Missing <dataType> for topic: " << topicName << ", in domain: " << domainName << std::endl);
 		}
 
 		// sampleMaxSize optional, required if sample size os > 60000
@@ -398,9 +394,60 @@ public:
 			///TODO
 		}
 
+		//
+		bool topicDefinedInTransports = EraseIfExist(topicName, vTransportTopics);
+
 		// transport optional
 		std::string linkType = config.getString("transport");
-		if (linkType == "udp") udpTransportUsed = true;
+		std::string address = config.getString("address");
+		std::string port = config.getString("port");
+
+		if (topicDefinedInTransports) {
+			if (linkType != "") {
+				LOG_WARN(">>> Superfluous <transport> for topic '" << topicName << "', in domain: '" << domainName << "', since topic listed in the domains transport section." << std::endl);
+			}
+			if (address != "") {
+				LOG_WARN(">>> Superfluous <address> for topic '" << topicName << "', in domain: '" << domainName << "', since topic listed in the domains transport section." << std::endl);
+			}
+			if (port != "") {
+				LOG_WARN(">>> Superfluous <port> for topic '" << topicName << "', in domain: '" << domainName << "', since topic listed in the domains transport section." << std::endl);
+			}
+
+		} else {
+			// linktype
+			if (linkType == "") {
+				//LOG_WARN(">>> Missing <transport> for topic '" << topicName << "' in domain '" << domainName << "', multicast assumed." << std::endl);
+			}
+
+			// address
+			if ((address == "") && (linkType == "tcp")) {
+				LOG_WARN(">>> Missing <address> for topic '" << topicName << "' in domain '" << domainName << "'" << std::endl);
+			}
+
+			// port
+			if (port == "") {
+				if (linkType != "udp") {
+					LOG_WARN(">>> Missing <port> for topic '" << topicName << "' in domain '" << domainName << "'" << std::endl);
+				}
+			} else {
+				if (config.parseInt(port, -1) > 65535) {
+					LOG_WARN(">>> port > 65535 for topic '" << topicName << "' in domain '" << domainName << "'" << std::endl);
+				}
+			}
+
+			if (linkType == "udp") {
+				if (address == "") {
+					bUdpRequireMetadata = true;
+					if (port != "") {
+						LOG_WARN(">>> Superfluous <port> for topic '" << topicName << "' in domain '" << domainName << "'" << std::endl);
+					}
+				} else {
+					if (port == "") {
+						LOG_WARN(">>> Missing <port> for topic '" << topicName << "' in domain '" << domainName << "'. <port> is required if <address> specified" << std::endl);
+					}
+				}
+			}
+		}
 
 		// inSocketBufferSize optional
 		// outSocketBufferSize optional
@@ -420,6 +467,7 @@ void PrintDescription()
 	std::cout << "    - Channel names are unique within the given domain" << std::endl;
 	std::cout << "    - Topic names are unique within the given domain" << std::endl;
 	std::cout << "  " << std::endl;
+	std::cout << "  Program also checks for some common mistakes and miss-configurations." << std::endl;
 	std::cout << std::endl;
 }
 
