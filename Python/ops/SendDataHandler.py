@@ -27,21 +27,26 @@ class AbstractSendDataHandler(object):
 		raise NotImplementedError
 
 
-
-
 class UdpSendDataHandler(AbstractSendDataHandler):
-	def __init__(self):
+	def __init__(self,topic):
 		super(UdpSendDataHandler,self).__init__()
-		pass
+		self.sendAddress = (topic.domainAddress, topic.port)
+  		self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+  		if topic.outSocketBufferSize > 0:
+  			self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, topic.outSocketBufferSize)
+
 	def sendData(self,block,topic):
-		raise NotImplementedError
+		if self.socket is None:
+			return
+		self.socket.sendto(block,self.sendAddress)
+
+
 class TcpSendDataHandler(AbstractSendDataHandler):
 	def __init__(self):
 		super(TcpSendDataHandler,self).__init__()
 		pass
 	def sendData(self,block,topic):
 		raise NotImplementedError
-
 
 
 class McSendDataHandler(AbstractSendDataHandler):
@@ -64,5 +69,7 @@ def getSendDataHandler(participant,topic):
 
 	if topic.transport == TRANSPORT_MC:
 		return McSendDataHandler(localInterface,topic,topic.timeToLive)
+	if topic.transport == TRANSPORT_UDP:
+		return UdpSendDataHandler(topic)
 
 	return None

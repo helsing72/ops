@@ -58,6 +58,23 @@ class UdpReceiveDataHandler(AbstractReceiveDataHandler):
 	def __init__(self,localInterface,topic):
 		super(UdpReceiveDataHandler,self).__init__(localInterface,topic)
 
+	def run(self):
+		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+		sock.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
+		sock.bind(('',self.topic.port))
+
+  		if self.topic.inSocketBufferSize > 0:
+  			sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, self.topic.inSocketBufferSize)
+
+		while self.shouldRun:
+			try:
+				data, addr = sock.recvfrom(PACKET_MAX_SIZE);
+				self.segmentReceived(data,addr)
+			except socket.timeout:
+				pass
+
+		sock.close()
+
 class McReceiveDataHandler(AbstractReceiveDataHandler):
 	def __init__(self,localInterface,topic):
 		super(McReceiveDataHandler,self).__init__(localInterface,topic)
@@ -107,6 +124,8 @@ def getReceiveDataHandler(participant,topic):
 		localInterface = Support.doSubnetTranslation(topic.localInterface)
 		if topic.transport == TRANSPORT_MC:
 			rdh = McReceiveDataHandler(localInterface,topic)
+		if topic.transport == TRANSPORT_UDP:
+			rdh = UdpReceiveDataHandler(localInterface,topic)
 		rdh.start()
 		__ReceiveDataHandler[key] = rdh
 	return rdh
