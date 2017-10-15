@@ -571,12 +571,12 @@ void menu()
 
 int main(int argc, char**argv)
 {
-	UNUSED(argc)
-	UNUSED(argv)
-//	for (int i = 0; i < 10; i++) {
-//		std::cout << ".";
-//		ops::TimeHelper::sleep(1000);
-//	}
+	ops::execution_policy::Enum policy = ops::execution_policy::threading;
+
+	if (argc > 1) {
+		std::string arg = argv[1];
+		if (arg == "polling") policy = ops::execution_policy::polling;
+	}
 
 #ifdef _WIN32
 	// --------------------------------------------------------------------
@@ -636,7 +636,7 @@ int main(int argc, char**argv)
 
 	// Create participants
 	// NOTE that the second parameter (participantID) must be different for the two participant instances
-	ops::Participant* participant = ops::Participant::getInstance("PizzaDomain", "PizzaDomain");
+	ops::Participant* participant = ops::Participant::getInstance("PizzaDomain", "PizzaDomain", policy);
     if (participant == NULL) {
 	    std::cout << "Failed to create Participant. Missing ops_config.xml ??" << std::endl;
 		exit(-1);
@@ -644,7 +644,7 @@ int main(int argc, char**argv)
 	participant->addTypeSupport(new PizzaProject::PizzaProjectTypeFactory());
 	printDomainInfo(participant);
 
-	ops::Participant* otherParticipant = ops::Participant::getInstance("OtherPizzaDomain", "OtherPizzaDomain");
+	ops::Participant* otherParticipant = ops::Participant::getInstance("OtherPizzaDomain", "OtherPizzaDomain", policy);
 	if (otherParticipant == NULL) {
 		std::cout << "Failed to create Participant. Missing ops_config.xml ??" << std::endl;
         exit(-1);
@@ -691,21 +691,39 @@ int main(int argc, char**argv)
 
 	menu();
 
+	bool doPartPolling = false;
+
+	std::cout << std::endl;
+	if (participant->GetExecutionPolicy() == ops::execution_policy::polling) {
+		std::cout << "'participant' is using 'Polling' policy" << std::endl;
+		doPartPolling = true;
+	} else {
+		std::cout << "'participant' is using 'threading' policy" << std::endl;
+	}
+	if (otherParticipant->GetExecutionPolicy() == ops::execution_policy::polling) {
+		std::cout << "'otherParticipant' is using 'Polling' policy" << std::endl;
+		doPartPolling = true;
+	} else {
+		std::cout << "'otherParticipant' is using 'threading' policy" << std::endl;
+	}
+
 	__int64 nextSendTime = (__int64)getNow() + sendPeriod;
 
 	while (!doExit) {
 		std::cout << std::endl << " (? = menu) > ";
 
 		// Repeated sends
-		if (doPeriodicSend) {
+		if (doPeriodicSend || doPartPolling) {
 			while (!_kbhit()) {
 				__int64 now = (__int64)getNow();
-				if (now >= nextSendTime) {
+				if (doPeriodicSend && (now >= nextSendTime)) {
 					// write
 					WriteToAllSelected();
 					// Calc next time to send
 					nextSendTime = now + sendPeriod;
 				}
+				if (participant->GetExecutionPolicy() == ops::execution_policy::polling) participant->Poll();
+				if (otherParticipant->GetExecutionPolicy() == ops::execution_policy::polling) otherParticipant->Poll();
 				ops::TimeHelper::sleep(1);
 			}
 		}
