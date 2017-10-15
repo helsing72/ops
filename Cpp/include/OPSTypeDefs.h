@@ -8,6 +8,7 @@
 #ifndef _OPSTYPEDEFS_H
 #define _OPSTYPEDEFS_H
 
+#include <string>
 // -----------------------------------------------------------------------------
 // Some OPS configurations
 #define USE_C11             // Enables use of C++11 std::mutex, std::thread, std::condition_variable
@@ -25,6 +26,24 @@
 
 //#define REPLACE_OPS_CONFIG		// Removes the OPSConfig file reader from library so yo can implement 
 									// your own for targets without a filesystem.
+namespace ops {
+
+// -----------------------------------------------------------------------------
+// Defines for String handling in OPS
+	typedef std::string ObjectName_T;
+	typedef std::string FileName_T;
+	typedef std::string ObjectKey_T;
+	typedef std::string TypeId_T;
+	typedef std::string ChannelId_T;
+	// OPS internal
+	typedef std::string ParticipantKey_T;
+	typedef std::string Address_T;
+	typedef std::string Transport_T;
+	typedef std::string InternalString_T;
+	typedef std::string ExceptionMessage_T;
+	typedef std::string InternalKey_T;
+	typedef std::string ErrorMessage_T;
+	typedef const std::string& InoutName_T;
 
 // -----------------------------------------------------------------------------
 // OPS uses Little Endian data serialization to improve the performance since
@@ -42,6 +61,8 @@
 // -----------------------------------------------------------------------------
 // Macro used to remove compiler warnings about non used variables/parameters
 #define UNUSED(expr) (void)(expr);
+
+} // namespace
 
 #ifndef _WIN32
 
