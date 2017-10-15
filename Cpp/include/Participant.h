@@ -21,12 +21,14 @@
 #ifndef ops_ParticipantH
 #define	ops_ParticipantH
 
-#include <string>
+#include <map>
+#include <exception>
+
+#include "OPSTypeDefs.h"
 #include "ThreadPool.h"
 #include "Runnable.h"
 #include "IOService.h"
 #include "SerializableFactory.h"
-#include <map>
 #include "Topic.h"
 #include "OPSConfig.h"
 #include "OPSObjectFactory.h"
@@ -48,6 +50,15 @@ namespace ops
 	class Domain;
     class Publisher;
 
+	namespace execution_policy {
+		enum Enum {
+			threading,		// The Participant instance has its own thread that handles sockets, timeouts and 
+							// performs the callbacks to user code.
+			polling			// The user code need to "drive" the Participant instance by calling the Poll() method.
+							// During the execution of Poll() the Participant will handle work that is ready.
+		};
+	}
+
 	class OPS_EXPORT Participant : Runnable, Listener<int>
 	{
 		friend class Subscriber;
@@ -57,12 +68,26 @@ namespace ops
 		friend class ParticipantInfoDataListener;
 	public:
 
-		///By Singelton, one Participant per participantID
-		static std::map<std::string, Participant*> instances;
-		static Participant* getInstance(std::string domainID);
-		static Participant* getInstance(std::string domainID, std::string participantID);
-		static Participant* getInstance(std::string domainID, std::string participantID, std::string configFile);
+		// -------------------------------------------------------------------
+		///By Singelton, one Participant per 'domainID::participantID'
+		static std::map<ParticipantKey_T, Participant*> instances;
+
+		//NOTE: Since Participants are singletons per 'domainID::participantID', the execution_policy only has effect 
+		//at the first call when the Participant is created.
+		static Participant* getInstance(ObjectName_T domainID, execution_policy::Enum policy = execution_policy::threading) 
+		{
+			return getInstance(domainID, "DEFAULT_PARTICIPANT", policy);
+		}
+		static Participant* getInstance(ObjectName_T domainID, ObjectName_T participantID, execution_policy::Enum policy = execution_policy::threading)
+		{
+			return getInstance(domainID, participantID, "", policy);
+		}
+		static Participant* getInstance(ObjectName_T domainID, ObjectName_T participantID, FileName_T configFile, execution_policy::Enum policy = execution_policy::threading)
+		{
+			return getInstanceInternal(domainID, participantID, configFile, policy);
+		}
 		
+		// -------------------------------------------------------------------
 		//Report an error via all participants ErrorServices or the static ErrorService if it exists
 		static void reportStaticError(Error* err);
 
@@ -131,13 +156,20 @@ namespace ops
 		///Deprecated, use getErrorService()->removeListener instead. Remove a listener for OPS core reported Errors
 		void removeListener(Listener<Error*>* listener);
 
-		//TODO: Review
 		virtual ~Participant();
 
+		// Method to "drive" the Participant when the execution_policy is "polling"
+		bool Poll();
+
+		execution_policy::Enum GetExecutionPolicy() { return _policy; }
+
 	private:
+		execution_policy::Enum _policy;
+
+		static Participant* getInstanceInternal(ObjectName_T domainID, ObjectName_T participantID, FileName_T configFile, execution_policy::Enum policy);
 
 		///Constructor is private instance are acquired through getInstance()
-		Participant(std::string domainID_, std::string participantID_, std::string configFile_);
+		Participant(ObjectName_T domainID_, ObjectName_T participantID_, FileName_T configFile_, execution_policy::Enum policy);
 
 		///Remove this instance from the static instance map
 		void RemoveInstance();
@@ -192,9 +224,9 @@ namespace ops
 		Lockable serviceMutex;
 
 		///The domainID for this Participant
-		std::string domainID;
+		ObjectName_T domainID;
 		///The id of this participant, must be unique in process
-		std::string participantID;
+		ObjectName_T participantID;
 
 		///As long this is true, we keep on running this participant
 		bool keepRunning;

@@ -43,7 +43,7 @@
 namespace ops
 {
 	//static
-	std::map<std::string, Participant*> Participant::instances;
+	std::map<ParticipantKey_T, Participant*> Participant::instances;
 	Lockable Participant::creationMutex;
 
 
@@ -66,24 +66,22 @@ namespace ops
 
 	// --------------------------------------------------------------------------------
 
-	Participant* Participant::getInstance(std::string domainID_)
+	ParticipantKey_T getKey(ObjectName_T domainID_, ObjectName_T participantID)
 	{
-		return getInstance(domainID_, "DEFAULT_PARTICIPANT");
+		ParticipantKey_T key = domainID_;
+		key += "::";
+		key += participantID;
+		return key;
 	}
 
-	Participant* Participant::getInstance(std::string domainID_, std::string participantID)
+	Participant* Participant::getInstanceInternal(ObjectName_T domainID_, ObjectName_T participantID, FileName_T configFile, execution_policy::Enum policy)
 	{
-		return getInstance(domainID_, participantID, "");
-	}
-
-	Participant* Participant::getInstance(std::string domainID_, std::string participantID, std::string configFile)
-	{
-		std::string key = domainID_ + "::" + participantID;
+		ParticipantKey_T key = getKey(domainID_, participantID);
 		SafeLock lock(&creationMutex);
 		if (instances.find(key) == instances.end()) {
 			try
 			{
-				Participant* newInst = new Participant(domainID_, participantID, configFile);
+				Participant* newInst = new Participant(domainID_, participantID, configFile, policy);
 				instances[key] = newInst;
 			}
 			catch(ops::ConfigException& ex)
@@ -111,13 +109,14 @@ namespace ops
 	///Remove this instance from the static instance map
 	void Participant::RemoveInstance()
 	{
-		std::string key = domainID + "::" + participantID;
+		ParticipantKey_T key = getKey(domainID, participantID);
 		SafeLock lock(&creationMutex);
 		instances.erase(key);		
 	}
 
 
-	Participant::Participant(std::string domainID_, std::string participantID_, std::string configFile_):
+	Participant::Participant(ObjectName_T domainID_, ObjectName_T participantID_, FileName_T configFile_, execution_policy::Enum policy):
+		_policy(policy),
 		ioService(NULL),
 		config(NULL),
 		errorService(NULL), 
@@ -195,13 +194,17 @@ namespace ops
 		//------------Create timer for periodic events-
 		aliveDeadlineTimer = DeadlineTimer::create(ioService);
 		aliveDeadlineTimer->addListener(this);
+		// Start our timer. Calls onNewEvent(Notifier<int>* sender, int message) on timeout
+		aliveDeadlineTimer->start(aliveTimeout);
 		//--------------------------------------------
 
 		//------------Create thread pool--------------
-		threadPool = new SingleThreadPool();
-		//threadPool = new MultiThreadPool();
-		threadPool->addRunnable(this);
-		threadPool->start();
+		if (_policy == execution_policy::threading) {
+			threadPool = new SingleThreadPool();
+			//threadPool = new MultiThreadPool();
+			threadPool->addRunnable(this);
+			threadPool->start();
+		}
 		//--------------------------------------------
 
 		// Create the listener object for the participant info data published by participants on our domain.
@@ -244,6 +247,7 @@ namespace ops
 		// before receiveDataHandlerFactory is finished.
 		// Wait until receiveDataHandlerFactory has no more cleanup to do
 		while (!receiveDataHandlerFactory->cleanUpDone()) {
+			if (_policy == execution_policy::polling) Poll();	// Need to drive timer in case the user forget
 			TimeHelper::sleep(1);
 		}
 
@@ -300,7 +304,7 @@ namespace ops
 			staticErrorService->report(err);
 
 		} else {
-			std::map<std::string, Participant*>::iterator it = instances.begin();
+			std::map<ParticipantKey_T, Participant*>::iterator it = instances.begin();
 			while(it !=instances.end())
 			{
 				it->second->getErrorService()->report(err);
@@ -309,14 +313,21 @@ namespace ops
 		}
 	}
 
+	// Method to "drive" the Participant when the execution_policy is "polling"
+	bool Participant::Poll()
+	{
+		if (_policy != execution_policy::polling) return false;
+		ioService->poll();
+		return true;
+	}
+
 	// This will be called by our threadpool (started in the constructor())
 	void Participant::run()
 	{
+		if (_policy != execution_policy::threading) return;
 		// Set name of current thread for debug purpose
 		std::string name("OPSP_" + domainID);
 		thread_support::SetThreadName(name.c_str());
-		// Start our timer. Calls onNewEvent(Notifier<int>* sender, int message) on timeout
-		aliveDeadlineTimer->start(aliveTimeout);
 		ioService->run();	
 	}
 

@@ -44,6 +44,11 @@ namespace ops
 			boostIOService->stop();
 		}
 
+		void poll()
+		{
+			boostIOService->poll();
+		}
+
 		virtual ~BoostIOServiceImpl()
 		{
 			boostIOService->stop();
