@@ -45,15 +45,31 @@ public:
 class OPS_EXPORT MemoryMap
 {
 public:
-	MemoryMap(int width_, int height_)
-		: width(width_),
+	MemoryMap() :
+		width(0),
+		height(0),
+		dataCreator(false)
+	{
+		bytes = small_width_vector;
+		bytes[0] = nullptr;
+	}
+	MemoryMap(int width_, int height_):
+		  width(width_),
 		  height(height_),
 		  dataCreator(true)
 	{
-		bytes = new char*[width];
-		for(int i = 0; i < width; i ++)
-		{
-			bytes[i] = new char[height];
+		if (width <= smallWidthOpt) {
+			// For small maps, use our internal vector as segment pointer array
+			bytes = small_width_vector;
+		} else {
+			// For larger maps, allocate segment pointer array
+			bytes = new char*[width];
+		}
+		// Allocate all segments in one chunk
+		bytes[0] = new char[width*height];
+		// Setup segment pointers to point into the allocated chunk
+		for(int i = 1; i < width; i++) {
+			bytes[i] = bytes[i-1] + height;
 		}
 	}
 	MemoryMap(char* segment, int size):
@@ -61,8 +77,19 @@ public:
 		  height(size),
 		  dataCreator(false)
 	{
-		bytes = new char*[1];
+		bytes = small_width_vector;
 		bytes[0] = segment;
+	}
+
+	// Method to initialize/re-initialize object
+	// Fails if object is created as a data owner
+	bool set(char* segment, int size)
+	{
+		if ((width > 1) || dataCreator) return false;
+		width = 1;
+		height = size;
+		bytes[0] = segment;
+		return true;
 	}
 
 	char* getSegment(int i)
@@ -82,53 +109,32 @@ public:
 	{
 		return width*height;
 	}
+
 	///Makes a copy of the content of this memory to dest. startIndex and endIndex are memory map relative. 
-	void copyToBytes(char* dest, int startIndex, int endIndex )
+	bool copyToBytes(char* dest, int startIndex, int endIndex )
 	{
-		int currentSegment = (int)(startIndex / getSegmentSize());
-		int indexInSegment = startIndex - (currentSegment +  1) * getSegmentSize(); 
-		int bytesToWrite = endIndex - startIndex;
-		int bytesLeftInSegment = getSegmentSize() - indexInSegment;
+		int bytesToCopy = endIndex - startIndex + 1;
 
-		if(bytesLeftInSegment >= bytesToWrite)
-		{
-			memcpy(dest, getSegment(currentSegment) + indexInSegment, bytesToWrite);
-		}
-		else
-		{
-			//Recursively call this method again until we copied all bytes.
-			memcpy(dest, getSegment(currentSegment) + indexInSegment, bytesLeftInSegment);
-			copyToBytes(dest + bytesLeftInSegment, startIndex + bytesLeftInSegment, endIndex);
-		}
+		if ( (startIndex < 0) || (endIndex >= getTotalSize()) || (bytesToCopy <= 0) ) return false;
 
+		// Since all segments are in one chunk after each other we can do a simple memcpy()
+		memcpy(dest, bytes[0] + startIndex, bytesToCopy);
 	}
+
 	~MemoryMap()
 	{
-		//Delete all data.
-		if(dataCreator)
-		{
-			for(int i = 0; i < width; i ++)
-			{
-				if(bytes[i]) delete[] bytes[i];
-			}
-			delete[] bytes;
-		}
-		else //Do not delete individual segments.
-		{
-			delete[] bytes;
-		}
-		
+		if (dataCreator) delete[] bytes[0];
+		if (width > smallWidthOpt) delete[] bytes;
 	}
+
 private:
 	int width;
 	int height;
 	bool dataCreator;
 	char** bytes;
-
-
+	static const int smallWidthOpt = 4;
+	char* small_width_vector[smallWidthOpt];
 };
 
 }
-
 #endif
-
