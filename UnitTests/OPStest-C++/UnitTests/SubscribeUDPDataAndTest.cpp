@@ -294,7 +294,7 @@ int main(int argc, char**argv)
 
 
 TEST_F(Test_OPS_Publisher_And_Subscriber, TESTING_NORMAL_EXTRA_ALLT_UDP) {
-	EXPECT_EQ(receivedPizzaVec.size(), 22);
+	EXPECT_EQ(receivedPizzaVec.size(), (size_t)22);
 	test::testExtraAlltNormal(receivedPizzaVec.at(0), UDP);
 }
 
