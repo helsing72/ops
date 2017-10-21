@@ -53,6 +53,10 @@ namespace ops
 
 		int nextSegmentAt;
 		int currentSegment;
+
+		///"Short" string optimization for ReadString()
+		static const int shortStringBufferLength = 255;
+		char shortStringBuffer[shortStringBufferLength+1];
 	public:
         ///Writes the length first chars from chars to the buffer and increments index by length.
         void WriteChars(char* chars, int length);
