@@ -2,7 +2,7 @@ unit uOps.Transport.SendDataHandlerFactory;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2017 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -74,6 +74,7 @@ type
 implementation
 
 uses SysUtils,
+     uOps.NetworkSupport,
      uOps.Transport.McSendDataHandler,
      uOps.Transport.McUdpSendDataHandler,
      uOps.Transport.TCPSendDataHandler;
@@ -134,6 +135,9 @@ var
   localIf : string;
   ttl : Integer;
   info : THandlerInfo;
+  topName : string;
+	destAddress : string;
+	destPort : Integer;
 begin
   Result := nil;
 
@@ -154,7 +158,7 @@ begin
       Exit;
 		end;
 
-    localIf := string(TDomain.doSubnetTranslation(top.LocalInterface));
+    localIf := string(doSubnetTranslation(top.LocalInterface));
     ttl := top.TimeToLive;
 
 		if top.Transport = TTopic.TRANSPORT_MC then begin
@@ -172,10 +176,19 @@ begin
                                  FErrorService);
 			end;
 
-			// Setup a listener on the participant info data published by participants on our domain.
-			// We use the information for topics with UDP as transport, to know the destination for UDP sends
-			// ie. we extract ip and port from the information and add it to our McUdpSendDataHandler
-      if Assigned(FOnUdpConnectDisconnectProc) then FOnUdpConnectDisconnectProc(top, FUdpSendDataHandler, True);
+			// If topic specifies a valid node address, add that as a static destination address for topic
+			if isValidNodeAddress(top.DomainAddress) then begin
+				topName := string(top.Name);
+				destAddress := string(top.DomainAddress);
+				destPort := top.Port;
+        TMcUdpSendDataHandler(FUdpSendDataHandler).addSink(topName, destAddress, destPort, True);
+
+			end else begin
+        // Setup a listener on the participant info data published by participants on our domain.
+        // We use the information for topics with UDP as transport, to know the destination for UDP sends
+        // ie. we extract ip and port from the information and add it to our McUdpSendDataHandler
+        if Assigned(FOnUdpConnectDisconnectProc) then FOnUdpConnectDisconnectProc(top, FUdpSendDataHandler, True);
+      end;
 
       Inc(FUdpUsers);
 
@@ -202,7 +215,9 @@ begin
   FMutex.Acquire;
   try
     if top.Transport = TTopic.TRANSPORT_UDP then begin
-      if Assigned(FOnUdpConnectDisconnectProc) then FOnUdpConnectDisconnectProc(top, FUdpSendDataHandler, False);
+			if not isValidNodeAddress(top.DomainAddress) then begin
+        if Assigned(FOnUdpConnectDisconnectProc) then FOnUdpConnectDisconnectProc(top, FUdpSendDataHandler, False);
+      end;
       Dec(FUdpUsers);
       if FUdpUsers = 0 then begin
         // This is the last matching call, so now no one is using the SendDataHandler

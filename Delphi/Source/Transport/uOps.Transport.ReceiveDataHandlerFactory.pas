@@ -2,7 +2,7 @@ unit uOps.Transport.ReceiveDataHandlerFactory;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2017 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -65,6 +65,7 @@ type
 implementation
 
 uses SysUtils,
+     uOps.NetworkSupport,
      uOps.Transport.UDPReceiver;
 
 constructor TReceiveDataHandlerFactory.Create(Proc : TOnUdpTransportInfoProc; Reporter : TErrorService);
@@ -86,10 +87,10 @@ end;
 function TReceiveDataHandlerFactory.makeKey(top : TTopic) : string;
 begin
   // Since topics can use the same port for transports multicast & tcp, or
-  // use transport udp which always use a single ReceiveDataHandler,
+  // use transport udp which in most cases use a single ReceiveDataHandler,
   // we need to return the same ReceiveDataHandler in these cases.
   // Make a key with the transport info that uniquely defines the receiver.
-  if top.Transport = TTopic.TRANSPORT_UDP then begin
+  if (top.Transport = TTopic.TRANSPORT_UDP) and (not isMyNodeAddress(top.DomainAddress)) then begin
     Result := string(top.Transport);
   end else begin
     Result := string(top.Transport) + '::' + string(top.DomainAddress) + '::' + IntToStr(top.Port);
@@ -140,10 +141,12 @@ begin
     end else if top.Transport = TTopic.TRANSPORT_UDP then begin
       Result := TReceiveDataHandler.Create(top, dom, opsObjectFactory, FErrorService);
 
-      if Assigned(FOnUdpTransportInfoProc) then begin
-        FOnUdpTransportInfoProc(
-          (Result.getReceiver as TUDPReceiver).Address,
-          (Result.getReceiver as TUDPReceiver).Port);
+      if key = string(top.Transport) then begin
+        if Assigned(FOnUdpTransportInfoProc) then begin
+          FOnUdpTransportInfoProc(
+            (Result.getReceiver as TUDPReceiver).Address,
+            (Result.getReceiver as TUDPReceiver).Port);
+        end;
       end;
 
       FReceiveDataHandlerInstances.Add(key, Result);
@@ -177,8 +180,10 @@ begin
         FreeAndNil(rdh);
 
 				if top.Transport = TTopic.TRANSPORT_UDP then begin
-          if Assigned(FOnUdpTransportInfoProc) then begin
-            FOnUdpTransportInfoProc('', 0);
+          if key = string(top.Transport) then begin
+            if Assigned(FOnUdpTransportInfoProc) then begin
+              FOnUdpTransportInfoProc('', 0);
+            end;
           end;
 				end;
       end;

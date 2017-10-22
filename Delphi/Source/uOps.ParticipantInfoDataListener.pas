@@ -2,7 +2,7 @@ unit uOps.ParticipantInfoDataListener;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2017 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -33,6 +33,9 @@ uses
   uOps.Transport.SendDataHandler;
 
 type
+  // Method prototype to call when we want to check if a specific topic is published on the participant
+  TOnHasPublisherOnProc = function(topicName : AnsiString) : Boolean of object;
+
 	TParticipantInfoDataListener = class(TObject)
   private
     // Borrowed references
@@ -40,6 +43,7 @@ type
     FPartInfoTopic : TTopic;
     FErrorService : TErrorService;
     FSendDataHandler : TSendDataHandler;
+    FOnHasPublisherOnProc : TOnHasPublisherOnProc;
 
     //
     FMutex : TMutex;
@@ -52,8 +56,10 @@ type
 
     procedure OnOpsMessage(Sender : TObject; obj : TOPSMessage);
 
+    function HasPublisherOn(name : AnsiString) : Boolean;
+
   public
-    constructor Create(dom : TDomain; partInfoTopic : TTopic; Reporter : TErrorService);
+    constructor Create(dom : TDomain; partInfoTopic : TTopic; Proc : TOnHasPublisherOnProc; Reporter : TErrorService);
     destructor Destroy; override;
 
 //		void prepareForDelete();
@@ -68,16 +74,19 @@ type
 implementation
 
 uses SysUtils,
+     uOps.NetworkSupport,
      uOps.Subscriber,
      uOPs.Transport.McUdpSendDataHandler;
 
 { TParticipantInfoDataListener }
 
-constructor TParticipantInfoDataListener.Create(dom : TDomain; partInfoTopic : TTopic; Reporter : TErrorService);
+constructor TParticipantInfoDataListener.Create(dom : TDomain; partInfoTopic : TTopic;
+                Proc : TOnHasPublisherOnProc; Reporter : TErrorService);
 begin
   inherited Create;
   FDomain := dom;
   FPartInfoTopic := partInfoTopic;
+  FOnHasPublisherOnProc := Proc;
   FErrorService := Reporter;
   FMutex := TMutex.Create;
 end;
@@ -89,20 +98,30 @@ begin
   inherited;
 end;
 
+function TParticipantInfoDataListener.HasPublisherOn(name : AnsiString) : Boolean;
+begin
+  if Assigned(FOnHasPublisherOnProc) then begin
+    Result := FOnHasPublisherOnProc(name);
+  end else begin
+    Result := False;
+  end;
+end;
+
 procedure TParticipantInfoDataListener.connectUdp(top: TTopic; handler: TSendDataHandler);
 begin
   FMutex.Acquire;
   try
     if not Assigned(FPartInfoSub) then begin
       if not setupSubscriber then begin
-        // Generate an error message if we come here with domain->getMetaDataMcPort() == 0,
-        // it means that we have UDP topics that require meta data but user has disabled it.
-        if Assigned(FErrorService) then begin
-          FErrorService.Report(TBasicError.Create(
-            'ParticipantInfoDataListener', 'connectUdp',
-            'UDP topic "' + string(top.Name) + '" won''t work since Meta Data disabled in config-file'));
+        if not isValidNodeAddress(top.DomainAddress) then begin
+          // Generate an error message if we come here with domain->getMetaDataMcPort() == 0,
+          // it means that we have UDP topics that require meta data but user has disabled it.
+          if Assigned(FErrorService) then begin
+            FErrorService.Report(TBasicError.Create(
+              'ParticipantInfoDataListener', 'connectUdp',
+              'UDP topic "' + string(top.Name) + '" won''t work since Meta Data disabled in config-file'));
+          end;
         end;
-        Exit;
       end;
     end;
 
@@ -204,13 +223,15 @@ begin
           try
             // Checks for UDP transport
             if Assigned(FSendDataHandler) and Assigned(partInfo.subscribeTopics) then begin
-              for i := 0 to Length(partInfo.subscribeTopics) - 1 do begin
-                if (partInfo.subscribeTopics[i].transport = TTopic.TRANSPORT_UDP) and
-                   True //TODO participant->hasPublisherOn(partInfo->subscribeTopics[i].name) )
-                then begin
-                  // Do an add sink here
-                  TMcUdpSendDataHandler(FSendDataHandler).addSink(
-                      string(partInfo.subscribeTopics[i].name), string(partInfo.ip), partInfo.mc_udp_port);
+              if partInfo.mc_udp_port <> 0 then begin
+                for i := 0 to Length(partInfo.subscribeTopics) - 1 do begin
+                  if (partInfo.subscribeTopics[i].transport = TTopic.TRANSPORT_UDP) and
+                     HasPublisherOn(partInfo.subscribeTopics[i].name)
+                  then begin
+                    // Do an add sink here
+                    TMcUdpSendDataHandler(FSendDataHandler).addSink(
+                        string(partInfo.subscribeTopics[i].name), string(partInfo.ip), partInfo.mc_udp_port);
+                  end;
                 end;
               end;
             end;

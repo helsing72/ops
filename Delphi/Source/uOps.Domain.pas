@@ -2,7 +2,7 @@ unit uOps.Domain;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2017 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -76,10 +76,8 @@ type
 		// Fills the parameter obj with all values from this object.
 		procedure FillClone(var obj : TOPSObject); override;
 
-		class function doSubnetTranslation(addr : AnsiString) : AnsiString;
-
 		property DomainAddress : AnsiString read FDomainAddress;
-		property DomainID : AnsiString read FDomainID;
+		property DomainID : AnsiString read FDomainID;
 		property MetaDataMcPort : Integer read FMetaDataMcPort;
     property TimeToLive : Integer read FTimeToLive;
     property LocalInterface : AnsiString read FLocalInterface;
@@ -282,89 +280,6 @@ begin
 			end;
 		end;
 	end;
-end;
-
-/// ------------------------------------------
-/// Helper to get all IP interfaces
-
-procedure VVGetIpAddrTable(var p: PMibIpAddrTable; var Size: Cardinal; const bOrder: BOOL);
-var
-  Res: DWORD;
-begin
-  p := nil;
-  Size := 0;
-  if @GetIpAddrTable = nil then Exit;   //Not implemented in this windows version
-  Res := GetIpAddrTable(p,Size,bOrder);
-  if Res=ERROR_INSUFFICIENT_BUFFER then begin
-    Getmem(p,Size);
-    // Caller must free this buffer when it is no longer used
-    FillChar(p^,Size,#0);
-    Res := GetIpAddrTable(p,Size,bOrder);
-  end;
-  if Res <> NO_ERROR then begin
-    if Assigned(p) then FreeMem(p);
-    p := nil;
-    Size := 0;
-  end;
-end;
-
-function IpAddressToString(Addr: DWORD): AnsiString;
-var
-  InAddr: TInAddr;
-begin
-  InAddr.S_addr := Addr;
-  Result := AnsiString(inet_ntoa(InAddr));
-end;
-
-// If argument contains a "/" we assume it is on the form:  subnet-address/subnet-mask
-// e.g "192.168.10.0/255.255.255.0" or "192.168.10.0/24"
-// In that case we loop over all interfaces and take the first one that matches
-// i.e. the one whos interface address is on the subnet
-class function TDomain.doSubnetTranslation(addr : AnsiString) : AnsiString;
-var
-  Idx : Integer;
-  subnet, mask : AnsiString;
-  subnetIp, subnetMask : DWORD;
-  Size: ULONG;
-  p: PMibIpAddrTable;
-  i: integer;
-begin
-  Result := addr;
-
-  // If no '/' we just return the given address
-  Idx := Pos('/', string(addr));
-  if Idx = 0 then Exit;
-
-  subnet := Copy(addr, 1, Idx-1);
-  mask   := Copy(addr, Idx+1, MaxInt);
-
-  subnetIp := inet_addr(PAnsiChar(subnet));
-  if Length(mask) <= 2 then begin
-    // Expand to the number of bits given
-    subnetMask := StrToInt(string(mask));
-    subnetMask := (((1 shl subnetMask)-1) shl (32 - subnetMask)) and $FFFFFFFF;
-    subnetMask := ntohl(subnetMask);
-  end else begin
-    subnetMask := inet_addr(PAnsiChar(mask));
-  end;
-
-  VVGetIpAddrTable(p, Size, False);
-  if Assigned(p) then begin
-    try
-      with p^ do begin
-        for i := 0 to dwNumEntries - 1 do begin
-          with table[i] do begin
-            if (dwAddr and subnetMask) = (subnetIp and subnetMask) then begin
-              Result := IpAddressToString(dwAddr);
-              Break;
-            end;
-          end;
-        end;
-      end;
-    finally
-      FreeMem(p);
-    end;
-  end;
 end;
 
 end.

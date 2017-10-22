@@ -2,7 +2,7 @@ unit uOps.Transport.McUdpSendDataHandler;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2017 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -35,19 +35,25 @@ type
   private
     ip : string;
     port : Integer;
+    alwaysAlive : Boolean;
     lastTimeAlive : Int64;
     const ALIVE_TIMEOUT = 3000;
   public
-    constructor Create(ip : string; port : Integer);
+    constructor Create(ip : string; port : Integer; alwaysAlive : Boolean);
     function isAlive : Boolean;
-    procedure feedWatchdog;
+    procedure feedWatchdog(alwaysAlive : Boolean);
     function getKey : string; overload;
     class function getKey(ip : string; port : Integer) : string; overload;
   end;
 
+  Entry_T = record
+    staticRoute : Boolean;
+    portMap : TDictionary<string,TIpPortPair>;
+  end;
+
   TMcUdpSendDataHandler = class(TSendDataHandler)
   private
-    FTopSinkMap : TDictionary<string,TDictionary<string,TIpPortPair>>;
+    FTopSinkMap : TDictionary<string,Entry_T>;
 
   public
     constructor Create(localInterface : string; ttl : Integer; outSocketBufferSize : Int64; Reporter : TErrorService);
@@ -55,7 +61,7 @@ type
 
 		function sendData(buf : PByte; bufSize : Integer; topic : TTopic) : Boolean; override;
 
-    procedure addSink(topic : string; ip : string; port : Integer);
+    procedure addSink(topic : string; ip : string; port : Integer; staticRoute : Boolean = False);
   end;
 
 implementation
@@ -64,21 +70,23 @@ uses Classes,
      SysUtils,
      uOps.TimeHelper;
 
-constructor TIpPortPair.Create(ip : string; port : Integer);
+constructor TIpPortPair.Create(ip : string; port : Integer; alwaysAlive : Boolean);
 begin
   inherited Create;
   Self.ip := ip;
   Self.port := port;
+  Self.alwaysAlive := alwaysAlive;
   Self.lastTimeAlive := TTimeHelper.CurrentTimeMillis;
 end;
 
 function TIpPortPair.isAlive : Boolean;
 begin
-  Result := (TTimeHelper.currentTimeMillis - lastTimeAlive) < ALIVE_TIMEOUT;
+  Result := alwaysAlive or ((TTimeHelper.currentTimeMillis - lastTimeAlive) < ALIVE_TIMEOUT);
 end;
 
-procedure TIpPortPair.feedWatchdog;
+procedure TIpPortPair.feedWatchdog(alwaysAlive : Boolean);
 begin
+  Self.alwaysAlive := Self.alwaysAlive or alwaysAlive;  // Once set to true always true
   lastTimeAlive := TTimeHelper.CurrentTimeMillis;
 end;
 
@@ -95,7 +103,7 @@ end;
 constructor TMcUdpSendDataHandler.Create(localInterface : string; ttl : Integer; outSocketBufferSize : Int64; Reporter : TErrorService);
 begin
   inherited Create;
-  FTopSinkMap := TDictionary<string,TDictionary<string,TIpPortPair>>.Create;
+  FTopSinkMap := TDictionary<string,Entry_T>.Create;
 
   FSender := TSenderFactory.CreateUDPSender(localInterface, ttl, OutSocketBufferSize);
   FSender.ErrorService := Reporter;
@@ -118,7 +126,7 @@ var
   i : Integer;
   ipPort : TIpPortPair;
   tmpPair : TPair<string, TIpPortPair>;
-  topicSincs : TDictionary<string, TIpPortPair>;
+  topicSincs : Entry_T;
   sinksToDelete : TStringList;
 begin
   Result := True;
@@ -128,7 +136,7 @@ begin
       sinksToDelete := TStringList.Create;
       try
         // Loop over all sinks and send data, remove items that isn't "alive".
-        for ipPort in topicSincs.Values do begin
+        for ipPort in topicSincs.portMap.Values do begin
           // Check if this sink is alive
           if ipPort.isAlive then begin
             Result := Result and FSender.sendTo(buf, bufSize, ipPort.ip, ipPort.port);
@@ -141,7 +149,7 @@ begin
 
         // Delete all IpPortPair's that is marked for delete
         for i := 0 to sinksToDelete.Count - 1 do begin
-          tmpPair := topicSincs.ExtractPair(sinksToDelete[i]);
+          tmpPair := topicSincs.portMap.ExtractPair(sinksToDelete[i]);
           FreeAndNil(tmpPair.Value);
         end;
       finally
@@ -153,28 +161,32 @@ begin
   end;
 end;
 
-procedure TMcUdpSendDataHandler.addSink(topic : string; ip : string; port : Integer);
+procedure TMcUdpSendDataHandler.addSink(topic : string; ip : string; port : Integer; staticRoute : Boolean);
 var
   ipPort : TIpPortPair;
-  ipPortMap : TDictionary<string, TIpPortPair>;
+  ipPortMap : Entry_T;
 begin
   FMutex.Acquire;
   try
-    // check if we already have a sink map for this topic
+    // check if we already have any sinks for this topic
     if not FTopSinkMap.TryGetValue(topic, ipPortMap) then begin
-      // We have no sink map for this topic, so add it
-      ipPortMap := TDictionary<string, TIpPortPair>.Create;
+      // We have no sinks for this topic, so add it
+      ipPortMap.staticRoute := staticRoute;
+      ipPortMap.portMap := TDictionary<string, TIpPortPair>.Create;
       FTopSinkMap.Add(topic, ipPortMap);
     end;
 
-    if not ipPortMap.TryGetValue(TIpPortPair.getKey(ip, port), ipPort) then begin
-      // We have no matching sink, add it
-      ipPort := TIpPortPair.Create(ip, port);
-      ipPortMap.Add(ipPort.getKey, ipPort);
-      //std::cout << topic << " added as new sink " << ipPort.getKey() << std::endl;
-    end;
+    //If created as static route, we only add sinks that are static
+    if (not ipPortMap.staticRoute) or (ipPortMap.staticRoute and staticRoute) then begin
+      if not ipPortMap.portMap.TryGetValue(TIpPortPair.getKey(ip, port), ipPort) then begin
+        // We have no matching sink, add it
+        ipPort := TIpPortPair.Create(ip, port, staticRoute);
+        ipPortMap.portMap.Add(ipPort.getKey, ipPort);
+        //std::cout << topic << " added as new sink " << ipPort.getKey() << std::endl;
+      end;
 
-    ipPort.feedWatchdog;
+      ipPort.feedWatchdog(staticRoute);
+    end;
   finally
     FMutex.Release;
   end;
