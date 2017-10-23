@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   OPSTypeDefs.h
  * Author: gravanto
  *
@@ -34,7 +34,7 @@ namespace ops {
 //#define REPLACE_TRANSPORT_LAYER	// Removes IOService.cpp, Sender.cpp, Receiver.cpp and DeadlineTimer.cpp
 									// from library so you can use your own implementations.
 
-//#define REPLACE_OPS_CONFIG		// Removes the OPSConfig file reader from library so you can implement 
+//#define REPLACE_OPS_CONFIG		// Removes the OPSConfig file reader from library so you can implement
 									// your own for targets without a filesystem.
 
 // -----------------------------------------------------------------------------
@@ -113,7 +113,7 @@ namespace ops {
 // -----------------------------------------------------------------------------
 // OPS uses Little Endian data serialization to improve the performance since
 // thats the native packing for x86 and it also works on Arm.
-// If OPS is compiled for a Big Endian machine (and it need to communicate with a 
+// If OPS is compiled for a Big Endian machine (and it need to communicate with a
 // little endian machine via OPS) you need to uncomment the following define to
 // keep the binary compatibility.
 //
@@ -183,7 +183,7 @@ typedef  int16_t __int16;
 		stringer(FIXED_MESSAGE_KEY_SIZE) " " \
 		stringer(FIXED_TYPE_ID_SIZE) " " \
 		stringer(FIXED_CHANNEL_ID_SIZE) " " \
-		stringer(FIXED_FILENAME_SIZE) 
+		stringer(FIXED_FILENAME_SIZE)
 #else
 	#define COMPILESIGNATURE_STRINGS "STD"
 #endif

@@ -1,5 +1,5 @@
 /**
-* 
+*
 * Copyright (C) 2006-2009 Anton Gravestam.
 *
 * This file is part of OPS (Open Publish Subscribe).
@@ -53,7 +53,7 @@ namespace ops
 	}
 
 	// --------------------------------------------------------------------------------
-	// A static error service that user could create, by calling getStaticErrorService(), and connect to. 
+	// A static error service that user could create, by calling getStaticErrorService(), and connect to.
 	// If it exist, "reportStaticError()" will use this instead of using all participants errorservices
 	// which leads to duplicated error messages when several participants exist.
 	// This static errorservice also has the advantage that errors during Participant creation can be logged.
@@ -79,14 +79,14 @@ namespace ops
 		return key;
 	}
 
-	Participant* Participant::getInstanceInternal(ObjectName_T domainID_, ObjectName_T participantID, FileName_T configFile)
+	Participant* Participant::getInstanceInternal(ObjectName_T domainID_, ObjectName_T participantID, FileName_T configFile, execution_policy::Enum policy)
 	{
 		ParticipantKey_T key = getKey(domainID_, participantID);
 		SafeLock lock(&creationMutex);
 		if (instances.find(key) == instances.end()) {
 			try
 			{
-				Participant* newInst = new Participant(domainID_, participantID, configFile);
+				Participant* newInst = new Participant(domainID_, participantID, configFile, policy);
 				instances[key] = newInst;
 			}
 			catch(ops::ConfigException& ex)
@@ -118,27 +118,28 @@ namespace ops
 	{
 		ParticipantKey_T key = getKey(domainID, participantID);
 		SafeLock lock(&creationMutex);
-		instances.erase(key);		
+		instances.erase(key);
 	}
 
 
-	Participant::Participant(ObjectName_T domainID_, ObjectName_T participantID_, FileName_T configFile_):
+	Participant::Participant(ObjectName_T domainID_, ObjectName_T participantID_, FileName_T configFile_, execution_policy::Enum policy):
+		_policy(policy),
 		ioService(NULL),
 		config(NULL),
-		errorService(NULL), 
+		errorService(NULL),
 		threadPool(NULL),
 		aliveDeadlineTimer(NULL),
 		partInfoPub(NULL),
-		domain(NULL), 
+		domain(NULL),
 		partInfoListener(NULL),
 		receiveDataHandlerFactory(NULL),
 		sendDataHandlerFactory(NULL),
-		domainID(domainID_), 
+		domainID(domainID_),
 		participantID(participantID_),
 		keepRunning(true),
 		aliveTimeout(1000),
 		objectFactory(NULL)
-	{	
+	{
 		ioService = IOService::create();
 
 		if(!ioService)
@@ -167,7 +168,7 @@ namespace ops
 
 		//Get the domain from config. Note should not be deleted, owned by config.
 		domain = config->getDomain(domainID);
-		if(!domain) 
+		if(!domain)
 		{
 			ExceptionMessage_T msg("Domain '");
 			msg += domainID;
@@ -178,7 +179,7 @@ namespace ops
 
 		//Create a factory instance for each participant
 		objectFactory = new OPSObjectFactoryImpl();
-		
+
 		// Initialize static data in partInfoData (ReceiveDataHandlerFactory() will set some more fields)
 		InternalString_T Name = GetHostName();
 		std::ostringstream myStream;
@@ -202,13 +203,17 @@ namespace ops
 		//------------Create timer for periodic events-
 		aliveDeadlineTimer = DeadlineTimer::create(ioService);
 		aliveDeadlineTimer->addListener(this);
+		// Start our timer. Calls onNewEvent(Notifier<int>* sender, int message) on timeout
+		aliveDeadlineTimer->start(aliveTimeout);
 		//--------------------------------------------
 
 		//------------Create thread pool--------------
-		threadPool = new SingleThreadPool();
-		//threadPool = new MultiThreadPool();
-		threadPool->addRunnable(this);
-		threadPool->start();
+		if (_policy == execution_policy::threading) {
+			threadPool = new SingleThreadPool();
+			//threadPool = new MultiThreadPool();
+			threadPool->addRunnable(this);
+			threadPool->start();
+		}
 		//--------------------------------------------
 
 		// Create the listener object for the participant info data published by participants on our domain.
@@ -229,7 +234,7 @@ namespace ops
 
 		{
 			SafeLock lock(&serviceMutex);
-		
+
 			// Indicate that shutdown is in progress
 			keepRunning = false;
 
@@ -247,16 +252,17 @@ namespace ops
 		if (sendDataHandlerFactory) delete sendDataHandlerFactory;
 		sendDataHandlerFactory = NULL;
 
-		// Our timer is required for ReceiveDataHandlers to be cleaned up so it shouldn't be stopped 
+		// Our timer is required for ReceiveDataHandlers to be cleaned up so it shouldn't be stopped
 		// before receiveDataHandlerFactory is finished.
 		// Wait until receiveDataHandlerFactory has no more cleanup to do
 		while (!receiveDataHandlerFactory->cleanUpDone()) {
+			if (_policy == execution_policy::polling) Poll();	// Need to drive timer in case the user forget
 			TimeHelper::sleep(1);
 		}
 
 		// Now stop and delete our timer (NOTE requires ioService to be running).
 		// If the timer is in the callback, the delete will wait for it to finish and then the object is deleted.
-		if (aliveDeadlineTimer) delete aliveDeadlineTimer; 
+		if (aliveDeadlineTimer) delete aliveDeadlineTimer;
 		aliveDeadlineTimer = NULL;
 
 		// Now time to delete our receive factory
@@ -269,11 +275,11 @@ namespace ops
 		// The stop() call will not block, it just signals that we want it to finish as soon as possible.
 		if (ioService) ioService->stop();
 
-		// Now we delete the threadpool, which will wait for the thread(s) to finish 
+		// Now we delete the threadpool, which will wait for the thread(s) to finish
 		if (threadPool) delete threadPool;
 		threadPool = NULL;
 
-		// Now when the threads are gone, it's safe to delete the rest of our objects 
+		// Now when the threads are gone, it's safe to delete the rest of our objects
 		if (partInfoListener) delete partInfoListener;
 		if (objectFactory) delete objectFactory;
 		if (errorService) delete errorService;
@@ -290,7 +296,7 @@ namespace ops
 		infoTopic.setDomainID(domainID);
 		infoTopic.setParticipantID(participantID);
 		infoTopic.setTransport(Topic::TRANSPORT_MC);
-		
+
 		return infoTopic;
 	}
 
@@ -316,16 +322,23 @@ namespace ops
 		}
 	}
 
+	// Method to "drive" the Participant when the execution_policy is "polling"
+	bool Participant::Poll()
+	{
+		if (_policy != execution_policy::polling) return false;
+		ioService->poll();
+		return true;
+	}
+
 	// This will be called by our threadpool (started in the constructor())
 	void Participant::run()
 	{
+		if (_policy != execution_policy::threading) return;
 		// Set name of current thread for debug purpose
 		InternalString_T name("OPSP_");
 		name += domainID;
 		thread_support::SetThreadName(name.c_str());
-		// Start our timer. Calls onNewEvent(Notifier<int>* sender, int message) on timeout
-		aliveDeadlineTimer->start(aliveTimeout);
-		ioService->run();	
+		ioService->run();
 	}
 
 	// Called on aliveDeadlineTimer timeouts
@@ -384,8 +397,8 @@ namespace ops
 		Topic topic = domain->getTopic(name);
 		topic.setParticipantID(participantID);
 		topic.setDomainID(domainID);
-		topic.participant = this;		
-		
+		topic.participant = this;
+
 		return topic;
 	}
 

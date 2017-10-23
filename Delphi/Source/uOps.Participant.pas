@@ -2,7 +2,7 @@ unit uOps.Participant;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2017 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -145,6 +145,8 @@ type
     // we can send the correct UDP transport info in the participant info data
     procedure OnUdpTransportInfoProc(ipaddress : string; port : Integer);
 
+    function HasPublisherOn(topicName : AnsiString) : Boolean;
+
     // Create a Topic for subscribing or publishing on ParticipantInfoData
     function createParticipantInfoTopic : TTopic;
 
@@ -286,7 +288,7 @@ begin
   FReceiveDataHandlerFactory := TReceiveDataHandlerFactory.Create(OnUdpTransportInfoProc, FErrorService);
 
   FPartInfoTopic := createParticipantInfoTopic;
-  FPartInfoListener := TParticipantInfoDataListener.Create(FDomain, FPartInfoTopic, FErrorService);
+  FPartInfoListener := TParticipantInfoDataListener.Create(FDomain, FPartInfoTopic, HasPublisherOn, FErrorService);
 
   // Start a thread running our run() method
   FRunner := TRunner.Create(Run);
@@ -323,6 +325,16 @@ begin
 end;
 
 // -----------------------------------------------------------------------------
+
+function TParticipant.HasPublisherOn(topicName : AnsiString) : Boolean;
+begin
+  FPartInfoDataMutex.Acquire;
+  try
+    Result := FPartInfoData.existTopic(FPartInfoData.publishTopics, topicName);
+  finally
+    FPartInfoDataMutex.Release;
+  end;
+end;
 
 function TParticipant.getSendDataHandler(top : TTopic) : TSendDataHandler;
 begin

@@ -24,7 +24,7 @@ void testExtraAlltNormal(pizza::special::ExtraAllt &extraAllt) {
 
 
 	//test bools
-	EXPECT_EQ((extraAllt.bools).size(),6) << "size of the bools vector are not correct";
+	EXPECT_EQ((extraAllt.bools).size(),(size_t)6) << "size of the bools vector are not correct";
 	EXPECT_EQ((extraAllt.bools).at(0),true);
 	EXPECT_EQ((extraAllt.bools).at(1),false);
 	EXPECT_EQ((extraAllt.bools).at(2),true);
@@ -33,7 +33,7 @@ void testExtraAlltNormal(pizza::special::ExtraAllt &extraAllt) {
 	EXPECT_EQ((extraAllt.bools).at(5),false);
 
 	//test bytes
-	EXPECT_EQ((extraAllt.bytes).size(),6) << "size of the bytes vector are not correct";
+	EXPECT_EQ((extraAllt.bytes).size(),(size_t)6) << "size of the bytes vector are not correct";
 	EXPECT_EQ((extraAllt.bytes).at(0), 'p');
 	EXPECT_EQ((extraAllt.bytes).at(1), 'i');
 	EXPECT_EQ((extraAllt.bytes).at(2), 'z');
@@ -42,7 +42,7 @@ void testExtraAlltNormal(pizza::special::ExtraAllt &extraAllt) {
 	EXPECT_EQ((extraAllt.bytes).at(5), '!');
 
 	//test ints
-	EXPECT_EQ((extraAllt.ints).size(), 6) << "size of the ints vector are not correct";
+	EXPECT_EQ((extraAllt.ints).size(), (size_t)6) << "size of the ints vector are not correct";
 	EXPECT_EQ((extraAllt.ints).at(0), 0);
 	EXPECT_EQ((extraAllt.ints).at(1), 123);
 	EXPECT_EQ((extraAllt.ints).at(2), -523);
@@ -51,7 +51,7 @@ void testExtraAlltNormal(pizza::special::ExtraAllt &extraAllt) {
 	EXPECT_EQ((extraAllt.ints).at(5), std::numeric_limits<int32_t>::max());//  2147483647);
 
 	//test shorts
-	EXPECT_EQ((extraAllt.shorts).size(), 6) << "size of the shorts vector are not correct";
+	EXPECT_EQ((extraAllt.shorts).size(), (size_t)6) << "size of the shorts vector are not correct";
 	EXPECT_EQ((extraAllt.shorts).at(0), 0);
 	EXPECT_EQ((extraAllt.shorts).at(1), 123);
 	EXPECT_EQ((extraAllt.shorts).at(2), -523);
@@ -60,7 +60,7 @@ void testExtraAlltNormal(pizza::special::ExtraAllt &extraAllt) {
 	EXPECT_EQ((extraAllt.shorts).at(5), 32767);
 
 	//test floats
-	EXPECT_EQ((extraAllt.floats).size(), 6) << "size of the floats vector are not correct";
+	EXPECT_EQ((extraAllt.floats).size(), (size_t)6) << "size of the floats vector are not correct";
 	EXPECT_NEAR(extraAllt.floats.at(0), 0.0f, delta);
 	EXPECT_NEAR(extraAllt.floats.at(1), 123.4f, delta);
 	EXPECT_NEAR(extraAllt.floats.at(2), -523.2f, delta);
@@ -69,7 +69,7 @@ void testExtraAlltNormal(pizza::special::ExtraAllt &extraAllt) {
 	EXPECT_NEAR(extraAllt.floats.at(5), float_max, delta);
 
 	//test doubles
-	EXPECT_EQ((extraAllt.doubles).size(), 6) << "size of the doubles vector are not correct";
+	EXPECT_EQ((extraAllt.doubles).size(), (size_t)6) << "size of the doubles vector are not correct";
 	EXPECT_NEAR((extraAllt.doubles).at(0), 0.0, delta);
 	EXPECT_NEAR((extraAllt.doubles).at(1), 123.4, delta);
 	EXPECT_NEAR((extraAllt.doubles).at(2), -523.2, delta);
@@ -78,7 +78,7 @@ void testExtraAlltNormal(pizza::special::ExtraAllt &extraAllt) {
 	EXPECT_NEAR((extraAllt.doubles).at(5), double_max, delta);
 
 	//test longs
-	EXPECT_EQ((extraAllt.longs).size(), 6) << "size of the longs vector are not correct";
+	EXPECT_EQ((extraAllt.longs).size(), (size_t)6) << "size of the longs vector are not correct";
 	EXPECT_EQ((extraAllt.longs).at(0), 0);
 	EXPECT_EQ((extraAllt.longs).at(1), 123);
 	EXPECT_EQ((extraAllt.longs).at(2), -523);
@@ -87,7 +87,7 @@ void testExtraAlltNormal(pizza::special::ExtraAllt &extraAllt) {
 	EXPECT_EQ((extraAllt.longs).at(5), std::numeric_limits<int64_t>::max());//  9223372036854775807);
 
 	//test cheeses
-	EXPECT_EQ((extraAllt.cheeses).size(), 6) << "size of the cheeses vector are not correct";
+	EXPECT_EQ((extraAllt.cheeses).size(), (size_t)6) << "size of the cheeses vector are not correct";
 	EXPECT_EQ(((extraAllt.cheeses).at(0)).age, 1);
 	EXPECT_EQ(((extraAllt.cheeses).at(0)).name, "cheddar");
 	EXPECT_EQ(((extraAllt.cheeses).at(1)).age, 2);
@@ -151,15 +151,15 @@ void testExtraAlltLarge(pizza::special::ExtraAllt &extraAllt, SendType sendType)
 	EXPECT_EQ(extraAllt.testingShort, 0);
 
 
-	EXPECT_EQ(extraAllt.bools.size(), exptectVecSize);
-	EXPECT_EQ(extraAllt.bytes.size(), exptectVecSize);
-	EXPECT_EQ(extraAllt.ints.size(), exptectVecSize);
-	EXPECT_EQ(extraAllt.floats.size(), exptectVecSize);
-	EXPECT_EQ(extraAllt.doubles.size(), exptectVecSize);
-	EXPECT_EQ(extraAllt.longs.size(), exptectVecSize);
-	EXPECT_EQ(extraAllt.strings.size(), exptectVecSize);
-	EXPECT_EQ(extraAllt.cheeses.size(), exptectVecSize);
-	EXPECT_EQ(extraAllt.shorts.size(), exptectVecSize);
+	EXPECT_EQ(extraAllt.bools.size(), (size_t)exptectVecSize);
+	EXPECT_EQ(extraAllt.bytes.size(), (size_t)exptectVecSize);
+	EXPECT_EQ(extraAllt.ints.size(), (size_t)exptectVecSize);
+	EXPECT_EQ(extraAllt.floats.size(), (size_t)exptectVecSize);
+	EXPECT_EQ(extraAllt.doubles.size(), (size_t)exptectVecSize);
+	EXPECT_EQ(extraAllt.longs.size(), (size_t)exptectVecSize);
+	EXPECT_EQ(extraAllt.strings.size(), (size_t)exptectVecSize);
+	EXPECT_EQ(extraAllt.cheeses.size(), (size_t)exptectVecSize);
+	EXPECT_EQ(extraAllt.shorts.size(), (size_t)exptectVecSize);
 
 
 	for(int i = 0; i < exptectVecSize; ++i) {

@@ -2,7 +2,7 @@ unit uOps.ParticipantInfoData;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2017 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -65,6 +65,9 @@ type
     // Help routines for updating the dynamic arrays with TopicInfoData
     procedure addTopic(var arr : TDynTopicInfoDataArray; top : TTopic);
     procedure removeTopic(var arr : TDynTopicInfoDataArray; top : TTopic);
+
+    function existTopic(var arr : TDynTopicInfoDataArray; topicName : AnsiString) : Boolean;
+
   end;
 
 implementation
@@ -167,6 +170,20 @@ begin
       arr[i-1] := arr[i];
     end;
     SetLength(arr, Len - 1);
+  end;
+end;
+
+function TParticipantInfoData.existTopic(var arr : TDynTopicInfoDataArray; topicName : AnsiString) : Boolean;
+var
+  Len, i : Integer;
+begin
+  Result := False;
+  Len := Length(arr);
+  for i := 0 to Len - 1 do begin
+    if arr[i].Name = topicName then begin
+      Result := True;
+      Break;
+    end;
   end;
 end;
 

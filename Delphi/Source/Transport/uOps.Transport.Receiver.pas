@@ -2,7 +2,7 @@ unit uOps.Transport.Receiver;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2017 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -89,6 +89,7 @@ type
 implementation
 
 uses SysUtils,
+     uOps.NetworkSupport,
      uOps.Transport.MulticastReceiver,
      uOps.Transport.UDPReceiver,
      uOps.Transport.TCPClient;
@@ -130,10 +131,11 @@ end;
 class function TReceiverFactory.getReceiver(top : TTopic; dom : TDomain; Reporter : TErrorService) : TReceiver;
 var
   localif : string;
+  port : Integer;
 begin
   Result := nil;
 
-  localIf := string(TDomain.doSubnetTranslation(top.LocalInterface));
+  localIf := string(doSubnetTranslation(top.LocalInterface));
 
   if top.Transport = TTopic.TRANSPORT_MC then begin
     Result := TMulticastReceiver.Create(string(top.DomainAddress), top.Port, localIf, top.InSocketBufferSize);
@@ -142,7 +144,15 @@ begin
     Result := TTCPClientReceiver.Create(string(top.DomainAddress), top.Port, top.InSocketBufferSize);
 
   end else if top.Transport = TTopic.TRANSPORT_UDP then begin
-    Result := TUDPReceiver.Create(0, localIf, top.InSocketBufferSize);
+    // If UDP topic is configured with my node address, we use the configured port, otherwise
+    // we use port 0 which will force the OS to create a unique port that we listen to.
+    port := 0;
+    if isMyNodeAddress(top.DomainAddress) then begin
+      localIf := string(top.DomainAddress);
+      port := top.Port;
+    end;
+
+    Result := TUDPReceiver.Create(port, localIf, top.InSocketBufferSize);
   end;
 
   if Assigned(Result) then Result.FErrorService := Reporter;

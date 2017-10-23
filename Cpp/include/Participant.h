@@ -1,5 +1,5 @@
 /**
-* 
+*
 * Copyright (C) 2006-2009 Anton Gravestam.
 *
 * This file is part of OPS (Open Publish Subscribe).
@@ -50,6 +50,15 @@ namespace ops
 	class Domain;
     class Publisher;
 
+	namespace execution_policy {
+		enum Enum {
+			threading,		// The Participant instance has its own thread that handles sockets, timeouts and
+							// performs the callbacks to user code.
+			polling			// The user code need to "drive" the Participant instance by calling the Poll() method.
+							// During the execution of Poll() the Participant will handle work that is ready.
+		};
+	}
+
 	class OPS_EXPORT Participant : Runnable, Listener<int>
 	{
 		friend class Subscriber;
@@ -65,23 +74,27 @@ namespace ops
 		static InternalString_T LibraryCompileSignature();
 		static bool CheckCompileSignature() { return LibraryCompileSignature() == OPS_COMPILESIGNATURE; }
 
-		///By Singelton, one Participant per domainID::participantID
+		// -------------------------------------------------------------------
+		///By Singelton, one Participant per 'domainID::participantID'
 		static std::map<ParticipantKey_T, Participant*> instances;
 
-		static Participant* getInstance(ObjectName_T domainID) 
+		//NOTE: Since Participants are singletons per 'domainID::participantID', the execution_policy only has effect
+		//at the first call when the Participant is created.
+		static Participant* getInstance(ObjectName_T domainID, execution_policy::Enum policy = execution_policy::threading)
 		{
-			return getInstance(domainID, "DEFAULT_PARTICIPANT");
+			return getInstance(domainID, "DEFAULT_PARTICIPANT", policy);
 		}
-		static Participant* getInstance(ObjectName_T domainID, ObjectName_T participantID)
+		static Participant* getInstance(ObjectName_T domainID, ObjectName_T participantID, execution_policy::Enum policy = execution_policy::threading)
 		{
-			return getInstance(domainID, participantID, "");
+			return getInstance(domainID, participantID, "", policy);
 		}
-		static Participant* getInstance(ObjectName_T domainID, ObjectName_T participantID, FileName_T configFile)
+		static Participant* getInstance(ObjectName_T domainID, ObjectName_T participantID, FileName_T configFile, execution_policy::Enum policy = execution_policy::threading)
 		{
 			if (!CheckCompileSignature()) throw mismatched_headers_and_library();
-			return getInstanceInternal(domainID, participantID, configFile);
+			return getInstanceInternal(domainID, participantID, configFile, policy);
 		}
-		
+
+		// -------------------------------------------------------------------
 		//Report an error via all participants ErrorServices or the static ErrorService if it exists
 		static void reportStaticError(Error* err);
 
@@ -107,7 +120,7 @@ namespace ops
 
 		///Deadline listener callback
 		void onNewEvent(Notifier<int>* sender, int message);
-		
+
 		///Cleans up ReceiveDataHandlers
 		//void cleanUpReceiveDataHandlers();
 
@@ -121,13 +134,13 @@ namespace ops
 		{
 			return config;
 		}
-		
+
 		ErrorService* getErrorService()
 		{
 			return errorService;
 		}
 
-		// A static error service that user could create, by calling getStaticErrorService(), and connect to. 
+		// A static error service that user could create, by calling getStaticErrorService(), and connect to.
 		// If it exist, "reportStaticError()" will use this instead of using all participants errorservices
 		// which leads to duplicated error messages when several participants exist.
 		// This static errorservice also has the advantage that errors during Participant creation can be logged.
@@ -138,7 +151,7 @@ namespace ops
 			return domain;
 		}
 
-		///Get a pointer to the data type factory used in this Participant. 
+		///Get a pointer to the data type factory used in this Participant.
 		//TODO: Rename?
 		OPSObjectFactory* getObjectFactory()
 		{
@@ -150,15 +163,20 @@ namespace ops
 		///Deprecated, use getErrorService()->removeListener instead. Remove a listener for OPS core reported Errors
 		void removeListener(Listener<Error*>* listener);
 
-		//TODO: Review
 		virtual ~Participant();
 
-	private:
+		// Method to "drive" the Participant when the execution_policy is "polling"
+		bool Poll();
 
-		static Participant* getInstanceInternal(ObjectName_T domainID, ObjectName_T participantID, FileName_T configFile);
+		execution_policy::Enum GetExecutionPolicy() { return _policy; }
+
+	private:
+		execution_policy::Enum _policy;
+
+		static Participant* getInstanceInternal(ObjectName_T domainID, ObjectName_T participantID, FileName_T configFile, execution_policy::Enum policy);
 
 		///Constructor is private instance are acquired through getInstance()
-		Participant(ObjectName_T domainID_, ObjectName_T participantID_, FileName_T configFile_);
+		Participant(ObjectName_T domainID_, ObjectName_T participantID_, FileName_T configFile_, execution_policy::Enum policy);
 
 		///Remove this instance from the static instance map
 		void RemoveInstance();
@@ -179,7 +197,7 @@ namespace ops
 		//------------------------------------------------------------------------
 		///A publisher of ParticipantInfoData
 		Publisher* partInfoPub;
-                
+
 		///The ParticipantInfoData that partInfoPub will publish periodically
 		ParticipantInfoData partInfoData;
 		Lockable partInfoDataMutex;
@@ -188,7 +206,7 @@ namespace ops
 		void setUdpTransportInfo(Address_T ip, int port);
 		bool hasPublisherOn(ObjectName_T topicName);
 
-		Domain* domain;		
+		Domain* domain;
 
 		//------------------------------------------------------------------------
 		///A listener and handler for ParticipantInfoData
@@ -207,8 +225,8 @@ namespace ops
 		///Visible to friends only
 		//TODO: Deprecate and delegate to sendDataHandlerFactory???
 		SendDataHandler* getSendDataHandler(Topic top);
-		void releaseSendDataHandler(Topic top);		
-		
+		void releaseSendDataHandler(Topic top);
+
 		///Mutex for ioService, used to shutdown safely
 		Lockable serviceMutex;
 
@@ -223,7 +241,7 @@ namespace ops
 		///The interval with which this Participant publishes ParticipantInfoData
 		__int64 aliveTimeout;
 
-		///The data type factory used in this Participant. 
+		///The data type factory used in this Participant.
 		OPSObjectFactory* objectFactory;
 
 		///Static Mutex used by factory methods getInstance()
