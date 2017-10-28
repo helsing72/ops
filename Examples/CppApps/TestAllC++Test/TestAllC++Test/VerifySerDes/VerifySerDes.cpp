@@ -54,7 +54,7 @@ void checkEmpty(TestAll::TestData& data)
 void checkEmpty(TestAll::ChildData& data)
 {
 	std::cout << "Checking empty object..." << std::endl;
-	
+
 	// BaseData
 	//   std::string baseText;
 	AssertEQ<std::string>(data.baseText, "");
@@ -62,12 +62,12 @@ void checkEmpty(TestAll::ChildData& data)
 	AssertEQ<int>(data.stringOpenArr.size(), 0);
 	//   std::string stringFixArr[5];
 	for (int i = 0; i < 5; i++) AssertEQ<std::string>(data.stringFixArr[i], "");
-	//   ops::fixed_string<23> fixLengthString;
-	AssertEQ<ops::fixed_string<23>>(data.fixLengthString, "");
-	//   std::vector<ops::fixed_string<16>> fixLengthStringOpenArr;
+	//   strings::fixed_string<23> fixLengthString;
+	AssertEQ<strings::fixed_string<23>>(data.fixLengthString, "");
+	//   std::vector<strings::fixed_string<16>> fixLengthStringOpenArr;
 	AssertEQ<int>(data.fixLengthStringOpenArr.size(), 0);
-	//   ops::fixed_string<16> fixLengthStringFixArr[10];
-	for (int i = 0; i < 10; i++) AssertEQ<ops::fixed_string<16>>(data.fixLengthStringFixArr[i], "");
+	//   strings::fixed_string<16> fixLengthStringFixArr[10];
+	for (int i = 0; i < 10; i++) AssertEQ<strings::fixed_string<16>>(data.fixLengthStringFixArr[i], "");
 
 	// ChildData
 	AssertEQ<bool>(data.bo, false, "data.bo");
@@ -156,15 +156,15 @@ void checkObjects(TestAll::ChildData& data, TestAll::ChildData& exp)
 	//   std::string stringFixArr[5];
 	for (int i = 0; i < 5; i++) AssertEQ<std::string>(data.stringFixArr[i], exp.stringFixArr[i], "stringFixArr");
 
-	//   ops::fixed_string<23> fixLengthString;
-	AssertEQ<ops::fixed_string<23>>(data.fixLengthString, exp.fixLengthString, "fixLengthString");
+	//   strings::fixed_string<23> fixLengthString;
+	AssertEQ<strings::fixed_string<23>>(data.fixLengthString, exp.fixLengthString, "fixLengthString");
 
-	//   std::vector<ops::fixed_string<16>> fixLengthStringOpenArr;
+	//   std::vector<strings::fixed_string<16>> fixLengthStringOpenArr;
 	AssertEQ<int>(data.fixLengthStringOpenArr.size(), exp.fixLengthStringOpenArr.size(), "fixLengthStringOpenArr");
-	for (size_t i = 0; i < data.fixLengthStringOpenArr.size(); i++) AssertEQ<ops::fixed_string<16>>(data.fixLengthStringOpenArr[i], exp.fixLengthStringOpenArr[i], "fixLengthStringOpenArr");
+	for (size_t i = 0; i < data.fixLengthStringOpenArr.size(); i++) AssertEQ<strings::fixed_string<16>>(data.fixLengthStringOpenArr[i], exp.fixLengthStringOpenArr[i], "fixLengthStringOpenArr");
 
-	//   ops::fixed_string<16> fixLengthStringFixArr[10];
-	for (int i = 0; i < 10; i++) AssertEQ<ops::fixed_string<16>>(data.fixLengthStringFixArr[i], exp.fixLengthStringFixArr[i], "fixLengthStringFixArr");
+	//   strings::fixed_string<16> fixLengthStringFixArr[10];
+	for (int i = 0; i < 10; i++) AssertEQ<strings::fixed_string<16>>(data.fixLengthStringFixArr[i], exp.fixLengthStringFixArr[i], "fixLengthStringFixArr");
 
 	// Test fields in ChildData
 	AssertEQ<bool>(data.bo, exp.bo, "data.bo");
@@ -252,12 +252,12 @@ void fillChildData(TestAll::ChildData& data)
 	data.stringFixArr[2] = "dsf 2";
 	data.stringFixArr[3] = "dsf 3";
 	data.stringFixArr[4] = "dsf 4";
-	//   ops::fixed_string<23> fixLengthString;
+	//   strings::fixed_string<23> fixLengthString;
 	data.fixLengthString = "fixed length string";
-	//   std::vector<ops::fixed_string<16>> fixLengthStringOpenArr;
+	//   std::vector<strings::fixed_string<16>> fixLengthStringOpenArr;
 	data.fixLengthStringOpenArr.push_back("fix len str 1");
 	data.fixLengthStringOpenArr.push_back("fix len str 2");
-	//   ops::fixed_string<16> fixLengthStringFixArr[10];
+	//   strings::fixed_string<16> fixLengthStringFixArr[10];
 	data.fixLengthStringFixArr[0] = "fsf 0";
 	data.fixLengthStringFixArr[1] = "fsf 1";
 	data.fixLengthStringFixArr[2] = "fsf 2";
@@ -543,7 +543,7 @@ int main(int argc, const char* args[])
 			// Check that sent data isn't affected by publish
 			checkObjects(cd1, cd2);
 
-			
+
 			// Check received values against sent values
 			AssertEQ<bool>(sub.waitForNewData(100), true, "No data received");
 			bool flag = AssertEQ<bool>(sub.getData(cd3), true, "No received data");
@@ -578,7 +578,7 @@ int main(int argc, const char* args[])
 				}
 			}
 		}
-		
+
 #if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
 		std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
 #endif
@@ -603,4 +603,3 @@ int main(int argc, const char* args[])
 
 	return 0;
 }
-

@@ -122,7 +122,7 @@ namespace ops
         void WriteString(std::string& s);
 		///Writes s.size() followed by s to the buffer as a c-string (8-bit chars) and increments the buffer by s.size() + 4.
 		template<size_t N>
-		void WriteString(fixed_string<N>& s)
+		void WriteString(strings::fixed_string<N>& s)
 		{
 			int siz = (int)s.size();
 			WriteInt(siz);
@@ -159,7 +159,7 @@ namespace ops
 		void ReadString(std::string& value);
 		///Reads an int (length) from the buffer followed by length number of chars returned as a fixed_string. Index is increased by length + 4.
 		template<size_t N>
-		void ReadString(fixed_string<N>& value)
+		void ReadString(strings::fixed_string<N>& value)
 		{
 			int length = ReadInt();
 			if (length > (int)N) throw fixed_string_to_small();

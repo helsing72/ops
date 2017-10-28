@@ -474,7 +474,7 @@ public class CppCompiler extends opsc.Compiler
     protected String languageType(IDLField field)
     {
         String s = field.getType().replace("[]", "");
-        if (s.equals("string") && (field.getStringSize() > 0))  return "ops::fixed_string<" + field.getStringSize() + ">";
+        if (s.equals("string") && (field.getStringSize() > 0))  return "strings::fixed_string<" + field.getStringSize() + ">";
         if (s.equals("string") && (field.getStringSize() == 0)) return "std::string";
         if (s.equals("boolean"))                                return "bool";
         if (s.equals("int"))                                    return "int";

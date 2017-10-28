@@ -85,7 +85,7 @@ namespace ops
 		virtual void inoutfixstring(InoutName_T name, char* value, int& size, int max_size, int idx) = 0;
 
 		template<size_t N>
-		void inout(InoutName_T name, fixed_string<N>& value, int idx = 0)
+		void inout(InoutName_T name, strings::fixed_string<N>& value, int idx = 0)
 		{
 			int size = (int)value.size();
 			inoutfixstring(name, &value[0], size, (int)value.max_size(), idx);
@@ -108,7 +108,7 @@ namespace ops
         virtual void inout(InoutName_T name, std::vector<std::string>& value) = 0;
 
 		template<size_t N>
-		void inout(InoutName_T name, std::vector<fixed_string<N>>& vec)
+		void inout(InoutName_T name, std::vector<strings::fixed_string<N>>& vec)
 		{
 			int size = beginList(name, (int)vec.size());
 			if ((int)vec.size() != size)

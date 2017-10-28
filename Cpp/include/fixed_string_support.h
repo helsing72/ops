@@ -20,18 +20,45 @@
 
 #pragma once
 
-#include <sstream>
+#include <ostream>
 
 #include "fixed_string.h"
 
-namespace ops {
+namespace strings {
 
 	// Stream operator
-	template<size_t M>
-	std::ostream& operator<< (std::ostream& os, const fixed_string<M>& str)
+	inline std::ostream& operator<< (std::ostream& os, const basic_fixed_string& str)
 	{
 		os << str.c_str();
 		return os;
+	}
+
+	template<size_t N>
+	fixed_string<N> ToLower(fixed_string<N> str)
+	{
+		for (typename fixed_string<N>::size_type i = 0; i < str.size(); ++i) {
+			str[i] = ::tolower(str[i]);
+		}
+		return str;
+	}
+
+	template<size_t N>
+	fixed_string<N> ToUpper(fixed_string<N> str)
+	{
+		for (typename fixed_string<N>::size_type i = 0; i < str.size(); ++i) {
+			str[i] = ::toupper(str[i]);
+		}
+		return str;
+	}
+
+	template<size_t N>
+	fixed_string<N> Trim(fixed_string<N> str)
+	{
+		typename fixed_string<N>::size_type pos1 = str.find_first_not_of(' ');
+		typename fixed_string<N>::size_type pos2 = str.find_last_not_of(' ');
+		if ((pos1 == pos2) && (pos1 == fixed_string<N>::npos)) return "";
+		return str.substr(pos1 == fixed_string<N>::npos ? 0 : pos1,
+			pos2 == fixed_string<N>::npos ? str.length() - 1 : pos2 - pos1 + 1);
 	}
 
 } //namespace

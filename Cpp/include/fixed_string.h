@@ -20,36 +20,68 @@
 
 #pragma once
 
-#include <string.h>
+#include <cstring>
 #ifndef FIXED_NO_STD_STRING
 	#include <string>
 #endif
 #include <exception>
 
-namespace ops {
+// noexcept and default specifiers requires a c++11 compiler.
+#if __cplusplus >= 201103L		// Value according to standard for full C++11 conformity
+	#define FIXED_C11_DETECTED
+#elif defined(_MSC_VER) && (_MSC_VER >= 1900)
+	// VS2015 still defines _cplusplus to 199711L but supports the features we need.
+	// VS2013 an earlier also defines _cplusplus to 199711L but does not support the features.
+	#define FIXED_C11_DETECTED
+#endif
 
-	template <size_t N>
-	class fixed_string
+#ifndef NOEXCEPT
+	#ifdef FIXED_C11_DETECTED
+		#define NOEXCEPT noexcept
+	#else
+		#define NOEXCEPT
+	#endif
+#endif
+
+namespace strings {
+
+	class basic_fixed_string
 	{
-	private:
-		char _array[N + 1];
-		size_t _size;
-
 	public:
 		typedef size_t size_type;
+		// Capacity:
+		virtual size_type size() const NOEXCEPT = 0;
+		virtual size_type length() const NOEXCEPT = 0;
 
+		// String operations
+		virtual const char* data() const NOEXCEPT = 0;
+		virtual const char* c_str() const NOEXCEPT = 0;
+	};
+
+	template <size_t N>
+	class fixed_string : public basic_fixed_string
+	{
+	public:
+		typedef basic_fixed_string::size_type size_type;
+	private:
+		char _array[N + 1];
+		size_type _size;
+	protected:
+		typedef enum { truncate_string, throw_exception } overrun_policy_t;
+		overrun_policy_t _overrun_policy = throw_exception;
+	public:
 		// Exceptions:
 		struct index_out_of_range : public std::exception {
-			const char* what() const noexcept { return "Index too large"; }
+			const char* what() const NOEXCEPT { return "Index too large"; }
 		};
 		struct size_out_of_range : public std::exception {
-			const char* what() const noexcept { return "String too large"; }
+			const char* what() const NOEXCEPT { return "String too large"; }
 		};
 
 		// Constructors:
 		fixed_string() : _size(0) { _array[0] = '\0'; }
 		fixed_string(const char* s) : _size(0) { append(s, strlen(s)); }
-		fixed_string(const char* s, size_t len) : _size(0) { size_t sz = strlen(s); append(s, (sz < len) ? sz : len); }
+		fixed_string(const char* s, size_type len) : _size(0) { size_type sz = strlen(s); append(s, (sz < len) ? sz : len); }
 #ifndef FIXED_NO_STD_STRING
 		fixed_string(const std::string s) : _size(0) { append(s.c_str(), s.size()); }
 #endif
@@ -58,44 +90,49 @@ namespace ops {
 		fixed_string(const fixed_string<M>& str) : _size(0) { append(str.c_str(), str.size()); }
 
 		// all the special members can be defaulted
+#ifdef FIXED_C11_DETECTED
 		fixed_string(fixed_string const&) = default;
 		fixed_string(fixed_string&&) = default;
-		fixed_string& operator=(fixed_string const&) = default;
 		fixed_string& operator=(fixed_string&&) = default;
+		fixed_string& operator=(fixed_string const&) = default;
 		~fixed_string() = default;
+#endif
 
 		// Iterators:
 		// ...
 
 		// Capacity:
-		size_t size() const noexcept { return _size; }
-		size_t length() const noexcept { return _size; }
-		size_t max_size() const noexcept { return N; }
+		size_type size() const NOEXCEPT { return _size; }
+		size_type length() const NOEXCEPT { return _size; }
+		size_type max_size() const NOEXCEPT { return N; }
 		void resize() 
 		{
 			_array[N] = '\0';	// make sure the array is null terminated
 			_size = strlen(&_array[0]); 
 		}
-		void resize(size_t n) { resize(n, '\0'); }
-		void resize(size_t n, char c) 
+		void resize(size_type n) { resize(n, '\0'); }
+		void resize(size_type n, char c)
 		{
-			if (n > N) throw size_out_of_range();
-			for (size_t i = _size; i < n; ++i) _array[i] = c;
+			if (n > N) {
+				if (_overrun_policy == throw_exception) throw size_out_of_range();
+				n = N;
+			}
+			for (size_type i = _size; i < n; ++i) _array[i] = c;
 			_size = n; 
 			_array[_size] = '\0';
 		}
 
-		void clear() noexcept { _array[0] = '\0'; _size = 0; }
-		bool empty() const noexcept { return _size == 0; }
+		void clear() NOEXCEPT { _array[0] = '\0'; _size = 0; }
+		bool empty() const NOEXCEPT { return _size == 0; }
 
 		// Element access:
-		char& operator[] (size_t pos)
+		char& operator[] (size_type pos)
 		{
 			// if pos is equal to size, return ref to null char (according to standard for std::string)
 			if (pos > _size) throw index_out_of_range();
 			return _array[pos];
 		}
-		char& at(size_t pos)
+		char& at(size_type pos)
 		{
 			if (pos >= _size) throw index_out_of_range();
 			return _array[pos];
@@ -109,23 +146,29 @@ namespace ops {
 		fixed_string& operator+= (const char* s) { return append(s, strlen(s)); }
 		fixed_string& operator+= (char c)
 		{
-			if (_size == N) throw size_out_of_range();
-			_array[_size] = c;
-			_size++;
-			_array[_size] = '\0';
+			if (_size == N) {
+				if (_overrun_policy == throw_exception) throw size_out_of_range();
+			} else {
+				_array[_size] = c;
+				_size++;
+				_array[_size] = '\0';
+			}
 			return *this;
 		}
 
 		fixed_string& append(const fixed_string& str) { return append(str.c_str(), str.size()); }
 		fixed_string& append(const char* s) { return append(s, strlen(s)); }
-		fixed_string& append(const char* s, size_t len)
+		fixed_string& append(const char* s, size_type len)
 		{
 			if (len > 0) {
-				if ((_size + len) > N) throw size_out_of_range();
+				if ((_size + len) > N) {
+					if (_overrun_policy == throw_exception) throw size_out_of_range();
+					len = N - _size;
+				}
 				memcpy(&_array[_size], s, len);
 				_size += len;
 			}
-			_array[_size] = '\0';	// Needed if if len == 0, since it can be from constructors with null string
+			_array[_size] = '\0';	// Needed if len == 0, since it can be from constructors with null string
 			return *this;
 		}
 
@@ -141,54 +184,98 @@ namespace ops {
 #endif
 
 		// String operations
-		const char* data() const noexcept { return &_array[0]; }
-		const char* c_str() const noexcept { return &_array[0]; }
+		const char* data() const NOEXCEPT { return &_array[0]; }
+		const char* c_str() const NOEXCEPT { return &_array[0]; }
 
-		size_t find(const fixed_string& str, size_t pos = 0) const 
+		size_type find(const fixed_string& str, size_type pos = 0) const
 		{
 			return find(str.c_str(), pos);
 		}
-		size_t find(const char* s, size_t pos = 0) const 
+		size_type find(const char* s, size_type pos = 0) const
 		{
-			if (pos > _size) throw index_out_of_range();
+			if (pos > _size) return npos;
 			const char* ptr = strstr(&_array[pos], s);
 			if (ptr == nullptr) return npos;
-			return (size_t)(ptr - &_array[0]);
+			return (size_type)(ptr - &_array[0]);
 		}
-		size_t find(char c, size_t pos = 0) const 
+		size_type find(char c, size_type pos = 0) const
 		{
-			if (pos > _size) throw index_out_of_range();
+			if (pos > _size) return npos;
 			const char* ptr = strchr(&_array[pos], c);
 			if (ptr == nullptr) return npos;
-			return (size_t)(ptr - &_array[0]);
+			return (size_type)(ptr - &_array[0]);
+		}
+
+		size_type find_first_of(char c, size_type pos = 0) const
+		{
+			if (pos < _size) {
+				for (size_type i = pos; i < _size; ++i) {
+					if (_array[i] == c) return i;
+				}
+			}
+			return npos;
+		}
+
+		size_type find_first_not_of(char c, size_type pos = 0) const
+		{
+			if (pos < _size) {
+				for (size_type i = pos; i < _size; ++i) {
+					if (_array[i] != c) return i;
+				}
+			}
+			return npos;
+		}
+
+		size_type find_last_of(char c, size_type pos = npos) const
+		{
+			if (_size > 0) {
+				if ((pos == npos) || (pos >= _size)) pos = _size - 1;
+				for (size_type i = pos; i > 0; --i) {
+					if (_array[i] == c) return i;
+				}
+				if (_array[0] == c) return 0;
+			}
+			return npos;
+		}
+
+		size_type find_last_not_of(char c, size_type pos = npos) const
+		{
+			if (_size > 0) {
+				if ((pos == npos) || (pos >= _size)) pos = _size - 1;
+				for (size_type i = pos; i > 0; --i) {
+					if (_array[i] != c) return i;
+				}
+				if (_array[0] != c) return 0;
+			}
+			return npos;
 		}
 
 #ifndef FIXED_NO_STD_STRING
-		std::string substr(size_t pos = 0, size_t len = npos) const
+		std::string substr(size_type pos = 0, size_type len = npos) const
 		{
 			if (pos > _size) throw index_out_of_range();
-			size_t avail = _size - pos;
+			size_type avail = _size - pos;
 			if (len > avail) len = avail;
 			return std::string(&_array[pos], len);
 		}
 #else
-		fixed_string substr(size_t pos = 0, size_t len = npos) const
+		fixed_string substr(size_type pos = 0, size_type len = npos) const
 		{
 			if (pos > _size) throw index_out_of_range();
-			size_t avail = _size - pos;
+			size_type avail = _size - pos;
 			if (len > avail) len = avail;
 			return fixed_string(&_array[pos], len);
 		}
 #endif
 
 		template<size_t M>
-		fixed_string<M> substr(size_t pos = 0, size_t len = npos) const
+		fixed_string<M> substr(size_type pos = 0, size_type len = npos) const
 		{
 			if (pos >= _size) throw index_out_of_range();
 			return fixed_string<M>(&_array[pos], len);
 		}
 
-		static const size_t npos = (size_t)(-1);
+		static const size_type npos = (size_type)(-1);
 	};
 
 	// Relational operators
@@ -246,9 +333,39 @@ namespace ops {
 
 #ifndef FIXED_NO_STD_STRING
 	template <size_t M>
-	std::string operator+ (const std::string& lhs, const fixed_string<M>& rhs) { return lhs + rhs.substr(); }
+	std::string operator+ (const std::string& lhs, const fixed_string<M>& rhs) { return lhs + rhs.substr(); } 
 	template <size_t M>
 	std::string operator+ (const fixed_string<M>& lhs, const std::string& rhs) { return lhs.substr() + rhs; }
 #endif
+
+	template <size_t N>
+	class fixed_string_trunc : public fixed_string<N>
+	{
+	public:
+		typedef basic_fixed_string::size_type size_type;
+
+		fixed_string_trunc() : fixed_string<N>() {
+			this->_overrun_policy = fixed_string<N>::truncate_string;
+		}
+		fixed_string_trunc(const char* s) : fixed_string<N>() { 
+			this->_overrun_policy = fixed_string<N>::truncate_string;
+			this->append(s, strlen(s));
+		}
+		fixed_string_trunc(const char* s, size_type len) : fixed_string<N>() {
+			this->_overrun_policy = fixed_string<N>::truncate_string;
+			size_type sz = strlen(s); this->append(s, (sz < len) ? sz : len);
+		}
+#ifndef FIXED_NO_STD_STRING
+		fixed_string_trunc(const std::string s) : fixed_string<N>() { 
+			this->_overrun_policy = fixed_string<N>::truncate_string;
+			this->append(s.c_str(), s.size());
+		}
+#endif
+		template<size_t M>
+		fixed_string_trunc(const fixed_string<M>& str) : fixed_string<N>() { 
+			this->_overrun_policy = fixed_string<N>::truncate_string;
+			this->append(str.c_str(), str.size());
+		}
+	};
 
 } //namespace

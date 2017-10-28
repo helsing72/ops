@@ -1,4 +1,4 @@
-/*
+/* 
  * File:   OPSTypeDefs.h
  * Author: gravanto
  *
@@ -9,15 +9,7 @@
 #define _OPSTYPEDEFS_H
 
 #include <string>
-
-// Configure the fixed length string to NOT have std::string support members.
-#define FIXED_NO_STD_STRING
-#include "fixed_string.h"
-#include "fixed_string_support.h"
-
 #include <sstream>
-
-namespace ops {
 
 // -----------------------------------------------------------------------------
 // Some OPS configurations
@@ -28,14 +20,38 @@ namespace ops {
 #undef USE_C11					// This will use boost and WIN32/Linux specific calls instead of C++11
 #endif
 
+// noexcept specifier, nullptr and USE_C11 requires a c++11 compiler.
+#if __cplusplus >= 201103L		// Value according to standard for full C++11 conformity
+	#define OPS_C11_DETECTED
+#elif defined(_MSC_VER) && (_MSC_VER >= 1900)
+	// VS2015 still defines _cplusplus to 199711L but supports the features we need.
+	// VS2013 an earlier also defines _cplusplus to 199711L but does not support the features.
+	#define OPS_C11_DETECTED
+#endif
+#ifdef OPS_C11_DETECTED
+	#define NOEXCEPT noexcept
+#else
+	#define NOEXCEPT
+	#define nullptr NULL
+	#undef USE_C11
+#endif
+
 
 //#define OPSSLIM_NORESERVE			// Removes Reservable from OPSMessage
 
 //#define REPLACE_TRANSPORT_LAYER	// Removes IOService.cpp, Sender.cpp, Receiver.cpp and DeadlineTimer.cpp
 									// from library so you can use your own implementations.
 
-//#define REPLACE_OPS_CONFIG		// Removes the OPSConfig file reader from library so you can implement
+//#define REPLACE_OPS_CONFIG		// Removes the OPSConfig file reader from library so you can implement 
 									// your own for targets without a filesystem.
+
+// -----------------------------------------------------------------------------
+// Configure the fixed length string implementation to NOT have std::string support members.
+#define FIXED_NO_STD_STRING
+#include "fixed_string.h"
+#include "fixed_string_support.h"
+
+namespace ops {
 
 // -----------------------------------------------------------------------------
 // Defines for String handling in OPS
@@ -78,20 +94,20 @@ namespace ops {
 	// transport::xxx.xxx.xxx.xxx::port
 	#define FIXED_INTERNAL_KEY_SIZE (FIXED_TRANSPORT_SIZE + 2 + FIXED_ADDRESS_SIZE + 2 + 5)
 
-	typedef fixed_string<FIXED_OBJECT_NAME_SIZE>     ObjectName_T;
-	typedef fixed_string<FIXED_FILENAME_SIZE>        FileName_T;
-	typedef fixed_string<FIXED_MESSAGE_KEY_SIZE>     ObjectKey_T;
-	typedef fixed_string<FIXED_TYPE_ID_SIZE>         TypeId_T;
-	typedef fixed_string<FIXED_CHANNEL_ID_SIZE>      ChannelId_T;
+	typedef strings::fixed_string<FIXED_OBJECT_NAME_SIZE>     ObjectName_T;
+	typedef strings::fixed_string<FIXED_FILENAME_SIZE>        FileName_T;
+	typedef strings::fixed_string<FIXED_MESSAGE_KEY_SIZE>     ObjectKey_T;
+	typedef strings::fixed_string<FIXED_TYPE_ID_SIZE>         TypeId_T;
+	typedef strings::fixed_string<FIXED_CHANNEL_ID_SIZE>      ChannelId_T;
 	// OPS internal
-	typedef fixed_string<FIXED_PART_KEY_SIZE>        ParticipantKey_T;
-	typedef fixed_string<FIXED_ADDRESS_SIZE>         Address_T;
-	typedef fixed_string<FIXED_TRANSPORT_SIZE>       Transport_T;
-	typedef fixed_string<FIXED_INTERNAL_STRING_SIZE> InternalString_T;
-	typedef fixed_string<FIXED_EXCEPTION_MSG_SIZE>   ExceptionMessage_T;
-	typedef fixed_string<FIXED_INTERNAL_KEY_SIZE>    InternalKey_T;
-	typedef fixed_string<FIXED_ERROR_MSG_SIZE>       ErrorMessage_T;
-	typedef const char*                              InoutName_T;
+	typedef strings::fixed_string<FIXED_PART_KEY_SIZE>        ParticipantKey_T;
+	typedef strings::fixed_string<FIXED_ADDRESS_SIZE>         Address_T;
+	typedef strings::fixed_string<FIXED_TRANSPORT_SIZE>       Transport_T;
+	typedef strings::fixed_string<FIXED_INTERNAL_STRING_SIZE> InternalString_T;
+	typedef strings::fixed_string<FIXED_EXCEPTION_MSG_SIZE>   ExceptionMessage_T;
+	typedef strings::fixed_string<FIXED_INTERNAL_KEY_SIZE>    InternalKey_T;
+	typedef strings::fixed_string<FIXED_ERROR_MSG_SIZE>       ErrorMessage_T;
+	typedef const char*                                       InoutName_T;
 
 #else
 	typedef std::string ObjectName_T;
@@ -113,7 +129,7 @@ namespace ops {
 // -----------------------------------------------------------------------------
 // OPS uses Little Endian data serialization to improve the performance since
 // thats the native packing for x86 and it also works on Arm.
-// If OPS is compiled for a Big Endian machine (and it need to communicate with a
+// If OPS is compiled for a Big Endian machine (and it need to communicate with a 
 // little endian machine via OPS) you need to uncomment the following define to
 // keep the binary compatibility.
 //
@@ -183,7 +199,7 @@ typedef  int16_t __int16;
 		stringer(FIXED_MESSAGE_KEY_SIZE) " " \
 		stringer(FIXED_TYPE_ID_SIZE) " " \
 		stringer(FIXED_CHANNEL_ID_SIZE) " " \
-		stringer(FIXED_FILENAME_SIZE)
+		stringer(FIXED_FILENAME_SIZE) 
 #else
 	#define COMPILESIGNATURE_STRINGS "STD"
 #endif
