@@ -3,6 +3,13 @@
 
 namespace test {
 
+#ifdef _MSC_VER
+#pragma push_macro("max")
+#undef max
+#pragma push_macro("min")
+#undef min
+#endif
+
 const float float_max 		= std::numeric_limits<float>::max();
 const float float_min	 	= std::numeric_limits<float>::min();
 const double double_max 	= std::numeric_limits<double>::max();
@@ -212,5 +219,10 @@ void testVessuvio(pizza::VessuvioData &vessuvioData) {
 	EXPECT_EQ(vessuvioData.tomatoSauce, "Hot tomato sauce");
 	EXPECT_EQ(vessuvioData.ham, 		"smoked ham");
 }
+
+#ifdef _MSC_VER
+#pragma pop_macro("max")
+#pragma pop_macro("min")
+#endif
 
 }

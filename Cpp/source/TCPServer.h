@@ -39,6 +39,7 @@
 #include "boost/bind.hpp"
 #include "Participant.h"
 #include "BasicError.h"
+#include "BasicWarning.h"
 #include "Compatibility.h"
 
 namespace ops
@@ -148,7 +149,7 @@ namespace ops
 						sock->get_option(option);
 						if(ec != 0 || option.value() != _outSocketBufferSize) {
 							//std::cout << "Socket buffer size could not be set" << std::endl;
-							ops::BasicError err("TCPServer", "TCPServer", "Socket buffer size could not be set");
+							ops::BasicWarning err("TCPServer", "TCPServer", "Socket buffer size could not be set");
 							Participant::reportStaticError(&err);
 						}
 					}

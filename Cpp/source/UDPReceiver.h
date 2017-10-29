@@ -29,6 +29,7 @@
 #include "BoostIOServiceImpl.h"
 #include <iostream>
 #include "BasicError.h"
+#include "BasicWarning.h"
 #include "Compatibility.h"
 
 namespace ops
@@ -83,7 +84,7 @@ namespace ops
                 if (ec != 0 || option.value() != inSocketBufferSizent)
                 {
                     //std::cout << "Socket buffer size could not be set" << std::endl;
-					ops::BasicError err("UDPReceiver", "UDPReceiver", "Socket buffer size could not be set");
+					ops::BasicWarning err("UDPReceiver", "UDPReceiver", "Socket buffer size could not be set");
                     Participant::reportStaticError(&err);
                 }
             }
