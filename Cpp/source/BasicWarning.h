@@ -1,16 +1,15 @@
-#ifndef ops_BasicError_h
-#define ops_BasicError_h
+#pragma once
 
 #include "Error.h"
 
 namespace ops
 {
 	///Basic implementaion of an error for OPS.
-	class BasicError : public Error
+	class BasicWarning : public Error
 	{
 	public:
 		static const int ERROR_CODE = 1;
-		BasicError(ErrorMessage_T className, ErrorMessage_T method, ErrorMessage_T mess)
+		BasicWarning(ErrorMessage_T className, ErrorMessage_T method, ErrorMessage_T mess)
 		{
 			_message = className;
 			_message += "::";
@@ -18,6 +17,7 @@ namespace ops
 			_message += "(): ";
 			_message += mess;
 		}
+		virtual Severity_T getSeverity() { return Error::warning; }
 		virtual int getErrorCode()
 		{
 			return ERROR_CODE;
@@ -26,9 +26,8 @@ namespace ops
 		{
 			return _message;
 		}
-		virtual ~BasicError(){}
+		virtual ~BasicWarning(){}
 	private:
 		ErrorMessage_T _message;
 	};
 }
-#endif

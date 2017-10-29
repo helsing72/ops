@@ -87,6 +87,7 @@ set(OPS_SRC_PATH ${OPS4_CPP_ROOT}/source)
 set(LIB_OPS_CORE_SRCS
   ${OPS_SRC_PATH}/ArchiverInOut.cpp
   ${OPS_SRC_PATH}/BasicError.h
+  ${OPS_SRC_PATH}/BasicWarning.h
   ${OPS_SRC_PATH}/ByteBuffer.cpp
   ${OPS_SRC_PATH}/Channel.cpp
   ${OPS_SRC_PATH}/Compatibility.cpp

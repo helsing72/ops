@@ -18,9 +18,16 @@ namespace ops
 
 		void onNewEvent(Notifier<Error*>* notifier, Error* error)
 		{
-			UNUSED(notifier)
-			oStream << "@" << TimeHelper::getTimeToString() << " - Error code: " << error->getErrorCode() << ". Message: " << error->getMessage() << "." << std::endl;
+			UNUSED(notifier);
+			oStream << "@" << TimeHelper::getTimeToString();
+			if (error->getSeverity() == Error::warning) {
+				oStream << " - Warning, code: ";
+			} else {
+				oStream << " - Error, code: ";
+			}
+			oStream << error->getErrorCode() << ". Message: " << error->getMessage() << "." << std::endl;
 		}
+
 	private:
 		std::ostream& oStream;
 	};

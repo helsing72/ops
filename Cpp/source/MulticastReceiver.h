@@ -31,6 +31,7 @@
 #include <iostream>
 #include "Participant.h"
 #include "BasicError.h"
+#include "BasicWarning.h"
 #include "Compatibility.h"
 
 namespace ops
@@ -79,7 +80,7 @@ namespace ops
 				if(ec != 0 || option.value() != _inSocketBufferSizent)
 				{
 					//std::cout << "Socket buffer size could not be set" << std::endl;
-					ops::BasicError err("MulticastReceiver", "Start", "Socket buffer size could not be set");
+					ops::BasicWarning err("MulticastReceiver", "Start", "Socket buffer size could not be set");
 					Participant::reportStaticError(&err);
 				}
 			}
