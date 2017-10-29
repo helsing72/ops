@@ -1,19 +1,28 @@
-#include "PizzaProjectTypeFactory.h"
 #include <string>
 #include <typeinfo>
 #include <iostream>
-#include <limits>
+
+#include <ops.h>
 #include "OPSArchiverOut.h"
 #include "OPSArchiverIn.h"
 #include "OPSMessage.h"
+
 #include "Cheese.h"
 #include "PizzaData.h"
 #include "VessuvioData.h"
 #include "CapricosaData.h"
 #include "LHCData.h"
 #include "ExtraAllt.h"
-#include <ops.h>
 #include "PizzaProjectTypeFactory.h"
+
+#ifdef _MSC_VER
+#pragma push_macro("max")
+#undef max
+#pragma push_macro("min")
+#undef min
+#endif
+
+#include <limits>
 
 using namespace std;
 
@@ -62,7 +71,7 @@ void initExtraAlltNormal(pizza::special::ExtraAllt &extraAllt) {
 	extraAllt.extraCheese 		= true;
 	extraAllt.nrOfMushRooms		= 'P';
 	extraAllt.meetQuality		= 9;
-	extraAllt.timeBakedHours	= 123.4;
+	extraAllt.timeBakedHours	= (float)123.4;
 	extraAllt.timeBakedSeconds	= 53.4;
 	extraAllt.description		= "Pizza with extra allt";
 	extraAllt.cheese_->age		= 5;
@@ -239,3 +248,8 @@ void initVessuvioData(pizza::VessuvioData &vessuvio){
 
 
 }
+
+#ifdef _MSC_VER
+#pragma pop_macro("max")
+#pragma pop_macro("min")
+#endif

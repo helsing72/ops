@@ -96,7 +96,7 @@ public:
 		} else {
 			try {
 				//Create topic, might throw ops::NoSuchTopicException
-				ops::Topic topic = part->createTopic(topicName);
+				ops::Topic topic = part->createTopic(topicName.c_str());
 
 				//Create a publisher on that topic
 				pub = new DataTypePublisher(topic);
@@ -107,7 +107,7 @@ public:
 #else
 				myStream << " Linux(" << getpid() << ")" << std::ends;
 #endif
-				pub->setName("C++Test " + myStream.str());
+				pub->setName(std::string("C++Test " + myStream.str()).c_str());
 			}
 			catch (...) {
 				std::cout << "Requested topic '" << topicName << "' does not exist!!" << std::endl;

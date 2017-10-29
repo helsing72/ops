@@ -1,7 +1,6 @@
 #pragma once
 
 #ifdef _WIN32
-#include "stdafx.h"
 #include <windows.h>
 #include <conio.h>
 #include <process.h>
@@ -33,21 +32,4 @@
 #include "VessuvioDataSubscriber.h"
 #include "VessuvioDataPublisher.h"
 
-#ifdef _WIN32
-#include "SdsSystemTime.h"
-#endif
-
 #undef USE_MESSAGE_HEADER
-
-#ifdef _WIN32
-#include "stdafx.h"
-#include <windows.h>
-#include <conio.h>
-#include <process.h>
-#else
-#include <unistd.h>
-#endif
-
-#ifdef _WIN32
-#include "SdsSystemTime.h"
-#endif

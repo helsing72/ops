@@ -92,7 +92,7 @@ public:
 		} else {
 			try {
 				//Create topic, might throw ops::NoSuchTopicException
-				ops::Topic topic = part->createTopic(topicName);
+				ops::Topic topic = part->createTopic(topicName.c_str());
 
 				//Create a subscriber on that topic.
 				sub = new DataTypeSubscriber(topic);
@@ -313,4 +313,3 @@ TEST_F(Test_OPS_Publisher_And_Subscriber, TESTING_BURST_LARGE_EXTRA_ALLT_UDP) {
 		test::testExtraAlltLarge(receivedPizzaVec.at(i), UDP);
 	}
 }
-
