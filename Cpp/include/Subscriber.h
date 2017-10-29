@@ -31,7 +31,6 @@
 #include "DataNotifier.h"
 #include "DeadlineMissedListener.h"
 #include "FilterQoSPolicy.h"
-#include "ThreadPool.h"
 #include "Listener.h"
 #include "OPSMessage.h"
 #include "ReceiveDataHandler.h"

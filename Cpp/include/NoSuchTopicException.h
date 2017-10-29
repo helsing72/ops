@@ -14,7 +14,7 @@ namespace ops
 		NoSuchTopicException(ExceptionMessage_T mess) : message(mess)
 		{
 		}
-		const char* what() const noexcept { return message.c_str(); }
+		const char* what() const NOEXCEPT { return message.c_str(); }
 
 		~NoSuchTopicException() throw()
         {

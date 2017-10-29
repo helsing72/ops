@@ -48,6 +48,7 @@ namespace ops
 #endif
     }
 
+#ifdef OPS_C11_DETECTED
 	// Move constructor
 	OPSObject::OPSObject(OPSObject&& other)
 	{
@@ -59,6 +60,7 @@ namespace ops
 		_NumOpsObjects++;
 #endif
 	}
+#endif
 
 	// Copy assignment operator
     OPSObject& OPSObject::operator= (OPSObject other)

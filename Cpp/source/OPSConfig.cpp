@@ -72,7 +72,7 @@ namespace ops
 
 	OPSConfig::~OPSConfig()
 	{
-		for (auto it = domains.begin(); it != domains.end(); ++it) {
+		for (std::vector<Domain* >::iterator it = domains.begin(); it != domains.end(); ++it) {
 			delete (*it);
 		}
 		domains.clear();

@@ -50,11 +50,7 @@ namespace ops
 				message = "XMLArchiverException: ";
 				message += m;
             }
-			ExceptionMessage_T GetMessage()
-            {
-                return message;
-            }
-			const char* what() const noexcept { return message.c_str(); }
+			const char* what() const NOEXCEPT { return message.c_str(); }
 		};
     }
     using namespace exceptions;

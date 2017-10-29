@@ -39,9 +39,8 @@ public:
 		message = "MemoryMapException: ";
 		message += m;
 	}
-	const char* what() const noexcept { return message.c_str(); }
+	const char* what() const NOEXCEPT { return message.c_str(); }
 };
-
 
 class OPS_EXPORT MemoryMap
 {
@@ -54,7 +53,7 @@ public:
 		bytes = small_width_vector;
 		bytes[0] = nullptr;
 	}
-	MemoryMap(int width_, int height_):
+	MemoryMap(int width_, int height_): 
 		  width(width_),
 		  height(height_),
 		  dataCreator(true)
@@ -81,6 +80,12 @@ public:
 		bytes = small_width_vector;
 		bytes[0] = segment;
 	}
+#ifdef OPS_C11_DETECTED
+	MemoryMap(MemoryMap const&) = delete;
+	MemoryMap(MemoryMap&&) = delete;
+	MemoryMap& operator =(MemoryMap&&) = delete;
+	MemoryMap& operator =(MemoryMap const&) = delete;
+#endif
 
 	// Method to initialize/re-initialize object
 	// Fails if object is created as a data owner

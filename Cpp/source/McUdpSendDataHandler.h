@@ -29,7 +29,6 @@
 #include "Sender.h"
 #include "OPSObject.h"
 #include "Lockable.h"
-#include "MemoryMap.h"
 #include "TimeHelper.h"
 
 namespace ops

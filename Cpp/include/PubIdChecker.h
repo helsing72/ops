@@ -67,7 +67,7 @@ namespace ops {
 				key += NumberToString(port); 
 				
 				// Look up entry
-				auto result = _map.find(key);
+				std::map<InternalKey_T, Entry_T>::iterator result = _map.find(key);
 				if (result != _map.end()) {
 					// found
 					_prev = &_map[key];

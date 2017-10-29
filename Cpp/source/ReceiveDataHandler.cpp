@@ -174,7 +174,7 @@ namespace ops
 					message = dynamic_cast<OPSMessage*> (archiver.inout("message", message));
 				} catch (ops::ArchiverException& e) {
 					ErrorMessage_T msg("Invalid data on network. Exception: ");
-					msg += e.GetMessage();
+					msg += e.what();
 					ReportError(participant, msg, addr, port);
 				} catch (std::exception& e) {
 					ErrorMessage_T msg("Invalid data on network. Exception: ");

@@ -1,5 +1,5 @@
 /**
-*
+* 
 * Copyright (C) 2006-2009 Anton Gravestam.
 *
 * This file is part of OPS (Open Publish Subscribe).
@@ -52,7 +52,7 @@ namespace ops
 
 	namespace execution_policy {
 		enum Enum {
-			threading,		// The Participant instance has its own thread that handles sockets, timeouts and
+			threading,		// The Participant instance has its own thread that handles sockets, timeouts and 
 							// performs the callbacks to user code.
 			polling			// The user code need to "drive" the Participant instance by calling the Poll() method.
 							// During the execution of Poll() the Participant will handle work that is ready.
@@ -67,9 +67,10 @@ namespace ops
 		friend class SendDataHandlerFactory;
 		friend class ParticipantInfoDataListener;
 	public:
+		// -------------------------------------------------------------------
 		// Mismatched header and library detection
 		struct mismatched_headers_and_library : public std::exception {
-			const char* what() const noexcept { return "Mismatched headers and compiled library"; }
+			const char* what() const NOEXCEPT { return "Mismatched headers and compiled library"; }
 		};
 		static InternalString_T LibraryCompileSignature();
 		static bool CheckCompileSignature() { return LibraryCompileSignature() == OPS_COMPILESIGNATURE; }
@@ -78,9 +79,9 @@ namespace ops
 		///By Singelton, one Participant per 'domainID::participantID'
 		static std::map<ParticipantKey_T, Participant*> instances;
 
-		//NOTE: Since Participants are singletons per 'domainID::participantID', the execution_policy only has effect
+		//NOTE: Since Participants are singletons per 'domainID::participantID', the execution_policy only has effect 
 		//at the first call when the Participant is created.
-		static Participant* getInstance(ObjectName_T domainID, execution_policy::Enum policy = execution_policy::threading)
+		static Participant* getInstance(ObjectName_T domainID, execution_policy::Enum policy = execution_policy::threading) 
 		{
 			return getInstance(domainID, "DEFAULT_PARTICIPANT", policy);
 		}
@@ -93,7 +94,7 @@ namespace ops
 			if (!CheckCompileSignature()) throw mismatched_headers_and_library();
 			return getInstanceInternal(domainID, participantID, configFile, policy);
 		}
-
+		
 		// -------------------------------------------------------------------
 		//Report an error via all participants ErrorServices or the static ErrorService if it exists
 		static void reportStaticError(Error* err);
@@ -120,7 +121,7 @@ namespace ops
 
 		///Deadline listener callback
 		void onNewEvent(Notifier<int>* sender, int message);
-
+		
 		///Cleans up ReceiveDataHandlers
 		//void cleanUpReceiveDataHandlers();
 
@@ -134,13 +135,13 @@ namespace ops
 		{
 			return config;
 		}
-
+		
 		ErrorService* getErrorService()
 		{
 			return errorService;
 		}
 
-		// A static error service that user could create, by calling getStaticErrorService(), and connect to.
+		// A static error service that user could create, by calling getStaticErrorService(), and connect to. 
 		// If it exist, "reportStaticError()" will use this instead of using all participants errorservices
 		// which leads to duplicated error messages when several participants exist.
 		// This static errorservice also has the advantage that errors during Participant creation can be logged.
@@ -151,7 +152,7 @@ namespace ops
 			return domain;
 		}
 
-		///Get a pointer to the data type factory used in this Participant.
+		///Get a pointer to the data type factory used in this Participant. 
 		//TODO: Rename?
 		OPSObjectFactory* getObjectFactory()
 		{
@@ -197,7 +198,7 @@ namespace ops
 		//------------------------------------------------------------------------
 		///A publisher of ParticipantInfoData
 		Publisher* partInfoPub;
-
+                
 		///The ParticipantInfoData that partInfoPub will publish periodically
 		ParticipantInfoData partInfoData;
 		Lockable partInfoDataMutex;
@@ -206,7 +207,7 @@ namespace ops
 		void setUdpTransportInfo(Address_T ip, int port);
 		bool hasPublisherOn(ObjectName_T topicName);
 
-		Domain* domain;
+		Domain* domain;		
 
 		//------------------------------------------------------------------------
 		///A listener and handler for ParticipantInfoData
@@ -225,8 +226,8 @@ namespace ops
 		///Visible to friends only
 		//TODO: Deprecate and delegate to sendDataHandlerFactory???
 		SendDataHandler* getSendDataHandler(Topic top);
-		void releaseSendDataHandler(Topic top);
-
+		void releaseSendDataHandler(Topic top);		
+		
 		///Mutex for ioService, used to shutdown safely
 		Lockable serviceMutex;
 
@@ -241,7 +242,7 @@ namespace ops
 		///The interval with which this Participant publishes ParticipantInfoData
 		__int64 aliveTimeout;
 
-		///The data type factory used in this Participant.
+		///The data type factory used in this Participant. 
 		OPSObjectFactory* objectFactory;
 
 		///Static Mutex used by factory methods getInstance()

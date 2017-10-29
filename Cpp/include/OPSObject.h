@@ -77,7 +77,9 @@ namespace ops
         virtual ~OPSObject();
 
         OPSObject(const OPSObject& other);                      // Copy constructor
-        OPSObject(OPSObject&& other);                           // Move constructor
+#ifdef OPS_C11_DETECTED
+		OPSObject(OPSObject&& other);                           // Move constructor
+#endif
 
         OPSObject& operator= (OPSObject other);                 // Copy assignment operator
         //OPSObject& operator= (OPSObject&& other) = delete;    // Move assignment operator

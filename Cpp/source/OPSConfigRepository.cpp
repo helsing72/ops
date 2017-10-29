@@ -134,7 +134,7 @@ void OPSConfigRepository::DebugTotalClear()
 	SafeLock lock(&repoLock);
 	m_config->getRefToDomains().clear();
 
-	for (auto it = m_configFiles.begin(); it != m_configFiles.end(); ++it) {
+	for (std::map<FileName_T, OPSConfig*>::iterator it = m_configFiles.begin(); it != m_configFiles.end(); ++it) {
 		delete it->second;
 	}
 	m_configFiles.clear();

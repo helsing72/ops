@@ -77,7 +77,7 @@ namespace ops
      
     public:
 		struct fixed_string_to_small : public std::exception {
-			const char* what() const noexcept { return "Fixed string to small"; }
+			const char* what() const NOEXCEPT { return "Fixed string to small"; }
 		};
 
         ///The Write Policy is default to preserve all written data (see description above).

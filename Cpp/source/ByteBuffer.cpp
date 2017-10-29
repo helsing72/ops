@@ -111,7 +111,7 @@ namespace ops
         index = 0;
         writeProtocol();
         int tInt = 0;
-        WriteInt(tInt);
+        WriteInt(tInt); 
         WriteInt(currentSegment);
     }
 
@@ -160,7 +160,7 @@ namespace ops
 
     int ByteBuffer::GetSize()
     {
-        return totalSize;
+        return totalSize; 
     }
 
 	// -----------------------------------------------------------------
@@ -329,7 +329,7 @@ namespace ops
         std::string ret(text, length);
         delete[] text;
 
-        return ret;
+		return ret;
     }
 
 	void ByteBuffer::ReadString(std::string& value)
@@ -657,7 +657,7 @@ namespace ops
 	const char versionLow = 5;
 	const char protocolID[] = "opsp";
 
-    bool ByteBuffer::checkProtocol()
+	bool ByteBuffer::checkProtocol()
     {
 		char inProtocolID[4];
         ReadChars(&inProtocolID[0], 4);

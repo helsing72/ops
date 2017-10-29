@@ -27,9 +27,9 @@
 
 #pragma once
 
-#include <iostream>
-#include <mutex>
+#include "OPSTypeDefs.h"
 
+#include "Lockable.h"
 #include "Sender.h"
 
 #include "Participant.h"
@@ -52,7 +52,7 @@ namespace ops
 
 		virtual void close()
 		{
-			std::lock_guard<std::mutex> lck(_mtx);
+			SafeLock lck(&_mtx);
 			for (int i = (int)_connectedSockets.size() - 1; i >= 0; i--) {
 				delete _connectedSockets[i];
 			}
@@ -64,7 +64,7 @@ namespace ops
 		{
 			UNUSED(ip);
 			UNUSED(port);
-			std::lock_guard<std::mutex> lck(_mtx);
+			SafeLock lck(&_mtx);
 			// Send to anyone connected. Loop backwards to avoid problems when removing broken sockets
 			for (int i = (int)_connectedSockets.size() - 1; i >= 0 ; i--) {
 				// Send the data
@@ -96,13 +96,13 @@ namespace ops
 
 		void AddSocket(SocketSender* sock)
 		{
-			std::lock_guard<std::mutex> lck(_mtx);
+			SafeLock lck(&_mtx);
 			_connectedSockets.push_back(sock);
 		}
 
 		// All connected sockets
 		std::vector<SocketSender*> _connectedSockets;
-		std::mutex _mtx;
+		Lockable _mtx;
     };
 }
 

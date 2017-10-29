@@ -15,7 +15,7 @@ namespace ops
         {
         }
 
-		const char* what() const noexcept { return message.c_str(); }
+		const char* what() const NOEXCEPT { return message.c_str(); }
 
         virtual ~ConfigException() throw ()
         {
