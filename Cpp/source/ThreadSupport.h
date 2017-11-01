@@ -21,9 +21,14 @@
 */
 
 #include <string>
+#include "ThreadPool.h"
 
 namespace ops {
 	namespace thread_support {
+		// Called from Participant to create a thread pool on which to execute the Participant Run() method.
+		ThreadPool* CreateThreadPool();
+
+		// Called from within the thread to be named
 		void SetThreadName(const char* name);
 	}
 }

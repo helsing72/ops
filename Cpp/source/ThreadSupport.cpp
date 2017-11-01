@@ -19,6 +19,8 @@
 */
 
 #include "OPSTypeDefs.h"
+#include "SingleThreadPool.h"
+//#include "MultiThreadPool.h"
 #include "ThreadSupport.h"
 
 #ifdef _WIN32
@@ -29,6 +31,13 @@
 
 namespace ops {
 namespace thread_support {
+
+	// Called from Participant to create a thread pool on which to execute the Participant Run() method.
+	ThreadPool* CreateThreadPool()
+	{
+		return new SingleThreadPool();
+		//return new MultiThreadPool();
+	}
 
 #ifdef _WIN32
 	const DWORD MS_VC_EXCEPTION = 0x406D1388;
@@ -43,6 +52,7 @@ namespace thread_support {
 	#pragma pack(pop)  
 #endif
 
+	// Called from within the thread to be named
 	void SetThreadName(const char* name)
 	{
 #ifdef _WIN32

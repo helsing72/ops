@@ -27,8 +27,6 @@
 #endif
 #include "OPSTypeDefs.h"
 #include "Participant.h"
-#include "SingleThreadPool.h"
-//#include "MultiThreadPool.h"
 #include "ReceiveDataHandler.h"
 #include "ReceiveDataHandlerFactory.h"
 #include "SendDataHandlerFactory.h"
@@ -209,8 +207,7 @@ namespace ops
 
 		//------------Create thread pool--------------
 		if (_policy == execution_policy::threading) {
-			threadPool = new SingleThreadPool();
-			//threadPool = new MultiThreadPool();
+			threadPool = thread_support::CreateThreadPool();
 			threadPool->addRunnable(this);
 			threadPool->start();
 		}
