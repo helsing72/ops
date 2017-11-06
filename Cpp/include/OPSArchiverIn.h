@@ -30,6 +30,7 @@
 #include "SerializableInheritingTypeFactory.h"
 #include "Serializable.h"
 #include "ArchiverInOut.h"
+#include "OPSObject.h"
 
 namespace ops
 {

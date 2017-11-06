@@ -23,7 +23,6 @@
 #include "OPSObject.h"
 #include <string>
 #include <vector>
-#include "IOService.h"
 #include "Topic.h"
 #include "Channel.h"
 #include "Transport.h"

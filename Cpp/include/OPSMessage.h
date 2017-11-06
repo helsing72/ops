@@ -51,6 +51,8 @@ namespace ops
         qosMask(0),
         publicationID(0)
         {
+			UNUSED(endianness)
+			UNUSED(qosMask)
             std::string typeName("ops.protocol.OPSMessage");
             OPSObject::appendType(typeName);
             data = NULL;
