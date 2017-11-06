@@ -11,7 +11,7 @@ namespace ops
 	{
 	public:
 		void report(Error* error);
-		void report(std::string className, std::string methodName, std::string errorMessage);
+		void report(std::string className, std::string methodName, std::string errorMessage, Error::Severity_T severity = Error::error);
 		
 	};
 
