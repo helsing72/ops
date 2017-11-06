@@ -119,6 +119,7 @@ public:
 
 		// Since all segments are in one chunk after each other we can do a simple memcpy()
 		memcpy(dest, bytes[0] + startIndex, bytesToCopy);
+		return true;
 	}
 
 	~MemoryMap()
