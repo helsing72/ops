@@ -68,7 +68,7 @@ namespace strings {
 		size_type _size;
 	protected:
 		typedef enum { truncate_string, throw_exception } overrun_policy_t;
-		overrun_policy_t _overrun_policy = throw_exception;
+		overrun_policy_t _overrun_policy;
 	public:
 		// Exceptions:
 		struct index_out_of_range : public std::exception {
@@ -79,15 +79,15 @@ namespace strings {
 		};
 
 		// Constructors:
-		fixed_string() : _size(0) { _array[0] = '\0'; }
-		fixed_string(const char* s) : _size(0) { append(s, strlen(s)); }
-		fixed_string(const char* s, size_type len) : _size(0) { size_type sz = strlen(s); append(s, (sz < len) ? sz : len); }
+		fixed_string() : _size(0), _overrun_policy(throw_exception) { _array[0] = '\0'; }
+		fixed_string(const char* s) : _size(0), _overrun_policy(throw_exception) { append(s, strlen(s)); }
+		fixed_string(const char* s, size_type len) : _size(0), _overrun_policy(throw_exception) { size_type sz = strlen(s); append(s, (sz < len) ? sz : len); }
 #ifndef FIXED_NO_STD_STRING
-		fixed_string(const std::string s) : _size(0) { append(s.c_str(), s.size()); }
+		fixed_string(const std::string s) : _size(0), _overrun_policy(throw_exception) { append(s.c_str(), s.size()); }
 #endif
 
 		template<size_t M>
-		fixed_string(const fixed_string<M>& str) : _size(0) { append(str.c_str(), str.size()); }
+		fixed_string(const fixed_string<M>& str) : _size(0), _overrun_policy(throw_exception) { append(str.c_str(), str.size()); }
 
 		// all the special members can be defaulted
 #ifdef FIXED_C11_DETECTED
