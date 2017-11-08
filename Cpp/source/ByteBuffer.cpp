@@ -149,8 +149,8 @@ namespace ops
 
     void ByteBuffer::ByteSwap(unsigned char * b, int n)
     {
-        register int i = 0;
-        register int j = n - 1;
+        int i = 0;
+        int j = n - 1;
         while (i < j)
         {
             std::swap(b[i], b[j]);
@@ -216,43 +216,6 @@ namespace ops
         WriteInt(siz);
         WriteChars((char*) s.c_str(), siz);
     }
-
-	// -----------------------------------------------------------------
-
-	//  void ByteBuffer::WriteOPSObject(OPSObject* o, OPSObjectHelper* oh)
-    //  {
-    //      int size = oh->getSize(o);
-    ///*if(size > (Manager::MAX_SIZE - index))
-    //{
-    //	throw exceptions::CommException("In ByteBuffer::WriteOPSObject: Size exceeds MAX_SIZE limit.");
-    //}*/
-    //      WriteInt(size);
-    //      //char* oBytes = oh->serialize(o, buffer + index);
-    //      oh->serialize(o, buffer + index);
-    //index += size;
-    //      //delete oh;
-    //  }
-
-    //Readers
-
-    //  OPSObject* ByteBuffer::ReadOPSObject(OPSObjectHelper* oh)
-    //  {
-    //      int size = ReadInt();
-    ///*if(size < 0)
-    //{
-    //	throw exceptions::CommException("In ByteBuffer::ReadOPSObject: Negative size read from data.");
-    //}
-    //if(size > Manager::MAX_SIZE)
-    //{
-    //	throw exceptions::CommException("In ByteBuffer::ReadOPSObject: Size of incomming data exceeds local MAX_SIZE limit.");
-    //}*/
-    //      //char* oBytes = new char[size];
-    //      //ReadChars(oBytes, size);
-    //      OPSObject* o = oh->deserialize(buffer + index);
-    //index += size;
-    //      //delete oh;
-    //      return o;
-    //  }
 
 	// -----------------------------------------------------------------
 
@@ -464,6 +427,8 @@ namespace ops
                     ByteSwap((unsigned char*) &out[i], 8);
                 }
             }
+#else
+			UNUSED(preserveWrittenData)
 #endif
         }
     }

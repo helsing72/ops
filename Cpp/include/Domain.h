@@ -24,7 +24,6 @@
 
 #include "OPSTypeDefs.h"
 #include "OPSObject.h"
-#include "IOService.h"
 #include "Topic.h"
 #include "Channel.h"
 #include "Transport.h"

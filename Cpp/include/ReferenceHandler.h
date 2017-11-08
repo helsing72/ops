@@ -23,24 +23,26 @@
 
 #include <vector>
 #include "Reservable.h"
+#include "ReserveInfo.h"
 #include "Lockable.h"
 
 namespace ops
 {
 
-	class ReferenceHandler : Lockable//: Listener<ReserveInfo>, Lockable
+	class ReferenceHandler : Lockable
 	{
 	public:
 		ReferenceHandler()
 		{
-	
 		}
+
 		void addReservable(Reservable* res)
 		{
 			SafeLock lock(this);
 			references.push_back(res);
 			res->setReferenceHandler(this);
 		}
+
 		void onNewEvent(Reservable* notifier, ReserveInfo reserveInfo)
 		{
 			if(reserveInfo.nrOfReservations == 0)
@@ -77,11 +79,7 @@ namespace ops
 					return;
 				}
 			}
-
 		}
-
 	};
-
 }
-
 #endif

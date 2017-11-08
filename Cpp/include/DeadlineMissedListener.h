@@ -39,8 +39,7 @@ public:
 class DeadlineMissedEvent
 {
 private:
-		///Vector that holds pointers to the DataListeners
-		std::vector<DeadlineMissedListener*> listeners;
+	std::vector<DeadlineMissedListener*> listeners;
 public:
 	void addDeadlineMissedListener(DeadlineMissedListener* listener)
 	{
@@ -53,7 +52,6 @@ public:
 			listeners[i]->onDeadlineMissed(this);
         }
 	}
-
 };
 
 }

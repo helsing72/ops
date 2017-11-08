@@ -49,7 +49,9 @@ namespace ops
         qosMask(0),
         publicationID(0)
         {
-            TypeId_T typeName("ops.protocol.OPSMessage");
+			UNUSED(endianness)
+			UNUSED(qosMask)
+			TypeId_T typeName("ops.protocol.OPSMessage");
             OPSObject::appendType(typeName);
             data = NULL;
         }

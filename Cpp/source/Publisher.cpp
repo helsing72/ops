@@ -36,6 +36,7 @@ namespace ops
     sleepEverySendPacket(100000),
     sleepOnSendFailed(true)
     {
+		UNUSED(priority)
         participant = Participant::getInstance(topic.getDomainID(), topic.getParticipantID());
 
         sendDataHandler = participant->getSendDataHandler(topic);

@@ -28,7 +28,6 @@
 #include "OPSTypeDefs.h"
 #include "OPSExport.h"
 #include "MemoryMap.h"
-#include "OPSObject.h"
 
 namespace ops
 { 
@@ -129,14 +128,6 @@ namespace ops
 			WriteChars((char*)s.c_str(), siz);
 		}
 
-        ///Writes size(o) followed by the bytes making up o to the buffer and increments index by size(o) + 4
-        ///IMPORTANT: oh must be an OPSObjectHelper for sub type of o. No check that this is the case is performed.
-        //void WriteOPSObject(OPSObject* o, OPSObjectHelper* oh);
-        
-        ///Reads size of and an OPSObject from the buffer and increments index by the first read size.
-        ///oh must be an OPSObjectHelper for the corresponding type that wants to be read.
-        //OPSObject* ReadOPSObject(OPSObjectHelper* oh);
-        
 		///Reads 4 bytes from the buffer and returns them as a float. Index is increased by 4.
         ///Byte order is swaped before return.
         float ReadFloat();
@@ -156,6 +147,7 @@ namespace ops
         char ReadChar();
         ///Reads an int (length) from the buffer followed by length number of chars returned as a std::string. Index is increased by length + 4.
         std::string ReadString();
+
 		void ReadString(std::string& value);
 		///Reads an int (length) from the buffer followed by length number of chars returned as a fixed_string. Index is increased by length + 4.
 		template<size_t N>
@@ -168,9 +160,6 @@ namespace ops
 			Ptr[length] = '\0';
 			value.resize();
 		}
-
-        //void ReadOPSObjectFields(ops::OPSObject* o);
-        //void WriteOPSObjectFields(OPSObject* o);
 
 		///Reads std::vector of corresponding type and increments index accordingly
 		void ReadBooleans(std::vector<bool>& out);

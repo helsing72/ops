@@ -527,10 +527,11 @@ class Main : ops::DataListener, ops::Listener<ops::PublicationIdNotification_T>
 	std::vector<ops::Subscriber*> vSubs;
 	std::map<ops::Subscriber*, ops::PublicationIdChecker*> pubIdMap;
 
-	typedef struct {
+	typedef struct _entry {
 		int64_t time;
 		ops::Subscriber* sub;
 		ops::OPSMessage* mess;
+		_entry(): time(0), sub(nullptr), mess(nullptr) {}
 	} TEntry;
 	std::deque<TEntry> List;
 	ops::Lockable ListLock;
@@ -806,7 +807,7 @@ public:
 		if (logTime) {
 			str += "[" + sds::sdsSystemTimeToLocalTime(_messageTime) + "] ";
 		}
-		std::cout << str << 
+		std::cout << str <<
 			"PubIdChecker(): " << newPub <<
 			" on Topic: " << arg.mess->getTopicName() <<
 			", Addr: " << address <<
