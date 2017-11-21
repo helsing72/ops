@@ -1,4 +1,0 @@
-C:\Program Files\NetBeans 6.5\platform9=1231490090722
-C:\code\Software SVN\OPS\Tools\OPS IDL Builder NB\OPS IDL IDE SA\build\cluster=1231775646591
-C:\Program Files\NetBeans 6.5\ide10=1231775646591
-C:\code\Software SVN\OPS\Tools\OPS IDL Builder NB\OPS IDL IDE SA\build\testuserdir=1231775646591

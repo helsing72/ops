@@ -1,6 +1,0 @@
-package weatherstation;
-
-class ExtendedWindData extends BasicWindData
-{
-    double direction;
-}

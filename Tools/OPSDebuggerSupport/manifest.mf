@@ -1,6 +1,0 @@
-Manifest-Version: 1.0
-OpenIDE-Module: ops.debuggersupport
-OpenIDE-Module-Layer: ops/debuggersupport/layer.xml
-OpenIDE-Module-Localizing-Bundle: ops/debuggersupport/Bundle.properties
-OpenIDE-Module-Specification-Version: 1.0
-

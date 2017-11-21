@@ -1,7 +1,0 @@
-src/parsing/AbstractTemplateBasedIDLCompiler.java
-src/parsing/IDLClass.java
-src/parsing/IDLCompiler.java
-src/parsing/IDLField.java
-src/parsing/TopicInfo.java
-src/parsing/Topic.java
-src/gui/IDLCompilerSettingsPlugin.java

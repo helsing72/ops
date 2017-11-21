@@ -1,5 +1,0 @@
-Manifest-Version: 1.0
-OpenIDE-Module: ops.compilerlib
-OpenIDE-Module-Localizing-Bundle: ops/compilerlib/Bundle.properties
-OpenIDE-Module-Specification-Version: 1.0
-

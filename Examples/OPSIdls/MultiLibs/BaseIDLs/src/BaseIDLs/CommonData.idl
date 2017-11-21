@@ -1,6 +1,0 @@
-package BaseIDLs;
-
-class CommonData
-{
-    string dummy;
-}

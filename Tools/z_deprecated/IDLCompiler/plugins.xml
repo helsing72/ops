@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<IDLCompilers>
-
-    <IDLCompiler jarfile = "DocsCompilerPlugin.jar" name = "docscompilerplugin.DocsCompiler"/>
-    <IDLCompiler jarfile = "IDLCompiler.jar" name = "idlcompiler.compilers.CppFactoryIDLCompiler"/>
-    <IDLCompiler jarfile = "IDLCompiler.jar" name = "idlcompiler.compilers.NewJavaCompiler"/>
-
-</IDLCompilers>

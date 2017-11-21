@@ -1,6 +1,0 @@
-src/opstestapp/COpsHelper.java
-src/opstestapp/ILogListener.java
-src/opstestapp/IOpsHelper.java
-src/opstestapp/IOpsHelperListener.java
-src/consoleapp/opstestmain.java
-src/consoleapp/PizzaTest.java

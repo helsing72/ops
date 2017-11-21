@@ -1,6 +1,0 @@
-package pizza;
-
-class CapricosaData extends VessuvioData
-{
-    string mushrooms;
-}

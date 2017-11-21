@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<module codename="ops.netbeansmodules.sampleprojects">
-    <module_version install_time="1231775643903" last="true" origin="installer" specification_version="1.0">
-        <file crc="1762112608" name="config/Modules/ops-netbeansmodules-sampleprojects.xml"/>
-        <file crc="2910094285" name="modules/ops-netbeansmodules-sampleprojects.jar"/>
-    </module_version>
-</module>

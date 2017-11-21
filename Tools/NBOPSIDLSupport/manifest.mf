@@ -1,6 +1,0 @@
-Manifest-Version: 1.0
-OpenIDE-Module: ops.netbeansmodules.idlsupport
-OpenIDE-Module-Layer: ops/netbeansmodules/idlsupport/layer.xml
-OpenIDE-Module-Localizing-Bundle: ops/netbeansmodules/idlsupport/Bundle.properties
-OpenIDE-Module-Specification-Version: 1.0
-

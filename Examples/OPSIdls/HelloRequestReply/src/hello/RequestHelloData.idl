@@ -1,6 +1,0 @@
-package hello;
-
-class RequestHelloData extends ops.Request
-{
-    string requestersName;
-}

@@ -1,8 +1,0 @@
-package pizza.special;
-//This is a svettig pizza
-class LHCData extends pizza.CapricosaData
-{
-    string bearnaise;
-    string beef;
-    pizza.PizzaData[] p;
-}

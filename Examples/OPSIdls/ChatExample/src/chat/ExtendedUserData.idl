@@ -1,9 +1,0 @@
-package chat;
-
-class ExtendedUserData extends UserData
-{
-    string nickname;
-    string email;
-    string telephone;
-    string profileImageUrl;
-}

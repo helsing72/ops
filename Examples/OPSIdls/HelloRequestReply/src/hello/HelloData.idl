@@ -1,7 +1,0 @@
-package hello;
-
-class HelloData extends ops.Reply
-{
-    string helloString;
-
-}

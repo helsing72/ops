@@ -1,5 +1,0 @@
-Manifest-Version: 1.0
-OpenIDE-Module: configlib
-OpenIDE-Module-Localizing-Bundle: configlib/Bundle.properties
-OpenIDE-Module-Specification-Version: 1.0
-

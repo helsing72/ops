@@ -1,6 +1,0 @@
-package pizza;
-
-class VessuvioData extends PizzaData
-{
-    string ham;
-}

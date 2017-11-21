@@ -1,7 +1,0 @@
-package hello;
-
-class HelloData
-{
-    /*This string holds hello messages.*/
-    string helloString;
-}
