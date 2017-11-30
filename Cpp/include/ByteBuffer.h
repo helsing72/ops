@@ -75,8 +75,11 @@ namespace ops
 		void ReadBytes(std::vector<char>& out, int offset, int length);
      
     public:
+		struct data_corrupted : public std::exception {
+			const char* what() const NOEXCEPT { return "ByteBuffer(): Data corrupted. Trying to read beyond buffer"; }
+		};
 		struct fixed_string_to_small : public std::exception {
-			const char* what() const NOEXCEPT { return "Fixed string to small"; }
+			const char* what() const NOEXCEPT { return "ByteBuffer(): Fixed string to small"; }
 		};
 
         ///The Write Policy is default to preserve all written data (see description above).
