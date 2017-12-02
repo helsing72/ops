@@ -287,6 +287,9 @@ namespace ops
 			return shortStringBuffer;
 		}
 
+		// Safety check
+		if (length > memMap->getTotalSize()) throw data_corrupted();
+
         char* text = new char[length];
         ReadChars(text, length);
         std::string ret(text, length);
