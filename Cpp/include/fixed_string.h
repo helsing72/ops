@@ -43,7 +43,7 @@
 	#endif
 #endif
 
-namespace strings {
+namespace ops { namespace strings {
 
 	class basic_fixed_string
 	{
@@ -216,6 +216,14 @@ namespace strings {
 			return npos;
 		}
 
+		size_type find_first_of(const char* s, size_type pos = 0) const
+		{
+			if (pos >= _size) return npos;
+			const char* ptr = strpbrk(&_array[pos], s);
+			if (ptr == nullptr) return npos;
+			return (size_type)(ptr - &_array[0]);
+		}
+
 		size_type find_first_not_of(char c, size_type pos = 0) const
 		{
 			if (pos < _size) {
@@ -368,4 +376,4 @@ namespace strings {
 		}
 	};
 
-} //namespace
+}} //namespace

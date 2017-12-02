@@ -23,6 +23,16 @@
 #include <OPSConfigRepository.h>
 #include "PrintArchiverOut.h"
 
+#ifdef _WIN32
+	#include <crtdbg.h>
+#endif
+
+//TestAll::BaseData::MemoryPool TestAll::BaseData::_pool(10);
+//TestAll::ChildData::MemoryPool TestAll::ChildData::_pool(10);
+//TestAll::Fruit::MemoryPool TestAll::Fruit::_pool(50);
+//TestAll::TestData::MemoryPool TestAll::TestData::_pool(100);
+
+
 bool gTestFailed = false;
 
 template <typename T>
@@ -62,12 +72,12 @@ void checkEmpty(TestAll::ChildData& data)
 	AssertEQ<int>(data.stringOpenArr.size(), 0);
 	//   std::string stringFixArr[5];
 	for (int i = 0; i < 5; i++) AssertEQ<std::string>(data.stringFixArr[i], "");
-	//   strings::fixed_string<23> fixLengthString;
-	AssertEQ<strings::fixed_string<23>>(data.fixLengthString, "");
-	//   std::vector<strings::fixed_string<16>> fixLengthStringOpenArr;
+	//   ops::strings::fixed_string<23> fixLengthString;
+	AssertEQ<ops::strings::fixed_string<23>>(data.fixLengthString, "");
+	//   std::vector<ops::strings::fixed_string<16>> fixLengthStringOpenArr;
 	AssertEQ<int>(data.fixLengthStringOpenArr.size(), 0);
-	//   strings::fixed_string<16> fixLengthStringFixArr[10];
-	for (int i = 0; i < 10; i++) AssertEQ<strings::fixed_string<16>>(data.fixLengthStringFixArr[i], "");
+	//   ops::strings::fixed_string<16> fixLengthStringFixArr[10];
+	for (int i = 0; i < 10; i++) AssertEQ<ops::strings::fixed_string<16>>(data.fixLengthStringFixArr[i], "");
 
 	// ChildData
 	AssertEQ<bool>(data.bo, false, "data.bo");
@@ -156,15 +166,15 @@ void checkObjects(TestAll::ChildData& data, TestAll::ChildData& exp)
 	//   std::string stringFixArr[5];
 	for (int i = 0; i < 5; i++) AssertEQ<std::string>(data.stringFixArr[i], exp.stringFixArr[i], "stringFixArr");
 
-	//   strings::fixed_string<23> fixLengthString;
-	AssertEQ<strings::fixed_string<23>>(data.fixLengthString, exp.fixLengthString, "fixLengthString");
+	//   ops::strings::fixed_string<23> fixLengthString;
+	AssertEQ<ops::strings::fixed_string<23>>(data.fixLengthString, exp.fixLengthString, "fixLengthString");
 
-	//   std::vector<strings::fixed_string<16>> fixLengthStringOpenArr;
+	//   std::vector<ops::strings::fixed_string<16>> fixLengthStringOpenArr;
 	AssertEQ<int>(data.fixLengthStringOpenArr.size(), exp.fixLengthStringOpenArr.size(), "fixLengthStringOpenArr");
-	for (size_t i = 0; i < data.fixLengthStringOpenArr.size(); i++) AssertEQ<strings::fixed_string<16>>(data.fixLengthStringOpenArr[i], exp.fixLengthStringOpenArr[i], "fixLengthStringOpenArr");
+	for (size_t i = 0; i < data.fixLengthStringOpenArr.size(); i++) AssertEQ<ops::strings::fixed_string<16>>(data.fixLengthStringOpenArr[i], exp.fixLengthStringOpenArr[i], "fixLengthStringOpenArr");
 
-	//   strings::fixed_string<16> fixLengthStringFixArr[10];
-	for (int i = 0; i < 10; i++) AssertEQ<strings::fixed_string<16>>(data.fixLengthStringFixArr[i], exp.fixLengthStringFixArr[i], "fixLengthStringFixArr");
+	//   ops::strings::fixed_string<16> fixLengthStringFixArr[10];
+	for (int i = 0; i < 10; i++) AssertEQ<ops::strings::fixed_string<16>>(data.fixLengthStringFixArr[i], exp.fixLengthStringFixArr[i], "fixLengthStringFixArr");
 
 	// Test fields in ChildData
 	AssertEQ<bool>(data.bo, exp.bo, "data.bo");
@@ -252,12 +262,12 @@ void fillChildData(TestAll::ChildData& data)
 	data.stringFixArr[2] = "dsf 2";
 	data.stringFixArr[3] = "dsf 3";
 	data.stringFixArr[4] = "dsf 4";
-	//   strings::fixed_string<23> fixLengthString;
+	//   ops::strings::fixed_string<23> fixLengthString;
 	data.fixLengthString = "fixed length string";
-	//   std::vector<strings::fixed_string<16>> fixLengthStringOpenArr;
+	//   std::vector<ops::strings::fixed_string<16>> fixLengthStringOpenArr;
 	data.fixLengthStringOpenArr.push_back("fix len str 1");
 	data.fixLengthStringOpenArr.push_back("fix len str 2");
-	//   strings::fixed_string<16> fixLengthStringFixArr[10];
+	//   ops::strings::fixed_string<16> fixLengthStringFixArr[10];
 	data.fixLengthStringFixArr[0] = "fsf 0";
 	data.fixLengthStringFixArr[1] = "fsf 1";
 	data.fixLengthStringFixArr[2] = "fsf 2";
@@ -418,8 +428,19 @@ int main(int argc, const char* args[])
 			std::cout << "ERROR: Headers and compiled library are not consistent !!" << std::endl;
 		}
 
+#ifdef _WIN32
+		_CrtMemState s1, s2, sd;
+		_CrtMemCheckpoint(&s1);
+#endif
+
+		ops::OPSObject od0;
 //		TestAll::BaseData bd0;
 //		TestAll::ChildData cd0;
+
+#ifdef _WIN32
+		_CrtMemCheckpoint(&s2);
+		_CrtMemDifference(&sd, &s1, &s2);
+#endif
 
 //		TestAll::BaseData& pbd1 = bd0;
 //		TestAll::BaseData& pbd2 = cd0;

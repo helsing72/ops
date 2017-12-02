@@ -24,7 +24,7 @@
 
 #include "fixed_string.h"
 
-namespace strings {
+namespace ops { namespace strings {
 
 	// Stream operator
 	inline std::ostream& operator<< (std::ostream& os, const basic_fixed_string& str)
@@ -61,4 +61,4 @@ namespace strings {
 			pos2 == fixed_string<N>::npos ? str.length() - 1 : pos2 - pos1 + 1);
 	}
 
-} //namespace
+}} //namespace
