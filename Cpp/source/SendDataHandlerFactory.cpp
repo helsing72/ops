@@ -73,8 +73,8 @@ namespace ops
 
 			// If topic specifies a valid node address, add that as a static destination address for topic
 			if(isValidNodeAddress(top.getDomainAddress())) {
-				std::string topName = top.getName();
-				std::string destAddress = top.getDomainAddress();
+				ObjectName_T topName = top.getName();
+				Address_T destAddress = top.getDomainAddress();
 				int destPort = top.getPort();
 				((McUdpSendDataHandler*)udpSendDataHandler)->addSink(topName, destAddress, destPort, true);
 

@@ -74,7 +74,7 @@ namespace ops
             return result;
         }
 
-		void addSink(std::string& topic, std::string& ip, int& port, bool staticRoute = false)
+		void addSink(ObjectName_T& topic, Address_T& ip, int& port, bool staticRoute = false)
 		{
             SafeLock lock(&mutex);
 
@@ -130,7 +130,7 @@ namespace ops
         class IpPortPair
         {
         public:
-            IpPortPair(std::string ip, int port, bool alwaysAlive):
+            IpPortPair(Address_T ip, int port, bool alwaysAlive):
 				_ip(ip), _port(port), _alwaysAlive(alwaysAlive)
             {
                 _lastTimeAlive = TimeHelper::currentTimeMillis();
