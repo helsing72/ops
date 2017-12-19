@@ -27,7 +27,7 @@ if(MSVC)
 elseif(MINGW)
   target_link_libraries(${APP_NAME} ws2_32 mswsock)
 else()
-  target_link_libraries(${APP_NAME} pthread)
+  target_link_libraries(${APP_NAME} pthread rt)
 endif()
 
 install(TARGETS ${APP_NAME} DESTINATION examples/pizzatest)
