@@ -35,6 +35,10 @@ clean_opt:
 	@echo "Cleaning opt"
 	rm -rf $(BUILD_OPT)
 
+.PHONY : clean_deploy
+clean_deploy :
+	rm -rf $(INSTALL_PREFIX)
+
 .PHONY : opt
 opt: $(BUILD_OPT)/Makefile
 	$(MAKE) -C $(BUILD_OPT) --no-print-directory
@@ -89,11 +93,6 @@ $(INSTALL_PREFIX)/lib/README :
 	echo "gcc version: $(CCV)" > $@
 	echo "g++ version: $(CXXV)" >> $@
 
-.PHONY : clean_deploy
-
-clean_deploy :
-	rm -rf $(INSTALL_PREFIX)
-
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -103,7 +102,6 @@ help:
 	@echo "... unittest-c++"
 	@echo "... unittest-python"
 	@echo "... install"
-	@echo "... unittest"
 	@echo "... clean"
 	@echo "... clean_debug"
 	@echo "... clean_opt"
