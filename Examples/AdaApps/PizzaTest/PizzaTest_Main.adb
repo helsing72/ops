@@ -1,6 +1,5 @@
 
-with Com_Socket_Pa,
-     PizzaTest_Pa;
+with PizzaTest_Pa;
 
 procedure PizzaTest_Main is
 begin

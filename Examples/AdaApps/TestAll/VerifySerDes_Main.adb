@@ -17,9 +17,9 @@
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
 with Ada.Text_Io;
-with Com_Base_Abs_Pa;
 with VerifySerDes_Pa;
 with Interfaces;
+with Ops_Pa;
 
 use Ada.Text_IO;
 use VerifySerDes_Pa;
@@ -27,8 +27,8 @@ use Interfaces;
 
 procedure VerifySerDes_Main is
 begin
-  Put_Line("Debug: Count= " & Integer_32'Image(Com_Base_Abs_Pa.NumActiveObjects));
+  Put_Line("Debug: Count= " & Integer_32'Image(Ops_Pa.NumActiveObjects));
   VerifySerDes;
-  Put_Line("Debug: Count= " & Integer_32'Image(Com_Base_Abs_Pa.NumActiveObjects));
+  Put_Line("Debug: Count= " & Integer_32'Image(Ops_Pa.NumActiveObjects));
 end;
 
