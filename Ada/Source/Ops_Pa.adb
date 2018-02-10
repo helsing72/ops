@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2018 Lennart Andersson.
 --  
 -- This file is part of OPS (Open Publish Subscribe).
 --  
@@ -19,11 +19,94 @@
 with Ada.Text_IO,
      Ada.Real_Time,
      Ada.Exceptions,
-     Ada.Unchecked_Conversion;
+     Ada.Unchecked_Conversion,
+     Ada.Unchecked_Deallocation,
+     Ada.Tags,
+     Ops_Pa.SyncPrimitives_Pa;
 
 package body Ops_Pa is
 
-  StartTime : Float64;
+  StartTime     : Float64;
+  Count         : aliased Interfaces.Integer_32 := 0;
+  TraceRoutine  : TraceRoutine_At   := null;
+
+  --------------------------------------------------------------------------
+  --
+  --------------------------------------------------------------------------
+  function NumActiveObjects return Interfaces.Integer_32 is
+  begin
+    return Count;
+  end;
+
+  ----------------------------------------------------------------------
+  -- Install trace routine to catch allocation/deallocation
+  -- of objects, when running.
+  ----------------------------------------------------------------------
+  procedure InstallTrace(Routine : TraceRoutine_At) is
+  begin
+    TraceRoutine := Routine;
+  end InstallTrace;
+
+  procedure UnInstallTrace(Routine : TraceRoutine_At) is
+  begin
+    TraceRoutine := null;
+  end UnInstallTrace;
+
+  ---------------------------------------------------------------------------
+  -- Get original Class name (  Shall not be overridden to get the same
+  --                            name when create/free object)
+  ---------------------------------------------------------------------------
+  function OriginalClassName(Self : Ops_Class) return String is
+  begin
+    return Ada.Tags.External_Tag(Ops_Class'Class(Self)'Tag);
+  end OriginalClassName;
+  
+  --------------------------------------------------------------------------
+  -- Get class name for object (May be overridden to shorten class name)
+  --------------------------------------------------------------------------
+  function ClassName(Self : Ops_Class) return String is
+  begin
+    return Ada.Tags.External_Tag(Ops_Class'Class(Self)'Tag);
+  end ClassName;
+
+  --------------------------------------------------------------------------
+  -- Unchecked deallocation for the Com_Base
+  --------------------------------------------------------------------------
+  procedure Dealloc is new Ada.Unchecked_Deallocation( Ops_Class'Class, Ops_Class_At);
+
+  ----------------------------------------------------------------------
+  -- Destructor ( There is no need to override this method anytime, use
+  --              Finalize() instead to dealloc memory )
+  ----------------------------------------------------------------------
+  procedure Free(Self : access Ops_Class) is
+    Dummy : Ops_Class_At;
+    tmp : Interfaces.Integer_32;
+  begin
+    Dummy := Ops_Class_At(Self);
+    if Dummy /= null then
+      tmp := Ops_Pa.SyncPrimitives_Pa.InterlockedDecrement(Count'Access);
+      if TraceRoutine /= null then
+        TraceRoutine( Class         => OriginalClassName( Self.all ),
+                      CreateStatus  => Dealloc,
+                      TotalAllocObj => tmp);
+      end if;
+      Dealloc(Dummy);
+    end if;
+  end Free;
+                      
+  ----------------------------------------------------------------------
+  -- Initialize object (Only used to trace allocation of object)
+  ----------------------------------------------------------------------
+  overriding procedure Initialize(Self : in out Ops_Class) is
+    tmp : Interfaces.Integer_32;
+  begin
+    tmp := Ops_Pa.SyncPrimitives_Pa.InterlockedIncrement(Count'Access);
+    if TraceRoutine /= null then
+      TraceRoutine( Class         => OriginalClassName( Self ),
+                    CreateStatus  => Alloc,
+                    TotalAllocObj => tmp);
+    end if;
+  end Initialize;
 
   --------------------------------------------------------------------------
   --

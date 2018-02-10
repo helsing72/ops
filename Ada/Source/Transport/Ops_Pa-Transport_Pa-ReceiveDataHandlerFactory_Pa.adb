@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -68,7 +68,7 @@ package body Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa is
       end if;
     end;
 
-    S : Com_Mutex_Pa.Scope_Lock(Self.Lock'Access);
+    S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Lock'Access);
   begin
     -- Cleanup/Free all receivedatahandlers under protection
     Self.ReceiveDataHandlerInstances.Iterate(Process'Access);
@@ -108,7 +108,7 @@ package body Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa is
     pos : MyMap.Cursor;
     info : HandlerInfo;
 
-    S : Com_Mutex_Pa.Scope_Lock(Self.Lock'Access);
+    S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Lock'Access);
   begin
     pos := Self.ReceiveDataHandlerInstances.Find( key );
 
@@ -164,7 +164,7 @@ package body Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa is
     pos : MyMap.Cursor;
     info : HandlerInfo;
 
-    S : Com_Mutex_Pa.Scope_Lock(Self.Lock'Access);
+    S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Lock'Access);
   begin
     pos := Self.ReceiveDataHandlerInstances.Find( key );
 

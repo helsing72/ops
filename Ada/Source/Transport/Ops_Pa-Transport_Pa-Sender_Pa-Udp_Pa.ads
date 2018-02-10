@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -16,7 +16,7 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
-with Com_Socket_Pa;
+with Ops_Pa.Socket_Pa;
 
 package Ops_Pa.Transport_Pa.Sender_Pa.Udp_Pa is
 
@@ -54,7 +54,7 @@ private
        OutSocketBufferSize : Int64 := -1;
        MulticastSocket : Boolean := True;
 
-       UdpSocket : Com_Socket_Pa.UDPSocket_Class_At := null;
+       UdpSocket : Ops_Pa.Socket_Pa.UDPSocket_Class_At := null;
     end record;
 
   procedure Report( Self : in out UdpSender_Class; method : String; mess : String );

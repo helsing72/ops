@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2017 Lennart Andersson.
+-- Copyright (C) 2017-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -18,7 +18,7 @@
 
 with Ada.Containers.Indefinite_Ordered_Maps;
 
-with Com_Mutex_Pa;
+with Ops_Pa.Mutex_Pa;
 
 with Ops_Pa.OpsObject_Pa.OPSConfig_Pa;
 use  Ops_Pa.OpsObject_Pa.OPSConfig_Pa;
@@ -72,7 +72,7 @@ private
       -- File cache with all added config files and their domains
       ConfigFiles : MyMap.Map;
 
-      Mutex : aliased Com_Mutex_Pa.Mutex;
+      Mutex : aliased Ops_Pa.Mutex_Pa.Mutex;
     end record;
 
   -- Must only be called while holding the Self.Mutex

@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -16,8 +16,8 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
-with Com_Mutex_Pa,
-     Com_Signal_Pa;
+with Ops_Pa.Mutex_Pa,
+     Ops_Pa.Signal_Pa;
 
 with Ops_Pa.Transport_Pa.SendDataHandler_Pa,
      Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa,
@@ -112,8 +112,8 @@ private
     entry Finish;
   end Participant_Pr_T;
 
-  TerminateEvent_C : constant Com_Signal_Pa.Event_T := Com_Signal_Pa.Event1_C;
-  StartEvent_C     : constant Com_Signal_Pa.Event_T := Com_Signal_Pa.Event2_C;
+  TerminateEvent_C : constant Ops_Pa.Signal_Pa.Event_T := Ops_Pa.Signal_Pa.Event1_C;
+  StartEvent_C     : constant Ops_Pa.Signal_Pa.Event_T := Ops_Pa.Signal_Pa.Event2_C;
 
 -- ==========================================================================
 --
@@ -131,7 +131,7 @@ private
        pragma volatile(StopFlag);
        TerminateFlag : aliased Boolean := False;
        pragma volatile(TerminateFlag);
-       EventsToTask : Com_Signal_Pa.Signal_T;
+       EventsToTask : Ops_Pa.Signal_Pa.Signal_T;
 
        SelfAt : Participant_Class_At := null;
 
@@ -154,7 +154,7 @@ private
        ------------------------------------------------------------------------
        -- The ParticipantInfoData that partInfoPub will publish periodically
        PartInfoData : ParticipantInfoData_Class_At := null;
-       PartInfoDataMutex : aliased Com_Mutex_Pa.Mutex;
+       PartInfoDataMutex : aliased Ops_Pa.Mutex_Pa.Mutex;
 
        PartInfoTopic : Topic_Class_At := null;
        PartInfoListener : ParticipantInfoDataListener_Class_At := null;

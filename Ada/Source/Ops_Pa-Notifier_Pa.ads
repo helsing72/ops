@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -16,7 +16,7 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
-with Com_Mutex_Pa;
+with Ops_Pa.Mutex_Pa;
 
 generic
   MaxListeners : Positive;
@@ -78,7 +78,7 @@ private
   type Notifier_Class is new Ops_Class with
     record
       Owner        : Ops_Class_At := null;
-      Mutex        : aliased Com_Mutex_Pa.Mutex;
+      Mutex        : aliased Ops_Pa.Mutex_Pa.Mutex;
       Listeners    : ListenerArray_T;
       NumListeners : Integer := 0;
     end record;

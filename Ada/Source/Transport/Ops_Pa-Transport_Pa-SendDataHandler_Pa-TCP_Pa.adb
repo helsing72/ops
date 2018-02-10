@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2017 Lennart Andersson.
+-- Copyright (C) 2017-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -42,7 +42,7 @@ package body Ops_Pa.Transport_Pa.SendDataHandler_Pa.TCP_Pa is
   overriding procedure Finalize( Self : in out TcpSendDataHandler_Class ) is
   begin
     declare
-      S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
+      S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
     begin
       Free(Self.Sender);
     exception

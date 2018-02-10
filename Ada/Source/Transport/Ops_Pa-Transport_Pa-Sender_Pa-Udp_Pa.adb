@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -46,7 +46,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.Udp_Pa is
     Self.Ttl := ttl;
     Self.OutSocketBufferSize := outSocketBufferSize;
     Self.MulticastSocket := multicastSocket;
-    Self.UdpSocket := Com_Socket_Pa.Create;
+    Self.UdpSocket := Ops_Pa.Socket_Pa.Create;
     Open( Self );
   end;
 
@@ -54,7 +54,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.Udp_Pa is
   begin
     Close( Self );
 
-    Com_Socket_Pa.Free(Self.UdpSocket);
+    Ops_Pa.Socket_Pa.Free(Self.UdpSocket);
 
     if Self.LocalInterface /= null then
       Dispose(Self.LocalInterface);
@@ -95,7 +95,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.Udp_Pa is
 
       if Self.UdpSocket.GetSendBufferSize /= Integer(Self.OutSocketBufferSize) then
         if Self.LastErrorCode = 0 then
-          Self.LastErrorCode := Com_Socket_Pa.SOCKET_ERROR_C;
+          Self.LastErrorCode := Ops_Pa.Socket_Pa.SOCKET_ERROR_C;
         end if;
         Report(Self, "Start", "Socket buffer size could not be set");
       end if;

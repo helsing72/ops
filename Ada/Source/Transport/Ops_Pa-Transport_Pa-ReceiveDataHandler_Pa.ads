@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -27,7 +27,7 @@ with Ops_Pa.OpsObject_Pa.Domain_Pa,
      Ops_Pa.ArchiverInOut_Pa,
      Ops_Pa.ArchiverInOut_Pa.ArchiverIn_Pa,
      Ops_Pa.Notifier_Pa,
-     Com_Mutex_Pa;
+     Ops_Pa.Mutex_Pa;
 
 use  Ops_Pa.Transport_Pa.Receiver_Pa;
 
@@ -98,7 +98,7 @@ private
       CurrentMessageSize : Integer := 0;
 
       --
-      MessageLock : aliased Com_Mutex_Pa.Mutex;
+      MessageLock : aliased Ops_Pa.Mutex_Pa.Mutex;
 
       -- Status variables for the reception
       ExpectedSegment : UInt32 := 0;

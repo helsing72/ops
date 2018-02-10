@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2017 Lennart Andersson.
+-- Copyright (C) 2017-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -21,9 +21,7 @@ with Ada.Streams;
 with Ada.Exceptions;
 with GNAT.Sockets;
 
-with Com_Base_Abs_Pa;
-
-package Com_Socket_Pa is
+package Ops_Pa.Socket_Pa is
 
   SOCKET_ERROR_C : constant Integer := -1;
 
@@ -33,7 +31,7 @@ package Com_Socket_Pa is
 -- ==========================================================================
 --      C l a s s    D e c l a r a t i o n.
 -- ==========================================================================
-  type Socket_Class    is new Com_Base_Abs_Pa.Com_Base_Abs_Class with private;
+  type Socket_Class    is new Ops_Class with private;
   type Socket_Class_At is access all Socket_Class'Class;
 
   function Create( SocketType : GNAT.Sockets.Mode_Type ) return Socket_Class_At;
@@ -130,7 +128,7 @@ private
 -- ==========================================================================
 --
 -- ==========================================================================
-  type Socket_Class is new Com_Base_Abs_Pa.Com_Base_Abs_Class with
+  type Socket_Class is new Ops_Class with
      record
        SelfAt : Socket_Class_At := null;
        SocketType : GNAT.Sockets.Mode_Type := GNAT.Sockets.Socket_Datagram;
@@ -213,4 +211,4 @@ private
 
   overriding procedure Finalize( Self : in out TCPServerSocket_Class );
 
-end Com_Socket_Pa;
+end Ops_Pa.Socket_Pa;

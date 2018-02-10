@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -16,11 +16,11 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
-with Com_Socket_Pa;
+with Ops_Pa.Socket_Pa;
 
 package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
 
-  use type Com_Socket_Pa.TCPClientSocket_Class_At;
+  use type Ops_Pa.Socket_Pa.TCPClientSocket_Class_At;
 
   function Create( serverIP : string;
                    serverPort : Integer;
@@ -49,7 +49,7 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
     Self.InSocketBufferSize := inSocketBufferSize;
 
     -- Create socket
-    Self.TcpClient := Com_Socket_Pa.Create;
+    Self.TcpClient := Ops_Pa.Socket_Pa.Create;
   end;
 
   overriding procedure Finalize( Self : in out TCPClientReceiver_Class ) is
@@ -59,7 +59,7 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
     Finalize( Receiver_Class(Self) );  -- Make sure thread is terminated
 
     if Self.TcpClient /= null then
-      Com_Socket_Pa.Free(Self.TcpClient);
+      Ops_Pa.Socket_Pa.Free(Self.TcpClient);
     end if;
 
     if Self.IpAddress /= null then
@@ -194,7 +194,7 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
 
       if BytesToRead > Byte_Arr_Index_T(Self.BufferSize) then
         -- This is an error, we are not able to receive more than the buffer size
-        Self.LastErrorCode := Com_Socket_Pa.SOCKET_ERROR_C;
+        Self.LastErrorCode := Ops_Pa.Socket_Pa.SOCKET_ERROR_C;
         Self.Report("HandleSizeInfo", "Error in read size info");
         --notifyNewEvent(BytesSizePair(NULL, -1));
         ErrorDetected := True;
@@ -243,7 +243,7 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
         if Self.InSocketBufferSize > 0 then
           dummy := Self.TcpClient.SetReceiveBufferSize(Integer(Self.InSocketBufferSize));
           if Self.TcpClient.GetReceiveBufferSize /= Integer(Self.InSocketBufferSize) then
-            Self.LastErrorCode := Com_Socket_Pa.SOCKET_ERROR_C;
+            Self.LastErrorCode := Ops_Pa.Socket_Pa.SOCKET_ERROR_C;
             Self.Report("Run", "Socket buffer size could not be set");
           end if;
         end if;
@@ -297,7 +297,7 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
         DisconnectAndClose;
       exception
         when others =>
-          Self.LastErrorCode := Com_Socket_Pa.SOCKET_ERROR_C;
+          Self.LastErrorCode := Ops_Pa.Socket_Pa.SOCKET_ERROR_C;
           Self.Report("Run", "Exception ");
           DisconnectAndClose;
       end;

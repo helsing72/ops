@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2017 Lennart Andersson.
+-- Copyright (C) 2017-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -78,7 +78,7 @@ package body Ops_Pa.OPSConfigRepository_Pa is
   -- if "domain" == '', all domains will be added otherwise only the specified "domain"
   -- Returns true if at least one domain added
   function Add( Self : in out OPSConfigRepository_Class; filename : string; domainID : string := "" ) return Boolean is
-    S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
+    S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
     return Self.LocalAdd( filename, domainID );
   end;
@@ -141,7 +141,7 @@ package body Ops_Pa.OPSConfigRepository_Pa is
   end;
 
   procedure Clear( Self : in out OPSConfigRepository_Class ) is
-    S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
+    S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
     -- Since we just borrow the references to domains (they are owned by file cache)
     -- we can just clear the domain list in our OPSConfig object
@@ -149,7 +149,7 @@ package body Ops_Pa.OPSConfigRepository_Pa is
   end;
 
   function domainExist( Self : in out OPSConfigRepository_Class; domainID : string ) return Boolean is
-    S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
+    S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
     return Self.LocalDomainExist( domainID );
   end;
@@ -172,7 +172,7 @@ package body Ops_Pa.OPSConfigRepository_Pa is
 
   function getConfig( Self : in out OPSConfigRepository_Class; domainID : string := "" ) return OPSConfig_Class_At is
     domains : Domain_Class_At_Arr_At;
-    S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
+    S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
     -- If no domain have been added, we try to add the default file
     -- This is for backward compatibility

@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -18,16 +18,16 @@
 
 with Ada.Unchecked_Conversion;
 
-with Com_Socket_Pa,
-     Com_Signal_Pa;
+with Ops_Pa.Socket_Pa,
+     Ops_Pa.Signal_Pa;
 
 package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
 
   use type Ada.Containers.Count_Type;
-  use type Com_Socket_Pa.TCPClientSocket_Class_At;
-  use type Com_Signal_Pa.Event_T;
+  use type Ops_Pa.Socket_Pa.TCPClientSocket_Class_At;
+  use type Ops_Pa.Signal_Pa.Event_T;
 
-  function Equal( Left, Right : Com_Socket_Pa.TCPClientSocket_Class_At ) return Boolean is
+  function Equal( Left, Right : Ops_Pa.Socket_Pa.TCPClientSocket_Class_At ) return Boolean is
   begin
     return Left = Right;
   end;
@@ -55,7 +55,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
     Self.IpAddress := Copy(serverIP);
     Self.OutSocketBufferSize := outSocketBufferSize;
 
-    Self.TcpServer := Com_Socket_Pa.Create;
+    Self.TcpServer := Ops_Pa.Socket_Pa.Create;
 
     Self.Server_Pr.Start;
   end;
@@ -68,7 +68,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
     Self.EventsToTask.Signal(TerminateEvent_C);
     Self.Server_Pr.Finish;
 
-    Com_Socket_Pa.Free(Self.TcpServer);
+    Ops_Pa.Socket_Pa.Free(Self.TcpServer);
 
     if Self.IpAddress /= null then
       Dispose( Self.IpAddress );
@@ -108,11 +108,11 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
 
       -- Free all connected sockets, which implicitly will close all connections
       declare
-        S : Com_Mutex_Pa.Scope_Lock(Self.ConnectedSocketsMutex'Access);
+        S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.ConnectedSocketsMutex'Access);
       begin
         for i in Self.ConnectedSockets.First_Index .. Self.ConnectedSockets.Last_Index loop
           if Self.ConnectedSockets.Element(i) /= null then
-            Com_Socket_Pa.Free(Self.ConnectedSockets.Element(i));
+            Ops_Pa.Socket_Pa.Free(Self.ConnectedSockets.Element(i));
           end if;
         end loop;
       end;
@@ -158,7 +158,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
   overriding function sendTo( Self : in out TCPServerSender_Class; buf : Byte_Arr_At; size : Integer; ip : string; port : Integer) return Boolean is
     sizeInfo : Byte_Arr(0..21);
     errorFlag : Boolean;
-    S : Com_Mutex_Pa.Scope_Lock(Self.ConnectedSocketsMutex'Access);
+    S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.ConnectedSocketsMutex'Access);
   begin
     -- First, prepare a package of fixed length 22 with information about the size of the data package
     sizeinfo(0 ..17) := opsp_tcp_size_info_header;
@@ -187,7 +187,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
       if ErrorFlag then
         Self.LastErrorCode := Self.ConnectedSockets.Element(i).GetLatestError;
         Report(Self, "sendTo", "Error sending");
-        Com_Socket_Pa.Free( Self.ConnectedSockets.Element(i) );
+        Ops_Pa.Socket_Pa.Free( Self.ConnectedSockets.Element(i) );
         Self.ConnectedSockets.Delete(i);
       end if;
     end loop;
@@ -195,14 +195,14 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
   end;
 
   task body Server_Pr_T is
-    Events : Com_Signal_Pa.Event_T;
+    Events : Ops_Pa.Signal_Pa.Event_T;
   begin
     accept Start;
     while not Self.TerminateFlag loop
       begin
         Self.EventsToTask.WaitForAny(Events);
-        exit when (Events and TerminateEvent_C) /= Com_Signal_Pa.NoEvent_C;
-        if (Events and StartEvent_C) /= Com_Signal_Pa.NoEvent_C then
+        exit when (Events and TerminateEvent_C) /= Ops_Pa.Signal_Pa.NoEvent_C;
+        if (Events and StartEvent_C) /= Ops_Pa.Signal_Pa.NoEvent_C then
           Self.Run;
         end if;
       exception
@@ -214,7 +214,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
   end Server_Pr_T;
 
   procedure Run( Self : in out TCPServerSender_Class ) is
-    tcpClient : Com_Socket_Pa.TCPClientSocket_Class_At := null;
+    tcpClient : Ops_Pa.Socket_Pa.TCPClientSocket_Class_At := null;
     dummy : Boolean;
   begin
     while not Self.StopFlag loop
@@ -240,7 +240,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
           -- Keep listening for connecting clients
           while not Self.StopFlag loop
             -- Create a client socket ready for the calling client
-            tcpClient := Com_Socket_Pa.Create;
+            tcpClient := Ops_Pa.Socket_Pa.Create;
 
             -- accept()
             while not Self.StopFlag and not Self.TcpServer.AcceptClient(tcpClient) loop
@@ -252,7 +252,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
             if Self.OutSocketBufferSize > 0 then
               dummy:= tcpClient.SetSendBufferSize(Integer(Self.OutSocketBufferSize));
               if tcpClient.GetSendBufferSize /= Integer(Self.OutSocketBufferSize) then
-                Self.LastErrorCode := Com_Socket_Pa.SOCKET_ERROR_C;
+                Self.LastErrorCode := Ops_Pa.Socket_Pa.SOCKET_ERROR_C;
                 Report(Self, "Run", "Socket buffer size could not be set");
               end if;
             end if;
@@ -262,7 +262,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
 
             -- and put it in list and then wait for another connection
             declare
-              S : Com_Mutex_Pa.Scope_Lock(Self.ConnectedSocketsMutex'Access);
+              S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.ConnectedSocketsMutex'Access);
             begin
               Self.ConnectedSockets.Append( tcpClient );
             end;
@@ -278,7 +278,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
       delay 0.100;
 
       if tcpClient /= null then
-        Com_Socket_Pa.Free(tcpClient);
+        Ops_Pa.Socket_Pa.Free(tcpClient);
         tcpClient := null;
       end if;
     end loop;

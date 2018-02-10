@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -70,7 +70,7 @@ package body Ops_Pa.Subscriber_Pa is
 
     -- Remove the filters we still own
     declare
-      S : Com_Mutex_Pa.Scope_Lock(Self.FilterQoSPolicyMutex'Access);
+      S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.FilterQoSPolicyMutex'Access);
     begin
       for i in Self.FilterQoSPolicies.First_Index .. Self.FilterQoSPolicies.Last_Index loop
         if Self.FilterQoSPolicies.Element(i) /= null then
@@ -159,7 +159,7 @@ package body Ops_Pa.Subscriber_Pa is
   begin
     if fqos /= null then
       declare
-        S : Com_Mutex_Pa.Scope_Lock(Self.FilterQoSPolicyMutex'Access);
+        S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.FilterQoSPolicyMutex'Access);
       begin
         Self.FilterQoSPolicies.Append(fqos);
       end;
@@ -171,7 +171,7 @@ package body Ops_Pa.Subscriber_Pa is
   begin
     if fqos /= null then
       declare
-        S : Com_Mutex_Pa.Scope_Lock(Self.FilterQoSPolicyMutex'Access);
+        S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.FilterQoSPolicyMutex'Access);
       begin
         Idx := Self.FilterQoSPolicies.Find_Index(fqos);
         if Idx /= MyVector_Pa.No_Index then
@@ -184,7 +184,7 @@ package body Ops_Pa.Subscriber_Pa is
 
   function ApplyFilterQoSPolicies( Self : in out Subscriber_Class; o : OpsObject_Class_At ) return Boolean is
     fqos : FilterQoSPolicy_Class_At;
-    S : Com_Mutex_Pa.Scope_Lock(Self.FilterQoSPolicyMutex'Access);
+    S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.FilterQoSPolicyMutex'Access);
   begin
     for i in Self.FilterQoSPolicies.First_Index .. Self.FilterQoSPolicies.Last_Index loop
       fqos := Self.FilterQoSPolicies.Element(i);
@@ -286,7 +286,7 @@ package body Ops_Pa.Subscriber_Pa is
         Self.DataNotifier.doNotify(Item);
 
         Self.HasUnreadData := True;
-        Self.NewDataEvent.Signal( Com_Signal_Pa.Event1_C );
+        Self.NewDataEvent.Signal( Ops_Pa.Signal_Pa.Event1_C );
 
         Self.TimeLastDataForTimeBase := GetTimeInMs;
         Self.TimeLastData := Self.TimeLastDataForTimeBase;
@@ -302,7 +302,7 @@ package body Ops_Pa.Subscriber_Pa is
   -- Waits for new data to arrive or timeout.
   -- Returns: true if new data (i.e. unread data) exist.
   function WaitForNewData( Self : in out Subscriber_Class; timeoutMS : Integer) return Boolean is
-    Events : Com_Signal_Pa.Event_T;
+    Events : Ops_Pa.Signal_Pa.Event_T;
   begin
     Self.NewDataEvent.Get( Events );  -- Clear events
 

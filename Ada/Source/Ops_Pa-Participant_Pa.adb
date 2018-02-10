@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -21,7 +21,7 @@ with Ada.Containers.Indefinite_Ordered_Maps,
 
 with GNAT.OS_Lib;
 
-with Com_Socket_Pa;
+with Ops_Pa.Socket_Pa;
 
 with Ops_Pa.Error_Pa,
      Ops_Pa.SerializableFactory_Pa.CompFactory_Pa,
@@ -32,7 +32,7 @@ use  Ops_Pa.Error_Pa,
 
 package body Ops_Pa.Participant_Pa is
 
-  use type Com_Signal_Pa.Event_T;
+  use type Ops_Pa.Signal_Pa.Event_T;
 
   -- ===========================================================================
 
@@ -55,7 +55,7 @@ package body Ops_Pa.Participant_Pa is
 
   -- By Singelton, one Participant per 'domainId + participantID'
   gInstances : MyMap.Map;
-  gMutex : aliased Com_Mutex_Pa.Mutex;
+  gMutex : aliased Ops_Pa.Mutex_Pa.Mutex;
 
   -- Get a Participant instance
   function getInstance(domainID : String) return Participant_Class_At is
@@ -72,7 +72,7 @@ package body Ops_Pa.Participant_Pa is
     key : String := domainID & "::" & participantID;
     result : Participant_Class_At := null;
     pos : MyMap.Cursor;
-    S : Com_Mutex_Pa.Scope_Lock(gMutex'Access);
+    S : Ops_Pa.Mutex_Pa.Scope_Lock(gMutex'Access);
   begin
     pos := gInstances.Find( key );
 
@@ -93,7 +93,7 @@ package body Ops_Pa.Participant_Pa is
   procedure releaseInstance( part : Participant_Class_At ) is
     key : String := part.domainID.all & "::" & part.participantID.all;
     pos : MyMap.Cursor;
-    S : Com_Mutex_Pa.Scope_Lock(gMutex'Access);
+    S : Ops_Pa.Mutex_Pa.Scope_Lock(gMutex'Access);
   begin
     pos := gInstances.Find( key );
 
@@ -130,7 +130,7 @@ package body Ops_Pa.Participant_Pa is
     Result := Self.SendDataHandlerFactory.getSendDataHandler(top);
     if Result /= null then
       declare
-        S : Com_Mutex_Pa.Scope_Lock(Self.PartInfoDataMutex'Access);
+        S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.PartInfoDataMutex'Access);
       begin
         -- Need to add topic to partInfoData.publishTopics
         addTopic(Self.PartInfoData.publishTopics, top);
@@ -143,7 +143,7 @@ package body Ops_Pa.Participant_Pa is
   begin
     Self.SendDataHandlerFactory.releaseSendDataHandler(top);
     declare
-      S : Com_Mutex_Pa.Scope_Lock(Self.PartInfoDataMutex'Access);
+      S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.PartInfoDataMutex'Access);
     begin
       removeTopic(Self.PartInfoData.publishTopics, top);
     end;
@@ -156,7 +156,7 @@ package body Ops_Pa.Participant_Pa is
     Result := Self.ReceiveDataHandlerFactory.getReceiveDataHandler( top, Self.Domain, SerializableInheritingTypeFactory_Class_At(Self.ObjectFactory) );
     if Result /= null then
       declare
-        S : Com_Mutex_Pa.Scope_Lock(Self.PartInfoDataMutex'Access);
+        S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.PartInfoDataMutex'Access);
       begin
         -- Need to add topic to partInfoData.subscribeTopics
         addTopic(Self.PartInfoData.subscribeTopics, top);
@@ -169,7 +169,7 @@ package body Ops_Pa.Participant_Pa is
   begin
     Self.ReceiveDataHandlerFactory.releaseReceiveDataHandler( top );
     declare
-      S : Com_Mutex_Pa.Scope_Lock(Self.PartInfoDataMutex'Access);
+      S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.PartInfoDataMutex'Access);
     begin
       removeTopic(Self.PartInfoData.subscribeTopics, top);
     end;
@@ -229,14 +229,14 @@ package body Ops_Pa.Participant_Pa is
   end;
 
   task body Participant_Pr_T is
-    Events : Com_Signal_Pa.Event_T;
+    Events : Ops_Pa.Signal_Pa.Event_T;
   begin
     accept Start;
     while not Self.TerminateFlag loop
       begin
         Self.EventsToTask.WaitForAny(Events);
-        exit when (Events and TerminateEvent_C) /= Com_Signal_Pa.NoEvent_C;
-        if (Events and StartEvent_C) /= Com_Signal_Pa.NoEvent_C then
+        exit when (Events and TerminateEvent_C) /= Ops_Pa.Signal_Pa.NoEvent_C;
+        if (Events and StartEvent_C) /= Ops_Pa.Signal_Pa.NoEvent_C then
           Self.Run;
         end if;
       exception
@@ -275,7 +275,7 @@ package body Ops_Pa.Participant_Pa is
         end if;
         if partInfoPub /= null then
           declare
-            S : Com_Mutex_Pa.Scope_Lock(Self.PartInfoDataMutex'Access);
+            S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.PartInfoDataMutex'Access);
           begin
             partInfoPub.WriteOPSObject( Ops_Pa.OpsObject_Pa.OpsObject_Class_At(Self.PartInfoData) );
           end;
@@ -297,7 +297,7 @@ package body Ops_Pa.Participant_Pa is
   -- Called from ReceiveDataHandlerFactory when an UDP Reciver is created/deleted, so
   -- we can send the correct UDP transport info in the participant info data
   procedure OnUdpTransport( Self : in out Participant_Class; ipaddress : String; port : Int32 ) is
-    S : Com_Mutex_Pa.Scope_Lock(Self.PartInfoDataMutex'Access);
+    S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.PartInfoDataMutex'Access);
   begin
     Self.PartInfoData.ip := Copy(ipaddress);
     Self.PartInfoData.mc_udp_port := port;
@@ -364,7 +364,7 @@ package body Ops_Pa.Participant_Pa is
 
     -- Initialize static data in partInfoData
     Self.PartInfoData := Create;
-    Self.PartInfoData.name := Copy(Com_Socket_Pa.GetHostName & " (" & Integer'Image(GNAT.OS_Lib.Pid_To_Integer(GNAT.OS_Lib.Current_Process_Id)) & ")");
+    Self.PartInfoData.name := Copy(Ops_Pa.Socket_Pa.GetHostName & " (" & Integer'Image(GNAT.OS_Lib.Pid_To_Integer(GNAT.OS_Lib.Current_Process_Id)) & ")");
     Self.PartInfoData.languageImplementation := Copy("Ada");
     Self.PartInfoData.id := Copy(participantID);
     Self.PartInfoData.domain := Copy(domainID);

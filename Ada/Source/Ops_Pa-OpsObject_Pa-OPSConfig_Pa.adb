@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -19,7 +19,7 @@
 with Ada.Text_IO;
 with Ada.IO_Exceptions;
 
-with Com_Mutex_Pa;
+with Ops_Pa.Mutex_Pa;
 
 with Ops_Pa.Error_Pa,
      Ops_Pa.ArchiverInOut_Pa.XMLArchiverIn_Pa,
@@ -245,7 +245,7 @@ package body Ops_Pa.OpsObject_Pa.OPSConfig_Pa is
 -- ---------------------------------------------------------------------------
 
   gConfiguration : OPSConfig_Class_At := null;
-  gMutex : aliased Com_Mutex_Pa.Mutex;
+  gMutex : aliased Ops_Pa.Mutex_Pa.Mutex;
 
 
   function ReadFile(Name : String) return String_At is
@@ -313,7 +313,7 @@ package body Ops_Pa.OpsObject_Pa.OPSConfig_Pa is
   -- Returns a reference to a singleton instance and should NOT be deleted.
   -- See also releaseConfig below
   function getConfig return OPSConfig_Class_At is
-    S : Com_Mutex_Pa.Scope_Lock(gMutex'Access);
+    S : Ops_Pa.Mutex_Pa.Scope_Lock(gMutex'Access);
   begin
     if gConfiguration = null then
       gConfiguration := Ops_Pa.OPSConfigRepository_Pa.Instance.getConfig;

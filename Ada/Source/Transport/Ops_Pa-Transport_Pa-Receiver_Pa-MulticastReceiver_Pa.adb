@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -45,7 +45,7 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.MulticastReceiver_Pa is
     Self.Ipaddress := Copy(mcAddress);
     Self.LocalInterface := Copy(localInterface);
     Self.InSocketBufferSize := inSocketBufferSize;
-    Self.UdpSocket := Com_Socket_Pa.Create;
+    Self.UdpSocket := Ops_Pa.Socket_Pa.Create;
   end;
 
   --------------------------------------------------------------------------
@@ -58,7 +58,7 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.MulticastReceiver_Pa is
 
     Finalize( Receiver_Class(Self) );  -- Make sure thread is terminated
 
-    Com_Socket_Pa.Free( Self.UdpSocket );
+    Ops_Pa.Socket_Pa.Free( Self.UdpSocket );
 
     if Self.IpAddress /= null then
       Dispose(Self.IpAddress);
@@ -127,7 +127,7 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.MulticastReceiver_Pa is
 
       if Self.UdpSocket.GetReceiveBufferSize /= Integer(Self.InSocketBufferSize) then
         if Self.LastErrorCode = 0 then
-          Self.LastErrorCode := Com_Socket_Pa.SOCKET_ERROR_C;
+          Self.LastErrorCode := Ops_Pa.Socket_Pa.SOCKET_ERROR_C;
         end if;
         Report(Self, "Start", "Socket buffer size could not be set");
       end if;

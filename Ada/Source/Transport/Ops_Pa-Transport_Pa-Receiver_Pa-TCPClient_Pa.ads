@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -16,7 +16,7 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
-with Com_Socket_Pa;
+with Ops_Pa.Socket_Pa;
 
 package Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
 
@@ -65,7 +65,7 @@ private
        IpAddress : String_At := null;
        InSocketBufferSize : Int64 := 0;
 
-       TcpClient : Com_Socket_Pa.TCPClientSocket_Class_At := null;
+       TcpClient : Ops_Pa.Socket_Pa.TCPClientSocket_Class_At := null;
 
        -- Current read buffer from user
        Buffer : Byte_Arr_At := null;

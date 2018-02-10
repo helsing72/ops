@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -16,9 +16,9 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
-with Com_SyncPrimitives_Pa,
+with Ops_Pa.SyncPrimitives_Pa,
      Ops_Pa.Error_Pa;
-use Com_SyncPrimitives_Pa,
+use Ops_Pa.SyncPrimitives_Pa,
     Ops_Pa.Error_Pa;
 
 package body Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
