@@ -85,7 +85,7 @@ project VerifySerDes is
             case Win32Ada_Build is
 
                when "default" =>
-                  for Default_Switches ("ada") use ("-g", "-lWs2_32");
+                  for Default_Switches ("ada") use ("-g");
 
                when "relocatable" =>
 
