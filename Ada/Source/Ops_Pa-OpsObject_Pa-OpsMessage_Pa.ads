@@ -16,6 +16,8 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
+with System.Atomic_Counters;
+
 with Ops_Pa.ArchiverInOut_Pa;
 use  Ops_Pa.ArchiverInOut_Pa;
 
@@ -59,7 +61,7 @@ package Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
   -- the Unreserve() call will do that for you.
   procedure Reserve( Self : in out OPSMessage_Class );
   procedure UnReserve( Self : in out OPSMessage_Class );
-  function NrOfReservations( Self : OPSMessage_Class ) return Int32;
+  function NrOfReservations( Self : OPSMessage_Class ) return System.Atomic_Counters.Atomic_Unsigned;
 
   -- Getters/Setters
   function DataOwner( Self : OPSMessage_Class ) return Boolean;
@@ -97,7 +99,7 @@ private
       SourceIP : String_At := new String'("");
 
       -- Reservation handling
-      NrOfReservations : aliased Int32 := 0;
+      NrOfReservations : aliased System.Atomic_Counters.Atomic_Unsigned := 0;
     end record;
 
   procedure InitInstance( Self : in out OPSMessage_Class; SelfAt : OPSMessage_Class_At );

@@ -21,19 +21,18 @@ with Ada.Text_IO,
      Ada.Exceptions,
      Ada.Unchecked_Conversion,
      Ada.Unchecked_Deallocation,
-     Ada.Tags,
-     Ops_Pa.SyncPrimitives_Pa;
+     Ada.Tags;
 
 package body Ops_Pa is
 
   StartTime     : Float64;
-  Count         : aliased Interfaces.Integer_32 := 0;
+  Count         : aliased System.Atomic_Counters.Atomic_Unsigned := 0;
   TraceRoutine  : TraceRoutine_At   := null;
 
   --------------------------------------------------------------------------
   --
   --------------------------------------------------------------------------
-  function NumActiveObjects return Interfaces.Integer_32 is
+  function NumActiveObjects return System.Atomic_Counters.Atomic_Unsigned is
   begin
     return Count;
   end;
@@ -80,11 +79,15 @@ package body Ops_Pa is
   ----------------------------------------------------------------------
   procedure Free(Self : access Ops_Class) is
     Dummy : Ops_Class_At;
-    tmp : Interfaces.Integer_32;
+    tmp : System.Atomic_Counters.Atomic_Unsigned;
   begin
     Dummy := Ops_Class_At(Self);
     if Dummy /= null then
-      tmp := Ops_Pa.SyncPrimitives_Pa.InterlockedDecrement(Count'Access);
+      System.Atomic_Counters.Decrement(Count);
+      -- The count variable may be changed by some one else before we read it below.
+      -- For our purpose we don't care since the count itself is protected, it's
+      -- only the count in the trace that temporarily may be wrong.
+      tmp := Count;
       if TraceRoutine /= null then
         TraceRoutine( Class         => OriginalClassName( Self.all ),
                       CreateStatus  => Dealloc,
@@ -98,9 +101,13 @@ package body Ops_Pa is
   -- Initialize object (Only used to trace allocation of object)
   ----------------------------------------------------------------------
   overriding procedure Initialize(Self : in out Ops_Class) is
-    tmp : Interfaces.Integer_32;
+    tmp : System.Atomic_Counters.Atomic_Unsigned;
   begin
-    tmp := Ops_Pa.SyncPrimitives_Pa.InterlockedIncrement(Count'Access);
+    System.Atomic_Counters.Increment(Count);
+    -- The count variable may be changed by some one else before we read it below.
+    -- For our purpose we don't care since the count itself is protected, it's
+    -- only the count in the trace that temporarily may be wrong.
+    tmp := Count;
     if TraceRoutine /= null then
       TraceRoutine( Class         => OriginalClassName( Self ),
                     CreateStatus  => Alloc,
@@ -230,12 +237,12 @@ package body Ops_Pa is
 --          return UInt32'Image(Value);
 --        end;
 --      else
-      declare
-        function Conv is new Ada.Unchecked_Conversion(Byte_Arr_At, UInt64);
-        Value : UInt64 := Conv(Ptr);
-      begin
+--      declare
+--        function Conv is new Ada.Unchecked_Conversion(Byte_Arr_At, UInt64);
+--        Value : UInt64 := Conv(Ptr);
+--      begin
         return "TBD"; -- this does not give expected result UInt64'Image(Value);
-      end;
+--      end;
 --      end if;
   end ToString;
   

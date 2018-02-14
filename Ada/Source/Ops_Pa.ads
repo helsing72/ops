@@ -17,6 +17,7 @@
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
 with System,
+     System.Atomic_Counters,
      Ada.Unchecked_Deallocation,
      Ada.Exceptions,
      Ada.Streams,
@@ -53,12 +54,12 @@ package Ops_Pa is
   type CreateStatus_T is (Alloc, Dealloc);
   type TraceRoutine_At is access procedure( Class         : String;
                                             CreateStatus  : CreateStatus_T;
-                                            TotalAllocObj : Interfaces.Integer_32);
+                                            TotalAllocObj : System.Atomic_Counters.Atomic_Unsigned);
   procedure InstallTrace(   Routine : TraceRoutine_At);
   procedure UnInstallTrace( Routine : TraceRoutine_At);
 
   -- Debug
-  function NumActiveObjects return Interfaces.Integer_32;
+  function NumActiveObjects return System.Atomic_Counters.Atomic_Unsigned;
 
   ----------------------------------------------------------------------
 

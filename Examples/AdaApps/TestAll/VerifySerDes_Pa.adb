@@ -16,6 +16,7 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
+with System.Atomic_Counters;
 with Ada.Text_IO; use Ada.Text_IO;
 with Ops_Pa;
 
@@ -74,12 +75,12 @@ package body VerifySerDes_Pa is
 
   procedure MyTrace( Class : String;
              CreateStatus  : Ops_Pa.CreateStatus_T;
-             TotalAllocObj : Interfaces.Integer_32) is
+             TotalAllocObj : System.Atomic_Counters.Atomic_Unsigned) is
   begin
     if CreateStatus = Ops_Pa.Alloc then
-      Put_Line("Debug: Alloc: " & Class & ", Total= " & Interfaces.Integer_32'Image(TotalAllocObj));
+      Put_Line("Debug: Alloc: " & Class & ", Total= " & System.Atomic_Counters.Atomic_Unsigned'Image(TotalAllocObj));
     else
-      Put_Line("Debug: Dealloc: " & Class & ", Total= " & Interfaces.Integer_32'Image(TotalAllocObj));
+      Put_Line("Debug: Dealloc: " & Class & ", Total= " & System.Atomic_Counters.Atomic_Unsigned'Image(TotalAllocObj));
     end if;
   end;
 

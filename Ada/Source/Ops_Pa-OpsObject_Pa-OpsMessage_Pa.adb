@@ -16,10 +16,8 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
-with Ops_Pa.SyncPrimitives_Pa,
-     Ops_Pa.Error_Pa;
-use Ops_Pa.SyncPrimitives_Pa,
-    Ops_Pa.Error_Pa;
+with Ops_Pa.Error_Pa;
+use Ops_Pa.Error_Pa;
 
 package body Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
 
@@ -50,20 +48,19 @@ package body Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
   end;
 
   procedure Reserve( Self : in out OPSMessage_Class ) is
-    tmp : Int32;
   begin
-    tmp := InterlockedIncrement(Self.NrOfReservations'Access);
+    System.Atomic_Counters.Increment(Self.NrOfReservations);
   end;
 
   procedure UnReserve( Self : in out OPSMessage_Class ) is
     pragma Suppress(Accessibility_Check);
   begin
-    if InterlockedDecrement(Self.NrOfReservations'Access) = 0 then
+    if System.Atomic_Counters.Decrement(Self.NrOfReservations) then
       Free(Self.SelfAt);
     end if;
   end;
 
-  function NrOfReservations( Self : OPSMessage_Class ) return Int32 is
+  function NrOfReservations( Self : OPSMessage_Class ) return System.Atomic_Counters.Atomic_Unsigned is
   begin
     return Self.NrOfReservations;
   end;
@@ -176,6 +173,7 @@ package body Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
   end;
 
   overriding procedure Finalize( Self : in out OPSMessage_Class ) is
+    use type System.Atomic_Counters.Atomic_Unsigned;
   begin
     -- Validation
     if Self.NrOfReservations /= 0 then
