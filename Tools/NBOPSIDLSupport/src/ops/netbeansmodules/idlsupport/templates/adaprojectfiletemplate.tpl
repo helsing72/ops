@@ -6,5 +6,9 @@ project __projName is
 
   for Source_Dirs use ("./**");
   for Object_Dir use ".obj";
-  
+
+  package Naming is
+     for Casing use "mixedcase";
+  end Naming;
+
 end __projName;
