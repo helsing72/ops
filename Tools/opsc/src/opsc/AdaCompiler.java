@@ -545,6 +545,7 @@ public class AdaCompiler extends opsc.Compiler
                 }
             }
         }
+        if (ret == "") ret = tab(pos) + "null;";
         return ret;
     }
 
@@ -680,6 +681,7 @@ public class AdaCompiler extends opsc.Compiler
                 ret += languageType(fieldType) + " := " + getInitValue(fieldType) + ";" + endl();
             }
         }
+        if (ret == "") ret = tab(3) + "null;";
         return ret;
     }
 
