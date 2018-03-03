@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -16,8 +16,12 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
-with Ops_Pa.OpsObject_Pa.Domain_Pa,
+with Ada.Containers.Indefinite_Ordered_Maps;
+
+with Ops_Pa.Mutex_Pa,
+     Ops_Pa.OpsObject_Pa.Domain_Pa,
      Ops_Pa.ArchiverInOut_Pa;
+
 use  Ops_Pa.OpsObject_Pa.Domain_Pa,
      Ops_Pa.ArchiverInOut_Pa;
 
@@ -77,6 +81,7 @@ package Ops_Pa.OpsObject_Pa.OPSConfig_Pa is
 
   overriding procedure Serialize( Self : in out DefaultOPSConfigImpl_Class; archiver : ArchiverInOut_Class_At);
 
+
 -- ==========================================================================
 --      C l a s s    D e c l a r a t i o n.
 -- ==========================================================================
@@ -88,6 +93,34 @@ package Ops_Pa.OpsObject_Pa.OPSConfig_Pa is
   procedure Add( Self : in out ExtendedOPSConfig_Class; domain : Domain_Class_At);
   procedure Remove( Self : in out ExtendedOPSConfig_Class; domain : Domain_Class_At);
   procedure Clear( Self : in out ExtendedOPSConfig_Class );
+
+
+-- ==========================================================================
+--      C l a s s    D e c l a r a t i o n.
+-- ==========================================================================
+  type OPSConfigRepository_Class is new Ops_Class with private;
+  type OPSConfigRepository_Class_At is access all OPSConfigRepository_Class'Class;
+
+  -- Access to the singleton repository object
+  function RepositoryInstance return OPSConfigRepository_Class_At;
+
+  -- ======================================================
+  -- Add one or more domains from OPS configuration file "filename"
+  -- if "domainID" == "", all domains will be added otherwise only the specified "domainID"
+  -- Returns true if at least one domain was added
+  function Add( Self : in out OPSConfigRepository_Class; filename : string; domainID : string := "" ) return Boolean;
+
+  -- Remove all domain references from the repository (Note does not clear the file-cache)
+  -- Note: Calling this while TParticipant, TPublisher or TSubscriber instances exist
+  -- may have unwanted side effects
+  procedure Clear( Self : in out OPSConfigRepository_Class );
+
+  -- ======================================================
+  -- Get a reference to the internal OPSConfig object
+  -- if "domainID" <> "", the domain "domainID" must exist otherwise null is returned.
+  function getConfig( Self : in out OPSConfigRepository_Class; domainID : string := "" ) return OPSConfig_Class_At;
+
+  function domainExist( Self : in out OPSConfigRepository_Class; domainID : string ) return Boolean;
 
 private
 -- ==========================================================================
@@ -127,6 +160,40 @@ private
   procedure InitInstance( Self : in out ExtendedOPSConfig_Class );
 
   overriding procedure Finalize( Self : in out ExtendedOPSConfig_Class );
+
+-- ==========================================================================
+--
+-- ==========================================================================
+  function Less (Left, Right : String) return Boolean;
+  function Equal (Left, Right : OPSConfig_Class_At) return Boolean;
+
+  package MyMap is new Ada.Containers.Indefinite_Ordered_Maps(String, OPSConfig_Class_At, Less, Equal);
+
+-- ==========================================================================
+--
+-- ==========================================================================
+  type OPSConfigRepository_Class is new Ops_Class with
+    record
+      -- Our OPSConfig object containing references to all selectivly added domains
+      Config : OPSConfig_Class_At := null;
+
+      -- File cache with all added config files and their domains
+      ConfigFiles : MyMap.Map;
+
+      Mutex : aliased Ops_Pa.Mutex_Pa.Mutex;
+    end record;
+
+  -- Must only be called while holding the Self.Mutex
+  function LocalAdd( Self : in out OPSConfigRepository_Class; filename : string; domainID : string := "" ) return Boolean;
+  function LocalDomainExist( Self : in out OPSConfigRepository_Class; domainID : string ) return Boolean;
+
+  procedure InitInstance( Self : in out OPSConfigRepository_Class );
+
+  --------------------------------------------------------------------------
+  --  Finalize the object
+  --  Will be called automatically when object is deleted.
+  --------------------------------------------------------------------------
+  overriding procedure Finalize( Self : in out OPSConfigRepository_Class );
 
 end Ops_Pa.OpsObject_Pa.OPSConfig_Pa;
 
