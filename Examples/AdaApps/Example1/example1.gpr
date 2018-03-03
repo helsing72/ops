@@ -5,12 +5,6 @@ project Example1 is
 
    for Object_Dir use ".obj";
    for Exec_Dir use ".";
---     type Build_Kind is
---        ("static", "relocatable", "static-pic");
---     Xmlada_Build : Build_Kind := external ("XMLADA_BUILD");
---     type Build_Kind1 is
---        ("default", "relocatable");
---     Win32Ada_Build : Build_Kind1 := external ("WIN32ADA_BUILD");
 
    for Source_Dirs use ("./**");
    for Main use ("Example1.adb");
@@ -19,12 +13,21 @@ project Example1 is
       for Casing use "mixedcase";
    end Naming;
 
+   package Builder is
+
+     for Global_Compilation_switches ("ada") use ("-g"
+                                                  , "-gnatE"
+                                                  , "-gnat12"
+                                                 );
+
+   end Builder;
+
    package Compiler is
-      for Default_Switches ("ada") use ("-g", "-gnat12");
+
    end Compiler;
 
    package Linker is
-      for Default_Switches ("ada") use ("-g");
+
    end Linker;
 
 end Example1;

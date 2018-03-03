@@ -2,33 +2,15 @@ with "xmlada";
 
 project Ops4 is
 
-   for Source_Dirs use ("Common/**", "Source/**", "Source/Transport/**");
-   for Object_Dir use ".obj";
-   for Exec_Dir use ".obj";
-   for Library_Name use "ops4";
-   for Library_Dir use "lib";
-   for Library_Ali_Dir use "lib";
---     type Build_Kind is
---        ("static", "relocatable", "static-pic");
---     Xmlada_Build : Build_Kind := external ("XMLADA_BUILD");
---     type Build_Kind1 is
---        ("default", "relocatable");
---     Win32Ada_Build : Build_Kind1 := external ("WIN32ADA_BUILD");
+  for Source_Dirs use ("Common/**", "Source/**", "Source/Transport/**");
+  for Object_Dir use ".obj";
+  for Exec_Dir use ".obj";
+  for Library_Name use "ops4";
+  for Library_Dir use "lib";
+  for Library_Ali_Dir use "lib";
 
-   package Naming is
-      for Casing use "mixedcase";
-   end Naming;
-
-   package Linker is
-
-   end Linker;
-
-   package Builder is
-      for Default_Switches ("ada") use ("-g");
-   end Builder;
-
-   package Compiler is
-      for Default_Switches ("ada") use ("-g");
-   end Compiler;
+  package Naming is
+    for Casing use "mixedcase";
+  end Naming;
 
 end Ops4;

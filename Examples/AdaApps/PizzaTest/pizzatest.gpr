@@ -6,12 +6,6 @@ project pizzatest is
    for Object_Dir use ".obj";
    for Exec_Dir use ".";
    for Main use ("PizzaTest_Main.adb");
---     type Build_Kind is
---        ("static", "relocatable", "static-pic");
---     Xmlada_Build : Build_Kind := external ("XMLADA_BUILD");
---     type Build_Kind1 is
---        ("default", "relocatable");
---     Win32Ada_Build : Build_Kind1 := external ("WIN32ADA_BUILD");
 
    for Source_Files use ("PizzaTest_Main.adb", "PizzaTest_Pa.adb", "PizzaTest_Pa.ads");
 
@@ -20,16 +14,19 @@ project pizzatest is
    end Naming;
 
    package Builder is
-      for Default_Switches ("ada") use ("-g");
+
+     for Global_Compilation_switches ("ada") use ("-g"
+                                                  , "-gnatE"
+                                                 );
+
    end Builder;
 
    package Compiler is
-      for Default_Switches ("ada") use ("-g");
+
    end Compiler;
 
    package Linker is
-      for Default_Switches ("ada") use ("-g");
+
    end Linker;
 
 end pizzatest;
-
