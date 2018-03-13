@@ -4,6 +4,9 @@
 
 #ifdef _WIN32
   #include "windows.h"
+#else
+  #define __STDC_FORMAT_MACROS
+  #include <cstdio>
 #endif
 #include <string>
 #include <time.h>
@@ -103,7 +106,7 @@ std::string sdsSystemTimeToLocalTime(int64_t time)
 	frac /= msToSdsSystemTimeUnits(1);
 
 	char tmp[256];
-	sprintf(tmp, "%ld.%03ld", time, frac);
+	sprintf(tmp, "%" PRId64 ".%03" PRId64 , time, frac);
 
 	return tmp;
 #endif

@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -22,7 +22,7 @@ package body Ops_Pa.Transport_Pa.SendDataHandler_Pa is
 
   procedure addUser( Self : in out SendDataHandler_Class; client : Ops_Class_At ) is
     Idx : MyVector_Pa.Extended_Index;
-    S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
+    S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
     -- Check that it isn't already in the list
     Idx := Self.Users.Find_Index(client);
@@ -41,7 +41,7 @@ package body Ops_Pa.Transport_Pa.SendDataHandler_Pa is
 
   procedure removeUser( Self : in out SendDataHandler_Class; client : Ops_Class_At ) is
     Idx : MyVector_Pa.Extended_Index;
-    S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
+    S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
     Idx := Self.Users.Find_Index(client);
     if Idx /= MyVector_Pa.No_Index then

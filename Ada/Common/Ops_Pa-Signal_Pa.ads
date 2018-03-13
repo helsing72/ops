@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -16,7 +16,7 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
-package Com_Signal_Pa is
+package Ops_Pa.Signal_Pa is
 
   type Event_T is mod 2**32;
   for Event_T'Size use 32;
@@ -44,5 +44,5 @@ package Com_Signal_Pa is
   
   type Signal_T_At is access all Signal_T;
         
-end Com_Signal_Pa;
+end Ops_Pa.Signal_Pa;
 

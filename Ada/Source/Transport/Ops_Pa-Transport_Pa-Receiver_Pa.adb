@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -24,11 +24,11 @@ use Ops_Pa.Transport_Pa.Receiver_Pa.MulticastReceiver_Pa,
     Ops_Pa.Transport_Pa.Receiver_Pa.UDPReceiver_Pa,
     Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa;
 
-with Com_Socket_Pa;
+with Ops_Pa.Socket_Pa;
 
 package body Ops_Pa.Transport_Pa.Receiver_Pa is
 
-  use type Com_Signal_Pa.Event_T;
+  use type Ops_Pa.Signal_Pa.Event_T;
 
   function ErrorService( Self : Receiver_Class ) return ErrorService_Class_At is
   begin
@@ -70,14 +70,14 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa is
   end;
 
   task body Receiver_Pr_T is
-    Events : Com_Signal_Pa.Event_T;
+    Events : Ops_Pa.Signal_Pa.Event_T;
   begin
     accept Start;
     while not Self.TerminateFlag loop
       begin
         Self.EventsToTask.WaitForAny(Events);
-        exit when (Events and TerminateEvent_C) /= Com_Signal_Pa.NoEvent_C;
-        if (Events and StartEvent_C) /= Com_Signal_Pa.NoEvent_C then
+        exit when (Events and TerminateEvent_C) /= Ops_Pa.Signal_Pa.NoEvent_C;
+        if (Events and StartEvent_C) /= Ops_Pa.Signal_Pa.NoEvent_C then
           Self.Run;
         end if;
       exception
@@ -97,7 +97,7 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa is
 
   function getReceiver(top : Topic_Class_At; dom : Domain_Class_At; Reporter : ErrorService_Class_At) return Receiver_Class_At is
     Result : Receiver_Class_At := null;
-    localif : String := Com_Socket_Pa.doSubnetTranslation(top.LocalInterface);
+    localif : String := Ops_Pa.Socket_Pa.doSubnetTranslation(top.LocalInterface);
   begin
     if top.Transport = TRANSPORT_MC then
       Result := Receiver_Class_At(Ops_Pa.Transport_Pa.Receiver_Pa.MulticastReceiver_Pa.

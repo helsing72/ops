@@ -2,7 +2,7 @@ import struct
 import socket
 
 def getInterfaceList():
-	return socket.gethostbyname_ex(socket.getfqdn())[2]
+	return socket.gethostbyname_ex(socket.gethostname())[2] + socket.gethostbyname_ex('localhost')[2]
 
 
 def doSubnetTranslation(localInterface):

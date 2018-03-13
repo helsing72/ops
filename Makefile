@@ -35,6 +35,10 @@ clean_opt:
 	@echo "Cleaning opt"
 	rm -rf $(BUILD_OPT)
 
+.PHONY : clean_deploy
+clean_deploy :
+	rm -rf $(INSTALL_PREFIX)
+
 .PHONY : opt
 opt: $(BUILD_OPT)/Makefile
 	$(MAKE) -C $(BUILD_OPT) --no-print-directory
@@ -44,7 +48,7 @@ $(BUILD_OPT)/Makefile : %/Makefile :
 	export CXX=$(CXX) && \
 	mkdir -p $* && \
 	cd $* && \
-	cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_PREFIX) -DCMAKE_BUILD_TYPE=Release -DOPS_BUILD_UNITTESTS=$(OPS_BUILD_UNITTESTS) -DOPS_BUILD_EXAMPLES=$(OPS_BUILD_EXAMPLES) ..
+	cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_PREFIX) -DCMAKE_BUILD_TYPE=Release -DOPS_BUILD_UNITTESTS=$(OPS_BUILD_UNITTESTS) -DOPS_BUILD_EXAMPLES=$(OPS_BUILD_EXAMPLES) $(CURDIR)
 
 .PHONY : debug
 debug: $(BUILD_DEBUG)/Makefile
@@ -55,7 +59,7 @@ $(BUILD_DEBUG)/Makefile : %/Makefile :
 	export CXX=$(CXX) && \
 	mkdir -p $* && \
 	cd $* && \
-	cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_PREFIX) -DCMAKE_BUILD_TYPE=Debug -DOPS_BUILD_UNITTESTS=$(OPS_BUILD_UNITTESTS) -DOPS_BUILD_EXAMPLES=$(OPS_BUILD_EXAMPLES) ..
+	cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_PREFIX) -DCMAKE_BUILD_TYPE=Debug -DOPS_BUILD_UNITTESTS=$(OPS_BUILD_UNITTESTS) -DOPS_BUILD_EXAMPLES=$(OPS_BUILD_EXAMPLES) $(CURDIR)
 
 .PHONY : unittest-c++
 unittest-c++ : debug
@@ -89,11 +93,6 @@ $(INSTALL_PREFIX)/lib/README :
 	echo "gcc version: $(CCV)" > $@
 	echo "g++ version: $(CXXV)" >> $@
 
-.PHONY : clean_deploy
-
-clean_deploy :
-	rm -rf $(INSTALL_PREFIX)
-
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -103,7 +102,6 @@ help:
 	@echo "... unittest-c++"
 	@echo "... unittest-python"
 	@echo "... install"
-	@echo "... unittest"
 	@echo "... clean"
 	@echo "... clean_debug"
 	@echo "... clean_opt"

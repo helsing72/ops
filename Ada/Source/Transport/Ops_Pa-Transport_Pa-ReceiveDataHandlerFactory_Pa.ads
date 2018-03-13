@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -26,7 +26,7 @@ with Ops_Pa.OpsObject_Pa.Domain_Pa,
      Ops_Pa.OpsObject_Pa.OPSMessage_Pa,
      Ops_Pa.MemoryMap_Pa,
      Ops_Pa.Notifier_Pa,
-     Com_Mutex_Pa;
+     Ops_Pa.Mutex_Pa;
 
 use
      Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa;
@@ -88,7 +88,7 @@ private
 
       -- By Singelton, one ReceiveDataHandler per 'key' on this Participant
       ReceiveDataHandlerInstances : MyMap.Map;
-      Lock : aliased Com_Mutex_Pa.Mutex;
+      Lock : aliased Ops_Pa.Mutex_Pa.Mutex;
     end record;
 
   function makeKey( top : Ops_Pa.OpsObject_Pa.Topic_Pa.Topic_Class_At ) return String;

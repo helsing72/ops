@@ -16,6 +16,7 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
+with System.Atomic_Counters;
 with Ada.Text_IO; use Ada.Text_IO;
 with Ops_Pa;
 
@@ -59,7 +60,6 @@ with Ops_Pa.ArchiverInOut_Pa.PrintArchiverOut_Pa;
 use Ops_Pa.ArchiverInOut_Pa.PrintArchiverOut_Pa;
 
 with Ops_Pa; use Ops_Pa;
-with Com_Base_Abs_Pa;
 with Ops_Pa.Error_Pa;
 with Ops_Pa.Participant_Pa;
 
@@ -71,22 +71,22 @@ package body VerifySerDes_Pa is
   use type Ops_Pa.Int32;
   use type Ops_Pa.Float64;
 
-  use type Com_Base_Abs_Pa.CreateStatus_T;
+  use type Ops_Pa.CreateStatus_T;
 
   procedure MyTrace( Class : String;
-             CreateStatus  : Com_Base_Abs_Pa.CreateStatus_T;
-             TotalAllocObj : Interfaces.Integer_32) is
+             CreateStatus  : Ops_Pa.CreateStatus_T;
+             TotalAllocObj : System.Atomic_Counters.Atomic_Unsigned) is
   begin
-    if CreateStatus = Com_Base_Abs_Pa.Alloc then
-      Put_Line("Debug: Alloc: " & Class & ", Total= " & Interfaces.Integer_32'Image(TotalAllocObj));
+    if CreateStatus = Ops_Pa.Alloc then
+      Put_Line("Debug: Alloc: " & Class & ", Total= " & System.Atomic_Counters.Atomic_Unsigned'Image(TotalAllocObj));
     else
-      Put_Line("Debug: Dealloc: " & Class & ", Total= " & Interfaces.Integer_32'Image(TotalAllocObj));
+      Put_Line("Debug: Dealloc: " & Class & ", Total= " & System.Atomic_Counters.Atomic_Unsigned'Image(TotalAllocObj));
     end if;
   end;
 
   procedure InstallMyTrace is
   begin
-    Com_Base_Abs_Pa.InstallTrace(Routine => MyTrace'Access);
+    Ops_Pa.InstallTrace(Routine => MyTrace'Access);
   end;
 
   procedure Log(str : string) is
@@ -1016,7 +1016,7 @@ package body VerifySerDes_Pa is
 --        Free(prt);
 --      end;
 
---    Put_Line("Debug: Count= " & Ctv.Integer32'Image(Com_Base_Abs_Pa.NumActiveObjects));
+--    Put_Line("Debug: Count= " & Ctv.Integer32'Image(Ops_Pa.NumActiveObjects));
 
     Log("Test publish/subscribe ...");
 
@@ -1140,4 +1140,3 @@ package body VerifySerDes_Pa is
   end;
 
 end;
-

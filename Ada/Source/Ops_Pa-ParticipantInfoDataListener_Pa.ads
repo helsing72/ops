@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2017 Lennart Andersson.
+-- Copyright (C) 2017-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -16,7 +16,7 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
-with Com_Mutex_Pa;
+with Ops_Pa.Mutex_Pa;
 
 with Ops_Pa.Error_Pa,
      Ops_Pa.OpsObject_Pa.Topic_Pa,
@@ -64,7 +64,7 @@ private
 
        -- Owned references
        SelfAt : ParticipantInfoDataListener_Class_At := null;
-       Mutex : aliased Com_Mutex_Pa.Mutex;
+       Mutex : aliased Ops_Pa.Mutex_Pa.Mutex;
        PartInfoSub : Subscriber_Class_At := null;
 
        NumUdpTopics : Integer := 0;

@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -40,7 +40,7 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.UDPReceiver_Pa is
   begin
     InitInstance( Receiver_Class(Self), Receiver_Class_At(SelfAt) );
 
-    Self.UdpSocket := Com_Socket_Pa.Create;
+    Self.UdpSocket := Ops_Pa.Socket_Pa.Create;
 
     if not Self.UdpSocket.Open then
       Self.LastErrorCode := Self.UdpSocket.GetLatestError;
@@ -89,7 +89,7 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.UDPReceiver_Pa is
 
       if Self.UdpSocket.GetReceiveBufferSize /= Integer(InSocketBufferSize) then
         if Self.LastErrorCode = 0 then
-          Self.LastErrorCode := Com_Socket_Pa.SOCKET_ERROR_C;
+          Self.LastErrorCode := Ops_Pa.Socket_Pa.SOCKET_ERROR_C;
         end if;
         Report(Self, "Start", "Socket buffer size could not be set");
       end if;
@@ -102,7 +102,7 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.UDPReceiver_Pa is
 
     Finalize( Receiver_Class(Self) );  -- Make sure thread is terminated
 
-    Com_Socket_Pa.Free(Self.UdpSocket);
+    Ops_Pa.Socket_Pa.Free(Self.UdpSocket);
 
     if Self.IpAddress /= null then
       Dispose(Self.IpAddress);
@@ -128,7 +128,7 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.UDPReceiver_Pa is
     Self.LastErrorCode := 0;
     if not Self.UdpSocket.IsOpen then
       -- This is a Start after Stop case. Do we need to handle that???
-      Self.LastErrorCode := Com_Socket_Pa.SOCKET_ERROR_C;
+      Self.LastErrorCode := Ops_Pa.Socket_Pa.SOCKET_ERROR_C;
       Report(Self, "Start", "Can't Start after a Stop (NYI)");
       return False;
     end if;

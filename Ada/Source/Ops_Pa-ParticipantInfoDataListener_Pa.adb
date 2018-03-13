@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2017 Lennart Andersson.
+-- Copyright (C) 2017-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -56,7 +56,7 @@ package body Ops_Pa.ParticipantInfoDataListener_Pa is
   end;
 
   procedure connectUdp( Self : in out ParticipantInfoDataListener_Class; top : Topic_Class_At; handler : SendDataHandler_Class_At) is
-    S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
+    S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
     if Self.PartInfoSub = null then
       if not Self.setupSubscriber then
@@ -78,7 +78,7 @@ package body Ops_Pa.ParticipantInfoDataListener_Pa is
   end;
 
   procedure disconnectUdp( Self : in out ParticipantInfoDataListener_Class; top : Topic_Class_At; handler : SendDataHandler_Class_At) is
-    S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
+    S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
     -- Remove topic from list so we know if the subscriber is needed
     Self.NumUdpTopics := Self.NumUdpTopics - 1;
@@ -160,7 +160,7 @@ package body Ops_Pa.ParticipantInfoDataListener_Pa is
         -- Is it on our domain?
         if partInfo.Domain.all = Self.Domain.DomainID then
           declare
-            S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
+            S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
           begin
             -- Checks for UDP transport
             if Self.SendDataHandler /= null and partInfo.subscribeTopics /= null then

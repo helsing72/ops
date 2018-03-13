@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2017 Lennart Andersson.
+-- Copyright (C) 2017-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -26,7 +26,7 @@ with Interfaces.C;
 
 with GNAT.Sockets;
 
-package body Com_Socket_Pa is
+package body Ops_Pa.Socket_Pa is
 
   use type GNAT.Sockets.Socket_Type;
 
@@ -662,5 +662,5 @@ package body Com_Socket_Pa is
     end;
   end;
 
-end Com_Socket_Pa;
+end Ops_Pa.Socket_Pa;
 

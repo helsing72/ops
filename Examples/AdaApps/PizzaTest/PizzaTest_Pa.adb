@@ -3,6 +3,7 @@ with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Characters.Latin_1; use Ada.Characters.Latin_1;
 with Ada.Strings.Fixed;
 with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
+with Ops_Pa.OpsObject_Pa.OPSConfig_Pa;
 
 with Ops_Pa,
      Ops_Pa.Error_Pa,
@@ -10,7 +11,6 @@ with Ops_Pa,
      Ops_Pa.OpsObject_Pa.OPSMessage_Pa,
      Ops_Pa.OpsObject_Pa.Domain_Pa,
      Ops_Pa.OpsObject_Pa.Topic_Pa,
-     Ops_Pa.OPSConfigRepository_Pa,
      Ops_Pa.Participant_Pa,
      Ops_Pa.Subscriber_Pa,
      Ops_Pa.PublisherAbs_Pa.Publisher_Pa,
@@ -687,7 +687,7 @@ package body PizzaTest_Pa is
     StaticErrorService.addListener(ErrorLog'Access, null);
 
     -- Add all Domain's from given file(s)
-    if not Ops_Pa.OPSConfigRepository_Pa.Instance.Add("ops_config.xml") then
+    if not Ops_Pa.OpsObject_Pa.OPSConfig_Pa.RepositoryInstance.Add("ops_config.xml") then
       Put_Line("No domain's added. Missing ops_config.xml ??");
       return;
     end if;

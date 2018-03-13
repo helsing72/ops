@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -18,7 +18,7 @@
 
 with Ada.Containers.Indefinite_Ordered_Maps;
 
-with Com_Mutex_Pa;
+with Ops_Pa.Mutex_Pa;
 
 with Ops_Pa.Error_Pa;
 with Ops_Pa.Transport_Pa.SendDataHandler_Pa;
@@ -95,7 +95,7 @@ private
 
       -- Dictionary with all SendDataHandlers except for UDP-transport
       SendDataHandlers : MyMap.Map;
-      Mutex : aliased Com_Mutex_Pa.Mutex;
+      Mutex : aliased Ops_Pa.Mutex_Pa.Mutex;
     end record;
 
   -- Generate the key used in the dictionary

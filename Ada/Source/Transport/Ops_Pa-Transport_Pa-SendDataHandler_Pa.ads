@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -18,7 +18,7 @@
 
 with Ada.Containers.Vectors;
 
-with Com_Mutex_Pa;
+with Ops_Pa.Mutex_Pa;
 
 with Ops_Pa.Transport_Pa.Sender_Pa;
 use Ops_Pa.Transport_Pa.Sender_Pa;
@@ -56,7 +56,7 @@ private
       Users : MyVector_Pa.Vector;
 
       Sender : Sender_Class_At;
-      Mutex : aliased Com_Mutex_Pa.Mutex;
+      Mutex : aliased Ops_Pa.Mutex_Pa.Mutex;
     end record;
 
   procedure InitInstance( Self : in out SendDataHandler_Class );

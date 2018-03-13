@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -107,7 +107,7 @@ package body Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa is
 
   procedure addListener( Self : in out ReceiveDataHandler_Class; Client : MessageNotifier_Pa.Listener_Interface_At ) is
     res : Boolean;
-    S : Com_Mutex_Pa.Scope_Lock(Self.MessageLock'Access);
+    S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.MessageLock'Access);
   begin
     Self.DataNotifier.addListener(Client);
     if Self.DataNotifier.numListeners = 1 then
@@ -118,7 +118,7 @@ package body Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa is
   end;
 
   procedure removeListener( Self : in out ReceiveDataHandler_Class; Client : MessageNotifier_Pa.Listener_Interface_At ) is
-    S : Com_Mutex_Pa.Scope_Lock(Self.MessageLock'Access);
+    S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.MessageLock'Access);
   begin
     -- By taking the lock (above), we also make sure that the receiveDataHandler::onNewEvent() can't be in
     -- the callback of a listener
@@ -265,7 +265,7 @@ package body Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa is
 
         if newMessage /= null then
           declare
-            S : Com_Mutex_Pa.Scope_Lock(Self.MessageLock'Access);
+            S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.MessageLock'Access);
           begin
             oldMessage := Self.Message;
             Self.Message := newMessage;

@@ -23,7 +23,7 @@ if(WIN32)
     target_link_libraries(${EXE_NAME} ws2_32 mswsock)
   endif()
 else()
-  target_link_libraries(${EXE_NAME} pthread)
+  target_link_libraries(${EXE_NAME} pthread rt)
 endif()
 
 # exe installation

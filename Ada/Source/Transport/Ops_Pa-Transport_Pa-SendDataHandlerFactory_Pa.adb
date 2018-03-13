@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -20,7 +20,7 @@ with Ops_Pa.Transport_Pa.SendDataHandler_Pa.Mc_Pa,
      Ops_Pa.Transport_Pa.SendDataHandler_Pa.McUdp_Pa,
      Ops_Pa.Transport_Pa.SendDataHandler_Pa.TCP_Pa;
 
-with Com_Socket_Pa;
+with Ops_Pa.Socket_Pa;
 
 package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
 
@@ -64,7 +64,7 @@ package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
       element.numUsers := element.numUsers + 1;
     end;
 
-    localIf : string := Com_Socket_Pa.doSubnetTranslation(top.LocalInterface);
+    localIf : string := Ops_Pa.Socket_Pa.doSubnetTranslation(top.LocalInterface);
     ttl : Integer := Integer(top.TimeToLive);
     result : SendDataHandler_Class_At := null;
     pos : MyMap.Cursor;
@@ -75,7 +75,7 @@ package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
     -- Make a key with the transport info that uniquely defines the receiver.
     key : String := getKey(top);
 
-    S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
+    S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
     pos := Self.SendDataHandlers.Find( key );
 
@@ -136,7 +136,7 @@ package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
     pos : MyMap.Cursor;
     info : HandlerInfo;
 
-    S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
+    S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
     if top.Transport = TRANSPORT_UDP then
       if self.OnUdpConnectDisconnectClient /= null then
@@ -200,7 +200,7 @@ package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
   begin
     declare
       -- Cleanup/Free all senddatahandlers under protection
-      S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
+      S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
     begin
       if Self.UdpUsers /= 0 then
         handlerExist := True;

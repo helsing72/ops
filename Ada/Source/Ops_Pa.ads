@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -17,22 +17,54 @@
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
 with System,
+     System.Atomic_Counters,
      Ada.Unchecked_Deallocation,
      Ada.Exceptions,
      Ada.Streams,
-     Interfaces,
-     Com_Base_Abs_Pa;
+     Ada.Finalization,
+     Interfaces;
 
 use  System;
 
 package Ops_Pa is
 
+-- ===========================================================================
+--          C l a s s   D e c l a r a t i o n
+-- ===========================================================================
   -- Base Class for all OPS classes
-  type Ops_Class    is abstract new Com_Base_Abs_Pa.Com_Base_Abs_Class with null record;
+  type Ops_Class    is abstract new Ada.Finalization.Limited_Controlled with null record;
   type Ops_Class_At is access all Ops_Class'Class;
 
+  -- Get class name for object (May be overridden to shorten class name)
+  function ClassName(Self : Ops_Class) return String;
+
+  -- Destructor ( There is no need to override this method anytime, use
+  --              Finalize() instead to dealloc memory )
+  procedure Free(Self : access Ops_Class);
+
+  -- Destructor
+  overriding procedure Finalize(Self : in out Ops_Class) is abstract;
+
+  -- Initialize object (Only used to trace allocation of object)
+  overriding procedure Initialize(Self : in out Ops_Class);
+
+  ----------------------------------------------------------------------
+  -- Install/Uninstall trace routine to catch allocation/deallocation
+  -- of objects, when running.
+  type CreateStatus_T is (Alloc, Dealloc);
+  type TraceRoutine_At is access procedure( Class         : String;
+                                            CreateStatus  : CreateStatus_T;
+                                            TotalAllocObj : System.Atomic_Counters.Atomic_Unsigned);
+  procedure InstallTrace(   Routine : TraceRoutine_At);
+  procedure UnInstallTrace( Routine : TraceRoutine_At);
+
+  -- Debug
+  function NumActiveObjects return System.Atomic_Counters.Atomic_Unsigned;
+
+  ----------------------------------------------------------------------
+
   -- Extra parameter in notification callbacks using a procedure call
-  subtype NotifyParam_T is Com_Base_Abs_Pa.Com_Base_Abs_Class_At;
+  subtype NotifyParam_T is Ops_Class_At;
 
   -- Types
   subtype Byte    is Ada.Streams.Stream_Element;
@@ -135,6 +167,10 @@ package Ops_Pa is
   procedure Trace( NameStr, ValueStr : String; E : Ada.Exceptions.Exception_Occurrence );
 
   function ToString(ptr : Byte_Arr_At) return String;
+
+private
+  -- Get original Class name
+  function OriginalClassName(Self : Ops_Class) return String;
 
 end Ops_Pa;
 

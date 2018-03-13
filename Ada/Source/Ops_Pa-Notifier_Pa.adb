@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -37,7 +37,7 @@ package body Ops_Pa.Notifier_Pa is
   -- Called by "owner" that wishes to notify its listeners.
   --------------------------------------------------------------------------
   procedure doNotify( Self : in out Notifier_Class; Item : in Item_T ) is
-    S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
+    S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
     for i in 1..Self.NumListeners loop
       -- We don't allow a client to stop us from notify all clients
@@ -60,7 +60,7 @@ package body Ops_Pa.Notifier_Pa is
   procedure addListener( Self  : in out Notifier_Class; 
                          Proc  : in OnNotifyEvent_T;
                          Arg   : in Ops_Class_At ) is
-    S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
+    S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
     if Self.NumListeners < MaxListeners then
       Self.NumListeners := Self.NumListeners + 1;
@@ -77,7 +77,7 @@ package body Ops_Pa.Notifier_Pa is
   procedure removeListener( Self  : in out Notifier_Class;
                             Proc  : in OnNotifyEvent_T;
                             Arg   : in Ops_Class_At ) is
-    S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
+    S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
     for i in Self.Listeners'Range loop
       if Self.Listeners(i).Proc = Proc and Self.Listeners(i).Arg = Arg then
@@ -97,7 +97,7 @@ package body Ops_Pa.Notifier_Pa is
   --------------------------------------------------------------------------
   procedure addListener( Self     : in out Notifier_Class; 
                          Listener : in Listener_Interface_At) is
-    S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
+    S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
     if Self.NumListeners < MaxListeners then
       Self.NumListeners := Self.NumListeners + 1;
@@ -112,7 +112,7 @@ package body Ops_Pa.Notifier_Pa is
   --------------------------------------------------------------------------
   procedure removeListener( Self     : in out Notifier_Class;
                             Listener : in Listener_Interface_At ) is
-    S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
+    S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
     for i in Self.Listeners'Range loop
       if Self.Listeners(i).ClassAt = Listener then

@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -18,9 +18,9 @@
 
 with Ada.Containers.Vectors;
 
-with Com_Socket_Pa,
-     Com_Signal_Pa,
-     Com_Mutex_Pa;
+with Ops_Pa.Socket_Pa,
+     Ops_Pa.Signal_Pa,
+     Ops_Pa.Mutex_Pa;
 
 package Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
 
@@ -47,10 +47,10 @@ private
 -- ==========================================================================
 --
 -- ==========================================================================
-  function Equal( Left, Right : Com_Socket_Pa.TCPClientSocket_Class_At ) return Boolean;
+  function Equal( Left, Right : Ops_Pa.Socket_Pa.TCPClientSocket_Class_At ) return Boolean;
 
   subtype MyIndex_T is Integer range 0..Integer'Last;
-  package MyVector_Pa is new Ada.Containers.Vectors(MyIndex_T, Com_Socket_Pa.TCPClientSocket_Class_At, Equal);
+  package MyVector_Pa is new Ada.Containers.Vectors(MyIndex_T, Ops_Pa.Socket_Pa.TCPClientSocket_Class_At, Equal);
 
 -- ==========================================================================
 --
@@ -60,8 +60,8 @@ private
     entry Finish;
   end Server_Pr_T;
 
-  TerminateEvent_C : constant Com_Signal_Pa.Event_T := Com_Signal_Pa.Event1_C;
-  StartEvent_C     : constant Com_Signal_Pa.Event_T := Com_Signal_Pa.Event2_C;
+  TerminateEvent_C : constant Ops_Pa.Signal_Pa.Event_T := Ops_Pa.Signal_Pa.Event1_C;
+  StartEvent_C     : constant Ops_Pa.Signal_Pa.Event_T := Ops_Pa.Signal_Pa.Event2_C;
 
 -- ==========================================================================
 --
@@ -72,10 +72,10 @@ private
        IpAddress : String_At := null;
        OutSocketBufferSize : Int64 := -1;
 
-       TcpServer : Com_Socket_Pa.TCPServerSocket_Class_At := null;
+       TcpServer : Ops_Pa.Socket_Pa.TCPServerSocket_Class_At := null;
 
        ConnectedSockets : MyVector_Pa.Vector;
-       ConnectedSocketsMutex : aliased Com_Mutex_Pa.Mutex;
+       ConnectedSocketsMutex : aliased Ops_Pa.Mutex_Pa.Mutex;
 
        -- Our thread running our Run() method
        Server_Pr : Server_Pr_T(TCPServerSender_Class'Access);
@@ -83,7 +83,7 @@ private
        pragma volatile(StopFlag);
        TerminateFlag : aliased Boolean := False;
        pragma volatile(TerminateFlag);
-       EventsToTask : Com_Signal_Pa.Signal_T;
+       EventsToTask : Ops_Pa.Signal_Pa.Signal_T;
 
        Opened : Boolean := False;
      end record;

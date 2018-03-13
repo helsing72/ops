@@ -5,76 +5,29 @@ project Example1 is
 
    for Object_Dir use ".obj";
    for Exec_Dir use ".";
-   type Build_Kind is
-      ("static", "relocatable", "static-pic");
-   Xmlada_Build : Build_Kind := external ("XMLADA_BUILD");
-   type Build_Kind1 is
-      ("default", "relocatable");
-   Win32Ada_Build : Build_Kind1 := external ("WIN32ADA_BUILD");
 
-   case Xmlada_Build is
+   for Source_Dirs use ("./**");
+   for Main use ("Example1.adb");
 
-      when "static" =>
+   package Naming is
+      for Casing use "mixedcase";
+   end Naming;
 
-         case Win32Ada_Build is
+   package Builder is
 
-            when "default" =>
-               for Source_Dirs use ("./**");
-               for Main use ("Example1.adb");
+     for Global_Compilation_switches ("ada") use ("-g"
+                                                  , "-gnatE"
+                                                  , "-gnat12"
+                                                 );
 
-            when "relocatable" =>
-               for Source_Dirs use ("./**");
-         end case;
-
-      when "relocatable" =>
-         for Source_Dirs use ("./**");
-
-      when "static-pic" =>
-         for Source_Dirs use ("./**");
-   end case;
+   end Builder;
 
    package Compiler is
 
-      case Xmlada_Build is
-
-         when "static" =>
-
-            case Win32Ada_Build is
-
-               when "default" =>
-                  for Default_Switches ("ada") use ("-g", "-gnat12");
-
-               when "relocatable" =>
-
-            end case;
-
-         when "relocatable" =>
-
-         when "static-pic" =>
-
-      end case;
    end Compiler;
 
    package Linker is
 
-      case Xmlada_Build is
-
-         when "static" =>
-
-            case Win32Ada_Build is
-
-               when "default" =>
-                  for Default_Switches ("ada") use ("-g", "-lWs2_32");
-
-               when "relocatable" =>
-
-            end case;
-
-         when "relocatable" =>
-
-         when "static-pic" =>
-
-      end case;
    end Linker;
 
 end Example1;

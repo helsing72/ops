@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2017 Lennart Andersson.
+-- Copyright (C) 2017-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -141,7 +141,7 @@ package body Ops_Pa.Transport_Pa.SendDataHandler_Pa.McUdp_Pa is
     end;
 
     posDict : IpPortPairDict.Cursor;
-    S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
+    S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
 
   begin
     posDict := Self.TopSinkMap.Find( topic.Name );
@@ -162,7 +162,7 @@ package body Ops_Pa.Transport_Pa.SendDataHandler_Pa.McUdp_Pa is
     ipPortMap : TopicMap_At := null;
     posMap : IpPortPairMap.Cursor;
     posDict : IpPortPairDict.Cursor;
-    S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
+    S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
     -- check if we already have a sink map for this topic
     posDict := Self.TopSinkMap.Find( topic );
@@ -216,7 +216,7 @@ package body Ops_Pa.Transport_Pa.SendDataHandler_Pa.McUdp_Pa is
 
   begin
     declare
-      S : Com_Mutex_Pa.Scope_Lock(Self.Mutex'Access);
+      S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
     begin
       Self.TopSinkMap.Iterate( Process'Access );
       Free(Self.Sender);

@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -21,8 +21,8 @@ with Ada.Containers.Vectors,
      Ada.Containers.Unbounded_Synchronized_Queues,
      Ada.Finalization;
 
-with Com_Signal_Pa,
-     Com_Mutex_Pa,
+with Ops_Pa.Signal_Pa,
+     Ops_Pa.Mutex_Pa,
      Ops_Pa.Notifier_Pa,
      Ops_Pa.OpsObject_Pa,
      Ops_Pa.OpsObject_Pa.OPSMessage_Pa,
@@ -181,13 +181,13 @@ private
       -- Receiver side filters that will be applied to data from receiveDataHandler
       -- before delivery to application layer.
       FilterQoSPolicies : MyVector_Pa.Vector;
-      FilterQoSPolicyMutex : aliased Com_Mutex_Pa.Mutex;
+      FilterQoSPolicyMutex : aliased Ops_Pa.Mutex_Pa.Mutex;
 
       MessageBuffer : MyQ.Queue;
       MessageBufferMaxSize : Integer := 1;
 
       -- Used for wakeup of thread waiting for new data in 'WaitForNewData()'
-      NewDataEvent : Com_Signal_Pa.Signal_T;
+      NewDataEvent : Ops_Pa.Signal_Pa.Signal_T;
 
       -- Time used for deadline missed checks
       TimeLastData : TimeMs_T := 0;

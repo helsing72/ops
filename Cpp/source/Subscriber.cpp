@@ -62,11 +62,9 @@ namespace ops
 
     Subscriber::~Subscriber()
     {
-        listeners.clear();
-        if (started)
-        {
-            stop();
-        }
+        // Make sure subscriber is stopped and no more notifications can call us
+        stop();
+
         delete deadlineTimer;
 
 		while (messageBuffer.size() > 0) {
@@ -92,18 +90,20 @@ namespace ops
 
     void Subscriber::stop()
     {
-		if (!started) return;
+        if (!started) return;
 
-		receiveDataHandler->aquireMessageLock();
+        // Note that the receiveDataHandler messageLock is held while we are removed from its list.
+        // This ensures that the receive thread can't be in our onNewEvent() or be calling us anymore
+        // when we return from the removeListener() call.
         receiveDataHandler->removeListener(this);
-        receiveDataHandler->releaseMessageLock();
-		receiveDataHandler = NULL;
+        receiveDataHandler = NULL;
         participant->releaseReceiveDataHandler(topic);
         deadlineTimer->removeListener(this);
         deadlineTimer->cancel();
         started = false;
     }
 
+    // Note that the receiveDataHandler messageLock is held while executing this method
     void Subscriber::onNewEvent(Notifier<OPSMessage*>* sender, OPSMessage* message)
     {
         UNUSED(sender);

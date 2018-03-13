@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2018 Lennart Andersson.
 --  
 -- This file is part of OPS (Open Publish Subscribe).
 --  
@@ -19,11 +19,101 @@
 with Ada.Text_IO,
      Ada.Real_Time,
      Ada.Exceptions,
-     Ada.Unchecked_Conversion;
+     Ada.Unchecked_Conversion,
+     Ada.Unchecked_Deallocation,
+     Ada.Tags;
 
 package body Ops_Pa is
 
-  StartTime : Float64;
+  StartTime     : Float64;
+  Count         : aliased System.Atomic_Counters.Atomic_Unsigned := 0;
+  TraceRoutine  : TraceRoutine_At   := null;
+
+  --------------------------------------------------------------------------
+  --
+  --------------------------------------------------------------------------
+  function NumActiveObjects return System.Atomic_Counters.Atomic_Unsigned is
+  begin
+    return Count;
+  end;
+
+  ----------------------------------------------------------------------
+  -- Install trace routine to catch allocation/deallocation
+  -- of objects, when running.
+  ----------------------------------------------------------------------
+  procedure InstallTrace(Routine : TraceRoutine_At) is
+  begin
+    TraceRoutine := Routine;
+  end InstallTrace;
+
+  procedure UnInstallTrace(Routine : TraceRoutine_At) is
+  begin
+    TraceRoutine := null;
+  end UnInstallTrace;
+
+  ---------------------------------------------------------------------------
+  -- Get original Class name (  Shall not be overridden to get the same
+  --                            name when create/free object)
+  ---------------------------------------------------------------------------
+  function OriginalClassName(Self : Ops_Class) return String is
+  begin
+    return Ada.Tags.External_Tag(Ops_Class'Class(Self)'Tag);
+  end OriginalClassName;
+  
+  --------------------------------------------------------------------------
+  -- Get class name for object (May be overridden to shorten class name)
+  --------------------------------------------------------------------------
+  function ClassName(Self : Ops_Class) return String is
+  begin
+    return Ada.Tags.External_Tag(Ops_Class'Class(Self)'Tag);
+  end ClassName;
+
+  --------------------------------------------------------------------------
+  -- Unchecked deallocation for the Com_Base
+  --------------------------------------------------------------------------
+  procedure Dealloc is new Ada.Unchecked_Deallocation( Ops_Class'Class, Ops_Class_At);
+
+  ----------------------------------------------------------------------
+  -- Destructor ( There is no need to override this method anytime, use
+  --              Finalize() instead to dealloc memory )
+  ----------------------------------------------------------------------
+  procedure Free(Self : access Ops_Class) is
+    Dummy : Ops_Class_At;
+    tmp : System.Atomic_Counters.Atomic_Unsigned;
+  begin
+    Dummy := Ops_Class_At(Self);
+    if Dummy /= null then
+      System.Atomic_Counters.Decrement(Count);
+      -- The count variable may be changed by some one else before we read it below.
+      -- For our purpose we don't care since the count itself is protected, it's
+      -- only the count in the trace that temporarily may be wrong.
+      tmp := Count;
+      if TraceRoutine /= null then
+        TraceRoutine( Class         => OriginalClassName( Self.all ),
+                      CreateStatus  => Dealloc,
+                      TotalAllocObj => tmp);
+      end if;
+      Dealloc(Dummy);
+    end if;
+  end Free;
+                      
+  ----------------------------------------------------------------------
+  -- Initialize object (Only used to trace allocation of object)
+  ----------------------------------------------------------------------
+  overriding procedure Initialize(Self : in out Ops_Class) is
+    tmp : System.Atomic_Counters.Atomic_Unsigned;
+  begin
+    System.Atomic_Counters.Increment(Count);
+    -- The count variable may be changed by some one else before we read it below.
+    -- For our purpose we don't care since the count itself is protected, it's
+    -- only the count in the trace that temporarily may be wrong.
+    tmp := Count;
+    if TraceRoutine /= null then
+      TraceRoutine( Class         => OriginalClassName( Self ),
+                    CreateStatus  => Alloc,
+                    TotalAllocObj => tmp);
+    end if;
+  end Initialize;
 
   --------------------------------------------------------------------------
   --
@@ -147,12 +237,12 @@ package body Ops_Pa is
 --          return UInt32'Image(Value);
 --        end;
 --      else
-      declare
-        function Conv is new Ada.Unchecked_Conversion(Byte_Arr_At, UInt64);
-        Value : UInt64 := Conv(Ptr);
-      begin
+--      declare
+--        function Conv is new Ada.Unchecked_Conversion(Byte_Arr_At, UInt64);
+--        Value : UInt64 := Conv(Ptr);
+--      begin
         return "TBD"; -- this does not give expected result UInt64'Image(Value);
-      end;
+--      end;
 --      end if;
   end ToString;
   

@@ -25,7 +25,6 @@ namespace ops
     
     DataNotifier::~DataNotifier()
     {
-        listeners.clear();
     }
     
     void DataNotifier::notifyNewData()
