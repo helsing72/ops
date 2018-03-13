@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #include "OPSTypeDefs.h"
 #include "Subscriber.h"
 #include "TimeHelper.h"
@@ -30,7 +31,6 @@
 #include <boost/thread/condition_variable.hpp>
 #include "boost/date_time/local_time/local_time.hpp"
 #endif
-
 
 namespace ops
 {
@@ -62,11 +62,9 @@ namespace ops
 
     Subscriber::~Subscriber()
     {
-        listeners.clear();
-        if (started)
-        {
-            stop();
-        }
+        // Make sure subscriber is stopped and no more notifications can call us
+        stop();
+
         delete deadlineTimer;
 
 		while (messageBuffer.size() > 0) {
@@ -92,18 +90,20 @@ namespace ops
 
     void Subscriber::stop()
     {
-		if (!started) return;
+        if (!started) return;
 
-		receiveDataHandler->aquireMessageLock();
+        // Note that the receiveDataHandler messageLock is held while we are removed from its list.
+        // This ensures that the receive thread can't be in our onNewEvent() or be calling us anymore
+        // when we return from the removeListener() call.
         receiveDataHandler->removeListener(this);
-        receiveDataHandler->releaseMessageLock();
-		receiveDataHandler = NULL;
+        receiveDataHandler = NULL;
         participant->releaseReceiveDataHandler(topic);
         deadlineTimer->removeListener(this);
         deadlineTimer->cancel();
         started = false;
     }
 
+    // Note that the receiveDataHandler messageLock is held while executing this method
     void Subscriber::onNewEvent(Notifier<OPSMessage*>* sender, OPSMessage* message)
     {
         UNUSED(sender);
@@ -116,12 +116,15 @@ namespace ops
             return;
         }
         //Check that the type of the delivered data can be interpreted as the type we expect in this Subscriber
-        else if (message->getData()->getTypeString().find(topic.getTypeID()) == std::string::npos)
+        else if (message->getData()->getTypeString().find(topic.getTypeID()) == TypeId_T::npos)
         {
-            BasicError err("Subscriber", "onNewEvent", 
-				std::string("Received message with wrong data type for Topic: ") + topic.getName() +
-				std::string("\nExpected type: ") + topic.getTypeID() + 
-				std::string("\nGot type: ") + message->getData()->getTypeString());
+			ErrorMessage_T msg("Received message with wrong data type for Topic: ");
+			msg += topic.getName();
+			msg += "\nExpected type: ";
+			msg += topic.getTypeID();
+			msg += "\nGot type: ";
+			msg += message->getData()->getTypeString();
+			BasicError err("Subscriber", "onNewEvent", msg);
             participant->reportError(&err);
             return;
         }
@@ -296,12 +299,12 @@ namespace ops
 		return false;
     }
 
-    std::string Subscriber::getName()
+	ObjectName_T Subscriber::getName()
     {
         return name;
     }
 
-    void Subscriber::setName(std::string name)
+    void Subscriber::setName(ObjectName_T name)
     {
         this->name = name;
     }

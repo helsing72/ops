@@ -23,6 +23,7 @@
 
 #include <list>
 #include <deque>
+
 #include "OPSTypeDefs.h"
 #include "Topic.h"
 #include "Lockable.h"
@@ -30,7 +31,6 @@
 #include "DataNotifier.h"
 #include "DeadlineMissedListener.h"
 #include "FilterQoSPolicy.h"
-#include "ThreadPool.h"
 #include "Listener.h"
 #include "OPSMessage.h"
 #include "ReceiveDataHandler.h"
@@ -112,8 +112,8 @@ namespace ops
             return receiveDataHandler->numReservedMessages();
         }
 
-        std::string getName();
-        void setName(std::string name);
+		ObjectName_T getName();
+        void setName(ObjectName_T name);
 
         bool isDeadlineMissed();
 
@@ -164,7 +164,7 @@ namespace ops
         Topic topic;
 
         ///Name of this subscriber
-        std::string name;
+		ObjectName_T name;
 
         ///Receiver side filters that will be applied to data from receiveDataHandler before delivery to application layer.
         std::list<FilterQoSPolicy*> filterQoSPolicies;
