@@ -9,6 +9,8 @@
 #define _OPSTYPEDEFS_H
 
 #include <string>
+#include <sstream>
+
 // -----------------------------------------------------------------------------
 // Some OPS configurations
 #define USE_C11             // Enables use of C++11 std::mutex, std::thread, std::condition_variable
@@ -24,7 +26,7 @@
 //#define REPLACE_TRANSPORT_LAYER	// Removes IOService.cpp, Sender.cpp, Receiver.cpp and DeadlineTimer.cpp
 									// from library so you can use your own implementations.
 
-//#define REPLACE_OPS_CONFIG		// Removes the OPSConfig file reader from library so yo can implement 
+//#define REPLACE_OPS_CONFIG		// Removes the OPSConfig file reader from library so you can implement 
 									// your own for targets without a filesystem.
 namespace ops {
 
@@ -61,6 +63,15 @@ namespace ops {
 // -----------------------------------------------------------------------------
 // Macro used to remove compiler warnings about non used variables/parameters
 #define UNUSED(expr) (void)(expr);
+
+// Helper for converting a number to a string
+template <typename T>
+InternalString_T NumberToString(T Number)
+{
+	std::ostringstream ss;
+	ss << Number << std::ends;
+	return ss.str().c_str();
+}
 
 } // namespace
 
