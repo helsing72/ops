@@ -13,10 +13,10 @@ namespace ops
 		typeID(typeIDd), 
 		domainAddress(domainAddresss),
 		participantID("DEFAULT_PARTICIPANT"),
-		reliable(false),
+		//reliable(false),
 		sampleMaxSize(OPSConstants::PACKET_MAX_SIZE),
-		deadline(OPSConstants::MAX_DEADLINE_TIMEOUT),
-		minSeparation(0),
+		//deadline(OPSConstants::MAX_DEADLINE_TIMEOUT),
+		//minSeparation(0),
 		outSocketBufferSize(-1),
 		inSocketBufferSize(-1)
 	{
@@ -30,10 +30,10 @@ namespace ops
 		typeID(""), 
 		domainAddress(""),
 		participantID("DEFAULT_PARTICIPANT"),
-		reliable(false),
+		//reliable(false),
 		sampleMaxSize(OPSConstants::PACKET_MAX_SIZE),
-		deadline(OPSConstants::MAX_DEADLINE_TIMEOUT),
-		minSeparation(0),
+		//deadline(OPSConstants::MAX_DEADLINE_TIMEOUT),
+		//minSeparation(0),
 		outSocketBufferSize(-1),
 		inSocketBufferSize(-1)
 	{

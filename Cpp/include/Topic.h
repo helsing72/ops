@@ -83,22 +83,22 @@ namespace ops
 		static Transport_T TRANSPORT_UDP;
 
 	private:
-        ObjectName_T name;
+        ObjectName_T name;					// Serialized
 
-		int port;
+		int port;							// Serialized
 		int timeToLive;
-		TypeId_T typeID;
-		Address_T domainAddress;
+		TypeId_T typeID;					// Serialized
+		Address_T domainAddress;			// Serialized
 		Address_T localInterface;
 		ObjectName_T participantID;
 		ObjectName_T domainID;
-		bool reliable;
-		int sampleMaxSize;
-		__int64 deadline;
-		__int64 minSeparation;
-		Transport_T transport;
-		__int64 outSocketBufferSize;
-		__int64 inSocketBufferSize;
+		//bool reliable;
+		int sampleMaxSize;					// Serialized
+		//__int64 deadline;
+		//__int64 minSeparation;
+		Transport_T transport;				// Serialized
+		__int64 outSocketBufferSize;		// Serialized
+		__int64 inSocketBufferSize;			// Serialized
 
 		Participant* participant;
     };
