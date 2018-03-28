@@ -86,8 +86,12 @@ namespace ops
 			socket->set_option(ifOption);
 		}
 
+#if BOOST_VERSION > 106500
+		socket->non_blocking(true);
+#else
 		boost::asio::socket_base::non_blocking_io command(true);
 		socket->io_control(command);
+#endif
 	}
 
 	void UDPSender::close()

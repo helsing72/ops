@@ -100,7 +100,11 @@ namespace ops
 				// If set to 1, the socket will receive messages from all the groups that have been joined
 				// globally on the whole system. Otherwise, it will deliver messages only from the groups that
 				// have been explicitly joined (for example via the IP_ADD_MEMBERSHIP option) on this particular socket.
+#if BOOST_VERSION > 106000
+				int nsock = sock->native_handle();
+#else
 				int nsock = sock->native();
+#endif
 				if (nsock >= 0) {
 					int mc_all = 0;
 					if ((setsockopt(nsock, IPPROTO_IP, IP_MULTICAST_ALL, (void*) &mc_all, sizeof(mc_all))) < 0) {

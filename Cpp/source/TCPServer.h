@@ -153,7 +153,11 @@ namespace ops
 							Participant::reportStaticError(&err);
 						}
 					}
-					
+
+					//Disable Nagle algorithm
+					boost::asio::ip::tcp::no_delay option(true);
+					sock->set_option(option);
+
 					AddSocket(new boostSocketSender(sock));
 
 					sock = new boost::asio::ip::tcp::socket(*ioService);

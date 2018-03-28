@@ -30,7 +30,7 @@ Make sure you have boost installed, otherwise download pre-built binaries for bo
     * Boost System
     * Boost Thread
 
-OPS has been used with Boost versions 1.38, 1.48, 1.53, 1.55 and 1.60.
+OPS has been used with Boost versions 1.38, 1.48, 1.53, 1.55, 1.60, 1.64 and 1.66.
 
 ## CMake ##
 Version 3.1.0 or later is required to build OPS with CMake. Make sure the cmake command is in your path. CMake can be downloaded at https://cmake.org/.
@@ -39,6 +39,9 @@ OPS has been used with CMake version 3.5.0 and later.
 
 ## Visual Studio (Windows) ##
 OPS has been used with VS2008, VS2010, VS2012, VS2013, VS2015 and VS2017.
+
+## gcc (Linux) ##
+OPS has been used with 4.4.7, 5.3.0, 5.4.0, 6.2.1, 6.4.1 and 7.3.1.
 
 ## Google Test (required for unit tests) ##
 Google Test can be downloaded at https://github.com/google/googletest.
@@ -57,7 +60,7 @@ OPS has been used with Delphi XE2 and Delphi 10.1 Berlin.
 
 ## Ada ##
 The Ada implementation requires Ada 2012 support.
-OPS has been used with GNAT GPS 2016.
+OPS has been used with GNAT GPS 2016 and GNAT Pro 17.1.
 
 ## gcovr ##
 TBD
