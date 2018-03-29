@@ -149,7 +149,7 @@ namespace ops
             }
         }
 
-        virtual void inout(InoutName_T name, __int16& value)
+        virtual void inout(InoutName_T name, int16_t& value)
         {
             if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
@@ -162,14 +162,14 @@ namespace ops
             }
         }
 
-        virtual void inout(InoutName_T name, __int64& value)
+        virtual void inout(InoutName_T name, int64_t& value)
         {
             if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
 				std::string s(currentNode.getChildNode(NAME(name)).getText());
 				std::stringstream ss(s);
 
-                __int64 inVal;
+                int64_t inVal;
                 ss >> inVal;
                 value = inVal;
             }
@@ -365,7 +365,7 @@ namespace ops
 			}
         }
 
-        virtual void inout(InoutName_T name, std::vector<__int16>& value)
+        virtual void inout(InoutName_T name, std::vector<int16_t>& value)
         {
             if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
@@ -389,7 +389,7 @@ namespace ops
 			}
         }
 
-        virtual void inout(InoutName_T name, std::vector<__int64>& value)
+        virtual void inout(InoutName_T name, std::vector<int64_t>& value)
         {
             if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
@@ -404,7 +404,7 @@ namespace ops
 					std::string s(currentNode.getChildNode("element", i).getText());
 					std::stringstream ss(s);
 
-                    __int64 inVal;
+                    int64_t inVal;
                     ss >> inVal;
                     value[i] = inVal;
                 }
@@ -511,7 +511,7 @@ namespace ops
 			throw ops::ArchiverException("XMLArchiverIn.inoutfixarr NYI");
 		}
 
-		void inoutfixarr(InoutName_T name, __int16* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, int16_t* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			UNUSED(value)
@@ -521,7 +521,7 @@ namespace ops
 			throw ops::ArchiverException("XMLArchiverIn.inoutfixarr NYI");
 		}
 
-		void inoutfixarr(InoutName_T name, __int64* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, int64_t* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			UNUSED(value)

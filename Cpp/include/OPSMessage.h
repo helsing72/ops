@@ -80,8 +80,8 @@ namespace ops
         bool dataOwner;
         int sourcePort;
 		Address_T sourceIP;
-        __int64 qosMask;
-        __int64 publicationID;		// Serialized
+        int64_t qosMask;
+        int64_t publicationID;		// Serialized
 		ObjectName_T publisherName;	// Serialized
         ObjectName_T topicName;		// Serialized
         ObjectKey_T topLevelKey;	// Serialized (not used, empty string)
@@ -89,12 +89,12 @@ namespace ops
         OPSObject* data;			// Serialized
 
     public:
-        __int64 getPublicationID()
+        int64_t getPublicationID()
         {
             return publicationID;
         }
 
-        void setPublicationID(__int64 pubID)
+        void setPublicationID(int64_t pubID)
         {
             publicationID = pubID;
         }

@@ -40,7 +40,7 @@ namespace ops
     {
     public:
 
-        UDPReceiver(int bindPort, IOService* ioServ, Address_T localInterface = "0.0.0.0", __int64 inSocketBufferSizent = 16000000) :
+        UDPReceiver(int bindPort, IOService* ioServ, Address_T localInterface = "0.0.0.0", int64_t inSocketBufferSizent = 16000000) :
 	        sock(NULL), localEndpoint(NULL), max_length(65535), 
 			cancelled(false), m_asyncCallActive(false), m_working(false)
         {

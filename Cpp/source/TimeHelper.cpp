@@ -41,13 +41,13 @@
 namespace ops
 {
     ///Returns the current time as a number of milliseconds since Epoch 1970-01-01.
-    __int64 TimeHelper::currentTimeMillis()
+    int64_t TimeHelper::currentTimeMillis()
     {
         return getEpochTime();
     }
 
 	///Sleeps the given number of milliseconds (millis).
-    void TimeHelper::sleep(__int64 millis)
+    void TimeHelper::sleep(int64_t millis)
     {
         boost::xtime xt;
         boost::xtime_get(&xt, boost::TIME_UTC_);
@@ -79,7 +79,7 @@ namespace ops
     }
 
 	///Returns the current time as a number of milliseconds since Epoch 1970-01-01.
-    __int64 TimeHelper::getEpochTime()
+    int64_t TimeHelper::getEpochTime()
     {
         using namespace boost::gregorian;
         using namespace boost::local_time;

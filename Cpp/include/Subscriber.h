@@ -70,16 +70,16 @@ namespace ops
         ///Sets the deadline timout for this subscriber.
         ///If no message is received within deadline,
         ///listeners to deadlineMissedEvent will be notified
-        void setDeadlineQoS(__int64 deadlineT);
-        __int64 getDeadlineQoS();
+        void setDeadlineQoS(int64_t deadlineT);
+        int64_t getDeadlineQoS();
 
         void addFilterQoSPolicy(FilterQoSPolicy* fqos);
         void removeFilterQoSPolicy(FilterQoSPolicy* fqos);
 
-        __int64 getTimeBasedFilterQoS();
+        int64_t getTimeBasedFilterQoS();
         ///Sets the minimum time separation between to consecutive messages.
         ///Received messages in between will be ignored by this Subscriber
-        void setTimeBasedFilterQoS(__int64 timeBaseMinSeparationMillis);
+        void setTimeBasedFilterQoS(int64_t timeBaseMinSeparationMillis);
 
         ///Returns a copy of this subscribers Topic.
         Topic getTopic();
@@ -182,10 +182,10 @@ namespace ops
 		boost::condition_variable* newDataEvent;
 #endif
 
-        __int64 timeLastData;
-        __int64 timeLastDataForTimeBase;
-        __int64 timeBaseMinSeparationTime;
-        __int64 deadlineTimeout;
+        int64_t timeLastData;
+        int64_t timeLastDataForTimeBase;
+        int64_t timeBaseMinSeparationTime;
+        int64_t deadlineTimeout;
 
         bool applyFilterQoSPolicies(OPSObject* o);
         //bool applyKeyFilter(OPSObject* o);

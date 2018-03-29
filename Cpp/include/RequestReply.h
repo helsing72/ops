@@ -53,7 +53,7 @@ namespace ops
 			ss << key << reqInt;
 			req->requestId = ss.str(); 
 			
-			__int64 requestLimit = TimeHelper::currentTimeMillis() + (__int64)timeout;
+			int64_t requestLimit = TimeHelper::currentTimeMillis() + (int64_t)timeout;
 			sub->getDataReference();
 			pub->writeOPSObject(req);
 			while(TimeHelper::currentTimeMillis() < requestLimit)

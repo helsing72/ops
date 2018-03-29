@@ -49,7 +49,7 @@ namespace ops
 	class TCPServer : public TCPServerBase
     {
     public:
-		TCPServer(IOService* ioServ, Address_T serverIP, int serverPort, __int64 outSocketBufferSize = 16000000) :
+		TCPServer(IOService* ioServ, Address_T serverIP, int serverPort, int64_t outSocketBufferSize = 16000000) :
 			TCPServerBase(),
 			_serverPort(serverPort), _serverIP(serverIP), _outSocketBufferSize(outSocketBufferSize),
 			endpoint(NULL), sock(NULL), acceptor(NULL), _canceled(false),
@@ -177,7 +177,7 @@ namespace ops
 
 		int _serverPort;
 		Address_T _serverIP;
-		__int64 _outSocketBufferSize;
+		int64_t _outSocketBufferSize;
 		boost::asio::ip::tcp::endpoint* endpoint;		//<-- The local port to bind to.
         boost::asio::ip::tcp::socket* sock;				//<-- The socket that handles next accept.
         

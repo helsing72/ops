@@ -154,18 +154,18 @@ InternalString_T NumberToString(T Number)
 
 } // namespace
 
-#ifndef _WIN32
+// Defines for integer types
+#ifdef _WIN32
+#ifndef OPS_C11_DETECTED
 
-#define OPS_LINUX
+typedef __int64 int64_t;
+typedef __int16 int16_t;
 
 #endif
+#else 
 
-#ifdef OPS_LINUX
-
+// Linux
 #include "inttypes.h"
-
-typedef  int64_t __int64;
-typedef  int16_t __int16;
 
 #endif
 

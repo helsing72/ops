@@ -53,7 +53,7 @@ namespace ops
         explicit BoostDeadlineTimerImpl(boost::asio::io_service* boostIOService);
         ~BoostDeadlineTimerImpl();
 
-		void start(__int64 timeoutMs);
+		void start(int64_t timeoutMs);
 		void cancel();
     };
 
@@ -67,7 +67,7 @@ namespace ops
 		{
 		}
 
-		virtual void start(__int64 timeoutMs) 
+		virtual void start(int64_t timeoutMs) 
 		{
 			deadlineTimer.cancel();
 			deadlineTimer.expires_from_now(boost::posix_time::milliseconds(timeoutMs));
@@ -116,7 +116,7 @@ namespace ops
         notifyNewEvent(message);    // Just forward the event
     }
 
-    void BoostDeadlineTimerImpl::start(__int64 timeout)
+    void BoostDeadlineTimerImpl::start(int64_t timeout)
     {
         pimpl_->start(timeout);
     }

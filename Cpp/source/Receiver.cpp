@@ -32,15 +32,15 @@
 
 namespace ops
 {
-	Receiver* Receiver::create(Address_T ip, int bindPort, IOService* ioService, Address_T localInterface, __int64 inSocketBufferSize)
+	Receiver* Receiver::create(Address_T ip, int bindPort, IOService* ioService, Address_T localInterface, int64_t inSocketBufferSize)
 	{
 		return new MulticastReceiver(ip, bindPort, ioService, localInterface, inSocketBufferSize);
 	}
-	Receiver* Receiver::createTCPClient(Address_T ip, int port, IOService* ioService, __int64 inSocketBufferSize)
+	Receiver* Receiver::createTCPClient(Address_T ip, int port, IOService* ioService, int64_t inSocketBufferSize)
 	{
 		return new TCPClient(ip, port, ioService, inSocketBufferSize);
 	}
-	Receiver* Receiver::createUDPReceiver(int port, IOService* ioService, Address_T localInterface, __int64 inSocketBufferSize)
+	Receiver* Receiver::createUDPReceiver(int port, IOService* ioService, Address_T localInterface, int64_t inSocketBufferSize)
 	{
 		return new UDPReceiver(port, ioService, localInterface, inSocketBufferSize);
 	}

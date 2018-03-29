@@ -12,7 +12,7 @@ namespace ops
 	public:
 		const static int PACKET_MAX_SIZE = 60000;
 		const static int MESSAGE_MAX_SIZE = 2400000;
-		const static __int64 MAX_DEADLINE_TIMEOUT = LLONG_MAX;
+		const static int64_t MAX_DEADLINE_TIMEOUT = LLONG_MAX;
 	};
 }
 #endif

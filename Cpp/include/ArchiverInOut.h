@@ -71,8 +71,8 @@ namespace ops
         virtual void inout(InoutName_T name, bool& value) = 0;
         virtual void inout(InoutName_T name, char& value) = 0;
         virtual void inout(InoutName_T name, int& value) = 0;
-        virtual void inout(InoutName_T name, __int16& value) = 0;
-        virtual void inout(InoutName_T name, __int64& value) = 0;
+        virtual void inout(InoutName_T name, int16_t& value) = 0;
+        virtual void inout(InoutName_T name, int64_t& value) = 0;
         virtual void inout(InoutName_T name, float& value) = 0;
         virtual void inout(InoutName_T name, double& value) = 0;
         virtual void inout(InoutName_T name, std::string& value) = 0;
@@ -97,8 +97,8 @@ namespace ops
         virtual void inout(InoutName_T name, std::vector<bool>& value) = 0;
         virtual void inout(InoutName_T name, std::vector<char>& value) = 0;
         virtual void inout(InoutName_T name, std::vector<int>& value) = 0;
-        virtual void inout(InoutName_T name, std::vector<__int16>& value) = 0;
-        virtual void inout(InoutName_T name, std::vector<__int64>& value) = 0;
+        virtual void inout(InoutName_T name, std::vector<int16_t>& value) = 0;
+        virtual void inout(InoutName_T name, std::vector<int64_t>& value) = 0;
         virtual void inout(InoutName_T name, std::vector<float>& value) = 0;
         virtual void inout(InoutName_T name, std::vector<double>& value) = 0;
         virtual void inout(InoutName_T name, std::vector<std::string>& value) = 0;
@@ -130,8 +130,8 @@ namespace ops
 		virtual void inoutfixarr(InoutName_T name, bool* value, int numElements, int totalSize) = 0;
 		virtual void inoutfixarr(InoutName_T name, char* value, int numElements, int totalSize) = 0;
 		virtual void inoutfixarr(InoutName_T name, int* value, int numElements, int totalSize) = 0;
-		virtual void inoutfixarr(InoutName_T name, __int16* value, int numElements, int totalSize) = 0;
-		virtual void inoutfixarr(InoutName_T name, __int64* value, int numElements, int totalSize) = 0;
+		virtual void inoutfixarr(InoutName_T name, int16_t* value, int numElements, int totalSize) = 0;
+		virtual void inoutfixarr(InoutName_T name, int64_t* value, int numElements, int totalSize) = 0;
 		virtual void inoutfixarr(InoutName_T name, float* value, int numElements, int totalSize) = 0;
 		virtual void inoutfixarr(InoutName_T name, double* value, int numElements, int totalSize) = 0;
 

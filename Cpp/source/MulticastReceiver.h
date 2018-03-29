@@ -40,7 +40,7 @@ namespace ops
 	class MulticastReceiver : public Receiver
 	{
 	public:
-		MulticastReceiver(Address_T mcAddress, int bindPort, IOService* ioServ, Address_T localInterface = "0.0.0.0", __int64 inSocketBufferSizent = 16000000):
+		MulticastReceiver(Address_T mcAddress, int bindPort, IOService* ioServ, Address_T localInterface = "0.0.0.0", int64_t inSocketBufferSizent = 16000000):
 		  _port(0),
 		  _ipaddress(mcAddress),
 		  _localInterface(localInterface),
@@ -270,7 +270,7 @@ namespace ops
 		int _port;
 		Address_T _ipaddress;
 		Address_T _localInterface;
-		__int64 _inSocketBufferSizent;
+		int64_t _inSocketBufferSizent;
 		boost::asio::ip::udp::socket* sock;
 		boost::asio::ip::udp::endpoint* localEndpoint;
 		boost::asio::ip::udp::endpoint lastEndpoint;

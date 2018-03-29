@@ -66,7 +66,7 @@ private:
  
 	Participant* participant;
 
-    __int64 currentPublicationID;
+    int64_t currentPublicationID;
 	ObjectName_T name;
     ObjectKey_T key;
     char priority;
@@ -75,7 +75,7 @@ private:
 
 public:
 	//Send behaivior parameters
-	__int64 sendSleepTime;
+	int64_t sendSleepTime;
 	int sleepEverySendPacket;
 	bool sleepOnSendFailed;
 };

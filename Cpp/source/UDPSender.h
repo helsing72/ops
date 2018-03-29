@@ -36,7 +36,7 @@ namespace ops
         ///and a dynamically allocated local port.
 		///This class accepts synchronous write operations through sendTo().
 
-        UDPSender(IOService* ioServ, Address_T localInterface = "0.0.0.0", int ttl = 1, __int64 outSocketBufferSize = 16000000, bool multicastSocket = false);
+        UDPSender(IOService* ioServ, Address_T localInterface = "0.0.0.0", int ttl = 1, int64_t outSocketBufferSize = 16000000, bool multicastSocket = false);
         ~UDPSender();
         
 		void open();
@@ -62,7 +62,7 @@ namespace ops
 
 		Address_T _localInterface;
 		int _ttl;
-		__int64 _outSocketBufferSize;
+		int64_t _outSocketBufferSize;
 		bool _multicastSocket;
 
     };

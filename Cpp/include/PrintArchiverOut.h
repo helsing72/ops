@@ -85,12 +85,12 @@ namespace ops
             os << tab() << name << " = " << value << "\n";
         }
 
-        virtual void inout(InoutName_T name, __int16& value)
+        virtual void inout(InoutName_T name, int16_t& value)
         {
             os << tab() << name << " = " << value << "\n";
         }
 
-        virtual void inout(InoutName_T name, __int64& value)
+        virtual void inout(InoutName_T name, int64_t& value)
         {
             os << tab() << name << " = " << value << "\n";
         }
@@ -190,13 +190,13 @@ namespace ops
                 os << tab() << name << "(size = " << value.size() << ") = [ " << value[0] << " ... " << value[value.size() - 1] << " ]" << endl;
         }
 
-        virtual void inout(InoutName_T name, std::vector<__int16>& value)
+        virtual void inout(InoutName_T name, std::vector<int16_t>& value)
         {
             if (value.size() > 0)
                 os << tab() << name << "(size = " << value.size() << ") = [ " << value[0] << " ... " << value[value.size() - 1] << " ]" << endl;
         }
 
-        virtual void inout(InoutName_T name, std::vector<__int64>& value)
+        virtual void inout(InoutName_T name, std::vector<int64_t>& value)
         {
             if (value.size() > 0)
                 os << tab() << name << "(size = " << value.size() << ") = [ " << value[0] << " ... " << value[value.size() - 1] << " ]" << endl;
@@ -249,13 +249,13 @@ namespace ops
 			os << tab() << name << "(size = " << numElements << ") = [ " << value[0] << " ... " << value[numElements - 1] << " ]" << endl;
 		}
 
-		virtual void inoutfixarr(InoutName_T name, __int16* value, int numElements, int totalSize)
+		virtual void inoutfixarr(InoutName_T name, int16_t* value, int numElements, int totalSize)
 		{
 			UNUSED(totalSize)
 			os << tab() << name << "(size = " << numElements << ") = [ " << value[0] << " ... " << value[numElements - 1] << " ]" << endl;
 		}
 
-		virtual void inoutfixarr(InoutName_T name, __int64* value, int numElements, int totalSize)
+		virtual void inoutfixarr(InoutName_T name, int64_t* value, int numElements, int totalSize)
 		{
 			UNUSED(totalSize)
 			os << tab() << name << "(size = " << numElements << ") = [ " << value[0] << " ... " << value[numElements - 1] << " ]" << endl;

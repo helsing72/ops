@@ -67,11 +67,11 @@ namespace ops
 
 		void serialize(ArchiverInOut* archiver);
 
-		__int64 getOutSocketBufferSize();
-		void setOutSocketBufferSize(__int64 size);
+		int64_t getOutSocketBufferSize();
+		void setOutSocketBufferSize(int64_t size);
 
-		__int64 getInSocketBufferSize();
-		void setInSocketBufferSize(__int64 size);
+		int64_t getInSocketBufferSize();
+		void setInSocketBufferSize(int64_t size);
 
 		Participant* getParticipant()
 		{
@@ -94,11 +94,11 @@ namespace ops
 		ObjectName_T domainID;
 		//bool reliable;
 		int sampleMaxSize;					// Serialized
-		//__int64 deadline;
-		//__int64 minSeparation;
+		//int64_t deadline;
+		//int64_t minSeparation;
 		Transport_T transport;				// Serialized
-		__int64 outSocketBufferSize;		// Serialized
-		__int64 inSocketBufferSize;			// Serialized
+		int64_t outSocketBufferSize;		// Serialized
+		int64_t inSocketBufferSize;			// Serialized
 
 		Participant* participant;
     };

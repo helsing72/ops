@@ -239,7 +239,7 @@ namespace ops
         return ret;
     }
 
-    void Subscriber::setDeadlineQoS(__int64 millis)
+    void Subscriber::setDeadlineQoS(int64_t millis)
     {
 		if (millis == 0) {
 		    deadlineTimeout = TimeHelper::infinite;
@@ -249,7 +249,7 @@ namespace ops
 		cancelDeadlineTimeouts();	// Restart with new timeout
     }
 
-    __int64 Subscriber::getDeadlineQoS()
+    int64_t Subscriber::getDeadlineQoS()
     {
         return deadlineTimeout;
     }
@@ -264,12 +264,12 @@ namespace ops
         }
     }
 
-    __int64 Subscriber::getTimeBasedFilterQoS()
+    int64_t Subscriber::getTimeBasedFilterQoS()
     {
         return timeBaseMinSeparationTime;
     }
 
-    void Subscriber::setTimeBasedFilterQoS(__int64 timeBaseMinSeparationMillis)
+    void Subscriber::setTimeBasedFilterQoS(int64_t timeBaseMinSeparationMillis)
     {
         timeBaseMinSeparationTime = timeBaseMinSeparationMillis;
     }
@@ -311,7 +311,7 @@ namespace ops
 
     bool Subscriber::isDeadlineMissed()
     {
-        __int64 currTime = TimeHelper::currentTimeMillis();
+        int64_t currTime = TimeHelper::currentTimeMillis();
         if (currTime - timeLastData > deadlineTimeout)
         {
             deadlineMissed = true;

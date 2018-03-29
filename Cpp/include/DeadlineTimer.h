@@ -29,7 +29,7 @@ namespace ops
 	class OPS_EXPORT DeadlineTimer : public Notifier<int>
 	{
 	public:
-		virtual void start(__int64 timeoutMs) = 0;
+		virtual void start(int64_t timeoutMs) = 0;
 		virtual void cancel() = 0;
 		virtual ~DeadlineTimer(){};
 

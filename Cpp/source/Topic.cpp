@@ -122,19 +122,19 @@ namespace ops
 		return transport;
 	}
 
-	__int64 Topic::getOutSocketBufferSize()
+	int64_t Topic::getOutSocketBufferSize()
 	{
 		return outSocketBufferSize;
 	}
-	void Topic::setOutSocketBufferSize(__int64 size)
+	void Topic::setOutSocketBufferSize(int64_t size)
 	{
 		outSocketBufferSize = size;
 	}
-	__int64 Topic::getInSocketBufferSize()
+	int64_t Topic::getInSocketBufferSize()
 	{
 		return inSocketBufferSize;
 	}
-	void Topic::setInSocketBufferSize(__int64 size)
+	void Topic::setInSocketBufferSize(int64_t size)
 	{
 		inSocketBufferSize = size;
 	}

@@ -240,7 +240,7 @@ namespace ops
 		bool keepRunning;
 
 		///The interval with which this Participant publishes ParticipantInfoData
-		__int64 aliveTimeout;
+		int64_t aliveTimeout;
 
 		///The data type factory used in this Participant. 
 		OPSObjectFactory* objectFactory;

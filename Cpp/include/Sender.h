@@ -45,9 +45,9 @@ namespace ops
 		virtual void open() = 0;
 		virtual void close() = 0;
 
-        static OPS_EXPORT Sender* create(IOService* ioService, Address_T localInterface = "0.0.0.0", int ttl = 1, __int64 outSocketBufferSize = 16000000);
-        static OPS_EXPORT Sender* createUDPSender(IOService* ioService, Address_T localInterface = "0.0.0.0", int ttl = 1, __int64 outSocketBufferSize = 16000000);
-        static OPS_EXPORT Sender* createTCPServer(IOService* ioService, Address_T ip, int port, __int64 outSocketBufferSize = 16000000);
+        static OPS_EXPORT Sender* create(IOService* ioService, Address_T localInterface = "0.0.0.0", int ttl = 1, int64_t outSocketBufferSize = 16000000);
+        static OPS_EXPORT Sender* createUDPSender(IOService* ioService, Address_T localInterface = "0.0.0.0", int ttl = 1, int64_t outSocketBufferSize = 16000000);
+        static OPS_EXPORT Sender* createTCPServer(IOService* ioService, Address_T ip, int port, int64_t outSocketBufferSize = 16000000);
 
         virtual ~Sender() {}
     };

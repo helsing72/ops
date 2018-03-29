@@ -37,8 +37,8 @@ namespace ops
         Address_T domainAddress;
         int timeToLive;                 // if multicast, this specifies the ttl parameter
         int port;
-        __int64 outSocketBufferSize;
-        __int64 inSocketBufferSize;
+        int64_t outSocketBufferSize;
+        int64_t inSocketBufferSize;
 
         Channel();
 

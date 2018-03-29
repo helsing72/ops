@@ -68,13 +68,13 @@ namespace ops
             buf->WriteInt(value);
         }
 
-        void inout(InoutName_T name, __int16& value)
+        void inout(InoutName_T name, int16_t& value)
         {
             UNUSED(name)
             buf->WriteShort(value);
         }
 
-        void inout(InoutName_T name, __int64& value)
+        void inout(InoutName_T name, int64_t& value)
         {
             UNUSED(name)
             buf->WriteLong(value);
@@ -158,13 +158,13 @@ namespace ops
             buf->WriteInts(value);
         }
 
-        void inout(InoutName_T name, std::vector<__int16>& value)
+        void inout(InoutName_T name, std::vector<int16_t>& value)
         {
             UNUSED(name)
             buf->WriteShorts(value);
         }
 
-        void inout(InoutName_T name, std::vector<__int64>& value)
+        void inout(InoutName_T name, std::vector<int64_t>& value)
         {
             UNUSED(name)
             buf->WriteLongs(value);
@@ -210,14 +210,14 @@ namespace ops
 			buf->WriteChars((char *)value, totalSize);
 		}
 
-		void inoutfixarr(InoutName_T name, __int16* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, int16_t* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			buf->WriteInt(numElements);
 			buf->WriteChars((char *)value, totalSize);
 		}
 
-		void inoutfixarr(InoutName_T name, __int64* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, int64_t* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			buf->WriteInt(numElements);

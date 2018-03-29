@@ -40,7 +40,7 @@ namespace ops
     class TCPClient : public TCPClientBase
     {
     public:
-        TCPClient(Address_T serverIP, int serverPort, IOService* ioServ, __int64 inSocketBufferSizent = 16000000) :
+        TCPClient(Address_T serverIP, int serverPort, IOService* ioServ, int64_t inSocketBufferSizent = 16000000) :
 			_serverPort(serverPort), ipaddress(serverIP),
 			sock(NULL), endpoint(NULL), _connected(false), 
 			tryToConnect(false),
@@ -193,7 +193,7 @@ namespace ops
 	private:
         int _serverPort;
 		Address_T ipaddress;
-		__int64 inSocketBufferSizent;
+		int64_t inSocketBufferSizent;
         boost::asio::ip::tcp::socket* sock;
         boost::asio::ip::tcp::endpoint* endpoint;
 

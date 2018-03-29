@@ -181,7 +181,7 @@ namespace ops
         WriteChars(((char*)&i), 4);
     }
 
-    void ByteBuffer::WriteShort(__int16 i)
+    void ByteBuffer::WriteShort(int16_t i)
     {
 #ifdef ON_BIG_ENDIAN_MACHINE
         ByteSwap((unsigned char*)&i, 2);
@@ -189,7 +189,7 @@ namespace ops
         WriteChars(((char*)&i), 2);
     }
 
-    void ByteBuffer::WriteLong(__int64 l)
+    void ByteBuffer::WriteLong(int64_t l)
     {
 #ifdef ON_BIG_ENDIAN_MACHINE
         ByteSwap((unsigned char*)&l, 8);
@@ -249,9 +249,9 @@ namespace ops
         return ret;
     }
 
-    __int16 ByteBuffer::ReadShort()
+    int16_t ByteBuffer::ReadShort()
     {
-        __int16 ret = 0;
+        int16_t ret = 0;
         ReadChars((char*)&ret, 2);
 #ifdef ON_BIG_ENDIAN_MACHINE
         ByteSwap((unsigned char*)&ret, 2);
@@ -259,9 +259,9 @@ namespace ops
         return ret;
     }
 
-    __int64 ByteBuffer::ReadLong()
+    int64_t ByteBuffer::ReadLong()
     {
-        __int64 ret = 0;
+        int64_t ret = 0;
         ReadChars((char*)&ret, 8);
 #ifdef ON_BIG_ENDIAN_MACHINE
         ByteSwap((unsigned char*)&ret, 8);
@@ -477,7 +477,7 @@ namespace ops
         }
     }
 
-    void ByteBuffer::ReadShorts(std::vector<__int16>& out)
+    void ByteBuffer::ReadShorts(std::vector<int16_t>& out)
     {
         int size = ReadInt();
         out.reserve(size);
@@ -494,7 +494,7 @@ namespace ops
         }
     }
 
-    void ByteBuffer::WriteShorts(std::vector<__int16>& out)
+    void ByteBuffer::WriteShorts(std::vector<int16_t>& out)
     {
         int size = (int)out.size();
         WriteInt(size);
@@ -559,7 +559,7 @@ namespace ops
         }
     }
 
-    void ByteBuffer::ReadLongs(std::vector<__int64>& out)
+    void ByteBuffer::ReadLongs(std::vector<int64_t>& out)
     {
         int size = ReadInt();
         out.reserve(size);
@@ -576,7 +576,7 @@ namespace ops
         }
     }
 
-    void ByteBuffer::WriteLongs(std::vector<__int64>& out)
+    void ByteBuffer::WriteLongs(std::vector<int64_t>& out)
     {
         int size = (int)out.size();
         WriteInt(size);

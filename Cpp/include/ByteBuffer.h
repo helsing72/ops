@@ -111,10 +111,10 @@ namespace ops
         void WriteInt(int i);
 		//Writes the 2 bytes making up i to the buffer and increments index by 4.
         ///Byte order is swaped before writing takes place.
-        void WriteShort(__int16 i);
+        void WriteShort(int16_t i);
         ///Writes the 8 bytes making up l to the buffer and increments index by 8.
         ///Byte order is swaped before writing takes place.
-        void WriteLong(__int64 l);
+        void WriteLong(int64_t l);
         ///Writes the 8 bytes making up d to the buffer and increments index by 4.
         ///Byte order is swaped before writing takes place.
         void WriteDouble(double d);
@@ -142,10 +142,10 @@ namespace ops
         int ReadInt();
 		///Reads 2 bytes from the buffer and returns them as an int. Index is increased by 4.
         ///Byte order is swaped before return.
-        __int16 ReadShort();
-        ///Reads 8 bytes from the buffer and returns them as a long long (__int64). Index is increased by 8.
+        int16_t ReadShort();
+        ///Reads 8 bytes from the buffer and returns them as a long long (int64_t). Index is increased by 8.
         ///Byte order is swaped before return.
-        __int64 ReadLong();
+        int64_t ReadLong();
         ///Reads 1 byte from the buffer and returns it as a char. Index is increased by 1.
         char ReadChar();
         ///Reads an int (length) from the buffer followed by length number of chars returned as a std::string. Index is increased by length + 4.
@@ -169,9 +169,9 @@ namespace ops
 		void ReadBytes(std::vector<char>& out);
 		void ReadDoubles(std::vector<double>& out);
 		void ReadInts(std::vector<int>& out);
-		void ReadShorts(std::vector<__int16>& out);
+		void ReadShorts(std::vector<int16_t>& out);
 		void ReadFloats(std::vector<float>& out);		
-		void ReadLongs(std::vector<__int64>& out);		
+		void ReadLongs(std::vector<int64_t>& out);		
 		void ReadStrings(std::vector<std::string>& out);
 		
 		///Writes std::vector of corresponding type and increments index accordingly
@@ -181,9 +181,9 @@ namespace ops
 		
 		void WriteDoubles(std::vector<double>& out);
 		void WriteInts(std::vector<int>& out);
-		void WriteShorts(std::vector<__int16>& out);
+		void WriteShorts(std::vector<int16_t>& out);
 		void WriteFloats(std::vector<float>& out);
-		void WriteLongs(std::vector<__int64>& out);
+		void WriteLongs(std::vector<int64_t>& out);
 
 		void writeProtocol();
 		bool checkProtocol();

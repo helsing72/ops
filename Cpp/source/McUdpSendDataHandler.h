@@ -37,7 +37,7 @@ namespace ops
     class McUdpSendDataHandler : public SendDataHandler
     {
     public:
-        McUdpSendDataHandler(IOService* ioService, Address_T localInterface, int ttl, __int64 outSocketBufferSize = 16000000)
+        McUdpSendDataHandler(IOService* ioService, Address_T localInterface, int ttl, int64_t outSocketBufferSize = 16000000)
         {
             sender = Sender::createUDPSender(ioService, localInterface, ttl, outSocketBufferSize);
         }
@@ -163,7 +163,7 @@ namespace ops
 			Address_T _ip;
             int _port;
 			bool _alwaysAlive;
-			__int64 _lastTimeAlive;
+			int64_t _lastTimeAlive;
             const static int ALIVE_TIMEOUT = 3000;
         };
 

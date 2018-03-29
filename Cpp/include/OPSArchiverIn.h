@@ -70,13 +70,13 @@ namespace ops
             value = buf->ReadInt();
         }
 
-        void inout(InoutName_T name, __int16& value)
+        void inout(InoutName_T name, int16_t& value)
         {
             UNUSED(name)
             value = buf->ReadShort();
         }
 
-        void inout(InoutName_T name, __int64& value)
+        void inout(InoutName_T name, int64_t& value)
         {
             UNUSED(name)
             value = buf->ReadLong();
@@ -174,13 +174,13 @@ namespace ops
             buf->ReadInts(value);
         }
 
-        void inout(InoutName_T name, std::vector<__int16>& value)
+        void inout(InoutName_T name, std::vector<int16_t>& value)
         {
             UNUSED(name)
             buf->ReadShorts(value);
         }
 
-        void inout(InoutName_T name, std::vector<__int64>& value)
+        void inout(InoutName_T name, std::vector<int64_t>& value)
         {
             UNUSED(name)
             buf->ReadLongs(value);
@@ -229,7 +229,7 @@ namespace ops
 			buf->ReadChars((char *)value, totalSize);
 		}
 
-		void inoutfixarr(InoutName_T name, __int16* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, int16_t* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			int num = buf->ReadInt();
@@ -237,7 +237,7 @@ namespace ops
 			buf->ReadChars((char *)value, totalSize);
 		}
 
-		void inoutfixarr(InoutName_T name, __int64* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, int64_t* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
 			int num = buf->ReadInt();
