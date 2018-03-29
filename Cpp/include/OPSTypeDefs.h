@@ -39,7 +39,8 @@
 
 //#define OPSSLIM_NORESERVE			// Removes Reservable from OPSMessage
 
-//#define REPLACE_TRANSPORT_LAYER	// Removes IOService.cpp, Sender.cpp, Receiver.cpp and DeadlineTimer.cpp
+//#define REPLACE_TRANSPORT_LAYER	// Removes IOService.cpp, Sender.cpp, Receiver.cpp, DeadlineTimer.cpp,
+									// NetworkSupport.cpp and TimeHelper.cpp
 									// from library so you can use your own implementations.
 
 //#define REPLACE_OPS_CONFIG		// Removes the OPSConfig file reader from library so you can implement 

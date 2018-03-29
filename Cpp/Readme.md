@@ -2,9 +2,6 @@
 
 All configurations are placed in file *OPSTypeDefs.h*.
 
-#### FIXED_NO_STD_STRING ####
-Defined to disable the *std::string* interface in the *fixed_string* class.
-
 #### USE_C11 ####
 Defined to enable the use of C++11 *std::mutex*, *std::thread*, *std::condition_variable*
 instead of Boost or WIN32/Linux specific calls.
@@ -16,11 +13,14 @@ Define this to override the default settings and disable the use of C++11 featur
 Define this to remove *Reservable* from *OPSMessage*.
 
 #### REPLACE_TRANSPORT_LAYER ####
-Define this to remove IOService.cpp, Sender.cpp, Receiver.cpp and DeadlineTimer.cpp
+Define this to remove IOService.cpp, Sender.cpp, Receiver.cpp, DeadlineTimer.cpp, NetworkSupport.cpp and TimeHelper.cpp
 thats using the Boost library, so you can use your own implementations (e.g. for targets that has no Boost implementation).
 
 #### REPLACE_OPS_CONFIG ####
 Define this to remove the OPSConfig file reader, so you can implement your own for targets without a filesystem.
+
+#### FIXED_NO_STD_STRING ####
+Defined to disable the *std::string* interface in the *fixed_string* class.
 
 #### USE_FIXED_LENGTH_STRINGS ####
 Define this to use the *fixed_string* class instead of *std::string* in OPS. When this is defined you can also define the maximum length of different string types in OPS, see below.

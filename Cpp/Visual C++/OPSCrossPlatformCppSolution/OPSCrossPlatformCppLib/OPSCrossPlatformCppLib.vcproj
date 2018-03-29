@@ -807,6 +807,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\source\BasicWarning.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\include\ByteBuffer.h"
 				>
 			</File>
@@ -851,11 +855,27 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\include\Error.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\include\ErrorService.h"
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\include\ErrorWriter.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\include\FilterQoSPolicy.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\fixed_string.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\fixed_string_support.h"
 				>
 			</File>
 			<File
@@ -911,6 +931,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\include\OPSExport.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\include\OPSMessage.h"
 				>
 			</File>
@@ -927,6 +951,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\include\OPSUtilities.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\include\Participant.h"
 				>
 			</File>
@@ -936,6 +964,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\include\ParticipantInfoDataListener.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\PrintArchiverOut.h"
 				>
 			</File>
 			<File
