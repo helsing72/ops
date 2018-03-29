@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2017 Lennart Andersson.
+* Copyright (C) 2017-2018 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -58,7 +58,9 @@ namespace ops { namespace strings {
 		virtual const char* c_str() const NOEXCEPT = 0;
 	};
 
-	template <size_t N>
+	typedef enum { truncate_string, throw_exception } overrun_policy_t;
+
+	template <size_t N, overrun_policy_t POLICY = throw_exception>
 	class fixed_string : public basic_fixed_string
 	{
 	public:
@@ -66,9 +68,6 @@ namespace ops { namespace strings {
 	private:
 		char _array[N + 1];
 		size_type _size;
-	protected:
-		typedef enum { truncate_string, throw_exception } overrun_policy_t;
-		overrun_policy_t _overrun_policy;
 	public:
 		// Exceptions:
 		struct index_out_of_range : public std::exception {
@@ -79,15 +78,21 @@ namespace ops { namespace strings {
 		};
 
 		// Constructors:
-		fixed_string() : _size(0), _overrun_policy(throw_exception) { _array[0] = '\0'; }
-		fixed_string(const char* s) : _size(0), _overrun_policy(throw_exception) { append(s, strlen(s)); }
-		fixed_string(const char* s, size_type len) : _size(0), _overrun_policy(throw_exception) { size_type sz = strlen(s); append(s, (sz < len) ? sz : len); }
+		fixed_string() : _size(0) { _array[0] = '\0'; }
+		fixed_string(char* s) : _size(0) { append(s, strlen(s)); }
+		fixed_string(const char* s) : _size(0) { append(s, strlen(s)); }
+		fixed_string(char* s, size_type len) : _size(0) { size_type sz = strlen(s); append(s, (sz < len) ? sz : len); }
+		fixed_string(const char* s, size_type len) : _size(0) { size_type sz = strlen(s); append(s, (sz < len) ? sz : len); }
 #ifndef FIXED_NO_STD_STRING
-		fixed_string(const std::string s) : _size(0), _overrun_policy(throw_exception) { append(s.c_str(), s.size()); }
+		fixed_string(const std::string s) : _size(0) { append(s.c_str(), s.size()); }
 #endif
 
 		template<size_t M>
-		fixed_string(const fixed_string<M>& str) : _size(0), _overrun_policy(throw_exception) { append(str.c_str(), str.size()); }
+		fixed_string(const fixed_string<M>& str) : _size(0) { append(str.c_str(), str.size()); }
+
+		// Construction from any type that have c_str() and size() methods
+		template<typename T>
+		fixed_string(T str) : _size(0) { append(str.c_str(), str.size()); }
 
 		// all the special members can be defaulted
 #ifdef FIXED_C11_DETECTED
@@ -114,7 +119,7 @@ namespace ops { namespace strings {
 		void resize(size_type n, char c)
 		{
 			if (n > N) {
-				if (_overrun_policy == throw_exception) throw size_out_of_range();
+				if (POLICY == throw_exception) throw size_out_of_range();
 				n = N;
 			}
 			for (size_type i = _size; i < n; ++i) _array[i] = c;
@@ -147,7 +152,7 @@ namespace ops { namespace strings {
 		fixed_string& operator+= (char c)
 		{
 			if (_size == N) {
-				if (_overrun_policy == throw_exception) throw size_out_of_range();
+				if (POLICY == throw_exception) throw size_out_of_range();
 			} else {
 				_array[_size] = c;
 				_size++;
@@ -162,7 +167,7 @@ namespace ops { namespace strings {
 		{
 			if (len > 0) {
 				if ((_size + len) > N) {
-					if (_overrun_policy == throw_exception) throw size_out_of_range();
+					if (POLICY == throw_exception) throw size_out_of_range();
 					len = N - _size;
 				}
 				memcpy(&_array[_size], s, len);
@@ -347,33 +352,25 @@ namespace ops { namespace strings {
 #endif
 
 	template <size_t N>
-	class fixed_string_trunc : public fixed_string<N>
+	class fixed_string_trunc : public fixed_string<N, truncate_string>
 	{
 	public:
 		typedef basic_fixed_string::size_type size_type;
 
-		fixed_string_trunc() : fixed_string<N>() {
-			this->_overrun_policy = fixed_string<N>::truncate_string;
-		}
-		fixed_string_trunc(const char* s) : fixed_string<N>() { 
-			this->_overrun_policy = fixed_string<N>::truncate_string;
-			this->append(s, strlen(s));
-		}
-		fixed_string_trunc(const char* s, size_type len) : fixed_string<N>() {
-			this->_overrun_policy = fixed_string<N>::truncate_string;
-			size_type sz = strlen(s); this->append(s, (sz < len) ? sz : len);
-		}
+		fixed_string_trunc() : fixed_string<N, truncate_string>() {}
+		fixed_string_trunc(char* s) : fixed_string<N, truncate_string>(s) {}
+		fixed_string_trunc(const char* s) : fixed_string<N, truncate_string>(s) {}
+		fixed_string_trunc(char* s, size_type len) : fixed_string<N, truncate_string>(s, len) {}
+		fixed_string_trunc(const char* s, size_type len) : fixed_string<N, truncate_string>(s, len) {}
 #ifndef FIXED_NO_STD_STRING
-		fixed_string_trunc(const std::string s) : fixed_string<N>() { 
-			this->_overrun_policy = fixed_string<N>::truncate_string;
-			this->append(s.c_str(), s.size());
-		}
+		fixed_string_trunc(const std::string s) : fixed_string<N, truncate_string>(s) {}
 #endif
 		template<size_t M>
-		fixed_string_trunc(const fixed_string<M>& str) : fixed_string<N>() { 
-			this->_overrun_policy = fixed_string<N>::truncate_string;
-			this->append(str.c_str(), str.size());
-		}
+		fixed_string_trunc(const fixed_string<M>& str) : fixed_string<N, truncate_string>(str) {}
+
+		// Construction from any type that have c_str() and size() methods
+		template<typename T>
+		fixed_string_trunc(T str) : fixed_string<N, truncate_string>(str) {}
 	};
 
 }} //namespace
