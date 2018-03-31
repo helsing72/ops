@@ -37,7 +37,7 @@ namespace ops
     {
     public:
 
-        Serializable* create(TypeId_T& type)
+        Serializable* create(const TypeId_T& type)
         {
             if (type == ("ops.protocol.OPSMessage"))
             {

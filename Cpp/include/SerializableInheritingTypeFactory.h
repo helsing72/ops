@@ -33,7 +33,7 @@ public:
     /**
      * Tries to construct the most specialized object in the given typeString list
      */
-	virtual Serializable* create(TypeId_T& typeString);
+	virtual Serializable* create(const TypeId_T& typeString);
     
 };
 

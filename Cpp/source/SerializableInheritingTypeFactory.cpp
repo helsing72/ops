@@ -40,7 +40,7 @@ namespace ops
 	/**
      * Tries to construct the most specialized object in the given typeString list
  	 */
-	Serializable* SerializableInheritingTypeFactory::create(TypeId_T& typeString)
+	Serializable* SerializableInheritingTypeFactory::create(const TypeId_T& typeString)
 	{
 		std::vector<TypeId_T> types;
 		split(typeString, ' ', types);

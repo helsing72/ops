@@ -30,7 +30,7 @@ namespace ops
 	{
 	public:
 		virtual ~SerializableFactory() {}
-		virtual Serializable* create(TypeId_T& type) = 0;
+		virtual Serializable* create(const TypeId_T& type) = 0;
 	};
 
 }
