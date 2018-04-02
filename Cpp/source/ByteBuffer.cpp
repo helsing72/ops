@@ -31,6 +31,13 @@ namespace ops
         memMap = mMap;
         currentSegment = 0;
         nextSegmentAt = memMap->getSegmentSize();
+
+		// Check that each segment in map is larger than our needed segment header
+		//   protocolID                 4
+		//   version                    2
+		//   total number of segments   4
+		//   current segment number     4
+		if (memMap->getSegmentSize() <= 14) throw illformed_memmap();
     }
 
 	///Resets the whole buffer to creation state
@@ -661,6 +668,7 @@ namespace ops
     void ByteBuffer::ResetIndex()
     {
         index = 0;
+		currentSegment = 0;
     }
 
 }

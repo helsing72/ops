@@ -75,6 +75,9 @@ namespace ops
 		void ReadBytes(std::vector<char>& out, int offset, int length);
      
     public:
+		struct illformed_memmap : public std::exception {
+			const char* what() const NOEXCEPT { return "ByteBuffer(): Given MemoryMap is to small"; }
+		};
 		struct data_corrupted : public std::exception {
 			const char* what() const NOEXCEPT { return "ByteBuffer(): Data corrupted. Trying to read beyond buffer"; }
 		};
