@@ -6,7 +6,7 @@
 #ifndef _WIN32
 #include <time.h>
 
-__int64 getNow()
+int64_t getNow()
 {
     struct timespec ts;
     memset(&ts, 0, sizeof(ts));
@@ -38,9 +38,9 @@ int _kbhit() {
     return bytesWaiting;
 }
 #else
-__int64 getNow()
+int64_t getNow()
 {
-    return (__int64)timeGetTime();
+    return (int64_t)timeGetTime();
 }
 #endif
 
@@ -68,7 +68,7 @@ private:
 	CHelperListener<DataType>* client;
 	ops::Publisher* pub;
 	ops::Subscriber* sub;
-	__int64 expectedPubId;
+	int64_t expectedPubId;
 
 public:
 	DataType data;
@@ -140,7 +140,7 @@ public:
 			std::cout << "Subscriber must be created first!!" << std::endl;
 		}
 	}
-	void SetDeadlineQos(__int64 timeoutMs)
+	void SetDeadlineQos(int64_t timeoutMs)
 	{
 		if (sub) {
 			std::cout << "Setting deadlineQos to " << timeoutMs << " [ms] for topic " << sub->getTopic().getName() << std::endl;

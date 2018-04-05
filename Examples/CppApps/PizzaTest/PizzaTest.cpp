@@ -42,7 +42,7 @@
 #include <unistd.h>
 #include <time.h>
 
-__int64 getNow()
+int64_t getNow()
 {
     struct timespec ts;
     memset(&ts, 0, sizeof(ts));
@@ -74,9 +74,9 @@ int _kbhit() {
     return bytesWaiting;
 }
 #else
-__int64 getNow()
+int64_t getNow()
 {
-    return (__int64)timeGetTime();
+    return (int64_t)timeGetTime();
 }
 #endif
 
@@ -101,7 +101,7 @@ public:
 	virtual void DeleteSubscriber(bool doLog = true) = 0;
 	virtual void StartSubscriber() = 0;
 	virtual void StopSubscriber() = 0;
-	virtual void SetDeadlineQos(__int64 timeoutMs) = 0;
+	virtual void SetDeadlineQos(int64_t timeoutMs) = 0;
 	virtual ~IHelper() {};
 };
 
@@ -113,7 +113,7 @@ private:
 	//ops::Publisher* pub;
 	DataTypePublisher* pub;
 	ops::Subscriber* sub;
-	__int64 expectedPubId;
+	int64_t expectedPubId;
 
 public:
 	DataType data;
@@ -284,7 +284,7 @@ public:
 		}
 	}
 
-	void SetDeadlineQos(__int64 timeoutMs)
+	void SetDeadlineQos(int64_t timeoutMs)
 	{
 		if (sub) {
 			std::cout << "Setting deadlineQos to " << timeoutMs << " [ms] for topic " << sub->getTopic().getName() << std::endl;
@@ -458,11 +458,11 @@ public:
 
 static int NumVessuvioBytes = 0;
 static std::string FillerStr("");
-__int64 sendPeriod = 1000;
+int64_t sendPeriod = 1000;
 
 void WriteToAllSelected()
 {
-	static __int64 Counter = 0;
+	static int64_t Counter = 0;
 
 	for (unsigned int i = 0; i < ItemInfoList.size(); i++) {
 		ItemInfo* info = ItemInfoList[i];
@@ -722,7 +722,7 @@ int main(int argc, char**argv)
 		std::cout << "'otherParticipant' is using 'threading' policy" << std::endl;
 	}
 
-	__int64 nextSendTime = (__int64)getNow() + sendPeriod;
+	int64_t nextSendTime = (int64_t)getNow() + sendPeriod;
 
 	while (!doExit) {
 		std::cout << std::endl << " (? = menu) > ";
@@ -730,7 +730,7 @@ int main(int argc, char**argv)
 		// Repeated sends
 		if (doPeriodicSend || doPartPolling) {
 			while (!_kbhit()) {
-				__int64 now = (__int64)getNow();
+				int64_t now = (int64_t)getNow();
 				if (doPeriodicSend && (now >= nextSendTime)) {
 					// write
 					WriteToAllSelected();
@@ -862,7 +862,7 @@ int main(int argc, char**argv)
 					} else if (func == SUB) {
 						info->helper->StopSubscriber();
 					} else {
-						__int64 timeout = atoi(line.c_str());
+						int64_t timeout = atoi(line.c_str());
 						info->helper->SetDeadlineQos(timeout);
 					}
 				}

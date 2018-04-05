@@ -28,7 +28,7 @@ namespace ops {
 
 	typedef struct {
 		OPSMessage* mess;		// Pointer to received message
-		__int64 expectedPubID;
+		int64_t expectedPubID;
 		bool newPublisher;		// True for a new Publisher, False for a detected Sequence Error
 	} PublicationIdNotification_T;
 
@@ -39,7 +39,7 @@ namespace ops {
 		{
 			Address_T Addr;
 			int Port;
-			__int64 expectedPubID;
+			int64_t expectedPubID;
 		} Entry_T;
 
 		std::map<InternalKey_T, Entry_T> _map;

@@ -30,7 +30,7 @@
 #include <unistd.h>
 #include <time.h>
 
-__int64 getNow()
+int64_t getNow()
 {
     struct timespec ts;
     memset(&ts, 0, sizeof(ts));
@@ -62,9 +62,9 @@ int _kbhit() {
     return bytesWaiting;
 }
 #else
-__int64 getNow()
+int64_t getNow()
 {
-    return (__int64)timeGetTime();
+    return (int64_t)timeGetTime();
 }
 #endif
 

@@ -84,7 +84,7 @@ void checkEmpty(TestAll::ChildData& data)
     AssertEQ<char>(data.b, 0, "data.b");
     AssertEQ<short>(data.sh, 0);
     AssertEQ<int>(data.i, 0);
-    AssertEQ<__int64>(data.l, 0);
+    AssertEQ<int64_t>(data.l, 0);
     AssertEQ<float>(data.f, 0.0);
     AssertEQ<double>(data.d, 0.0);
 	AssertEQ<std::string>(data.s, "");
@@ -113,8 +113,8 @@ void checkEmpty(TestAll::ChildData& data)
 	for(int i = 0; i < 3; i++) AssertEQ<int>(data.fis_[i], 0);
 
 	AssertEQ<int>(data.ls.size(), 0);
-	//	__int64 fls[6];
-	for(int i = 0; i < 6; i++) AssertEQ<__int64>(data.fls[i], 0);
+	//	int64_t fls[6];
+	for(int i = 0; i < 6; i++) AssertEQ<int64_t>(data.fls[i], 0);
 
 	AssertEQ<int>(data.fs.size(), 0);
 	//    float ffs[77];
@@ -181,7 +181,7 @@ void checkObjects(TestAll::ChildData& data, TestAll::ChildData& exp)
     AssertEQ<char>(data.b, exp.b, "data.b");
     AssertEQ<short>(data.sh, exp.sh);
     AssertEQ<int>(data.i, exp.i);
-    AssertEQ<__int64>(data.l, exp.l);
+    AssertEQ<int64_t>(data.l, exp.l);
     AssertEQ<float>(data.f, exp.f);
     AssertEQ<double>(data.d, exp.d);
 	AssertEQ<std::string>(data.s, exp.s);
@@ -215,8 +215,8 @@ void checkObjects(TestAll::ChildData& data, TestAll::ChildData& exp)
 	for(int i = 0; i < 3; i++) AssertEQ<int>(data.fis_[i], exp.fis_[i]);
 
 	AssertEQ<int>(data.ls.size(), exp.ls.size());
-	//	__int64 fls[6];
-	for(int i = 0; i < 6; i++) AssertEQ<__int64>(data.fls[i], exp.fls[i]);
+	//	int64_t fls[6];
+	for(int i = 0; i < 6; i++) AssertEQ<int64_t>(data.fls[i], exp.fls[i]);
 
 	AssertEQ<int>(data.fs.size(), exp.fs.size());
 	//    float ffs[77];
@@ -337,7 +337,7 @@ void fillChildData(TestAll::ChildData& data)
 	data.ls.push_back(7);
 	data.ls.push_back(6);
 
-	//	__int64 fls[6];
+	//	int64_t fls[6];
 	data.fls[0] = 9999;
 	data.fls[1] = 9998;
 	data.fls[2] = 9997;

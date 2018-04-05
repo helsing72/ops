@@ -479,7 +479,7 @@ public class CppCompiler extends opsc.Compiler
         if (s.equals("boolean"))                                return "bool";
         if (s.equals("int"))                                    return "int";
         if (s.equals("short"))                                  return "short";
-        if (s.equals("long"))                                   return "__int64";
+        if (s.equals("long"))                                   return "int64_t";
         if (s.equals("double"))                                 return "double";
         if (s.equals("float"))                                  return "float";
         if (s.equals("byte"))                                   return "char";
