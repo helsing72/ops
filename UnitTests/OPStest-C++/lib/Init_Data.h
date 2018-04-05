@@ -36,8 +36,8 @@ const float float_max 		= std::numeric_limits<float>::max();
 const float float_min	 	= std::numeric_limits<float>::min();
 const double double_max 	= std::numeric_limits<double>::max();
 const double double_min 	= std::numeric_limits<double>::min();
-const __int64 int64_max 	= std::numeric_limits<__int64>::max();
-const __int64 int64_min 	= std::numeric_limits<__int64>::min();
+const int64_t int64_max 	= std::numeric_limits<int64_t>::max();
+const int64_t int64_min 	= std::numeric_limits<int64_t>::min();
 
 void ClearExtraAllt(pizza::special::ExtraAllt &extraAllt) {
 
