@@ -1,5 +1,5 @@
-#ifndef pizzaPizzaDataSubscriber_h
-#define pizzaPizzaDataSubscriber_h
+#ifndef pizza_PizzaDataSubscriber_h
+#define pizza_PizzaDataSubscriber_h
 
 #include "Subscriber.h"
 #include "Topic.h"
@@ -10,40 +10,50 @@
 namespace pizza {
 
 
-
 class PizzaDataSubscriber : public ops::Subscriber
 {
-
 public:
     PizzaDataSubscriber(ops::Topic t)
         : ops::Subscriber(t)
     {
-
     }
 
+    // Copies the latest received data into d
+    // Clears the "new data" flag (see newDataExist()).
     bool getData(PizzaData* d)
     {
         if(!data) return false;
         aquireMessageLock();
-		data->fillClone(d);
-		releaseMessageLock();
+        getTypedDataReference()->fillClone(d);
+        releaseMessageLock();
         return true;
     }
 
+    // Copies the latest received data into d
+    // Clears the "new data" flag (see newDataExist()).
+    bool getData(PizzaData& d)
+    {
+        if(!data) return false;
+        aquireMessageLock();
+        getTypedDataReference()->fillClone(&d);
+        releaseMessageLock();
+        return true;
+    }
+
+    // Returns a reference to the latest received data object.
+    // Clears the "new data" flag (see newDataExist()).
+    // NOTE: MessageLock should be held while working with the data object, to
+    // prevent a new incoming message to delete the current one while in use.
     PizzaData* getTypedDataReference()
     {
-        return (PizzaData*)getDataReference();
+        return dynamic_cast<PizzaData*>(getDataReference());
     }
 
     ~PizzaDataSubscriber(void)
     {
-
     }
-private:
-    PizzaData narrowedData;
 
 };
-
 
 }
 

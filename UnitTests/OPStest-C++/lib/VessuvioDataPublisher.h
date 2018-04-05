@@ -5,43 +5,33 @@
 #include "Topic.h"
 #include "OPSObject.h"
 #include "VessuvioData.h"
-#include <string>
 
 namespace pizza {
 
-
-
-class VessuvioDataPublisher : public ops::Publisher 
+class VessuvioDataPublisher : public ops::Publisher
 {
-    
+
 public:
     VessuvioDataPublisher(ops::Topic t)
         : ops::Publisher(t)
     {
-
-
     }
-    
+
     ~VessuvioDataPublisher(void)
     {
     }
-    
+
     void write(VessuvioData* data)
     {
         ops::Publisher::write(data);
-
     }
-    /*
-    ops::AckData writeReliable(VessuvioData* data, std::string destinationIdentity)
+
+    void write(VessuvioData& data)
     {
-        return ops::Publisher::writeReliable(data, destinationIdentity);
-
+        ops::Publisher::write(&data);
     }
-    */
-    
 
 };
-
 
 }
 

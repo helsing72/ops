@@ -5,7 +5,7 @@
 
 #include "OPSObject.h"
 #include "ArchiverInOut.h"
-#include <string>
+#include <string.h>		// for memset() on Linux
 #include <vector>
 
 
@@ -19,28 +19,28 @@ class Cheese :
 public:
    static ops::TypeId_T getTypeName(){return ops::TypeId_T("pizza.special.Cheese");}
 
-	std::string name;
-	double age;
+    std::string name;
+    double age;
 
     ///Default constructor.
     Cheese()
         : ops::OPSObject()
-		, age(0)
+        , age(0)
     {
         OPSObject::appendType(ops::TypeId_T("pizza.special.Cheese"));
 
-
     }
+
     ///Copy-constructor making full deep copy of a(n) Cheese object.
     Cheese(const Cheese& __c)
        : ops::OPSObject()
-		, age(0)
+        , age(0)
     {
         OPSObject::appendType(ops::TypeId_T("pizza.special.Cheese"));
 
-        __c.fillClone((Cheese*)this);
-
+        __c.fillClone(this);
     }
+
     ///Assignment operator making full deep copy of a(n) Cheese object.
     Cheese& operator = (const Cheese& other)
     {
@@ -52,26 +52,26 @@ public:
     ///instance of this class to a format dictated by the implementation of the ArchiverInout.
     void serialize(ops::ArchiverInOut* archive)
     {
-		ops::OPSObject::serialize(archive);
-		archive->inout("name", name);
-		archive->inout("age", age);
+        ops::OPSObject::serialize(archive);
+        archive->inout("name", name);
+        archive->inout("age", age);
 
     }
+
     //Returns a deep copy of this object.
     virtual ops::OPSObject* clone()
     {
-		Cheese* ret = new Cheese;
-		this->fillClone(ret);
-		return ret;
+        Cheese* ret = new Cheese;
+        fillClone(ret);
+        return ret;
 
     }
 
-    virtual void fillClone(ops::OPSObject* obj) const
+    void fillClone(Cheese* obj) const
     {
-		Cheese* narrRet = (Cheese*)obj;
-		ops::OPSObject::fillClone(narrRet);
-		narrRet->name = name;
-		narrRet->age = age;
+        ops::OPSObject::fillClone(obj);
+        obj->name = name;
+        obj->age = age;
 
     }
 
@@ -81,9 +81,9 @@ public:
 
     }
 
+
 };
 
 }}
-
 
 #endif

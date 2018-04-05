@@ -5,7 +5,7 @@
 
 #include "OPSObject.h"
 #include "ArchiverInOut.h"
-#include <string>
+#include <string.h>		// for memset() on Linux
 #include <vector>
 
 #include "VessuvioData.h"
@@ -20,27 +20,27 @@ class CapricosaData :
 public:
    static ops::TypeId_T getTypeName(){return ops::TypeId_T("pizza.CapricosaData");}
 
-	std::string mushrooms;
+    std::string mushrooms;
 
     ///Default constructor.
     CapricosaData()
         : VessuvioData()
-
+        
     {
         OPSObject::appendType(ops::TypeId_T("pizza.CapricosaData"));
 
-
     }
+
     ///Copy-constructor making full deep copy of a(n) CapricosaData object.
     CapricosaData(const CapricosaData& __c)
        : VessuvioData()
-
+        
     {
         OPSObject::appendType(ops::TypeId_T("pizza.CapricosaData"));
 
-        __c.fillClone((CapricosaData*)this);
-
+        __c.fillClone(this);
     }
+
     ///Assignment operator making full deep copy of a(n) CapricosaData object.
     CapricosaData& operator = (const CapricosaData& other)
     {
@@ -52,24 +52,24 @@ public:
     ///instance of this class to a format dictated by the implementation of the ArchiverInout.
     void serialize(ops::ArchiverInOut* archive)
     {
-		VessuvioData::serialize(archive);
-		archive->inout("mushrooms", mushrooms);
+        VessuvioData::serialize(archive);
+        archive->inout("mushrooms", mushrooms);
 
     }
+
     //Returns a deep copy of this object.
     virtual ops::OPSObject* clone()
     {
-		CapricosaData* ret = new CapricosaData;
-		this->fillClone(ret);
-		return ret;
+        CapricosaData* ret = new CapricosaData;
+        fillClone(ret);
+        return ret;
 
     }
 
-    virtual void fillClone(ops::OPSObject* obj) const
+    void fillClone(CapricosaData* obj) const
     {
-		CapricosaData* narrRet = (CapricosaData*)obj;
-		VessuvioData::fillClone(narrRet);
-		narrRet->mushrooms = mushrooms;
+        VessuvioData::fillClone(obj);
+        obj->mushrooms = mushrooms;
 
     }
 
@@ -79,9 +79,9 @@ public:
 
     }
 
+
 };
 
 }
-
 
 #endif

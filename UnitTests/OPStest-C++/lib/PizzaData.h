@@ -5,7 +5,7 @@
 
 #include "OPSObject.h"
 #include "ArchiverInOut.h"
-#include <string>
+#include <string.h>		// for memset() on Linux
 #include <vector>
 
 
@@ -13,33 +13,34 @@
 namespace pizza {
 
 
-class PizzaData : public ops::OPSObject
+class PizzaData :
+	public ops::OPSObject
 {
 public:
    static ops::TypeId_T getTypeName(){return ops::TypeId_T("pizza.PizzaData");}
 
-	std::string cheese;
-	std::string tomatoSauce;
+    std::string cheese;
+    std::string tomatoSauce;
 
     ///Default constructor.
     PizzaData()
         : ops::OPSObject()
-
+        
     {
         OPSObject::appendType(ops::TypeId_T("pizza.PizzaData"));
 
-
     }
+
     ///Copy-constructor making full deep copy of a(n) PizzaData object.
     PizzaData(const PizzaData& __c)
        : ops::OPSObject()
-
+        
     {
         OPSObject::appendType(ops::TypeId_T("pizza.PizzaData"));
 
-        __c.fillClone((PizzaData*)this);
-
+        __c.fillClone(this);
     }
+
     ///Assignment operator making full deep copy of a(n) PizzaData object.
     PizzaData& operator = (const PizzaData& other)
     {
@@ -51,26 +52,26 @@ public:
     ///instance of this class to a format dictated by the implementation of the ArchiverInout.
     void serialize(ops::ArchiverInOut* archive)
     {
-		ops::OPSObject::serialize(archive);
-		archive->inout("cheese", cheese);
-		archive->inout("tomatoSauce", tomatoSauce);
+        ops::OPSObject::serialize(archive);
+        archive->inout("cheese", cheese);
+        archive->inout("tomatoSauce", tomatoSauce);
 
     }
+
     //Returns a deep copy of this object.
     virtual ops::OPSObject* clone()
     {
-		PizzaData* ret = new PizzaData;
-		this->fillClone(ret);
-		return ret;
+        PizzaData* ret = new PizzaData;
+        fillClone(ret);
+        return ret;
 
     }
 
-    virtual void fillClone(ops::OPSObject* obj) const
+    void fillClone(PizzaData* obj) const
     {
-		PizzaData* narrRet = (PizzaData*)obj;
-		ops::OPSObject::fillClone(narrRet);
-		narrRet->cheese = cheese;
-		narrRet->tomatoSauce = tomatoSauce;
+        ops::OPSObject::fillClone(obj);
+        obj->cheese = cheese;
+        obj->tomatoSauce = tomatoSauce;
 
     }
 
@@ -80,9 +81,9 @@ public:
 
     }
 
+
 };
 
 }
-
 
 #endif

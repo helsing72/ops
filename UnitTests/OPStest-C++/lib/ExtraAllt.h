@@ -8,8 +8,8 @@
 #include <string>
 #include <vector>
 
-#include "LHCData.h"
 #include "Cheese.h"
+#include "LHCData.h"
 
 
 namespace pizza { namespace special {
@@ -26,7 +26,7 @@ public:
     ///@limits(0,INFINITY)
     char nrOfMushRooms;
     int meetQuality;
-    __int64 timestamp;
+    int64_t timestamp;
     float timeBakedHours;
     double timeBakedSeconds;
     std::string description;
@@ -35,7 +35,7 @@ public:
     std::vector<bool> bools;
     std::vector<char> bytes;
     std::vector<int> ints;
-    std::vector<__int64> longs;
+    std::vector<int64_t> longs;
     std::vector<float> floats;
     std::vector<double> doubles;
     std::vector<std::string> strings;
@@ -60,7 +60,7 @@ public:
         OPSObject::appendType(ops::TypeId_T("pizza.special.ExtraAllt"));
         cheese_ = new pizza::special::Cheese;
 
-        __c.fillClone((ExtraAllt*)this);
+        __c.fillClone(this);
 
     }
     ///Assignment operator making full deep copy of a(n) ExtraAllt object.
@@ -99,34 +99,33 @@ public:
     virtual ops::OPSObject* clone()
     {
         ExtraAllt* ret = new ExtraAllt;
-        this->fillClone(ret);
+        fillClone(ret);
         return ret;
 
     }
 
-    virtual void fillClone(ops::OPSObject* obj) const
+    void fillClone(ExtraAllt* obj) const
     {
-        ExtraAllt* narrRet = (ExtraAllt*)obj;
-        LHCData::fillClone(narrRet);
-        narrRet->extraCheese = extraCheese;
-        narrRet->nrOfMushRooms = nrOfMushRooms;
-        narrRet->meetQuality = meetQuality;
-        narrRet->timestamp = timestamp;
-        narrRet->timeBakedHours = timeBakedHours;
-        narrRet->timeBakedSeconds = timeBakedSeconds;
-        narrRet->description = description;
-        narrRet->testingShort = testingShort;
-        if(narrRet->cheese_) delete narrRet->cheese_;
-        narrRet->cheese_ = (pizza::special::Cheese*)cheese_->clone();
-        narrRet->bools = bools;
-        narrRet->bytes = bytes;
-        narrRet->ints = ints;
-        narrRet->longs = longs;
-        narrRet->floats = floats;
-        narrRet->doubles = doubles;
-        narrRet->strings = strings;
-        narrRet->shorts = shorts;
-        narrRet->cheeses = cheeses;
+        LHCData::fillClone(obj);
+        obj->extraCheese = extraCheese;
+        obj->nrOfMushRooms = nrOfMushRooms;
+        obj->meetQuality = meetQuality;
+        obj->timestamp = timestamp;
+        obj->timeBakedHours = timeBakedHours;
+        obj->timeBakedSeconds = timeBakedSeconds;
+        obj->description = description;
+        obj->testingShort = testingShort;
+        if(obj->cheese_) delete obj->cheese_;
+        obj->cheese_ = (pizza::special::Cheese*)cheese_->clone();
+        obj->bools = bools;
+        obj->bytes = bytes;
+        obj->ints = ints;
+        obj->longs = longs;
+        obj->floats = floats;
+        obj->doubles = doubles;
+        obj->strings = strings;
+        obj->shorts = shorts;
+        obj->cheeses = cheeses;
 
     }
 
@@ -137,9 +136,9 @@ public:
 
     }
 
+
 };
 
 }}
-
 
 #endif

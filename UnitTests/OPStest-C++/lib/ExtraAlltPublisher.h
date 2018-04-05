@@ -5,43 +5,33 @@
 #include "Topic.h"
 #include "OPSObject.h"
 #include "ExtraAllt.h"
-#include <string>
 
 namespace pizza { namespace special {
 
-
-
-class ExtraAlltPublisher : public ops::Publisher 
+class ExtraAlltPublisher : public ops::Publisher
 {
-    
+
 public:
     ExtraAlltPublisher(ops::Topic t)
         : ops::Publisher(t)
     {
-
-
     }
-    
+
     ~ExtraAlltPublisher(void)
     {
     }
-    
+
     void write(ExtraAllt* data)
     {
         ops::Publisher::write(data);
-
     }
-    /*
-    ops::AckData writeReliable(ExtraAllt* data, std::string destinationIdentity)
+
+    void write(ExtraAllt& data)
     {
-        return ops::Publisher::writeReliable(data, destinationIdentity);
-
+        ops::Publisher::write(&data);
     }
-    */
-    
 
 };
-
 
 }}
 

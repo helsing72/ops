@@ -1,5 +1,5 @@
-#ifndef pizza_specialExtraAlltSubscriber_h
-#define pizza_specialExtraAlltSubscriber_h
+#ifndef pizza_special_ExtraAlltSubscriber_h
+#define pizza_special_ExtraAlltSubscriber_h
 
 #include "Subscriber.h"
 #include "Topic.h"
@@ -10,40 +10,50 @@
 namespace pizza { namespace special {
 
 
-
 class ExtraAlltSubscriber : public ops::Subscriber
 {
-
 public:
     ExtraAlltSubscriber(ops::Topic t)
         : ops::Subscriber(t)
     {
-
     }
 
+    // Copies the latest received data into d
+    // Clears the "new data" flag (see newDataExist()).
     bool getData(ExtraAllt* d)
     {
         if(!data) return false;
         aquireMessageLock();
-		data->fillClone(d);
-		releaseMessageLock();
+        getTypedDataReference()->fillClone(d);
+        releaseMessageLock();
         return true;
     }
 
+    // Copies the latest received data into d
+    // Clears the "new data" flag (see newDataExist()).
+    bool getData(ExtraAllt& d)
+    {
+        if(!data) return false;
+        aquireMessageLock();
+        getTypedDataReference()->fillClone(&d);
+        releaseMessageLock();
+        return true;
+    }
+
+    // Returns a reference to the latest received data object.
+    // Clears the "new data" flag (see newDataExist()).
+    // NOTE: MessageLock should be held while working with the data object, to
+    // prevent a new incoming message to delete the current one while in use.
     ExtraAllt* getTypedDataReference()
     {
-        return (ExtraAllt*)getDataReference();
+        return dynamic_cast<ExtraAllt*>(getDataReference());
     }
 
     ~ExtraAlltSubscriber(void)
     {
-
     }
-private:
-    ExtraAllt narrowedData;
 
 };
-
 
 }}
 
