@@ -75,6 +75,7 @@ namespace ops
 
         void handleConnect(const boost::system::error_code& error)
         {
+			try {
 			m_asyncCallActive = false;
 			if (tryToConnect) {
 				if (error) {
@@ -108,13 +109,13 @@ namespace ops
 					//Disable Nagle algorithm
 
 					boost::asio::ip::tcp::no_delay option2(true);
-					sock->set_option(option2);
-					//if(sockOptErr != 0)
-					//{
-					//std::cout << "Failed to disable Nagle algorithm." << std::endl;
-					//ops::BasicError err("Failed to disable Nagle algorithm.");
-					//Participant::reportStaticError(&err);
-					//}
+					boost::system::error_code error2;
+					sock->set_option(option2, error2);
+					if (error2) {
+						//std::cout << "Failed to disable Nagle algorithm." << std::endl;
+						ops::BasicWarning warn("TCPClient", "TCPClient", "Failed to disable Nagle algorithm.");
+						Participant::reportStaticError(&warn);
+					}
 
 					//  std::cout << "connected tcp asynch" << std::endl;
 					connected(true);
@@ -124,7 +125,14 @@ namespace ops
 			// in case the destructor has been called and waiting for us to be finished.
 			// If we haven't started a new async call above, this will clear the flag.
 			m_working = m_asyncCallActive;
-        }
+
+			} catch (std::exception& e) {
+				ExceptionMessage_T msg("Unknown exception: ");
+				msg += e.what();
+				ops::BasicWarning err("TCPClient", "TCPClient", msg);
+				Participant::reportStaticError(&err);
+			}
+		}
 
 		// Used to get the sender IP and port for a received message
 		// Only safe to call in callback, before a new asynchWait() is called.
