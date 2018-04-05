@@ -28,10 +28,8 @@ namespace ops
 	{
 	public:
 		ReserveInfo(Reservable* reservabl, int nrOfReserv):
-		  nrOfReservations(nrOfReserv)
-		{
-			reservable = reservabl;			
-		}
+			reservable(reservabl), nrOfReservations(nrOfReserv)
+		{}
 		Reservable* reservable;
 		int nrOfReservations;
 	};
