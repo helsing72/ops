@@ -1,13 +1,15 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestAll_Publish", "TestAll_Publish\TestAll_Publish.vcproj", "{0089DD48-3956-4EE6-846E-3EF4AC4048D2}"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestAll_Publish", "TestAll_Publish\TestAll_Publish.vcxproj", "{0089DD48-3956-4EE6-846E-3EF4AC4048D2}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestAll_Subscribe", "TestAll_Subscribe\TestAll_Subscribe.vcproj", "{2A52CE77-840D-4011-B314-286AE376811C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestAll_Subscribe", "TestAll_Subscribe\TestAll_Subscribe.vcxproj", "{2A52CE77-840D-4011-B314-286AE376811C}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestAll_SubscribeToBase", "TestAll_SubscribeToBase\TestAll_SubscribeToBase.vcproj", "{94DBA0CE-B8C0-4F86-9CF2-5202B4F95224}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestAll_SubscribeToBase", "TestAll_SubscribeToBase\TestAll_SubscribeToBase.vcxproj", "{94DBA0CE-B8C0-4F86-9CF2-5202B4F95224}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VerifySerDes", "VerifySerDes\VerifySerDes.vcproj", "{79C294EF-FB9B-48B0-BD0D-443AE708A0E7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VerifySerDes", "VerifySerDes\VerifySerDes.vcxproj", "{79C294EF-FB9B-48B0-BD0D-443AE708A0E7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
