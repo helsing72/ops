@@ -191,7 +191,7 @@ void testExtraAlltLarge(pizza::special::ExtraAllt &extraAllt, SendType sendType)
 			EXPECT_EQ(extraAllt.longs.at(i), 35);
 			EXPECT_EQ(extraAllt.shorts.at(i), 45);
 
-			if(sendType == NORMAL) EXPECT_EQ(extraAllt.strings.at(i), "hejsan");
+			if(sendType == NORMAL) { EXPECT_EQ(extraAllt.strings.at(i), "hejsan"); }
 
 			EXPECT_EQ(extraAllt.cheeses.at(i).age, 3);
 			EXPECT_EQ(extraAllt.cheeses.at(i).name, "ecklig ost");
@@ -206,7 +206,7 @@ void testExtraAlltLarge(pizza::special::ExtraAllt &extraAllt, SendType sendType)
 			EXPECT_EQ(extraAllt.shorts.at(i), 50);
 
 
-			if(sendType == NORMAL) EXPECT_EQ(extraAllt.strings.at(i), "hoppsan");
+			if(sendType == NORMAL) { EXPECT_EQ(extraAllt.strings.at(i), "hoppsan"); }
 
 			EXPECT_EQ((extraAllt.cheeses.at(i)).age, 6);
 			EXPECT_EQ((extraAllt.cheeses.at(i)).name, "god ost");
