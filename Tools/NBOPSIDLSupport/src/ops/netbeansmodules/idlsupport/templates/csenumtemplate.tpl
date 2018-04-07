@@ -1,14 +1,17 @@
 //Auto generated OPS-code. DO NOT MODIFY!
 
 using Ops;
+using System;
+using System.ComponentModel;
 
 namespace __packageName
 {
+    [Serializable]
     public class __className : Ops.OPSObject
     {
         public enum Value {__declarations UNDEFINED};
 
-        public Value value = 0;
+        public Value value { get; set; }
 
         public static new string GetTypeName() { return "__packageName.__className"; }
 
@@ -22,7 +25,7 @@ namespace __packageName
             base.Serialize(archive);
             value = FromInt(archive.Inout("value", ToInt(value)));
         }
-    
+
         public override object Clone()
         {
             __className cloneResult = new __className();
