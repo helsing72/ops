@@ -168,6 +168,9 @@ typedef __int16 int16_t;
 // Linux
 #include "inttypes.h"
 
+typedef int64_t __int64;	// Deprecated, just for backward compatibility (used by some users) 
+typedef int16_t __int16;	// - " -
+
 #endif
 
 // ---------------------------------------------
