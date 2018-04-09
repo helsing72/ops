@@ -90,7 +90,7 @@ namespace ops
 
 		// Hide these since we don't support Clone of an OPSMessage()
 		virtual OPSObject* clone() { return nullptr; }
-		void fillClone(OPSMessage* obj) const {}
+		void fillClone(OPSMessage* obj) const { UNUSED(obj); }
 	
 	public:
         int64_t getPublicationID()

@@ -248,7 +248,8 @@ namespace ops
 
         virtual Serializable* inout(InoutName_T name, Serializable* value, int element)
         {
-            UNUSED(value);
+			UNUSED(name);
+			UNUSED(value);
 
             PushNode(currentNode);
             currentNode = currentNode.getChildNode("element", element);
