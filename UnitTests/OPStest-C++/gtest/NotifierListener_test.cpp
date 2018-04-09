@@ -17,7 +17,7 @@ class MyListener : public Listener<int>
 public:
 	int value;
 	MyListener() : value(0) {}
-	virtual void onNewEvent(Notifier<int>* sender, int arg)	{ value = arg; }
+	virtual void onNewEvent(Notifier<int>* sender, int arg) { UNUSED(sender);  value = arg; }
 };
 
 class MyNotifier : public Notifier<int>
@@ -88,7 +88,7 @@ class MyDataListener : public DataListener
 public:
 	int counter;
 	MyDataListener() : counter(0) {}
-	virtual void onNewData(DataNotifier* sender) { counter++; }
+	virtual void onNewData(DataNotifier* sender) { UNUSED(sender); counter++; }
 };
 
 class MyDataNotifier : public DataNotifier
@@ -99,6 +99,7 @@ public:
 
 void MyCallback(DataNotifier* sender, void* userData)
 {
+	UNUSED(sender);
 	MyDataListener* listener = (MyDataListener*)userData;
 	listener->counter++;
 }
@@ -150,7 +151,7 @@ class MyDeadlineListener : public DeadlineMissedListener
 public:
 	int counter;
 	MyDeadlineListener() : counter(0) {}
-	virtual void onDeadlineMissed(DeadlineMissedEvent* e) { counter++; }
+	virtual void onDeadlineMissed(DeadlineMissedEvent* e) { UNUSED(e); counter++; }
 };
 
 TEST(Test_NotifierListener, TestDeadlineMissedListener) {

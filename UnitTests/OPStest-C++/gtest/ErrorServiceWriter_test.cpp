@@ -24,6 +24,7 @@ public:
 	MyErrorListener() : counter(0) {}
 	virtual void onNewEvent(Notifier<Error*>* sender, Error* arg) 
 	{ 
+		(void)(sender);
 		counter++;
 		error = arg->getMessage();
 		severity = arg->getSeverity();

@@ -13,17 +13,17 @@ using namespace ops;
 
 class Object_A : public Serializable
 {
-	virtual void serialize(ArchiverInOut* archiver) {}
+	virtual void serialize(ArchiverInOut* archiver) { UNUSED(archiver); }
 };
 
 class Object_B : public Serializable
 {
-	virtual void serialize(ArchiverInOut* archiver) {}
+	virtual void serialize(ArchiverInOut* archiver) { UNUSED(archiver); }
 };
 
 class Object_C : public Serializable
 {
-	virtual void serialize(ArchiverInOut* archiver) {}
+	virtual void serialize(ArchiverInOut* archiver) { UNUSED(archiver); }
 };
 
 class ObjectFactory_1 : public SerializableFactory
