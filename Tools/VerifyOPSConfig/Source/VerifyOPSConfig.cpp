@@ -9,7 +9,7 @@
 
 #include "Configuration.h"
 
-const std::string sVersion = "Version 2017-10-14";
+const std::string sVersion = "Version 2018-04-13";
 
 
 bool gWarningGiven = false;
@@ -57,10 +57,30 @@ public:
 			//        <domains>
 
 			config.root();
+
+			// Check for unknown entries
+			{
+				std::vector<std::string> known = { "root" };
+				CheckForUnknown(config, known, "in file top-level");
+			}
+
+			verifyOnlyOneEntry(config, "root", "File");
+
 			if (!config.enter("root")) {
-			LOG_WARN( ">>> Missing <root>" << std::endl );
+				LOG_WARN( ">>> Missing <root>" << std::endl );
 				return;
 			}
+
+			VerifyNoAttributes(config, "in <root ...> node");
+
+			// Check for unknown entries
+			{
+				std::vector<std::string> known = { "ops_config" };
+				CheckForUnknown(config, known, "in <root> section");
+			}
+
+			verifyOnlyOneEntry(config, "ops_config", "<root>");
+
 			if (!config.enter("ops_config")) {
 				LOG_WARN( ">>> Missing <ops_config ...>" << std::endl );
 				return;
@@ -69,13 +89,30 @@ public:
 				LOG_WARN( ">>> Unknown <ops_config type=" << config.getAttribute("type") << "> " << std::endl );
 			}
 
-			if (config.numEntries("domains") > 1) {
-				LOG_WARN( ">>> File should only contain ONE <domains> section" << std::endl );
+			// Check for unknown attributes
+			{
+				std::vector<std::string> known = { "type" };
+				CheckForUnknownAttributes(config, known, "in <ops_config ...> node");
 			}
+			// Check for unknown entries
+			{
+				std::vector<std::string> known = { "domains" };
+				CheckForUnknown(config, known, "in <ops_config> section");
+			}
+
+			verifyOnlyOneEntry(config, "domains", "<ops_config>");
 
 			if (!config.enter("domains")) {
 				LOG_WARN( ">>> Missing <domains>" << std::endl );
 				return;
+			}
+
+			VerifyNoAttributes(config, "in <domains ...> node");
+
+			// Check for unknown entries
+			{
+				std::vector<std::string> known = { "element" };
+				CheckForUnknown(config, known, "in <domains> section");
 			}
 
 			for (int iDomains = 0; iDomains < config.numEntries("element"); iDomains++) {
@@ -91,26 +128,74 @@ public:
 		}
 		LOG_DEBUG("Total # domains: " << iNumDomains << std::endl);
 
-		// We have checked the xml-file.
-		// Now do further checks using the ops objects created from the xml-file
-		ops::OPSConfig* cfg = ops::OPSConfig::getConfig(filename.c_str());
-		if (cfg) {
-			// Trick to get all topics fully initialized
-			std::vector<ops::Domain*> domains = cfg->getRefToDomains();
-			for (unsigned int i = 0; i < domains.size(); i++) {
-				domains[i]->getTopics();
-			}
+		try {
+			// We have checked the xml-file.
+			// Now do further checks using the ops objects created from the xml-file
+			ops::OPSConfig* cfg = ops::OPSConfig::getConfig(filename.c_str());
+			if (cfg) {
+				// Trick to get all topics fully initialized
+				std::vector<ops::Domain*> domains = cfg->getRefToDomains();
+				for (unsigned int i = 0; i < domains.size(); i++) {
+					domains[i]->getTopics();
+				}
 
-			// 
+				// 
 
 
-			if (bDebug) {
-				// Dump all domains and topics to standard out 
-				ops::PrintArchiverOut prt(std::cout);
-				prt.printObject("", cfg);
-				std::cout << std::endl;
+				if (bDebug) {
+					// Dump all domains and topics to standard out 
+					ops::PrintArchiverOut prt(std::cout);
+					prt.printObject("", cfg);
+					std::cout << std::endl;
+				}
 			}
 		}
+		catch (std::exception& e) {
+			LOG_WARN(">>> Exception: " << e.what() << std::endl);
+		}
+	}
+
+	void verifyOnlyOneEntry(Configuration& config, std::string name, std::string parent)
+	{
+		if (config.numEntries(name) > 1) {
+			LOG_WARN(">>> " + parent + " should only contain ONE <" + name + ">" << std::endl);
+		}
+	}
+
+	void CheckForUnknown(Configuration& config, std::vector<std::string>& known, std::string msg)
+	{
+		// Check for unknown entries
+		int num = config.numEntries();
+		//std::cout << "Num entries=" << num << std::endl;
+		for (int i = 0; i < num; i++) {
+			std::string entryName = config.getNodeName(i);
+			//std::cout << "Name " << i << " = " << entryName << std::endl;
+			// if not a known name, log a warning
+			if (!CheckExist(entryName, known)) {
+				LOG_WARN( ">>> Unknown entry <" << entryName << "> found " << msg << std::endl );
+			}
+		}
+	}
+
+	void CheckForUnknownAttributes(Configuration& config, std::vector<std::string>& known, std::string msg)
+	{
+		// Check for unknown attributes
+		int num = config.numAttributes();
+		//std::cout << "Num attributes=" << num << std::endl;
+		for (int i = 0; i < num; i++) {
+			std::string attrName = config.getAttributeName(i);
+			//std::cout << "Name " << i << " = " << attrName << std::endl;
+			// if not a known name, log a warning
+			if (!CheckExist(attrName, known)) {
+				LOG_WARN(">>> Unknown attribute '" << attrName << "' used " << msg << std::endl);
+			}
+		}
+	}
+
+	void VerifyNoAttributes(Configuration& config, std::string msg)
+	{
+		std::vector<std::string> known = { "" };
+		CheckForUnknownAttributes(config, known, msg);
 	}
 
 	bool CheckExist(std::string name, std::vector<std::string>& vect)
@@ -160,25 +245,45 @@ public:
         //            <dataType>sds.RecordingControlData</dataType>
         //        </element>
 
+		// Check domainID first so we can use name in later logging
+		domainName = config.getString("domainID");
+		if (domainName == "") {
+			LOG_WARN(">>> Missing <domainID> for a domain" << std::endl);
+			domainName = "Missing <domainID>";
+		} else {
+			LOG_DEBUG("Domain: " << domainName << std::endl);
+			// Check unique domain name
+			if (CheckDuplicate(domainName, vDomains)) {
+				LOG_WARN(">>> Duplicate domain detected. '" << domainName << "' already used." << std::endl);
+			}
+		}
+		verifyOnlyOneEntry(config, "domainID", "<domains> <element> section for domainID '" + domainName + "'");
+
 		std::string domainType = config.getAttribute("type");
 		if ((domainType != "MulticastDomain") && (domainType != "Domain")) {
 			LOG_WARN( ">>> Unknown <element type=" << domainType << "> " << std::endl );
 		}
 
-		// domainID
-		domainName = config.getString("domainID");
-		if (domainName == "") {
-			LOG_WARN( ">>> Missing <domainID> for a domain" << std::endl );
-			domainName = "Missing <domainID>";
-		} else {
-			LOG_DEBUG( "Domain: " << domainName << std::endl );
-			// Check unique domain name
-			if (CheckDuplicate(domainName, vDomains)) {
-				LOG_WARN( ">>> Duplicate domain detected. '" << domainName << "' already used." << std::endl );
-			}
+		// Check for unknown attributes
+		{
+			std::vector<std::string> known = { "type" };
+			CheckForUnknownAttributes(config, known, "in <domains> <element> section for domainID '" + domainName + "'");
+		}
+
+		// Check for unknown entries
+		{
+			std::vector<std::string> known = { 
+				"domainID", "domainAddress", "metaDataMcPort", 
+				"localInterface", "timeToLive",
+				"channels", "transports",
+				"outSocketBufferSize", "inSocketBufferSize",
+				"topics" 
+			};
+			CheckForUnknown(config, known, " in <domains> for domainID '" + domainName + "'");
 		}
 
 		// domainAddress
+		verifyOnlyOneEntry(config, "domainAddress", "<domains> <element> section for domainID '" + domainName + "'");
 		std::string domainAddress = config.getString("domainAddress");
 		if (domainAddress == "") {
 			LOG_WARN( ">>> Missing <domainAddress> for domain: " << domainName << std::endl );
@@ -186,21 +291,33 @@ public:
 
 		// metaDataMcPort, optional but necessary if UDP transports are used.
 		// If not set to 0, then DomainAddress::metaDataMcPort should be unique
+		verifyOnlyOneEntry(config, "metaDataMcPort", "<domains> <element> section");
 		std::string metaDataMcPort = config.getString("metaDataMcPort");
 		LOG_DEBUG("metaDataMcPort: '" << metaDataMcPort << "', parsed as: " << config.parseInt(metaDataMcPort, 9494) << std::endl );
 		if (config.parseInt(metaDataMcPort, 9494) != 0) {
 			if (CheckDuplicate(domainAddress + "::" + metaDataMcPort, vDomainMeta)) {
-				LOG_WARN(">>> Duplicate use of DomainAddress::metaDataMcPort for domain " << domainName << std::endl);
+				LOG_WARN(">>> Duplicate use of DomainAddress::metaDataMcPort for domain: " << domainName << std::endl);
 			}
 		}
 
 		// localInterface, optional
+		verifyOnlyOneEntry(config, "localInterface", "<domains> <element> section for domainID '" + domainName + "'");
+
+		verifyOnlyOneEntry(config, "timeToLive", "<domains> <element> section for domainID '" + domainName + "'");
+
+		verifyOnlyOneEntry(config, "outSocketBufferSize", "<domains> <element> section for domainID '" + domainName + "'");
+
+		verifyOnlyOneEntry(config, "inSocketBufferSize", "<domains> <element> section for domainID '" + domainName + "'");
 
 		// channels, optional
-		if (config.numEntries("channels") > 1) {
-			LOG_WARN( ">>> Domain should only contain at most ONE <channels> section" << std::endl );
-		}
+		verifyOnlyOneEntry(config, "channels", "<domains> <element> section for domainID '" + domainName + "'");
 		if (config.enter("channels")) {
+			VerifyNoAttributes(config, "in <channels ...> node for domain: " + domainName);
+
+			// Check for unknown entries
+			std::vector<std::string> known = { "element" };
+			CheckForUnknown(config, known, "in <channels> node for domain: " + domainName);
+
 			for (int iChannels = 0; iChannels < config.numEntries("element"); iChannels++) {
 				if (config.enter("element", iChannels)) {
 					VerifyChannel(config, domainName);
@@ -211,10 +328,14 @@ public:
 		}
 
 		// transports, optional
-		if (config.numEntries("transports") > 1) {
-			LOG_WARN( ">>> Domain should only contain at most ONE <transports> section" << std::endl );
-		}
+		verifyOnlyOneEntry(config, "transports", "<domains> <element> section for domainID '" + domainName + "'");
 		if (config.enter("transports")) {
+			VerifyNoAttributes(config, "in <transports ...> node for domain: " + domainName);
+
+			// Check for unknown entries
+			std::vector<std::string> known = { "element" };
+			CheckForUnknown(config, known, "in <transports> node for domain: " + domainName);
+
 			for (int iTransports = 0; iTransports < config.numEntries("element"); iTransports++) {
 				if (config.enter("element", iTransports)) {
 					VerifyTransport(config, domainName);
@@ -225,13 +346,17 @@ public:
 		}
 
 		// topics
-		if (config.numEntries("topics") > 1) {
-			LOG_WARN( ">>> Domain should only contain ONE <topics> section" << std::endl );
-		}
+		verifyOnlyOneEntry(config, "topics", "<domains> <element> section for domainID '" + domainName + "'");
 		if (!config.enter("topics")) {
 			LOG_WARN( ">>> Missing <topics> for domain: " << domainName << std::endl );
 
 		} else {
+			VerifyNoAttributes(config, "in <topics ...> node for domain: " + domainName);
+
+			// Check for unknown entries
+			std::vector<std::string> known = { "element" };
+			CheckForUnknown(config, known, "in <topics> node for domain: " + domainName);
+
 			vTopics.clear();
 			for (int iTopics = 0; iTopics < config.numEntries("element"); iTopics++) {
 				if (config.enter("element", iTopics)) {
@@ -262,10 +387,10 @@ public:
 	{
 		std::string s;
 
-		//must have a unique channel name
+		//must have a unique channel name. Check first to get a name to use in later logging
 		std::string channelName = config.getString("name");
 		if (channelName == "") {
-			LOG_WARN( ">>> Missing <name> for a channel" << std::endl );
+			LOG_WARN( ">>> Missing <name> for a channel in domain: " << domainName << std::endl );
 			channelName = "Missing <name>";
 		} else {
 			LOG_DEBUG( "Channel: " << channelName << std::endl );
@@ -274,6 +399,26 @@ public:
 				LOG_WARN( ">>> Duplicate channel name detected in domain '" << domainName << "'. Channel name '" << channelName << "' already used." << std::endl );
 			}
 		}
+		verifyOnlyOneEntry(config, "name", "<channels> <element> section in domain: " + domainName + " with name: " + channelName);
+
+		// Check for unknown attributes
+		{
+			std::vector<std::string> known = { "type" };
+			CheckForUnknownAttributes(config, known, "in <channels> <element ...> node for domain: " + domainName + " channel: " + channelName);
+		}
+
+		// Check for unknown entries
+		{
+			std::vector<std::string> known = { 
+				"name", "linktype", "address", "localInterface", "port", "timeToLive",
+				"outSocketBufferSize", "inSocketBufferSize"
+			};
+			CheckForUnknown(config, known, "in <channels> <element> section for domain: " + domainName + " channel: " + channelName);
+		}
+
+		verifyOnlyOneEntry(config, "linktype", "<channels> <element> section in domain: " + domainName + " with name: " + channelName);
+		verifyOnlyOneEntry(config, "address", "<channels> <element> section in domain: " + domainName + " with name: " + channelName);
+		verifyOnlyOneEntry(config, "port", "<channels> <element> section in domain: " + domainName + " with name: " + channelName);
 
 		std::string linkType = config.getString("linktype");
 		std::string address = config.getString("address");
@@ -314,14 +459,18 @@ public:
 		}
 
 		///TODO can have local interface, buffer sizes
+		verifyOnlyOneEntry(config, "localInterface", "<channels> <element> section in domain: " + domainName + " with name: " + channelName);
+		verifyOnlyOneEntry(config, "timeToLive", "<channels> <element> section in domain: " + domainName + " with name: " + channelName);
+		verifyOnlyOneEntry(config, "outSocketBufferSize", "<channels> <element> section in domain: " + domainName + " with name: " + channelName);
+		verifyOnlyOneEntry(config, "inSocketBufferSize", "<channels> <element> section in domain: " + domainName + " with name: " + channelName);
 	}
 
 	void VerifyTransport(Configuration& config, std::string domainName)
 	{
-		///must have an existing channel name
+		///must have an existing channel name. Check first to have a name for later logging
 		std::string channelName = config.getString("channelID");
 		if (channelName == "") {
-			LOG_WARN( ">>> Missing <channelID> for a transport" << std::endl );
+			LOG_WARN( ">>> Missing <channelID> for a transport in domain: " << domainName << std::endl );
 			channelName = "Missing <channelID>";
 		} else {
 			LOG_DEBUG( "  channelID: " << channelName << std::endl );
@@ -329,16 +478,31 @@ public:
 				LOG_WARN( ">>> Unknown channel name '" << channelName << "' used in transport for domain '" << domainName << "'." << std::endl );
 			}
 		}
+		verifyOnlyOneEntry(config, "channelID", "<transports> <element> section in domain: " + domainName + " with channelID: " + channelName);
+
+		// Check for unknown attributes
+		{
+			std::vector<std::string> known = { "type" };
+			CheckForUnknownAttributes(config, known, "in <transports> <element ...> node for domain: " + domainName + " channel: " + channelName);
+		}
+
+		// Check for unknown entries
+		{
+			std::vector<std::string> known = { "channelID", "topics" };
+			CheckForUnknown(config, known, "in <transports> <element ...> node for domain: " + domainName + " channel: " + channelName);
+		}
 
 		///can have zero or more topic names (save all topicnames and check that they are defined in topics section)
 		///check that topic only exist in one transport
-		if (config.numEntries("topics") > 1) {
-			LOG_WARN( ">>> Transports should only contain ONE <topics> section" << std::endl );
-		}
+		verifyOnlyOneEntry(config, "topics", "<transports> <element> section in domain: " + domainName + " with channelID: " + channelName);
 		if (!config.enter("topics")) {
 			LOG_WARN( ">>> Missing <topics> for transport '" << channelName << "' in domain '" << domainName << "'" << std::endl );
 
 		} else {
+			// Check for unknown entries
+			std::vector<std::string> known = { "element" };
+			CheckForUnknown(config, known, "in <transports> <element> <topics> node for domain: " + domainName + "channel: " + channelName);
+
 			for (int iTopics = 0; iTopics < config.numEntries("element"); iTopics++) {
 				std::string topicName = config.getString("element", iTopics);
 				LOG_DEBUG( "    topicName: " << topicName << std::endl );
@@ -364,30 +528,50 @@ public:
 		//  <outSocketBufferSize>32000000</outSocketBufferSize>
 		//</element>
 
-		if (config.getAttribute("type") != "Topic") {
-			LOG_WARN( ">>> Unknown <element type=...> " << std::endl );
-		}
-
-		// name
+		// Check name first to use in later logging
 		topicName = config.getString("name");
 		if (topicName == "") {
-			LOG_WARN( ">>> Missing <name> for a topic" << std::endl );
+			LOG_WARN( ">>> Missing <name> for a topic in domain: " << domainName << std::endl );
 			topicName = "Missing <name>";
 		} else {
 			LOG_DEBUG( "Checking topic: " << topicName << std::endl );
 			// Check that name is unique in domain
 			if (CheckDuplicate(topicName, vTopics)) {
-				LOG_WARN( ">>> Duplicate Topic detected. Name '" << topicName << "' already used." << std::endl );
+				LOG_WARN( ">>> Duplicate Topic detected. Name '" << topicName << "' already used in domain: " << domainName << std::endl );
 			}
+		}
+		verifyOnlyOneEntry(config, "name", "<topics> <element> section in domain: " + domainName + " topic: " + topicName);
+
+		// Check for unknown attributes
+		{
+			std::vector<std::string> known = { "type" };
+			CheckForUnknownAttributes(config, known, "in <topics> <element ...> node for domain: " + domainName + " topic: " + topicName);
+		}
+
+		if (config.getAttribute("type") != "Topic") {
+			LOG_WARN(">>> Unknown <element type=" << config.getAttribute("type") << std::endl);
+		}
+
+		// Check for unknown entries
+		{
+			std::vector<std::string> known = {
+				"name", "dataType",
+				"sampleMaxSize",
+				"address", "transport", "port",
+				"outSocketBufferSize", "inSocketBufferSize"
+			};
+			CheckForUnknown(config, known, "in <topics> for domain: " + domainName + " topic: " + topicName);
 		}
 
 		// dataType
+		verifyOnlyOneEntry(config, "dataType", "<topics> <element> section in domain: " + domainName + " topic: " + topicName);
 		dataType = config.getString("dataType");
 		if (dataType == "") {
 			LOG_WARN(">>> Missing <dataType> for topic: " << topicName << ", in domain: " << domainName << std::endl);
 		}
 
 		// sampleMaxSize optional, required if sample size os > 60000
+		verifyOnlyOneEntry(config, "sampleMaxSize", "<topics> <element> section in domain: " + domainName + " topic: " + topicName);
 		sampleMaxSize = config.parseInt64(config.getString("sampleMaxSize"), 60000);
 		if (sampleMaxSize > 60000) {
 			// For datatypes > 60000, we require different ports
@@ -396,6 +580,10 @@ public:
 
 		//
 		bool topicDefinedInTransports = EraseIfExist(topicName, vTransportTopics);
+
+		verifyOnlyOneEntry(config, "transport", "<topics> <element> section in domain: " + domainName + " topic: " + topicName);
+		verifyOnlyOneEntry(config, "address", "<topics> <element> section in domain: " + domainName + " topic: " + topicName);
+		verifyOnlyOneEntry(config, "port", "<topics> <element> section in domain: " + domainName + " topic: " + topicName);
 
 		// transport optional
 		std::string linkType = config.getString("transport");
@@ -451,6 +639,8 @@ public:
 
 		// inSocketBufferSize optional
 		// outSocketBufferSize optional
+		verifyOnlyOneEntry(config, "outSocketBufferSize", "<topics> <element> section in domain: " + domainName + " topic: " + topicName);
+		verifyOnlyOneEntry(config, "inSocketBufferSize", "<topics> <element> section in domain: " + domainName + " topic: " + topicName);
 	}
 
 };

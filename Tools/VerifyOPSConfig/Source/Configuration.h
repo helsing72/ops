@@ -97,6 +97,11 @@
 			return "";
 		}
 
+		std::string getNodeName(int i = 0)
+		{
+			return currentNode.getChildNode(i).getName();
+		}
+
 		bool updateString(std::string name, std::string value, int i = 0)
 		{
 			if(!currentNode.getChildNode(name.c_str(), i).isEmpty()) {
@@ -108,6 +113,16 @@
 			return false;
 		}
 
+		int numAttributes()
+		{
+			return currentNode.nAttribute();
+		}
+
+		std::string getAttributeName(int i = 0)
+		{
+			return currentNode.getAttributeName(i);
+		}
+		
 		std::string getAttribute(std::string name, std::string defaultValue = "")
 		{
 			for (int i = 0; i < currentNode.nAttribute(); i++) {
