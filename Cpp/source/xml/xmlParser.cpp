@@ -628,8 +628,11 @@ XMLSTR ToXMLStringTool::toXMLUnSafe(XMLSTR dest,XMLCSTR source)
         switch(XML_ByteTable[(unsigned char)ch])
         {
         case 4: *(dest++)=*(source++);
+        /* FALLTHRU */
         case 3: *(dest++)=*(source++);
+        /* FALLTHRU */
         case 2: *(dest++)=*(source++);
+        /* FALLTHRU */
         case 1: *(dest++)=*(source++);
         }
 #endif
@@ -780,8 +783,11 @@ XMLSTR fromXMLString(XMLCSTR s, int lo, XML *pXML)
             switch(XML_ByteTable[(unsigned char)*ss])
             {
             case 4: *(d++)=*(ss++); ll--;
+            /* FALLTHRU */
             case 3: *(d++)=*(ss++); ll--;
+            /* FALLTHRU */
             case 2: *(d++)=*(ss++); ll--;
+            /* FALLTHRU */
             case 1: *(d++)=*(ss++);
             }
 #endif
@@ -948,6 +954,7 @@ static NextToken GetNextToken(XML *pXML, int *pcbToken, enum XMLTokenTypeTag *pT
 
 			// If we haven't found a short hand closing tag then drop into the
 			// text process
+                        /* FALLTHRU */
 
 		// Other characters
 		default:
@@ -2624,8 +2631,11 @@ XMLNode::XMLCharEncoding XMLNode::guessCharEncoding(void *buf,int l, char useXML
         switch (XML_utf8ByteTable[b[i]])
         {
         case 4: i++; if ((i<l)&&(b[i]& 0xC0)!=0x80) { bestGuess=encoding_ascii; i=l; } // 10bbbbbb ?
+        /* FALLTHRU */
         case 3: i++; if ((i<l)&&(b[i]& 0xC0)!=0x80) { bestGuess=encoding_ascii; i=l; } // 10bbbbbb ?
+        /* FALLTHRU */
         case 2: i++; if ((i<l)&&(b[i]& 0xC0)!=0x80) { bestGuess=encoding_ascii; i=l; } // 10bbbbbb ?
+        /* FALLTHRU */
         case 1: i++; break;
         case 0: i=l;
         }
