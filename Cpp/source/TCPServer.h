@@ -79,6 +79,11 @@ namespace ops
 
 		void open()
 		{
+			/// We must handle asynchronous callbacks that haven't finished yet (in case open()/close() called multiple times)
+			/// We must not delete the acceptor while the async call is active.
+			while (_working) {
+				Sleep(1);
+			}
 			_canceled = false;
 			if (acceptor) delete acceptor;
 			// This constructor opens, binds and listens to the given endpoint.
