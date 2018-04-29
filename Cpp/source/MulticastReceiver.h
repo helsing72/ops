@@ -134,6 +134,12 @@ namespace ops
 			if (sock) sock->close();
 		}
 
+		// Returns true if all asynchronous work has finished
+		virtual bool asyncFinished()
+		{
+			return !m_working;
+		}
+
 		void asynchWait(char* bytes, int size)
 		{
 			data  = bytes;

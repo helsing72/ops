@@ -261,6 +261,12 @@ namespace ops
 			}
         }
 
+		// Returns true if all asynchronous work has finished
+		virtual bool asyncFinished()
+		{
+			return !m_working;
+		}
+
     private:
         int port;
 		Address_T ipaddress;

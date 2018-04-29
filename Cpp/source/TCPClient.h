@@ -145,8 +145,14 @@ namespace ops
 			port = sendingEndPoint.port();
 		}
 
-        virtual ~TCPClient()
-        {
+		// Returns true if all asynchronous work has finished
+		virtual bool asyncFinished()
+		{
+			return !m_working;
+		}
+
+		virtual ~TCPClient()
+		{
 			// Make sure socket is closed
 			stop();
 

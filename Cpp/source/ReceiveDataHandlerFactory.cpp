@@ -122,7 +122,8 @@ namespace ops
         
         for (int i = (int)garbageReceiveDataHandlers.size() - 1; i >= 0; i--)
         {
-            if (garbageReceiveDataHandlers[i]->numReservedMessages() == 0)
+            if ((garbageReceiveDataHandlers[i]->numReservedMessages() == 0) &&
+                (garbageReceiveDataHandlers[i]->getReceiver()->asyncFinished()))
             {
                 delete garbageReceiveDataHandlers[i];
                 std::vector<ReceiveDataHandler*>::iterator iter = garbageReceiveDataHandlers.begin() + i;
