@@ -2,6 +2,7 @@
 cd ../../
 
 exit_count=0
+exit_gtest=0
 exit_des_ser=0
 exit_normal=0
 exit_tcp=0
@@ -10,7 +11,10 @@ exit_udp=0
 find build.debug/ -name '*.gcda' | xargs rm -f
 
 mkdir -p UnitTests/OPStest-C++/Unit_test_results
-date > UnitTests/OPStest-C++/Unit_test_results/UnitTests-result.txt 
+date > UnitTests/OPStest-C++/Unit_test_results/UnitTests-result.txt
+build.debug/UnitTests/OPStest-C++/gtest/gtest-main --gtest_output="xml:unittest-c++-gtest-result.xml"
+exit_gtest=$?
+
 build.debug/UnitTests/OPStest-C++/UnitTests/test-serialize-and-deserialize --gtest_output="xml:unittest-c++-ser-deser-result.xml"
 exit_des_ser=$?
 
@@ -42,7 +46,7 @@ bash
 	cppcheck --enable=all --inconclusive --xml --xml-version=2 Cpp/source Cpp/include 2> cppcheck-c++-result.xml
 exit
 
-exit_count=$(( $exit_des_ser + $exit_normal + $exit_tcp  + $exit_udp ))
+exit_count=$(( $exit_gtest + $exit_des_ser + $exit_normal + $exit_tcp  + $exit_udp ))
 
 if [ $exit_count == 0 ]
 then
