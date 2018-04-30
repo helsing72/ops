@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016-2017 Lennart Andersson.
+* Copyright (C) 2016-2018 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -39,12 +39,18 @@ namespace ops
         // Returns true if at least one domain was added
         bool Add( FileName_T filename, ObjectName_T domainID = "" );
 
+		// Add all domains from the given OPSConfig object. To be used in cases were the config
+		// is constructed in some other way than directly from a file.
+		// Note that the repository takes over ownership of the config object
+		// Returns true if at least one domain was added
+		bool Add( OPSConfig* config );
+
         // Remove all domains from repository (Note does not clear the file-cache)
         void Clear();
 
         // ======================================================
         // Get a reference to the internal OPSConfig object
-        // if 'domainID' != "", the domain 'domainID' must exist otherwise NULL is returned.
+        // if 'domainID' != "", the domain 'domainID' must exist otherwise nullptr is returned.
         OPSConfig* getConfig(ObjectName_T domainID = "" );
 
         bool domainExist(ObjectName_T domainID );
@@ -54,6 +60,8 @@ namespace ops
 
     private:
         OPSConfigRepository();
+
+		bool extractDomains(OPSConfig* config, ObjectName_T domain = "");
 
         // Our OPSConfig object containing references to all selectivly added domains
         OPSConfig* m_config;

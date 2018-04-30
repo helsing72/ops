@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016-2017 Lennart Andersson.
+* Copyright (C) 2016-2018 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -24,6 +24,7 @@
 #include "Domain.h"
 #include "DefaultOPSConfigImpl.h"
 #include "ConfigException.h"
+#include "TimeHelper.h"
 
 #include "OPSConfigRepository.h"
 
@@ -76,7 +77,7 @@ bool OPSConfigRepository::Add( FileName_T filename, ObjectName_T domain )
         }
     }
 
-    OPSConfig* config = NULL;
+    OPSConfig* config = nullptr;
 
     try {
         // Check if file already read
@@ -86,7 +87,7 @@ bool OPSConfigRepository::Add( FileName_T filename, ObjectName_T domain )
         } else {
             // Need to read file
             config = OPSConfig::getConfig( filename );
-            if (config == NULL) return retVal;
+            if (config == nullptr) return retVal;
             m_configFiles[filename] = config;
         }
     } catch (ops::ConfigException& ex)
@@ -98,26 +99,62 @@ bool OPSConfigRepository::Add( FileName_T filename, ObjectName_T domain )
         return retVal;
     }
 
-    // Get all domains read from file 
+	return extractDomains(config, domain);
+}
+
+// Add all domains from the given OPSConfig object. To be used in cases were the config
+// is constructed in some other way than directly from a file.
+// Note that the repository takes over ownership of the config object
+bool OPSConfigRepository::Add(OPSConfig* config)
+{
+	bool retVal = false;
+
+	// Construct a new unique name to be used in the "file cache"
+	FileName_T name("Internal_");
+	name += NumberToString((size_t)config);
+	name += '_';
+	name += NumberToString(TimeHelper::currentTimeMillis());
+
+	SafeLock lock(&repoLock);
+
+	// Check if name already used
+	if (m_configFiles.find(name) != m_configFiles.end()) {
+		ErrorMessage_T msg("Failed to add OPSConfig to repository");
+		BasicError err("OPSConfigRepository", "Add", msg);
+		Participant::reportStaticError(&err);
+		return retVal;
+
+	} else {
+		m_configFiles[name] = config;
+	}
+
+	return extractDomains(config);
+}
+
+bool OPSConfigRepository::extractDomains(OPSConfig* config, ObjectName_T domain)
+{
+	bool retVal = false;
+
+	// Get all domains read from file 
 	std::vector<ops::Domain* > domains = config->getDomains();
-    // Add the choosen one(s) to our list if not already there
-    for (unsigned int i = 0; i < domains.size(); i++) {
-        if ( (domain == "") || (domains[i]->getDomainID() == domain) ) {
-            if (domainExist( domains[i]->getDomainID() )) {
+	// Add the choosen one(s) to our list if not already there
+	for (unsigned int i = 0; i < domains.size(); i++) {
+		if ((domain == "") || (domains[i]->getDomainID() == domain)) {
+			if (domainExist(domains[i]->getDomainID())) {
 				ErrorMessage_T msg("domain '");
 				msg += domains[i]->getDomainID();
 				msg += "' already exist";
-	    		BasicError err("OPSConfigRepository", "Add", msg);
-                Participant::reportStaticError(&err);
-            } else {
-                // Add unique domains to our list
-                m_config->getRefToDomains().push_back(domains[i]);
-                retVal = true;
-            }
-        }
-    }
+				BasicError err("OPSConfigRepository", "Add", msg);
+				Participant::reportStaticError(&err);
+			} else {
+				// Add unique domains to our list
+				m_config->getRefToDomains().push_back(domains[i]);
+				retVal = true;
+			}
+		}
+	}
 
-    return retVal;
+	return retVal;
 }
 
 void OPSConfigRepository::Clear()
@@ -139,10 +176,11 @@ void OPSConfigRepository::DebugTotalClear()
 	}
 	m_configFiles.clear();
 	delete m_config;
+	m_config = nullptr;
 }
 
 // Get a reference to the OPSConfig object
-// if 'domainID' != "", the domain must exist otherwise NULL is returned.
+// if 'domainID' != "", the domain must exist otherwise nullptr is returned.
 OPSConfig* OPSConfigRepository::getConfig(ObjectName_T domainID )
 {
     SafeLock lock(&repoLock);
@@ -150,11 +188,11 @@ OPSConfig* OPSConfigRepository::getConfig(ObjectName_T domainID )
     // If no domain have been added, we try to add the default file
     // This is for backward compatibility
     if (m_config->getRefToDomains().size() == 0) {
-        if (!Add("ops_config.xml")) return NULL;
+        if (!Add("ops_config.xml")) return nullptr;
     }
 
     if (domainID != "") {
-        if (!domainExist( domainID )) return NULL;
+        if (!domainExist( domainID )) return nullptr;
     }
 
     return m_config;

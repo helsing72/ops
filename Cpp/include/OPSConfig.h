@@ -34,6 +34,7 @@ namespace ops
 	public:
 		static OPSConfig* getConfig();
 		static OPSConfig* getConfig(FileName_T configFile);
+		static OPSConfig* getConfig(std::istream& inStream);
 
 		// Should be used with care, since the above methods may return a singleton
 		virtual ~OPSConfig();
@@ -69,8 +70,6 @@ namespace ops
 
 	private:
 		std::vector<Domain* > domains;
-
-		static OPSConfig* getConfig(std::istream& inStream);
 	};
 }
 #endif
