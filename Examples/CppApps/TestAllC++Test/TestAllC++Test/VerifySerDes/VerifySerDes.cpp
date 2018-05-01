@@ -22,6 +22,7 @@
 #include <MemoryMap.h>
 #include <OPSConfigRepository.h>
 #include "PrintArchiverOut.h"
+#include "OPSArchiverOut.h"
 
 #ifdef _WIN32
 	#include <crtdbg.h>
