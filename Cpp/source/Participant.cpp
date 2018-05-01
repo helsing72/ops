@@ -37,6 +37,7 @@
 #include "BasicError.h"
 #include "NetworkSupport.h"
 #include "ThreadSupport.h"
+#include "TimeHelper.h"
 
 namespace ops
 {
@@ -137,6 +138,9 @@ namespace ops
 		keepRunning(true),
 		aliveTimeout(1000),
 		objectFactory(NULL)
+#ifdef OPS_ENABLE_DEBUG_HANDLER
+		, debugHandler(this)
+#endif
 	{
 		ioService = IOService::create();
 
@@ -286,15 +290,24 @@ namespace ops
 
 	ops::Topic Participant::createParticipantInfoTopic()
 	{
-///		ops::Topic infoTopic("ops.bit.ParticipantInfoTopic", 9494, "ops.ParticipantInfoData", domain->getDomainAddress());
 		ops::Topic infoTopic("ops.bit.ParticipantInfoTopic", domain->getMetaDataMcPort(), "ops.ParticipantInfoData", domain->getDomainAddress());
 		infoTopic.setLocalInterface(domain->getLocalInterface());
 		infoTopic.setTimeToLive(domain->getTimeToLive());
 		infoTopic.setDomainID(domainID);
 		infoTopic.setParticipantID(participantID);
 		infoTopic.setTransport(Topic::TRANSPORT_MC);
-
 		return infoTopic;
+	}
+
+	ops::Topic Participant::createDebugTopic()
+	{
+		ops::Topic debugTopic("ops.DebugTopic", domain->getDebugMcPort(), DebugRequestResponseData::getTypeName(), domain->getDomainAddress());
+		debugTopic.setLocalInterface(domain->getLocalInterface());
+		debugTopic.setTimeToLive(domain->getTimeToLive());
+		debugTopic.setDomainID(domainID);
+		debugTopic.setParticipantID(participantID);
+		debugTopic.setTransport(Topic::TRANSPORT_MC);
+		return debugTopic;
 	}
 
 	// Report an error via the participants ErrorService
@@ -371,6 +384,12 @@ namespace ops
 				BasicError err("Participant", "onNewEvent", errMessage);
 				reportStaticError(&err);
 			}
+
+#ifdef OPS_ENABLE_DEBUG_HANDLER
+			if (domain->getDebugMcPort() != 0) {
+				debugHandler.Start();
+			}
+#endif
 		}
 
 		// Start a new timeout

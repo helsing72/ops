@@ -40,6 +40,7 @@ namespace ops
 		std::vector<Topic* > topics;
 		ObjectName_T domainID;
 		int metaDataMcPort;
+		int debugMcPort;
 
 		std::vector<Channel* > channels;
 		std::vector<Transport* > transports;
@@ -57,7 +58,8 @@ namespace ops
 		bool existsTopic(ObjectName_T name);
 		ObjectName_T getDomainID();
 		int getMetaDataMcPort();
-		
+		int getDebugMcPort();
+
 		void serialize(ArchiverInOut* archiver);
 		int getTimeToLive();
 

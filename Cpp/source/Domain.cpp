@@ -32,7 +32,8 @@ Domain::Domain() :
 	localInterface("0.0.0.0"),
 	inSocketBufferSize(-1),		// Use OS default, Topics may override
 	outSocketBufferSize(-1),	// Use OS default, Topics may override
-	metaDataMcPort(9494)		// Default port 
+	metaDataMcPort(9494),		// Default port 
+	debugMcPort(0)
 {
 	appendType(TypeId_T("Domain"));
 }
@@ -110,6 +111,7 @@ void Domain::serialize(ArchiverInOut* archiver)
 	if (dynamic_cast<XMLArchiverIn*>(archiver) != NULL) { 
 		archiver->inout<Channel>("channels", channels);
 		archiver->inout<Transport>("transports", transports);
+		archiver->inout("debugMcPort", debugMcPort);
 		checkTransports();
 	}
 }
@@ -185,6 +187,11 @@ int Domain::getOutSocketBufferSize()
 int Domain::getMetaDataMcPort()
 {
 	return metaDataMcPort;
+}
+
+int Domain::getDebugMcPort()
+{
+	return debugMcPort;
 }
 
 Domain::~Domain()

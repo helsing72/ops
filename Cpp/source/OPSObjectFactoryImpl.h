@@ -29,6 +29,9 @@
 #include "DefaultOPSConfigImpl.h"
 #include "Domain.h"
 #include "ParticipantInfoData.h"
+#ifdef OPS_ENABLE_DEBUG_HANDLER
+	#include "ops/DebugRequestResponseData.h"
+#endif
 
 namespace ops
 {
@@ -71,7 +74,13 @@ namespace ops
             {
                 return new ParticipantInfoData();
             }
-            return NULL;
+#ifdef OPS_ENABLE_DEBUG_HANDLER
+			if (type == ("ops.DebugRequestResponseData"))
+			{
+				return new DebugRequestResponseData();
+			}
+#endif
+			return NULL;
         }
     };
 
@@ -85,5 +94,4 @@ namespace ops
     };
 
 }
-
 #endif

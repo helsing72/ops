@@ -334,6 +334,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\Channel.h" />
+    <ClInclude Include="..\..\..\include\DebugHandler.h" />
     <ClInclude Include="..\..\..\include\Error.h" />
     <ClInclude Include="..\..\..\include\ErrorWriter.h" />
     <ClInclude Include="..\..\..\include\fixed_string.h" />
@@ -430,6 +431,7 @@
     <ClCompile Include="..\..\..\source\Compatibility.cpp" />
     <ClCompile Include="..\..\..\source\DataNotifier.cpp" />
     <ClCompile Include="..\..\..\source\DeadlineTimer.cpp" />
+    <ClCompile Include="..\..\..\source\DebugHandler.cpp" />
     <ClCompile Include="..\..\..\source\Domain.cpp" />
     <ClCompile Include="..\..\..\source\ErrorService.cpp" />
     <ClCompile Include="..\..\..\source\IOService.cpp" />

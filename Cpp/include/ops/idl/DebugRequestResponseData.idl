@@ -1,0 +1,54 @@
+package ops;
+
+class DebugRequestResponseData
+{
+    /* Type of entity to talk to: Debug = 0, Participant = 1, Publisher = 2, Subscriber = 3, ... */
+    int    Entity;
+
+    /* Name of entity */
+    string Name;
+
+    /* Commands and parameters
+       0 = Response
+       1 = Request status
+         Debug:
+       2 = List, Param1 = 2 [Publishers], Param1 = 3 [Subscribers]
+         Participant:
+           TBD
+         Publisher:
+       2 = Enable, Param1 = 0 [False] / 1 [True]
+       3 = PubId, Increment counter with Param1
+       4 = Skip, Skip Param1 number of sends             (TODO)
+       5 = Send, Send message in Objs[0]
+         Subcriber:
+       2 = Enable, Param1 = 0 [False] / 1 [True]
+       3 = Filter, Set key filter from Param3            (TODO)
+       4 = Skip, Skip Param1 number of received messages (TODO)
+    */
+    int      Command;
+    long     Param1;
+    string[] Param3;
+    virtual OPSObject[] Objs;
+
+    /* Response to Request with results
+         Debug:
+           Result1 = 2, List in Param3 contains Publishers
+           Result1 = 3, List in Param3 contains subscribers
+         Participant:
+           TBD
+         Publisher:
+           Enabled or not
+           Result1 = Publication Counter
+           Result2 = Number of sends left to skip
+           Result3 = True if fejk message stored for sending
+         Subcriber:
+           Enabled or not
+           Result1 = Number of messages received
+           Result2 = Number of receives left to skip
+           Result3 = True if Key filter active
+    */
+    boolean  Enabled;
+    long     Result1;
+    long     Result2;
+    boolean  Result3;
+}

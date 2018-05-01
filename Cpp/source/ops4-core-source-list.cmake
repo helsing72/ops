@@ -20,6 +20,7 @@ set(LIB_OPS_PUBLIC_HEADERS
   ${OPS_HEADER_PATH}/DataNotifier.h
   ${OPS_HEADER_PATH}/DeadlineMissedListener.h
   ${OPS_HEADER_PATH}/DeadlineTimer.h
+  ${OPS_HEADER_PATH}/DebugHandler.h
   ${OPS_HEADER_PATH}/Domain.h
   ${OPS_HEADER_PATH}/Error.h
   ${OPS_HEADER_PATH}/ErrorService.h
@@ -94,6 +95,7 @@ set(LIB_OPS_CORE_SRCS
   ${OPS_SRC_PATH}/Channel.cpp
   ${OPS_SRC_PATH}/Compatibility.cpp
   ${OPS_SRC_PATH}/DataNotifier.cpp
+  ${OPS_SRC_PATH}/DebugHandler.cpp
   ${OPS_SRC_PATH}/DefaultOPSConfigImpl.h
   ${OPS_SRC_PATH}/Domain.cpp
   ${OPS_SRC_PATH}/ErrorService.cpp

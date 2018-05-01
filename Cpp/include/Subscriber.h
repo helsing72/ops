@@ -37,6 +37,7 @@
 #include "DeadlineTimer.h"
 #include "OPSExport.h"
 #include "PubIdChecker.h"
+#include "DebugHandler.h"
 
 #ifdef USE_C11
 #include <mutex>
@@ -54,7 +55,10 @@ namespace ops
 {
 
     class OPS_EXPORT Subscriber : public DataNotifier, public Lockable, public Listener<OPSMessage*>, public Listener<int>
-    {
+#ifdef OPS_ENABLE_DEBUG_HANDLER
+		, DebugNotifyInterface
+#endif
+	{
     public:
         Subscriber(Topic t);
         virtual ~Subscriber();
@@ -199,7 +203,13 @@ namespace ops
         bool started;
 
         DeadlineTimer* deadlineTimer;
-    };
+
+#ifdef OPS_ENABLE_DEBUG_HANDLER
+		bool _enabled;
+		int64_t _numReceived;
+		virtual void onRequest(DebugRequestResponseData& req, DebugRequestResponseData& resp);
+#endif
+	};
 
 }
 #endif

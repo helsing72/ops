@@ -49,7 +49,11 @@ namespace ops
 		deadlineTimeout(TimeHelper::infinite),
 		deadlineMissed(false),
 		started(false)
-    {
+#ifdef OPS_ENABLE_DEBUG_HANDLER
+		, _enabled(true)
+		, _numReceived(0)
+#endif
+	{
         participant = Participant::getInstance(topic.getDomainID(), topic.getParticipantID());
         deadlineTimer = DeadlineTimer::create(participant->getIOService());
         
@@ -58,11 +62,18 @@ namespace ops
         newDataEvent = new boost::condition_variable;
 #endif
         timeLastData = TimeHelper::currentTimeMillis();
-    }
+
+#ifdef OPS_ENABLE_DEBUG_HANDLER
+		participant->debugHandler.RegisterSub(this, topic.getName());
+#endif
+	}
 
     Subscriber::~Subscriber()
     {
-        // Make sure subscriber is stopped and no more notifications can call us
+#ifdef OPS_ENABLE_DEBUG_HANDLER
+		participant->debugHandler.UnregisterSub(this, topic.getName());
+#endif
+		// Make sure subscriber is stopped and no more notifications can call us
         stop();
 
         delete deadlineTimer;
@@ -108,6 +119,10 @@ namespace ops
     {
         UNUSED(sender);
         //Perform a number of checks on incomming data to be sure we want to deliver it to the application layer
+#ifdef OPS_ENABLE_DEBUG_HANDLER
+		if (!_enabled) return;
+		_numReceived++;
+#endif
 
         //Check that this message is delivered on the same topic as this Subscriber use
         if (message->getTopicName() != topic.getName())
@@ -359,4 +374,28 @@ namespace ops
         return message;
     }
 
+#ifdef OPS_ENABLE_DEBUG_HANDLER
+	void Subscriber::onRequest(DebugRequestResponseData& req, DebugRequestResponseData& resp)
+	{
+		switch (req.Command) {
+		case 1: // Request
+			break;
+		case 2: // Enable
+			_enabled = (req.Param1 == 1);
+			break;
+		case 3: // Filter
+			///TODO
+			break;
+		case 4: // Skip
+			///TODO
+			break;
+		}
+
+		// Fill in status
+		resp.Enabled = _enabled;
+		resp.Result1 = _numReceived;	///TODO thread safety
+		resp.Result2 = 0;
+		resp.Result3 = false;
+	}
+#endif
 }

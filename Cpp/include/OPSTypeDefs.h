@@ -46,6 +46,8 @@
 //#define REPLACE_OPS_CONFIG		// Removes the OPSConfig file reader from library so you can implement 
 									// your own for targets without a filesystem.
 
+#define OPS_ENABLE_DEBUG_HANDLER	// Adds some debug functionality
+
 // -----------------------------------------------------------------------------
 // Configure the fixed length string implementation to NOT have std::string support members.
 #define FIXED_NO_STD_STRING

@@ -18,10 +18,12 @@
  * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "OPSTypeDefs.h"
 #include "Publisher.h"
 #include "Participant.h"
 #include "Domain.h"
+#include "OPSArchiverOut.h"
+#include "OPSConstants.h"
+#include "TimeHelper.h"
 
 namespace ops
 {
@@ -31,14 +33,13 @@ namespace ops
     currentPublicationID(0),
     name(""),
     key(""),
-    priority(0),
+#ifdef OPS_ENABLE_DEBUG_HANDLER
+	_enabled(true),
+#endif
     sendSleepTime(1),
-    sleepEverySendPacket(100000),
-    sleepOnSendFailed(true)
+    sleepEverySendPacket(100000)
     {
-		UNUSED(priority)
         participant = Participant::getInstance(topic.getDomainID(), topic.getParticipantID());
-
         sendDataHandler = participant->getSendDataHandler(topic);
 
         message.setPublisherName(name);
@@ -46,13 +47,20 @@ namespace ops
         message.setDataOwner(false);
 		
 		start();
-    }
+
+#ifdef OPS_ENABLE_DEBUG_HANDLER
+		participant->debugHandler.RegisterPub(this, topic.getName());
+#endif
+	}
 
     Publisher::~Publisher()
     {
+#ifdef OPS_ENABLE_DEBUG_HANDLER
+		participant->debugHandler.UnregisterPub(this, topic.getName());
+#endif
 		stop();
 		participant->releaseSendDataHandler(topic);
-    }
+	}
 
 	void Publisher::start()
 	{
@@ -122,6 +130,9 @@ namespace ops
 
         buf.finish();
 
+#ifdef OPS_ENABLE_DEBUG_HANDLER
+		if (_enabled)
+#endif
         for (int i = 0; i < buf.getNrOfSegments(); i++)
         {
             int segSize = buf.getSegmentSize(i);
@@ -145,4 +156,32 @@ namespace ops
         currentPublicationID++;
     }
 
+#ifdef OPS_ENABLE_DEBUG_HANDLER
+	void Publisher::onRequest(DebugRequestResponseData& req, DebugRequestResponseData& resp)
+	{
+		switch (req.Command) {
+		case 1: // Request
+			break;
+		case 2: // Enable
+			_enabled = (req.Param1 == 1);
+			break;
+		case 3: // PubId
+			currentPublicationID += req.Param1;		// TODO thread safety
+			break;
+		case 4: // Skip
+			///TODO
+			break;
+		case 5: // Send
+			if (req.Objs.size() == 0) break;
+			if (req.Objs[0]) write(req.Objs[0]);	// TODO thread safety
+			break;
+		}
+
+		// Fill in status
+		resp.Enabled = _enabled;
+		resp.Result1 = currentPublicationID;
+		resp.Result2 = 0;
+		resp.Result3 = false;
+	}
+#endif
 }

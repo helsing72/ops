@@ -21,20 +21,22 @@
 #ifndef ops_PublisherH
 #define	ops_PublisherH
 
+#include "OPSTypeDefs.h"
 #include "OPSObject.h"
 #include "OPSMessage.h"
-#include "OPSArchiverOut.h"
 #include "Topic.h"
 #include "SendDataHandler.h"
-#include "OPSConstants.h"
-#include "TimeHelper.h"
 #include "MemoryMap.h"
 #include "Participant.h"
 #include "OPSExport.h"
+#include "DebugHandler.h"
 
 namespace ops
 {
 class OPS_EXPORT Publisher
+#ifdef OPS_ENABLE_DEBUG_HANDLER
+	: DebugNotifyInterface
+#endif
 {
 public:
 	Publisher(Topic t);
@@ -69,15 +71,18 @@ private:
     int64_t currentPublicationID;
 	ObjectName_T name;
     ObjectKey_T key;
-    char priority;
 	
     void IncCurrentPublicationID();
 
+#ifdef OPS_ENABLE_DEBUG_HANDLER
+	bool _enabled;
+	virtual void onRequest(DebugRequestResponseData& req, DebugRequestResponseData& resp);
+#endif
+
 public:
-	//Send behaivior parameters
+	//Send behavior parameters
 	int64_t sendSleepTime;
 	int sleepEverySendPacket;
-	bool sleepOnSendFailed;
 };
 
 }

@@ -39,7 +39,7 @@
 #include "ParticipantInfoDataListener.h"
 #include "SendDataHandler.h"
 #include "OPSExport.h"
-
+#include "DebugHandler.h"
 
 namespace ops
 {
@@ -98,6 +98,9 @@ namespace ops
 		// -------------------------------------------------------------------
 		//Report an error via all participants ErrorServices or the static ErrorService if it exists
 		static void reportStaticError(Error* err);
+
+		//Create a Topic for subscribing or publishing on DebugRequest
+		ops::Topic createDebugTopic();
 
 		//Create a Topic for subscribing or publishing on ParticipantInfoData
 		ops::Topic createParticipantInfoTopic();
@@ -248,6 +251,9 @@ namespace ops
 		///Static Mutex used by factory methods getInstance()
 		static Lockable creationMutex;
 
+#ifdef OPS_ENABLE_DEBUG_HANDLER
+		DebugHandler debugHandler;
+#endif
 	};
 
 }
