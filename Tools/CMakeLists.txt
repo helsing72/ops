@@ -11,6 +11,8 @@ add_subdirectory(OPSListener)
 
 add_subdirectory(VerifyOPSConfig)
 
+add_subdirectory(DebugConsole)
+
 # install the latest template files
 set(TMPL_PATH NBOPSIDLSupport/src/ops/netbeansmodules/idlsupport/templates)
 set(OPS_TEMPLATE_FILES
