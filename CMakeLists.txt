@@ -122,6 +122,9 @@ set(OPS_JAR_REL_INSTALL_PATH lib/ops)
 ################################################################################
 # Build the source
 
+# common parts
+add_subdirectory(Common)
+
 # recurse into java source
 if(Java_JAVAC_EXECUTABLE)
   # this builds ConfigurationLib and JarSearch
@@ -143,7 +146,7 @@ if(Boost_FOUND)
   if(OPS_BUILD_UNITTESTS AND GTEST_FOUND AND CMAKE_BUILD_TYPE MATCHES "Debug")
     add_subdirectory(UnitTests)
   endif()
-  
+
 else()
   message(WARNING "install Boost to build OPS C++ libraries")
 endif()

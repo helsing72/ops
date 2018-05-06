@@ -12,6 +12,8 @@ add_executable(${EXE_NAME}
     ${EXE_SRCS}
 )
 
+add_dependencies(${EXE_NAME} opsidls)
+
 target_link_libraries(${EXE_NAME} ${Boost_LIBRARIES} ops-static)
 
 if(WIN32)
