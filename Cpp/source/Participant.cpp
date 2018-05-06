@@ -301,7 +301,7 @@ namespace ops
 
 	ops::Topic Participant::createDebugTopic()
 	{
-		ops::Topic debugTopic("ops.DebugTopic", domain->getDebugMcPort(), DebugRequestResponseData::getTypeName(), domain->getDomainAddress());
+		ops::Topic debugTopic("ops.DebugTopic", domain->getDebugMcPort(), opsidls::DebugRequestResponseData::getTypeName(), domain->getDomainAddress());
 		debugTopic.setLocalInterface(domain->getLocalInterface());
 		debugTopic.setTimeToLive(domain->getTimeToLive());
 		debugTopic.setDomainID(domainID);

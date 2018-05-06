@@ -1,12 +1,12 @@
-#ifndef ops_DebugRequestResponseDataPublisher_h
-#define ops_DebugRequestResponseDataPublisher_h
+#ifndef opsidls_DebugRequestResponseDataPublisher_h
+#define opsidls_DebugRequestResponseDataPublisher_h
 
 #include "Publisher.h"
 #include "Topic.h"
 #include "OPSObject.h"
 #include "DebugRequestResponseData.h"
 
-namespace ops {
+namespace opsidls {
 
 class DebugRequestResponseDataPublisher : public ops::Publisher
 {

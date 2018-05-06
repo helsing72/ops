@@ -8,16 +8,16 @@
 #include "TimeHelper.h"
 #include "PrintArchiverOut.h"
 
-#include "ops/DebugRequestResponseDataPublisher.h"
-#include "ops/DebugRequestResponseDataSubscriber.h"
-#include "ops/opsTypeFactory.h"
+#include "opsidls/DebugRequestResponseDataPublisher.h"
+#include "opsidls/DebugRequestResponseDataSubscriber.h"
+#include "opsidls/opsidlsTypeFactory.h"
 
 #ifdef USE_PIZZATEST
 #include "pizza\PizzaData.h"
 pizza::PizzaData testData;
 #endif
 
-ops::DebugRequestResponseData request;
+opsidls::DebugRequestResponseData request;
 
 class DebugListener : public ops::DataListener
 {
@@ -39,7 +39,7 @@ public:
 	{
 		ops::Subscriber* sub = dynamic_cast<ops::Subscriber*> (notifier);
 		if (sub) {
-			ops::DebugRequestResponseData* data = dynamic_cast<ops::DebugRequestResponseData*>(sub->getMessage()->getData());
+			opsidls::DebugRequestResponseData* data = dynamic_cast<opsidls::DebugRequestResponseData*>(sub->getMessage()->getData());
 			if (data) {
 				// Skip All requests
 				if (data->Command != 0) return;
@@ -101,7 +101,7 @@ private:
 	ops::Participant* _part;
 	ops::Subscriber* _sub;
 
-	ops::DebugRequestResponseData _request;
+	opsidls::DebugRequestResponseData _request;
 };
 
 void CommandLoop(ops::Participant* part)
@@ -113,7 +113,7 @@ void CommandLoop(ops::Participant* part)
 	request.Param1 = 1;
 
 	ops::Topic top = part->createDebugTopic();
-	ops::DebugRequestResponseDataPublisher pub(top);
+	opsidls::DebugRequestResponseDataPublisher pub(top);
 	pub.start();
 	pub.write(request);
 
@@ -123,7 +123,7 @@ void CommandLoop(ops::Participant* part)
 void Usage()
 {
 	std::cout << std::endl;
-	std::cout << "Version 2018-05-01" << std::endl;
+	std::cout << "Version 2018-05-05" << std::endl;
 	std::cout << std::endl;
 	std::cout << "  Usage:" << std::endl;
 	std::cout << "    DebugConsole [-?] -k key -e n -n name -c cmd -p1 n" << std::endl;
@@ -214,7 +214,7 @@ int main(int argc, char* argv[])
 			std::cout << "Failed to create Participant. Missing ops_config.xml ??" << std::endl;
 			exit(-1);
 		}
-		participant->addTypeSupport(new ops::opsTypeFactory());
+		participant->addTypeSupport(new opsidls::opsidlsTypeFactory());
 
 		DebugListener listener(participant);
 		listener.Start();
@@ -222,7 +222,7 @@ int main(int argc, char* argv[])
 //		CommandLoop(participant);
 	
 		ops::Topic top = participant->createDebugTopic();
-		ops::DebugRequestResponseDataPublisher pub(top);
+		opsidls::DebugRequestResponseDataPublisher pub(top);
 		pub.start();
 		pub.write(request);
 

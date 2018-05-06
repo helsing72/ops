@@ -207,7 +207,7 @@ namespace ops
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 		bool _enabled;
 		int64_t _numReceived;
-		virtual void onRequest(DebugRequestResponseData& req, DebugRequestResponseData& resp);
+		virtual void onRequest(opsidls::DebugRequestResponseData& req, opsidls::DebugRequestResponseData& resp);
 #endif
 	};
 

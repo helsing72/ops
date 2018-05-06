@@ -103,7 +103,7 @@ namespace ops {
 		{
 			Subscriber* sub = dynamic_cast<Subscriber*> (notifier);
 			if (sub) {
-				DebugRequestResponseData* req = dynamic_cast<DebugRequestResponseData*>(sub->getMessage()->getData());
+				opsidls::DebugRequestResponseData* req = dynamic_cast<opsidls::DebugRequestResponseData*>(sub->getMessage()->getData());
 				if (req) {
 					if (req->Command == 0) return;  // We don't care about responses
 
@@ -167,7 +167,7 @@ namespace ops {
 		}
 
 		// Called with _mapLock held
-		void onRequest(DebugRequestResponseData& req, DebugRequestResponseData& resp)
+		void onRequest(opsidls::DebugRequestResponseData& req, opsidls::DebugRequestResponseData& resp)
 		{
 			switch (req.Command) {
 			case 2: // List
@@ -192,7 +192,7 @@ namespace ops {
 		Subscriber* _sub;
 		Publisher* _pub;
 
-		DebugRequestResponseData _response;
+		opsidls::DebugRequestResponseData _response;
 
 		std::mutex _mapLock;
 		std::map<ObjectName_T, DebugNotifyInterface*> _pubMap;

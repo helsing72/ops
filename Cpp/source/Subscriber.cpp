@@ -375,7 +375,7 @@ namespace ops
     }
 
 #ifdef OPS_ENABLE_DEBUG_HANDLER
-	void Subscriber::onRequest(DebugRequestResponseData& req, DebugRequestResponseData& resp)
+	void Subscriber::onRequest(opsidls::DebugRequestResponseData& req, opsidls::DebugRequestResponseData& resp)
 	{
 		switch (req.Command) {
 		case 1: // Request

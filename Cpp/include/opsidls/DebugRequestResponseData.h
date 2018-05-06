@@ -1,7 +1,7 @@
 //Auto generated OPS-code. DO NOT MODIFY!
 
-#ifndef ops_DebugRequestResponseData_h
-#define ops_DebugRequestResponseData_h
+#ifndef opsidls_DebugRequestResponseData_h
+#define opsidls_DebugRequestResponseData_h
 
 #include "OPSObject.h"
 #include "ArchiverInOut.h"
@@ -11,14 +11,14 @@
 #include "OPSObject.h"
 
 
-namespace ops {
+namespace opsidls {
 
 
 class DebugRequestResponseData :
 	public ops::OPSObject
 {
 public:
-   static ops::TypeId_T getTypeName(){return ops::TypeId_T("ops.DebugRequestResponseData");}
+   static ops::TypeId_T getTypeName(){return ops::TypeId_T("opsidls.DebugRequestResponseData");}
 
     /// Type of entity to talk to: Debug = 0, Participant = 1, Publisher = 2, Subscriber = 3, ... 
     int Entity;
@@ -40,6 +40,7 @@ public:
     ///       2 = Enable, Param1 = 0 [False] / 1 [True]
     ///       3 = Filter, Set key filter from Param3            (TODO)
     ///       4 = Skip, Skip Param1 number of received messages (TODO)
+    ///       Future: Be able to change port dynamically to enable injection of a custom filter
     ///    
     int Command;
     int64_t Param1;
@@ -72,7 +73,7 @@ public:
         : ops::OPSObject()
         , Entity(0), Command(0), Param1(0), Enabled(false), Result1(0), Result2(0), Result3(false)
     {
-        OPSObject::appendType(ops::TypeId_T("ops.DebugRequestResponseData"));
+        OPSObject::appendType(ops::TypeId_T("opsidls.DebugRequestResponseData"));
 
     }
 
@@ -81,7 +82,7 @@ public:
        : ops::OPSObject()
         , Entity(0), Command(0), Param1(0), Enabled(false), Result1(0), Result2(0), Result3(false)
     {
-        OPSObject::appendType(ops::TypeId_T("ops.DebugRequestResponseData"));
+        OPSObject::appendType(ops::TypeId_T("opsidls.DebugRequestResponseData"));
 
         __c.fillClone(this);
     }

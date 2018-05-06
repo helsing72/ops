@@ -1,4 +1,4 @@
-package ops;
+package opsidls;
 
 class DebugRequestResponseData
 {
@@ -24,6 +24,7 @@ class DebugRequestResponseData
        2 = Enable, Param1 = 0 [False] / 1 [True]
        3 = Filter, Set key filter from Param3            (TODO)
        4 = Skip, Skip Param1 number of received messages (TODO)
+       Future: Be able to change port dynamically to enable injection of a custom filter
     */
     int      Command;
     long     Param1;

@@ -1,5 +1,5 @@
-#ifndef ops_DebugRequestResponseDataSubscriber_h
-#define ops_DebugRequestResponseDataSubscriber_h
+#ifndef opsidls_DebugRequestResponseDataSubscriber_h
+#define opsidls_DebugRequestResponseDataSubscriber_h
 
 #include "Subscriber.h"
 #include "Topic.h"
@@ -7,7 +7,7 @@
 #include "DebugRequestResponseData.h"
 
 
-namespace ops {
+namespace opsidls {
 
 
 class DebugRequestResponseDataSubscriber : public ops::Subscriber

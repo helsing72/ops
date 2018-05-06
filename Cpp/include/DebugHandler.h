@@ -24,7 +24,7 @@
 
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 
-#include "ops/DebugRequestResponseData.h"
+#include "opsidls/DebugRequestResponseData.h"
 
 namespace ops {
 
@@ -32,7 +32,7 @@ namespace ops {
 	class DebugNotifyInterface
 	{
 	public:
-		virtual void onRequest(DebugRequestResponseData& req, DebugRequestResponseData& resp) = 0;
+		virtual void onRequest(opsidls::DebugRequestResponseData& req, opsidls::DebugRequestResponseData& resp) = 0;
 	};
 
 	class DebugHandler

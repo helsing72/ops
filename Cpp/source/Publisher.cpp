@@ -157,7 +157,7 @@ namespace ops
     }
 
 #ifdef OPS_ENABLE_DEBUG_HANDLER
-	void Publisher::onRequest(DebugRequestResponseData& req, DebugRequestResponseData& resp)
+	void Publisher::onRequest(opsidls::DebugRequestResponseData& req, opsidls::DebugRequestResponseData& resp)
 	{
 		switch (req.Command) {
 		case 1: // Request

@@ -30,7 +30,7 @@
 #include "Domain.h"
 #include "ParticipantInfoData.h"
 #ifdef OPS_ENABLE_DEBUG_HANDLER
-	#include "ops/DebugRequestResponseData.h"
+	#include "opsidls/DebugRequestResponseData.h"
 #endif
 
 namespace ops
@@ -75,9 +75,9 @@ namespace ops
                 return new ParticipantInfoData();
             }
 #ifdef OPS_ENABLE_DEBUG_HANDLER
-			if (type == ("ops.DebugRequestResponseData"))
+			if (type == ("opsidls.DebugRequestResponseData"))
 			{
-				return new DebugRequestResponseData();
+				return new opsidls::DebugRequestResponseData();
 			}
 #endif
 			return NULL;
