@@ -516,6 +516,7 @@ void printDomainInfo(ops::Participant* part)
 		"  InSocketBufferSize: " << dom->getInSocketBufferSize() << std::endl <<
 		"  OutSocketBufferSize: " << dom->getOutSocketBufferSize() << std::endl <<
 		"  MetaDataMcPort: " << dom->getMetaDataMcPort() << std::endl <<
+		"  DebugMcPort: " << dom->getDebugMcPort() << std::endl <<
 		"  LocalInterface: " << dom->getLocalInterface() << std::endl <<
 		"  TimeToLive: " <<	dom->getTimeToLive() << std::endl;
 
@@ -658,6 +659,10 @@ int main(int argc, char**argv)
     }
 	participant->addTypeSupport(new PizzaProject::PizzaProjectTypeFactory());
 	printDomainInfo(participant);
+	
+#ifdef OPS_ENABLE_DEBUG_HANDLER
+	ops::DebugHandler::SetKey("Pizza");
+#endif
 
 	ops::Participant* otherParticipant = ops::Participant::getInstance("OtherPizzaDomain", "OtherPizzaDomain", policy);
 	if (otherParticipant == NULL) {
