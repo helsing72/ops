@@ -46,7 +46,7 @@ namespace ops {
 	{
 	public:
 		InternalDebugListener(Participant* part) : _part(part), _sub(nullptr), _pub(nullptr) {}
-		~InternalDebugListener() { remove(); }
+		virtual ~InternalDebugListener() { remove(); }
 
 		// Register/Unregister with the debug handler
 		void RegisterPub(DebugNotifyInterface* client, ObjectName_T topicName)
