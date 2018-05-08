@@ -132,10 +132,10 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
   overriding procedure Stop( Self : in out TCPClientReceiver_Class ) is
     dummy : Boolean;
   begin
-    if Self.TcpClient.IsOpen then
-      -- Tell run to exit
-      Self.StopFlag := True;
+    -- Tell run to exit
+    Self.StopFlag := True;
 
+    if Self.TcpClient.IsOpen then
       -- Thread is probably waiting in a read, so we must close the socket
       dummy := Self.TcpClient.Shutdown;
       dummy := Self.TcpClient.Disconnect;
@@ -233,6 +233,7 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
         while (not Self.StopFlag) and (not Self.TcpClient.IsConnected) loop
           DisconnectAndClose;
           delay 0.100;
+          exit when Self.StopFlag;
           OpenAndConnect;
         end loop;
         exit when Self.StopFlag;

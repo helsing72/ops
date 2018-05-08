@@ -171,10 +171,10 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.UDPReceiver_Pa is
   overriding procedure Stop( Self : in out UDPReceiver_Class ) is
     dummy : Boolean;
   begin
-    if Self.UdpSocket.IsOpen then
-      -- Tell run to exit
-      Self.StopFlag := True;
+    -- Tell run to exit
+    Self.StopFlag := True;
 
+    if Self.UdpSocket.IsOpen then
       -- Thread is probably waiting in a read, so we must close the socket
       dummy := Self.UdpSocket.Shutdown;
 
