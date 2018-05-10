@@ -28,6 +28,7 @@
 #include "Subscriber.h"
 #include "Publisher.h"
 #include "KeyFilterQoSPolicy.h"
+#include "TimeHelper.h"
 
 namespace ops
 {

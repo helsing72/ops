@@ -185,6 +185,7 @@ namespace ops
 		///The IOService used for this participant, it handles communication and timers for all receivers, subscribers and member timers of this Participant.
 		IOService* ioService;
 		OPSConfig* config;
+		bool ownsConfig;
 
 		///The ErrorService
 		ErrorService* errorService;

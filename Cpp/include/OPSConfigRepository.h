@@ -48,23 +48,26 @@ namespace ops
         // Remove all domains from repository (Note does not clear the file-cache)
         void Clear();
 
-        // ======================================================
+		// Remove all domains from repository and clears the file-cache
+		void TotalClear();
+
+		// ======================================================
         // Get a reference to the internal OPSConfig object
         // if 'domainID' != "", the domain 'domainID' must exist otherwise nullptr is returned.
         OPSConfig* getConfig(ObjectName_T domainID = "" );
 
         bool domainExist(ObjectName_T domainID );
 
-        // Just for Test
-        void DebugTotalClear();
+		// Just for Test
+		void DebugTotalClear();
 
-    private:
+	private:
         OPSConfigRepository();
 
 		bool extractDomains(OPSConfig* config, ObjectName_T domain = "");
 
         // Our OPSConfig object containing references to all selectivly added domains
-        OPSConfig* m_config;
+        OPSConfig m_config;
 
         // File cache with all added config files and their domains
         std::map<FileName_T, OPSConfig*> m_configFiles;

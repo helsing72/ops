@@ -37,6 +37,7 @@
 #include "BasicError.h"
 #include "NetworkSupport.h"
 #include "ThreadSupport.h"
+#include "TimeHelper.h"
 
 namespace ops
 {
@@ -124,6 +125,7 @@ namespace ops
 		_policy(policy),
 		ioService(NULL),
 		config(NULL),
+		ownsConfig(false),
 		errorService(NULL),
 		threadPool(NULL),
 		aliveDeadlineTimer(NULL),
@@ -153,10 +155,11 @@ namespace ops
 			// It may be shared between several Participants.
 			config = OPSConfig::getConfig();
 		} else {
-			// This gets a reference to a unique instance and should eventually be deleted.
+			// This gets a reference to a unique instance and should be deleted.
 			// Note however that the getDomain() call below returns a reference to an
 			// object internally in config.
 			config = OPSConfig::getConfig(configFile_);
+			ownsConfig = true;
 		}
 		if(!config)
 		{
@@ -245,7 +248,7 @@ namespace ops
 		// Note that this (the subscriber) uses our receiveDataHandlerFactory.
 		if (partInfoListener) partInfoListener->prepareForDelete();
 
-		// Now delete our send factory (TODO it does not cleanup correctly yet)
+		// Now delete our send factory
 		if (sendDataHandlerFactory) delete sendDataHandlerFactory;
 		sendDataHandlerFactory = NULL;
 
@@ -280,6 +283,7 @@ namespace ops
 		if (partInfoListener) delete partInfoListener;
 		if (objectFactory) delete objectFactory;
 		if (errorService) delete errorService;
+		if (ownsConfig && config) delete config;
 		// All objects connected to this ioservice should now be deleted, so it should be safe to delete it
 		if (ioService) delete ioService;
 	}

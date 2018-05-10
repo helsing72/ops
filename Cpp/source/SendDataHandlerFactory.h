@@ -24,6 +24,7 @@ namespace ops
 
     public:
         explicit SendDataHandlerFactory(Participant* part);
+		// Make sure all SendDataHandlers are released before freeing the instance 
  	    ~SendDataHandlerFactory();
 
         SendDataHandler* getSendDataHandler(Topic& top, Participant* participant);
