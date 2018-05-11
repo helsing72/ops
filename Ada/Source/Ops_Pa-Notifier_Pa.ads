@@ -16,10 +16,12 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
+with Ada.Containers.Vectors;
+
 with Ops_Pa.Mutex_Pa;
 
 generic
-  MaxListeners : Positive;
+  MinCapacity : Positive;
   type Item_T is private;
 package Ops_Pa.Notifier_Pa is
 
@@ -64,8 +66,6 @@ package Ops_Pa.Notifier_Pa is
 
   function numListeners(Self : in out Notifier_Class) return Integer;
 
-  ETooManyListeners : exception;
-
 private
   type Listener_T is record
     Proc    : OnNotifyEvent_T := null;
@@ -73,14 +73,16 @@ private
     ClassAt : Listener_Interface_At := null;
   end record;
 
-  type ListenerArray_T is array (1..MaxListeners) of Listener_T;
+  function Equal( Left, Right : Listener_T ) return Boolean;
+
+  subtype MyIndex_T is Integer range 0..Integer'Last;
+  package MyVector_Pa is new Ada.Containers.Vectors(MyIndex_T, Listener_T, Equal);
 
   type Notifier_Class is new Ops_Class with
     record
       Owner        : Ops_Class_At := null;
       Mutex        : aliased Ops_Pa.Mutex_Pa.Mutex;
-      Listeners    : ListenerArray_T;
-      NumListeners : Integer := 0;
+      Listeners    : MyVector_Pa.Vector;
     end record;
 
   procedure InitInstance( Self : in out Notifier_Class; Owner : Ops_Class_At );

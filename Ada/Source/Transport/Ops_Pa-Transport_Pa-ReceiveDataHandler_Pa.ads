@@ -51,7 +51,8 @@ package Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa is
 
   procedure Stop( Self : in out ReceiveDataHandler_Class );
 
-  package MessageNotifier_Pa is new Ops_Pa.Notifier_Pa(10, Ops_Pa.OpsObject_Pa.OPSMessage_Pa.OPSMessage_Class_At);
+  -- Set the default capacity to handle many subscribers (may happen when many topics use the same transport and port).
+  package MessageNotifier_Pa is new Ops_Pa.Notifier_Pa(100, Ops_Pa.OpsObject_Pa.OPSMessage_Pa.OPSMessage_Class_At);
 
   procedure addListener( Self : in out ReceiveDataHandler_Class; Client : MessageNotifier_Pa.Listener_Interface_At );
   procedure removeListener( Self : in out ReceiveDataHandler_Class; Client : MessageNotifier_Pa.Listener_Interface_At );
