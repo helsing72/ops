@@ -25,7 +25,13 @@ namespace ops
 	{
 		if (udpSendDataHandler) delete udpSendDataHandler;
 
-		///TODO cleanup
+		// All SendDataHandlers should have been released before this instance is deleted,
+		// so it should be OK to delete all objects in the map.
+		for (std::map<InternalKey_T, SendDataHandler*>::iterator it = sendDataHandlers.begin();
+			it != sendDataHandlers.end(); ++it)
+		{
+			delete it->second;
+		}
 	}
 	
 	InternalKey_T getKey(Topic& top)

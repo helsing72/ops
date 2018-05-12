@@ -43,13 +43,12 @@ OPSConfigRepository* OPSConfigRepository::Instance()
 
 OPSConfigRepository::OPSConfigRepository()
 {
-    m_config = new DefaultOPSConfigImpl();
 }
 
 bool OPSConfigRepository::domainExist(ObjectName_T domainID )
 {
     SafeLock lock(&repoLock);
-    std::vector<Domain*>& doms = m_config->getRefToDomains();
+    std::vector<Domain*>& doms = m_config.getRefToDomains();
     for (unsigned int i = 0; i < doms.size(); i++) {
         if (doms[i]->getDomainID() == domainID) return true;
     }
@@ -148,7 +147,7 @@ bool OPSConfigRepository::extractDomains(OPSConfig* config, ObjectName_T domain)
 				Participant::reportStaticError(&err);
 			} else {
 				// Add unique domains to our list
-				m_config->getRefToDomains().push_back(domains[i]);
+				m_config.getRefToDomains().push_back(domains[i]);
 				retVal = true;
 			}
 		}
@@ -162,21 +161,25 @@ void OPSConfigRepository::Clear()
     SafeLock lock(&repoLock);
     // Since we just borrow the references to domains (they are owned by file cache)
     // we can just clear the domain list in our OPSConfig object
-    m_config->getRefToDomains().clear();
+    m_config.getRefToDomains().clear();
 }
 
-// Just for Test
-void OPSConfigRepository::DebugTotalClear()
+// Remove all domains from repository and clears the file-cache
+void OPSConfigRepository::TotalClear()
 {
 	SafeLock lock(&repoLock);
-	m_config->getRefToDomains().clear();
+	m_config.getRefToDomains().clear();
 
 	for (std::map<FileName_T, OPSConfig*>::iterator it = m_configFiles.begin(); it != m_configFiles.end(); ++it) {
 		delete it->second;
 	}
 	m_configFiles.clear();
-	delete m_config;
-	m_config = nullptr;
+}
+
+// Exist for backward compatibility
+void OPSConfigRepository::DebugTotalClear()
+{
+	TotalClear();
 }
 
 // Get a reference to the OPSConfig object
@@ -187,7 +190,7 @@ OPSConfig* OPSConfigRepository::getConfig(ObjectName_T domainID )
 
     // If no domain have been added, we try to add the default file
     // This is for backward compatibility
-    if (m_config->getRefToDomains().size() == 0) {
+    if (m_config.getRefToDomains().size() == 0) {
         if (!Add("ops_config.xml")) return nullptr;
     }
 
@@ -195,7 +198,7 @@ OPSConfig* OPSConfigRepository::getConfig(ObjectName_T domainID )
         if (!domainExist( domainID )) return nullptr;
     }
 
-    return m_config;
+    return &m_config;
 }
 
 }

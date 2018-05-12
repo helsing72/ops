@@ -171,10 +171,10 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.MulticastReceiver_Pa is
   overriding procedure Stop( Self : in out MulticastReceiver_Class ) is
     dummy : Boolean;
   begin
-    if Self.UdpSocket.IsOpen then
-      -- Tell run to exit
-      Self.StopFlag := True;
+    -- Tell run to exit
+    Self.StopFlag := True;
 
+    if Self.UdpSocket.IsOpen then
       dummy := Self.UdpSocket.Shutdown;
 
       if not Self.UdpSocket.Close then

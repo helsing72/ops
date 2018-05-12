@@ -18,6 +18,18 @@
 
 package body Ops_Pa.Notifier_Pa is
 
+  use type MyVector_Pa.Cursor;
+
+  --------------------------------------------------------------------------
+  --
+  --------------------------------------------------------------------------
+  function Equal( Left, Right : Listener_T ) return Boolean is
+  begin
+    return Left.Proc = Right.Proc and 
+      Left.Arg = Right.Arg and
+      Left.ClassAt = Right.ClassAt;
+  end;
+
   --------------------------------------------------------------------------
   --
   --------------------------------------------------------------------------
@@ -39,13 +51,13 @@ package body Ops_Pa.Notifier_Pa is
   procedure doNotify( Self : in out Notifier_Class; Item : in Item_T ) is
     S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
-    for i in 1..Self.NumListeners loop
+    for i in Self.Listeners.First_Index .. Self.Listeners.Last_Index loop
       -- We don't allow a client to stop us from notify all clients
       begin
-        if Self.Listeners(i).ClassAt /= null then
-          OnNotify( Self.Listeners(i).ClassAt.all, Self.Owner, Item );
+        if Self.Listeners.Element(i).ClassAt /= null then
+          OnNotify( Self.Listeners.Element(i).ClassAt.all, Self.Owner, Item );
         else
-          Self.Listeners(i).Proc.all( Self.Owner, Item, Self.Listeners(i).Arg );
+          Self.Listeners.Element(i).Proc.all( Self.Owner, Item, Self.Listeners.Element(i).Arg );
         end if;
       exception
         when others =>
@@ -62,12 +74,8 @@ package body Ops_Pa.Notifier_Pa is
                          Arg   : in Ops_Class_At ) is
     S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
-    if Self.NumListeners < MaxListeners then
-      Self.NumListeners := Self.NumListeners + 1;
-      Self.Listeners(Self.NumListeners).Proc := Proc;
-      Self.Listeners(Self.NumListeners).Arg := Arg;
-    else
-      raise ETooManyListeners;
+    if Proc /= null then
+      Self.Listeners.Append(Listener_T'(Proc => Proc, Arg => Arg, ClassAt => null));
     end if;
   end;
 
@@ -77,19 +85,15 @@ package body Ops_Pa.Notifier_Pa is
   procedure removeListener( Self  : in out Notifier_Class;
                             Proc  : in OnNotifyEvent_T;
                             Arg   : in Ops_Class_At ) is
+    Cursor : MyVector_Pa.Cursor;
     S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
-    for i in Self.Listeners'Range loop
-      if Self.Listeners(i).Proc = Proc and Self.Listeners(i).Arg = Arg then
-        -- Compact list
-        for j in i+1..Self.Listeners'Last loop
-          Self.Listeners(j-1) := Self.Listeners(j);  
-        end loop;
-        Self.Listeners(Self.Listeners'Last) := Listener_T'(null, null, null);
-        Self.NumListeners := Self.NumListeners - 1;
-        exit;
+    if Proc /= null then
+      Cursor := Self.Listeners.Find(Listener_T'(Proc => Proc, Arg => Arg, ClassAt => null));
+      if Cursor /= MyVector_Pa.No_Element then
+        Self.Listeners.Delete(Cursor);
       end if;
-    end loop;
+    end if;
   end;
 
   --------------------------------------------------------------------------
@@ -99,11 +103,8 @@ package body Ops_Pa.Notifier_Pa is
                          Listener : in Listener_Interface_At) is
     S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
-    if Self.NumListeners < MaxListeners then
-      Self.NumListeners := Self.NumListeners + 1;
-      Self.Listeners(Self.NumListeners).ClassAt := Listener;
-    else
-      raise ETooManyListeners;
+    if Listener /= null then
+      Self.Listeners.Append(Listener_T'(Proc => null, Arg => null, ClassAt => Listener));
     end if;
   end;
 
@@ -112,19 +113,15 @@ package body Ops_Pa.Notifier_Pa is
   --------------------------------------------------------------------------
   procedure removeListener( Self     : in out Notifier_Class;
                             Listener : in Listener_Interface_At ) is
+    Cursor : MyVector_Pa.Cursor;
     S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
-    for i in Self.Listeners'Range loop
-      if Self.Listeners(i).ClassAt = Listener then
-        -- Compact list
-        for j in i+1..Self.Listeners'Last loop
-          Self.Listeners(j-1) := Self.Listeners(j);  
-        end loop;
-        Self.Listeners(Self.Listeners'Last) := Listener_T'(null, null, null);
-        Self.NumListeners := Self.NumListeners - 1;
-        exit;
+    if Listener /= null then
+      Cursor := Self.Listeners.Find(Listener_T'(Proc => null, Arg => null, ClassAt => Listener));
+      if Cursor /= MyVector_Pa.No_Element then
+        Self.Listeners.Delete(Cursor);
       end if;
-    end loop;
+    end if;
   end;
 
   --------------------------------------------------------------------------
@@ -132,7 +129,7 @@ package body Ops_Pa.Notifier_Pa is
   --------------------------------------------------------------------------
   function numListeners(Self : in out Notifier_Class) return Integer is
   begin
-    return Self.NumListeners;
+    return Integer(Self.Listeners.Length);
   end;
 
   --------------------------------------------------------------------------
@@ -141,6 +138,7 @@ package body Ops_Pa.Notifier_Pa is
   procedure InitInstance( Self : in out Notifier_Class; Owner : Ops_Class_At ) is
   begin
     Self.Owner := Owner;
+    Self.Listeners.Reserve_Capacity(Ada.Containers.Count_Type(MinCapacity));
   end InitInstance;
 
   --------------------------------------------------------------------------
