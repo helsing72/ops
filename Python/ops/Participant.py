@@ -67,4 +67,18 @@ class Participant(object):
 		topic.participant = self;
 		topic.port = self.domain.metaDataMcPort
 		topic.name = "ops.bit.ParticipantInfoTopic"
+		topic.typeID = "ops.ParticipantInfoData"
+		return topic
+
+	def createDebugTopic(self):
+		topic = Topic()
+		topic.domainAddress = self.domain.domainAddress
+		topic.localInterface = self.domain.localInterface;
+		topic.timeToLive = self.domain.timeToLive;
+		topic.participantID = self.participantID;
+		topic.domainID = self.domainID;
+		topic.participant = self;
+		topic.port = self.domain.debugMcPort
+		topic.name = "ops.DebugTopic"
+		topic.typeID = "opsidls.DebugRequestResponseData"
 		return topic

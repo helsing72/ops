@@ -279,6 +279,7 @@ class Domain(OPS_Object):
 		self.inSocketBufferSize = 16000000
 		self.outSocketBufferSize = 16000000
 		self.metaDataMcPort = 9494
+		self.debugMcPort = 0
 		self.topics=[]
 		self.domainID=""
 		self.channels=[]
@@ -292,6 +293,7 @@ class Domain(OPS_Object):
 		temp += "\n  inSocketBufferSize: %s" % self.inSocketBufferSize
 		temp += "\n  outSocketBufferSize: %s" % self.outSocketBufferSize
 		temp += "\n  metaDataMcPort: %s" % self.metaDataMcPort
+		temp += "\n  debugMcPort: %s" % self.debugMcPort
 		temp += "\n  domainID: %s" % self.domainID
 		for t in self.topics:
 		 	temp+="\n" + t.__str__()
@@ -317,6 +319,7 @@ class Domain(OPS_Object):
 		if isinstance(archiver,XML_Archiver_In):
 			archiver.OpsVector("channels",self.channels,Channel)
 			archiver.OpsVector("transports",self.transports,Transport)
+			self.debugMcPort = archiver.Int32("debugMcPort",self.debugMcPort)
 			self.checkTransports()
 
 	def validate(self):
@@ -338,6 +341,8 @@ class Domain(OPS_Object):
 		if not isinstance(self.outSocketBufferSize,int):
 			raise ValueError()
 		if not isinstance(self.metaDataMcPort,int):
+			raise ValueError()
+		if not isinstance(self.debugMcPort,int):
 			raise ValueError()
 		for x in self.channels:
 			if not isinstance(x,Channel):
