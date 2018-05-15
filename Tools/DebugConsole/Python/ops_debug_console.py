@@ -22,10 +22,27 @@ def menu():
 	print "\t x                       Exit program"
 	print ""
 
+def usage():
+	print ""
+	print "  Usage: run <ops_config-file> <domain-name>"
 
-participant = Participant.Participant.getInstance("PizzaDomain", "PizzaDomain")
+
+print ""
+print '  Number of arguments:', len(sys.argv)
+print '  Argument List:', str(sys.argv)
+
+if len(sys.argv) < 3:
+	usage()
+	sys.exit(-1)
+
+ops_config_filename = sys.argv[1]
+ops_domainname = sys.argv[2]
+
+participant = Participant.Participant.getInstance(ops_domainname, ops_domainname, ops_config_filename)
 if participant == None:
-	print "Failed to create Participant. Missing ops_config.xml ??"
+	print ""
+	print "Failed to create Participant. Missing ops_config.xml or domain ??"
+	usage()
 	sys.exit(-1)
 
 dbgHandler = OpsDebugCommands.OpsDebugCommands(participant)

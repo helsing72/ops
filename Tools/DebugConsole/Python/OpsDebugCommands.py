@@ -82,6 +82,10 @@ class OpsDebugCommands():
 		##
 		topic = part.createDebugTopic()
 		print "Created topic " + topic.name + " [" + topic.transport + "." + topic.domainAddress + "." + str(topic.port) + " (IF:" + topic.localInterface + ")]"
+		if topic.port == 0:
+			print ""
+			print "!!!! DebugTopic NOT enabled in given Domain !!!!"
+
 		self.pub = Publisher.Publisher(topic)
 		self.pub.name = "PyDbgConsole"
 		self.pub.start();

@@ -16,4 +16,4 @@ GEN_PATH=$SCRIPT_PATH/../../../Common/idl/Generated/Python
 GEN_PATH2=$GEN_PATH/opsidls
 export PYTHONPATH=$OPS_PATH:$GEN_PATH:$GEN_PATH2:$PYTHONPATH
 
-python $SCRIPT_PATH/OPS_test.py $@
+python $SCRIPT_PATH/ops_debug_console.py $@
