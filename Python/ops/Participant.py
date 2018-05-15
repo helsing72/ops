@@ -17,7 +17,10 @@ class Participant(object):
 	def getInstance(domainID, participantID="DEFAULT_PARTICIPANT", configFile=None):
 		name = Participant.__createName(domainID, participantID)
 		if not name in Participant.instances:
-			Participant.instances[name] = Participant(domainID, participantID, configFile)
+			part = Participant(domainID, participantID, configFile)
+			if part.domain is None:
+				return None
+			Participant.instances[name] = part
 		return Participant.instances[name]
 
 	def __init__(self,domainID, participantID, configFile):
