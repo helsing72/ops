@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2018 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -175,6 +175,7 @@ package body Ops_Pa.OpsObject_Pa.ParticipantInfoData_Pa is
       tmp := new TopicInfoData_Class_At_Arr(arr'First..arr'Last+1);
       tmp(arr'Range) := arr(arr'Range);
       tmp(tmp'Last) := tid;
+      Dispose(arr);
       arr := tmp;
     end if;
   end;
@@ -204,6 +205,7 @@ package body Ops_Pa.OpsObject_Pa.ParticipantInfoData_Pa is
         if idx < arr'Last then
           tmp(idx..arr'Last-1) := arr(idx+1..arr'Last);
         end if;
+        Dispose(arr);
         arr := tmp;
       end if;
     end if;
