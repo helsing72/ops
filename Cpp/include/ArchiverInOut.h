@@ -134,8 +134,18 @@ namespace ops
 		virtual void inoutfixarr(InoutName_T name, int64_t* value, int numElements, int totalSize) = 0;
 		virtual void inoutfixarr(InoutName_T name, float* value, int numElements, int totalSize) = 0;
 		virtual void inoutfixarr(InoutName_T name, double* value, int numElements, int totalSize) = 0;
-
 		virtual void inoutfixarr(InoutName_T name, std::string* value, int numElements) = 0;
+
+		template<size_t N>
+		void inoutfixarr(InoutName_T name, strings::fixed_string<N>* value, int numElements)
+		{
+			int size = beginList(name, numElements);
+			if (size != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
+			for (int i = 0; i < size; i++) {
+				inout("element", value[i], i);
+			}
+			endList(name);
+		}
 
         template <class SerializableType> 
 		void inout(InoutName_T name, std::vector<SerializableType>& vec, SerializableType prototype)
@@ -201,7 +211,7 @@ namespace ops
             int size = beginList(name, numElements);
             if (size != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
             for (int i = 0; i < size; i++) {
-                inout(name, value[i]);
+                inout("element", value[i]);
             }
             endList(name);
         }

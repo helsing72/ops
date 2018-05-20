@@ -25,6 +25,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <iomanip>
 #include "OPSObject.h"
 
 
@@ -96,38 +97,36 @@ namespace ops
 
         virtual void inout(InoutName_T name, float& value)
         {
-            os << tab() << "<" << name << ">" << value << "</" << name << ">\n";
+            os << tab() << "<" << name << ">" << std::setprecision(9) << value << "</" << name << ">\n";
         }
 
         virtual void inout(InoutName_T name, double& value)
         {
-            os << tab() << "<" << name << ">" << value << "</" << name << ">\n";
+            os << tab() << "<" << name << ">" << std::setprecision(15) << value << "</" << name << ">\n";
         }
 
         virtual void inout(InoutName_T name, std::string& value)
         {
+			///TODO convert string to allowed xml chars
             os << tab() << "<" << name << ">" << value << "</" << name << ">\n";
         }
 
 		virtual void inoutfixstring(InoutName_T name, char* value, int& size, int max_size, int idx)
 		{
-			UNUSED(name)
-			UNUSED(value)
-			UNUSED(size)
-			UNUSED(max_size)
-			UNUSED(idx)
-			///TODO
-			throw ops::ArchiverException("XMLArchiverOut.inout(name, char*, int&, int) NYI");
+			UNUSED(max_size);
+			UNUSED(idx);
+			
+			///TODO convert string to allowed xml chars
+			std::string tmp((const char*)value, size);
+			os << tab() << "<" << name << ">" << tmp << "</" << name << ">\n";
 		}
 
 		virtual void inout(InoutName_T name, char* buffer, int bufferSize)
         {
-            UNUSED(name);
-            UNUSED(buffer);
-            UNUSED(bufferSize);
-            ///TODO
-            throw ops::ArchiverException("XMLArchiverOut.inout(name, char*, int) NYI");
-        }
+			os << tab() << "<" << name << ">";
+			for (int i = 0; i < bufferSize; i++) os << ((unsigned int)buffer[i]) << " ";
+			os << "</" << name << ">\n";
+		}
 
         virtual Serializable* inout(InoutName_T name, Serializable* value, int element)
         {
@@ -144,7 +143,6 @@ namespace ops
                 os << tab() << "</" << "element" << ">" << "\n";
             }
             return value;
-
         }
 
         virtual Serializable* inout(InoutName_T name, Serializable* value)
@@ -160,14 +158,18 @@ namespace ops
                 os << tab() << "</" << name << ">" << "\n";
             }
             return value;
-
         }
 
         virtual void inout(InoutName_T name, Serializable& value)
         {
-            UNUSED(name);
-            UNUSED(value);
-        }
+			OPSObject& opsO = dynamic_cast<OPSObject&> (value);
+
+			os << tab() << "<" << name << " type = \"" << opsO.getTypeString() << "\" >" << "\n";
+			currentTabDepth++;
+			value.serialize(this);
+			currentTabDepth--;
+			os << tab() << "</" << name << ">" << "\n";
+		}
 
         virtual void inout(InoutName_T name, std::vector<bool>& value)
         {
@@ -268,82 +270,121 @@ namespace ops
 
 		void inoutfixarr(InoutName_T name, bool* value, int numElements, int totalSize)
 		{
-			UNUSED(name)
-			UNUSED(value)
-			UNUSED(numElements);
 			UNUSED(totalSize);
-			///TODO
-			throw ops::ArchiverException("XMLArchiverOut.inoutfixarr NYI");
+
+			os << tab() << "<" << name << ">" << std::endl;
+			for (int i = 0; i < numElements; i++)
+			{
+				currentTabDepth++;
+				bool e = value[i];
+				inout("element", e);
+				currentTabDepth--;
+			}
+			os << tab() << "</" << name << ">" << std::endl;
 		}
 
 		void inoutfixarr(InoutName_T name, char* value, int numElements, int totalSize)
 		{
-			UNUSED(name)
-			UNUSED(value)
-			UNUSED(numElements);
 			UNUSED(totalSize);
-			///TODO
-			throw ops::ArchiverException("XMLArchiverOut.inoutfixarr NYI");
+
+			os << tab() << "<" << name << ">" << std::endl;
+			for (int i = 0; i < numElements; i++)
+			{
+				currentTabDepth++;
+				char e = value[i];
+				inout("element", e);
+				currentTabDepth--;
+			}
+			os << tab() << "</" << name << ">" << std::endl;
 		}
 
 		void inoutfixarr(InoutName_T name, int* value, int numElements, int totalSize)
 		{
-			UNUSED(name)
-			UNUSED(value)
-			UNUSED(numElements);
 			UNUSED(totalSize);
-			///TODO
-			throw ops::ArchiverException("XMLArchiverOut.inoutfixarr NYI");
+
+			os << tab() << "<" << name << ">" << std::endl;
+			for (int i = 0; i < numElements; i++)
+			{
+				currentTabDepth++;
+				int e = value[i];
+				inout("element", e);
+				currentTabDepth--;
+			}
+			os << tab() << "</" << name << ">" << std::endl;
 		}
 
 		void inoutfixarr(InoutName_T name, int16_t* value, int numElements, int totalSize)
 		{
-			UNUSED(name)
-			UNUSED(value)
-			UNUSED(numElements);
 			UNUSED(totalSize);
-			///TODO
-			throw ops::ArchiverException("XMLArchiverOut.inoutfixarr NYI");
+
+			os << tab() << "<" << name << ">" << std::endl;
+			for (int i = 0; i < numElements; i++)
+			{
+				currentTabDepth++;
+				int16_t e = value[i];
+				inout("element", e);
+				currentTabDepth--;
+			}
+			os << tab() << "</" << name << ">" << std::endl;
 		}
 
 		void inoutfixarr(InoutName_T name, int64_t* value, int numElements, int totalSize)
 		{
-			UNUSED(name)
-			UNUSED(value)
-			UNUSED(numElements);
 			UNUSED(totalSize);
-			///TODO
-			throw ops::ArchiverException("XMLArchiverOut.inoutfixarr NYI");
+
+			os << tab() << "<" << name << ">" << std::endl;
+			for (int i = 0; i < numElements; i++)
+			{
+				currentTabDepth++;
+				int64_t e = value[i];
+				inout("element", e);
+				currentTabDepth--;
+			}
+			os << tab() << "</" << name << ">" << std::endl;
 		}
 
 		void inoutfixarr(InoutName_T name, float* value, int numElements, int totalSize)
 		{
-			UNUSED(name)
-			UNUSED(value)
-			UNUSED(numElements);
 			UNUSED(totalSize);
-			///TODO
-			throw ops::ArchiverException("XMLArchiverOut.inoutfixarr NYI");
+
+			os << tab() << "<" << name << ">" << std::endl;
+			for (int i = 0; i < numElements; i++)
+			{
+				currentTabDepth++;
+				float e = value[i];
+				inout("element", e);
+				currentTabDepth--;
+			}
+			os << tab() << "</" << name << ">" << std::endl;
 		}
 
 		void inoutfixarr(InoutName_T name, double* value, int numElements, int totalSize)
 		{
-			UNUSED(name)
-			UNUSED(value)
-			UNUSED(numElements);
 			UNUSED(totalSize);
-			///TODO
-			throw ops::ArchiverException("XMLArchiverOut.inoutfixarr NYI");
+
+			os << tab() << "<" << name << ">" << std::endl;
+			for (int i = 0; i < numElements; i++)
+			{
+				currentTabDepth++;
+				double e = value[i];
+				inout("element", e);
+				currentTabDepth--;
+			}
+			os << tab() << "</" << name << ">" << std::endl;
 		}
 
 		void inoutfixarr(InoutName_T name, std::string* value, int numElements)
         {
-            UNUSED(name)
-            UNUSED(value)
-            UNUSED(numElements);
-            ///TODO
-            throw ops::ArchiverException("XMLArchiverOut.inoutfixarr NYI");
-        }
+			os << tab() << "<" << name << ">" << std::endl;
+			for (int i = 0; i < numElements; i++)
+			{
+				currentTabDepth++;
+				std::string e = value[i];
+				inout("element", e);
+				currentTabDepth--;
+			}
+			os << tab() << "</" << name << ">" << std::endl;
+		}
 
         int beginList(InoutName_T name, int size)
         {
