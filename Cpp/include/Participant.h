@@ -83,7 +83,7 @@ namespace ops
 		//at the first call when the Participant is created.
 		static Participant* getInstance(ObjectName_T domainID, execution_policy::Enum policy = execution_policy::threading) 
 		{
-			return getInstance(domainID, "DEFAULT_PARTICIPANT", policy);
+			return getInstance(domainID, OPSConstants::DEFAULT_PARTICIPANT_ID, policy);
 		}
 		static Participant* getInstance(ObjectName_T domainID, ObjectName_T participantID, execution_policy::Enum policy = execution_policy::threading)
 		{

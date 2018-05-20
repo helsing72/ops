@@ -92,10 +92,7 @@ namespace ops
 		Address_T localInterface;
 		ObjectName_T participantID;
 		ObjectName_T domainID;
-		//bool reliable;
 		int sampleMaxSize;					// Serialized
-		//int64_t deadline;
-		//int64_t minSeparation;
 		Transport_T transport;				// Serialized
 		int64_t outSocketBufferSize;		// Serialized
 		int64_t inSocketBufferSize;			// Serialized
