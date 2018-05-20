@@ -63,8 +63,10 @@ namespace ops
 
     class XMLArchiverIn : public ArchiverInOut
     {
-    private:
-        std::istream& is;
+	private:
+		std::istream& is;
+		std::string topNode;
+		SerializableInheritingTypeFactory * factory;
         opsXML::XMLNode currentNode;
         std::string xmlString;
         std::string parseString;
@@ -84,12 +86,22 @@ namespace ops
 			_stack.pop();
 		}
 
+		bool toBool(InoutName_T name, std::string s)
+		{
+			if (s.compare("true") == 0) return true;
+			if (s.compare("false") == 0) return false;
+			if (s.compare("TRUE") == 0) return true;
+			if (s.compare("FALSE") == 0) return false;
+			if (s.compare("True") == 0) return true;
+			if (s.compare("False") == 0) return false;
+			throw ops::ArchiverException("XMLArchiverIn: Illegal value for bool with name: ", name);
+		}
+
     public:
 
-		XMLArchiverIn(std::istream& is_, std::string topNode_, SerializableInheritingTypeFactory* factory) : is(is_)
+		XMLArchiverIn(std::istream& is_, std::string topNode_, SerializableInheritingTypeFactory* factory_): 
+			is(is_), topNode(topNode_), factory(factory_)
         {
-            this->factory = factory;
-
             std::string tmp;
             is >> tmp;
             while (!is.eof())
@@ -104,6 +116,13 @@ namespace ops
         {
         }
 
+		// Reset to the start state of XMLArchiverIn() for cases where an exception has been raised
+		// and the user want to read again
+		void reset()
+		{
+			currentNode = opsXML::XMLNode::parseString(xmlString.c_str(), topNode.c_str());
+		}
+
 		// Returns true if it's an output archiver
 		virtual bool isOut() { return false; }
 
@@ -112,14 +131,7 @@ namespace ops
             if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
                 std::string s(currentNode.getChildNode(NAME(name)).getText());
-                if (s.compare("true") == 0) value = true;
-                if (s.compare("false") == 0) value = false;
-                if (s.compare("TRUE") == 0) value = true;
-                if (s.compare("FALSE") == 0) value = false;
-                if (s.compare("true") == 0) value = true;
-                if (s.compare("false") == 0) value = false;
-                if (s.compare("True") == 0) value = true;
-                if (s.compare("False") == 0) value = false;
+				value = toBool(name, s);
             }
         }
 
@@ -239,12 +251,24 @@ namespace ops
 		
 		virtual void inout(InoutName_T name, char* buffer, int bufferSize)
         {
-            UNUSED(name);
-            UNUSED(buffer);
-            UNUSED(bufferSize);
-            ///TODO
-            throw ops::ArchiverException("XMLArchiverIn.inout(name, char*, int) NYI");
-        }
+			if (!currentNode.getChildNode(NAME(name)).isEmpty())
+			{
+				if (currentNode.getChildNode(NAME(name)).getText() != NULL)
+				{
+					std::string s(currentNode.getChildNode(NAME(name)).getText());
+					std::istringstream is(s);
+
+					// each char stored as dec number + " " 
+					for (int i = 0; i < bufferSize; i++) {
+						int tmp;
+						if (is.eof()) throw ops::ArchiverException("Illegal size of buffer received. name: ", name);
+						is >> tmp;
+						if (is.fail()) throw ops::ArchiverException("Illegal size of buffer received. name: ", name);
+						buffer[i] = (char)(tmp);
+					}
+				}
+			}
+		}
 
         virtual Serializable* inout(InoutName_T name, Serializable* value, int element)
         {
@@ -267,9 +291,18 @@ namespace ops
 
         virtual void inout(InoutName_T name, Serializable& value)
         {
-            UNUSED(name);
-            UNUSED(value);
-        }
+			if (!currentNode.getChildNode(NAME(name)).isEmpty())
+			{
+				PushNode(currentNode);
+				currentNode = currentNode.getChildNode(NAME(name));
+				TypeId_T types(currentNode.getAttribute("type"));
+				///TODO check that type is correct
+
+				value.serialize(this);
+
+				PopNode(currentNode);
+			}
+		}
 
         virtual Serializable* inout(InoutName_T name, Serializable* value)
         {
@@ -304,14 +337,7 @@ namespace ops
                 for (int i = 0; i < size; i++)
                 {
 					std::string s(currentNode.getChildNode("element", i).getText());
-                    if (s.compare("true") == 0) value[i] = true;
-                    if (s.compare("false") == 0) value[i] = false;
-                    if (s.compare("TRUE") == 0) value[i] = true;
-                    if (s.compare("FALSE") == 0) value[i] = false;
-                    if (s.compare("true") == 0) value[i] = true;
-                    if (s.compare("false") == 0) value[i] = false;
-                    if (s.compare("True") == 0) value[i] = true;
-                    if (s.compare("False") == 0) value[i] = false;
+					value[i] = toBool(name, s);
                 }
 
 				PopNode(currentNode);
@@ -484,82 +510,189 @@ namespace ops
 
 		void inoutfixarr(InoutName_T name, bool* value, int numElements, int totalSize)
 		{
-			UNUSED(name)
-			UNUSED(value)
-			UNUSED(numElements);
 			UNUSED(totalSize);
-			///TODO
-			throw ops::ArchiverException("XMLArchiverIn.inoutfixarr NYI");
+
+			if (!currentNode.getChildNode(NAME(name)).isEmpty())
+			{
+				PushNode(currentNode);
+				currentNode = currentNode.getChildNode(NAME(name));
+
+				int size = currentNode.nChildNode("element");
+				if (size != numElements) throw ops::ArchiverException("Illegal size of fix bool array received. name: ", name);
+
+				for (int i = 0; i < size; i++)
+				{
+					std::string s(currentNode.getChildNode("element", i).getText());
+					value[i] = toBool(name, s);
+				}
+
+				PopNode(currentNode);
+			}
 		}
 
 		void inoutfixarr(InoutName_T name, char* value, int numElements, int totalSize)
 		{
-			UNUSED(name)
-			UNUSED(value)
-			UNUSED(numElements);
-			UNUSED(totalSize);
-			///TODO
-			throw ops::ArchiverException("XMLArchiverIn.inoutfixarr NYI");
+			if (!currentNode.getChildNode(NAME(name)).isEmpty())
+			{
+				PushNode(currentNode);
+				currentNode = currentNode.getChildNode(NAME(name));
+
+				int size = currentNode.nChildNode("element");
+				if (size != numElements) throw ops::ArchiverException("Illegal size of fix char array received. name: ", name);
+
+				for (int i = 0; i < size; i++)
+				{
+					std::string s(currentNode.getChildNode("element", i).getText());
+					std::stringstream ss(s);
+
+					int inVal;
+					ss >> inVal;
+					value[i] = inVal;
+				}
+
+				PopNode(currentNode);
+			}
 		}
 
 		void inoutfixarr(InoutName_T name, int* value, int numElements, int totalSize)
 		{
-			UNUSED(name)
-			UNUSED(value)
-			UNUSED(numElements);
-			UNUSED(totalSize);
-			///TODO
-			throw ops::ArchiverException("XMLArchiverIn.inoutfixarr NYI");
+			if (!currentNode.getChildNode(NAME(name)).isEmpty())
+			{
+				PushNode(currentNode);
+				currentNode = currentNode.getChildNode(NAME(name));
+
+				int size = currentNode.nChildNode("element");
+				if (size != numElements) throw ops::ArchiverException("Illegal size of fix int array received. name: ", name);
+
+				for (int i = 0; i < size; i++)
+				{
+					std::string s(currentNode.getChildNode("element", i).getText());
+					std::stringstream ss(s);
+
+					int inVal;
+					ss >> inVal;
+					value[i] = inVal;
+				}
+
+				PopNode(currentNode);
+			}
 		}
 
 		void inoutfixarr(InoutName_T name, int16_t* value, int numElements, int totalSize)
 		{
-			UNUSED(name)
-			UNUSED(value)
-			UNUSED(numElements);
-			UNUSED(totalSize);
-			///TODO
-			throw ops::ArchiverException("XMLArchiverIn.inoutfixarr NYI");
+			if (!currentNode.getChildNode(NAME(name)).isEmpty())
+			{
+				PushNode(currentNode);
+				currentNode = currentNode.getChildNode(NAME(name));
+
+				int size = currentNode.nChildNode("element");
+				if (size != numElements) throw ops::ArchiverException("Illegal size of fix int16 array received. name: ", name);
+
+				for (int i = 0; i < size; i++)
+				{
+					std::string s(currentNode.getChildNode("element", i).getText());
+					std::stringstream ss(s);
+
+					int inVal;
+					ss >> inVal;
+					value[i] = inVal;
+				}
+
+				PopNode(currentNode);
+			}
 		}
 
 		void inoutfixarr(InoutName_T name, int64_t* value, int numElements, int totalSize)
 		{
-			UNUSED(name)
-			UNUSED(value)
-			UNUSED(numElements);
-			UNUSED(totalSize);
-			///TODO
-			throw ops::ArchiverException("XMLArchiverIn.inoutfixarr NYI");
+			if (!currentNode.getChildNode(NAME(name)).isEmpty())
+			{
+				PushNode(currentNode);
+				currentNode = currentNode.getChildNode(NAME(name));
+
+				int size = currentNode.nChildNode("element");
+				if (size != numElements) throw ops::ArchiverException("Illegal size of fix int64 array received. name: ", name);
+
+				for (int i = 0; i < size; i++)
+				{
+					std::string s(currentNode.getChildNode("element", i).getText());
+					std::stringstream ss(s);
+
+					int64_t inVal;
+					ss >> inVal;
+					value[i] = inVal;
+				}
+
+				PopNode(currentNode);
+			}
 		}
 
 		void inoutfixarr(InoutName_T name, float* value, int numElements, int totalSize)
 		{
-			UNUSED(name)
-			UNUSED(value)
-			UNUSED(numElements);
-			UNUSED(totalSize);
-			///TODO
-			throw ops::ArchiverException("XMLArchiverIn.inoutfixarr NYI");
+			if (!currentNode.getChildNode(NAME(name)).isEmpty())
+			{
+				PushNode(currentNode);
+				currentNode = currentNode.getChildNode(NAME(name));
+
+				int size = currentNode.nChildNode("element");
+				if (size != numElements) throw ops::ArchiverException("Illegal size of fix float array received. name: ", name);
+
+				for (int i = 0; i < size; i++)
+				{
+					std::string s(currentNode.getChildNode("element", i).getText());
+					std::stringstream ss(s);
+
+					float inVal;
+					ss >> inVal;
+					value[i] = inVal;
+				}
+
+				PopNode(currentNode);
+			}
 		}
 
 		void inoutfixarr(InoutName_T name, double* value, int numElements, int totalSize)
 		{
-			UNUSED(name)
-			UNUSED(value)
-			UNUSED(numElements);
-			UNUSED(totalSize);
-			///TODO
-			throw ops::ArchiverException("XMLArchiverIn.inoutfixarr NYI");
+			if (!currentNode.getChildNode(NAME(name)).isEmpty())
+			{
+				PushNode(currentNode);
+				currentNode = currentNode.getChildNode(NAME(name));
+
+				int size = currentNode.nChildNode("element");
+				if (size != numElements) throw ops::ArchiverException("Illegal size of fix double array received. name: ", name);
+
+				for (int i = 0; i < size; i++)
+				{
+					std::string s(currentNode.getChildNode("element", i).getText());
+					std::stringstream ss(s);
+
+					double inVal;
+					ss >> inVal;
+					value[i] = inVal;
+				}
+
+				PopNode(currentNode);
+			}
 		}
 
 		void inoutfixarr(InoutName_T name, std::string* value, int numElements)
         {
-            UNUSED(name)
-            UNUSED(value)
-            UNUSED(numElements);
-            ///TODO
-            throw ops::ArchiverException("XMLArchiverIn.inoutfixarr NYI");
-        }
+			if (!currentNode.getChildNode(NAME(name)).isEmpty())
+			{
+				PushNode(currentNode);
+				currentNode = currentNode.getChildNode(NAME(name));
+
+				int size = currentNode.nChildNode("element");
+				if (size != numElements) throw ops::ArchiverException("Illegal size of fix string array received. name: ", name);
+
+				for (int i = 0; i < size; i++)
+				{
+					std::string s(currentNode.getChildNode("element", i).getText());
+					value[i] = s;
+				}
+
+				PopNode(currentNode);
+			}
+		}
 
         int beginList(InoutName_T name, int size)
         {
@@ -579,9 +712,6 @@ namespace ops
             UNUSED(name);
 			PopNode(currentNode);
 		}
-
-    private:
-        SerializableInheritingTypeFactory* factory;
 
     };
 }

@@ -9,13 +9,11 @@ set(OPS_HEADER_PATH ${OPS4_CPP_ROOT}/include)
 set(LIB_OPS_PUBLIC_HEADERS
   ${OPS_HEADER_PATH}/ArchiverInOut.h
   ${OPS_HEADER_PATH}/ByteBuffer.h
-  ${OPS_HEADER_PATH}/ByteListener.h
   ${OPS_HEADER_PATH}/BytesSizePair.h
   ${OPS_HEADER_PATH}/Channel.h
   ${OPS_HEADER_PATH}/CommException.h
   ${OPS_HEADER_PATH}/Compatibility.h
   ${OPS_HEADER_PATH}/ConfigException.h
-  ${OPS_HEADER_PATH}/ConfigLoader.h
   ${OPS_HEADER_PATH}/DataListener.h
   ${OPS_HEADER_PATH}/DataNotifier.h
   ${OPS_HEADER_PATH}/DeadlineMissedListener.h
@@ -58,7 +56,6 @@ set(LIB_OPS_PUBLIC_HEADERS
   ${OPS_HEADER_PATH}/Publisher.h
   ${OPS_HEADER_PATH}/ReceiveDataHandler.h
   ${OPS_HEADER_PATH}/Receiver.h
-  ${OPS_HEADER_PATH}/ReceiveTransport.h
   ${OPS_HEADER_PATH}/ReferenceHandler.h
   ${OPS_HEADER_PATH}/RequestReply.h
   ${OPS_HEADER_PATH}/Reservable.h
@@ -66,7 +63,6 @@ set(LIB_OPS_PUBLIC_HEADERS
   ${OPS_HEADER_PATH}/Runnable.h
   ${OPS_HEADER_PATH}/SendDataHandler.h
   ${OPS_HEADER_PATH}/Sender.h
-  ${OPS_HEADER_PATH}/SendTransport.h
   ${OPS_HEADER_PATH}/SerializableCompositeFactory.h
   ${OPS_HEADER_PATH}/SerializableFactory.h
   ${OPS_HEADER_PATH}/SerializableInheritingTypeFactory.h
@@ -78,7 +74,6 @@ set(LIB_OPS_PUBLIC_HEADERS
   ${OPS_HEADER_PATH}/TimeHelper.h
   ${OPS_HEADER_PATH}/Topic.h
   ${OPS_HEADER_PATH}/TopicInfoData.h
-  ${OPS_HEADER_PATH}/Transaction.h
   ${OPS_HEADER_PATH}/Transport.h
   ${OPS_HEADER_PATH}/xml/xmlParser.h
   ${OPS_HEADER_PATH}/XMLArchiverIn.h
@@ -123,7 +118,6 @@ set(LIB_OPS_CORE_SRCS
   ${OPS_SRC_PATH}/Reservable.cpp
   ${OPS_SRC_PATH}/SendDataHandlerFactory.cpp
   ${OPS_SRC_PATH}/SendDataHandlerFactory.h
-  ${OPS_SRC_PATH}/SendDiscoveryModule.cpp
   ${OPS_SRC_PATH}/SerializableCompositeFactory.cpp
   ${OPS_SRC_PATH}/SerializableInheritingTypeFactory.cpp
   ${OPS_SRC_PATH}/Subscriber.cpp

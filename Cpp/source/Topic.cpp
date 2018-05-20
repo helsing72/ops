@@ -12,16 +12,13 @@ namespace ops
 		timeToLive(-1),
 		typeID(typeIDd), 
 		domainAddress(domainAddresss),
-		participantID("DEFAULT_PARTICIPANT"),
-		//reliable(false),
+		participantID(OPSConstants::DEFAULT_PARTICIPANT_ID),
 		sampleMaxSize(OPSConstants::PACKET_MAX_SIZE),
-		//deadline(OPSConstants::MAX_DEADLINE_TIMEOUT),
-		//minSeparation(0),
 		outSocketBufferSize(-1),
-		inSocketBufferSize(-1)
+		inSocketBufferSize(-1),
+		participant(nullptr)
 	{
 		appendType(TypeId_T("Topic"));
-
 	}
 	Topic::Topic()
 		: name(""), 
@@ -29,13 +26,11 @@ namespace ops
 		timeToLive(-1),
 		typeID(""), 
 		domainAddress(""),
-		participantID("DEFAULT_PARTICIPANT"),
-		//reliable(false),
+		participantID(OPSConstants::DEFAULT_PARTICIPANT_ID),
 		sampleMaxSize(OPSConstants::PACKET_MAX_SIZE),
-		//deadline(OPSConstants::MAX_DEADLINE_TIMEOUT),
-		//minSeparation(0),
 		outSocketBufferSize(-1),
-		inSocketBufferSize(-1)
+		inSocketBufferSize(-1),
+		participant(nullptr)
 	{
 		appendType(TypeId_T("Topic"));
 	}
