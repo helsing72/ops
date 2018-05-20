@@ -1,6 +1,8 @@
 
-// TODO: Not all exception cases are tested (see all inoutfixarr() in OPSArchiverIn.cpp
+// TODO: Not all exception cases are tested. 
 //
+
+#include <sstream>
 
 #include "gtest/gtest.h"
 
@@ -8,6 +10,8 @@
 #include "ArchiverInOut.h"
 #include "OPSArchiverIn.h"
 #include "OPSArchiverOut.h"
+#include "XMLArchiverIn.h"
+#include "XMLArchiverOut.h"
 
 using namespace ops;
 
@@ -106,6 +110,28 @@ TEST(Test_Serialization, TestCoreTypes) {
 	ExpectObjects_EQ(obj1, obj2, "Comparing serialized object");
 }
 
+TEST(Test_Serialization, TestCoreTypesXml) {
+
+	SerDesObject_Core obj1, obj2;
+	InitObject(obj1);
+	ExpectObjects_EQ(obj1, obj1, "Comparing object with itself");
+
+	std::ostringstream os;
+
+	XMLArchiverOut arcOut(os, "root");
+	EXPECT_TRUE(arcOut.isOut());
+
+	obj1.serialize(&arcOut);
+
+	std::istringstream is(os.str());
+
+	XMLArchiverIn arcIn(is, "root", nullptr);		// No factory needed since we only have core types
+	EXPECT_FALSE(arcIn.isOut());
+
+	obj2.serialize(&arcIn);
+	ExpectObjects_EQ(obj1, obj2, "Comparing serialized object");
+}
+
 // ===============================
 // Helper classes
 
@@ -191,6 +217,28 @@ TEST(Test_Serialization, TestVectorTypes) {
 	buf.ResetIndex();
 
 	OPSArchiverIn arcIn(&buf, nullptr);		// No factory needed since we only have core types
+	EXPECT_FALSE(arcIn.isOut());
+
+	obj2.serialize(&arcIn);
+	ExpectObjects_EQ(obj1, obj2, "Comparing serialized object");
+}
+
+TEST(Test_Serialization, TestVectorTypesXml) {
+
+	SerDesObject_Vectors obj1, obj2;
+	InitObject(obj1);
+	ExpectObjects_EQ(obj1, obj1, "Comparing object with itself");
+
+	std::ostringstream os;
+
+	XMLArchiverOut arcOut(os, "root");
+	EXPECT_TRUE(arcOut.isOut());
+
+	obj1.serialize(&arcOut);
+
+	std::istringstream is(os.str());
+
+	XMLArchiverIn arcIn(is, "root", nullptr);		// No factory needed since we only have core types
 	EXPECT_FALSE(arcIn.isOut());
 
 	obj2.serialize(&arcIn);
@@ -321,6 +369,28 @@ TEST(Test_Serialization, TestFixedArrays) {
 	ExpectObjects_EQ(obj1, obj2, "Comparing serialized object");
 }
 
+TEST(Test_Serialization, TestFixedArraysXml) {
+
+	SerDesObject_Fixarrays obj1, obj2;
+	InitObject(obj1);
+	ExpectObjects_EQ(obj1, obj1, "Comparing object with itself");
+
+	std::ostringstream os;
+
+	XMLArchiverOut arcOut(os, "root");
+	EXPECT_TRUE(arcOut.isOut());
+
+	obj1.serialize(&arcOut);
+
+	std::istringstream is(os.str());
+
+	XMLArchiverIn arcIn(is, "root", nullptr);		// No factory needed since we only have core types
+	EXPECT_FALSE(arcIn.isOut());
+
+	obj2.serialize(&arcIn);
+	ExpectObjects_EQ(obj1, obj2, "Comparing serialized object");
+}
+
 // ===============================
 // Helper classes
 
@@ -395,9 +465,7 @@ public:
 
 		//virtual Serializable* inout(InoutName_T name, Serializable* value) = 0;
 		obj2 = (SerDesObject_Core*)archive->inout("obj2", obj2);
-
-		//virtual Serializable* inout(InoutName_T name, Serializable* value, int element) = 0;
-		obj3 = (SerDesObject_Core*)archive->inout("obj3", obj3, 0);
+		obj3 = (SerDesObject_Core*)archive->inout("obj3", obj3);
 
 		//template <class SerializableType>
 		//void inout(InoutName_T name, std::vector<SerializableType>& vec, SerializableType prototype)
@@ -411,6 +479,7 @@ public:
 		//void inoutfixarr(InoutName_T name, SerializableType* value, int numElements)
 		archive->inoutfixarr("fixarr1", &fixarr1[0], 2 + testException1);
 
+		//virtual Serializable* inout(InoutName_T name, Serializable* value, int element) = 0;
 		//template <class SerializableType>
 		//void inoutfixarr(InoutName_T name, SerializableType** value, int numElements)
 		archive->inoutfixarr("fixarr2", &fixarr2[0], 2 + testException2);
@@ -526,6 +595,43 @@ TEST(Test_Serialization, TestObjects) {
 	ExpectObjects_EQ(obj1, obj2, "Comparing serialized object");
 
 	buf.ResetIndex();
+	obj2.testException2 = 1;
+	EXPECT_THROW(obj2.serialize(&arcIn), ArchiverException);
+}
+
+TEST(Test_Serialization, TestObjectsXml) {
+
+	SerDesObject_Serializables obj1, obj2;
+	InitObject(obj1);
+	ExpectObjects_EQ(obj1, obj1, "Comparing object with itself");
+
+	std::ostringstream os;
+
+	XMLArchiverOut arcOut(os, "root");
+	EXPECT_TRUE(arcOut.isOut());
+
+	obj1.serialize(&arcOut);
+
+	std::istringstream is(os.str());
+
+	RAII_FactoryHelper factory;
+	XMLArchiverIn arcIn(is, "root", &factory.fact);
+	EXPECT_FALSE(arcIn.isOut());
+
+	// Test Exceptions
+	obj2.serialize(&arcIn);
+	ExpectObjects_EQ(obj1, obj2, "Comparing serialized object");
+
+	arcIn.reset();
+	obj2.testException1 = 1;
+	EXPECT_THROW(obj2.serialize(&arcIn), ArchiverException);
+
+	arcIn.reset();
+	obj2.testException1 = 0;
+	EXPECT_NO_THROW(obj2.serialize(&arcIn));
+	ExpectObjects_EQ(obj1, obj2, "Comparing serialized object");
+
+	arcIn.reset();
 	obj2.testException2 = 1;
 	EXPECT_THROW(obj2.serialize(&arcIn), ArchiverException);
 }
