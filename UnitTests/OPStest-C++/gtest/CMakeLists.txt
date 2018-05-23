@@ -10,6 +10,7 @@ set(APP_SRCS
   MemoryMap_test.cpp
   NotifierListener_test.cpp
   ObjectFactory_test.cpp
+  OpsConfigObjects_test.cpp
   OpsObject_test.cpp
   OPSUtilities_test.cpp
   Reservable_test.cpp
