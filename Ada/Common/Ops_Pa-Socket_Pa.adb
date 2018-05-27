@@ -549,12 +549,24 @@ package body Ops_Pa.Socket_Pa is
   function AcceptClient( Self : in out TCPServerSocket_Class; Client : TCPClientSocket_Class_At ) return Boolean is
     Address : GNAT.Sockets.Sock_Addr_Type;
     Socket : GNAT.Sockets.Socket_Type;
+    Status : GNAT.Sockets.Selector_Status;
+    use type GNAT.Sockets.Selector_Status;
   begin
-    GNAT.Sockets.Accept_Socket( Self.SocketID,
-                                Socket,
-                                Address );
-    client.Initialize( Socket, True );
-    return True;
+    -- GNAT.Sockets.Accept_Socket( Server => Self.SocketID,
+    --                             Socket => Socket,
+    --                             Address => Address );
+    GNAT.Sockets.Accept_Socket( Server => Self.SocketID,
+                                Socket => Socket,
+                                Address => Address,
+                                Timeout => 1.0,
+                                Selector => null,
+                                Status => Status );
+    if Status = GNAT.Sockets.Completed then
+      client.Initialize( Socket, True );
+      return True;
+    else
+      return False;
+    end if;
   exception
     when e: others =>
       Self.ExtractErrorCode( e );
