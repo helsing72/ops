@@ -44,19 +44,16 @@ namespace ops
 
         ///Override from Sender
         bool sendTo(char* buf, int size, const Address_T& ip, int port);
-		///Override from Sender
-		///int receiveReply(char* buf, int size);
         ///Override from Sender
         int getPort() {return socket->local_endpoint().port();};
         ///Override from Sender
 		Address_T getAddress() {return socket->local_endpoint().address().to_string().c_str();};
 
-		///bool waitForReply(int timeout);
-
     private:
         ///This UDPSender wraps boost socket functionality.
         ///These are the required boost members to perform operations required.
-        boost::asio::ip::udp::endpoint* localEndpoint;  //<-- The local port to bind to.
+		boost::asio::ip::address ipAddr;
+		boost::asio::ip::udp::endpoint localEndpoint;   //<-- The local port to bind to.
         boost::asio::ip::udp::socket* socket;           //<-- The socket that sends data.
         boost::asio::io_service* io_service;            //<-- Required for boost sockets.
 
@@ -64,8 +61,6 @@ namespace ops
 		int _ttl;
 		int64_t _outSocketBufferSize;
 		bool _multicastSocket;
-
     };
-
 }
 #endif	
