@@ -727,6 +727,10 @@ public class PythonCompiler extends opsc.CompilerSupport
                 {
                     int splitIndex = typeName.lastIndexOf(".");
                     typeName   = typeName.substring(splitIndex+1);
+
+                    // In case an IDL contains our builtin type that Python has a slightly different name for
+                    if (typeName.equals("OPSObject")) typeName = "OPS_Object";
+                    if (typeName.equals("OPSObject[]")) typeName = "OPS_Object[]";
                 }
                 if (field.isArray())
                 {

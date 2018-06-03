@@ -36,7 +36,7 @@ class DebugRequestResponseData
     int      Command;
     long     Param1;
     string[] Param3;
-    virtual OPSObject[] Objs;
+    virtual  OPSObject[] Objs;
 
     /* Response to Request with results
          Debug:
@@ -51,7 +51,7 @@ class DebugRequestResponseData
            Result1 = Publication Counter
            Result2 = Number of sends left to skip
            Result3 = True if fejk message stored for sending
-           
+
          Subcriber:
            Enabled or not
            Result1 = Number of messages received
