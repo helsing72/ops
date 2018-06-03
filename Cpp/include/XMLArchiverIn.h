@@ -532,6 +532,8 @@ namespace ops
 
 		void inoutfixarr(InoutName_T name, char* value, int numElements, int totalSize)
 		{
+			UNUSED(totalSize);
+
 			if (!currentNode.getChildNode(NAME(name)).isEmpty())
 			{
 				PushNode(currentNode);
@@ -556,6 +558,8 @@ namespace ops
 
 		void inoutfixarr(InoutName_T name, int* value, int numElements, int totalSize)
 		{
+			UNUSED(totalSize);
+
 			if (!currentNode.getChildNode(NAME(name)).isEmpty())
 			{
 				PushNode(currentNode);
@@ -580,6 +584,8 @@ namespace ops
 
 		void inoutfixarr(InoutName_T name, int16_t* value, int numElements, int totalSize)
 		{
+			UNUSED(totalSize);
+
 			if (!currentNode.getChildNode(NAME(name)).isEmpty())
 			{
 				PushNode(currentNode);
@@ -604,6 +610,8 @@ namespace ops
 
 		void inoutfixarr(InoutName_T name, int64_t* value, int numElements, int totalSize)
 		{
+			UNUSED(totalSize);
+
 			if (!currentNode.getChildNode(NAME(name)).isEmpty())
 			{
 				PushNode(currentNode);
@@ -628,6 +636,8 @@ namespace ops
 
 		void inoutfixarr(InoutName_T name, float* value, int numElements, int totalSize)
 		{
+			UNUSED(totalSize);
+
 			if (!currentNode.getChildNode(NAME(name)).isEmpty())
 			{
 				PushNode(currentNode);
@@ -652,6 +662,8 @@ namespace ops
 
 		void inoutfixarr(InoutName_T name, double* value, int numElements, int totalSize)
 		{
+			UNUSED(totalSize);
+
 			if (!currentNode.getChildNode(NAME(name)).isEmpty())
 			{
 				PushNode(currentNode);
