@@ -28,18 +28,18 @@ TEST(Test_fixed_string, TestConstructors) {
 
 	fixed_string<50> a;		// default constructor
 
-	EXPECT_EQ(a.size(), 0) << "Wrong size";
-	EXPECT_EQ(a.length(), 0) << "Wrong length";
-	EXPECT_EQ(a.max_size(), 50) << "Wrong max_size";
+	EXPECT_EQ(a.size(), (size_t)0) << "Wrong size";
+	EXPECT_EQ(a.length(), (size_t)0) << "Wrong length";
+	EXPECT_EQ(a.max_size(), (size_t)50) << "Wrong max_size";
 	EXPECT_TRUE(a.empty()) << "Not empty";
 	EXPECT_STREQ(a.c_str(), "") << "Content error";
 	EXPECT_STREQ(a.data(), "") << "Content error";
 
 	fixed_string<20> b("hej hopp");		// const char*
 
-	EXPECT_EQ(b.size(), 8) << "Wrong size";
-	EXPECT_EQ(b.length(), 8) << "Wrong length";
-	EXPECT_EQ(b.max_size(), 20) << "Wrong max_size";
+	EXPECT_EQ(b.size(), (size_t)8) << "Wrong size";
+	EXPECT_EQ(b.length(), (size_t)8) << "Wrong length";
+	EXPECT_EQ(b.max_size(), (size_t)20) << "Wrong max_size";
 	EXPECT_FALSE(b.empty()) << "Empty";
 	EXPECT_STREQ(b.c_str(), "hej hopp") << "Content error";
 	EXPECT_STREQ(b.data(), "hej hopp") << "Content error";
@@ -47,68 +47,68 @@ TEST(Test_fixed_string, TestConstructors) {
 	char b1_source[] = "hej hopp";
 	fixed_string<20> b1(b1_source);		// char*
 
-	EXPECT_EQ(b1.size(), 8) << "Wrong size";
-	EXPECT_EQ(b1.length(), 8) << "Wrong length";
-	EXPECT_EQ(b1.max_size(), 20) << "Wrong max_size";
+	EXPECT_EQ(b1.size(), (size_t)8) << "Wrong size";
+	EXPECT_EQ(b1.length(), (size_t)8) << "Wrong length";
+	EXPECT_EQ(b1.max_size(), (size_t)20) << "Wrong max_size";
 	EXPECT_FALSE(b1.empty()) << "Empty";
 	EXPECT_STREQ(b1.c_str(), "hej hopp") << "Content error";
 	EXPECT_STREQ(b1.data(), "hej hopp") << "Content error";
 
 	fixed_string<20> b2("Det var en gång", 3);		// const char*, length
 
-	EXPECT_EQ(b2.size(), 3) << "Wrong size";
-	EXPECT_EQ(b2.length(), 3) << "Wrong length";
-	EXPECT_EQ(b2.max_size(), 20) << "Wrong max_size";
+	EXPECT_EQ(b2.size(), (size_t)3) << "Wrong size";
+	EXPECT_EQ(b2.length(), (size_t)3) << "Wrong length";
+	EXPECT_EQ(b2.max_size(), (size_t)20) << "Wrong max_size";
 	EXPECT_FALSE(b2.empty()) << "Empty";
 	EXPECT_STREQ(b2.c_str(), "Det") << "Content error";
 
 	char b2a_source[] = "Detta";
 	fixed_string<20> b2a(b2a_source, 3);		// char*, length
 
-	EXPECT_EQ(b2a.size(), 3) << "Wrong size";
-	EXPECT_EQ(b2a.length(), 3) << "Wrong length";
-	EXPECT_EQ(b2a.max_size(), 20) << "Wrong max_size";
+	EXPECT_EQ(b2a.size(), (size_t)3) << "Wrong size";
+	EXPECT_EQ(b2a.length(), (size_t)3) << "Wrong length";
+	EXPECT_EQ(b2a.max_size(), (size_t)20) << "Wrong max_size";
 	EXPECT_FALSE(b2a.empty()) << "Empty";
 	EXPECT_STREQ(b2a.c_str(), "Det") << "Content error";
 
 	fixed_string<20> c(b);		// copy constructor
 
-	EXPECT_EQ(c.size(), 8) << "Wrong size";
-	EXPECT_EQ(c.length(), 8) << "Wrong length";
-	EXPECT_EQ(c.max_size(), 20) << "Wrong max_size";
+	EXPECT_EQ(c.size(), (size_t)8) << "Wrong size";
+	EXPECT_EQ(c.length(), (size_t)8) << "Wrong length";
+	EXPECT_EQ(c.max_size(), (size_t)20) << "Wrong max_size";
 	EXPECT_FALSE(c.empty()) << "Empty";
 	EXPECT_STREQ(c.c_str(), "hej hopp") << "Content error";
 
 	fixed_string<80> c2(b);		// template constructor fixed_string<M>
-	EXPECT_EQ(c2.size(), 8) << "Wrong size";
-	EXPECT_EQ(c2.length(), 8) << "Wrong length";
-	EXPECT_EQ(c2.max_size(), 80) << "Wrong max_size";
+	EXPECT_EQ(c2.size(), (size_t)8) << "Wrong size";
+	EXPECT_EQ(c2.length(), (size_t)8) << "Wrong length";
+	EXPECT_EQ(c2.max_size(), (size_t)80) << "Wrong max_size";
 	EXPECT_FALSE(c2.empty()) << "Empty";
 	EXPECT_STREQ(c2.c_str(), "hej hopp") << "Content error";
 
 	fixed_string<20> d = c;		// assignment operator
 
-	EXPECT_EQ(d.size(), 8) << "Wrong size";
-	EXPECT_EQ(d.length(), 8) << "Wrong length";
-	EXPECT_EQ(d.max_size(), 20) << "Wrong max_size";
+	EXPECT_EQ(d.size(), (size_t)8) << "Wrong size";
+	EXPECT_EQ(d.length(), (size_t)8) << "Wrong length";
+	EXPECT_EQ(d.max_size(), (size_t)20) << "Wrong max_size";
 	EXPECT_FALSE(d.empty()) << "Empty";
 	EXPECT_STREQ(d.c_str(), "hej hopp") << "Content error";
 
 	std::string kalle("kalle");
 	fixed_string<15> e(kalle);		// std::string (if enabled)
 
-	EXPECT_EQ(e.size(), 5) << "Wrong size";
-	EXPECT_EQ(e.length(), 5) << "Wrong length";
-	EXPECT_EQ(e.max_size(), 15) << "Wrong max_size";
+	EXPECT_EQ(e.size(), (size_t)5) << "Wrong size";
+	EXPECT_EQ(e.length(), (size_t)5) << "Wrong length";
+	EXPECT_EQ(e.max_size(), (size_t)15) << "Wrong max_size";
 	EXPECT_FALSE(e.empty()) << "Empty";
 	EXPECT_STREQ(e.c_str(), kalle.c_str()) << "Content error";
 
 	// Test template constructor "from any T..."
 	mstring g1("hej");
 	fixed_string<100> f1(g1);
-	EXPECT_EQ(f1.size(), 3) << "Wrong size";
-	EXPECT_EQ(f1.length(), 3) << "Wrong length";
-	EXPECT_EQ(f1.max_size(), 100) << "Wrong max_size";
+	EXPECT_EQ(f1.size(), (size_t)3) << "Wrong size";
+	EXPECT_EQ(f1.length(), (size_t)3) << "Wrong length";
+	EXPECT_EQ(f1.max_size(), (size_t)100) << "Wrong max_size";
 	EXPECT_FALSE(f1.empty()) << "Empty";
 	EXPECT_STREQ(f1.c_str(), "hej") << "Content error";
 }
@@ -124,27 +124,27 @@ TEST(Test_fixed_string, TestModifiers) {
 	e += ' ';
 	e += b;
 
-	EXPECT_EQ(e.size(), 14) << "Wrong size";
-	EXPECT_EQ(e.length(), 14) << "Wrong length";
-	EXPECT_EQ(e.max_size(), 15) << "Wrong max_size";
+	EXPECT_EQ(e.size(), (size_t)14) << "Wrong size";
+	EXPECT_EQ(e.length(), (size_t)14) << "Wrong length";
+	EXPECT_EQ(e.max_size(), (size_t)15) << "Wrong max_size";
 	EXPECT_FALSE(e.empty()) << "Empty";
 	EXPECT_STREQ(e.c_str(), "kalle hej hopp") << "Content error";
 
 	b2 += ' ';
 	b2 += kalle;
 
-	EXPECT_EQ(b2.size(), 9) << "Wrong size";
-	EXPECT_EQ(b2.length(), 9) << "Wrong length";
-	EXPECT_EQ(b2.max_size(), 20) << "Wrong max_size";
+	EXPECT_EQ(b2.size(), (size_t)9) << "Wrong size";
+	EXPECT_EQ(b2.length(), (size_t)9) << "Wrong length";
+	EXPECT_EQ(b2.max_size(), (size_t)20) << "Wrong max_size";
 	EXPECT_FALSE(b2.empty()) << "Empty";
 	EXPECT_STREQ(b2.c_str(), "Det kalle") << "Content error";
 
 	a += e;
 	a += " i lingonskogen";
 
-	EXPECT_EQ(a.size(), 29) << "Wrong size";
-	EXPECT_EQ(a.length(), 29) << "Wrong length";
-	EXPECT_EQ(a.max_size(), 50) << "Wrong max_size";
+	EXPECT_EQ(a.size(), (size_t)29) << "Wrong size";
+	EXPECT_EQ(a.length(), (size_t)29) << "Wrong length";
+	EXPECT_EQ(a.max_size(), (size_t)50) << "Wrong max_size";
 	EXPECT_FALSE(a.empty()) << "Empty";
 	//                               1    1    2    2  2
 	//                     0    5    0    5    0    5  8
@@ -159,24 +159,24 @@ TEST(Test_fixed_string, TestSubstr) {
 	// Test substr()
 	fixed_string<10> f = a.substr<10>(24);
 
-	EXPECT_EQ(f.size(), 5) << "Wrong size";
-	EXPECT_EQ(f.length(), 5) << "Wrong length";
-	EXPECT_EQ(f.max_size(), 10) << "Wrong max_size";
+	EXPECT_EQ(f.size(), (size_t)5) << "Wrong size";
+	EXPECT_EQ(f.length(), (size_t)5) << "Wrong length";
+	EXPECT_EQ(f.max_size(), (size_t)10) << "Wrong max_size";
 	EXPECT_STREQ(f.c_str(), "kogen") << "Content error";
 
 	f.clear();
 
-	EXPECT_EQ(f.size(), 0) << "Wrong size";
-	EXPECT_EQ(f.length(), 0) << "Wrong length";
-	EXPECT_EQ(f.max_size(), 10) << "Wrong max_size";
+	EXPECT_EQ(f.size(), (size_t)0) << "Wrong size";
+	EXPECT_EQ(f.length(), (size_t)0) << "Wrong length";
+	EXPECT_EQ(f.max_size(), (size_t)10) << "Wrong max_size";
 	EXPECT_TRUE(f.empty()) << "Not empty";
 	EXPECT_STREQ(f.c_str(), "") << "Content error";
 
 	auto g = a.substr<5>(10, 4);
 
-	EXPECT_EQ(g.size(), 4) << "Wrong size";
-	EXPECT_EQ(g.length(), 4) << "Wrong length";
-	EXPECT_EQ(g.max_size(), 5) << "Wrong max_size";
+	EXPECT_EQ(g.size(), (size_t)4) << "Wrong size";
+	EXPECT_EQ(g.length(), (size_t)4) << "Wrong length";
+	EXPECT_EQ(g.max_size(), (size_t)5) << "Wrong max_size";
 	EXPECT_STREQ(g.c_str(), "hopp") << "Content error";
 
 	EXPECT_EQ(a[0], 'k') << "Wrong character";
@@ -192,30 +192,30 @@ TEST(Test_fixed_string, TestResize) {
 	//                             1    1    2    2  2
 	//                   0    5    0    5    0    5  8
 	fixed_string<100> h("kalle hej hopp i lingonskogen");
-	EXPECT_EQ(h.size(), 29) << "Wrong size";
-	EXPECT_EQ(h.length(), 29) << "Wrong length";
-	EXPECT_EQ(h.max_size(), 100) << "Wrong max_size";
+	EXPECT_EQ(h.size(), (size_t)29) << "Wrong size";
+	EXPECT_EQ(h.length(), (size_t)29) << "Wrong length";
+	EXPECT_EQ(h.max_size(), (size_t)100) << "Wrong max_size";
 
 	h.resize(34, 'Z');
 
-	EXPECT_EQ(h.size(), 34) << "Wrong size";
-	EXPECT_EQ(h.length(), 34) << "Wrong length";
-	EXPECT_EQ(h.max_size(), 100) << "Wrong max_size";
+	EXPECT_EQ(h.size(), (size_t)34) << "Wrong size";
+	EXPECT_EQ(h.length(), (size_t)34) << "Wrong length";
+	EXPECT_EQ(h.max_size(), (size_t)100) << "Wrong max_size";
 	EXPECT_STREQ(h.c_str(), "kalle hej hopp i lingonskogenZZZZZ") << "Content error";
 
 	h.resize(32);
 
-	EXPECT_EQ(h.size(), 32) << "Wrong size";
-	EXPECT_EQ(h.length(), 32) << "Wrong length";
-	EXPECT_EQ(h.max_size(), 100) << "Wrong max_size";
+	EXPECT_EQ(h.size(), (size_t)32) << "Wrong size";
+	EXPECT_EQ(h.length(), (size_t)32) << "Wrong length";
+	EXPECT_EQ(h.max_size(), (size_t)100) << "Wrong max_size";
 	EXPECT_STREQ(h.c_str(), "kalle hej hopp i lingonskogenZZZ") << "Content error";
 
 	h[14] = '\0';
 	h.resize();
 
-	EXPECT_EQ(h.size(), 14) << "Wrong size";
-	EXPECT_EQ(h.length(), 14) << "Wrong length";
-	EXPECT_EQ(h.max_size(), 100) << "Wrong max_size";
+	EXPECT_EQ(h.size(), (size_t)14) << "Wrong size";
+	EXPECT_EQ(h.length(), (size_t)14) << "Wrong length";
+	EXPECT_EQ(h.max_size(), (size_t)100) << "Wrong max_size";
 	EXPECT_STREQ(h.c_str(), "kalle hej hopp") << "Content error";
 }
 
@@ -228,45 +228,45 @@ TEST(Test_fixed_string, TestFind) {
 
 	fixed_string<100>::size_type npos = fixed_string<100>::npos;
 
-	EXPECT_EQ(h.find('h'), 6) << "find failed";
-	EXPECT_EQ(h.find('h', 7), 10) << "find failed";
+	EXPECT_EQ(h.find('h'), (size_t)6) << "find failed";
+	EXPECT_EQ(h.find('h', 7), (size_t)10) << "find failed";
 	EXPECT_EQ(h.find('x'), npos) << "find failed";
 	EXPECT_EQ(h.find('k', 90), npos) << "find failed";
-	EXPECT_EQ(h.find("hej"), 6) << "find failed";
-	EXPECT_EQ(h.find("hop"), 10) << "find failed";
+	EXPECT_EQ(h.find("hej"), (size_t)6) << "find failed";
+	EXPECT_EQ(h.find("hop"), (size_t)10) << "find failed";
 	EXPECT_EQ(h.find("zzz"), npos) << "find failed";
 	EXPECT_EQ(h.find("hop", 28), npos) << "find failed";
-	EXPECT_EQ(h.find("hop", 11), 24) << "find failed";
-	EXPECT_EQ(h.find(kalle), 0) << "find failed";
-	EXPECT_EQ(h.find(kalle, 1), 14) << "find failed";
+	EXPECT_EQ(h.find("hop", 11), (size_t)24) << "find failed";
+	EXPECT_EQ(h.find(kalle), (size_t)0) << "find failed";
+	EXPECT_EQ(h.find(kalle, 1), (size_t)14) << "find failed";
 
-	EXPECT_EQ(h.find_first_of('j'), 8) << "find failed";
-	EXPECT_EQ(h.find_first_of('j', 9), 22) << "find failed";
+	EXPECT_EQ(h.find_first_of('j'), (size_t)8) << "find failed";
+	EXPECT_EQ(h.find_first_of('j', 9), (size_t)22) << "find failed";
 	EXPECT_EQ(h.find_first_of('j', 100), npos) << "find failed";
 	EXPECT_EQ(h.find_first_of('z'), npos) << "find failed";
-	EXPECT_EQ(h.find_first_not_of('k'), 1) << "find failed";
-	EXPECT_EQ(h.find_first_not_of('p', 12), 14) << "find failed";
+	EXPECT_EQ(h.find_first_not_of('k'), (size_t)1) << "find failed";
+	EXPECT_EQ(h.find_first_not_of('p', 12), (size_t)14) << "find failed";
 	EXPECT_EQ(h.find_first_not_of('j', 100), npos) << "find failed";
 
-	EXPECT_EQ(h.find_first_of("j :"), 5) << "find failed";
-	EXPECT_EQ(h.find_first_of("poh", 4), 6) << "find failed";
+	EXPECT_EQ(h.find_first_of("j :"), (size_t)5) << "find failed";
+	EXPECT_EQ(h.find_first_of("poh", 4), (size_t)6) << "find failed";
 	EXPECT_EQ(h.find_first_of("xzy", 20), npos) << "find failed";
 
-	EXPECT_EQ(h.find_last_of('j'), 22) << "find failed";
-	EXPECT_EQ(h.find_last_of('j', 21), 8) << "find failed";
-	EXPECT_EQ(h.find_last_of('j', 200), 22) << "find failed";
+	EXPECT_EQ(h.find_last_of('j'), (size_t)22) << "find failed";
+	EXPECT_EQ(h.find_last_of('j', 21), (size_t)8) << "find failed";
+	EXPECT_EQ(h.find_last_of('j', 200), (size_t)22) << "find failed";
 	EXPECT_EQ(h.find_last_of('z'), npos) << "find failed";
-	EXPECT_EQ(h.find_last_not_of('p'), 25) << "find failed";
-	EXPECT_EQ(h.find_last_not_of('p', 13), 11) << "find failed";
-	EXPECT_EQ(h.find_last_not_of('p', 150), 25) << "find failed";
+	EXPECT_EQ(h.find_last_not_of('p'), (size_t)25) << "find failed";
+	EXPECT_EQ(h.find_last_not_of('p', 13), (size_t)11) << "find failed";
+	EXPECT_EQ(h.find_last_not_of('p', 150), (size_t)25) << "find failed";
 
 	fixed_string<90> x("==================");
 	EXPECT_EQ(x.find_last_of('s'), npos) << "find failed";
 	EXPECT_EQ(x.find_last_not_of('='), npos) << "find failed";
 
 	fixed_string<90> xx("s=================");
-	EXPECT_EQ(xx.find_last_of('s'), 0) << "find failed";
-	EXPECT_EQ(xx.find_last_not_of('='), 0) << "find failed";
+	EXPECT_EQ(xx.find_last_of('s'), (size_t)0) << "find failed";
+	EXPECT_EQ(xx.find_last_not_of('='), (size_t)0) << "find failed";
 
 	fixed_string<90> y("");
 	EXPECT_EQ(y.find_last_of('s'), npos) << "find failed";
@@ -345,9 +345,9 @@ TEST(Test_fixed_string, TestPlusOperator) {
 	fixed_string<40> p("hej hopp");
 
 	auto r = p + o;
-	EXPECT_EQ(r.size(), 13) << "Wrong size";
-	EXPECT_EQ(r.length(), 13) << "Wrong length";
-	EXPECT_EQ(r.max_size(), 70) << "Wrong max_size";
+	EXPECT_EQ(r.size(), (size_t)13) << "Wrong size";
+	EXPECT_EQ(r.length(), (size_t)13) << "Wrong length";
+	EXPECT_EQ(r.max_size(), (size_t)70) << "Wrong max_size";
 	EXPECT_STREQ(r.c_str(), "hej hoppkalle") << "Content error";
 }
 
@@ -377,55 +377,55 @@ TEST(Test_fixed_string_trunc, Test) {
 	// Test constructors
 	fixed_string_trunc<4> a;
 
-	EXPECT_EQ(a.size(), 0) << "Wrong size";
-	EXPECT_EQ(a.length(), 0) << "Wrong length";
-	EXPECT_EQ(a.max_size(), 4) << "Wrong max_size";
+	EXPECT_EQ(a.size(), (size_t)0) << "Wrong size";
+	EXPECT_EQ(a.length(), (size_t)0) << "Wrong length";
+	EXPECT_EQ(a.max_size(), (size_t)4) << "Wrong max_size";
 	EXPECT_TRUE(a.empty()) << "Not empty";
 	EXPECT_STREQ(a.c_str(), "") << "Content error";
 	EXPECT_STREQ(a.data(), "") << "Content error";
 
 	a += "123456789";
-	EXPECT_EQ(a.size(), 4) << "Wrong size";
+	EXPECT_EQ(a.size(), (size_t)4) << "Wrong size";
 	EXPECT_STREQ(a.c_str(), "1234") << "Content error";
 
 	fixed_string_trunc<5> b("hej hopp");
 
-	EXPECT_EQ(b.size(), 5) << "Wrong size";
-	EXPECT_EQ(b.max_size(), 5) << "Wrong max_size";
+	EXPECT_EQ(b.size(), (size_t)5) << "Wrong size";
+	EXPECT_EQ(b.max_size(), (size_t)5) << "Wrong max_size";
 	EXPECT_FALSE(b.empty()) << "Empty";
 	EXPECT_STREQ(b.c_str(), "hej h") << "Content error";
 
 	b += "jgjhgj";
-	EXPECT_EQ(b.size(), 5) << "Wrong size";
+	EXPECT_EQ(b.size(), (size_t)5) << "Wrong size";
 	EXPECT_STREQ(b.c_str(), "hej h") << "Content error";
 
 	fixed_string_trunc<7> b2("Det", 7);
 
-	EXPECT_EQ(b2.size(), 3) << "Wrong size";
-	EXPECT_EQ(b2.max_size(), 7) << "Wrong max_size";
+	EXPECT_EQ(b2.size(), (size_t)3) << "Wrong size";
+	EXPECT_EQ(b2.max_size(), (size_t)7) << "Wrong max_size";
 	EXPECT_FALSE(b2.empty()) << "Empty";
 	EXPECT_STREQ(b2.c_str(), "Det") << "Content error";
 
 	b2 += " var en gång";
-	EXPECT_EQ(b2.size(), 7) << "Wrong size";
+	EXPECT_EQ(b2.size(), (size_t)7) << "Wrong size";
 	EXPECT_STREQ(b2.c_str(), "Det var") << "Content error";
 
 	fixed_string_trunc<10> c(b);
 
-	EXPECT_EQ(c.size(), 5) << "Wrong size";
-	EXPECT_EQ(c.max_size(), 10) << "Wrong max_size";
+	EXPECT_EQ(c.size(), (size_t)5) << "Wrong size";
+	EXPECT_EQ(c.max_size(), (size_t)10) << "Wrong max_size";
 	EXPECT_FALSE(c.empty()) << "Empty";
 	EXPECT_STREQ(c.c_str(), "hej h") << "Content error";
 
 	c += "opp i lingonskogen";
-	EXPECT_EQ(c.size(), 10) << "Wrong size";
+	EXPECT_EQ(c.size(), (size_t)10) << "Wrong size";
 	EXPECT_STREQ(c.c_str(), "hej hopp i") << "Content error";
 
 	fixed_string_trunc<6> d = c;
 
-	EXPECT_EQ(d.size(), 6) << "Wrong size";
-	EXPECT_EQ(d.length(), 6) << "Wrong length";
-	EXPECT_EQ(d.max_size(), 6) << "Wrong max_size";
+	EXPECT_EQ(d.size(), (size_t)6) << "Wrong size";
+	EXPECT_EQ(d.length(), (size_t)6) << "Wrong length";
+	EXPECT_EQ(d.max_size(), (size_t)6) << "Wrong max_size";
 	EXPECT_FALSE(d.empty()) << "Empty";
 	EXPECT_STREQ(d.c_str(), "hej ho") << "Content error";
 }

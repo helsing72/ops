@@ -1,5 +1,5 @@
 
-// TODO: Add test using getDebugMcPort()
+// TODO:
 //
 
 #include "gtest/gtest.h"
@@ -279,7 +279,7 @@ TEST(Test_OPSConfigObjects, TestTransport) {
 	Transport obj1;
 	EXPECT_STREQ(obj1.getTypeString().c_str(), "Transport ");
 	EXPECT_STREQ(obj1.channelID.c_str(), "");
-	EXPECT_EQ(obj1.topics.size(), 0);
+	EXPECT_EQ(obj1.topics.size(), (size_t)0);
 }
 
 TEST(Test_OPSConfigObjects, TestTransport_Serialize) {
@@ -302,7 +302,7 @@ TEST(Test_OPSConfigObjects, TestTransport_Serialize) {
 	XMLArchiverIn arcIn(is, "root", nullptr);
 	obj1.serialize(&arcIn);
 	EXPECT_STREQ(obj1.channelID.c_str(), "Channel-A");
-	ASSERT_EQ(obj1.topics.size(), 4);
+	ASSERT_EQ(obj1.topics.size(), (size_t)4);
 
 	EXPECT_STREQ(obj1.topics[0].c_str(), "Topic1");
 	EXPECT_STREQ(obj1.topics[1].c_str(), "Topic2");
@@ -337,12 +337,12 @@ TEST(Test_OPSConfigObjects, TestDomain) {
 	EXPECT_STREQ(obj1.getDomainAddress().c_str(), "");
 	EXPECT_STREQ(obj1.getDomainID().c_str(), "");
 	EXPECT_STREQ(obj1.getLocalInterface().c_str(), "0.0.0.0");
-///TODO	EXPECT_EQ(obj1.getDebugMcPort(), 0);
+	EXPECT_EQ(obj1.getDebugMcPort(), 0);
 	EXPECT_EQ(obj1.getMetaDataMcPort(), 9494);
 	EXPECT_EQ(obj1.getTimeToLive(), 1);
 	EXPECT_EQ(obj1.getOutSocketBufferSize(), -1);
 	EXPECT_EQ(obj1.getInSocketBufferSize(), -1);
-	EXPECT_EQ(obj1.getTopics().size(), 0);
+	EXPECT_EQ(obj1.getTopics().size(), (size_t)0);
 	EXPECT_THROW(obj1.getTopic("TestTopic"), NoSuchTopicException);
 	EXPECT_FALSE(obj1.existsTopic("TestTopic"));
 }
@@ -391,13 +391,13 @@ TEST(Test_OPSConfigObjects, TestDomain_Serialize) {
 		EXPECT_STREQ(obj1.getDomainID().c_str(), "TestDomain");
 		EXPECT_STREQ(obj1.getDomainAddress().c_str(), "236.7.8.9");
 		EXPECT_STREQ(obj1.getLocalInterface().c_str(), "127.0.0.1");
-///TODO		EXPECT_EQ(obj1.getDebugMcPort(), 9999);
+		EXPECT_EQ(obj1.getDebugMcPort(), 9999);
 		EXPECT_EQ(obj1.getMetaDataMcPort(), 7877);
 		EXPECT_EQ(obj1.getTimeToLive(), 4);
 		EXPECT_EQ(obj1.getOutSocketBufferSize(), 200000);
 		EXPECT_EQ(obj1.getInSocketBufferSize(), 100000);
 		std::vector<Topic*> vec = obj1.getTopics();
-		EXPECT_EQ(vec.size(), 3);
+		EXPECT_EQ(vec.size(), (size_t)3);
 
 		// These should be set by Domain for all topics
 		for (unsigned int i = 0; i < vec.size(); i++) {
@@ -470,7 +470,7 @@ TEST(Test_OPSConfigObjects, TestDomain_Serialize) {
 		EXPECT_STREQ(obj1.getDomainID().c_str(), "TestDomain");
 		EXPECT_STREQ(obj1.getDomainAddress().c_str(), "236.7.8.9");
 		std::vector<Topic*> vec = obj1.getTopics();
-		EXPECT_EQ(vec.size(), 3);
+		EXPECT_EQ(vec.size(), (size_t)3);
 
 		// These should be set by Domain for all topics
 		for (unsigned int i = 0; i < vec.size(); i++) {

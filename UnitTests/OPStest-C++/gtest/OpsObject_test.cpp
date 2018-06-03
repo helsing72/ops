@@ -53,7 +53,7 @@ TEST(Test_OPSObject, Test) {
 	EXPECT_STREQ(obj3->getTypeString().c_str(), "MyOpsObject ");
 	EXPECT_STREQ(obj3->getKey().c_str(), "Pelle");
 
-	EXPECT_EQ(obj3->spareBytes.size(), 5);
+	EXPECT_EQ(obj3->spareBytes.size(), (size_t)5);
 	EXPECT_STREQ((char*)&obj3->spareBytes[0], "abcd");
 
 	delete obj3;

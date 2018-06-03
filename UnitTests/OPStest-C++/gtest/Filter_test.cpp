@@ -20,7 +20,7 @@ TEST(Test_Filters, TestEmpty) {
 
 	// Empty filter
 	KeyFilterQoSPolicy filter;
-	EXPECT_EQ(filter.getKeys().size(), 0);
+	EXPECT_EQ(filter.getKeys().size(), (size_t)0);
 	EXPECT_TRUE(filter.applyFilter(&obj));
 	EXPECT_TRUE(filter.applyFilter(&obj2));
 	EXPECT_TRUE(filter.applyFilter(&obj3));
@@ -40,28 +40,28 @@ TEST(Test_Filters, TestOneKey) {
 	// Filter with one key
 	KeyFilterQoSPolicy filter("olle");
 
-	EXPECT_EQ(filter.getKeys().size(), 1);
+	EXPECT_EQ(filter.getKeys().size(), (size_t)1);
 	EXPECT_FALSE(filter.applyFilter(&obj));
 	EXPECT_TRUE(filter.applyFilter(&obj2));
 	EXPECT_FALSE(filter.applyFilter(&obj3));
 
 	// Replace key in filter
 	filter.setKey("kalle");
-	EXPECT_EQ(filter.getKeys().size(), 1);
+	EXPECT_EQ(filter.getKeys().size(), (size_t)1);
 	EXPECT_TRUE(filter.applyFilter(&obj));
 	EXPECT_FALSE(filter.applyFilter(&obj2));
 	EXPECT_FALSE(filter.applyFilter(&obj3));
 
 	// Replace key in filter
 	filter.setKey("");
-	EXPECT_EQ(filter.getKeys().size(), 1);
+	EXPECT_EQ(filter.getKeys().size(), (size_t)1);
 	EXPECT_FALSE(filter.applyFilter(&obj));
 	EXPECT_FALSE(filter.applyFilter(&obj2));
 	EXPECT_FALSE(filter.applyFilter(&obj3));
 
 	// Clear filter
 	filter.setKeys(std::vector<ObjectKey_T>());
-	EXPECT_EQ(filter.getKeys().size(), 0);
+	EXPECT_EQ(filter.getKeys().size(), (size_t)0);
 	EXPECT_TRUE(filter.applyFilter(&obj));
 	EXPECT_TRUE(filter.applyFilter(&obj2));
 	EXPECT_TRUE(filter.applyFilter(&obj3));
@@ -87,21 +87,21 @@ TEST(Test_Filters, TestSeveralKeys) {
 	// Filter with several keys
 	KeyFilterQoSPolicy filter(keys);
 
-	EXPECT_EQ(filter.getKeys().size(), 4);
+	EXPECT_EQ(filter.getKeys().size(), (size_t)4);
 	EXPECT_TRUE(filter.applyFilter(&obj));
 	EXPECT_TRUE(filter.applyFilter(&obj2));
 	EXPECT_FALSE(filter.applyFilter(&obj3));
 
 	// Replace keys in filter
 	filter.setKey("");
-	EXPECT_EQ(filter.getKeys().size(), 1);
+	EXPECT_EQ(filter.getKeys().size(), (size_t)1);
 	EXPECT_FALSE(filter.applyFilter(&obj));
 	EXPECT_FALSE(filter.applyFilter(&obj2));
 	EXPECT_FALSE(filter.applyFilter(&obj3));
 
 	// Clear filter
 	filter.setKeys(std::vector<ObjectKey_T>());
-	EXPECT_EQ(filter.getKeys().size(), 0);
+	EXPECT_EQ(filter.getKeys().size(), (size_t)0);
 	EXPECT_TRUE(filter.applyFilter(&obj));
 	EXPECT_TRUE(filter.applyFilter(&obj2));
 	EXPECT_TRUE(filter.applyFilter(&obj3));
@@ -111,7 +111,7 @@ TEST(Test_Filters, TestSeveralKeys) {
 	keys.push_back("kalle");
 	
 	filter.setKeys(keys);
-	EXPECT_EQ(filter.getKeys().size(), 2);
+	EXPECT_EQ(filter.getKeys().size(), (size_t)2);
 	EXPECT_TRUE(filter.applyFilter(&obj));
 	EXPECT_FALSE(filter.applyFilter(&obj2));
 	EXPECT_FALSE(filter.applyFilter(&obj3));
