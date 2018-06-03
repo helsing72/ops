@@ -14,6 +14,8 @@ SCRIPT_PATH=`readlink -f "$0"`; SCRIPT_PATH=`dirname "$SCRIPT_PATH"`; SCRIPT_PAT
 OPS_PATH=$SCRIPT_PATH/../../../Python
 GEN_PATH=$SCRIPT_PATH/../../../Common/idl/Generated/Python
 GEN_PATH2=$GEN_PATH/opsidls
-export PYTHONPATH=$OPS_PATH:$GEN_PATH:$GEN_PATH2:$PYTHONPATH
+GEN_PATH3=$SCRIPT_PATH/../../../Examples/OPSIdls/PizzaProject/Generated/Python
+GEN_PATH4=$GEN_PATH3/PizzaProject
+export PYTHONPATH=$OPS_PATH:$GEN_PATH:$GEN_PATH2:$GEN_PATH3:$GEN_PATH4:$PYTHONPATH
 
 python $SCRIPT_PATH/ops_debug_console.py $@

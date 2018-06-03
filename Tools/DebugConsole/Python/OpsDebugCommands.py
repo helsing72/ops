@@ -45,6 +45,8 @@ def ShowResponse(sub,mess):
 		tempStr +=" Publisher Name: " + data.Name
 		tempStr +=" Enabled: " + str(data.Enabled)
 		tempStr +=" PubId: " + str(data.Result1)
+		tempStr +=" Skip: " + str(data.Result2)
+		tempStr +=" Mess Q'd: " + str(data.Result3)
 		print tempStr
 
 	if data.Entity == 3:	# Subscriber
@@ -53,6 +55,7 @@ def ShowResponse(sub,mess):
 		tempStr +=" Subscriber Name: " + data.Name
 		tempStr +=" Enabled: " + str(data.Enabled)
 		tempStr +=" #Mess: " + str(data.Result1)
+		tempStr +=" Skip: " + str(data.Result2)
 		print tempStr
 
 	if dumpInfo:
@@ -123,14 +126,27 @@ class OpsDebugCommands():
 	def PublisherStatus(self,key,topic):
 		self.PublisherCommand(key,topic,1,0)
 
-	def DisablePublisher(self,key,topic):
+	def PublisherDisable(self,key,topic):
 		self.PublisherCommand(key,topic,2,0)
 
-	def EnablePublisher(self,key,topic):
+	def PublisherEnable(self,key,topic):
 		self.PublisherCommand(key,topic,2,1)
 
-	def IncrementPubId(self,key,topic,amount):
+	def PublisherIncPubId(self,key,topic,amount):
 		self.PublisherCommand(key,topic,3,amount)
+
+	def PublisherSkip(self,key,topic,amount):
+		self.PublisherCommand(key,topic,4,amount)
+
+	def PublisherSend(self,key,topic,mess):
+		self.request.Objs = [mess]
+		self.PublisherCommand(key,topic,5,0)
+		self.request.Objs = []
+
+	def PublisherReplace(self,key,topic,messages):
+		self.request.Objs = messages
+		self.PublisherCommand(key,topic,6,0)
+		self.request.Objs = []
 
 	############################
 	def SubscriberCommand(self,key,top,cmd,param):
@@ -140,8 +156,11 @@ class OpsDebugCommands():
 	def SubscriberStatus(self,key,topic):
 		self.SubscriberCommand(key,topic,1,0)
 
-	def DisableSubscriber(self,key,topic):
+	def SubscriberDisable(self,key,topic):
 		self.SubscriberCommand(key,topic,2,0)
 
-	def EnableSubscriber(self,key,topic):
+	def SubscriberEnable(self,key,topic):
 		self.SubscriberCommand(key,topic,2,1)
+
+	def SubscriberSkip(self,key,topic,amount):
+		self.SubscriberCommand(key,topic,4,amount)
