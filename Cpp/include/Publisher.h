@@ -72,11 +72,12 @@ private:
 	ObjectName_T name;
     ObjectKey_T key;
 	
-    void IncCurrentPublicationID();
-
 #ifdef OPS_ENABLE_DEBUG_HANDLER
-	bool _enabled;
+	volatile int64_t _dbgSkip;
+	Lockable _dbgLock;
+	std::vector<OPSObject*> _replace;
 	virtual void onRequest(opsidls::DebugRequestResponseData& req, opsidls::DebugRequestResponseData& resp);
+	void internalWrite(OPSObject* data);
 #endif
 
 public:

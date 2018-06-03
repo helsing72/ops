@@ -205,8 +205,9 @@ namespace ops
         DeadlineTimer* deadlineTimer;
 
 #ifdef OPS_ENABLE_DEBUG_HANDLER
-		bool _enabled;
-		int64_t _numReceived;
+		volatile int64_t _dbgSkip;
+		volatile int64_t _numReceived;
+		Lockable _dbgLock;
 		virtual void onRequest(opsidls::DebugRequestResponseData& req, opsidls::DebugRequestResponseData& resp);
 #endif
 	};

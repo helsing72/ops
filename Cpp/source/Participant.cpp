@@ -302,6 +302,7 @@ namespace ops
 		return infoTopic;
 	}
 
+#ifdef OPS_ENABLE_DEBUG_HANDLER
 	ops::Topic Participant::createDebugTopic()
 	{
 		ops::Topic debugTopic("ops.DebugTopic", domain->getDebugMcPort(), opsidls::DebugRequestResponseData::getTypeName(), domain->getDomainAddress());
@@ -312,6 +313,7 @@ namespace ops
 		debugTopic.setTransport(Topic::TRANSPORT_MC);
 		return debugTopic;
 	}
+#endif
 
 	// Report an error via the participants ErrorService
 	void Participant::reportError(Error* err)

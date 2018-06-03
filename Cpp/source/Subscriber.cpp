@@ -36,12 +36,12 @@ namespace ops
 {
 
     Subscriber::Subscriber(Topic t) :
-		pubIdChecker(NULL),
-		message(NULL),
-		data(NULL),
+		pubIdChecker(nullptr),
+		message(nullptr),
+		data(nullptr),
 		firstDataReceived(false),
 		hasUnreadData(false),
-		receiveDataHandler(NULL),
+		receiveDataHandler(nullptr),
 		topic(t),
 		messageBufferMaxSize(1),
 		timeLastDataForTimeBase(0),
@@ -50,7 +50,7 @@ namespace ops
 		deadlineMissed(false),
 		started(false)
 #ifdef OPS_ENABLE_DEBUG_HANDLER
-		, _enabled(true)
+		, _dbgSkip(0)
 		, _numReceived(0)
 #endif
 	{
@@ -107,7 +107,7 @@ namespace ops
         // This ensures that the receive thread can't be in our onNewEvent() or be calling us anymore
         // when we return from the removeListener() call.
         receiveDataHandler->removeListener(this);
-        receiveDataHandler = NULL;
+        receiveDataHandler = nullptr;
         participant->releaseReceiveDataHandler(topic);
         deadlineTimer->removeListener(this);
         deadlineTimer->cancel();
@@ -119,11 +119,6 @@ namespace ops
     {
         UNUSED(sender);
         //Perform a number of checks on incomming data to be sure we want to deliver it to the application layer
-#ifdef OPS_ENABLE_DEBUG_HANDLER
-		if (!_enabled) return;
-		_numReceived++;
-#endif
-
         //Check that this message is delivered on the same topic as this Subscriber use
         if (message->getTopicName() != topic.getName())
         {
@@ -143,6 +138,16 @@ namespace ops
             participant->reportError(&err);
             return;
         }
+#ifdef OPS_ENABLE_DEBUG_HANDLER
+		{
+			SafeLock lck(&_dbgLock);
+			if (_dbgSkip > 0) {
+				_dbgSkip--;
+				return;
+			}
+			_numReceived++;
+		}
+#endif
 
 		//OK, we passed the basic checks
 
@@ -377,24 +382,25 @@ namespace ops
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 	void Subscriber::onRequest(opsidls::DebugRequestResponseData& req, opsidls::DebugRequestResponseData& resp)
 	{
+		SafeLock lck(&_dbgLock);
 		switch (req.Command) {
 		case 1: // Request
 			break;
 		case 2: // Enable
-			_enabled = (req.Param1 == 1);
+			_dbgSkip = (req.Param1 == 1) ? 0 : LLONG_MAX;
 			break;
 		case 3: // Filter
 			///TODO
 			break;
-		case 4: // Skip
-			///TODO
+		case 4: // Skip next x receives
+			_dbgSkip = req.Param1;
 			break;
 		}
 
 		// Fill in status
-		resp.Enabled = _enabled;
-		resp.Result1 = _numReceived;	///TODO thread safety
-		resp.Result2 = 0;
+		resp.Enabled = (_dbgSkip == 0);
+		resp.Result1 = _numReceived;
+		resp.Result2 = _dbgSkip;
 		resp.Result3 = false;
 	}
 #endif

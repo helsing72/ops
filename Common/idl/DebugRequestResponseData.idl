@@ -11,19 +11,26 @@ class DebugRequestResponseData
     /* Commands and parameters
        0 = Response
        1 = Request status
+
          Debug:
        2 = List, Param1 = 2 [Publishers], Param1 = 3 [Subscribers]
+
          Participant:
-           TBD
+       TBD
+
          Publisher:
        2 = Enable, Param1 = 0 [False] / 1 [True]
        3 = PubId, Increment counter with Param1
-       4 = Skip, Skip Param1 number of sends             (TODO)
-       5 = Send, Send message in Objs[0]
+       4 = Skip, Skip Param1 number of sends
+       5 = Send, Send message in Objs[0] directly
+           NOTE: Only works if DebugRequestResponseData + message is less than 60000 bytes in size
+       6 = Send, Send message(s) in Objs instead of next ordinary send(s)
+           NOTE: Only works if DebugRequestResponseData + message(s) is less than 60000 bytes in size
+
          Subcriber:
        2 = Enable, Param1 = 0 [False] / 1 [True]
        3 = Filter, Set key filter from Param3            (TODO)
-       4 = Skip, Skip Param1 number of received messages (TODO)
+       4 = Skip, Skip Param1 number of received messages
        Future: Be able to change port dynamically to enable injection of a custom filter
     */
     int      Command;
@@ -35,13 +42,16 @@ class DebugRequestResponseData
          Debug:
            Result1 = 2, List in Param3 contains Publishers
            Result1 = 3, List in Param3 contains subscribers
+
          Participant:
            TBD
+
          Publisher:
            Enabled or not
            Result1 = Publication Counter
            Result2 = Number of sends left to skip
            Result3 = True if fejk message stored for sending
+           
          Subcriber:
            Enabled or not
            Result1 = Number of messages received

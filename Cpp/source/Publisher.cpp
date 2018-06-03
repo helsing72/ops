@@ -34,7 +34,7 @@ namespace ops
     name(""),
     key(""),
 #ifdef OPS_ENABLE_DEBUG_HANDLER
-	_enabled(true),
+	_dbgSkip(0),
 #endif
     sendSleepTime(1),
     sleepEverySendPacket(100000)
@@ -57,6 +57,9 @@ namespace ops
     {
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 		participant->debugHandler.UnregisterPub(this, topic.getName());
+		for (unsigned int i = 0; i < _replace.size(); i++) {
+			if (_replace[i]) delete _replace[i];
+		}
 #endif
 		stop();
 		participant->releaseSendDataHandler(topic);
@@ -102,9 +105,27 @@ namespace ops
         write(obj);
     }
 
-    void Publisher::write(OPSObject* data)
-    {
-        if (key != "")
+	void Publisher::write(OPSObject* data)
+	{
+#ifdef OPS_ENABLE_DEBUG_HANDLER
+		SafeLock lck(&_dbgLock);
+		if (_dbgSkip > 0) {
+			_dbgSkip--;
+		} else {
+			if (_replace.size() > 0) {
+				internalWrite(_replace[_replace.size()-1]);
+				delete _replace[_replace.size() - 1];
+				_replace.pop_back();
+			} else {
+				internalWrite(data);
+			}
+		}
+	}
+
+	void Publisher::internalWrite(OPSObject* data)
+	{
+#endif
+		if (key != "")
         {
             data->setKey(key);
         }
@@ -130,9 +151,6 @@ namespace ops
 
         buf.finish();
 
-#ifdef OPS_ENABLE_DEBUG_HANDLER
-		if (_enabled)
-#endif
         for (int i = 0; i < buf.getNrOfSegments(); i++)
         {
             int segSize = buf.getSegmentSize(i);
@@ -148,40 +166,49 @@ namespace ops
             }
         }
 
-        IncCurrentPublicationID();
-    }
-
-    void Publisher::IncCurrentPublicationID()
-    {
-        currentPublicationID++;
+		currentPublicationID++;
     }
 
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 	void Publisher::onRequest(opsidls::DebugRequestResponseData& req, opsidls::DebugRequestResponseData& resp)
 	{
+		SafeLock lck(&_dbgLock);
 		switch (req.Command) {
-		case 1: // Request
+		case 1: // Request status
 			break;
 		case 2: // Enable
-			_enabled = (req.Param1 == 1);
+			_dbgSkip = (req.Param1 == 1) ? 0 : LLONG_MAX;
 			break;
 		case 3: // PubId
-			currentPublicationID += req.Param1;		// TODO thread safety
+			currentPublicationID += req.Param1;
 			break;
-		case 4: // Skip
-			///TODO
+		case 4: // Skip next x sends
+			_dbgSkip = req.Param1;
 			break;
-		case 5: // Send
+		case 5: // Send directly
 			if (req.Objs.size() == 0) break;
-			if (req.Objs[0]) write(req.Objs[0]);	// TODO thread safety
+			if (req.Objs[0]) internalWrite(req.Objs[0]);
+			break;
+		case 6: // Send instead of next x ordinary
+			// Free ev. objects stored since earlier 
+			for (unsigned int i = 0; i < _replace.size(); i++) {
+				if (_replace[i]) delete _replace[i];
+			}
+			_replace.clear();
+			// Store backwards in _replace vector
+			for (auto i = req.Objs.size(); i > 0; i--) {
+				_replace.push_back(req.Objs[i-1]);
+			}
+			// We have now taken over ownership
+			req.Objs.clear();
 			break;
 		}
 
 		// Fill in status
-		resp.Enabled = _enabled;
+		resp.Enabled = _dbgSkip == 0;
 		resp.Result1 = currentPublicationID;
-		resp.Result2 = 0;
-		resp.Result3 = false;
+		resp.Result2 = _dbgSkip;
+		resp.Result3 = (_replace.size() > 0);
 	}
 #endif
 }
