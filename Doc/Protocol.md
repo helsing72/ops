@@ -18,18 +18,18 @@ pub name              string        4 + n    n = length of Publisher name, if an
 topic name            string        4 + n    n = length of Topic name
 top level key         string        4        (always = "")
 address               string        4        (always = "")
-data                  OPSObject*    ...
+data                  OPSObject*    
     data type         string        4 + n    n = length of 'data type', see note below
     OPSObject
        key            string        4 + n    n = length of 'key', see note below
     DerivedObject
        fields         ...           ...      depends on sent object
 ```
-*** Note: 'data type' ***
+** Note: 'data type' **
 
 The data type field is a concatenation of all datatypes in the inheritance hierarchy for the message sent.
 
-*** Note: 'key'***
+** Note: 'key'**
 
 The key field sent is the Publisher key if it has been set. If it hasn't been set, the key will be the sent message key, which defaults to "k" if not set by the user.
 
@@ -39,10 +39,12 @@ The serialized data from OPSMessage is split into one or more segments as descri
 To be able to correctly reassemble segments into a complete message, each segment starts with a segment header (14 bytes):
 
 ```
-protocol id         4 bytes    = "opsp"
-version             2 bytes    currently = 5
-total # segments    4 bytes
-segment number      4 bytes
+Field                 Type          Bytes
+-----                 ----          -----
+protocol id                         4        = "opsp"
+version               short         2        currently = 5
+total # segments      int           4
+segment number        int           4
 ```
 The header is directly followed by the serialized data from the message, max 60000-14 bytes. Rest of the serialized data, if any, continues in a new segment.
 
@@ -51,6 +53,8 @@ The header is directly followed by the serialized data from the message, max 600
 When *TCP* is used as transport, each segment is preceded by the following *TCP* unique header (22 bytes):
 
 ```
-protocol id        18 bytes    = "opsp_tcp_size_info"
-length of data      4 bytes    size of segment
+Field                 Type          Bytes
+-----                 ----          -----
+protocol id                         18       = "opsp_tcp_size_info"
+length of data        int           4        size of segment
 ```

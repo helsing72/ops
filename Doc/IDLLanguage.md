@@ -34,9 +34,11 @@ The following table shows a listing of all available OPS IDL types and their cor
 | double  | double | double | double | Double | 8 bytes                  |
 | string  | std::string | String | string | AnsiString | 4 bytes (size) + 1 byte per character (8-bit) |
 | string`<size>` | fixed_string`<size>` | String | string | AnsiString | 4 bytes (size) + 1 byte per character (8-bit) |
-| T       | T  | T  | T | T | sizeof( T )              |
+| T       | T  | T  | T | T | sizeof( T ) |
 | T`[]` | std::vector< T > | java.util.Vector< T > | List< T > | array of T | 4 bytes (size) + sizeof( T ) per element |
 | T`[size]` | T`[size]` | java.util.Vector< T > | List< T > | array`[0..size-1]` of T | 4 bytes (size) + sizeof( T ) per element |
+
+where sizeof( T ) is the serialized size of a string for the datatype plus the serialized size of all fields in T.
 
 Or as IDL code example:
 
@@ -94,7 +96,7 @@ What we normally would like to do when using inheritance is to have some sort of
 1.
 `SampleData childData;`
 
-While this is a valid declaration it does not give us the opportunity to use the field as  a ChildData. This because OPS tries to use static memory allocation as often as possible and this type of declaration will generate code (if allowed by the target language) that allocates the field on the stack rather than on the heap and thus not allow it to change implementation dynamically .
+While this is a valid declaration it does not give us the opportunity to use the field as a ChildData. This because OPS tries to use static memory allocation as often as possible and this type of declaration will generate code (if allowed by the target language) that allocates the field on the stack rather than on the heap and thus not allow it to change implementation dynamically.
 To tell the OPS code generators to allow for dynamic memory allocation and support for polymorfism the keyword virtual is used like this:
 
 2.
@@ -137,7 +139,7 @@ There is a special form of comments that is used to give instructions to the OPS
 
 | Directive | Values | Default | Description |
 |-----------|--------|---------|-------------|
-| toplevel  | true / false | true | Publishers/Subscribers are only generated for toplevel classes. (only supported for Ada, C++, Java) |
+| toplevel  | true / false | true | Publishers/Subscribers are only generated for toplevel classes. This directive is only supported for Ada, C++ and Java |
 
 Example of usage:
 
