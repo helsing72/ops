@@ -19,6 +19,9 @@ thats using the Boost library, so you can use your own implementations (e.g. for
 #### REPLACE_OPS_CONFIG ####
 Define this to remove the OPSConfig file reader, so you can implement your own for targets without a filesystem.
 
+#### OPS_ENABLE_DEBUG_HANDLER ####
+Defined to enable the built-in debug functionality in OPS.
+
 #### FIXED_NO_STD_STRING ####
 Defined to disable the *std::string* interface in the *fixed_string* class.
 
