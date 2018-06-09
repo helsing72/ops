@@ -7,11 +7,13 @@ add_subdirectory(OPSReflectionLib)
 
 add_subdirectory(opsc)
 
-add_subdirectory(OPSListener)
+if(NOT CMAKE_BUILD_TYPE MATCHES "Bootstrap")
+  add_subdirectory(OPSListener)
 
-add_subdirectory(VerifyOPSConfig)
+  add_subdirectory(VerifyOPSConfig)
 
-add_subdirectory(DebugConsole)
+  add_subdirectory(DebugConsole)
+endif()
 
 # install the latest template files
 set(TMPL_PATH NBOPSIDLSupport/src/ops/netbeansmodules/idlsupport/templates)

@@ -4,6 +4,8 @@ cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 # The main project name
 project(OPS VERSION 4.1.0)
 
+set (CMAKE_CXX_STANDARD 11)
+
 ################################################################################
 #
 #if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
@@ -135,34 +137,35 @@ if(Java_JAVAC_EXECUTABLE)
   add_subdirectory(Tools)
 endif()
 
+if(NOT CMAKE_BUILD_TYPE MATCHES "Bootstrap")
+  add_subdirectory(CSharp)
 
-add_subdirectory(CSharp)
+  # add the C++ source, only if Boost is loaded
+  if(Boost_FOUND)
+    add_subdirectory(Cpp)
 
-# add the C++ source, only if Boost is loaded
-if(Boost_FOUND)
-  add_subdirectory(Cpp)
+    option(OPS_BUILD_UNITTESTS "Enable to build the UnitTest app(s)" ON)
+    if(OPS_BUILD_UNITTESTS AND GTEST_FOUND AND CMAKE_BUILD_TYPE MATCHES "Debug")
+      add_subdirectory(UnitTests)
+    endif()
 
-  option(OPS_BUILD_UNITTESTS "Enable to build the UnitTest app(s)" ON)
-  if(OPS_BUILD_UNITTESTS AND GTEST_FOUND AND CMAKE_BUILD_TYPE MATCHES "Debug")
-    add_subdirectory(UnitTests)
+  else()
+    message(WARNING "install Boost to build OPS C++ libraries")
   endif()
 
-else()
-  message(WARNING "install Boost to build OPS C++ libraries")
-endif()
+  if(PYTHONINTERP_FOUND)
+    add_subdirectory(Python)
+  endif()
 
-if(PYTHONINTERP_FOUND)
-  add_subdirectory(Python)
-endif()
+  ################################################################################
+  # Build Examples
 
-################################################################################
-# Build Examples
-
-# we need the opsc compiler to generate code for the examples
-if(TARGET opsc)
-  option(OPS_BUILD_EXAMPLES "Enable to build the example applications" ON)
-  if(OPS_BUILD_EXAMPLES AND CMAKE_BUILD_TYPE MATCHES "Debug")
-    add_subdirectory(Examples)
+  # we need the opsc compiler to generate code for the examples
+  if(TARGET opsc)
+    option(OPS_BUILD_EXAMPLES "Enable to build the example applications" ON)
+    if(OPS_BUILD_EXAMPLES AND CMAKE_BUILD_TYPE MATCHES "Debug")
+      add_subdirectory(Examples)
+   endif()
   endif()
 endif()
 

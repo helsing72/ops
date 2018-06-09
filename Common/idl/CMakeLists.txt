@@ -6,16 +6,15 @@ set(IDL_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/DebugRequestResponseData.idl
     )
 
-# the output file that we want
-set(JAR_OUTPUT ${CMAKE_BINARY_DIR}/bin/opsidls.jar)
+# the output files that we want are a several, but we use one for the check
+set(WANTED_OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/Generated/Cpp/opsidls/DebugRequestResponseData.h)
 
-add_custom_command(OUTPUT ${JAR_OUTPUT}
-  COMMAND ${OPS_COMPILER} -g ALL -b java -o ${CMAKE_CURRENT_SOURCE_DIR}/Generated -p opsidls ${IDL_SRCS}
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/Generated/Java/opsidls.jar ${JAR_OUTPUT}
+add_custom_command(OUTPUT ${WANTED_OUTPUT}
+  COMMAND ${OPS_COMPILER} -g ALL -B ALL -o ${CMAKE_CURRENT_SOURCE_DIR}/Generated -p opsidls ${IDL_SRCS}
   DEPENDS ${IDL_SRCS}
-  COMMENT "Generating ${JAR_OUTPUT} from ${CMAKE_CURRENT_SOURCE_DIR}"
+  COMMENT "Generating source files from IDL's in ${CMAKE_CURRENT_SOURCE_DIR}"
   VERBATIM
   )
 
-add_custom_target(${BUILD_NAME} DEPENDS ${JAR_OUTPUT})
+add_custom_target(${BUILD_NAME} DEPENDS ${WANTED_OUTPUT})
 add_dependencies(${BUILD_NAME} opsc)

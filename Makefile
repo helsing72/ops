@@ -5,6 +5,7 @@ DEPLOY_SUFFIX?=
 
 BUILD_DEBUG?=$(BUILD_ROOT).debug$(BUILD_SUFFIX)
 BUILD_OPT?=$(BUILD_ROOT).opt$(BUILD_SUFFIX)
+BUILD_BOOTSTRAP?=$(BUILD_ROOT).bootstrap$(BUILD_SUFFIX)
 
 CC?=$(shell which gcc)
 CXX?=$(shell which g++)
@@ -23,7 +24,13 @@ all: debug opt
 	$(MAKE) install
 
 .PHONY : clean
-clean: clean_debug clean_opt clean_deploy
+clean: clean_debug clean_opt clean_deploy clean_bootstrap
+
+.PHONY : clean_bootstrap
+clean_bootstrap:
+	@echo "Cleaning bootstrap"
+	rm -rf $(BUILD_BOOTSTRAP)
+	rm -rf Common/idl/Generated
 
 .PHONY : clean_debug
 clean_debug:
@@ -39,11 +46,22 @@ clean_opt:
 clean_deploy :
 	rm -rf $(INSTALL_PREFIX)
 
+.PHONY : bootstrap
+bootstrap: $(BUILD_BOOTSTRAP)/Makefile
+	$(MAKE) -C $(BUILD_BOOTSTRAP) --no-print-directory opsidls
+
+$(BUILD_BOOTSTRAP)/Makefile : %/Makefile :
+	export CC=$(CC) && \
+	export CXX=$(CXX) && \
+	mkdir -p $* && \
+	cd $* && \
+	cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_PREFIX) -DCMAKE_BUILD_TYPE=Bootstrap -DOPS_BUILD_UNITTESTS=$(OPS_BUILD_UNITTESTS) -DOPS_BUILD_EXAMPLES=$(OPS_BUILD_EXAMPLES) $(CURDIR)
+
 .PHONY : opt
 opt: $(BUILD_OPT)/Makefile
 	$(MAKE) -C $(BUILD_OPT) --no-print-directory
 
-$(BUILD_OPT)/Makefile : %/Makefile :
+$(BUILD_OPT)/Makefile : %/Makefile : bootstrap
 	export CC=$(CC) && \
 	export CXX=$(CXX) && \
 	mkdir -p $* && \
@@ -54,7 +72,7 @@ $(BUILD_OPT)/Makefile : %/Makefile :
 debug: $(BUILD_DEBUG)/Makefile
 	$(MAKE) -C $(BUILD_DEBUG) --no-print-directory
 
-$(BUILD_DEBUG)/Makefile : %/Makefile :
+$(BUILD_DEBUG)/Makefile : %/Makefile : bootstrap
 	export CC=$(CC) && \
 	export CXX=$(CXX) && \
 	mkdir -p $* && \

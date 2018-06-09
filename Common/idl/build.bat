@@ -1,1 +1,3 @@
-..\..\Tools\opsc\opsc.bat -g ALL -b java -o Generated *.idl -p opsidls
+@pushd %~dp0
+@call ..\..\Tools\opsc\opsc.bat -g ALL -B ALL -o Generated *.idl -p opsidls
+@popd

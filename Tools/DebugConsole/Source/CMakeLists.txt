@@ -2,7 +2,6 @@
 # the Exe name
 set(EXE_NAME DebugConsole)
 
-
 set(EXE_SRCS
 DebugConsole.cpp
 )
@@ -12,7 +11,9 @@ add_executable(${EXE_NAME}
     ${EXE_SRCS}
 )
 
-add_dependencies(${EXE_NAME} opsidls)
+if(NOT EXISTS ${CMAKE_SOURCE_DIR}/Common/idl/Generated/Cpp)
+  message(SEND_ERROR "Needed files not generated. Run bootstrap.")
+endif()
 
 target_link_libraries(${EXE_NAME} ${Boost_LIBRARIES} ops-static)
 

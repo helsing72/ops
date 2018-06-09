@@ -1,9 +1,18 @@
-@rem NOTE requires a MSBUILD command shell to work
+@rem NOTE requires CMAKE and a MSBUILD command shell to work
 
 @rem define build directories
 @set DBG_DIR=%~dp0\build.debug
 @set OPT_DIR=%~dp0\build.opt
+@set BOOTSTRAP_DIR=%~dp0\build.bootstrap
 @set INSTALL_PREFIX=%~dp0\deploy
+
+@rem Perform the bootstrap process that generates source files neded by the other targets
+@pushd %~dp0
+@IF NOT EXIST %BOOTSTRAP_DIR% mkdir %BOOTSTRAP_DIR%
+@cd %BOOTSTRAP_DIR%
+cmake -DCMAKE_BUILD_TYPE=Bootstrap -DCMAKE_INSTALL_PREFIX=%INSTALL_PREFIX% ..
+cmake --build . --target opsidls --config Debug
+@popd
 
 @rem build and install Debug
 @pushd %~dp0

@@ -8,19 +8,21 @@ Use a Git client of your choice to clone the OPS repository to a directory of yo
 
 ## Building with CMake ##
 #### Configuration ####
-Building the examples from the *Examples* directory can optionally be turned on using the *cmake-gui* or by editing CMakeLists.txt.
+Building the examples from the *Examples* directory can optionally be turned off using the *cmake-gui* or by editing CMakeLists.txt. If make is used, building examples can also be controlled from the command line.
+
+Building unit tests can also optionally be turned off in the same maner as building examples.
 
 #### Linux ####
 In directory "OPS_DIR" type 'make'.
 
-This will build both 'debug' and 'optimized' builds and put the intermediate result in subdirectories 'build.debug' and 'build.opt'.
+This will first perform a bootstrap step to generate some needed source code and then build both 'debug' and 'optimized' builds. The intermediate result is placed in subdirectories 'build.bootstrap', 'build.debug' and 'build.opt'.
 
 #### Windows ####
 Building with CMake on Windows currently requires Visual Studio.
 
 Start a *MSBuild* command prompt, change to "OPS_DIR" and run the *run-cmake.bat* file.
 
-This will build both 'debug' and 'optimized' builds and put the intermediate result in subdirectories 'build.debug' and 'build.opt'.
+This will first perform a bootstrap step to generate some needed source code and then build both 'debug' and 'optimized' builds. The intermediate result is placed in subdirectories 'build.bootstrap', 'build.debug' and 'build.opt'.
 
 #### CMake result ####
 The install result will be in the subdirectory 'deploy' with the following structure:
