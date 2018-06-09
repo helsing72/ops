@@ -12,9 +12,6 @@ There are three properties of an OPSMessage of vital importance:
 **publisherName** accessed by getter getPublisherName()
 > name of the publisher, set by Publisher.setName()
 
-**topLevelKey** accessed by getter getTopLevelKey()
-> the key of the publication. This is the same key value as OPSMessage.getData().getKey() but can be used for filtering purposes etc. without unpacking the data object.
-
 
 Let's look at an example of how you can read the OPSMessage from a subscriber:
 
@@ -22,7 +19,7 @@ In Java:
 
 ```
 OPSMessage message = sub.getMessage();
-System.out.println("Publication " + message.getPublicationID() + " from " + message.getPublisherName() + " on key = " + message.getTopLevelKey());
+System.out.println("Publication " + message.getPublicationID() + " from " + message.getPublisherName());
 
 ```
 
@@ -30,6 +27,6 @@ Or similar in C++:
 
 ```
 OPSMessage* message = sub.getMessage();
-std::cout << "Publication " << message->getPublicationID() << " from " << message->getPublisherName() << " on key = " << message->getTopLevelKey() << std::endl;
+std::cout << "Publication " << message->getPublicationID() << " from " << message->getPublisherName() << std::endl;
 
 ```

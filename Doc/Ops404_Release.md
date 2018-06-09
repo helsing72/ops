@@ -31,8 +31,5 @@ could yield e.g. (at code generation time rather than runtime)
 
 ```
 
-### Platform Support ###
-  * Support for development under linux (OPS IDL Builder may need tweeks to work well under linux).
-
 ### IDL ###
   * Enums

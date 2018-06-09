@@ -9,7 +9,7 @@ The opsc compiler can then be used like:
 
 ## Build OPS Core for C++ with Visual Studio ##
 Open the solution/project for your version of Visual Studio (has been used with
-VS2008, VS2010, VS2012, VS2013 and VS2015) in directory
+VS2008, VS2010, VS2012, VS2013, VS2015 and VS2017) in directory
 
 > "OPS\_DIR\Cpp\Visual C++\OPSCrossPlatformCppSolution_20xx\OPSCrossPlatformCppLib_20xx.sln"
 
@@ -26,7 +26,7 @@ Verify they all compile alright (you will have some warnings).
 
 ## Building OPS Core for C# with Visual Studio ##
 Open the solution/project with Visual Studio (has been used with
-VS2010, VS2012, VS2013 and VS2015) in directory
+VS2010, VS2012, VS2013, VS2015 and VS2017) in directory
 
 > "OPS_DIR\CSharp\Projects\OpsLibrary\OpsLibrary.sln"
 

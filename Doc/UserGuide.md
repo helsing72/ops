@@ -25,6 +25,7 @@
   * Advanced Concepts and Features
     * [Understanding OPSObject and OPSMessage](OpsMessage.md)
     * [Serializing](Serializing.md)
+    * [Binary Protocol](Protocol.md)
     * [Sending Large Messages > 60000 bytes](LargeMessages.md)
     * [Using Publisher Name](PublisherName.md)
     * [Memory Managment](AdvancedReferenceHandling.md)
