@@ -18,7 +18,7 @@
  * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ops_TCPCLientH
+#ifndef ops_TCPClientH
 #define ops_TCPClientH
 
 #include "TCPClientBase.h"

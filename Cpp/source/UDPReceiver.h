@@ -273,7 +273,7 @@ namespace ops
         boost::asio::ip::udp::socket* sock;
         boost::asio::ip::udp::endpoint* localEndpoint;
         boost::asio::ip::udp::endpoint lastEndpoint;
-        boost::asio::io_service* ioService;
+        //boost::asio::io_service* ioService;
 
 		boost::asio::ip::udp::endpoint sendingEndPoint;
 
