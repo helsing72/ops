@@ -2,6 +2,7 @@
 # We are going to need the OPS headers
 include_directories(
   ${CMAKE_SOURCE_DIR}/Cpp/include
+  ${CMAKE_SOURCE_DIR}/Common/idl/Generated/Cpp
 )
 
 # We are going to need the boost headers
@@ -22,4 +23,3 @@ endif()
 
 # add the source
 add_subdirectory(Source)
-

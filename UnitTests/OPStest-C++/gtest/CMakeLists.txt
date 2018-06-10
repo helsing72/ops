@@ -18,7 +18,10 @@ set(APP_SRCS
 )
 
 # We need also the internal OPS C++ headers from:
-include_directories(${CMAKE_SOURCE_DIR}/Cpp/source)
+include_directories(
+  ${CMAKE_SOURCE_DIR}/Cpp/source
+  ${CMAKE_SOURCE_DIR}/Common/idl/Generated/Cpp
+)
 
 add_executable(${APP_NAME} ${APP_SRCS})
 

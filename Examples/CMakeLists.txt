@@ -10,6 +10,9 @@ add_subdirectory(JavaApps)
 
 # C++ example applications
 # All will need the ops headers
-include_directories(${CMAKE_SOURCE_DIR}/Cpp/include)
+include_directories(
+  ${CMAKE_SOURCE_DIR}/Cpp/include
+  ${CMAKE_SOURCE_DIR}/Common/idl/Generated/Cpp
+)
 
 add_subdirectory(CppApps)

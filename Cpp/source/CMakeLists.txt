@@ -88,3 +88,4 @@ install(TARGETS ${LIB_NAME} ${LIB_STATIC}
 
 # install headers separately to keep the include file hierarchy
 install(DIRECTORY ${OPS_HEADER_PATH}/ DESTINATION ${INSTALL_INCDIR}/${LIB_NAME})
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/Common/idl/Generated/Cpp/ DESTINATION ${INSTALL_INCDIR}/${LIB_NAME})

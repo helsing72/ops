@@ -2,6 +2,7 @@
 # Make the headers visible to everything (below this location)
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/../Common/idl/Generated/Cpp
 )
 
 # We are going to need the boost headers
