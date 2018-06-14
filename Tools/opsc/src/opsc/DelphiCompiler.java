@@ -192,6 +192,13 @@ public class DelphiCompiler extends opsc.Compiler
       }
     }
 
+    private String noReservedName(String name)
+    {
+        if (name.toLowerCase().equals("type")) return name + "_";
+        if (name.toLowerCase().equals("result")) return name + "_";
+        return name;
+    }
+
     private String elementType(String type)
     {
         return languageType(type.replace("[]", ""));
@@ -244,15 +251,16 @@ public class DelphiCompiler extends opsc.Compiler
     {
       String ret = "";
       for (IDLField field : idlClass.getFields()) {
+          String fieldName = noReservedName(field.getName());
           if (field.isIdlType()) {
               if (field.isArray()) {
                   if (field.getArraySize() > 0) {
-                      ret += tab(1) + "for i := 0 to High(" + field.getName() + ") do begin" + endl();
-                      ret += tab(2) +   field.getName() + "[i] := " + getFullyQualifiedClassName(elementType(field.getType())) + ".Create;" + endl();
+                      ret += tab(1) + "for i := 0 to High(" + fieldName + ") do begin" + endl();
+                      ret += tab(2) +   fieldName + "[i] := " + getFullyQualifiedClassName(elementType(field.getType())) + ".Create;" + endl();
                       ret += tab(1) + "end;" + endl();
                   }
               } else {
-                  ret += tab(1) + field.getName() + " := " + getFullyQualifiedClassName(field.getType()) + ".Create;" + endl();
+                  ret += tab(1) + fieldName + " := " + getFullyQualifiedClassName(field.getType()) + ".Create;" + endl();
               }
           }
       }
@@ -276,13 +284,14 @@ public class DelphiCompiler extends opsc.Compiler
     {
       String ret = "";
       for (IDLField field : idlClass.getFields()) {
+          String fieldName = noReservedName(field.getName());
           if (field.isIdlType()) {
               if (field.isArray()) {
-                ret += tab(1) + "for i := 0 to High(" + field.getName() + ") do begin" + endl();
-                ret += tab(2) +   "FreeAndNil(" + field.getName() + "[i]);" + endl();
+                ret += tab(1) + "for i := 0 to High(" + fieldName + ") do begin" + endl();
+                ret += tab(2) +   "FreeAndNil(" + fieldName + "[i]);" + endl();
                 ret += tab(1) + "end;" + endl();
               } else {
-                ret += tab(1) + "FreeAndNil(" + field.getName() + ");" + endl();
+                ret += tab(1) + "FreeAndNil(" + fieldName + ");" + endl();
               }
           }
       }
@@ -308,27 +317,28 @@ public class DelphiCompiler extends opsc.Compiler
     {
         String ret = "";
         for (IDLField field : idlClass.getFields()) {
+            String fieldName = noReservedName(field.getName());
             if (field.isIdlType()) {
                 if (!field.isArray()) {
                     // Free existing object and clone the new one
-                    ret += tab(2) + "FreeAndNil(" + field.getName() + ");" + endl();
-                    ret += tab(2) + field.getName() + " := " + getFullyQualifiedClassName(field.getType()) + "(Self." + field.getName() + ".Clone());" + endl();
+                    ret += tab(2) + "FreeAndNil(" + fieldName + ");" + endl();
+                    ret += tab(2) + fieldName + " := " + getFullyQualifiedClassName(field.getType()) + "(Self." + fieldName + ".Clone());" + endl();
                 } else {
                     String s = field.getType();
                     s = getFullyQualifiedClassName(s.substring(0, s.indexOf('[')));
-                    ret += tab(2) + "for __i__ := 0 to High("+ field.getName() + ") do FreeAndNil(" + field.getName() + "[__i__]);" + endl();
+                    ret += tab(2) + "for __i__ := 0 to High("+ fieldName + ") do FreeAndNil(" + fieldName + "[__i__]);" + endl();
                     if (field.getArraySize() == 0) {
-                        ret += tab(2) + "SetLength(" + field.getName() + ", Length(Self." + field.getName() + "));" + endl();
+                        ret += tab(2) + "SetLength(" + fieldName + ", Length(Self." + fieldName + "));" + endl();
                     }
-                    ret += tab(2) + "for __i__ := 0 to High("+ field.getName() + ") do" + endl();
-                    ret += tab(3) +   field.getName() + "[__i__] := " + s + "(Self." + field.getName() + "[__i__].Clone());" + endl();
+                    ret += tab(2) + "for __i__ := 0 to High("+ fieldName + ") do" + endl();
+                    ret += tab(3) +   fieldName + "[__i__] := " + s + "(Self." + fieldName + "[__i__].Clone());" + endl();
                 }
             } else if (field.isArray() && (field.getArraySize() == 0)) {
                 // Dynamic arrays of base types can be copied using the Delphi global Copy() function
-                ret += tab(2) + field.getName() + " := Copy(Self." + field.getName() + ");" + endl();
+                ret += tab(2) + fieldName + " := Copy(Self." + fieldName + ");" + endl();
             } else {
                 // Base types can just be assigned
-                ret += tab(2) + field.getName() + " := Self." + field.getName() + ";" + endl();
+                ret += tab(2) + fieldName + " := Self." + fieldName + ";" + endl();
             }
         }
         return ret;
@@ -378,13 +388,22 @@ public class DelphiCompiler extends opsc.Compiler
     protected String getDeclareVector(IDLField field)
     {
         String fieldType = getLastPart(field.getType());
-        String ret = field.getName() + " : ";
+        String fieldName = noReservedName(field.getName());
+        String ret = fieldName + " : ";
         if (field.getArraySize() == 0) {
             // idl = type[] name;
-            ret += languageType(fieldType) + ";" + endl();
+            if (field.isIdlType()) {
+                ret += languageType(getFullyQualifiedClassName(fieldType)) + ";" + endl();
+            } else {
+                ret += languageType(fieldType) + ";" + endl();
+            }
         } else {
             // idl = type[size] name;
-            ret += "array [0.." + (field.getArraySize() - 1) + "] of " + languageType(elementType(field.getType())) + ";" + endl();
+            if (field.isIdlType()) {
+                ret += "array [0.." + (field.getArraySize() - 1) + "] of " + languageType(getFullyQualifiedClassName(elementType(field.getType()))) + ";" + endl();
+            } else {
+                ret += "array [0.." + (field.getArraySize() - 1) + "] of " + languageType(elementType(field.getType())) + ";" + endl();
+            }
         }
         return ret;
     }
@@ -393,6 +412,7 @@ public class DelphiCompiler extends opsc.Compiler
     {
         String ret = "";
         for (IDLField field : idlClass.getFields()) {
+            String fieldName = noReservedName(field.getName());
             if(!field.getComment().equals("")) {
                 String comment = field.getComment();
                 int idx;
@@ -406,11 +426,11 @@ public class DelphiCompiler extends opsc.Compiler
             if (field.isArray()) {
                 ret += tab(2) + getDeclareVector(field);
             } else if(field.getType().equals("string")) {
-                ret += tab(2) + field.getName() + " : " + languageType(fieldType) + ";" + endl();
+                ret += tab(2) + fieldName + " : " + languageType(fieldType) + ";" + endl();
             } else if(field.isIdlType()) {
-                ret += tab(2) + field.getName() + " : " + languageType(fieldType) + ";" + endl();
+                ret += tab(2) + fieldName + " : " + languageType(fieldType) + ";" + endl();
             } else {
-                ret += tab(2) + field.getName() + " : " + languageType(fieldType) + ";" + endl();
+                ret += tab(2) + fieldName + " : " + languageType(fieldType) + ";" + endl();
             }
         }
         return ret;
@@ -435,22 +455,21 @@ public class DelphiCompiler extends opsc.Compiler
     protected String getValidationBody(IDLClass idlClass)
     {
       String ret = "";
-      for (IDLField field : idlClass.getFields())
-      {
+      for (IDLField field : idlClass.getFields()) {
+          String fieldName = noReservedName(field.getName());
           String fieldType = getLastPart(field.getType());
-          if (field.isIdlType() && !field.isAbstract())
-          {
+          if (field.isIdlType() && !field.isAbstract()) {
               // 'virtual': All fields that are objects are also virtual in Delphi!!
               // Need to validate that an object that isn't declared 'virtual' really
               // is of the correct type
               if (field.isArray()) {
                 String s = field.getType();
                 s = getLastPart(s.substring(0, s.indexOf('[')));
-                ret += tab(1) + "for __i__ := 0 to High(" + field.getName() + ") do begin" + endl();
-                ret += tab(2) + "if not " + field.getName() + "[__i__].ClassNameIs('" + s + "') then Result := False;" + endl();
+                ret += tab(1) + "for __i__ := 0 to High(" + fieldName + ") do begin" + endl();
+                ret += tab(2) + "if not " + fieldName + "[__i__].ClassNameIs('" + s + "') then Result := False;" + endl();
                 ret += tab(1) + "end;" + endl();
               } else {
-                ret += tab(1) + "if not " + field.getName() + ".ClassNameIs('" + getLastPart(field.getType()) + "') then Result := False;" + endl();
+                ret += tab(1) + "if not " + fieldName + ".ClassNameIs('" + getLastPart(field.getType()) + "') then Result := False;" + endl();
               }
           }
       }
@@ -483,18 +502,19 @@ public class DelphiCompiler extends opsc.Compiler
     {
         String ret = "";
         for (IDLField field : idlClass.getFields()) {
+            String fieldName = noReservedName(field.getName());
             ret += tab(1);
             if (field.isIdlType()) {
                 if (!field.isArray()) {
-                    ret += field.getName() + " := " + getFullyQualifiedClassName(field.getType()) +
-                          "(archiver.Inout2('" + field.getName() + "', TSerializable(" + field.getName() + ")));" + endl();
+                    ret += fieldName + " := " + getFullyQualifiedClassName(field.getType()) +
+                          "(archiver.Inout2('" + fieldName + "', TSerializable(" + fieldName + ")));" + endl();
                 } else {
                     if (field.getArraySize() > 0) {
                         // idl = type[size] name;
                         // TestDataArchiveHelper.inoutfixarr(archiver, 'ftest2s', ftest2s, 5);
-                        ret += elementType(field.getType()) + "ArchiveHelper.Inoutfixarr(archiver, '" + field.getName() + "', " + field.getName() + ", " + field.getArraySize() + ");" + endl();
+                        ret += getFullyQualifiedClassName(elementType(field.getType())) + "ArchiveHelper.Inoutfixarr(archiver, '" + fieldName + "', " + fieldName + ", " + field.getArraySize() + ");" + endl();
                     } else {
-                        ret += "archiver.Inout('" + field.getName() + "', TDynSerializableArray(" + field.getName() + "));" + endl();
+                        ret += "archiver.Inout('" + fieldName + "', TDynSerializableArray(" + fieldName + "));" + endl();
                     }
                 }
             } else {
@@ -503,17 +523,17 @@ public class DelphiCompiler extends opsc.Compiler
                     if (field.getArraySize() > 0) {
                         // idl = type[size] name;
                         if (field.getType().equals("string[]")) {
-                            ret += "archiver.Inoutfixarr('" + field.getName() + "', " + field.getName() + ", " + field.getArraySize() + ");" + endl();
+                            ret += "archiver.Inoutfixarr('" + fieldName + "', " + fieldName + ", " + field.getArraySize() + ");" + endl();
                         } else {
-                            ret += "archiver.Inoutfixarr('" + field.getName() + "', @" + field.getName() + "[0], " +
-                                field.getArraySize() + ", SizeOf(" + field.getName() + "));" + endl();
+                            ret += "archiver.Inoutfixarr('" + fieldName + "', @" + fieldName + "[0], " +
+                                field.getArraySize() + ", SizeOf(" + fieldName + "));" + endl();
                         }
                     } else {
                         // idl = type[] name;
-                        ret += "archiver.Inout('" + field.getName() + "', " + field.getName() + ");" + endl();
+                        ret += "archiver.Inout('" + fieldName + "', " + fieldName + ");" + endl();
                     }
                 } else {
-                  ret += "archiver.Inout('" + field.getName() + "', " + field.getName() + ");" + endl();
+                  ret += "archiver.Inout('" + fieldName + "', " + fieldName + ");" + endl();
                 }
             }
         }
