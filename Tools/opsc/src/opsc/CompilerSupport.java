@@ -37,6 +37,7 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
     protected Vector<String> _generatedFiles;
 
     protected boolean _onlyGenTypeSupport = false;
+    protected boolean _genMemoryPool = false;
 
     /** A verbosity flag. Currently supports 0 or not 0 */
     protected int _verbose = 0;
@@ -66,6 +67,11 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
     public void setGenOnlyTypeSupport(boolean value)
     {
         _onlyGenTypeSupport = value;
+    }
+
+    public void setGenMemoryPool(boolean value)
+    {
+        _genMemoryPool = value;
     }
 
     public void setTemplateDir(String templatedir) {

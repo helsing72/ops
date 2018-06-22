@@ -34,6 +34,7 @@ __declarations
         archive->inout("value", value);
     }
 
+__memoryPoolDecl
 };
 
 __packageCloser

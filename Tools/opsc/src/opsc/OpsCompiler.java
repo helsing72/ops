@@ -40,6 +40,7 @@ public class OpsCompiler
     String _strProjectDir = "";
     boolean _bOnlyParse = false;
     boolean _bOnlyGenFactories = false;
+    boolean _bGenMemoryPool = false;
 
     /** An instance of ProjectProperties is used to hold defaults
      *  as well is modifications to defaults either read from the
@@ -83,16 +84,18 @@ public class OpsCompiler
         System.out.println("  -idls <file>      get idl-filenames from given file");
         System.out.println("                    (one filename per line in file, paths relative to <file>)");
         System.out.println("  -o <dir>          set output directory");
-        System.out.println("  -P <IDL_proj_dir> use as project directory with pre-defined subdirectories");
         System.out.println("  -p <projname>     set project name");
+        System.out.println("  -P <IDL_proj_dir> use as project directory with pre-defined subdirectories");
         System.out.println("  -parse            only parse, don't generate");
         System.out.println("  -pp <file>        name an ops IDL project.properties file");
         System.out.println("  -printProps       print system props");
+        System.out.println("  -s <feature>      special, generate with given feature");
         System.out.println("  -t <dir>          set template directory (overrides built-in templates)");
         System.out.println("");
         System.out.println("FEATURE");
         System.out.println("  for generate: ALL, ada, cpp, csharp, delphi, java, json, python, debug");
         System.out.println("  for build:    ALL, csharp, java");
+        System.out.println("  for special:  mempool");
         System.out.println("");
     }
 
@@ -331,6 +334,10 @@ public class OpsCompiler
                 i++;
             //} else if(arg.equals("-P")) {
             // -P is handled in first step above
+            } else if(arg.equals("-s") && (i < extraArgs.size())) {
+                i++;
+                String special = extraArgs.elementAt(i);
+                if(special.equals("mempool")) _bGenMemoryPool = true;
             } else {
                 // not a known option - regard as input file
                 // Add file if not already in list
@@ -341,7 +348,6 @@ public class OpsCompiler
                 if(!found) _listInputFiles.add(arg);
             }
         }
-
         return true;
     }
 
@@ -395,12 +401,11 @@ public class OpsCompiler
         opsc.CppCompiler compiler = new opsc.CppCompiler(_strProjectName);
         compiler.setVerbose(_verbose);
         compiler.setGenOnlyTypeSupport(_bOnlyGenFactories);
+        compiler.setGenMemoryPool(_bGenMemoryPool);
         Property propTemplatePath = _props.getProperty("templatePath");
-        if(propTemplatePath != null)
-            compiler.setTemplateDir(propTemplatePath.value);
+        if (propTemplatePath != null) compiler.setTemplateDir(propTemplatePath.value);
         Property propOutPath = _props.getProperty("outputPath");
-        if(propOutPath != null)
-            compiler.setOutputDir(propOutPath.value + File.separator + "Cpp");
+        if (propOutPath != null) compiler.setOutputDir(propOutPath.value + File.separator + "Cpp");
 
         compiler.compileDataClasses(_parser._idlClasses, "baba");
         //compiler.compileTypeSupport();

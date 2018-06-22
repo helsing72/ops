@@ -47,6 +47,7 @@ public class CppCompiler extends opsc.Compiler
     final static String SIZE_REGEX = "__size";
     private static String BASE_CLASS_NAME_REGEX = "__baseClassName";
     private static String CREATE_BODY_REGEX = "__createBody";
+    private static String MEMORYPOOL_DECL_REGX = "__memoryPoolDecl";
 
     //private String projectDirectory;
     String createdFiles = "";
@@ -138,6 +139,7 @@ public class CppCompiler extends opsc.Compiler
         templateText = templateText.replace(SERIALIZE_REGEX, getSerialize(idlClass));
         templateText = templateText.replace(CLONE_REGEX, getClone(idlClass));
         templateText = templateText.replace(FILL_CLONE_REGEX, getFillClone(idlClass));
+        templateText = templateText.replace(MEMORYPOOL_DECL_REGX, getMemoryPoolDeclaration(idlClass));
 
         //Save the modified text to the output file.
         saveOutputText(templateText);
@@ -165,6 +167,7 @@ public class CppCompiler extends opsc.Compiler
         templateText = templateText.replace(PACKAGE_CLOSER_REGEX, getPackageCloser(packageName));
         templateText = templateText.replace(PACKAGE_NAME_REGEX, packageName);
         templateText = templateText.replace(UNDERSCORED_PACK_NAME_REGEX, getUnderscoredPackName(packageName));
+        templateText = templateText.replace(MEMORYPOOL_DECL_REGX, getMemoryPoolDeclaration(idlClass));
 
         templateText = templateText.replace(DECLARATIONS_REGEX, getEnumDeclarations(idlClass));
 
@@ -173,7 +176,26 @@ public class CppCompiler extends opsc.Compiler
         createdFiles += "\"" + getOutputFileName() + "\"\n";
     }
 
-    private String getEnumDeclarations(IDLClass idlClass) {
+    private String getMemoryPoolDeclaration(IDLClass idlClass)
+    {
+        String ret = "";
+        if (_genMemoryPool) {
+            ret += tab(1) + "typedef ops::memory_pools::memory_pool_nd<" + idlClass.getClassName() + "> memory_pool_type;" + endl();
+            ret += endl();
+            ret += tab(1) + "void* operator new(size_t size) { return _pool.getEntry(size); }" + endl();
+          	ret += tab(1) + "void operator delete(void *p) { _pool.returnEntry(p); }" + endl();
+            ret += endl();
+            ret += tab(0) + "private:" + endl();
+          	ret += tab(1) + "static memory_pool_type _pool;" + endl();
+            ret += endl();
+            ret += tab(1) + "/// To define the pool, you need to add the following to a cpp-file:" + endl();
+            ret += tab(1) + "///   " + idlClass.getClassName() + "::memory_pool_type " + idlClass.getClassName() + "::_pool(<max_number_of_objects>);";
+        }
+        return ret;
+    }
+
+    private String getEnumDeclarations(IDLClass idlClass)
+    {
         String ret = "";
         for (int i = 0; i < idlClass.getEnumNames().size(); i++) {
             ret += tab(1) + "const static int " + idlClass.getEnumNames().get(i) + " = " + i + ";" + endl();
@@ -182,7 +204,8 @@ public class CppCompiler extends opsc.Compiler
         return ret;
     }
 
-    public String getName() {
+    public String getName()
+    {
         return "CppCompiler";
     }
 
@@ -531,6 +554,9 @@ public class CppCompiler extends opsc.Compiler
                 }
                 typesToInclude.put(type, type);
             }
+        }
+        if(_genMemoryPool) {
+            ret += tab(0) + "#include \"memory_pool.h\"" + endl();
         }
         for (String includeType : typesToInclude.values()) {
             ret += tab(0) + "#include \"" + getSlashedType(includeType) + ".h\"" + endl();

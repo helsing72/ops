@@ -70,6 +70,7 @@ __fillClone
 __destructorBody
     }
 
+__memoryPoolDecl
 };
 
 __packageCloser
