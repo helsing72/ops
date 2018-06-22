@@ -339,6 +339,7 @@
     <ClInclude Include="..\..\..\include\ErrorWriter.h" />
     <ClInclude Include="..\..\..\include\fixed_string.h" />
     <ClInclude Include="..\..\..\include\fixed_string_support.h" />
+    <ClInclude Include="..\..\..\include\memory_pool.h" />
     <ClInclude Include="..\..\..\include\NetworkSupport.h" />
     <ClInclude Include="..\..\..\include\OPSConfigRepository.h" />
     <ClInclude Include="..\..\..\include\OPSUtilities.h" />
@@ -437,6 +438,7 @@
     <ClCompile Include="..\..\..\source\IOService.cpp" />
     <ClCompile Include="..\..\..\source\KeyFilterQoSPolicy.cpp" />
     <ClCompile Include="..\..\..\source\Lockable.cpp" />
+    <ClCompile Include="..\..\..\source\memory_pool.cpp" />
     <ClCompile Include="..\..\..\source\MulticastReceiver.cpp" />
     <ClCompile Include="..\..\..\source\NetworkSupport.cpp" />
     <ClCompile Include="..\..\..\source\OPSArchiverIn.cpp" />
