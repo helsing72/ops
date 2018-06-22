@@ -35,6 +35,18 @@
 #include "SdsSystemTime.h"
 #endif
 
+//#define USE_MEMORY_POOLS
+
+#ifdef USE_MEMORY_POOLS
+sds::MessageHeaderData::memory_pool_type sds::MessageHeaderData::_pool(1);
+pizza::PizzaData::memory_pool_type pizza::PizzaData::_pool(20);
+pizza::VessuvioData::memory_pool_type pizza::VessuvioData::_pool(20);
+pizza::CapricosaData::memory_pool_type pizza::CapricosaData::_pool(10);
+pizza::special::Cheese::memory_pool_type pizza::special::Cheese::_pool(10);
+pizza::special::LHCData::memory_pool_type pizza::special::LHCData::_pool(10);
+pizza::special::ExtraAllt::memory_pool_type pizza::special::ExtraAllt::_pool(20);
+#endif
+
 #undef USE_MESSAGE_HEADER
 
 #ifndef _WIN32
@@ -941,4 +953,7 @@ int main(int argc, char**argv)
 	timeEndPeriod(wTimerRes);
 #endif
 
+#ifdef USE_MEMORY_POOLS
+	ops::memory_pools::memory_pool_manager::Instance().PrintStat(std::cout);
+#endif
 }
