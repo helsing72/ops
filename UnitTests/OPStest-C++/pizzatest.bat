@@ -3,6 +3,7 @@
 cd ..\..
 
 build.debug\UnitTests\OPStest-C++\gtest\debug\gtest-main
+build.debug\UnitTests\OPStest-C++\gtest\debug\gtest-mempool
 build.debug\UnitTests\OPStest-C++\UnitTests\debug\test-serialize-and-deserialize
 
 @rem run these in parallel
