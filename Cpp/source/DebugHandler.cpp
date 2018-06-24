@@ -48,6 +48,13 @@ namespace ops {
 		InternalDebugListener(Participant* part) : _part(part), _sub(nullptr), _pub(nullptr) {}
 		virtual ~InternalDebugListener() { remove(); }
 
+		// Used by application to set a handler for "Generic Command" (50)
+		void SetAppCallback(DebugNotifyInterface* client)
+		{
+			std::lock_guard<std::mutex> lck(_mapLock);
+			_appCallback = client;
+		}
+
 		// Register/Unregister with the debug handler
 		void RegisterPub(DebugNotifyInterface* client, ObjectName_T topicName)
 		{
@@ -169,6 +176,7 @@ namespace ops {
 		// Called with _mapLock held
 		void onRequest(opsidls::DebugRequestResponseData& req, opsidls::DebugRequestResponseData& resp)
 		{
+			resp.Result1 = 0;
 			switch (req.Command) {
 			case 2: // List
 				resp.Param1 = 0;
@@ -185,6 +193,13 @@ namespace ops {
 					resp.Result1 = 3;
 				}
 				break;
+
+			case 50: // Generic command
+				if (_appCallback) {
+					_appCallback->onRequest(req, resp);
+					resp.Result1 = 50;
+				}
+				break;
 			}
 		}
 
@@ -197,6 +212,7 @@ namespace ops {
 		std::mutex _mapLock;
 		std::map<ObjectName_T, DebugNotifyInterface*> _pubMap;
 		std::map<ObjectName_T, DebugNotifyInterface*> _subMap;
+		DebugNotifyInterface* _appCallback;
 	};
 
 	DebugHandler::DebugHandler(Participant* part) : _pimpl(new InternalDebugListener(part))
@@ -211,6 +227,12 @@ namespace ops {
 	void DebugHandler::Start()
 	{
 		_pimpl->Start();
+	}
+
+	// Used by application to set a handler for "Generic Command" (50)
+	void DebugHandler::SetAppCallback(DebugNotifyInterface* client)
+	{
+		_pimpl->SetAppCallback(client);
 	}
 
 	// Register/Unregister with the debug handler

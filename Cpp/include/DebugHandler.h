@@ -28,6 +28,11 @@
 
 namespace ops {
 
+	// Forward Declaration
+	class Participant;
+	class Publisher;
+	class Subscriber;
+
 	// Interface for Debug callback
 	class DebugNotifyInterface
 	{
@@ -37,6 +42,9 @@ namespace ops {
 
 	class DebugHandler
 	{
+		friend class Participant;
+		friend class Publisher;
+		friend class Subscriber;
 	public:
 		DebugHandler(Participant* part);
 		~DebugHandler();
@@ -45,6 +53,10 @@ namespace ops {
 		// Should be set by application to a unique key in the system
 		static void SetKey(const ObjectKey_T& key);
 
+		// Used by application to set a handler for "Generic Command" (50)
+		void SetAppCallback(DebugNotifyInterface* client);
+
+	protected:
 		void Start();
 
 		// Register/Unregister with the debug handler

@@ -176,6 +176,9 @@ namespace ops
 
 		execution_policy::Enum GetExecutionPolicy() { return _policy; }
 
+#ifdef OPS_ENABLE_DEBUG_HANDLER
+		DebugHandler debugHandler;
+#endif
 	private:
 		execution_policy::Enum _policy;
 
@@ -253,10 +256,6 @@ namespace ops
 
 		///Static Mutex used by factory methods getInstance()
 		static Lockable creationMutex;
-
-#ifdef OPS_ENABLE_DEBUG_HANDLER
-		DebugHandler debugHandler;
-#endif
 	};
 
 }
