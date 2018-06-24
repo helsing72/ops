@@ -468,6 +468,22 @@ public:
 	}
 };
 
+#ifdef OPS_ENABLE_DEBUG_HANDLER
+class MyDebugNotifyInterface : ops::DebugNotifyInterface
+{
+	virtual void onRequest(opsidls::DebugRequestResponseData& req, opsidls::DebugRequestResponseData& resp)
+	{
+		std::cout << 
+			"DebugNotifyInterface::onRequest()"  <<
+			", Param1: " << req.Param1 <<
+			", Param3.size(): " << req.Param3.size() <<
+			std::endl;
+
+		resp.Param3.push_back("Test Debug Response from PizzaTest");
+	}
+};
+#endif
+
 static int NumVessuvioBytes = 0;
 static std::string FillerStr("");
 int64_t sendPeriod = 1000;
@@ -674,6 +690,8 @@ int main(int argc, char**argv)
 	
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 	ops::DebugHandler::SetKey("Pizza");
+	MyDebugNotifyInterface mdni;
+	participant->debugHandler.SetAppCallback((ops::DebugNotifyInterface*)&mdni);
 #endif
 
 	ops::Participant* otherParticipant = ops::Participant::getInstance("OtherPizzaDomain", "OtherPizzaDomain", policy);
