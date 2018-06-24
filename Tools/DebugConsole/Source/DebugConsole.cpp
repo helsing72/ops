@@ -46,7 +46,7 @@ public:
 
 				// Only responses come here
 
-				ops::PrintArchiverOut prt(std::cout);
+				ops::PrintArchiverOut prt(std::cout, 1);
 
 				switch (data->Entity) {
 				case 0: // Debug
@@ -60,6 +60,10 @@ public:
 							std::cout << "    " << data->Param3[i] << std::endl;
 						}
 						std::cout << std::endl;
+					}
+					if (data->Result1 == 50) {
+						std::cout << "Response on Command 50:" << std::endl;
+						data->serialize(&prt);
 					}
 					break;
 
@@ -123,25 +127,32 @@ void CommandLoop(ops::Participant* part)
 void Usage()
 {
 	std::cout << std::endl;
-	std::cout << "Version 2018-05-05" << std::endl;
+	std::cout << "Version 2018-06-24" << std::endl;
 	std::cout << std::endl;
 	std::cout << "  Usage:" << std::endl;
-	std::cout << "    DebugConsole [-?] -k key -e n -n name -c cmd -p1 n" << std::endl;
+	std::cout << "    DebugConsole [-?] -cfg file -d domain -k key -e n -n name -c cmd -p1 num" << std::endl;
 	std::cout << std::endl;
 	std::cout << "    -? | -h         Help" << std::endl;
+	std::cout << "    -cfg file       ops_config.xml file to use (default ops_config.xml in CWD)" << std::endl;
+	std::cout << "    -d domain       OPS Domain to use" << std::endl;
 	std::cout << "    -k key          Key to set in sent debug message" << std::endl;
 	std::cout << "    -e type         Entity type (2 = Publisher, 3 = Subscriber)" << std::endl;
 	std::cout << "    -n name         Entity name (for pub/sub the topic name)" << std::endl;
-	std::cout << "    -c num          Command to send to entity" << std::endl;
-	std::cout << "    -p1 num         Parameter 1" << std::endl;
+	std::cout << "    -c cmd          Command to send to entity" << std::endl;
+	std::cout << "    -p1 num         Value for parameter 1" << std::endl;
 	std::cout << std::endl;
 }
 
 
 int main(int argc, char* argv[])
 {
+	// Default values
 	bool printUsage = false;
+	std::string cfgFile("ops_config.xml");
+	std::string domain = "";
 	std::string key = "";
+
+	// Helper variables
 	std::string* strp = nullptr;
 	int* intp = nullptr;
 	int64_t* int64p = nullptr;
@@ -151,11 +162,17 @@ int main(int argc, char* argv[])
 		if (arg == "?") {
 			printUsage = true;
 
-		} else if ((arg == "-?") || (arg == "-h")) {
+		} else if ((arg == "-?") || (arg == "-h") || (arg == "--help")) {
 			printUsage = true;
 
 		} else if (arg == "-c") {
 			intp = &request.Command;
+
+		} else if (arg == "-cfg") {
+			strp = &cfgFile;
+
+		} else if (arg == "-d") {
+			strp = &domain;
 
 		} else if (arg == "-e") {
 			intp = &request.Entity;
@@ -197,7 +214,8 @@ int main(int argc, char* argv[])
 
 	if (printUsage) {
 		Usage();
-		ops::PrintArchiverOut prt(std::cout);
+		ops::PrintArchiverOut prt(std::cout, 1);
+		std::cout << "Dump of Request:" << std::endl;
 		request.serialize(&prt);
 
 	} else {
@@ -206,10 +224,10 @@ int main(int argc, char* argv[])
 		ops::Participant::getStaticErrorService()->addListener(errorWriterStatic);
 
 		// Add all Domain's from given file(s)
-		ops::OPSConfigRepository::Instance()->Add("ops_config.xml");
+		ops::OPSConfigRepository::Instance()->Add(cfgFile);
 
 		// Create participant
-		ops::Participant* participant = ops::Participant::getInstance("PizzaDomain", "PizzaDomain");
+		ops::Participant* participant = ops::Participant::getInstance(domain);
 		if (participant == NULL) {
 			std::cout << "Failed to create Participant. Missing ops_config.xml ??" << std::endl;
 			exit(-1);
