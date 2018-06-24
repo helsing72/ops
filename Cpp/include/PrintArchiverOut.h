@@ -51,7 +51,7 @@ namespace ops
         }
     public:
 
-        PrintArchiverOut(std::ostream& os_) : os(os_), currentTabDepth(0)
+        PrintArchiverOut(std::ostream& os_, int startTabDepth = 0) : os(os_), currentTabDepth(startTabDepth)
         {
 
         }
@@ -174,38 +174,67 @@ namespace ops
                 std::string value0 = value[0] ? "true" : "false";
                 std::string valueX = value[value.size() - 1] ? "true" : "false";
 
-                os << tab() << name << "(size = " << value.size() << ") = [ " << value0 << " ... " << valueX << " ]" << endl;
-            }
+				os << tab() << name << "(size = " << value.size() << ") = [ " << value0;
+				if (value.size() > 1) {
+					os << " ... " << valueX;
+				}
+				os << " ]" << endl;
+			}
         }
 
         virtual void inout(InoutName_T name, std::vector<char>& value)
         {
-            if (value.size() > 0)
-                os << tab() << name << "(size = " << value.size() << ") = [ " << (int)value[0] << " ... " << (int)value[value.size() - 1] << " ]" << endl;
+			if (value.size() > 0) {
+				os << tab() << name << "(size = " << value.size() << ") = [ " << (int)value[0];
+				if (value.size() > 1) {
+					os << " ... " << (int)value[value.size() - 1];
+				}
+				os << " ]" << endl;
+			}
         }
 
         virtual void inout(InoutName_T name, std::vector<int>& value)
         {
-            if (value.size() > 0)
-                os << tab() << name << "(size = " << value.size() << ") = [ " << value[0] << " ... " << value[value.size() - 1] << " ]" << endl;
+			if (value.size() > 0) {
+				os << tab() << name << "(size = " << value.size() << ") = [ " << value[0];
+				if (value.size() > 1) {
+					os << " ... " << value[value.size() - 1];
+				}
+				os << " ]" << endl;
+			}
         }
 
         virtual void inout(InoutName_T name, std::vector<int16_t>& value)
         {
-            if (value.size() > 0)
-                os << tab() << name << "(size = " << value.size() << ") = [ " << value[0] << " ... " << value[value.size() - 1] << " ]" << endl;
+			if (value.size() > 0) {
+				os << tab() << name << "(size = " << value.size() << ") = [ " << value[0];
+				if (value.size() > 1) {
+					os << " ... " << value[value.size() - 1];
+				}
+				os << " ]" << endl;
+			}
         }
 
         virtual void inout(InoutName_T name, std::vector<int64_t>& value)
         {
-            if (value.size() > 0)
-                os << tab() << name << "(size = " << value.size() << ") = [ " << value[0] << " ... " << value[value.size() - 1] << " ]" << endl;
+			if (value.size() > 0) {
+				os << tab() << name << "(size = " << value.size() << ") = [ " << value[0];
+				if (value.size() > 1) {
+					os << " ... " << value[value.size() - 1];
+				}
+				os << " ]" << endl;
+			}
         }
 
         virtual void inout(InoutName_T name, std::vector<float>& value)
         {
-            if (value.size() > 0)
-                os << tab() << name << "(size = " << value.size() << ") = [ " << value[0] << " ... " << value[value.size() - 1] << " ]" << endl;
+            if (value.size() > 0) {
+				os << tab() << name << "(size = " << value.size() << ") = [ " << value[0];
+				if (value.size() > 1) {
+					os << " ... " << value[value.size() - 1];
+				}
+				os << " ]" << endl;
+			}
             //            os << tab() << name << " = [" << endl;
             //            for (unsigned int i = 0; i < value.size(); i++)
             //            {
@@ -219,14 +248,24 @@ namespace ops
 
         virtual void inout(InoutName_T name, std::vector<double>& value)
         {
-            if (value.size() > 0)
-                os << tab() << name << "(size = " << value.size() << ") = [ " << value[0] << " ... " << value[value.size() - 1] << " ]" << endl;
+			if (value.size() > 0) {
+				os << tab() << name << "(size = " << value.size() << ") = [ " << value[0];
+				if (value.size() > 1) {
+					os << " ... " << value[value.size() - 1];
+				}
+				os << " ]" << endl;
+			}
         }
 
         virtual void inout(InoutName_T name, std::vector<std::string>& value)
         {
-            if (value.size() > 0)
-                os << tab() << name << "(size = " << value.size() << ") = [ " << value[0] << " ... " << value[value.size() - 1] << " ]" << endl;
+			if (value.size() > 0) {
+				os << tab() << name << "(size = " << value.size() << ") = [ " << value[0];
+				if (value.size() > 1) {
+					os << " ... " << value[value.size() - 1];
+				}
+				os << " ]" << endl;
+			}
         }
 
 		virtual void inoutfixarr(InoutName_T name, bool* value, int numElements, int totalSize)
