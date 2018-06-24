@@ -122,6 +122,9 @@ namespace ops
 
 
 	Participant::Participant(ObjectName_T domainID_, ObjectName_T participantID_, FileName_T configFile_, execution_policy::Enum policy):
+#ifdef OPS_ENABLE_DEBUG_HANDLER
+		debugHandler(this),
+#endif
 		_policy(policy),
 		ioService(NULL),
 		config(NULL),
@@ -139,9 +142,6 @@ namespace ops
 		keepRunning(true),
 		aliveTimeout(1000),
 		objectFactory(NULL)
-#ifdef OPS_ENABLE_DEBUG_HANDLER
-		, debugHandler(this)
-#endif
 	{
 		ioService = IOService::create();
 
