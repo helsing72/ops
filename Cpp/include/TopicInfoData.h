@@ -29,7 +29,7 @@ namespace ops
 	class TopicInfoData : public OPSObject
 	{
 	public:
-		TopicInfoData()
+		TopicInfoData() : port(0)
 		{
 			appendType(TypeId_T("TopicInfoData"));
 		}

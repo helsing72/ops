@@ -30,11 +30,9 @@ namespace ops
 	class ParticipantInfoData : public OPSObject
 	{
 	public:
-		ParticipantInfoData()
+		ParticipantInfoData() : mc_udp_port(0), mc_tcp_port(0)
 		{
 			appendType(TypeId_T("ops.ParticipantInfoData"));
-			mc_udp_port = 0;
-			mc_tcp_port = 0;
 		}
 		
 		void serialize(ArchiverInOut* archiver)
