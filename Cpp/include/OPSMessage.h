@@ -47,13 +47,13 @@ namespace ops
         dataOwner(true),
         sourcePort(0),
         qosMask(0),
-        publicationID(0)
+        publicationID(0),
+        data(nullptr)
         {
 			UNUSED(endianness)
 			UNUSED(qosMask)
 			TypeId_T typeName("ops.protocol.OPSMessage");
             OPSObject::appendType(typeName);
-            data = NULL;
         }
 
         virtual void setDataOwner(bool ownership)
@@ -126,7 +126,7 @@ namespace ops
         void setData(OPSObject* d)
         {
 			if (dataOwner) {
-				if (data) delete data;
+				if (data && (data != d)) delete data;
 			}
             data = d;
         }
