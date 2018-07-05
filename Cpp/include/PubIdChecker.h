@@ -2,7 +2,7 @@
 
 /**
 *
-* Copyright (C) 2017 Lennart Andersson.
+* Copyright (C) 2017-2018 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -26,20 +26,22 @@
 
 namespace ops {
 
-	typedef struct {
+	typedef struct _PublicationIdNotification {
 		OPSMessage* mess;		// Pointer to received message
 		int64_t expectedPubID;
 		bool newPublisher;		// True for a new Publisher, False for a detected Sequence Error
+		_PublicationIdNotification() : mess(nullptr), expectedPubID(0), newPublisher(false) {}
+		_PublicationIdNotification(int64_t id, OPSMessage* m, bool f) : mess(m), expectedPubID(id), newPublisher(f) {}
 	} PublicationIdNotification_T;
 
 	class PublicationIdChecker : public Notifier<PublicationIdNotification_T>
 	{
 	private:
-		typedef struct
-		{
+		typedef struct _Entry {
 			Address_T Addr;
 			int Port;
 			int64_t expectedPubID;
+			_Entry() : Port(0), expectedPubID(0) {}
 		} Entry_T;
 
 		std::map<InternalKey_T, Entry_T> _map;
@@ -70,16 +72,15 @@ namespace ops {
 				std::map<InternalKey_T, Entry_T>::iterator result = _map.find(key);
 				if (result != _map.end()) {
 					// found
-					_prev = &_map[key];
+					_prev = &result->second;
 				} else {
 					// not found, create a new one
 					_prev = &_map[key];
 					_prev->expectedPubID = message->getPublicationID();
+					_prev->Addr = addr;
+					_prev->Port = port;
 					// Notify listeners, that a new publisher arrived
-					PublicationIdNotification_T arg;
-					arg.expectedPubID = _prev->expectedPubID;
-					arg.mess = message;
-					arg.newPublisher = true;
+					PublicationIdNotification_T arg(_prev->expectedPubID, message, true);
 					notifyNewEvent(arg);
 				}
 			}
@@ -87,10 +88,7 @@ namespace ops {
 			// _prev points to correct entry
 			if (_prev->expectedPubID != message->getPublicationID()) {
 				// Notify listeners, that sequence didn't match
-				PublicationIdNotification_T arg;
-				arg.expectedPubID = _prev->expectedPubID;
-				arg.mess = message;
-				arg.newPublisher = false;
+				PublicationIdNotification_T arg(_prev->expectedPubID, message, false);
 				notifyNewEvent(arg);
 			}
 
