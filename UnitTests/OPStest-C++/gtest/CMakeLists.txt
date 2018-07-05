@@ -13,12 +13,16 @@ set(APP_SRCS
   NotifierListener_test.cpp
   ObjectFactory_test.cpp
   OpsConfigObjects_test.cpp
+  OpsConfigRepo_test.cpp
   OpsMessage_test.cpp
   OpsObject_test.cpp
   OPSUtilities_test.cpp
   ParticipantInfo_test.cpp
+  PubIdChecker_test.cpp
   Reservable_test.cpp
   Serialization_test.cpp
+  SetupOPSConfig.cpp
+  SetupOPSConfig.h
 )
 
 set(APP2_SRCS

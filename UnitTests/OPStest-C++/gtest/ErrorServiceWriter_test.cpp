@@ -21,7 +21,7 @@ public:
 	ErrorMessage_T error;
 	Error::Severity_T severity;
 	int errorCode;
-	MyErrorListener() : counter(0) {}
+	MyErrorListener() : counter(0), severity(Error::warning) {}
 	virtual void onNewEvent(Notifier<Error*>* sender, Error* arg) 
 	{ 
 		(void)(sender);
