@@ -57,9 +57,7 @@ namespace ops
         OPSConfig* getConfig(ObjectName_T domainID = "" );
 
         bool domainExist(ObjectName_T domainID );
-
-		// Just for Test
-		void DebugTotalClear();
+		int numDomains();
 
 	private:
         OPSConfigRepository();

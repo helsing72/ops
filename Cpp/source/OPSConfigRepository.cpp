@@ -55,6 +55,11 @@ bool OPSConfigRepository::domainExist(ObjectName_T domainID )
     return false;
 }
 
+int OPSConfigRepository::numDomains()
+{
+	return (int)m_config.getRefToDomains().size();
+}
+
 // Add domains from OPS configuration file "filename"
 // if 'domain' == "", all domains will be added otherwise only the specified 'domain'
 // Returns true if at least one domain added
@@ -111,8 +116,6 @@ bool OPSConfigRepository::Add(OPSConfig* config)
 	// Construct a new unique name to be used in the "file cache"
 	FileName_T name("Internal_");
 	name += NumberToString((size_t)config);
-	name += '_';
-	name += NumberToString(TimeHelper::currentTimeMillis());
 
 	SafeLock lock(&repoLock);
 
@@ -174,12 +177,6 @@ void OPSConfigRepository::TotalClear()
 		delete it->second;
 	}
 	m_configFiles.clear();
-}
-
-// Exist for backward compatibility
-void OPSConfigRepository::DebugTotalClear()
-{
-	TotalClear();
 }
 
 // Get a reference to the OPSConfig object

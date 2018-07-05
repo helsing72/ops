@@ -618,7 +618,7 @@ int main(int argc, const char* args[])
 #endif
 
 		delete participant;
-		ops::OPSConfigRepository::Instance()->DebugTotalClear();
+		ops::OPSConfigRepository::Instance()->TotalClear();
 
 	}
 	catch (std::exception& e) {
