@@ -63,7 +63,7 @@ namespace ops
 				boost::system::error_code ec;
 				ec = socket->set_option(option, ec);
 				socket->get_option(option);
-				if(ec != 0 || option.value() != _outSocketBufferSize)
+				if(ec || option.value() != _outSocketBufferSize)
 				{
 					//std::cout << "Socket buffer size could not be set" << std::endl;
 					ops::BasicWarning err("UDPSender", "UDPSender", "Socket buffer size could not be set");

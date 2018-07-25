@@ -13,4 +13,4 @@ Download pre-built binaries for boost or build boost from source  http://www.boo
     1. Boost System
     1. Boost Thread
 
-OPS has been used with Boost versions 1.38, 1.48, 1.55, 1.60 and 1.66.
+OPS has been used with Boost versions 1.38, 1.48, 1.53, 1.55, 1.60, 1.64, 1.66 and 1.67.

@@ -98,7 +98,7 @@ namespace ops
 						boost::system::error_code ec;
 						ec = sock->set_option(option, ec);
 						sock->get_option(option);
-						if (ec != 0 || option.value() != inSocketBufferSizent)
+						if (ec || option.value() != inSocketBufferSizent)
 						{
 							//std::cout << "Socket buffer size could not be set" << std::endl;
 							ops::BasicWarning err("TCPClient", "TCPClient", "Socket buffer size could not be set");

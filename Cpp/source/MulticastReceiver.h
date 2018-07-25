@@ -76,7 +76,7 @@ namespace ops
 				boost::system::error_code ec;
 				ec = sock->set_option(option, ec);
 				sock->get_option(option);
-				if(ec != 0 || option.value() != _inSocketBufferSizent)
+				if(ec || option.value() != _inSocketBufferSizent)
 				{
 					//std::cout << "Socket buffer size could not be set" << std::endl;
 					ops::BasicWarning err("MulticastReceiver", "Start", "Socket buffer size could not be set");
