@@ -4,6 +4,8 @@ set(APP2_NAME gtest-mempool)
 
 set(APP_SRCS
   ByteBuffer_test.cpp
+  CreateTempOpsConfigFile.cpp
+  CreateTempOpsConfigFile.h
   ErrorServiceWriter_test.cpp
   Filter_test.cpp
   fixed_string_test.cpp
