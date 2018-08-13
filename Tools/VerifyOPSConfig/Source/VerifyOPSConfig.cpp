@@ -9,7 +9,7 @@
 
 #include "Configuration.h"
 
-const std::string sVersion = "Version 2018-04-13";
+const std::string sVersion = "Version 2018-08-13";
 
 
 bool gWarningGiven = false;
@@ -273,7 +273,7 @@ public:
 		// Check for unknown entries
 		{
 			std::vector<std::string> known = { 
-				"domainID", "domainAddress", "metaDataMcPort", 
+				"domainID", "domainAddress", "metaDataMcPort", "debugMcPort", 
 				"localInterface", "timeToLive",
 				"channels", "transports",
 				"outSocketBufferSize", "inSocketBufferSize",
@@ -297,6 +297,17 @@ public:
 		if (config.parseInt(metaDataMcPort, 9494) != 0) {
 			if (CheckDuplicate(domainAddress + "::" + metaDataMcPort, vDomainMeta)) {
 				LOG_WARN(">>> Duplicate use of DomainAddress::metaDataMcPort for domain: " << domainName << std::endl);
+			}
+		}
+
+		// debugMcPort, optional
+		// If not set to 0, then DomainAddress::debugMcPort should be unique
+		verifyOnlyOneEntry(config, "debugMcPort", "<domains> <element> section");
+		std::string debugMcPort = config.getString("debugMcPort");
+		LOG_DEBUG("debugMcPort: '" << debugMcPort << "', parsed as: " << config.parseInt(debugMcPort, 0) << std::endl);
+		if (config.parseInt(debugMcPort, 0) != 0) {
+			if (CheckDuplicate(domainAddress + "::" + debugMcPort, vDomainMeta)) {
+				LOG_WARN(">>> Duplicate use of DomainAddress::debugMcPort for domain: " << domainName << std::endl);
 			}
 		}
 
