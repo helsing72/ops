@@ -47,8 +47,7 @@ package body Ops_Pa.Subscriber_Pa is
     Self.Topic := t;
 
     Self.DataNotifier := MessageNotifier_Pa.Create( Ops_Class_At(SelfAt) );
-
---///TODO    FDeadlineNotifier := TDeadlineTimer.Create(Self);
+    Self.DeadlineNotifier := Deadline_Pa.Create( Ops_Class_At(SelfAt), Periodic => True );
 
     Self.Participant := Participant_Interface_At(Ops_Pa.Participant_Pa.getInstance(t.DomainID, t.ParticipantID));
     Self.TimeLastData := GetTimeInMs;
@@ -57,7 +56,7 @@ package body Ops_Pa.Subscriber_Pa is
   overriding procedure Finalize( Self : in out Subscriber_Class ) is
     o : OPSMessage_Class_At;
   begin
---///TODO    FDeadlineNotifier.Cancel;
+    Self.DeadlineNotifier.Cancel;
     if Self.Started then
       Stop( Self );
     end if;
@@ -79,7 +78,7 @@ package body Ops_Pa.Subscriber_Pa is
       end loop;
     end;
 
---///TODO    FreeAndNil(FDeadlineNotifier);
+    Deadline_Pa.Free(Self.DeadlineNotifier);
     MessageNotifier_Pa.Free(Self.DataNotifier);
   end;
 
@@ -102,8 +101,7 @@ package body Ops_Pa.Subscriber_Pa is
       Self.ReceiveDataHandler.addListener(Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa.MessageNotifier_Pa.Listener_Interface_At(Self.SelfAt));
 
       if Self.DeadlineTimeout > 0 then
-        null;
-        --///TODO      FDeadlineNotifier.Start(FDeadlineTimeout);
+        Self.DeadlineNotifier.Start( Self.DeadlineTimeout );
       end if;
       Self.Started := True;
     end if;
@@ -115,8 +113,7 @@ package body Ops_Pa.Subscriber_Pa is
     if Self.Started then
 
       if Self.DeadlineTimeout > 0 then
-        null;
-        --///TODO      FDeadlineNotifier.Cancel;
+        Self.DeadlineNotifier.Cancel;
       end if;
 
       Self.ReceiveDataHandler.removeListener(Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa.MessageNotifier_Pa.Listener_Interface_At(Self.SelfAt));
@@ -292,8 +289,7 @@ package body Ops_Pa.Subscriber_Pa is
         Self.TimeLastData := Self.TimeLastDataForTimeBase;
 
         if Self.DeadlineTimeout > 0 then
-          null;
---///TODO          FDeadlineNotifier.Start(FDeadlineTimeout);
+          Self.DeadlineNotifier.Start( Self.DeadlineTimeout );
         end if;
       end if;
     end if;
@@ -331,19 +327,24 @@ package body Ops_Pa.Subscriber_Pa is
 
   -- ---------------------------------------------------------------------------
 
---  procedure TSubscriber.AddDeadlineListener(Proc : TOnNotifyEvent<Integer>) is
---  begin
---    FDeadlineNotifier.addListener(Proc);
---  end;
+  procedure addDeadlineListener( Self : in out Subscriber_Class; Proc : Deadline_Pa.OnNotifyEvent_T; Arg : Ops_Class_At ) is
+  begin
+    Self.DeadlineNotifier.addListener( Proc, Arg );
+  end;
+
+  procedure addDeadlineListener( Self : in out Subscriber_Class; Client : Deadline_Pa.DeadlineListener_Interface_At ) is
+  begin
+    Self.DeadlineNotifier.addListener( Client );
+  end;
 
   procedure SetDeadlineQoS( Self : in out Subscriber_Class; millis : TimeMs_T) is
   begin
     if millis <= 0 then
       Self.DeadlineTimeout := 0;
---///TODO      FDeadlineNotifier.Cancel;
+      Self.DeadlineNotifier.Cancel;
     else
       Self.DeadlineTimeout := millis;
---///TODO      FDeadlineNotifier.Start(FDeadlineTimeout);
+      Self.DeadlineNotifier.Start( Self.DeadlineTimeout );
     end if;
   end;
 

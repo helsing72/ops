@@ -99,7 +99,8 @@ package body PizzaTest_Pa is
 
     type Helper_Class is new Ops_Class and
       Helper_Interfaces_Pa.IHelper_Interface and
-      Ops_Pa.Subscriber_Pa.MessageNotifier_Pa.Listener_Interface with private;
+      Ops_Pa.Subscriber_Pa.MessageNotifier_Pa.Listener_Interface and
+      Ops_Pa.Subscriber_Pa.Deadline_Pa.DeadlineListener_Interface with private;
     type Helper_Class_At is access all Helper_Class'Class;
 
     function Create(client : z.Listener_Interface_At) return Helper_Class_At;
@@ -120,7 +121,8 @@ package body PizzaTest_Pa is
   private
     type Helper_Class is new Ops_Class and
       Helper_Interfaces_Pa.IHelper_Interface and
-      Ops_Pa.Subscriber_Pa.MessageNotifier_Pa.Listener_Interface with
+      Ops_Pa.Subscriber_Pa.MessageNotifier_Pa.Listener_Interface and
+      Ops_Pa.Subscriber_Pa.Deadline_Pa.DeadlineListener_Interface with
        record
          SelfAt : Helper_Class_At := null;
          data : DataType_At := null;
@@ -132,6 +134,7 @@ package body PizzaTest_Pa is
     procedure OnNotify( Self : in out Helper_Class;
                         Sender : in Ops_Class_At;
                         Item : in OPSMessage_Class_At );
+    procedure OnDeadlineMissed( Self : in out Helper_Class; Sender : in Ops_Class_At );
 
     procedure InitInstance( Self : in out Helper_Class; SelfAt : Helper_Class_At; client : z.Listener_Interface_At );
     procedure Finalize( Self : in out Helper_Class );
@@ -279,7 +282,7 @@ package body PizzaTest_Pa is
           --Create a subscriber on that topic.
           Self.sub := Create(topic);
           Self.sub.addListener( MessageNotifier_Pa.Listener_Interface_At(Self.SelfAt) );
---///TODO          Self.sub.deadlineMissedEvent.addDeadlineMissedListener(this);
+          Self.sub.addDeadlineListener( Deadline_Pa.DeadlineListener_Interface_At(Self.SelfAt) );
 
 --          -- Add a publication ID Checker
 --          sub->pubIdChecker = new ops::PublicationIdChecker;
@@ -330,8 +333,8 @@ package body PizzaTest_Pa is
     procedure SetDeadlineQos( Self : in out Helper_Class; timeoutMs : Int64 ) is
     begin
       if Self.sub /= null then
-        Put_Line("NYI !!! Setting deadlineQos to " & Int64'Image(timeoutMs) & " [ms] for topic " & self.sub.Topic.Name);
---///TODO        Self.sub.setDeadlineQoS(timeoutMs);
+        Put_Line("Setting deadlineQos to " & Int64'Image(timeoutMs) & " [ms] for topic " & self.sub.Topic.Name);
+        Self.sub.setDeadlineQoS(TimeMs_T(timeoutMs));
       else
         Put_Line("Subscriber must be created first!!");
       end if;
@@ -354,6 +357,11 @@ package body PizzaTest_Pa is
 --      procedure onData( Self : in out Listener_Interface; sub : Subscriber_Class_At; data : DataType_T ) is abstract;
         Self.client.onData(Self.sub, DataType_At(Item.Data));
       end if;
+    end;
+
+    procedure OnDeadlineMissed( Self : in out Helper_Class; Sender : in Ops_Class_At ) is
+    begin
+      Put_Line(">>> Deadline timeout for topic " & Self.sub.Topic.Name);
     end;
 
   end Helper_Pa;
@@ -408,7 +416,7 @@ package body PizzaTest_Pa is
        Part : Participant_Class_At := null;
      end record;
 
-  type ItemInfoList_T is array(Integer range 0..13) of ItemInfo_T;
+  type ItemInfoList_T is array(Integer range 0..15) of ItemInfo_T;
 
   ItemInfoList : ItemInfoList_T;
   ItemInfoNum : Integer := 0;
@@ -708,6 +716,8 @@ package body PizzaTest_Pa is
     Setup("OtherPizzaDomain", "OtherVessuvioTopic", "pizza.VessuvioData");
     Setup("PizzaDomain", "ExtraAlltTopic", "pizza.special.ExtraAllt");
     Setup("PizzaDomain", "PizzaTopic", "pizza.PizzaData");
+    Setup("PizzaDomain", "TcpPizzaTopic", "pizza.PizzaData");
+    Setup("PizzaDomain", "TcpPizzaTopic", "pizza.PizzaData");
 
     -- Create participants
     participant := getInstance("PizzaDomain");
@@ -859,6 +869,23 @@ package body PizzaTest_Pa is
                   else
                     FillerStr := new String'("");
                   end if;
+                end if;
+              end;
+
+            elsif Ada.Strings.Fixed.Index(line, "t") = 1 then
+              line(1) := ' ';
+              declare
+                ll : String := Ada.Strings.Fixed.Trim(line, Ada.Strings.Both);
+                ms : Integer := 0;
+              begin
+                -- get ms
+                if ll(1) >= '0' and ll(1) <= '9' then
+                  Get(ll, ms, Last);
+                  for i in ItemInfoList'Range loop
+                    if ItemInfoList(i).selected then
+                      ItemInfoList(i).helper.SetDeadlineQos(Int64(ms));
+                    end if;
+                  end loop;
                 end if;
               end;
 

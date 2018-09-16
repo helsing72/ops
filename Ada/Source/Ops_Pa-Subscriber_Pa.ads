@@ -24,6 +24,7 @@ with Ada.Containers.Vectors,
 with Ops_Pa.Signal_Pa,
      Ops_Pa.Mutex_Pa,
      Ops_Pa.Notifier_Pa,
+     Ops_Pa.DeadlineNotifier_Pa,
      Ops_Pa.OpsObject_Pa,
      Ops_Pa.OpsObject_Pa.OPSMessage_Pa,
      Ops_Pa.OpsObject_Pa.Topic_Pa,
@@ -68,11 +69,12 @@ package Ops_Pa.Subscriber_Pa is
   procedure addListener( Self : in out Subscriber_Class; Client : MessageNotifier_Pa.Listener_Interface_At );
   procedure removeListener( Self : in out Subscriber_Class; Client : MessageNotifier_Pa.Listener_Interface_At );
 
-  package DeadlineNotifier_Pa is new Ops_Pa.Notifier_Pa(10, Integer);
+  package Deadline_Pa is new Ops_Pa.DeadlineNotifier_Pa(10);
 
   -- Add notifications (callbacks) when a deadline is missed
   -- NOTE: 'Proc' will be called in the context of an arbitrary thread
---///TODO  procedure AddDeadlineListener(Proc : TOnNotifyEvent<Integer>);
+  procedure addDeadlineListener( Self : in out Subscriber_Class; Proc : Deadline_Pa.OnNotifyEvent_T; Arg : Ops_Class_At );
+  procedure addDeadlineListener( Self : in out Subscriber_Class; Client : Deadline_Pa.DeadlineListener_Interface_At );
 
   -- Add the given object and take ownership over it.
   procedure AddFilterQoSPolicy( Self : in out Subscriber_Class; fqos : FilterQoSPolicy_Class_At );
@@ -127,7 +129,7 @@ package Ops_Pa.Subscriber_Pa is
   -- The deadline timout [ms] for this subscriber.
   -- If no message is received within deadline, listeners to deadlines will be notified
   -- == 0, --> Infinite wait
---///TODO  property DeadlineQoS : Int64 read FDeadlineTimeout write SetDeadlineQoS;
+  procedure SetDeadlineQoS( Self : in out Subscriber_Class; millis : TimeMs_T);
 
   -- Sets the minimum time separation [ms] between to consecutive messages.
   -- Received messages in between will be ignored by this Subscriber
@@ -170,7 +172,7 @@ private
       DataNotifier : MessageNotifier_Pa.Notifier_Class_At := null;
 
       -- Used for notifications to users of the subscriber
---///TODO      FDeadlineNotifier : TDeadlineTimer;
+      DeadlineNotifier : Deadline_Pa.DeadlineNotifier_Class_At := null;
 
       -- The Participant to which this Subscriber belongs (NOTE: we don't own the object)
       Participant : Participant_Interface_At := null;
@@ -207,8 +209,6 @@ private
   procedure AddToBuffer( Self : in out Subscriber_Class; mess : OPSMessage_Class_At);
 
   function ApplyFilterQoSPolicies( Self : in out Subscriber_Class; o : OpsObject_Class_At) return Boolean;
-
-  procedure SetDeadlineQoS( Self : in out Subscriber_Class; millis : TimeMs_T);
 
   function getData( Self : in out Subscriber_Class ) return OpsObject_Class_At;
 
