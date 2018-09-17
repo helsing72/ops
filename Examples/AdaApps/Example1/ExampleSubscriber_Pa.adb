@@ -127,12 +127,12 @@ package body ExampleSubscriber_Pa is
     type SubscriptionHandler_Class is
       new Ops_Class and
       Ops_Pa.Subscriber_Pa.MessageNotifier_Pa.Listener_Interface and
-      OPs_Pa.Subscriber_Pa.DeadlineNotifier_Pa.Listener_Interface with
+      OPs_Pa.Subscriber_Pa.Deadline_Pa.DeadlineListener_Interface with
         private;
     type SubscriptionHandler_Class_At is access all SubscriptionHandler_Class'Class;
 
     procedure OnNotify( Self : in out SubscriptionHandler_Class; Sender : in Ops_Class_At; Item : in OPSMessage_Class_At );
-    procedure OnNotify( Self : in out SubscriptionHandler_Class; Sender : in Ops_Class_At; Item : in Integer );
+    procedure OnDeadlineMissed( Self : in out SubscriptionHandler_Class; Sender : in Ops_Class_At );
 
     function Create return SubscriptionHandler_Class_At;
 
@@ -140,7 +140,7 @@ package body ExampleSubscriber_Pa is
     type SubscriptionHandler_Class is
       new Ops_Class and
       Ops_Pa.Subscriber_Pa.MessageNotifier_Pa.Listener_Interface and
-      OPs_Pa.Subscriber_Pa.DeadlineNotifier_Pa.Listener_Interface with
+      OPs_Pa.Subscriber_Pa.Deadline_Pa.DeadlineListener_Interface with
       record
         SelfAt : SubscriptionHandler_Class_At;
         Sub : ChildDataSubscriber_Class_At;
@@ -270,7 +270,7 @@ package body ExampleSubscriber_Pa is
       end if;
     end;
 
-    procedure OnNotify( Self : in out SubscriptionHandler_Class; Sender : in Ops_Class_At; Item : in Integer ) is
+    procedure OnDeadlineMissed( Self : in out SubscriptionHandler_Class; Sender : in Ops_Class_At ) is
     begin
       Put_line("Deadline Missed for topic " & Self.Sub.Topic.Name);
     end;
