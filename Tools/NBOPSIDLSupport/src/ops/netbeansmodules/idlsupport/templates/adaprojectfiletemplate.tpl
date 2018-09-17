@@ -5,7 +5,7 @@ with "ops4.gpr";
 project __projName is
 
   for Source_Dirs use ("./**");
-  for Object_Dir use ".obj";
+  for Object_Dir use Ops4'Object_Dir;
 
   package Naming is
      for Casing use "mixedcase";

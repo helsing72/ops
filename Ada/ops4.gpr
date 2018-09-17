@@ -1,16 +1,43 @@
 with "xmlada";
 
-project Ops4 is
+library project Ops4 is
 
-  for Source_Dirs use ("Common/**", "Source/**", "Source/Transport/**");
-  for Object_Dir use ".obj";
-  for Exec_Dir use ".obj";
+  type BUILD_KIND is ("static", "relocatable", "static-pic");
+  BUILD : BUILD_KIND := external("XMLADA_BUILD", "static");
+
+  type Os_Type is ("Windows_NT", "LINUX");
+  OS : Os_Type := external("OS", "LINUX");
+
+  PREFIX := "build/";
+
+  case OS is
+    when "Windows_NT" =>
+      PREFIX := PREFIX & "win/";
+    when "LINUX" =>
+      PREFIX := PREFIX & "linux/";
+  end case;
+
   for Library_Name use "ops4";
-  for Library_Dir use "lib";
-  for Library_Ali_Dir use "lib";
+  for Source_Dirs use ("Common/**", "Source/**", "Source/Transport/**");
+
+  case BUILD is
+    when "static" =>
+      for Library_Dir use PREFIX & "lib.static";
+      for Library_Kind use "static";
+      for Object_Dir use PREFIX & ".obj.static";
+    when "relocatable" =>
+      for Library_Dir use PREFIX & "lib.relocatable";
+      for Library_Kind use "relocatable";
+      for Object_Dir use PREFIX & ".obj.relocatable";
+    when "static-pic" =>
+      for Library_Dir use PREFIX & "lib.static-pic";
+      for Library_Kind use "static-pic";
+      for Object_Dir use PREFIX & ".obj.static-pic";
+  end case;
 
   package Naming is
     for Casing use "mixedcase";
   end Naming;
 
 end Ops4;
+

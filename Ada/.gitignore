@@ -1,5 +1,6 @@
-.obj
-lib
+build/
+.obj/
+lib/
 *.o
 *.ali
 b__main.*
