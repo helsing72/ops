@@ -22,6 +22,12 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
 
   use type Ops_Pa.Socket_Pa.TCPClientSocket_Class_At;
 
+  procedure Trace(Self : TCPClientReceiver_Class; Msg : String) is
+    NameStr : String := "TcpClient (" & Integer'Image(Self.Port) & ")";
+  begin
+    Trace(NameStr, Msg);
+  end;
+
   function Create( serverIP : string;
                    serverPort : Integer;
                    inSocketBufferSize : Int64 := 16000000) return TCPClientReceiver_Class_At is
@@ -74,6 +80,7 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
       error := SocketError("TCPClientReceiver", method, mess, Self.LastErrorCode);
       Self.ErrorService.Report(Error_Class_At(error));
     end if;
+    if TraceEnabled then Self.Trace(method & ": " & mess & ", Error: " & Integer'Image(Self.LastErrorCode)); end if;
   end;
 
   -- Start():
@@ -207,6 +214,8 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
 
     procedure HandlePayload is
     begin
+      if TraceEnabled then Self.Trace("Notify(data packet received)"); end if;
+
       -- Notify upper layer with a data packet
       Self.DataNotifier.DoNotify(BytesSizePair_T'(Self.Buffer, Res));
 
@@ -227,9 +236,11 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
     end;
 
   begin
+    if TraceEnabled then Self.Trace("Started"); end if;
     while not Self.StopFlag loop
       begin
         -- Connect loop
+        if TraceEnabled then Self.Trace("Connecting..."); end if;
         while (not Self.StopFlag) and (not Self.TcpClient.IsConnected) loop
           DisconnectAndClose;
           delay 0.100;
@@ -237,6 +248,8 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
           OpenAndConnect;
         end loop;
         exit when Self.StopFlag;
+
+        if TraceEnabled then Self.Trace("Connected"); end if;
 
         dummy := Self.TcpClient.SetNonBlocking(False);
 
@@ -261,10 +274,15 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
 
         -- Read data loop
         while (not Self.StopFlag) and (Self.TcpClient.IsConnected) loop
+          if TraceEnabled then Self.Trace("Wait for Data..."); end if;
           Res := Self.TcpClient.ReceiveBuf( Self.Buffer(BufferIdx..BufferIdxLast) );
+          if TraceEnabled then Self.Trace("Got some Data"); end if;
+
           exit when Self.StopFlag;
+
           if Res = 0 then
             -- Connection closed gracefully
+            if TraceEnabled then Self.Trace("Connection closed gracefully"); end if;
             DisconnectAndClose;
             exit;
 
@@ -303,6 +321,7 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
           DisconnectAndClose;
       end;
     end loop;
+    if TraceEnabled then Self.Trace("Stopped"); end if;
   end;
 
 end Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa;

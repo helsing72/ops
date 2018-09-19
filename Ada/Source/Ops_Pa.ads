@@ -61,6 +61,10 @@ package Ops_Pa is
   -- Debug
   function NumActiveObjects return System.Atomic_Counters.Atomic_Unsigned;
 
+  -- Install generic trace
+  type TraceProc_At is access procedure( NameStr : String; ValueStr : String );
+  procedure InstallTrace( Proc : TraceProc_At );
+
   ----------------------------------------------------------------------
 
   -- Extra parameter in notification callbacks using a procedure call

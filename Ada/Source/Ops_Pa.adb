@@ -28,7 +28,8 @@ package body Ops_Pa is
   StartTime     : Float64;
   Count         : aliased System.Atomic_Counters.Atomic_Unsigned := 0;
   TraceRoutine  : TraceRoutine_At   := null;
-
+  TraceProc     : TraceProc_At      := null;
+  
   --------------------------------------------------------------------------
   --
   --------------------------------------------------------------------------
@@ -51,6 +52,11 @@ package body Ops_Pa is
     TraceRoutine := null;
   end UnInstallTrace;
 
+  procedure InstallTrace( Proc : TraceProc_At ) is
+  begin
+    TraceProc := Proc;
+  end;
+  
   ---------------------------------------------------------------------------
   -- Get original Class name (  Shall not be overridden to get the same
   --                            name when create/free object)
@@ -212,7 +218,11 @@ package body Ops_Pa is
   --------------------------------------------------------------------------
   procedure Trace( NameStr, ValueStr : String ) is
   begin
-    Ada.Text_IO.Put_Line( "[ " & NameStr & " ]  " & ValueStr);
+    if TraceProc /= null then
+      TraceProc.all( NameStr, ValueStr );
+    else
+      Ada.Text_IO.Put_Line( "[ " & NameStr & " ]  " & ValueStr);
+    end if;
   end Trace;
 
   --------------------------------------------------------------------------

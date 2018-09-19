@@ -55,6 +55,9 @@ package Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
   overriding function Port( Self : TCPClientReceiver_Class ) return Integer;
   overriding function Address( Self : TCPClientReceiver_Class ) return String;
 
+  -- Set this flag to enable trace from the TCP Client
+  TraceEnabled : Boolean := False;
+
 private
 -- ==========================================================================
 --

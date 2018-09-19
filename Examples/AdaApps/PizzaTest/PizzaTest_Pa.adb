@@ -5,6 +5,8 @@ with Ada.Strings.Fixed;
 with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
 with Ops_Pa.OpsObject_Pa.OPSConfig_Pa;
 
+with Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa;
+
 with Ops_Pa,
      Ops_Pa.Error_Pa,
      Ops_Pa.OpsObject_Pa,
@@ -685,12 +687,21 @@ package body PizzaTest_Pa is
     Put_Line(HT & " X     Exit program");
   end;
 
+  procedure MyTraceProc( NameStr : String; ValueStr : String ) is
+  begin
+    Ada.Text_IO.Put_Line( ">>>>>> [ " & NameStr & " ]  " & ValueStr);
+  end;
+
 
   procedure PizzaTest is
     participant : Participant_Class_At := null;
     otherParticipant : Participant_Class_At := null;
     dummy : Boolean;
   begin
+    -- Enable TCP Client trace
+    --Ops_Pa.InstallTrace(MyTraceProc'Access);
+    --Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa.TraceEnabled := True;
+
     -- Setup the OPS static error service (common for all participants, reports errors during participant creation)
     StaticErrorService.addListener(ErrorLog'Access, null);
 
