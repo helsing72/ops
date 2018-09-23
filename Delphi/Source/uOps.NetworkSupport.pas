@@ -89,22 +89,24 @@ begin
   subnet := Copy(addr, 1, Idx-1);
   mask   := Copy(addr, Idx+1, MaxInt);
 
-  subnetIp := inet_addr(PAnsiChar(subnet));
+  subnetIp := DWORD(inet_addr(PAnsiChar(subnet)));
   if Length(mask) <= 2 then begin
     // Expand to the number of bits given
     subnetMask := StrToInt(string(mask));
     subnetMask := (((1 shl subnetMask)-1) shl (32 - subnetMask)) and $FFFFFFFF;
-    subnetMask := ntohl(subnetMask);
+    subnetMask := DWORD(ntohl(Integer(subnetMask)));
   end else begin
-    subnetMask := inet_addr(PAnsiChar(mask));
+    subnetMask := DWORD(inet_addr(PAnsiChar(mask)));
   end;
 
   VVGetIpAddrTable(p, Size, False);
   if Assigned(p) then begin
     try
       with p^ do begin
+{$R-}
         for i := 0 to dwNumEntries - 1 do begin
           with table[i] do begin
+{$R+}
             if (dwAddr and subnetMask) = (subnetIp and subnetMask) then begin
               Result := IpAddressToString(dwAddr);
               Break;
@@ -127,7 +129,7 @@ begin
   //std::cout << "isValidNodeAddress(): " << addr << std::endl;
   if addr = '' then Exit;
 
-  Ip := ntohl(inet_addr(PAnsiChar(addr)));
+  Ip := DWORD(ntohl(inet_addr(PAnsiChar(addr))));
   //std::cout << "isValidNodeAddress(): " << std::hex << Ip << std::dec << std::endl;
   if Ip = 0 then Exit;
   if Ip >= $E0000000 then Exit;  // Skip multicast and above
@@ -146,7 +148,7 @@ begin
   //std::cout << "isMyNodeAddress(): " << addr << std::endl;
   if addr = '' then Exit;
 
-  Ip := ntohl(inet_addr(PAnsiChar(addr)));
+  Ip := DWORD(ntohl(inet_addr(PAnsiChar(addr))));
   //std::cout << "isMyNodeAddress(): " << std::hex << Ip << std::dec << std::endl;
 
   if Ip = $7F000001 then begin
@@ -158,8 +160,10 @@ begin
   if Assigned(p) then begin
     try
       with p^ do begin
+{$R-}
         for i := 0 to dwNumEntries - 1 do begin
           with table[i] do begin
+{$R+}
             if DWORD(htonl(dwAddr)) = Ip then begin
               Result := True;
               Break;
