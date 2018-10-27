@@ -24,14 +24,14 @@
 
 namespace ops
 {
-  namespace utilities
+  struct utilities
   {
 
 	// -------------------------------------------------------------------------------
 	// Methods that work on Topic names that use the syntax 'Domain::TopicName'
 
 	// Returns a full topic name on the format 'Domain::TopicName'
-	ObjectName_T fullTopicName(ObjectName_T domainName, ObjectName_T topicName)
+	static ObjectName_T fullTopicName(ObjectName_T domainName, ObjectName_T topicName)
 	{
 		ops::ObjectName_T name = domainName;
 		name += "::";
@@ -40,7 +40,7 @@ namespace ops
 	}
 
 	// Returns the topic name part
-	ObjectName_T topicName(ObjectName_T name)
+	static ObjectName_T topicName(ObjectName_T name)
 	{
 		ObjectName_T::size_type index1;
 		if ((index1 = name.find("::")) != ObjectName_T::npos) {
@@ -50,7 +50,7 @@ namespace ops
 	}
 
 	// Returns the domain name part
-	ObjectName_T domainName(ObjectName_T name)
+	static ObjectName_T domainName(ObjectName_T name)
 	{
 		ObjectName_T::size_type index1;
 		if ((index1 = name.find("::")) != ObjectName_T::npos) {
@@ -62,11 +62,11 @@ namespace ops
 	// -------------------------------------------------------------------------------
 	// Misc methods
 
-	bool verifyTopicType(ops::Topic& top, TypeId_T typeName)
+	static bool verifyTopicType(ops::Topic& top, TypeId_T typeName)
 	{
 		return (top.getTypeID() == typeName);
 	}
 
-  }
+  };
 
 }
