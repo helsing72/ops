@@ -34,6 +34,16 @@
 namespace ops
 {
 
+	uint32_t IPString2Addr(Address_T addr) 
+	{
+		return boost::asio::ip::address_v4::from_string(addr.c_str()).to_ulong();
+	}
+
+	Address_T IPAddr2String(uint32_t addr)
+	{
+		return boost::asio::ip::address_v4(addr).to_string();
+	}
+
 	// Return true if a valid node address
 	bool isValidNodeAddress(Address_T addr)
 	{

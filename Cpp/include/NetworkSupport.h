@@ -25,6 +25,9 @@
 
 namespace ops
 {
+	extern uint32_t IPString2Addr(Address_T addr);
+	extern Address_T IPAddr2String(uint32_t addr);
+
 	extern bool isValidNodeAddress(Address_T addr);
 	extern bool isMyNodeAddress(Address_T addr, IOService* ioServ);
 
