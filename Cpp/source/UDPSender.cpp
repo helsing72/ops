@@ -87,6 +87,8 @@ namespace ops
 			boost::asio::socket_base::non_blocking_io command(true);
 			socket->io_control(command);
 #endif
+
+			socket->bind(localEndpoint);
 		}
 		catch (...) {
 			socket->close();
