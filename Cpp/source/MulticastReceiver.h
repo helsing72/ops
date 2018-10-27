@@ -21,14 +21,15 @@
 #ifndef ops_MulticastReceiverH
 #define ops_MulticastReceiverH
 
+#include <iostream>
+
+#include <boost/asio.hpp>
+#include <boost/bind.hpp>
+
 #include "Participant.h"
 #include "Receiver.h"
-#include <boost/asio.hpp>
-#include "boost/bind.hpp"
 #include "ByteBuffer.h"
 #include "BoostIOServiceImpl.h"
-#include <iostream>
-#include "Participant.h"
 #include "BasicError.h"
 #include "BasicWarning.h"
 #include "Compatibility.h"
@@ -196,9 +197,9 @@ namespace ops
 				return;
 			}
 
-			//notifyNewEvent(data);
-			//printf("___________handleReadError__________ %d\n", error.value());
-			ops::BasicError err("MulticastReceiver", "handleReadError", "Error");
+			ErrorMessage_T message("Error: ");
+			message += NumberToString(error.value());
+			ops::BasicError err("MulticastReceiver", "handleReadError", message);
 			Participant::reportStaticError(&err);
 
 			//WSAEFAULT (10014) "Illegal buffer address" is fatal, happens e.g. if a too small buffer is given and
