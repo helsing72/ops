@@ -60,6 +60,11 @@ namespace ops
 #endif
 	{
     public:
+        //
+        // Methods marked with "(CB)" can be used from the callback.
+        // Other methods should not be used from the callback.
+        //
+
         Subscriber(Topic t);
         virtual ~Subscriber();
 
@@ -80,13 +85,13 @@ namespace ops
         void addFilterQoSPolicy(FilterQoSPolicy* fqos);
         void removeFilterQoSPolicy(FilterQoSPolicy* fqos);
 
-        int64_t getTimeBasedFilterQoS();
+        int64_t getTimeBasedFilterQoS();                                    // (CB)
         ///Sets the minimum time separation between to consecutive messages.
         ///Received messages in between will be ignored by this Subscriber
-        void setTimeBasedFilterQoS(int64_t timeBaseMinSeparationMillis);
+        void setTimeBasedFilterQoS(int64_t timeBaseMinSeparationMillis);    // (CB)
 
         ///Returns a copy of this subscribers Topic.
-        Topic getTopic();
+        Topic getTopic();                                                   // (CB)
 
         ///Waits for new data to arrive or timeout.
         ///Returns: true if new data (i.e. unread data) exist.
@@ -94,30 +99,31 @@ namespace ops
 
         ///Checks if new data exist (same as 'waitForNewData(0)' but faster) 
         ///Returns: true if new data (i.e. unread data) exist.
-        bool newDataExist() {
+        bool newDataExist() {                                               // (CB)
             return hasUnreadData;
         }
 
-		///
+        ///Acquires/Releases the MessageLock.
+        ///NOTE: The MessageLock is held by the subscriber while in the "New Message" callback
         bool aquireMessageLock();
         void releaseMessageLock();
 
         ///Returns a reference to the latest received OPSMessage (including the latest data object).
         ///Clears the "new data" flag.
-        ///NOTE: MessageLock should be hold while working with the message, to prevent a
+        ///NOTE: MessageLock should be held while working with the message, to prevent a
         ///new incomming message to delete the current one while in use.
-        OPSMessage* getMessage();
+        OPSMessage* getMessage();                                           // (CB)
 
         ///Returns the number of reserved messages in the underlying ReceiveDataHandler
         ///This value is the total nr for this topic on this participant not only
         ///for this subscriber.
-        int numReservedMessages()
+        int numReservedMessages()                                           // (CB)
         {
             return receiveDataHandler->numReservedMessages();
         }
 
-		ObjectName_T getName();
-        void setName(ObjectName_T name);
+        ObjectName_T getName();                                             // (CB)
+        void setName(ObjectName_T name);                                    // (CB)
 
         bool isDeadlineMissed();
 
@@ -126,9 +132,9 @@ namespace ops
 
         ///Returns a reference the latest received data object.
         ///Clears the "new data" flag.
-        ///NOTE: MessageLock should be hold while working with the data object, to prevent a 
+        ///NOTE: MessageLock should be held while working with the data object, to prevent a
         ///new incomming message to delete the current one while in use. 
-        virtual OPSObject* getDataReference()
+        virtual OPSObject* getDataReference()                               // (CB)
         {
             hasUnreadData = false;
             return data;
