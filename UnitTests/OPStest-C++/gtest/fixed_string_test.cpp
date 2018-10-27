@@ -90,29 +90,7 @@ TEST(Test_fixed_string, TestConstructors) {
 	EXPECT_FALSE(b2a.empty()) << "Empty";
 	EXPECT_STREQ(b2a.c_str(), "Det") << "Content error";
 
-	fixed_string<20> c(b);		// copy constructor
-
-	EXPECT_EQ(c.size(), (size_t)8) << "Wrong size";
-	EXPECT_EQ(c.length(), (size_t)8) << "Wrong length";
-	EXPECT_EQ(c.max_size(), (size_t)20) << "Wrong max_size";
-	EXPECT_FALSE(c.empty()) << "Empty";
-	EXPECT_STREQ(c.c_str(), "hej hopp") << "Content error";
-
-	fixed_string<80> c2(b);		// template constructor fixed_string<M>
-	EXPECT_EQ(c2.size(), (size_t)8) << "Wrong size";
-	EXPECT_EQ(c2.length(), (size_t)8) << "Wrong length";
-	EXPECT_EQ(c2.max_size(), (size_t)80) << "Wrong max_size";
-	EXPECT_FALSE(c2.empty()) << "Empty";
-	EXPECT_STREQ(c2.c_str(), "hej hopp") << "Content error";
-
-	fixed_string<20> d = c;		// assignment operator
-
-	EXPECT_EQ(d.size(), (size_t)8) << "Wrong size";
-	EXPECT_EQ(d.length(), (size_t)8) << "Wrong length";
-	EXPECT_EQ(d.max_size(), (size_t)20) << "Wrong max_size";
-	EXPECT_FALSE(d.empty()) << "Empty";
-	EXPECT_STREQ(d.c_str(), "hej hopp") << "Content error";
-
+#ifndef FIXED_NO_STD_STRING
 	std::string kalle("kalle");
 	fixed_string<15> e(kalle);		// std::string (if enabled)
 
@@ -121,15 +99,41 @@ TEST(Test_fixed_string, TestConstructors) {
 	EXPECT_EQ(e.max_size(), (size_t)15) << "Wrong max_size";
 	EXPECT_FALSE(e.empty()) << "Empty";
 	EXPECT_STREQ(e.c_str(), kalle.c_str()) << "Content error";
+#endif
+
+	fixed_string<80> c2(b);		// template constructor fixed_string<M>
+
+	EXPECT_EQ(c2.size(), (size_t)8) << "Wrong size";
+	EXPECT_EQ(c2.length(), (size_t)8) << "Wrong length";
+	EXPECT_EQ(c2.max_size(), (size_t)80) << "Wrong max_size";
+	EXPECT_FALSE(c2.empty()) << "Empty";
+	EXPECT_STREQ(c2.c_str(), "hej hopp") << "Content error";
 
 	// Test template constructor "from any T..."
 	mstring g1("hej");
 	fixed_string<100> f1(g1);
+
 	EXPECT_EQ(f1.size(), (size_t)3) << "Wrong size";
 	EXPECT_EQ(f1.length(), (size_t)3) << "Wrong length";
 	EXPECT_EQ(f1.max_size(), (size_t)100) << "Wrong max_size";
 	EXPECT_FALSE(f1.empty()) << "Empty";
 	EXPECT_STREQ(f1.c_str(), "hej") << "Content error";
+
+	fixed_string<20> c(b);		// copy constructor
+
+	EXPECT_EQ(c.size(), (size_t)8) << "Wrong size";
+	EXPECT_EQ(c.length(), (size_t)8) << "Wrong length";
+	EXPECT_EQ(c.max_size(), (size_t)20) << "Wrong max_size";
+	EXPECT_FALSE(c.empty()) << "Empty";
+	EXPECT_STREQ(c.c_str(), "hej hopp") << "Content error";
+
+	fixed_string<20> d = c;		// assignment operator
+
+	EXPECT_EQ(d.size(), (size_t)8) << "Wrong size";
+	EXPECT_EQ(d.length(), (size_t)8) << "Wrong length";
+	EXPECT_EQ(d.max_size(), (size_t)20) << "Wrong max_size";
+	EXPECT_FALSE(d.empty()) << "Empty";
+	EXPECT_STREQ(d.c_str(), "hej hopp") << "Content error";
 }
 
 TEST(Test_fixed_string, TestModifiers) {
@@ -176,7 +180,7 @@ TEST(Test_fixed_string, TestSubstr) {
 	fixed_string<50> a("kalle hej hopp i lingonskogen");
 
 	// Test substr()
-	fixed_string<10> f = a.substr<10>(24);
+	fixed_string<10> f = a.substr(24);
 
 	EXPECT_EQ(f.size(), (size_t)5) << "Wrong size";
 	EXPECT_EQ(f.length(), (size_t)5) << "Wrong length";

@@ -26,21 +26,20 @@
 // ===============================
 
 using namespace ops;
-using namespace utilities;
 
 TEST(Test_Utilities, Test) {
 
 	// DomainName::TopicName
-	EXPECT_STREQ(fullTopicName("Domain", "Topic").c_str(), "Domain::Topic");
+	EXPECT_STREQ(utilities::fullTopicName("Domain", "Topic").c_str(), "Domain::Topic");
 
-	EXPECT_STREQ(topicName("Kalle::Name").c_str(), "Name");
-	EXPECT_STREQ(topicName("Name").c_str(), "Name");
+	EXPECT_STREQ(utilities::topicName("Kalle::Name").c_str(), "Name");
+	EXPECT_STREQ(utilities::topicName("Name").c_str(), "Name");
 
-	EXPECT_STREQ(domainName("Kalle::Name").c_str(), "Kalle");
-	EXPECT_STREQ(domainName("Name").c_str(), "");
+	EXPECT_STREQ(utilities::domainName("Kalle::Name").c_str(), "Kalle");
+	EXPECT_STREQ(utilities::domainName("Name").c_str(), "");
 
 	Topic top("name", 9999, "topicTypeId", "domainAddress");
 
-	EXPECT_TRUE(verifyTopicType(top, "topicTypeId"));
-	EXPECT_FALSE(verifyTopicType(top, "typeid"));
+	EXPECT_TRUE(utilities::verifyTopicType(top, "topicTypeId"));
+	EXPECT_FALSE(utilities::verifyTopicType(top, "typeid"));
 }
