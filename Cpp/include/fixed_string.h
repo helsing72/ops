@@ -87,8 +87,8 @@ namespace ops { namespace strings {
 		fixed_string(const std::string s) : _size(0) { append(s.c_str(), s.size()); }
 #endif
 
-		template<size_t M>
-		fixed_string(const fixed_string<M>& str) : _size(0) { append(str.c_str(), str.size()); }
+		template<size_t M, overrun_policy_t POL>
+		fixed_string(const fixed_string<M, POL>& str) : _size(0) { append(str.c_str(), str.size()); }
 
 		// Construction from any type that have c_str() and size() methods
 		template<typename T>
@@ -177,11 +177,11 @@ namespace ops { namespace strings {
 			return *this;
 		}
 
-		template<size_t M>
-		fixed_string& operator+= (const fixed_string<M>& str) { return append(str.c_str(), str.size()); }
+		template<size_t M, overrun_policy_t POL>
+		fixed_string& operator+= (const fixed_string<M, POL>& str) { return append(str.c_str(), str.size()); }
 
-		template<size_t M>
-		fixed_string& append(const fixed_string<M>& str) { return append(str.c_str(), str.size()); }
+		template<size_t M, overrun_policy_t POL>
+		fixed_string& append(const fixed_string<M, POL>& str) { return append(str.c_str(), str.size()); }
 
 #ifndef FIXED_NO_STD_STRING
 		// Implicit conversion operator
@@ -281,96 +281,77 @@ namespace ops { namespace strings {
 		}
 #endif
 
-		template<size_t M>
-		fixed_string<M> substr(size_type pos = 0, size_type len = npos) const
+		template<size_t M, overrun_policy_t POL = POLICY>
+		fixed_string<M, POL> substr(size_type pos = 0, size_type len = npos) const
 		{
 			if (pos >= _size) throw index_out_of_range();
-			return fixed_string<M>(&_array[pos], len);
+			return fixed_string<M, POL>(&_array[pos], len);
 		}
 
 		static const size_type npos = (size_type)(-1);
 	};
 
 	// Relational operators
-	template<size_t M, size_t N>
-	bool operator== (const fixed_string<M>& lhs, const fixed_string<N>& rhs) { return strcmp(lhs.c_str(), rhs.c_str()) == 0; }
-	template<size_t M>
-	bool operator== (const char*   lhs, const fixed_string<M>& rhs) { return strcmp(lhs, rhs.c_str()) == 0; }
-	template<size_t M>
-	bool operator== (const fixed_string<M>& lhs, const char*   rhs) { return strcmp(lhs.c_str(), rhs) == 0; }
+	template<size_t M, size_t N, overrun_policy_t POLICYM, overrun_policy_t POLICYN>
+	bool operator== (const fixed_string<M, POLICYM>& lhs, const fixed_string<N, POLICYN>& rhs) { return strcmp(lhs.c_str(), rhs.c_str()) == 0; }
+	template<size_t M, overrun_policy_t POLICY>
+	bool operator== (const char*   lhs, const fixed_string<M, POLICY>& rhs) { return strcmp(lhs, rhs.c_str()) == 0; }
+	template<size_t M, overrun_policy_t POLICY>
+	bool operator== (const fixed_string<M, POLICY>& lhs, const char*   rhs) { return strcmp(lhs.c_str(), rhs) == 0; }
 
-	template<size_t M, size_t N>
-	bool operator!= (const fixed_string<M>& lhs, const fixed_string<N>& rhs) { return strcmp(lhs.c_str(), rhs.c_str()) != 0; }
-	template<size_t M>
-	bool operator!= (const char*   lhs, const fixed_string<M>& rhs) { return strcmp(lhs, rhs.c_str()) != 0; }
-	template<size_t M>
-	bool operator!= (const fixed_string<M>& lhs, const char*   rhs) { return strcmp(lhs.c_str(), rhs) != 0; }
+	template<size_t M, size_t N, overrun_policy_t POLICYM, overrun_policy_t POLICYN>
+	bool operator!= (const fixed_string<M, POLICYM>& lhs, const fixed_string<N, POLICYN>& rhs) { return strcmp(lhs.c_str(), rhs.c_str()) != 0; }
+	template<size_t M, overrun_policy_t POLICY>
+	bool operator!= (const char*   lhs, const fixed_string<M, POLICY>& rhs) { return strcmp(lhs, rhs.c_str()) != 0; }
+	template<size_t M, overrun_policy_t POLICY>
+	bool operator!= (const fixed_string<M, POLICY>& lhs, const char*   rhs) { return strcmp(lhs.c_str(), rhs) != 0; }
 
-	template <size_t M, size_t N>
-	bool operator<  (const fixed_string<M>& lhs, const fixed_string<N>& rhs) { return strcmp(lhs.c_str(), rhs.c_str()) < 0; }
-	template <size_t M>
-	bool operator<  (const char*   lhs, const fixed_string<M>& rhs) { return strcmp(lhs, rhs.c_str()) < 0; }
-	template <size_t M>
-	bool operator<  (const fixed_string<M>& lhs, const char*   rhs) { return strcmp(lhs.c_str(), rhs) < 0; }
+	template <size_t M, size_t N, overrun_policy_t POLICYM, overrun_policy_t POLICYN>
+	bool operator<  (const fixed_string<M, POLICYM>& lhs, const fixed_string<N, POLICYN>& rhs) { return strcmp(lhs.c_str(), rhs.c_str()) < 0; }
+	template <size_t M, overrun_policy_t POLICY>
+	bool operator<  (const char*   lhs, const fixed_string<M, POLICY>& rhs) { return strcmp(lhs, rhs.c_str()) < 0; }
+	template <size_t M, overrun_policy_t POLICY>
+	bool operator<  (const fixed_string<M, POLICY>& lhs, const char*   rhs) { return strcmp(lhs.c_str(), rhs) < 0; }
 
-	template <size_t M, size_t N>
-	bool operator<=  (const fixed_string<M>& lhs, const fixed_string<N>& rhs) { return strcmp(lhs.c_str(), rhs.c_str()) <= 0; }
-	template <size_t M>
-	bool operator<=  (const char*   lhs, const fixed_string<M>& rhs) { return strcmp(lhs, rhs.c_str()) <= 0; }
-	template <size_t M>
-	bool operator<=  (const fixed_string<M>& lhs, const char*   rhs) { return strcmp(lhs.c_str(), rhs) <= 0; }
+	template <size_t M, size_t N, overrun_policy_t POLICYM, overrun_policy_t POLICYN>
+	bool operator<=  (const fixed_string<M, POLICYM>& lhs, const fixed_string<N, POLICYN>& rhs) { return strcmp(lhs.c_str(), rhs.c_str()) <= 0; }
+	template <size_t M, overrun_policy_t POLICY>
+	bool operator<=  (const char*   lhs, const fixed_string<M, POLICY>& rhs) { return strcmp(lhs, rhs.c_str()) <= 0; }
+	template <size_t M, overrun_policy_t POLICY>
+	bool operator<=  (const fixed_string<M, POLICY>& lhs, const char*   rhs) { return strcmp(lhs.c_str(), rhs) <= 0; }
 
-	template <size_t M, size_t N>
-	bool operator>  (const fixed_string<M>& lhs, const fixed_string<N>& rhs) { return strcmp(lhs.c_str(), rhs.c_str()) > 0; }
-	template <size_t M>
-	bool operator>  (const char*   lhs, const fixed_string<M>& rhs) { return strcmp(lhs, rhs.c_str()) > 0; }
-	template <size_t M>
-	bool operator>  (const fixed_string<M>& lhs, const char*   rhs) { return strcmp(lhs.c_str(), rhs) > 0; }
+	template <size_t M, size_t N, overrun_policy_t POLICYM, overrun_policy_t POLICYN>
+	bool operator>  (const fixed_string<M, POLICYM>& lhs, const fixed_string<N, POLICYN>& rhs) { return strcmp(lhs.c_str(), rhs.c_str()) > 0; }
+	template <size_t M, overrun_policy_t POLICY>
+	bool operator>  (const char*   lhs, const fixed_string<M, POLICY>& rhs) { return strcmp(lhs, rhs.c_str()) > 0; }
+	template <size_t M, overrun_policy_t POLICY>
+	bool operator>  (const fixed_string<M, POLICY>& lhs, const char*   rhs) { return strcmp(lhs.c_str(), rhs) > 0; }
 
-	template <size_t M, size_t N>
-	bool operator>=  (const fixed_string<M>& lhs, const fixed_string<N>& rhs) { return strcmp(lhs.c_str(), rhs.c_str()) >= 0; }
-	template <size_t M>
-	bool operator>=  (const char*   lhs, const fixed_string<M>& rhs) { return strcmp(lhs, rhs.c_str()) >= 0; }
-	template <size_t M>
-	bool operator>=  (const fixed_string<M>& lhs, const char*   rhs) { return strcmp(lhs.c_str(), rhs) >= 0; }
+	template <size_t M, size_t N, overrun_policy_t POLICYM, overrun_policy_t POLICYN>
+	bool operator>=  (const fixed_string<M, POLICYM>& lhs, const fixed_string<N, POLICYN>& rhs) { return strcmp(lhs.c_str(), rhs.c_str()) >= 0; }
+	template <size_t M, overrun_policy_t POLICY>
+	bool operator>=  (const char*   lhs, const fixed_string<M, POLICY>& rhs) { return strcmp(lhs, rhs.c_str()) >= 0; }
+	template <size_t M, overrun_policy_t POLICY>
+	bool operator>=  (const fixed_string<M, POLICY>& lhs, const char*   rhs) { return strcmp(lhs.c_str(), rhs) >= 0; }
 
 	// operator +
-	template <size_t M, size_t N>
-	fixed_string<M + N> operator+ (const fixed_string<M>& lhs, const fixed_string<N>& rhs)
+	template <size_t M, size_t N, overrun_policy_t POLICY>
+	fixed_string<M + N> operator+ (const fixed_string<M, POLICY>& lhs, const fixed_string<N, POLICY>& rhs)
 	{
-		fixed_string<M + N> res;
+		fixed_string<M + N, POLICY> res;
 		res += lhs;
 		res += rhs;
 		return res;
 	}
 
 #ifndef FIXED_NO_STD_STRING
-	template <size_t M>
-	std::string operator+ (const std::string& lhs, const fixed_string<M>& rhs) { return lhs + rhs.substr(); } 
-	template <size_t M>
-	std::string operator+ (const fixed_string<M>& lhs, const std::string& rhs) { return lhs.substr() + rhs; }
+	template <size_t M, overrun_policy_t POLICY>
+	std::string operator+ (const std::string& lhs, const fixed_string<M, POLICY>& rhs) { return lhs + rhs.substr(); }
+	template <size_t M, overrun_policy_t POLICY>
+	std::string operator+ (const fixed_string<M, POLICY>& lhs, const std::string& rhs) { return lhs.substr() + rhs; }
 #endif
 
 	template <size_t N>
-	class fixed_string_trunc : public fixed_string<N, truncate_string>
-	{
-	public:
-		typedef basic_fixed_string::size_type size_type;
-
-		fixed_string_trunc() : fixed_string<N, truncate_string>() {}
-		fixed_string_trunc(char* s) : fixed_string<N, truncate_string>(s) {}
-		fixed_string_trunc(const char* s) : fixed_string<N, truncate_string>(s) {}
-		fixed_string_trunc(char* s, size_type len) : fixed_string<N, truncate_string>(s, len) {}
-		fixed_string_trunc(const char* s, size_type len) : fixed_string<N, truncate_string>(s, len) {}
-#ifndef FIXED_NO_STD_STRING
-		fixed_string_trunc(const std::string s) : fixed_string<N, truncate_string>(s) {}
-#endif
-		template<size_t M>
-		fixed_string_trunc(const fixed_string<M>& str) : fixed_string<N, truncate_string>(str) {}
-
-		// Construction from any type that have c_str() and size() methods
-		template<typename T>
-		fixed_string_trunc(T str) : fixed_string<N, truncate_string>(str) {}
-	};
+	using fixed_string_trunc = fixed_string<N, truncate_string>;
 
 }} //namespace
