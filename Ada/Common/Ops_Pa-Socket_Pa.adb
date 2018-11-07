@@ -546,6 +546,8 @@ package body Ops_Pa.Socket_Pa is
     return Self.Listening;
   end;
 
+  AbortSelector : aliased GNAT.Sockets.Selector_Type;
+
   function AcceptClient( Self : in out TCPServerSocket_Class; Client : TCPClientSocket_Class_At ) return Boolean is
     Address : GNAT.Sockets.Sock_Addr_Type;
     Socket : GNAT.Sockets.Socket_Type;
@@ -559,7 +561,7 @@ package body Ops_Pa.Socket_Pa is
                                 Socket => Socket,
                                 Address => Address,
                                 Timeout => 1.0,
-                                Selector => null,
+                                Selector => AbortSelector'Access,
                                 Status => Status );
     if Status = GNAT.Sockets.Completed then
       client.Initialize( Socket, True );
@@ -674,5 +676,7 @@ package body Ops_Pa.Socket_Pa is
     end;
   end;
 
+begin
+  GNAT.Sockets.Create_Selector(AbortSelector);
 end Ops_Pa.Socket_Pa;
 
