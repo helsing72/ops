@@ -10,6 +10,7 @@ set(APP_SRCS
   Filter_test.cpp
   fixed_string_test.cpp
   gtest_main.cpp
+  listener_helpers.h
   memory_pool_test.cpp
   MemoryMap_test.cpp
   NotifierListener_test.cpp
@@ -21,10 +22,13 @@ set(APP_SRCS
   OPSUtilities_test.cpp
   ParticipantInfo_test.cpp
   PubIdChecker_test.cpp
+  RAII_ioServ.h
   Reservable_test.cpp
   Serialization_test.cpp
   SetupOPSConfig.cpp
   SetupOPSConfig.h
+  socket_tcp_test.cpp
+  TCPOpsProtocol_test.cpp
 )
 
 set(APP2_SRCS
