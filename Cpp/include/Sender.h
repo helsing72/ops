@@ -40,10 +40,11 @@ namespace ops
     {
     public:
         virtual bool sendTo(char* buf, int size, const Address_T& ip, int port) = 0;
-        virtual int getPort() = 0;
-        virtual Address_T getAddress() = 0;
 		virtual void open() = 0;
 		virtual void close() = 0;
+
+		virtual int getLocalPort() = 0;
+		virtual Address_T getLocalAddress() = 0;
 
         static OPS_EXPORT Sender* create(IOService* ioService, Address_T localInterface = "0.0.0.0", int ttl = 1, int64_t outSocketBufferSize = 16000000);
         static OPS_EXPORT Sender* createUDPSender(IOService* ioService, Address_T localInterface = "0.0.0.0", int ttl = 1, int64_t outSocketBufferSize = 16000000);

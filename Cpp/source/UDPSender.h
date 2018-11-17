@@ -45,9 +45,9 @@ namespace ops
         ///Override from Sender
         bool sendTo(char* buf, int size, const Address_T& ip, int port);
         ///Override from Sender
-        int getPort() {return socket->local_endpoint().port();};
+        int getLocalPort() {return socket->local_endpoint().port();};
         ///Override from Sender
-		Address_T getAddress() {return socket->local_endpoint().address().to_string().c_str();};
+        Address_T getLocalAddress() {return socket->local_endpoint().address().to_string().c_str();};
 
     private:
         ///This UDPSender wraps boost socket functionality.

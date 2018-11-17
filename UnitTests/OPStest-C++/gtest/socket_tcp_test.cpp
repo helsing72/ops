@@ -86,8 +86,8 @@ TEST(Test_Sockets, TestTCPdefault) {
 	snd.addListener(&cstServer);
 	EXPECT_EQ(snd.getNrOfListeners(), 1);
 
-	EXPECT_STREQ(snd.getAddress().c_str(), "127.0.0.1");
-	EXPECT_EQ(snd.getPort(), serverPort);
+	EXPECT_STREQ(snd.getLocalAddress().c_str(), "127.0.0.1");
+	EXPECT_EQ(snd.getLocalPort(), serverPort);
 
 	// Create TCP Client with default buffersize
 	TCPClient rcv("127.0.0.1", serverPort, ioServ(), new ops::TCPOpsProtocol());
@@ -125,15 +125,15 @@ TEST(Test_Sockets, TestTCPdefault) {
 
 	// Check ConnectStatus from client
 	EXPECT_TRUE(cstClient.cst.connected);
-	EXPECT_STREQ(cstClient.cst.addr.c_str(), snd.getAddress().c_str());
-	EXPECT_EQ(cstClient.cst.port, snd.getPort());
+	EXPECT_STREQ(cstClient.cst.addr.c_str(), snd.getLocalAddress().c_str());
+	EXPECT_EQ(cstClient.cst.port, snd.getLocalPort());
 	EXPECT_EQ(cstClient.cst.totalNo, 1);
 
 	EXPECT_EQ(listener.counter, 1);
 	EXPECT_EQ(listener.bsp.size, -5);
 	EXPECT_EQ(listener.bsp.bytes, nullptr);
-	EXPECT_STREQ(listener.srcIp.c_str(), snd.getAddress().c_str());
-	EXPECT_EQ(listener.srcPort, snd.getPort());
+	EXPECT_STREQ(listener.srcIp.c_str(), snd.getLocalAddress().c_str());
+	EXPECT_EQ(listener.srcPort, snd.getLocalPort());
 
 	EXPECT_STREQ(rcv.getLocalAddress().c_str(), "127.0.0.1");
 
@@ -158,8 +158,8 @@ TEST(Test_Sockets, TestTCPdefault) {
 	EXPECT_EQ(listener.counter, 2);
 	EXPECT_EQ(listener.bsp.size, 100);
 	EXPECT_EQ(listener.bsp.bytes, &rcvbuf[0]);
-	EXPECT_STREQ(listener.srcIp.c_str(), snd.getAddress().c_str());
-	EXPECT_EQ(listener.srcPort, snd.getPort());
+	EXPECT_STREQ(listener.srcIp.c_str(), snd.getLocalAddress().c_str());
+	EXPECT_EQ(listener.srcPort, snd.getLocalPort());
 
 	// Disconnect receiver. Need to send data to discover disconnect
 	rcv.stop();

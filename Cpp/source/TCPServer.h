@@ -101,12 +101,12 @@ namespace ops
 			TCPServerBase::close();
 		}
 
-		virtual int getPort()
+		virtual int getLocalPort()
 		{
 			return _serverPort;
 		}
         
-		virtual Address_T getAddress()
+		virtual Address_T getLocalAddress()
 		{
 			return _serverIP;
 		}
