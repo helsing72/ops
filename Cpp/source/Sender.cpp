@@ -30,6 +30,7 @@
 
 #include "UDPSender.h"
 #include "TCPServer.h"
+#include "TCPOpsProtocol.h"
 
 namespace ops
 {
@@ -61,7 +62,7 @@ namespace ops
         //}
         //return tcpSenderInstances[port];
 
-		return new TCPServer(ioService, ip, port, outSocketBufferSize);
+		return new TCPServer(ioService, ip, port, new TCPOpsProtocol(), outSocketBufferSize);
     }
 
 }

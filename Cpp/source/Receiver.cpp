@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2018 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -29,6 +30,7 @@
 #include "MulticastReceiver.h"
 #include "TCPClient.h"
 #include "UDPReceiver.h"
+#include "TCPOpsProtocol.h"
 
 namespace ops
 {
@@ -38,7 +40,7 @@ namespace ops
 	}
 	Receiver* Receiver::createTCPClient(Address_T ip, int port, IOService* ioService, int64_t inSocketBufferSize)
 	{
-		return new TCPClient(ip, port, ioService, inSocketBufferSize);
+		return new TCPClient(ip, port, ioService, new TCPOpsProtocol(), inSocketBufferSize);
 	}
 	Receiver* Receiver::createUDPReceiver(int port, IOService* ioService, Address_T localInterface, int64_t inSocketBufferSize)
 	{

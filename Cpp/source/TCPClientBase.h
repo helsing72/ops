@@ -1,6 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
+ * Copyright (C) 2018 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -20,111 +21,106 @@
 
 #pragma once
 
-#include <iostream>
-
 #include "Receiver.h"
 #include "BytesSizePair.h"
 #include "Participant.h"
 #include "BasicError.h"
+#include "TCPProtocol.h"
+#include "ConnectStatus.h"
 
 namespace ops
 {
 
-    class TCPClientBase : public Receiver
+    class TCPClientBase : public Receiver, public Notifier<ConnectStatus>, TCPProtocolUser
     {
     public:
-        TCPClientBase() : 
-			_maxLength(0), _data(nullptr), _accumulatedSize(0), _expectedSize(0), _readingHeader(true)
+        TCPClientBase(TCPProtocol* protocol) :
+			_protocol(protocol), _cs(false, 0)
         {
+			_protocol->connect(this);
         }
+
+		virtual ~TCPClientBase()
+		{
+			delete _protocol;
+		}
 
         void asynchWait(char* bytes, int size)
         {
-            _data = bytes;
-            _maxLength = size;
-
             if (isConnected()) {
-                // Always start by reading the packet size when using tcp
-				_readingHeader = true;
-				_expectedSize = 22;
-				_accumulatedSize = 0;
-				startAsyncRead(_data, _expectedSize);
+				_protocol->startReceive(bytes, size);
             }
         }
+
+		virtual bool isConnected() = 0;
 
 	protected:
 		// Should be called by the derived classes
 		void connected(bool value)
 		{
+			bool doNotify = _cs.connected != value;
+			_cs.connected = value;
+			_cs.totalNo = value ? 1 : 0;
 			if (value) {
-				notifyNewEvent(BytesSizePair(NULL, -5)); //Connection was down but has been reastablished.
-			} else {
-
+				getSource(_cs.addr, _cs.port);
+				Notifier<BytesSizePair>::notifyNewEvent(BytesSizePair(nullptr, -5)); //Connection was down but has been reastablished.
 			}
+			if (doNotify) Notifier<ConnectStatus>::notifyNewEvent(_cs);
 		}
 
-		virtual bool isConnected() = 0;
 		virtual void startAsyncRead(char* bytes, int size) = 0;
+
+		// Called from protocol
+		bool isConnected(TCPProtocol* prot) override
+		{
+			UNUSED(prot);
+			return isConnected();
+		}
+		
+		// Called from protocol
+		void startAsyncRead(TCPProtocol* prot, char* bytes, int size) override
+		{
+			UNUSED(prot);
+			startAsyncRead(bytes, size);
+		}
+
+		// Called from protocol
+		void onEvent(TCPProtocol* prot, BytesSizePair arg) override
+		{
+			UNUSED(prot);
+			Notifier<BytesSizePair>::notifyNewEvent(arg);
+		}
+
+		// Needed by protocol
+		virtual int sendBuffer(TCPProtocol* prot, char* bytes, int size) override
+		{
+			UNUSED(prot);
+			UNUSED(bytes);
+			UNUSED(size);
+			return -1;	// Currently not used for TCPClient
+		}
 
 		// Should be called by the derived classes
 		void handleReceivedData(int error, int nrBytesReceived)
 		{
-			if (!isConnected()) {
-				notifyNewEvent(BytesSizePair(NULL, -2));
+			if (!_protocol->handleReceivedData(error, nrBytesReceived)) {
+				//Report error
+				ops::BasicError err("TCPClient", "handle_received_data", "Error in receive.");
+				Participant::reportStaticError(&err);
 
-			} else {
-				bool errorDetected = false;
+				//Close the socket
+				stop();
 
-				if (!error && nrBytesReceived > 0) {
-					_accumulatedSize += nrBytesReceived;
-					if (_accumulatedSize < _expectedSize) {
-						// We have not gotten all data yet, Read more
-						startAsyncRead(_data + _accumulatedSize, _expectedSize - _accumulatedSize);
-					} else {
-						// We have got all data
-						_accumulatedSize = 0;
-						if (_readingHeader) {
-							// Get size of data packet from the received size packet
-							int sizeInfo = *((int*)(_data + 18));
-							if (sizeInfo > _maxLength) {
-								// This is an error, we are not able to receive more than _maxLength bytes (the buffer size)
-								errorDetected = true;
-							} else {
-								_readingHeader = false;
-								_expectedSize = sizeInfo;
-								startAsyncRead(_data, _expectedSize);
-							}
-						} else {
-							// Got a complete data packet
-							notifyNewEvent(BytesSizePair(_data, _expectedSize));
-						}
-					}
-				} else {
-					errorDetected = true;
-				}
+				//Notify our user
+				Notifier<BytesSizePair>::notifyNewEvent(BytesSizePair(nullptr, -1));
 
-				if (errorDetected) {
-					//Report error
-					ops::BasicError err("TCPClient", "handle_received_data", "Error in receive.");
-					Participant::reportStaticError(&err);
-
-					//Close the socket
-					stop();
-
-					//Notify our user
-					notifyNewEvent(BytesSizePair(NULL, -1));
-
-					//Try to connect again
-					start();
-				}
+				//Try to connect again
+				start();
 			}
 		}
 
 	private:
-        int _maxLength;
-        char* _data;
-        int _accumulatedSize;
-		int _expectedSize;
-		bool _readingHeader;
-    };
+		TCPProtocol* _protocol;
+		ConnectStatus _cs;
+	};
 }

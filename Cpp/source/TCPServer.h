@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2018 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -25,18 +26,17 @@
  * Created on den 22 oktober 2008, 20:01
  */
 
-#ifndef ops_TCPServerH
-#define	ops_TCPServerH
-
-#include "TCPServerBase.h"
-#include "IOService.h" 
-#include "BytesSizePair.h"
+#pragma once
 
 #include <iostream>
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
+#include <boost/bind.hpp>
+
+#include "TCPServerBase.h"
+#include "IOService.h" 
+#include "BytesSizePair.h"
 #include "BoostIOServiceImpl.h"
-#include "boost/bind.hpp"
 #include "Participant.h"
 #include "BasicError.h"
 #include "BasicWarning.h"
@@ -49,8 +49,8 @@ namespace ops
 	class TCPServer : public TCPServerBase
     {
     public:
-		TCPServer(IOService* ioServ, Address_T serverIP, int serverPort, int64_t outSocketBufferSize = 16000000) :
-			TCPServerBase(),
+		TCPServer(IOService* ioServ, Address_T serverIP, int serverPort, TCPProtocol* protocol, int64_t outSocketBufferSize = 16000000) :
+			TCPServerBase(protocol),
 			_serverPort(serverPort), _serverIP(serverIP), _outSocketBufferSize(outSocketBufferSize),
 			endpoint(NULL), sock(NULL), acceptor(NULL), _canceled(false),
 			_asyncCallActive(false), _working(false)
@@ -136,6 +136,14 @@ namespace ops
 				}
 				return -1;
 			}
+			virtual void getRemote(Address_T& address, int&port)
+			{
+				boost::system::error_code error;
+				boost::asio::ip::tcp::endpoint sendingEndPoint;
+				sendingEndPoint = _sock->remote_endpoint(error);
+				address = sendingEndPoint.address().to_string().c_str();
+				port = sendingEndPoint.port();
+			}
 		};
 
 		void handleAccept(const boost::system::error_code& error)
@@ -196,5 +204,4 @@ namespace ops
 		volatile bool _working;
     };
 }
-#endif
 

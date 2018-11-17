@@ -1,6 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
+ * Copyright (C) 2018 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -17,11 +18,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef ops_TCPSendDataHandler_h
-#define	ops_TCPSendDataHandler_h
 
+#pragma once
 
-//#include "Participant.h"
 #include "SendDataHandler.h"
 #include "Lockable.h"
 #include "Sender.h"
@@ -30,11 +29,9 @@
 
 namespace ops
 {
-
     class TCPSendDataHandler : public SendDataHandler
     {
     public:
-
         TCPSendDataHandler(IOService* ioService, Topic& topic)
         {
 			sender = Sender::createTCPServer(ioService, topic.getDomainAddress(), topic.getPort(), topic.getOutSocketBufferSize());
@@ -45,16 +42,7 @@ namespace ops
             UNUSED(topic);
             SafeLock lock(&mutex);
             //We dont "sendTo" but rather lets the server (sender) send to all connected clients.
-            bool result = true;
-            if (sender) {
-				//First, prepare and send a package of fixed length 22 with information about the size of the data package
-				char sizeInfo[100] = "opsp_tcp_size_info";
-				memcpy(sizeInfo + 18, (void*)&bufSize, 4);
-				result &= sender->sendTo(sizeInfo, 22, "", 0);
-
-				// Then send the data package
-                result &= sender->sendTo(buf, bufSize, "", 0);
-            }
+            bool result = sender->sendTo(buf, bufSize, "", 0);
             return result;
         }
 
@@ -62,11 +50,7 @@ namespace ops
         {
             SafeLock lock(&mutex);
             delete sender;
-            sender = NULL;
         }
-
     };
 
 }
-
-#endif

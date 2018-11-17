@@ -1,6 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
+ * Copyright (C) 2018 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -18,17 +19,17 @@
  * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ops_TCPClientH
-#define ops_TCPClientH
-
-#include "TCPClientBase.h"
-#include "IOService.h" 
+#pragma once
 
 #include <iostream>
+
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
+#include <boost/bind.hpp>
+
+#include "TCPClientBase.h"
+#include "IOService.h"
 #include "BoostIOServiceImpl.h"
-#include "boost/bind.hpp"
 #include "Participant.h"
 #include "BasicError.h"
 #include "BasicWarning.h"
@@ -40,9 +41,10 @@ namespace ops
     class TCPClient : public TCPClientBase
     {
     public:
-        TCPClient(Address_T serverIP, int serverPort, IOService* ioServ, int64_t inSocketBufferSizent = 16000000) :
+        TCPClient(Address_T serverIP, int serverPort, IOService* ioServ, TCPProtocol* protocol, int64_t inSocketBufferSizent = 16000000) :
+			TCPClientBase(protocol),
 			_serverPort(serverPort), ipaddress(serverIP),
-			sock(NULL), endpoint(NULL), _connected(false), 
+			sock(nullptr), endpoint(nullptr), _connected(false),
 			tryToConnect(false),
 			m_asyncCallActive(false), m_working(false)
         {
@@ -66,11 +68,13 @@ namespace ops
 
         void stop()
         {
-			//Close the socket 
-			tryToConnect = false;
-            _connected = false;
-            if (sock) sock->close();
-			connected(false);
+			if (tryToConnect) {
+				//Close the socket 
+				tryToConnect = false;
+				_connected = false;
+				if (sock) sock->close();
+				connected(false);
+			}
 		}
 
         void handleConnect(const boost::system::error_code& error)
@@ -107,31 +111,27 @@ namespace ops
 					}
 
 					//Disable Nagle algorithm
-
 					boost::asio::ip::tcp::no_delay option2(true);
 					boost::system::error_code error2;
 					sock->set_option(option2, error2);
 					if (error2) {
-						//std::cout << "Failed to disable Nagle algorithm." << std::endl;
 						ops::BasicWarning warn("TCPClient", "TCPClient", "Failed to disable Nagle algorithm.");
 						Participant::reportStaticError(&warn);
 					}
 
-					//  std::cout << "connected tcp asynch" << std::endl;
 					connected(true);
 				}
 			}
-			// We update the "m_working" flag as the last thing in the callback, so we don't access the object any more 
-			// in case the destructor has been called and waiting for us to be finished.
-			// If we haven't started a new async call above, this will clear the flag.
-			m_working = m_asyncCallActive;
-
 			} catch (std::exception& e) {
 				ExceptionMessage_T msg("Unknown exception: ");
 				msg += e.what();
 				ops::BasicWarning err("TCPClient", "TCPClient", msg);
 				Participant::reportStaticError(&err);
 			}
+			// We update the "m_working" flag as the last thing in the callback, so we don't access the object any more
+			// in case the destructor has been called and waiting for us to be finished.
+			// If we haven't started a new async call above, this will clear the flag.
+			m_working = m_asyncCallActive;
 		}
 
 		// Used to get the sender IP and port for a received message
@@ -167,7 +167,7 @@ namespace ops
             if (endpoint) delete endpoint;
         }
 
-		void startAsyncRead(char* bytes, int size)
+		void startAsyncRead(char* bytes, int size) override
         {
             if (_connected) {
 				// Set variables indicating that we are "active"
@@ -182,26 +182,34 @@ namespace ops
         void handle_receive_data(const boost::system::error_code& error, size_t nrBytesReceived)
         {
 			m_asyncCallActive = false;
-			handleReceivedData(error.value(), (int)nrBytesReceived);
-			// We update the "m_working" flag as the last thing in the callback, so we don't access the object any more 
+			if (_connected) {
+				handleReceivedData(error.value(), (int)nrBytesReceived);
+			}
+			// We update the "m_working" flag as the last thing in the callback, so we don't access the object any more
 			// in case the destructor has been called and waiting for us to be finished.
 			// If we haven't started a new async call above, this will clear the flag.
 			m_working = m_asyncCallActive;
         }
 
-		bool isConnected() 
+		bool isConnected() override
 		{ 
 			return _connected; 
 		}
 
 		int getLocalPort()
 		{
-			return _serverPort;
+			boost::asio::ip::tcp::endpoint localEndPoint;
+			localEndPoint = sock->local_endpoint();
+			return localEndPoint.port();
+			//return _serverPort;
 		}
 
 		Address_T getLocalAddress()
 		{
-			return ipaddress;
+			boost::asio::ip::tcp::endpoint localEndPoint;
+			localEndPoint = sock->local_endpoint();
+			return localEndPoint.address().to_string().c_str();
+			//return ipaddress;
 		}
 
 	private:
@@ -211,12 +219,11 @@ namespace ops
         boost::asio::ip::tcp::socket* sock;
         boost::asio::ip::tcp::endpoint* endpoint;
 
-        bool _connected;
-		bool tryToConnect;
+        volatile bool _connected;
+		volatile bool tryToConnect;
 
 		// Variables to keep track of our outstanding requests, that will result in callbacks to us
 		volatile bool m_asyncCallActive;
 		volatile bool m_working;
     };
 }
-#endif

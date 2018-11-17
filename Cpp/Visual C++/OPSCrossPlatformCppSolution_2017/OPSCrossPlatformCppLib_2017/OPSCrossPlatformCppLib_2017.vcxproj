@@ -158,6 +158,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Lib>
       <OutputFile>$(TargetDir)$(TargetFileName)</OutputFile>
@@ -179,6 +180,7 @@
       <ProgramDataBaseFileName>$(TargetDir)\$(TargetName).pdb</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Lib>
       <OutputFile>$(TargetDir)$(TargetFileName)</OutputFile>
@@ -201,6 +203,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
@@ -229,6 +232,7 @@
       <ProgramDataBaseFileName>$(TargetDir)\$(TargetName).pdb</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
@@ -252,6 +256,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Lib>
       <OutputFile>$(TargetDir)$(TargetFileName)</OutputFile>
@@ -273,6 +278,7 @@
       <ProgramDataBaseFileName>$(TargetDir)\$(TargetName).pdb</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Lib>
       <OutputFile>$(TargetDir)$(TargetFileName)</OutputFile>
@@ -295,6 +301,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
@@ -323,6 +330,7 @@
       <ProgramDataBaseFileName>$(TargetDir)\$(TargetName).pdb</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
@@ -334,6 +342,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\Channel.h" />
+    <ClInclude Include="..\..\..\include\ConnectStatus.h" />
     <ClInclude Include="..\..\..\include\DebugHandler.h" />
     <ClInclude Include="..\..\..\include\Error.h" />
     <ClInclude Include="..\..\..\include\ErrorWriter.h" />
@@ -363,6 +372,8 @@
     <ClInclude Include="..\..\..\source\SendDataHandlerFactory.h" />
     <ClInclude Include="..\..\..\source\TCPClient.h" />
     <ClInclude Include="..\..\..\source\TCPClientBase.h" />
+    <ClInclude Include="..\..\..\source\TCPOpsProtocol.h" />
+    <ClInclude Include="..\..\..\source\TCPProtocol.h" />
     <ClInclude Include="..\..\..\source\TCPSendDataHandler.h" />
     <ClInclude Include="..\..\..\source\TCPServer.h" />
     <ClInclude Include="..\..\..\source\TCPServerBase.h" />

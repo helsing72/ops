@@ -13,6 +13,7 @@ set(LIB_OPS_PUBLIC_HEADERS
   ${OPS_HEADER_PATH}/Channel.h
   ${OPS_HEADER_PATH}/CommException.h
   ${OPS_HEADER_PATH}/Compatibility.h
+  ${OPS_HEADER_PATH}/ConnectStatus.h
   ${OPS_HEADER_PATH}/ConfigException.h
   ${OPS_HEADER_PATH}/DataListener.h
   ${OPS_HEADER_PATH}/DataNotifier.h
@@ -124,6 +125,8 @@ set(LIB_OPS_CORE_SRCS
   ${OPS_SRC_PATH}/SerializableInheritingTypeFactory.cpp
   ${OPS_SRC_PATH}/Subscriber.cpp
   ${OPS_SRC_PATH}/TCPClientBase.h
+  ${OPS_SRC_PATH}/TCPOpsProtocol.h
+  ${OPS_SRC_PATH}/TCPProtocol.h
   ${OPS_SRC_PATH}/TCPSendDataHandler.h
   ${OPS_SRC_PATH}/TCPServerBase.h
   ${OPS_SRC_PATH}/Thread.cpp
