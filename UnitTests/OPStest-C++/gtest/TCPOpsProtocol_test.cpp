@@ -29,7 +29,7 @@ using namespace ops;
 // ===============================
 // Helper classes
 
-class MyTcpProtClient : public TCPProtocolUser
+class MyTcpProtClient : public TCPProtocolCallbacks
 {
 public:
 	TCPProtocol* _prot;

@@ -125,6 +125,7 @@ set(LIB_OPS_CORE_SRCS
   ${OPS_SRC_PATH}/SerializableInheritingTypeFactory.cpp
   ${OPS_SRC_PATH}/Subscriber.cpp
   ${OPS_SRC_PATH}/TCPClientBase.h
+  ${OPS_SRC_PATH}/TCPConnection.h
   ${OPS_SRC_PATH}/TCPOpsProtocol.h
   ${OPS_SRC_PATH}/TCPProtocol.h
   ${OPS_SRC_PATH}/TCPSendDataHandler.h

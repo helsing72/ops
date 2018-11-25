@@ -27,9 +27,8 @@ namespace ops
 {
 	class TCPProtocol;
 
-	class TCPProtocolUser
+	struct TCPProtocolCallbacks
 	{
-	public:
 		virtual bool isConnected(TCPProtocol* prot) = 0;
 		virtual void startAsyncRead(TCPProtocol* prot, char* bytes, int size) = 0;
 		virtual void onEvent(TCPProtocol* prot, BytesSizePair arg) = 0;
@@ -39,7 +38,7 @@ namespace ops
 	class TCPProtocol
 	{
 	protected:
-		TCPProtocolUser* _client;
+		TCPProtocolCallbacks* _client;
 		char* _data;
 		int _maxLength;
 		int _accumulatedSize;
@@ -73,7 +72,7 @@ namespace ops
 		{}
 
 		// Connect a client
-		void connect(TCPProtocolUser* client) { _client = client; }
+		void connect(TCPProtocolCallbacks* client) { _client = client; }
 
 		// Create a fresh instance of the protocol (used by TCPServer for each connected client)
 		virtual TCPProtocol* create() = 0;

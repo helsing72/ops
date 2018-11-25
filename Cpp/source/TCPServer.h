@@ -41,6 +41,7 @@
 #include "BasicError.h"
 #include "BasicWarning.h"
 #include "Compatibility.h"
+#include "TCPBoostConnection.h"
 
 namespace ops
 {
@@ -49,8 +50,8 @@ namespace ops
 	class TCPServer : public TCPServerBase
     {
     public:
-		TCPServer(IOService* ioServ, Address_T serverIP, int serverPort, TCPProtocol* protocol, int64_t outSocketBufferSize = 16000000) :
-			TCPServerBase(protocol),
+		TCPServer(TCPServerCallbacks* client, IOService* ioServ, Address_T serverIP, int serverPort, TCPProtocol* protocol, int64_t outSocketBufferSize = 16000000) :
+			TCPServerBase(client, protocol),
 			_serverPort(serverPort), _serverIP(serverIP), _outSocketBufferSize(outSocketBufferSize),
 			endpoint(NULL), sock(NULL), acceptor(NULL), _canceled(false),
 			_asyncCallActive(false), _working(false)
@@ -77,7 +78,7 @@ namespace ops
 			if (endpoint) delete endpoint;
 		}
 
-		void open()
+		void open() override
 		{
 			/// We must handle asynchronous callbacks that haven't finished yet (in case open()/close() called multiple times)
 			/// We must not delete the acceptor while the async call is active.
@@ -86,7 +87,8 @@ namespace ops
 			}
 			_canceled = false;
 			if (acceptor) delete acceptor;
-			// This constructor opens, binds and listens to the given endpoint.
+
+			// This constructor opens, sets reuse_address, binds and listens to the given endpoint.
 			acceptor = new boost::asio::ip::tcp::acceptor(*ioService, *endpoint);
 			// Set variables indicating that we are "active"
 			_working = true;
@@ -94,58 +96,24 @@ namespace ops
 			acceptor->async_accept(*sock, boost::bind(&TCPServer::handleAccept, this, boost::asio::placeholders::error));
 		}
 
-		void close()
+		void close() override
 		{
 			_canceled = true;
 			if (acceptor) acceptor->close();
 			TCPServerBase::close();
 		}
 
-		virtual int getLocalPort()
+		int getLocalPort() override
 		{
 			return _serverPort;
 		}
         
-		virtual Address_T getLocalAddress()
+		Address_T getLocalAddress() override
 		{
 			return _serverIP;
 		}
 
     private:
-		class boostSocketSender : public SocketSender
-		{
-		private:
-			boost::asio::ip::tcp::socket* _sock;
-		public:
-			explicit boostSocketSender(boost::asio::ip::tcp::socket* sock) : _sock(sock) {}
-			virtual ~boostSocketSender()
-			{
-				_sock->close();
-				delete _sock;
-			}
-			virtual int send(char* buf, int size)
-			{
-				try {
-					// Send the data
-					return (int)_sock->send(boost::asio::buffer(buf, size));
-				} catch (std::exception& e) {
-					ErrorMessage_T msg("Socket closed, exception in TCPServer::sendTo():");
-					msg += e.what();
-					ops::BasicError err("TCPServer", "TCPServer", msg);
-					Participant::reportStaticError(&err);
-				}
-				return -1;
-			}
-			virtual void getRemote(Address_T& address, int&port)
-			{
-				boost::system::error_code error;
-				boost::asio::ip::tcp::endpoint sendingEndPoint;
-				sendingEndPoint = _sock->remote_endpoint(error);
-				address = sendingEndPoint.address().to_string().c_str();
-				port = sendingEndPoint.port();
-			}
-		};
-
 		void handleAccept(const boost::system::error_code& error)
 		{
 			_asyncCallActive = false;
@@ -155,34 +123,13 @@ namespace ops
 
 			} else {
 				if (!error) {
-					if (_outSocketBufferSize > 0) {
-						boost::asio::socket_base::send_buffer_size option((int)_outSocketBufferSize);
-						boost::system::error_code ec;
-						ec = sock->set_option(option, ec);
-						sock->get_option(option);
-						if(ec || option.value() != _outSocketBufferSize) {
-							//std::cout << "Socket buffer size could not be set" << std::endl;
-							ops::BasicWarning err("TCPServer", "TCPServer", "Socket buffer size could not be set");
-							Participant::reportStaticError(&err);
-						}
-					}
-
-					//Disable Nagle algorithm
-					boost::asio::ip::tcp::no_delay option(true);
-					sock->set_option(option);
-
-					AddSocket(new boostSocketSender(sock));
-
+					AddSocket(new TCPBoostConnection(this, sock, _outSocketBufferSize));
 					sock = new boost::asio::ip::tcp::socket(*ioService);
-					_asyncCallActive = true;
-					acceptor->async_accept(*sock, boost::bind(&TCPServer::handleAccept, this, boost::asio::placeholders::error));
-
-				} else {
-					_asyncCallActive = true;
-					acceptor->async_accept(*sock, boost::bind(&TCPServer::handleAccept, this, boost::asio::placeholders::error));
 				}
+				_asyncCallActive = true;
+				acceptor->async_accept(*sock, boost::bind(&TCPServer::handleAccept, this, boost::asio::placeholders::error));
 			}
-			// We update the "m_working" flag as the last thing in the callback, so we don't access the object any more 
+			// We update the "_working" flag as the last thing in the callback, so we don't access the object any more 
 			// in case the destructor has been called and waiting for us to be finished.
 			// If we haven't started a new async call above, this will clear the flag.
 			_working = _asyncCallActive;

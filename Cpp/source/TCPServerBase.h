@@ -28,6 +28,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include "OPSTypeDefs.h"
 
 #include "Notifier.h"
@@ -35,14 +37,31 @@
 #include "Sender.h"
 #include "ConnectStatus.h"
 #include "TCPProtocol.h"
+#include "TCPConnection.h"
 
 namespace ops
 {
-	class TCPServerBase : public Sender, public Notifier<ConnectStatus>
+	struct TCPServerCallbacks
+	{
+		// Called from server when a new connection is accepted
+		// Could be used to call conn->asynchRead(buffer, size)
+		virtual void onConnect(TCPConnection* conn, ConnectStatus status) = 0;
+
+		// Called from server when data has been filled into given buffer
+		// A new call to conn->asynchRead(buffer, size) need to be done to continue to read
+		virtual void onEvent(TCPConnection* conn, BytesSizePair arg) = 0;
+
+		// Called from server when a connection has been deleted
+		// NOTE: 'conn' is invalid and is only provided as an ID.
+		// Ev. buffer used in asynchRead() is no longer in use
+		virtual void onDisconnect(TCPConnection* conn, ConnectStatus status) = 0;
+	};
+
+	class TCPServerBase : public Sender, protected TCPConnectionCallbacks
     {
     public:
-		TCPServerBase(TCPProtocol* protocol) :
-			_protocol(protocol)
+		TCPServerBase(TCPServerCallbacks* client, TCPProtocol* protocol) :
+			_client(client), _protocol(protocol)
 		{}
 
 		virtual ~TCPServerBase()
@@ -51,17 +70,20 @@ namespace ops
 			delete _protocol;
 		}
 
-		virtual void close()
+		void close() override
 		{
 			SafeLock lck(&_mtx);
 			for (int i = (int)_connectedSockets.size() - 1; i >= 0; i--) {
+				ConnectStatus st(false, (int)_connectedSockets.size() - 1);
+				_connectedSockets[i]->getRemote(st.addr, st.port);
 				delete _connectedSockets[i];
+				_client->onDisconnect(_connectedSockets[i], st);
 			}
 			_connectedSockets.clear();
 		}
 
 		///Sends buf to all Receivers connected to this Sender, ip and port are discarded and can be left blank.
-        virtual bool sendTo(char* buf, int size, const Address_T& ip, int port)
+        bool sendTo(char* buf, int size, const Address_T& ip, int port) override
 		{
 			UNUSED(ip);
 			UNUSED(port);
@@ -74,12 +96,12 @@ namespace ops
 					ConnectStatus st(false, (int)_connectedSockets.size()-1);
 					_connectedSockets[i]->getRemote(st.addr, st.port);
 					// Remove it from our list
-					std::vector<SocketSender*>::iterator it = _connectedSockets.begin();
+					std::vector<TCPConnection*>::iterator it = _connectedSockets.begin();
 					it += i;
 					delete _connectedSockets[i];
-					_connectedSockets.erase(it);
 					// Connected status callback with deleted address::port and total sockets connected
-					notifyNewEvent(st);
+					_client->onDisconnect(_connectedSockets[i], st);
+					_connectedSockets.erase(it);
 				}
 			}
 			return true;
@@ -92,65 +114,8 @@ namespace ops
 		}
 
 	protected:
-		//Internal helper class for each connected socket
-		class SocketSender : TCPProtocolUser
-		{
-		public:
-			virtual ~SocketSender()
-			{
-				if (_protocol) delete _protocol;
-			}
-			
-			virtual void getRemote(Address_T& address, int&port) = 0;
-
-			int sendData(char* buf, int size)
-			{
-				return _protocol->sendData(buf, size);
-			}
-			
-		protected:
-			virtual int send(char* buf, int size) = 0;
-
-		private:
-			friend class TCPServerBase;
-
-			TCPProtocol* _protocol = nullptr;
-
-			void setProtocol(TCPProtocol* prot)
-			{
-				_protocol = prot;
-				_protocol->connect(this);
-			}
-
-			// Needed by protocol
-			bool isConnected(TCPProtocol* prot) override
-			{
-				UNUSED(prot);
-				return true;	// Currently not used for TCPServer
-			}
-
-			// Needed by protocol
-			void startAsyncRead(TCPProtocol* prot, char* bytes, int size) override
-			{
-				UNUSED(prot);
-				UNUSED(bytes);
-				UNUSED(size);	// Currently not used for TCPServer
-			}
-
-			// Needed by protocol
-			void onEvent(TCPProtocol* prot, BytesSizePair arg) override
-			{
-				UNUSED(prot);	// Currently not used for TCPServer
-			}
-
-			// Called from protocol
-			virtual int sendBuffer(TCPProtocol* prot, char* bytes, int size) override
-			{
-				return send(bytes, size);
-			}
-		};
-
-		void AddSocket(SocketSender* sock)
+		// Called from derived classes
+		void AddSocket(TCPConnection* sock)
 		{
 			SafeLock lck(&_mtx);
 			sock->setProtocol(_protocol->create());
@@ -158,14 +123,32 @@ namespace ops
 			// Connected status callback with new address::port and total sockets connected
 			ConnectStatus st(true, (int)_connectedSockets.size());
 			sock->getRemote(st.addr, st.port);
-			notifyNewEvent(st);
+			_client->onConnect(sock, st);
 		}
 
+		// Called from TCPConnection()
+		void onEvent(TCPConnection* conn, BytesSizePair arg) override
+		{
+			_client->onEvent(conn, arg);
+		}
+
+		// Called from TCPConnection()
+		void onReceiveError(TCPConnection* conn) override
+		{
+			// The protocol/connection can't receive any more. For a server connection
+			// we only close the connection. The TCP Client need to connect again.
+			conn->close();
+
+			// Since we are called from within the connection we can't delete it here.
+			// It will be deleted at next sendTo() call.
+		}
+		
 		// All connected sockets
-		std::vector<SocketSender*> _connectedSockets;
+		std::vector<TCPConnection*> _connectedSockets;
 		Lockable _mtx;
 	
 	private:
+		TCPServerCallbacks* _client;
 		TCPProtocol* _protocol;
 	};
 }

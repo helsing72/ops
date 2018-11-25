@@ -19,6 +19,7 @@ set(LIB_BOTTOM_LAYER_SRC
   NetworkSupport.cpp
   Receiver.cpp
   Sender.cpp
+  TCPBoostConnection.h
   TCPClient.cpp
   TCPClient.h
   TCPServer.h

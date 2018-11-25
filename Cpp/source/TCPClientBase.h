@@ -27,34 +27,40 @@
 #include "BasicError.h"
 #include "TCPProtocol.h"
 #include "ConnectStatus.h"
+#include "TCPConnection.h"
 
 namespace ops
 {
 
-    class TCPClientBase : public Receiver, public Notifier<ConnectStatus>, TCPProtocolUser
+    class TCPClientBase : public Receiver, public Notifier<ConnectStatus>, protected TCPConnectionCallbacks
     {
     public:
-        TCPClientBase(TCPProtocol* protocol) :
-			_protocol(protocol), _cs(false, 0)
+        TCPClientBase(TCPProtocol* protocol, TCPConnection* connection) :
+			_connection(connection), _cs(false, 0)
         {
-			_protocol->connect(this);
+			_connection->setProtocol(protocol);
         }
 
 		virtual ~TCPClientBase()
 		{
-			delete _protocol;
+			// _connection should be deleted by derived class(es)
 		}
 
-        void asynchWait(char* bytes, int size)
+        void asynchWait(char* bytes, int size) override
         {
-            if (isConnected()) {
-				_protocol->startReceive(bytes, size);
-            }
+			_connection->asynchWait(bytes, size);
         }
+
+		int sendTo(char* buf, int size)
+		{
+			return _connection->sendData(buf, size);
+		}
 
 		virtual bool isConnected() = 0;
 
 	protected:
+		TCPConnection* _connection;
+
 		// Should be called by the derived classes
 		void connected(bool value)
 		{
@@ -68,59 +74,32 @@ namespace ops
 			if (doNotify) Notifier<ConnectStatus>::notifyNewEvent(_cs);
 		}
 
-		virtual void startAsyncRead(char* bytes, int size) = 0;
-
-		// Called from protocol
-		bool isConnected(TCPProtocol* prot) override
-		{
-			UNUSED(prot);
-			return isConnected();
-		}
-		
-		// Called from protocol
-		void startAsyncRead(TCPProtocol* prot, char* bytes, int size) override
-		{
-			UNUSED(prot);
-			startAsyncRead(bytes, size);
-		}
-
-		// Called from protocol
-		void onEvent(TCPProtocol* prot, BytesSizePair arg) override
+		// Called from TCPConnection()
+		void onEvent(TCPConnection* prot, BytesSizePair arg) override
 		{
 			UNUSED(prot);
 			Notifier<BytesSizePair>::notifyNewEvent(arg);
 		}
 
-		// Needed by protocol
-		virtual int sendBuffer(TCPProtocol* prot, char* bytes, int size) override
+		// Called from TCPConnection()
+		void onReceiveError(TCPConnection* prot) override
 		{
 			UNUSED(prot);
-			UNUSED(bytes);
-			UNUSED(size);
-			return -1;	// Currently not used for TCPClient
-		}
+			//Report error
+			ops::BasicError err("TCPClient", "handle_received_data", "Error in receive.");
+			Participant::reportStaticError(&err);
 
-		// Should be called by the derived classes
-		void handleReceivedData(int error, int nrBytesReceived)
-		{
-			if (!_protocol->handleReceivedData(error, nrBytesReceived)) {
-				//Report error
-				ops::BasicError err("TCPClient", "handle_received_data", "Error in receive.");
-				Participant::reportStaticError(&err);
+			//Close the socket
+			stop();
 
-				//Close the socket
-				stop();
+			//Notify our user
+			Notifier<BytesSizePair>::notifyNewEvent(BytesSizePair(nullptr, -1));
 
-				//Notify our user
-				Notifier<BytesSizePair>::notifyNewEvent(BytesSizePair(nullptr, -1));
-
-				//Try to connect again
-				start();
-			}
+			//Try to connect again
+			start();
 		}
 
 	private:
-		TCPProtocol* _protocol;
 		ConnectStatus _cs;
 	};
 }

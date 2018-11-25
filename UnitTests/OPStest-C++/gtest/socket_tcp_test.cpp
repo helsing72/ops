@@ -66,6 +66,54 @@ static void WaitConnectedWTimeout(TCPClient& rcv, TCPServer& snd, RAII_ioServ& i
 	}
 }
 
+class MyTCPCallbacks : public TCPServerCallbacks
+{
+public:
+	ops::ConnectStatus cst;
+	char buffer[1024];
+	BytesSizePair bsp;
+
+	MyTCPCallbacks() : cst(false, 0), bsp(nullptr, 0) {}
+
+	void Log(ConnectStatus status)
+	{
+		std::cout << "Server: IP: " << status.addr << "::" << status.port;
+		if (status.connected) {
+			std::cout << " Connected.";
+		} else {
+			std::cout << " Disconnected.";
+		}
+		std::cout << " Total: " << status.totalNo << std::endl;
+	}
+
+	// Called from server when a new connection is accepted
+	// Could be used to call conn->asynchRead(buffer, size)
+	void onConnect(TCPConnection* conn, ConnectStatus status) override
+	{
+		Log(status);
+		cst = status;
+
+		// Start a read
+		conn->asynchWait(buffer, 1024);
+	}
+
+	// Called from server when data has been filled into given buffer
+	// A new call to conn->asynchRead(buffer, size) need to be done to continue to read
+	void onEvent(TCPConnection* conn, BytesSizePair arg) override
+	{
+		bsp = arg;
+	}
+
+	// Called from server when a connection has been deleted
+	// NOTE: 'conn' is invalid and is only provided as an ID.
+	// Ev. buffer used in asynchRead() is no longer in use
+	void onDisconnect(TCPConnection* conn, ConnectStatus status) override
+	{
+		Log(status);
+		cst = status;
+	}
+};
+
 // ===============================
 
 TEST(Test_Sockets, TestTCPdefault) {
@@ -76,24 +124,24 @@ TEST(Test_Sockets, TestTCPdefault) {
 
 	// Create a listener for received data
 	MyBSPListener listener(false);
-	MyConnectListener cstServer("Server: ");
+	MyTCPCallbacks ServerCB;
 	MyConnectListener cstClient("Client: ");
 
 	static const int serverPort = 9999;
 
 	// Create TCP Server with default buffer size. Add listener for connect status
-	TCPServer snd(ioServ(), "127.0.0.1", serverPort, new ops::TCPOpsProtocol());
-	snd.addListener(&cstServer);
-	EXPECT_EQ(snd.getNrOfListeners(), 1);
+	TCPServer snd(&ServerCB, ioServ(), "127.0.0.1", serverPort, new ops::TCPOpsProtocol());
 
 	EXPECT_STREQ(snd.getLocalAddress().c_str(), "127.0.0.1");
 	EXPECT_EQ(snd.getLocalPort(), serverPort);
+	EXPECT_EQ(snd.numConnected(), 0);
 
 	// Create TCP Client with default buffersize
 	TCPClient rcv("127.0.0.1", serverPort, ioServ(), new ops::TCPOpsProtocol());
 	rcv.Notifier<BytesSizePair>::addListener(&listener);
 	rcv.Notifier<ConnectStatus>::addListener(&cstClient);
 
+	EXPECT_FALSE(rcv.isConnected());
 	EXPECT_TRUE(rcv.asyncFinished());
 	EXPECT_FALSE(rcv.isConnected());
 	EXPECT_EQ(snd.numConnected(), 0);
@@ -118,10 +166,10 @@ TEST(Test_Sockets, TestTCPdefault) {
 	EXPECT_EQ(snd.numConnected(), 1);
 
 	// Check ConnectStatus from server
-	EXPECT_TRUE(cstServer.cst.connected);
-	EXPECT_STREQ(cstServer.cst.addr.c_str(), rcv.getLocalAddress().c_str());
-	EXPECT_EQ(cstServer.cst.port, rcv.getLocalPort());
-	EXPECT_EQ(cstServer.cst.totalNo, 1);
+	EXPECT_TRUE(ServerCB.cst.connected);
+	EXPECT_STREQ(ServerCB.cst.addr.c_str(), rcv.getLocalAddress().c_str());
+	EXPECT_EQ(ServerCB.cst.port, rcv.getLocalPort());
+	EXPECT_EQ(ServerCB.cst.totalNo, 1);
 
 	// Check ConnectStatus from client
 	EXPECT_TRUE(cstClient.cst.connected);
@@ -138,8 +186,8 @@ TEST(Test_Sockets, TestTCPdefault) {
 	EXPECT_STREQ(rcv.getLocalAddress().c_str(), "127.0.0.1");
 
 	// Save connected client for later use
-	Address_T connectedIP = cstServer.cst.addr;
-	int connectPort = cstServer.cst.port;
+	Address_T connectedIP = ServerCB.cst.addr;
+	int connectPort = ServerCB.cst.port;
 
 	// Start an async wait for data
 	char rcvbuf[1024];
@@ -161,6 +209,14 @@ TEST(Test_Sockets, TestTCPdefault) {
 	EXPECT_STREQ(listener.srcIp.c_str(), snd.getLocalAddress().c_str());
 	EXPECT_EQ(listener.srcPort, snd.getLocalPort());
 
+	// Test send other way, Async recv is started in serverCB.onConnect()
+	EXPECT_TRUE(rcv.sendTo(&sndbuf[0], 100));
+	
+	PollWTimeout(ioServ, 100);
+
+	EXPECT_EQ(ServerCB.bsp.bytes, ServerCB.buffer);
+	EXPECT_EQ(ServerCB.bsp.size, 100);
+
 	// Disconnect receiver. Need to send data to discover disconnect
 	rcv.stop();
 	EXPECT_TRUE(snd.sendTo(&sndbuf[0], 10, "", 0));
@@ -169,10 +225,10 @@ TEST(Test_Sockets, TestTCPdefault) {
 	EXPECT_TRUE(snd.sendTo(&sndbuf[10], 90, "", 0));
 	PollWTimeout(ioServ, 100);
 
-	EXPECT_FALSE(cstServer.cst.connected);
-	EXPECT_STREQ(cstServer.cst.addr.c_str(), connectedIP.c_str());
-	EXPECT_EQ(cstServer.cst.port, connectPort);
-	EXPECT_EQ(cstServer.cst.totalNo, 0);
+	EXPECT_FALSE(ServerCB.cst.connected);
+	EXPECT_STREQ(ServerCB.cst.addr.c_str(), connectedIP.c_str());
+	EXPECT_EQ(ServerCB.cst.port, connectPort);
+	EXPECT_EQ(ServerCB.cst.totalNo, 0);
 
 	// Need someone to drive the io service when we call stop() otherwise it will be a deadlock
 	{

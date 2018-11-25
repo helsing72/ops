@@ -25,16 +25,16 @@
 #include "Lockable.h"
 #include "Sender.h"
 #include "IOService.h"
-
+#include "TCPServerBase.h"
 
 namespace ops
 {
-    class TCPSendDataHandler : public SendDataHandler
+    class TCPSendDataHandler : public SendDataHandler, TCPServerCallbacks
     {
     public:
         TCPSendDataHandler(IOService* ioService, Topic& topic)
         {
-			sender = Sender::createTCPServer(ioService, topic.getDomainAddress(), topic.getPort(), topic.getOutSocketBufferSize());
+			sender = Sender::createTCPServer(this, ioService, topic.getDomainAddress(), topic.getPort(), topic.getOutSocketBufferSize());
         }
 
         bool sendData(char* buf, int bufSize, Topic& topic)
@@ -46,10 +46,37 @@ namespace ops
             return result;
         }
 
+		// Called from server when a new connection is accepted
+		// Could be used to call conn->asynchRead(buffer, size)
+		virtual void onConnect(TCPConnection* conn, ConnectStatus status)
+		{
+			// Notify parent
+			//onNewEvent(nullptr, status);
+		}
+
+		// Called from server when data has been filled into given buffer
+		// A new call to conn->asynchRead(buffer, size) need to be done to continue to read
+		virtual void onEvent(TCPConnection* conn, BytesSizePair arg)
+
+		{
+
+		}
+
+
+
+		// Called from server when a connection has been deleted
+		// NOTE: 'conn' is invalid and is only provided as an ID.
+		// Ev. buffer used in asynchRead() is no longer in use
+		virtual void onDisconnect(TCPConnection* conn, ConnectStatus status)
+		{
+			// Notify parent
+			//onNewEvent(nullptr, status);
+		}
+
         virtual ~TCPSendDataHandler()
         {
             SafeLock lock(&mutex);
-            delete sender;
+			delete sender;
         }
     };
 
