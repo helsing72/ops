@@ -123,14 +123,17 @@ namespace ops {
 							break;
 
 						case 1: // Participant
+							if (req->getKey() == "*") return;
 							break;
 
 						case 2: // Publisher
+							if (req->getKey() == "*") return;
 							if (_pubMap.find(req->Name) == _pubMap.end()) break;
 							_pubMap[req->Name]->onRequest(*req, _response);
 							break;
 
 						case 3: // Subscriber
+							if (req->getKey() == "*") return;
 							if (_subMap.find(req->Name) == _subMap.end()) break;
 							_subMap[req->Name]->onRequest(*req, _response);
 							break;
@@ -159,7 +162,10 @@ namespace ops {
 		{
 			_sub = new Subscriber(_part->createDebugTopic());
 			_sub->addDataListener(this);
-			_sub->addFilterQoSPolicy(new KeyFilterQoSPolicy(gKey));
+			std::vector<ObjectKey_T> keyStrings;
+			keyStrings.push_back(gKey);
+			keyStrings.push_back("*");
+			_sub->addFilterQoSPolicy(new KeyFilterQoSPolicy(keyStrings));
 			_sub->start();
 			_pub = new Publisher(_part->createDebugTopic());
 			_pub->start();
@@ -180,6 +186,10 @@ namespace ops {
 			switch (req.Command) {
 			case 2: // List
 				resp.Param1 = 0;
+				if (req.Param1 == 1) {
+					resp.Param3.push_back(gKey.c_str());
+					resp.Result1 = 1;
+				}
 				if (req.Param1 == 2) {
 					for (std::map<ObjectName_T, DebugNotifyInterface*>::iterator it = _pubMap.begin(); it != _pubMap.end(); ++it) {
 						resp.Param3.push_back(it->first.c_str());

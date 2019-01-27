@@ -6,16 +6,18 @@
 
 #include "OPSConfig.h"
 #include "PrintArchiverOut.h"
+#include "NetworkSupport.h"
+#include "IOService.h"
 
 #include "Configuration.h"
 
-const std::string sVersion = "Version 2018-08-13";
+const std::string sVersion = "Version 2019-01-15";
 
 
 bool gWarningGiven = false;
 
 #define LOG_WARN(message) { std::cout << message; gWarningGiven = true; } 
-
+#define LOG_INFO(message) { std::cout << "Info: " << message; }
 #define LOG_DEBUG(message) { if (bDebug) std::cout << message; } 
 
 class CVerifyOPSConfig 
@@ -289,6 +291,8 @@ public:
 			LOG_WARN( ">>> Missing <domainAddress> for domain: " << domainName << std::endl );
 		}
 
+		///TODO check that domainaddress is a MC address
+
 		// metaDataMcPort, optional but necessary if UDP transports are used.
 		// If not set to 0, then DomainAddress::metaDataMcPort should be unique
 		verifyOnlyOneEntry(config, "metaDataMcPort", "<domains> <element> section");
@@ -313,6 +317,12 @@ public:
 
 		// localInterface, optional
 		verifyOnlyOneEntry(config, "localInterface", "<domains> <element> section for domainID '" + domainName + "'");
+		std::string localIf = config.getString("localInterface");
+		if (localIf.size() > 0) {
+			ops::IOService* ioServ = ops::IOService::create();
+			ops::Address_T subnetIf = ops::doSubnetTranslation(localIf, ioServ);
+			LOG_INFO("Domain '" << domainName << "': localInterface " << localIf << " --> " << subnetIf << std::endl);
+		}
 
 		verifyOnlyOneEntry(config, "timeToLive", "<domains> <element> section for domainID '" + domainName + "'");
 
@@ -469,8 +479,14 @@ public:
 			}
 		}
 
-		///TODO can have local interface, buffer sizes
 		verifyOnlyOneEntry(config, "localInterface", "<channels> <element> section in domain: " + domainName + " with name: " + channelName);
+		std::string localIf = config.getString("localInterface");
+		if (localIf.size() > 0) {
+			ops::IOService* ioServ = ops::IOService::create();
+			ops::Address_T subnetIf = ops::doSubnetTranslation(localIf, ioServ);
+			LOG_INFO("Domain '" << domainName << "', Channel '" << channelName << "': localInterface " << localIf << " --> " << subnetIf << std::endl);
+		}
+
 		verifyOnlyOneEntry(config, "timeToLive", "<channels> <element> section in domain: " + domainName + " with name: " + channelName);
 		verifyOnlyOneEntry(config, "outSocketBufferSize", "<channels> <element> section in domain: " + domainName + " with name: " + channelName);
 		verifyOnlyOneEntry(config, "inSocketBufferSize", "<channels> <element> section in domain: " + domainName + " with name: " + channelName);

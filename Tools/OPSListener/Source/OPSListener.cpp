@@ -24,6 +24,8 @@
 #include "Lockable.h"
 #include "ParticipantInfoData.h"
 #include "PubIdChecker.h"
+#include "opsidls/DebugRequestResponseData.h"
+#include "NetworkSupport.h"
 
 #include "COpsConfigHelper.h"
 #include "SdsSystemTime.h"
@@ -49,6 +51,7 @@ void ShowUsage()
 	std::cout << "  OPSListener [-v] [-?] [-c ops_cfg_file [-c ops_cfg_file [...]]]" << std::endl;
 	std::cout << "              [-t] [-pA | -p<option_chars>]" << std::endl;
 	std::cout << "              [-a arg_file [-a arg_file [...]]]" << std::endl;
+	std::cout << "              [-GA | -G domain [-G domain [...]]]" << std::endl;
 	std::cout << "              [-IA | -I domain [-I domain [...]] [-O]]" << std::endl;
 	std::cout << "              [-SA | -S domain [-S domain [...]]]" << std::endl;
 	std::cout << "              [-D default_domain] [-C [-E]] [-n] Topic [Topic ...]" << std::endl;
@@ -62,6 +65,8 @@ void ShowUsage()
 	std::cout << "                       If none given, the default 'SDSDomain' is used" << std::endl;
 	std::cout << "                       A new default can be given between topics" << std::endl;
 	std::cout << "    -E                 If -C given, minimize normal output" << std::endl;
+	std::cout << "    -G domain          Subscribe to Debug Request/Response from given domain" << std::endl;
+	std::cout << "    -GA                Subscribe to Debug Request/Response from all domains in given configuration files" << std::endl;
 	std::cout << "    -I domain          Subscribe to Participant Info Data from given domain" << std::endl;
 	std::cout << "    -IA                Subscribe to Participant Info Data from all domains in given configuration files" << std::endl;
 	std::cout << "    -n                 Don't subscribe to topics following" << std::endl;
@@ -111,21 +116,21 @@ public:
 	std::vector<ops::ObjectName_T> topicNames;
 	std::vector<ops::ObjectName_T> subscribeDomains;
 	std::vector<ops::ObjectName_T> infoDomains;
+	std::vector<ops::ObjectName_T> debugDomains;
 	std::vector<ops::ObjectName_T> skipTopicNames;
 	std::string printFormat;
 	ops::ObjectName_T defaultDomain;
-	bool verboseOutput;
-	bool logTime;
-	bool allInfoDomains;
-	bool allTopics;
-	bool onlyArrivingLeaving;
-	bool doPubIdCheck;
-	bool doMinimizeOutput;
-	bool skipTopics;
+	bool verboseOutput = false;
+	bool logTime = false;
+	bool allDebugDomains = false;
+	bool allInfoDomains = false;
+	bool allTopics = false;
+	bool onlyArrivingLeaving = false;
+	bool doPubIdCheck = false;
+	bool doMinimizeOutput = false;
+	bool skipTopics = false;
 
-	CArguments() : indent(""), printFormat(""), defaultDomain(getDefaultDomain()),
-		verboseOutput(false), logTime(false), allInfoDomains(false), allTopics(false), onlyArrivingLeaving(false),
-		doPubIdCheck(false), doMinimizeOutput(false), skipTopics(false)
+	CArguments() : indent(""), printFormat(""), defaultDomain(getDefaultDomain())
 	{
 		// Create a map with all valid format chars, used for validating -p<...> argument
 		validFormatChars = getValidFormatChars();
@@ -195,6 +200,21 @@ public:
 			// minimize output
 			if (argument == "-E") {
 				doMinimizeOutput = true;
+				continue;
+			}
+
+			// Subscribe to Debug Request/Response Data
+			if (argument == "-G") {
+				if (argIdx >= nArgs) {
+					std::cout << "Argument '-G' is missing value" << std::endl;
+					return false;
+				}
+				debugDomains.push_back(toAnsi(szArglist[argIdx++]).c_str());
+				continue;
+			}
+
+			if (argument == "-GA") {
+				allDebugDomains = true;
 				continue;
 			}
 
@@ -307,7 +327,7 @@ public:
 		wchar_t wbuffer[32768];
 		std::string oldIndent = indent;
 
-		FILE* stream = NULL;
+		FILE* stream = nullptr;
 #ifdef _WIN32
 		if (fopen_s(&stream, fileName.c_str(), "r") != 0) {
 			std::cout << "Failed to open argument file: " << fileName << std::endl;
@@ -316,7 +336,7 @@ public:
 #else
 		stream = fopen(fileName.c_str(), "r");
 #endif
-		if (stream == NULL) {
+		if (stream == nullptr) {
 			std::cout << "Failed to open argument file: " << fileName << std::endl;
 			return false;
 		}
@@ -326,7 +346,7 @@ public:
 
 		bool returnValue = true;
 		while (!feof(stream) && returnValue) {
-			if (fgets(buffer, sizeof(buffer), stream) == NULL) break;
+			if (fgets(buffer, sizeof(buffer), stream) == nullptr) break;
 
 			int len = strlen(buffer);
 			if (len == 0) continue;
@@ -345,7 +365,7 @@ public:
 			int nArgs;
 
 			szArglist = CommandLineToArgvW(wbuffer, &nArgs);
-			if (NULL == szArglist) {
+			if (nullptr == szArglist) {
 				std::cout << "CommandLineToArgvW() failed" << std::endl;
 				returnValue = false;
 			}
@@ -369,7 +389,7 @@ public:
 		bool returnValue = false;
 		int nArgs;
 		LPWSTR *szArglist = CommandLineToArgvW(GetCommandLineW(), &nArgs);
-		if (NULL == szArglist) {
+		if (nullptr == szArglist) {
 			std::cout << "CommandLineToArgvW failed" << std::endl;
 			return false;
 		}
@@ -387,7 +407,8 @@ public:
 	bool ValidateArguments()
 	{
 		// Validate arguments
-		if ((topicNames.size() == 0) && (subscribeDomains.size() == 0) && (infoDomains.size() == 0) && !allInfoDomains && !allTopics) {
+		if ((topicNames.size() == 0) && (subscribeDomains.size() == 0) && (infoDomains.size() == 0) && (debugDomains.size() == 0) &&
+			!allInfoDomains && !allTopics && !allDebugDomains) {
 			std::cout << "No topics/domains given!!" << std::endl;
 			return false;
 		}
@@ -432,7 +453,7 @@ public:
 		if (type != "") {
 			return new ops::OPSObject();
 		}
-		return NULL;
+		return nullptr;
   }
 };
 
@@ -550,6 +571,22 @@ public:
 
 	int numQueued() {return (int)List.size();}
 
+	void LogTopic(ops::ObjectName_T domainName, ops::Topic& top)
+	{
+		// For our purpose we can use any participant
+		ops::Participant* part = opsHelper.getDomainParticipant(opsHelper.vDomains[0]);
+
+		std::cout <<
+			"Subscribing to Topic: " << ops::utilities::fullTopicName(domainName, top.getName()) <<
+			" [ " << top.getTransport() <<
+			"::" << top.getDomainAddress() <<
+			"::" << top.getPort() <<
+			" (" << top.getLocalInterface() <<
+			" --> " << ops::doSubnetTranslation(top.getLocalInterface(), part->getIOService()) <<
+			") ] " <<
+			std::endl;
+	}
+
 	//
 	Main(CArguments& args) :
 		logTime(args.logTime),
@@ -606,9 +643,27 @@ public:
 			}
 		}
 
+		// Handle case where we are requested to listen to deug Request/Response data from all existing domains
+		if (args.allDebugDomains) {
+			// Replace args.debugDomains with all known domains in configuration files
+			opsHelper.getAvailableDomains(args.debugDomains);
+		}
+
+		// Check given debug domains and make sure they exist and ev. add them to the unique list
+		for (unsigned int i = 0; i < args.debugDomains.size(); i++) {
+			ops::ObjectName_T domainName = args.debugDomains[i];
+			if (opsHelper.existsDomain(domainName)) {
+				domainName += "::";		// use domain syntax for routine below
+				opsHelper.checkTopicDomain(domainName);
+			} else {
+				std::cout << "##### Domain '" << domainName << "' not found. Have you forgot configuration file(s) ?" << std::endl;
+				args.debugDomains[i] = "";
+			}
+		}
+
 		// Handle case where we are requested to listen to partition info from all existing domains
 		if (args.allInfoDomains) {
-			// Replace args.InfoDomains with all known domains in configuration files
+			// Replace args.infoDomains with all known domains in configuration files
 			opsHelper.getAvailableDomains(args.infoDomains);
 		}
 
@@ -628,7 +683,7 @@ public:
 		for (unsigned int i = 0; i < opsHelper.vDomains.size(); i++) {
 			try {
 				ops::Participant* part = opsHelper.getDomainParticipant(opsHelper.vDomains[i]);
-				if (part == NULL) {
+				if (part == nullptr) {
 					std::cout << "##### Domain '" << opsHelper.vDomains[i] << "' not found. Have you forgot configuration file(s) ?" << std::endl;
 					continue;
 				}
@@ -689,13 +744,7 @@ public:
 
 			Topic topic = part->createTopic(ops::utilities::topicName(topName));
 
-			std::cout <<
-				"Subscribing to Topic: " << ops::utilities::fullTopicName(ops::utilities::domainName(topName), ops::utilities::topicName(topName)) <<
-				" [ " << topic.getTransport() <<
-				"::" << topic.getDomainAddress() <<
-				"::" <<topic.getPort() <<
-				" ] " <<
-				std::endl;
+			LogTopic(ops::utilities::domainName(topName), topic);
 
 			ops::Subscriber* sub;
 			sub = new ops::Subscriber(topic);
@@ -710,6 +759,35 @@ public:
 			}
 		}
 
+		// Create subscribers to all DebugRequestResponseData
+		for (unsigned int i = 0; i < args.debugDomains.size(); i++) {
+			try {
+				ops::ObjectName_T domainName = args.debugDomains[i];
+				if (domainName == "") continue;
+
+				ops::Participant* part = opsHelper.getDomainParticipant(domainName);
+				if (part == nullptr) continue;
+
+				Topic top = part->createDebugTopic();
+				if (top.getPort() == 0) continue;
+
+				LogTopic(domainName, top);
+
+				ops::Subscriber* sub = new ops::Subscriber(top);
+				sub->addDataListener(this);
+				sub->start();
+
+				vSubs.push_back(sub);
+				if (doPubIdCheck) {
+					// We don't use the subscriber to do the checking due to performance, instead we do it "off-line"
+					pubIdMap[sub] = new ops::PublicationIdChecker();
+					pubIdMap[sub]->addListener(this);
+				}
+			} catch (...)
+			{
+			}
+		}
+
 		// Create subscribers to all ParticipantInfoData
 		for (unsigned int i = 0; i < args.infoDomains.size(); i++) {
 			try {
@@ -717,18 +795,12 @@ public:
 				if (domainName == "") continue;
 
 				ops::Participant* part = opsHelper.getDomainParticipant(domainName);
-				if (part == NULL) continue;
+				if (part == nullptr) continue;
 
 				Topic top = part->createParticipantInfoTopic();
 				if (top.getPort() == 0) continue;
 
-				std::cout <<
-					"Subscribing to Topic: " << ops::utilities::fullTopicName(domainName, top.getName()) <<
-					" [ " << top.getTransport() <<
-					"::" << top.getDomainAddress() <<
-					"::" <<top.getPort() <<
-					" ] " <<
-					std::endl;
+				LogTopic(domainName, top);
 
 				ops::Subscriber* sub = new ops::Subscriber(top);
 				sub->addDataListener(this);
@@ -775,7 +847,7 @@ public:
 		ops::Subscriber* sub = dynamic_cast<ops::Subscriber*>(subscriber);
 		if (sub) {
 			ops::OPSMessage* mess = sub->getMessage();
-			if (mess == NULL) return;
+			if (mess == nullptr) return;
 
 			// Reserve message and queue, so we don't delay the subscriber thread
 			mess->reserve();
@@ -822,9 +894,10 @@ public:
 		/// Don't loop to much, to not loose mmi responsiveness
 		for (int loopCnt=0; loopCnt < numMess; loopCnt++) {
 			TEntry ent;
-			ops::OPSMessage* mess = NULL;
-			ops::OPSObject* opsData = NULL;
-			ops::ParticipantInfoData* piData = NULL;
+			ops::OPSMessage* mess = nullptr;
+			ops::OPSObject* opsData = nullptr;
+			ops::ParticipantInfoData* piData = nullptr;
+			opsidls::DebugRequestResponseData* debugData = nullptr;
 
 			ListLock.lock();
 			if (List.size() > 0) {
@@ -834,7 +907,7 @@ public:
 			}
 			ListLock.unlock();
 
-			if (mess == NULL) return;
+			if (mess == nullptr) return;
 
 			opsData = mess->getData();
 
@@ -849,26 +922,9 @@ public:
 			//    std::vector<char> spareBytes;
 
 			piData = dynamic_cast<ops::ParticipantInfoData*>(opsData);
+			debugData = dynamic_cast<opsidls::DebugRequestResponseData*>(opsData);
 
-			if (piData == NULL) {
-				// Ordinary Topic
-				std::string str = "";
-				if (logTime) {
-					str += "[" + sds::sdsSystemTimeToLocalTime(ent.time) + "] ";
-				}
-				for(unsigned int i = 0; i < printFormat.size(); i++) {
-					str += formatMap[printFormat[i]](mess, opsData) + ", ";
-				}
-				if ((str != "") && (!doMinimizeOutput)) {
-					std::cout << str << std::endl;
-				}
-				if (doPubIdCheck) {
-					// This may call our "onNewEvent(ops::Notifier<ops::PublicationIdNotification_T>* ...") method
-					// We may need the time in that method so save it in a member variable
-					_messageTime = ent.time;
-					pubIdMap[ent.sub]->Check(mess);
-				}
-			} else {
+			if (piData) {
 				// Show Participant Info
 				// First check if it's from any of our own participants
 				bool fromMe = false;
@@ -919,7 +975,52 @@ public:
 					}
 					std::cout << std::endl;
 				}
+			
+			} else if (debugData) {
+				// Show Debug Request/Response data
+				std::string str = "";
+				if (logTime) {
+					str += "[" + sds::sdsSystemTimeToLocalTime(ent.time) + "] ";
+				}
+				std::cout << str << 
+					"Key: " << debugData->getKey() <<
+					", Entity: " << debugData->Entity <<
+					", Name: " << debugData->Name <<
+					", Command: " << debugData->Command <<
+					", Param1: " << debugData->Param1 <<
+					", Enabled: " << debugData->Enabled <<
+					", Result1: " << debugData->Result1 <<
+					", Result2: " << debugData->Result2 <<
+					", Result3: " << debugData->Result3 <<
+					", " << source(mess, opsData) <<
+					std::endl;
+
+				for (unsigned int i = 0; i < debugData->Param3.size(); ++i) {
+					std::cout << "    Param3(" << i << "): " << debugData->Param3[i] << '\n';
+				}
+
+				//Objs
+
+			} else {
+				// Ordinary Topic
+				std::string str = "";
+				if (logTime) {
+					str += "[" + sds::sdsSystemTimeToLocalTime(ent.time) + "] ";
+				}
+				for (unsigned int i = 0; i < printFormat.size(); i++) {
+					str += formatMap[printFormat[i]](mess, opsData) + ", ";
+				}
+				if ((str != "") && (!doMinimizeOutput)) {
+					std::cout << str << std::endl;
+				}
+				if (doPubIdCheck) {
+					// This may call our "onNewEvent(ops::Notifier<ops::PublicationIdNotification_T>* ...") method
+					// We may need the time in that method so save it in a member variable
+					_messageTime = ent.time;
+					pubIdMap[ent.sub]->Check(mess);
+				}
 			}
+
 			mess->unreserve();
 		}
 	}
@@ -955,7 +1056,7 @@ int _kbhit() {
         tcgetattr(STDIN, &term);
         term.c_lflag &= ~ICANON;
         tcsetattr(STDIN, TCSANOW, &term);
-        setbuf(stdin, NULL);
+        setbuf(stdin, nullptr);
         initialized = true;
     }
 
@@ -967,7 +1068,7 @@ int _kbhit() {
 
 int main(int argc, char* argv[])
 {
-	std::cout << std::endl << "OPSListener Version 2017-06-30" << std::endl << std::endl;
+	std::cout << std::endl << "OPSListener Version 2019-01-26" << std::endl << std::endl;
 
 	sds::sdsSystemTimeInit();
 
@@ -986,7 +1087,7 @@ int main(int argc, char* argv[])
 		while (true) {
 			if (_kbhit()) {
 				char buffer[1024];
-				if (fgets(buffer, sizeof(buffer), stdin) != NULL) {
+				if (fgets(buffer, sizeof(buffer), stdin) != nullptr) {
 					std::string line(buffer);
 
 					// trim start

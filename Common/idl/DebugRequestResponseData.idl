@@ -13,7 +13,7 @@ class DebugRequestResponseData
        1 = Request status
 
          Debug:
-       2 = List, Param1 = 2 [Publishers], Param1 = 3 [Subscribers]
+       2 = List, Param1 = 1 [instance key], Param1 = 2 [Publishers], Param1 = 3 [Subscribers]
       50 = Generic command forwarded to connected application code, if any.
              Input data: Param1, Param3 and Objs
              Response data: See below
@@ -43,6 +43,7 @@ class DebugRequestResponseData
 
     /* Response to Request with results
          Debug:
+           Result1 = 1, Param3 contains this instance filter key
            Result1 = 2, List in Param3 contains Publishers
            Result1 = 3, List in Param3 contains subscribers
            Result1 = 50, Response to generic Command
