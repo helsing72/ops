@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018 Lennart Andersson.
+* Copyright (C) 2018-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -169,4 +169,51 @@ TEST(Test_memory_pools, Test_memory_pool) {
 	EXPECT_EQ(mp1.capacity(), (size_t)2);
 	EXPECT_EQ(mp1.size(), (size_t)1);
 #endif
+}
+
+TEST(Test_memory_pools, Test_memory_pool_exp) {
+
+	memory_pool_manager& mgr = memory_pool_manager::Instance();
+	EXPECT_EQ(mgr.numPools(), 0);
+	CheckMemoryPools(mgr, "");
+
+	memory_pool_exp<128> mp1(2);
+	EXPECT_EQ(mgr.numPools(), 1);
+	EXPECT_EQ(mp1.capacity(), (size_t)2);
+	EXPECT_EQ(mp1.size(), (size_t)2);
+
+	char* o1 = mp1.getEntry();
+	EXPECT_NE(o1, nullptr);
+	EXPECT_EQ(mp1.capacity(), (size_t)2);
+	EXPECT_EQ(mp1.size(), (size_t)1);
+
+	char* o2 = mp1.getEntry();
+	EXPECT_NE(o2, nullptr);
+	EXPECT_EQ(mp1.capacity(), (size_t)2);
+	EXPECT_EQ(mp1.size(), (size_t)0);
+
+	char* o3 = mp1.getEntry();
+	EXPECT_NE(o3, nullptr);
+	EXPECT_EQ(mp1.capacity(), (size_t)2);
+	EXPECT_EQ(mp1.size(), (size_t)0);
+
+	mp1.returnEntry(o1);
+	EXPECT_EQ(o1, nullptr);
+	EXPECT_EQ(mp1.capacity(), (size_t)2);
+	EXPECT_EQ(mp1.size(), (size_t)1);
+
+	mp1.returnEntry(o2);
+	EXPECT_EQ(o2, nullptr);
+	EXPECT_EQ(mp1.capacity(), (size_t)2);
+	EXPECT_EQ(mp1.size(), (size_t)2);
+
+	mp1.returnEntry(o3);
+	EXPECT_EQ(o3, nullptr);
+	EXPECT_GE(mp1.capacity(), (size_t)3);
+	EXPECT_EQ(mp1.size(), (size_t)3);
+
+	EXPECT_THROW(mp1.returnEntry(o3), memory_pool_exp<128>::illegal_ref);
+	EXPECT_GE(mp1.capacity(), (size_t)3);
+	EXPECT_EQ(mp1.size(), (size_t)3);
+
 }

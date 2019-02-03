@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2017-2018 Lennart Andersson.
+* Copyright (C) 2017-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -21,6 +21,7 @@
 #pragma once
 
 #include <ostream>
+#include <vector>
 #include <mutex>
 #include <exception>
 #include <typeinfo>
@@ -333,6 +334,79 @@ namespace ops {
 			memory_pool_nd& operator=(memory_pool_nd const&) = default;
 			memory_pool_nd& operator=(memory_pool_nd&&) = default;
 			std::exception_ptr _ep;
+		};
+
+		// ====================================================================
+
+		// A Memory Pool for fixed size buffers, that take an initial number of blocks and then
+		// grows if all blocks are used.
+		template <int block_size>
+		class memory_pool_exp : public memory_pool_abs
+		{
+			std::vector<char *> _blocks;
+			std::mutex _mtx;
+
+			void PrintStat(std::ostream& os)
+			{
+				os << "[" << typeid(this).name() << "] ";
+				os <<
+					"Capacity: " << _blocks.capacity() <<
+					", Current: " << _blocks.size() <<
+					std::endl;
+			}
+
+		public:
+			struct illegal_ref : public std::exception
+			{
+				const char* what() const noexcept { return "Illegal reference"; }
+			};
+
+			memory_pool_exp(int initial_num_blocks)
+			{
+				_blocks.reserve(initial_num_blocks);
+				for (auto i = 0; i < initial_num_blocks; ++i) {
+					_blocks.push_back(new char[block_size]);
+				}
+			}
+
+			~memory_pool_exp()
+			{
+				for (unsigned int i = 0; i < _blocks.size(); ++i) {
+					delete[] _blocks[i];
+				}
+			}
+
+			inline char* getEntry()
+			{
+				char* ptr;
+				std::lock_guard<std::mutex> lck(_mtx);
+				if (_blocks.size() > 0) {
+					ptr = _blocks.back();
+					_blocks.pop_back();
+				} else {
+					ptr = new char[block_size];
+				}
+				return ptr;
+			}
+
+			inline void returnEntry(char*& ptr)
+			{
+				if (ptr == nullptr) throw illegal_ref();
+
+				std::lock_guard<std::mutex> lck(_mtx);
+				_blocks.push_back(ptr);
+				ptr = nullptr;
+			}
+
+			size_t size() { return _blocks.size(); }
+			size_t capacity() { return _blocks.capacity(); }
+
+		private:
+			memory_pool_exp() = delete;
+			memory_pool_exp(memory_pool_exp const&) = delete;
+			memory_pool_exp(memory_pool_exp&&) = delete;
+			memory_pool_exp& operator=(memory_pool_exp const&) = default;
+			memory_pool_exp& operator=(memory_pool_exp&&) = default;
 		};
 
 	}
