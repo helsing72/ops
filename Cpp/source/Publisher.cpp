@@ -1,7 +1,8 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- *
+ * Copyright (C) 2018 Lennart Andersson.
+*
  * This file is part of OPS (Open Publish Subscribe).
  *
  * OPS (Open Publish Subscribe) is free software: you can redistribute it and/or modify
@@ -55,6 +56,7 @@ namespace ops
 
     Publisher::~Publisher()
     {
+		OPS_TRACE("Pub: Destructor()...\n");
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 		participant->debugHandler.UnregisterPub(this, topic.getName());
 		for (unsigned int i = 0; i < _replace.size(); i++) {
@@ -63,16 +65,19 @@ namespace ops
 #endif
 		stop();
 		participant->releaseSendDataHandler(topic);
+		OPS_TRACE("Pub: Destructor() finished\n");
 	}
 
 	void Publisher::start()
 	{
-		sendDataHandler->addPublisher(this);
+		sendDataHandler->addListener(this);
+		sendDataHandler->addPublisher(this, topic);
 	}
 
 	void Publisher::stop()
 	{
-		sendDataHandler->removePublisher(this);
+		sendDataHandler->removeListener(this);
+		sendDataHandler->removePublisher(this, topic);
 	}
 
     Topic Publisher::getTopic()

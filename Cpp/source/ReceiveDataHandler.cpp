@@ -1,6 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
+ * Copyright (C) 2018 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -26,24 +27,23 @@
 #include "Participant.h"
 #include "ReceiverFactory.h"
 #include "CommException.h"
+#include "TCPClientBase.h"
 
 namespace ops
 {
     ///Constructor.
-    ReceiveDataHandler::ReceiveDataHandler(Topic top, Participant* part) :
-    memMap(top.getSampleMaxSize() / OPSConstants::PACKET_MAX_SIZE + 1, OPSConstants::PACKET_MAX_SIZE),
-	sampleMaxSize(top.getSampleMaxSize()),
-    currentMessageSize(0),
-    expectedSegment(0),
-    firstReceived(false)
+    ReceiveDataHandler::ReceiveDataHandler(Topic top, Participant* part, Receiver* recv) :
+		receiver(recv),
+		memMap(top.getSampleMaxSize() / OPSConstants::PACKET_MAX_SIZE + 1, OPSConstants::PACKET_MAX_SIZE),
+		sampleMaxSize(top.getSampleMaxSize()),
+		participant(part), message(nullptr),
+		currentMessageSize(0),
+		expectedSegment(0),
+		firstReceived(false)
     {
-        message = NULL;
-        participant = part;
+        if (receiver == nullptr) receiver = ReceiverFactory::getReceiver(top, participant);
 
-        receiver = ReceiverFactory::getReceiver(top, participant);
-
-        if (receiver == NULL)
-        {
+        if (receiver == nullptr) {
             throw exceptions::CommException("Could not create receiver");
         }
 
@@ -57,24 +57,26 @@ namespace ops
     }
 
 	// Overridden from Notifier<OPSMessage*>
-	void ReceiveDataHandler::addListener(Listener<OPSMessage*>* listener)
+	void ReceiveDataHandler::addListener(Listener<OPSMessage*>* listener, Topic& top)
     {
         SafeLock lock(&messageLock);
 		Notifier<OPSMessage*>::addListener(listener);
-		if (getNrOfListeners() == 1) {
+		if (Notifier<OPSMessage*>::getNrOfListeners() == 1) {
 			receiver->start();
 			expectedSegment = 0;
 			currentMessageSize = 0;
 	        receiver->asynchWait(memMap.getSegment(expectedSegment), memMap.getSegmentSize());
 		}
+		topicUsage(top, true);
 	}
 
 	// Overridden from Notifier<OPSMessage*>
-    void ReceiveDataHandler::removeListener(Listener<OPSMessage*>* listener)
+    void ReceiveDataHandler::removeListener(Listener<OPSMessage*>* listener, Topic& top)
     {
         SafeLock lock(&messageLock);
+		topicUsage(top, false);
 		Notifier<OPSMessage*>::removeListener(listener);
-		if (getNrOfListeners() == 0) receiver->stop();
+		if (Notifier<OPSMessage*>::getNrOfListeners() == 0) receiver->stop();
 	}
 
 	void ReportError(Participant* participant, ErrorMessage_T message, Address_T addr, int port)
@@ -169,7 +171,7 @@ namespace ops
 
                 OPSMessage* oldMessage = message;
 
-                message = NULL;
+                message = nullptr;
 				try {
 					message = dynamic_cast<OPSMessage*> (archiver.inout("message", message));
 				} catch (ops::ArchiverException& e) {
@@ -199,7 +201,7 @@ namespace ops
 						messageReferenceHandler.addReservable(message);
 						message->reserve();
 						//Send it to Subscribers
-						notifyNewEvent(message);
+						Notifier<OPSMessage*>::notifyNewEvent(message);
 						//This will delete this message if no one reserved it in the application layer.
 						if (oldMessage) oldMessage->unreserve();
 						currentMessageSize = 0;
@@ -248,7 +250,7 @@ namespace ops
 		// (We always keep a reference to the last message received)
 		// If we don't, the garbage-cleaner won't delete us.
 		if (message) message->unreserve();
-		message = NULL;
+		message = nullptr;
 
 ///LA ///TTTTT        receiver->stop();
     }

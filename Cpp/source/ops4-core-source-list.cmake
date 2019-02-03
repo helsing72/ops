@@ -115,6 +115,8 @@ set(LIB_OPS_CORE_SRCS
   ${OPS_SRC_PATH}/ReceiveDataHandler.cpp
   ${OPS_SRC_PATH}/ReceiveDataHandlerFactory.cpp
   ${OPS_SRC_PATH}/ReceiveDataHandlerFactory.h
+  ${OPS_SRC_PATH}/ReceiveDataPool.cpp
+  ${OPS_SRC_PATH}/ReceiveDataPool.h
   ${OPS_SRC_PATH}/ReceiverFactory.cpp
   ${OPS_SRC_PATH}/ReceiverFactory.h
   ${OPS_SRC_PATH}/RequestReply.cpp
@@ -128,6 +130,7 @@ set(LIB_OPS_CORE_SRCS
   ${OPS_SRC_PATH}/TCPConnection.h
   ${OPS_SRC_PATH}/TCPOpsProtocol.h
   ${OPS_SRC_PATH}/TCPProtocol.h
+  ${OPS_SRC_PATH}/TCPReceiveDataHandler.cpp
   ${OPS_SRC_PATH}/TCPSendDataHandler.h
   ${OPS_SRC_PATH}/TCPServerBase.h
   ${OPS_SRC_PATH}/Thread.cpp

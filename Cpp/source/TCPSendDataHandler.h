@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018 Lennart Andersson.
+ * Copyright (C) 2018-2019 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -21,17 +21,44 @@
 
 #pragma once
 
+#include <map>
+#include <mutex>
+
+#include "OPSConstants.h"
 #include "SendDataHandler.h"
 #include "Lockable.h"
 #include "Sender.h"
 #include "IOService.h"
 #include "TCPServerBase.h"
+#include "TCPOpsProtocol.h"
 
 namespace ops
 {
+	///TODO
+	/// We want to send:
+	///   "Info about which publishers"
+	///      @ connect (actually @ 1st timer tick when we detected it's a version 2 client)
+	///      pub added/removed
+	/// We receive:
+    ///   "Info about which subscribers"
+	///      Store info in map so that publishers can ask if any subscriber
+	///      @ disconnect, clear subscribers from that connection
+
     class TCPSendDataHandler : public SendDataHandler, TCPServerCallbacks
     {
-    public:
+		std::map<ObjectName_T, int> _topics;
+
+		struct Connection_t : TCPUserBase
+		{
+			// For now static buffer, later from pool
+			char buffer[OPSConstants::PACKET_MAX_SIZE];
+			bool sentAtConnect = false;
+
+			///TODO @ creation get buffer from ReceiveDataPool
+			///TODO @ deletion return buffer to ReceiveDataPool
+		};
+
+	public:
         TCPSendDataHandler(IOService* ioService, Topic& topic)
         {
 			sender = Sender::createTCPServer(this, ioService, topic.getDomainAddress(), topic.getPort(), topic.getOutSocketBufferSize());
@@ -46,35 +73,84 @@ namespace ops
             return result;
         }
 
-		// Called from server when a new connection is accepted
-		// Could be used to call conn->asynchRead(buffer, size)
-		virtual void onConnect(TCPConnection* conn, ConnectStatus status)
+		// Tell derived classes which topics that are active
+		void topicUsage(Topic& top, bool used) override
 		{
+			bool needSend = false;
+			// Keep a list of all used topics, with count
+			std::map<ObjectName_T, int>::iterator it = _topics.find(top.getName());
+			if (used) {
+				if (it == _topics.end()) {
+					_topics[top.getName()] = 1;
+					needSend = true;
+				} else {
+					it->second = it->second + 1;
+				}
+			} else {
+				if (it != _topics.end()) {
+					it->second = it->second - 1;
+					if (it->second > 0) return;
+					_topics.erase(it);
+					needSend = true;
+				}
+			}
+			// If a new topic is added or an old one deleted, send updates
+			if (needSend) {
+				///TODO send topic info (if version >= 2)
+			}
+		}
+
+		// Called from server when a new connection is accepted
+		// A call to conn.setProtocol(...) should be done
+		// Could be used to call conn.asynchWait(buffer, size)
+		void onConnect(TCPConnection& conn, ConnectStatus status) override
+		{
+			// Create parameters that we need for each connection, will be deleted by protocol
+			Connection_t* ct = new Connection_t();
+			ct->sentAtConnect = false;
+
+			TCPOpsProtocol* prot = new TCPOpsProtocol(TimeHelper::currentTimeMillis);
+			prot->userData = ct;
+
+			conn.setProtocol(prot);
+			conn.asynchWait(ct->buffer, sizeof(ct->buffer));
+
 			// Notify parent
-			//onNewEvent(nullptr, status);
+			SendDataHandler::onNewEvent(nullptr, status);
 		}
 
 		// Called from server when data has been filled into given buffer
-		// A new call to conn->asynchRead(buffer, size) need to be done to continue to read
-		virtual void onEvent(TCPConnection* conn, BytesSizePair arg)
-
+		// A new call to conn.asynchWait(buffer, size) need to be done to continue to read
+		void onEvent(TCPConnection& conn, BytesSizePair arg) override
 		{
+			Connection_t* ct = dynamic_cast<Connection_t*>(conn.getProtocol()->userData);
+			if (!ct->sentAtConnect) {
+				///TODO send topic info (if version >= 2)
+				ct->sentAtConnect = true;
+			}
 
+			// Handle received data
+			// Keep a list of subscribers for each connection
+			///TODO
+
+			// Start a new read
+			conn.asynchWait(ct->buffer, sizeof(ct->buffer));
 		}
 
-
-
-		// Called from server when a connection has been deleted
-		// NOTE: 'conn' is invalid and is only provided as an ID.
+		// Called from server when a connection is going to be deleted
 		// Ev. buffer used in asynchRead() is no longer in use
-		virtual void onDisconnect(TCPConnection* conn, ConnectStatus status)
+		void onDisconnect(TCPConnection& conn, ConnectStatus status) override
 		{
+			// All subscribers from this connection disapeared, update list
+			///TODO
+
 			// Notify parent
-			//onNewEvent(nullptr, status);
+			SendDataHandler::onNewEvent(nullptr, status);
 		}
 
         virtual ~TCPSendDataHandler()
         {
+			OPS_TRACE("SDH: Destructor()\n");
             SafeLock lock(&mutex);
 			delete sender;
         }

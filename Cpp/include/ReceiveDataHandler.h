@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2018 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -18,8 +19,7 @@
 * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef ops_ReceiveDataHandler_h
-#define ops_ReceiveDataHandler_h
+#pragma once
 
 #include <map>
 #include <iostream>
@@ -34,17 +34,20 @@
 #include "BytesSizePair.h"
 #include "ReferenceHandler.h"
 #include "OPSExport.h"
+#include "ConnectStatus.h"
 
 namespace ops
-{	//Forward declaration
+{
+	//Forward declaration
 	class Participant;
 	
-	class OPS_EXPORT ReceiveDataHandler : public Notifier<OPSMessage*>, Listener<BytesSizePair>
+	class OPS_EXPORT ReceiveDataHandler : 
+		protected Notifier<OPSMessage*>, Listener<BytesSizePair>, 
+		public Notifier<ConnectStatus>, Listener<ConnectStatus>
 	{
+		friend class ReceiveDataHandlerFactory;
 	public:
-		///Constructor.
-		ReceiveDataHandler(Topic top, Participant* part);
-		///Destructor
+		ReceiveDataHandler(Topic top, Participant* part, Receiver* recv = nullptr);
 		virtual ~ReceiveDataHandler();
 
 		bool aquireMessageLock();
@@ -54,8 +57,8 @@ namespace ops
 
 		// We need to act on these localy
 		// overridden from Notifier<OPSMessage*>
-		void addListener(Listener<OPSMessage*>* listener);
-		void removeListener(Listener<OPSMessage*>* listener);
+		void addListener(Listener<OPSMessage*>* listener, Topic& top);
+		void removeListener(Listener<OPSMessage*>* listener, Topic& top);
 
 		int numReservedMessages()
 		{
@@ -75,8 +78,20 @@ namespace ops
 	protected:
 		///Override from Listener
 		///Called whenever the receiver has new data.
-		void onNewEvent(Notifier<BytesSizePair>* sender, BytesSizePair byteSizePair);
+		void onNewEvent(Notifier<BytesSizePair>* sender, BytesSizePair byteSizePair) override;
 		bool calculateAndSetSpareBytes(ByteBuffer &buf, int segmentPaddingSize);
+
+		void onNewEvent(Notifier<ConnectStatus>* sender, ConnectStatus arg) override
+		{
+			UNUSED(sender);
+			Notifier<ConnectStatus>::notifyNewEvent(arg);
+		}
+
+		// Tell derived classes which topics that are active
+		virtual void topicUsage(Topic& top, bool used) 
+		{
+			UNUSED(top); UNUSED(used);
+		}
 
 	private:
 		///The receiver used for this topic. 
@@ -102,10 +117,6 @@ namespace ops
 		
 		int expectedSegment;
 		bool firstReceived;
-
-		////How many subscribers use this instance. This will be used to check if it is ok to delete this ReceiveDataHandler.
-		//int reservations;
 	};
 	
 }
-#endif

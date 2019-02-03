@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018 Lennart Andersson.
+ * Copyright (C) 2018-2019 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -39,7 +39,6 @@ namespace ops
 
     class TCPClient : public TCPClientBase
     {
-		int64_t inSocketBufferSizent;
 
 		// Internal helper class that handles the socket connection
 		class TCPBoostConnectionWConnect : public TCPBoostConnection
@@ -48,11 +47,13 @@ namespace ops
 			volatile bool _tryToConnect;
 			boost::asio::ip::tcp::endpoint* _endpoint;
 			int64_t _inBufferSize;
+			boost::asio::deadline_timer _timer;
 
 		public:
 			TCPBoostConnectionWConnect(TCPClient* owner, Address_T serverIP, int serverPort, IOService* ioServ, int64_t inBufferSize) :
 				TCPBoostConnection(owner),
-				_owner(owner), _tryToConnect(false), _endpoint(nullptr), _inBufferSize(inBufferSize)
+				_owner(owner), _tryToConnect(false), _endpoint(nullptr), _inBufferSize(inBufferSize),
+				_timer(*dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService)
 			{
 				boost::asio::io_service* ioService = dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService;
 				boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(serverIP.c_str()));
@@ -65,22 +66,32 @@ namespace ops
 				if (_endpoint) delete _endpoint;
 			}
 
-			void start()
+			void start() override
 			{
 				_tryToConnect = true;
-				_connected = false;
-				// Set variables indicating that we are "active"
-				_working = true;
-				_asyncCallActive = true;
-				_sock->async_connect(*_endpoint, boost::bind(&TCPBoostConnectionWConnect::handleConnect, this, boost::asio::placeholders::error));
+				start_async_connect();
 			}
 
-			void stop()
+			void start_async_connect()
+			{
+				OPS_TCP_TRACE("Client: start_async_connect()\n");
+				_connected = false;
+
+				std::shared_ptr<TCPConnection> self = shared_from_this();
+				_sock->async_connect(
+					*_endpoint,
+					[self](const boost::system::error_code& error) {
+						std::dynamic_pointer_cast<TCPBoostConnectionWConnect>(self)->handleConnect(error);
+					}
+				);
+			}
+
+			void stop() override
 			{
 				if (_tryToConnect) {
-					//Close the socket 
 					_tryToConnect = false;
 					_connected = false;
+					_timer.cancel();
 					if (_sock) _sock->close();
 					_owner->connected(false);
 				}
@@ -88,15 +99,23 @@ namespace ops
 
 			void handleConnect(const boost::system::error_code& error)
 			{
-				_asyncCallActive = false;
+				OPS_TCP_TRACE("Client: handleConnect(), error: " << error << '\n');
 				try {
 					if (_tryToConnect) {
 						if (error) {
 							_owner->connected(false);
-							//connect again
-							_connected = false;
-							_asyncCallActive = true;
-							_sock->async_connect(*_endpoint, boost::bind(&TCPBoostConnectionWConnect::handleConnect, this, boost::asio::placeholders::error));
+
+							// Delay new connect attempt
+							std::shared_ptr<TCPConnection> self = shared_from_this();
+							_timer.cancel();
+							_timer.expires_from_now(boost::posix_time::milliseconds(100));
+							_timer.async_wait([self](const boost::system::error_code& e) {
+								OPS_TCP_TRACE("Client: handleConnect(), delay error: " << e << '\n');
+								if (e != boost::asio::error::operation_aborted) {
+									// Timer was not cancelled, connect again
+									std::dynamic_pointer_cast<TCPBoostConnectionWConnect>(self)->start_async_connect();
+								}
+							});
 
 						} else {
 							_connected = true;
@@ -113,26 +132,26 @@ namespace ops
 					ops::BasicWarning err("TCPClient", "handleConnect", msg);
 					Participant::reportStaticError(&err);
 				}
-				// We update the "_working" flag as the last thing in the callback, so we don't access the object any more
-				// in case the destructor has been called and waiting for us to be finished.
-				// If we haven't started a new async call above, this will clear the flag.
-				_working = _asyncCallActive;
 			}
 		};
 
 	public:
-        TCPClient(Address_T serverIP, int serverPort, IOService* ioServ, TCPProtocol* protocol, int64_t inSocketBufferSizent = 16000000) :
-			TCPClientBase(protocol, new TCPBoostConnectionWConnect(this, serverIP, serverPort, ioServ, inSocketBufferSizent))
+        TCPClient(TCPClientCallbacks* client, Address_T serverIP, int serverPort, IOService* ioServ, int64_t inSocketBufferSizent = 16000000) :
+			TCPClientBase(client, ioServ, std::make_shared<TCPBoostConnectionWConnect>(this, serverIP, serverPort, ioServ, inSocketBufferSizent))
         {}
 
 		void start() override
 		{
-			dynamic_cast<TCPBoostConnectionWConnect*>(_connection)->start();
+			TCPClientBase::start();
+			std::shared_ptr<TCPBoostConnectionWConnect> sp = std::dynamic_pointer_cast<TCPBoostConnectionWConnect>(_connection);
+			sp->start();
 		}
 
         void stop() override
         {
-			dynamic_cast<TCPBoostConnectionWConnect*>(_connection)->stop();
+			TCPClientBase::stop();
+			std::shared_ptr<TCPBoostConnectionWConnect> sp = std::dynamic_pointer_cast<TCPBoostConnectionWConnect>(_connection);
+			sp->stop();
 		}
 
 		// Used to get the sender IP and port for a received message
@@ -142,17 +161,15 @@ namespace ops
 			_connection->getRemote(address, port);
 		}
 
-		// Returns true if all asynchronous work has finished
 		virtual bool asyncFinished() override
 		{
-			return _connection->asyncFinished();
+			return true; ///TODO to be removed when other transports also fixed
 		}
 
 		virtual ~TCPClient()
 		{
 			// Make sure socket is closed
 			stop();
-			delete _connection;
         }
 
 		bool isConnected() override

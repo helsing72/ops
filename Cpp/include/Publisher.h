@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2018 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -18,8 +19,7 @@
 * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef ops_PublisherH
-#define	ops_PublisherH
+#pragma once
 
 #include "OPSTypeDefs.h"
 #include "OPSObject.h"
@@ -30,12 +30,14 @@
 #include "Participant.h"
 #include "OPSExport.h"
 #include "DebugHandler.h"
+#include "Listener.h"
+#include "ConnectStatus.h"
 
 namespace ops
 {
-class OPS_EXPORT Publisher
+class OPS_EXPORT Publisher : protected Listener<ConnectStatus>, public Notifier<ConnectStatus>
 #ifdef OPS_ENABLE_DEBUG_HANDLER
-	: DebugNotifyInterface
+	, DebugNotifyInterface
 #endif
 {
 public:
@@ -56,6 +58,14 @@ public:
 
 protected:
 	void write(OPSObject* data);
+
+	// Called from SendDataHandler (TCPServer)
+	virtual void onNewEvent(Notifier<ConnectStatus>* sender, ConnectStatus arg)
+	{
+		UNUSED(sender)
+		// Forward status to all connected
+		notifyNewEvent(arg);
+	}
 
 private:
     Topic topic;
@@ -87,4 +97,3 @@ public:
 };
 
 }
-#endif

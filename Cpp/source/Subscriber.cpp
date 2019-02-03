@@ -1,6 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
+ * Copyright (C) 2018 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -93,7 +94,8 @@ namespace ops
 		if (started) return;
 
         receiveDataHandler = participant->getReceiveDataHandler(topic);
-        receiveDataHandler->addListener(this);
+        receiveDataHandler->addListener(this, topic);
+		receiveDataHandler->Notifier<ConnectStatus>::addListener(this);
         deadlineTimer->addListener(this);
         deadlineTimer->start(deadlineTimeout);
         started = true;
@@ -106,7 +108,8 @@ namespace ops
         // Note that the receiveDataHandler messageLock is held while we are removed from its list.
         // This ensures that the receive thread can't be in our onNewEvent() or be calling us anymore
         // when we return from the removeListener() call.
-        receiveDataHandler->removeListener(this);
+		receiveDataHandler->Notifier<ConnectStatus>::removeListener(this);
+		receiveDataHandler->removeListener(this, topic);
         receiveDataHandler = nullptr;
         participant->releaseReceiveDataHandler(topic);
         deadlineTimer->removeListener(this);

@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018 Lennart Andersson.
+* Copyright (C) 2018-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -21,6 +21,9 @@
 
 #pragma once
 
+#include <memory>
+#include <mutex>
+
 #include "OPSTypeDefs.h"
 #include "TCPProtocol.h"
 
@@ -30,16 +33,16 @@ namespace ops
 
 	struct TCPConnectionCallbacks
 	{
-		virtual void onEvent(TCPConnection* prot, BytesSizePair arg) = 0;
-		virtual void onReceiveError(TCPConnection* prot) = 0;
+		virtual void onEvent(TCPConnection& prot, BytesSizePair arg) = 0;
+		virtual void onReceiveError(TCPConnection& prot) = 0;
 	};
 
 	// Helper class for a connected TCP socket
-	class TCPConnection : TCPProtocolCallbacks
+	class TCPConnection : TCPProtocolCallbacks, public std::enable_shared_from_this<TCPConnection>
 	{
 	public:
 		TCPConnection(TCPConnectionCallbacks* client) :
-			_client(client), _protocol(nullptr)
+			_connected(false), _client(client), _protocol(nullptr)
 		{}
 		
 		virtual ~TCPConnection()
@@ -47,9 +50,18 @@ namespace ops
 			if (_protocol) delete _protocol;
 		}
 
+		void clearCallbacks()
+		{
+			// By holding the mutex while clearing _client, we ensure that we can't 
+			// be in a callback while clearing it. This also means that when this method returns
+			// the connection can't call the _client anymore and it's OK for the client to vanish.
+			std::lock_guard<std::mutex> lck(_clientMtx);
+			_client = nullptr;
+		}
+
 		void asynchWait(char* bytes, int size)
 		{
-			if (isConnected()) {
+			if (_connected) {
 				_protocol->startReceive(bytes, size);
 			}
 		}
@@ -59,35 +71,17 @@ namespace ops
 			return _protocol->sendData(buf, size);
 		}
 
-		// Returns true if all asynchronous work has finished
-		virtual bool asyncFinished() = 0;
-
+		bool isConnected()
+		{
+			return _connected;
+		}
+		
 		virtual void getLocal(Address_T& address, int& port) = 0;
 		virtual void getRemote(Address_T& address, int& port) = 0;
 
+		virtual void start() {};
+		virtual void stop() {};
 		virtual void close() = 0;
-
-		virtual bool isConnected() = 0;
-
-	protected:
-		virtual int send(char* buf, int size) = 0;
-		virtual void startAsyncRead(char* bytes, int size) = 0;
-
-		// Should be called by the derived classes
-		void handleReceivedData(int error, int nrBytesReceived)
-		{
-			if (!_protocol->handleReceivedData(error, nrBytesReceived)) {
-				// If we come here the protocol can't receive any longer and we need to disconnect
-				_client->onReceiveError(this);
-			}
-		}
-
-	private:
-		friend class TCPServerBase;
-		friend class TCPClientBase;
-
-		TCPConnectionCallbacks* _client;
-		TCPProtocol* _protocol;
 
 		void setProtocol(TCPProtocol* prot)
 		{
@@ -95,31 +89,60 @@ namespace ops
 			_protocol->connect(this);
 		}
 
-		// Needed by protocol
-		bool isConnected(TCPProtocol* prot) override
+		TCPProtocol* getProtocol()
 		{
-			UNUSED(prot);
-			return isConnected();
+			return _protocol;
+		}
+
+	protected:
+		volatile bool _connected;
+
+		virtual int send(char* buf, uint32_t size) = 0;
+		virtual void startAsyncRead(char* bytes, uint32_t size) = 0;
+
+		// Should be called by the derived classes
+		virtual void handleReceivedData(int error, uint32_t nrBytesReceived)
+		{
+			OPS_TCP_TRACE("Conn: handleReceivedData(), error: " << error << ", #bytes: " << nrBytesReceived << '\n');
+			if (!_protocol->handleReceivedData(error, nrBytesReceived)) {
+				// If we come here the protocol can't receive any longer and we need to disconnect
+				// By holding the mutex while in the callback, we are synchronized with clearCallbacks()
+				std::lock_guard<std::mutex> lck(_clientMtx);
+				if (_client) _client->onReceiveError(*this);
+			}
+		}
+
+	private:
+		friend class TCPServerBase;
+		friend class TCPClientBase;
+
+		std::mutex _clientMtx;
+		TCPConnectionCallbacks* _client;
+		TCPProtocol* _protocol;
+
+		// Needed by protocol
+		bool isConnected(TCPProtocol&) override
+		{
+			return _connected;
 		}
 
 		// Needed by protocol
-		void startAsyncRead(TCPProtocol* prot, char* bytes, int size) override
+		void startAsyncRead(TCPProtocol&, char* bytes, uint32_t size) override
 		{
-			UNUSED(prot);
 			startAsyncRead(bytes, size);
 		}
 
 		// Needed by protocol
-		void onEvent(TCPProtocol* prot, BytesSizePair arg) override
+		void onEvent(TCPProtocol&, BytesSizePair arg) override
 		{
-			UNUSED(prot);
-			_client->onEvent(this, arg);
+			// By holding the mutex while in the callback, we are synchronized with clearCallbacks()
+			std::lock_guard<std::mutex> lck(_clientMtx);
+			if (_client) _client->onEvent(*this, arg);
 		}
 
-		// Called from protocol
-		virtual int sendBuffer(TCPProtocol* prot, char* bytes, int size) override
+		// Needed by protocol
+		virtual int sendBuffer(TCPProtocol&, char* bytes, uint32_t size) override
 		{
-			UNUSED(prot);
 			return send(bytes, size);
 		}
 	};

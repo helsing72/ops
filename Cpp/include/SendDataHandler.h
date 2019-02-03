@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2018 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -17,22 +18,24 @@
 * You should have received a copy of the GNU Lesser General Public License
 * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef ops_SendDataHandler_h
-#define	ops_SendDataHandler_h
+
+#pragma once
 
 #include "Topic.h"
 #include "Sender.h"
+#include "Notifier.h"
+#include "ConnectStatus.h"
 
 namespace ops
 {
-	class SendDataHandler
+	class SendDataHandler : protected Listener<ConnectStatus>, public Notifier<ConnectStatus>
 	{
 	public:
 		virtual ~SendDataHandler() {}
 
 		virtual bool sendData(char* buf, int bufSize, Topic& topic) = 0;
 
-		virtual void addPublisher(void* client) 
+		virtual void addPublisher(void* client, Topic& top)
 		{
             SafeLock lock(&mutex);
 			// Check that it isn't already in the list
@@ -43,9 +46,10 @@ namespace ops
 			publishers.push_back(client);
 			// For the first client, we open the sender
 			if (publishers.size() == 1) sender->open();
+			topicUsage(top , true);
 		}
 
-		virtual void removePublisher(void* client)
+		virtual void removePublisher(void* client, Topic& top)
 		{
             SafeLock lock(&mutex);
 			// Remove it from the list
@@ -53,6 +57,7 @@ namespace ops
 			for (Iter = publishers.begin(); Iter != publishers.end(); Iter++) {
 				if (*Iter == client) {
 					publishers.erase(Iter);
+					topicUsage(top, false);
 					break;
 				}
 			}
@@ -60,15 +65,24 @@ namespace ops
 		}
 
 	protected:
-
         Sender* sender;
         Lockable mutex;
 
+		// Called from senders (TCPServer)
+		virtual void onNewEvent(Notifier<ConnectStatus>* sndr, ConnectStatus arg)
+		{
+			UNUSED(sndr)
+			// Forward status to all connected publishers
+			notifyNewEvent(arg);
+		}
+
+		// Tell derived classes which topics that are active
+		virtual void topicUsage(Topic& top, bool used)
+		{
+			UNUSED(top); UNUSED(used);
+		}
+
 	private:
-
 		std::vector<void*> publishers;
-
 	};
 }
-
-#endif

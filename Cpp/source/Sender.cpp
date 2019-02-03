@@ -30,7 +30,6 @@
 
 #include "UDPSender.h"
 #include "TCPServer.h"
-#include "TCPOpsProtocol.h"
 
 namespace ops
 {
@@ -47,7 +46,7 @@ namespace ops
 
     Sender* Sender::createTCPServer(TCPServerCallbacks* client, IOService* ioService, Address_T ip, int port, int64_t outSocketBufferSize)
     {
-		return new TCPServer(client, ioService, ip, port, new TCPOpsProtocol(), outSocketBufferSize);
+		return new TCPServer(client, ioService, ip, port, outSocketBufferSize);
     }
 
 }

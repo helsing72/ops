@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018 Lennart Andersson.
+ * Copyright (C) 2018-2019 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -25,72 +25,202 @@
 
 namespace ops
 {
+	// Original TCP ptotocol (version 1)
+	// ---------------------------------
 	// The OPS TCP Protocol has a leading header of 22 bytes with
 	//    0..17    "opsp_tcp_size_info"
-	//   18..21    int32_t in little-endian format giving size of data that follows
+	//   18..21    uint32_t in little-endian format giving size of data that follows
+	//
+	// TCP protocol version 2
+	// ----------------------
+	// The above is still valid for ordinary transport of OPS messages (used by old clients and server).
+	// Version 2 adds probe messages (probe and heartbeat).
+	//    0..17    "opsprobeNNNN______"
+	//   18..21    uint32_t in little-endian format giving size of data that follows
+	//               0  : heartbeat no additional data
+	//               1  : probe additional data, 1 byte with value 0
+	//
+
+	// Function that returns current time in ms.
+	typedef int64_t(*timeFunc)();
 
 	class TCPOpsProtocol : public TCPProtocol
 	{
+		const uint32_t protocol_version = 2;
+		const uint32_t headersize = 22;
+		const uint32_t minbufsize = headersize + 1;
 	protected:
-		bool _readingHeader;
+		timeFunc _timeFuncMs;
 		char _sizeInfoBuffer[32];
+		char _probeBuffer[32];
+		bool _readingHeader = true;
+		int64_t _timeRcv = 0;
+		int64_t _timeSnd = 0;
+		int _detectedVersion = 1;
+		bool _hbSent = false;
 
 		// _data[0 .. _accumulatedSize-1] contains data (_accumulatedSize == _expectedSize)
 		// returns false if error
 		bool handleData() override
 		{
 			bool errorDetected = false;
+			_timeRcv = _timeFuncMs();
 			if (_readingHeader) {
 				// Get size of data packet from the received size packet
-				int sizeInfo = *((int*)(_data + 18));
+				uint32_t sizeInfo = *((uint32_t*)(_data + 18));
 				if (sizeInfo > _maxLength) {
 					// This is an error, we are not able to receive more than _maxLength bytes (the buffer size)
 					errorDetected = true;
+				} else if (sizeInfo < 2) {
+					// Check that it is a probe/heartbeat message using 8 first bytes
+					if (memcmp(_probeBuffer, _data, 8) != 0) {
+						errorDetected = true;
+					} else {
+						_detectedVersion = 2;
+						if (sizeInfo == 0) {
+							OPS_TCP_TRACE("Heartbeat received\n");
+							// Heartbeats, if used, are sent with size 0. Restart read of header
+							errorDetected = !startAsyncRead(headersize);
+						} else {
+							// size 1 is used for the leading Probe message from a client
+							if (_expectedSize == headersize) {
+								// We have not gotten all data yet, Read one more byte after header
+								_expectedSize = headersize + 1;
+								contAsyncRead();
+							} else {
+								OPS_TCP_TRACE("Probe received\n");
+								// Restart read of header
+								errorDetected = !startAsyncRead(headersize);
+							}
+						}
+					}
 				} else {
 					_readingHeader = false;
 					errorDetected = !startAsyncRead(sizeInfo);
 				}
 			} else {
 				// Got a complete data packet
-				_client->onEvent(this, BytesSizePair(_data, _expectedSize));
+				_client->onEvent(*this, BytesSizePair(_data, _expectedSize));
 			}
 			return !errorDetected;
 		}
 
 	public:
-		TCPOpsProtocol() :
-			_readingHeader(true), _sizeInfoBuffer("opsp_tcp_size_info")
-		{}
-
-		TCPProtocol* create() override
+		TCPOpsProtocol(timeFunc func) :
+			_timeFuncMs(func),
+			_sizeInfoBuffer("opsp_tcp_size_info"),
+			_probeBuffer   ("opsprobeNNNN______")
 		{
-			return new TCPOpsProtocol();
+			// In _probeBuffer the NNNN is the current TCP protocol version
+			*((uint32_t*)(_probeBuffer + 8)) = protocol_version;
+		}
+
+		int detectedVersion()
+		{
+			return _detectedVersion;
+		}
+
+		void resetProtocol() override
+		{
+			_detectedVersion = 1;
+			_hbSent = false;
 		}
 
 		// Returning false if unable to start
-		bool startReceive(char* bytes, int size) override
+		bool startReceive(char* bytes, uint32_t size) override
 		{
 			// Always start by reading the packet size when using tcp
 			// We use the users provided buffer for receiving the size info
-			if (size < 22) return false;
+			if (size < minbufsize) return false;
 			_data = bytes;
 			_maxLength = size;
 			_readingHeader = true;
-			return startAsyncRead(22);
+			return startAsyncRead(headersize);
 		}
 
 		// Returns number of bytes written or < 0 if an error
-		int sendData(char* bytes, int size) override
+		// size == 0, trigs a periodic check
+		int sendData(char* bytes, uint32_t size) override
 		{
-			// Fill in header
-			*((int*)(_sizeInfoBuffer + 18)) = size;
+			if (size == 0) {
+				if (!periodicCheck()) {
+					return -1;	// Error detected
+				} else {
+					return 0;	// No error
+				}
+			} else {
+				_timeSnd = _timeFuncMs();
 
-			// Send header
-			int res = _client->sendBuffer(this, _sizeInfoBuffer, 22);
-			if (res < 0) return res;
+				// Fill in header
+				*((uint32_t*)(_sizeInfoBuffer + 18)) = size;
 
-			// Send data
-			return _client->sendBuffer(this, bytes, size);
+				// Send header
+				int res = _client->sendBuffer(*this, _sizeInfoBuffer, headersize);
+				if (res < 0) return res;
+
+				// Send data
+				return _client->sendBuffer(*this, bytes, size);
+			}
+		}
+
+		// Should only be called by TCP clients
+		// Returns number of bytes written or < 0 if an error
+		int sendProbe()
+		{
+			OPS_TCP_TRACE("Send Probe\n");
+			_timeSnd = _timeFuncMs();
+
+			// Fill in protocol probe header
+			*((uint32_t*)(_probeBuffer + 18)) = 1;
+			
+
+			// One byte of real data is needed to not get a disconnect if the message is received in an old client.
+			// This will be acceptable by old servers/clients. Clients log an error code and continue to read.
+			// Old servers wont notice since they don't read. This should not be a problem, a small amount of
+			// bytes will be transfered and stored in the stack.
+			// New TCP Servers notice and enable the sending of heartbeat/pubinfo and other new functionality.
+			_probeBuffer[headersize] = 0;
+
+			// Send header + 1 byte
+			return _client->sendBuffer(*this, _probeBuffer, headersize + 1);
+		}
+
+		// Returns number of bytes written or < 0 if an error
+		int sendHeartbeat()
+		{
+			if (_detectedVersion > 1) {
+				OPS_TCP_TRACE("Send Heartbeat\n");
+				_timeSnd = _timeFuncMs();
+				_hbSent = true;
+
+				// Fill in protocol probe header
+				*((uint32_t*)(_probeBuffer + 18)) = 0;
+
+				// Send only a header
+				return _client->sendBuffer(*this, _probeBuffer, headersize);
+			}
+			return 0;
+		}
+
+		// Returns false if an error is detected
+		bool periodicCheck() override
+		{
+			bool errorDetected = false;
+
+			if (_detectedVersion > 1) {
+				// Check if we need to send a heartbeat (at least one during a connection)
+				if ((!_hbSent) || ((_timeFuncMs() - _timeSnd) >= 1000)) {
+					if (sendHeartbeat() < 0) errorDetected = true;
+				}
+
+				// Check that we got data from other side
+				if ((_timeFuncMs() - _timeRcv) >= 3000) {
+					OPS_TCP_TRACE("Receive timeout\n");
+					// A long time since any data
+					errorDetected = true;
+				}
+			}
+			return !errorDetected;
 		}
 
 	};

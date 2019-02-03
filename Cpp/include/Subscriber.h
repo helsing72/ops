@@ -1,6 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
+ * Copyright (C) 2018 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -18,8 +19,7 @@
  * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ops_SubscriberH
-#define	ops_SubscriberH
+#pragma once
 
 #include <list>
 #include <deque>
@@ -54,7 +54,8 @@ namespace boost
 namespace ops
 {
 
-    class OPS_EXPORT Subscriber : public DataNotifier, public Lockable, public Listener<OPSMessage*>, public Listener<int>
+    class OPS_EXPORT Subscriber : public DataNotifier, public Lockable, public Listener<OPSMessage*>, public Listener<int>,
+		protected Listener<ConnectStatus>, public Notifier<ConnectStatus>
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 		, DebugNotifyInterface
 #endif
@@ -163,7 +164,15 @@ namespace ops
         bool firstDataReceived;
         bool hasUnreadData;
 
-    private:
+		// Called from ReceiveDataHandler (TCPClient)
+		virtual void onNewEvent(Notifier<ConnectStatus>* sender, ConnectStatus arg)
+		{
+			UNUSED(sender);
+			// Forward status to all connected
+			notifyNewEvent(arg);
+		}
+
+	private:
         ///The Participant to which this Subscriber belongs.
         Participant* participant;
 
@@ -219,4 +228,3 @@ namespace ops
 	};
 
 }
-#endif

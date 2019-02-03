@@ -23,19 +23,21 @@
 
 #include "OPSTypeDefs.h"
 #include "Notifier.h"
-#include "IOService.h" 
+#include "IOService.h"
 #include "BytesSizePair.h"
 #include "OPSExport.h"
 
 namespace ops
 {
+	struct TCPClientCallbacks;
+
 	class OPS_EXPORT Receiver : public Notifier<BytesSizePair>
 	{
 	public:
 		virtual ~Receiver() {}
 
 		static Receiver* create(Address_T ip, int bindPort, IOService* ioService, Address_T localInterface = "0.0.0.0", int64_t inSocketBufferSize = 16000000);
-		static Receiver* createTCPClient(Address_T ip, int port, IOService* ioService, int64_t inSocketBufferSize = 16000000);
+		static Receiver* createTCPClient(TCPClientCallbacks* client, Address_T ip, int port, IOService* ioService, int64_t inSocketBufferSize = 16000000);
 		static Receiver* createUDPReceiver(int port, IOService* ioService, Address_T localInterface = "0.0.0.0", int64_t inSocketBufferSize = 16000000);
 		
 		// Set the receive buffer to use

@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018 Lennart Andersson.
+ * Copyright (C) 2018-2019 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -21,7 +21,10 @@
 
 #pragma once
 
+#include "OPSTypeDefs.h"
 #include "BytesSizePair.h"
+
+#define OPS_TCP_TRACE(msg) { OPS_TRACE("TCP: " << msg); }
 
 namespace ops
 {
@@ -29,10 +32,15 @@ namespace ops
 
 	struct TCPProtocolCallbacks
 	{
-		virtual bool isConnected(TCPProtocol* prot) = 0;
-		virtual void startAsyncRead(TCPProtocol* prot, char* bytes, int size) = 0;
-		virtual void onEvent(TCPProtocol* prot, BytesSizePair arg) = 0;
-		virtual int sendBuffer(TCPProtocol* prot, char* bytes, int size) = 0;
+		virtual bool isConnected(TCPProtocol& prot) = 0;
+		virtual void startAsyncRead(TCPProtocol& prot, char* bytes, uint32_t size) = 0;
+		virtual void onEvent(TCPProtocol& prot, BytesSizePair arg) = 0;
+		virtual int sendBuffer(TCPProtocol& prot, char* bytes, uint32_t size) = 0;
+	};
+
+	struct TCPUserBase
+	{
+		virtual ~TCPUserBase() {}
 	};
 
 	class TCPProtocol
@@ -40,23 +48,23 @@ namespace ops
 	protected:
 		TCPProtocolCallbacks* _client;
 		char* _data;
-		int _maxLength;
-		int _accumulatedSize;
-		int _expectedSize;
+		uint32_t _maxLength;
+		uint32_t _accumulatedSize;
+		uint32_t _expectedSize;
 
 		// Returns false on error
-		bool startAsyncRead(int size)
+		bool startAsyncRead(uint32_t size)
 		{
 			if (!_client) return false;
 			_accumulatedSize = 0;
 			_expectedSize = size;
-			_client->startAsyncRead(this, _data, _expectedSize);
+			_client->startAsyncRead(*this, _data, _expectedSize);
 			return true;
 		}
 
 		void contAsyncRead()
 		{
-			_client->startAsyncRead(this, _data + _accumulatedSize, _expectedSize - _accumulatedSize);
+			_client->startAsyncRead(*this, _data + _accumulatedSize, _expectedSize - _accumulatedSize);
 		}
 
 		// Called when _expectedSize of bytes has been received
@@ -64,32 +72,37 @@ namespace ops
 		virtual bool handleData() = 0;
 
 	public:
+		TCPUserBase* userData = nullptr;
+
 		TCPProtocol() :
 			_client(nullptr), _data(nullptr), _maxLength(0), _accumulatedSize(0), _expectedSize(0)
 		{}
 
 		virtual ~TCPProtocol()
-		{}
+		{
+			if (userData) delete userData;
+		}
 
 		// Connect a client
 		void connect(TCPProtocolCallbacks* client) { _client = client; }
 
-		// Create a fresh instance of the protocol (used by TCPServer for each connected client)
-		virtual TCPProtocol* create() = 0;
+		// Called to reset protocol internal state
+		// Normaly used at connect
+		virtual void resetProtocol() {}
 
 		// Returning false if unable to start
-		virtual bool startReceive(char* bytes, int size) = 0;
+		virtual bool startReceive(char* bytes, uint32_t size) = 0;
 
 		// Returns number of bytes written or < 0 if an error
-		virtual int sendData(char* buf, int size) = 0;
+		virtual int sendData(char* buf, uint32_t size) = 0;
 
 		// Returning false if an error is detected (should disconnect)
-		virtual bool handleReceivedData(int error, int nrBytesReceived)
+		virtual bool handleReceivedData(int error, uint32_t nrBytesReceived)
 		{
 			bool errorDetected = true;
 			if (_client) {
-				if (!_client->isConnected(this)) {
-					_client->onEvent(this, BytesSizePair(nullptr, -2));
+				if (!_client->isConnected(*this)) {
+					_client->onEvent(*this, BytesSizePair(nullptr, -2));
 
 				} else {
 					if (!error && nrBytesReceived > 0) {
@@ -108,5 +121,8 @@ namespace ops
 			}
 			return !errorDetected;
 		}
+
+		// Returns false if an error is detected (should diconnect)
+		virtual bool periodicCheck() = 0;
 	};
 }

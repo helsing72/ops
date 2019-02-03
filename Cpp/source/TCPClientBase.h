@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018 Lennart Andersson.
+ * Copyright (C) 2018-2019 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -23,6 +23,7 @@
 
 #include "Receiver.h"
 #include "BytesSizePair.h"
+#include "DeadlineTimer.h"
 #include "Participant.h"
 #include "BasicError.h"
 #include "TCPProtocol.h"
@@ -31,19 +32,34 @@
 
 namespace ops
 {
+	struct TCPClientCallbacks
+	{
+		// Called from client when a connection is made
+		virtual void onConnect(TCPConnection& conn, ConnectStatus status) = 0;
 
-    class TCPClientBase : public Receiver, public Notifier<ConnectStatus>, protected TCPConnectionCallbacks
+		// Called from client when a connection is closed
+		// Ev. buffer used in asynchRead() is no longer in use
+		virtual void onDisconnect(TCPConnection& conn, ConnectStatus status) = 0;
+	};
+
+    class TCPClientBase : public Receiver, Listener<int>, protected TCPConnectionCallbacks
     {
     public:
-        TCPClientBase(TCPProtocol* protocol, TCPConnection* connection) :
-			_connection(connection), _cs(false, 0)
+        TCPClientBase(TCPClientCallbacks* client, IOService* ioServ, std::shared_ptr<TCPConnection> connection) :
+			_connection(connection), _client(client), _cs(false, 0), _started(false)
         {
-			_connection->setProtocol(protocol);
-        }
+			_timer = DeadlineTimer::create(ioServ);
+			_timer->addListener(this);
+			_timer->start(period);
+		}
 
 		virtual ~TCPClientBase()
 		{
-			// _connection should be deleted by derived class(es)
+			delete _timer;
+			// Make sure ev. callbacks are finished and no new ones can be called
+			_connection->clearCallbacks();
+			// Delete connection
+			_connection.reset();
 		}
 
         void asynchWait(char* bytes, int size) override
@@ -59,7 +75,7 @@ namespace ops
 		virtual bool isConnected() = 0;
 
 	protected:
-		TCPConnection* _connection;
+		std::shared_ptr<TCPConnection> _connection;
 
 		// Should be called by the derived classes
 		void connected(bool value)
@@ -67,39 +83,78 @@ namespace ops
 			bool doNotify = _cs.connected != value;
 			_cs.connected = value;
 			_cs.totalNo = value ? 1 : 0;
+			if (value) getSource(_cs.addr, _cs.port);
+			// Need to call onConnect() before the notification, since onConnect()
+			// is used to provide the protocol to use.
+			if (doNotify) {
+				if (_cs.connected) {
+					_client->onConnect(*_connection, _cs);
+				} else {
+					_client->onDisconnect(*_connection, _cs);
+				}
+			}
+			// Backward compatibility. To be removed later
 			if (value) {
-				getSource(_cs.addr, _cs.port);
 				Notifier<BytesSizePair>::notifyNewEvent(BytesSizePair(nullptr, -5)); //Connection was down but has been reastablished.
 			}
-			if (doNotify) Notifier<ConnectStatus>::notifyNewEvent(_cs);
 		}
 
 		// Called from TCPConnection()
-		void onEvent(TCPConnection* prot, BytesSizePair arg) override
+		void onEvent(TCPConnection&, BytesSizePair arg) override
 		{
-			UNUSED(prot);
+			///TODO this could be simplified to a simple callback (when all Receiver's updated)
+			///Notifier has a list and takes a lock which isn't necessary, we can only have 1 listener
+			///and a lock is already taken in TCPConnection() calling us.
 			Notifier<BytesSizePair>::notifyNewEvent(arg);
 		}
 
 		// Called from TCPConnection()
-		void onReceiveError(TCPConnection* prot) override
+		void onReceiveError(TCPConnection& conn) override
 		{
-			UNUSED(prot);
 			//Report error
 			ops::BasicError err("TCPClient", "handle_received_data", "Error in receive.");
 			Participant::reportStaticError(&err);
 
 			//Close the socket
-			stop();
+			conn.stop();
 
 			//Notify our user
 			Notifier<BytesSizePair>::notifyNewEvent(BytesSizePair(nullptr, -1));
 
-			//Try to connect again
-			start();
+			if (_started) {
+				//Try to connect again
+				conn.start();
+			}
+		}
+
+		// Called from periodic timer
+		void onNewEvent(Notifier<int>*, int)
+		{
+			if (_connection->isConnected()) {
+				if (!_connection->getProtocol()->periodicCheck()) {
+					OPS_TCP_TRACE("Client: Error from periodicCheck()\n");
+					// Disconnect. Since there is a read ongoing, it will restart when finished.
+					_connection->stop();
+				}
+			}
+			_timer->start(period);
+		}
+
+		void start() override
+		{
+			_started = true;
+		}
+
+		void stop() override
+		{
+			_started = false;
 		}
 
 	private:
+		TCPClientCallbacks* _client;
 		ConnectStatus _cs;
+		volatile bool _started;
+		DeadlineTimer* _timer;
+		const int64_t period = 1000;
 	};
 }

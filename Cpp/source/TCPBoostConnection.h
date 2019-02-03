@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018 Lennart Andersson.
+* Copyright (C) 2018-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -37,15 +37,11 @@ namespace ops
 	{
 	protected:
 		boost::asio::ip::tcp::socket* _sock;
-		volatile bool _connected;
-		// Variables to keep track of our outstanding requests, that will result in callbacks to us
-		volatile bool _asyncCallActive;
-		volatile bool _working;
 
 		// Used for a connection created by TCPClient
 		TCPBoostConnection(TCPConnectionCallbacks* client) :
 			TCPConnection(client),
-			_sock(nullptr), _connected(false), _asyncCallActive(false), _working(false)
+			_sock(nullptr)
 		{
 		}
 
@@ -54,23 +50,16 @@ namespace ops
 		// In this case the socket is already connected
 		explicit TCPBoostConnection(TCPConnectionCallbacks* client, boost::asio::ip::tcp::socket* sock, int64_t outSocketBufferSize) :
 			TCPConnection(client),
-			_sock(sock), _connected(true), _asyncCallActive(false), _working(false)
+			_sock(sock)
 		{
+			_connected = true;
 			setOutSize(outSocketBufferSize);
 			disableNagleAlg();
 		}
 
 		virtual ~TCPBoostConnection()
 		{
-			if (_sock) _sock->close();
-
-			/// We must handle asynchronous callbacks that haven't finished yet.
-			/// This approach works, but the recommended boost way is to use a shared pointer to the instance object
-			/// between the "normal" code and the callbacks, so the callbacks can check if the object exists.
-			while (_working) {
-				Sleep(1);
-			}
-
+			close();
 			if (_sock) delete _sock;
 		}
 
@@ -91,7 +80,6 @@ namespace ops
 					Participant::reportStaticError(&err);
 				}
 			}
-
 		}
 
 		void setInSize(int64_t size)
@@ -108,7 +96,6 @@ namespace ops
 			}
 		}
 
-		//Disable Nagle algorithm
 		void disableNagleAlg()
 		{
 			if (_sock) {
@@ -122,42 +109,21 @@ namespace ops
 			}
 		}
 
-		bool isConnected() override
-		{
-			return _connected;
-		}
-
-		// Returns true if all asynchronous work has finished
-		bool asyncFinished() override
-		{
-			return !_working;
-		}
-
-		void startAsyncRead(char* bytes, int size) override
+		void startAsyncRead(char* bytes, uint32_t size) override
 		{
 			if (_connected) {
-				// Set variables indicating that we are "active"
-				_working = true;
-				_asyncCallActive = true;
+				OPS_TCP_TRACE("Conn: startAsyncRead(), size " << size << '\n');
+				std::shared_ptr<TCPConnection> self = shared_from_this();
 				_sock->async_receive(
 					boost::asio::buffer(bytes, size),
-					boost::bind(&TCPBoostConnection::handle_receive_data, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+					[self](const boost::system::error_code& error, size_t nrBytesReceived) {
+						std::dynamic_pointer_cast<TCPBoostConnection>(self)->handleReceivedData(error.value(), (uint32_t)nrBytesReceived);
+					}
+				);
 			}
 		}
 
-		void handle_receive_data(const boost::system::error_code& error, size_t nrBytesReceived)
-		{
-			_asyncCallActive = false;
-			if (_connected) {
-				handleReceivedData(error.value(), (int)nrBytesReceived);
-			}
-			// We update the "_working" flag as the last thing in the callback, so we don't access the object any more
-			// in case the destructor has been called and waiting for us to be finished.
-			// If we haven't started a new async call above, this will clear the flag.
-			_working = _asyncCallActive;
-		}
-
-		int send(char* buf, int size) override
+		int send(char* buf, uint32_t size) override
 		{
 			try {
 				// Send the data

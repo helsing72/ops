@@ -30,7 +30,6 @@
 #include "MulticastReceiver.h"
 #include "TCPClient.h"
 #include "UDPReceiver.h"
-#include "TCPOpsProtocol.h"
 
 namespace ops
 {
@@ -38,9 +37,9 @@ namespace ops
 	{
 		return new MulticastReceiver(ip, bindPort, ioService, localInterface, inSocketBufferSize);
 	}
-	Receiver* Receiver::createTCPClient(Address_T ip, int port, IOService* ioService, int64_t inSocketBufferSize)
+	Receiver* Receiver::createTCPClient(TCPClientCallbacks* client, Address_T ip, int port, IOService* ioService, int64_t inSocketBufferSize)
 	{
-		return new TCPClient(ip, port, ioService, new TCPOpsProtocol(), inSocketBufferSize);
+		return new TCPClient(client, ip, port, ioService, inSocketBufferSize);
 	}
 	Receiver* Receiver::createUDPReceiver(int port, IOService* ioService, Address_T localInterface, int64_t inSocketBufferSize)
 	{
