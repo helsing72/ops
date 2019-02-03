@@ -35,12 +35,34 @@
 	#define FIXED_C11_DETECTED
 #endif
 
+#if __cplusplus >= 201402L		// Value according to standard for full C++14 conformity
+	#define FIXED_C14_DETECTED
+#elif defined(_MSC_VER) && (_MSC_VER >= 1915)
+	#if _MSVC_LANG >= 201402L
+		#define FIXED_C14_DETECTED
+	#endif
+#endif
+
+#if __cplusplus >= 201703L		// Value according to standard for full C++17 conformity
+	#define FIXED_C17_DETECTED
+#elif defined(_MSC_VER) && (_MSC_VER >= 1915)
+	#if _MSVC_LANG >= 201703L
+		#define FIXED_C17_DETECTED
+	#endif
+#endif
+
 #ifndef NOEXCEPT
 	#ifdef FIXED_C11_DETECTED
 		#define NOEXCEPT noexcept
 	#else
 		#define NOEXCEPT
 	#endif
+#endif
+
+#ifdef FIXED_C17_DETECTED
+#define FIXED_IF_CONSTEXPR if constexpr
+#else
+#define FIXED_IF_CONSTEXPR if
 #endif
 
 namespace ops { namespace strings {
@@ -152,7 +174,7 @@ namespace ops { namespace strings {
 		fixed_string& operator+= (char c)
 		{
 			if (_size == N) {
-				if (POLICY == throw_exception) throw size_out_of_range();
+				FIXED_IF_CONSTEXPR (POLICY == throw_exception) throw size_out_of_range();
 			} else {
 				_array[_size] = c;
 				_size++;
@@ -167,8 +189,11 @@ namespace ops { namespace strings {
 		{
 			if (len > 0) {
 				if ((_size + len) > N) {
-					if (POLICY == throw_exception) throw size_out_of_range();
-					len = N - _size;
+					FIXED_IF_CONSTEXPR (POLICY == throw_exception) {
+						throw size_out_of_range();
+					} else {
+						len = N - _size;
+					}
 				}
 				memcpy(&_array[_size], s, len);
 				_size += len;
