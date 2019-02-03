@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2018-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -18,13 +19,14 @@
 * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef DataNotifier_h
-#define DataNotifier_h
+#pragma once
 
-#include "OPSExport.h"
 #include <vector>
+#include <functional>
+
+#include "OPSTypeDefs.h"
+#include "OPSExport.h"
 #include "DataListener.h"
-#include "OPSObject.h"
 
 namespace ops
 {
@@ -38,11 +40,17 @@ namespace ops
         typedef void (*CallbackFunc)(ops::DataNotifier* sender, void* userData);
 
         ///Register a DataListener that uses callbacks
+#ifdef OPS_C14_DETECTED
+        [[deprecated("Deprecated. Replaced by the more flexible addDataListener(std::function<...>) interface")]]
+#endif
         void addDataListener(CallbackFunc func, void* userData);
         
         ///Register a DataListener
         void addDataListener(DataListener* listener);
         
+        ///Register a DataListener that uses a closure
+        void addDataListener(std::function<void(ops::DataNotifier* sender)> callback);
+
         //Destructor:
         virtual ~DataNotifier();
 
@@ -58,8 +66,10 @@ namespace ops
         ///Vector that holds pointers to the DataListeners
         std::vector<DataListener*> listeners;
 
+        ///Vector that holds pointers to DataListeners using closures
+        std::vector<std::function<void(ops::DataNotifier* sender)>> closureListeners;
+
         ///Called by subclasses that wishes to notify its listeners of the arrival of new data.
         void notifyNewData();
     };
 }
-#endif

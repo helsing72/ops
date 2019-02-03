@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2018-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -18,41 +19,47 @@
 * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef DeadlineMissedListener_h
-#define DeadlineMissedListener_h
+#pragma once
 
 #include <vector>
+#include <functional>
+
+#include "OPSTypeDefs.h"
 
 namespace ops
 {
-//Forward declaration//////////
-class DeadlineMissedEvent;/////
-///////////////////////////////
+//Forward declaration
+class DeadlineMissedEvent;
 
 class DeadlineMissedListener
 {
 public:
 	virtual void onDeadlineMissed(DeadlineMissedEvent* e) = 0;
-
 };
 
 class DeadlineMissedEvent
 {
 private:
 	std::vector<DeadlineMissedListener*> listeners;
+	std::vector<std::function<void(ops::DeadlineMissedEvent* sender)>> closureListeners;
 public:
 	void addDeadlineMissedListener(DeadlineMissedListener* listener)
 	{
 		listeners.push_back(listener);
 	}
+	void addDeadlineMissedListener(std::function<void(ops::DeadlineMissedEvent* sender)> callback)
+	{
+		closureListeners.push_back(callback);
+	}
 	void notifyDeadlineMissed()
-    {
-        for(unsigned int i = 0; i < listeners.size() ; i++)
-        {
+	{
+		for(unsigned int i = 0; i < listeners.size() ; i++) {
 			listeners[i]->onDeadlineMissed(this);
-        }
+		}
+		for (unsigned int i = 0; i < closureListeners.size(); i++) {
+			closureListeners[i](this);
+		}
 	}
 };
 
 }
-#endif

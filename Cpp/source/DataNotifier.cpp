@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2018-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -17,7 +18,7 @@
 * You should have received a copy of the GNU Lesser General Public License
 * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "OPSTypeDefs.h"
+
 #include "DataNotifier.h"
 
 namespace ops
@@ -36,6 +37,9 @@ namespace ops
             TEntry& ent = callbackListeners[i];
             ent.func(this, ent.userData);
         }
+        for (unsigned int i = 0; i < closureListeners.size(); i++) {
+            closureListeners[i](this);
+        }
     }
 
     void DataNotifier::addDataListener(DataListener* listener)
@@ -49,6 +53,11 @@ namespace ops
         ent.func = func;
         ent.userData = userData;
         callbackListeners.push_back(ent);
+    }
+
+    void DataNotifier::addDataListener(std::function<void(ops::DataNotifier* sender)> callback)
+    {
+        closureListeners.push_back(callback);
     }
 
 }
