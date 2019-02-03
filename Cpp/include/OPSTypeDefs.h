@@ -28,6 +28,23 @@
 	// VS2013 an earlier also defines _cplusplus to 199711L but does not support the features.
 	#define OPS_C11_DETECTED
 #endif
+
+#if __cplusplus >= 201402L		// Value according to standard for full C++14 conformity
+	#define OPS_C14_DETECTED
+#elif defined(_MSC_VER) && (_MSC_VER >= 1916)
+	#if _MSVC_LANG >= 201402L
+		#define OPS_C14_DETECTED
+	#endif
+#endif
+
+#if __cplusplus >= 201703L		// Value according to standard for full C++17 conformity
+	#define OPS_C17_DETECTED
+#elif defined(_MSC_VER) && (_MSC_VER >= 1916)
+	#if _MSVC_LANG >= 201703L
+		#define OPS_C17_DETECTED
+	#endif
+#endif
+
 #ifdef OPS_C11_DETECTED
 	#define NOEXCEPT noexcept
 #else
@@ -141,6 +158,11 @@ namespace ops {
 // Define this to add counting of create/delete of OPSObject() (only if also USE_C11 is defined)
 // Also adds a debug function for reading the current number of living OPSObjects
 //#define DEBUG_OPSOBJECT_COUNTER
+
+// -----------------------------------------------------------------------------
+// Macros used for trace of some functionality used during development 
+//#define OPS_TRACE(msg) { std::cout << msg << std::flush; }
+#define OPS_TRACE(msg) 
 
 // -----------------------------------------------------------------------------
 // Macro used to remove compiler warnings about non used variables/parameters
