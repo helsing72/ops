@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018 Lennart Andersson.
+* Copyright (C) 2018-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -45,7 +45,7 @@ using namespace ops;
 static void WaitWTimeout(Receiver& rcv, RAII_ioServ& ioServ, int64_t timeoutMs)
 {
 	int64_t limit = TimeHelper::currentTimeMillis() + timeoutMs;
-	while ((!rcv.asyncFinished()) && (TimeHelper::currentTimeMillis() < limit)) {
+	while (TimeHelper::currentTimeMillis() < limit) {
 		ioServ()->poll();
 	}
 }
@@ -66,40 +66,42 @@ static void WaitConnectedWTimeout(TCPClient& rcv, TCPServer& snd, RAII_ioServ& i
 	}
 }
 
-class MyTCPCallbacks : public TCPServerCallbacks
+void Log(std::string msg, ConnectStatus status)
+{
+	std::cout << msg << ": IP: " << status.addr << "::" << status.port;
+	if (status.connected) {
+		std::cout << " Connected.";
+	} else {
+		std::cout << " Disconnected.";
+	}
+	std::cout << " Total: " << status.totalNo << std::endl;
+}
+
+class MyTCPServerCallbacks : public TCPServerCallbacks
 {
 public:
 	ops::ConnectStatus cst;
 	char buffer[1024];
 	BytesSizePair bsp;
 
-	MyTCPCallbacks() : cst(false, 0), bsp(nullptr, 0) {}
-
-	void Log(ConnectStatus status)
-	{
-		std::cout << "Server: IP: " << status.addr << "::" << status.port;
-		if (status.connected) {
-			std::cout << " Connected.";
-		} else {
-			std::cout << " Disconnected.";
-		}
-		std::cout << " Total: " << status.totalNo << std::endl;
-	}
+	MyTCPServerCallbacks() : cst(false, 0), bsp(nullptr, 0) {}
 
 	// Called from server when a new connection is accepted
 	// Could be used to call conn->asynchRead(buffer, size)
-	void onConnect(TCPConnection* conn, ConnectStatus status) override
+	void onConnect(TCPConnection& conn, ConnectStatus status) override
 	{
-		Log(status);
+		Log("Server", status);
 		cst = status;
-
+		
+		conn.setProtocol(new ops::TCPOpsProtocol(TimeHelper::currentTimeMillis));
+		
 		// Start a read
-		conn->asynchWait(buffer, 1024);
+		conn.asynchWait(buffer, 1024);
 	}
 
 	// Called from server when data has been filled into given buffer
 	// A new call to conn->asynchRead(buffer, size) need to be done to continue to read
-	void onEvent(TCPConnection* conn, BytesSizePair arg) override
+	void onEvent(TCPConnection& conn, BytesSizePair arg) override
 	{
 		bsp = arg;
 	}
@@ -107,9 +109,36 @@ public:
 	// Called from server when a connection has been deleted
 	// NOTE: 'conn' is invalid and is only provided as an ID.
 	// Ev. buffer used in asynchRead() is no longer in use
-	void onDisconnect(TCPConnection* conn, ConnectStatus status) override
+	void onDisconnect(TCPConnection& conn, ConnectStatus status) override
 	{
-		Log(status);
+		Log("Server", status);
+		cst = status;
+	}
+};
+
+class MyTCPClientCallbacks : public TCPClientCallbacks
+{
+public:
+	ops::ConnectStatus cst;
+	BytesSizePair bsp;
+	bool protSet = false;
+
+	MyTCPClientCallbacks() : cst(false, 0), bsp(nullptr, 0) {}
+
+	// Called from client when a connection is made
+	void onConnect(TCPConnection& conn, ConnectStatus status) override
+	{
+		if (!protSet) conn.setProtocol(new ops::TCPOpsProtocol(TimeHelper::currentTimeMillis));
+		protSet = true;
+		Log("Client", status);
+		cst = status;
+	}
+
+	// Called from client when a connection is closed
+	// Ev. buffer used in asynchRead() is no longer in use
+	void onDisconnect(TCPConnection& conn, ConnectStatus status) override
+	{
+		Log("Client", status);
 		cst = status;
 	}
 };
@@ -124,32 +153,29 @@ TEST(Test_Sockets, TestTCPdefault) {
 
 	// Create a listener for received data
 	MyBSPListener listener(false);
-	MyTCPCallbacks ServerCB;
-	MyConnectListener cstClient("Client: ");
+	MyTCPServerCallbacks ServerCB;
+	MyTCPClientCallbacks ClientCB;
 
 	static const int serverPort = 9999;
 
 	// Create TCP Server with default buffer size. Add listener for connect status
-	TCPServer snd(&ServerCB, ioServ(), "127.0.0.1", serverPort, new ops::TCPOpsProtocol());
+	TCPServer snd(&ServerCB, ioServ(), "127.0.0.1", serverPort);
 
 	EXPECT_STREQ(snd.getLocalAddress().c_str(), "127.0.0.1");
 	EXPECT_EQ(snd.getLocalPort(), serverPort);
 	EXPECT_EQ(snd.numConnected(), 0);
 
 	// Create TCP Client with default buffersize
-	TCPClient rcv("127.0.0.1", serverPort, ioServ(), new ops::TCPOpsProtocol());
+	TCPClient rcv(&ClientCB, "127.0.0.1", serverPort, ioServ());
 	rcv.Notifier<BytesSizePair>::addListener(&listener);
-	rcv.Notifier<ConnectStatus>::addListener(&cstClient);
 
-	EXPECT_FALSE(rcv.isConnected());
-	EXPECT_TRUE(rcv.asyncFinished());
 	EXPECT_FALSE(rcv.isConnected());
 	EXPECT_EQ(snd.numConnected(), 0);
 
 	// Start server and client so they connect
 	{
 		// Need someone to drive the io service while we connect
-		std::thread t1(WaitConnectedWTimeout, std::ref(rcv), std::ref(snd), std::ref(ioServ), 2000);
+		std::thread t1(WaitConnectedWTimeout, std::ref(rcv), std::ref(snd), std::ref(ioServ), 40000);
 
 		// Start server
 		snd.open();
@@ -162,8 +188,7 @@ TEST(Test_Sockets, TestTCPdefault) {
 
 	// Check connected status
 	EXPECT_TRUE(rcv.isConnected());
-	EXPECT_TRUE(rcv.asyncFinished());
-	EXPECT_EQ(snd.numConnected(), 1);
+	ASSERT_EQ(snd.numConnected(), 1);
 
 	// Check ConnectStatus from server
 	EXPECT_TRUE(ServerCB.cst.connected);
@@ -172,10 +197,10 @@ TEST(Test_Sockets, TestTCPdefault) {
 	EXPECT_EQ(ServerCB.cst.totalNo, 1);
 
 	// Check ConnectStatus from client
-	EXPECT_TRUE(cstClient.cst.connected);
-	EXPECT_STREQ(cstClient.cst.addr.c_str(), snd.getLocalAddress().c_str());
-	EXPECT_EQ(cstClient.cst.port, snd.getLocalPort());
-	EXPECT_EQ(cstClient.cst.totalNo, 1);
+	EXPECT_TRUE(ClientCB.cst.connected);
+	EXPECT_STREQ(ClientCB.cst.addr.c_str(), snd.getLocalAddress().c_str());
+	EXPECT_EQ(ClientCB.cst.port, snd.getLocalPort());
+	EXPECT_EQ(ClientCB.cst.totalNo, 1);
 
 	EXPECT_EQ(listener.counter, 1);
 	EXPECT_EQ(listener.bsp.size, -5);
@@ -192,7 +217,6 @@ TEST(Test_Sockets, TestTCPdefault) {
 	// Start an async wait for data
 	char rcvbuf[1024];
 	rcv.asynchWait(&rcvbuf[0], 1000);
-	EXPECT_FALSE(rcv.asyncFinished());
 
 	// Send data
 	char sndbuf[1024];
@@ -201,7 +225,6 @@ TEST(Test_Sockets, TestTCPdefault) {
 	// Wait for data
 	WaitWTimeout(rcv, ioServ, 500);
 	EXPECT_TRUE(rcv.isConnected());
-	EXPECT_TRUE(rcv.asyncFinished());
 
 	EXPECT_EQ(listener.counter, 2);
 	EXPECT_EQ(listener.bsp.size, 100);
@@ -237,4 +260,77 @@ TEST(Test_Sockets, TestTCPdefault) {
 		snd.close();
 		t1.join();
 	}
+}
+
+TEST(Test_Sockets, TestTCPdelete) {
+
+	// Create an IoService
+	RAII_ioServ ioServ;
+	ASSERT_NE(ioServ(), nullptr);
+
+	// Create a listener for received data
+	MyBSPListener listener(false);
+	MyTCPServerCallbacks ServerCB;
+	MyTCPClientCallbacks ClientCB;
+
+	static const int serverPort = 9999;
+	char rcvbuf[1024];
+
+	{
+		// Create TCP Server with default buffer size. Add listener for connect status
+		TCPServer snd(&ServerCB, ioServ(), "127.0.0.1", serverPort);
+
+		// Create TCP Client with default buffersize
+		TCPClient rcv(&ClientCB, "127.0.0.1", serverPort, ioServ());
+		rcv.Notifier<BytesSizePair>::addListener(&listener);
+
+		EXPECT_FALSE(rcv.isConnected());
+		EXPECT_EQ(snd.numConnected(), 0);
+
+		// Start server and client so they connect
+		{
+			// Need someone to drive the io service while we connect
+			std::thread t1(WaitConnectedWTimeout, std::ref(rcv), std::ref(snd), std::ref(ioServ), 40000);
+
+			// Start server
+			snd.open();
+
+			// Start client
+			rcv.start();
+
+			t1.join();
+		}
+
+		// Check connected status
+		EXPECT_TRUE(rcv.isConnected());
+		ASSERT_EQ(snd.numConnected(), 1);
+
+		// Start an async wait for data
+		rcv.asynchWait(&rcvbuf[0], 1000);
+	}
+
+	// Need someone to drive the io service to finish all asynch callbacks
+	{
+		std::thread t1(PollWTimeout, std::ref(ioServ), 500);
+		t1.join();
+	}
+
+	{
+		// Create TCP Server with default buffer size. Add listener for connect status
+		TCPServer snd(&ServerCB, ioServ(), "127.0.0.1", serverPort);
+		snd.open();
+		snd.close();
+		snd.open();
+		snd.open();
+		snd.open();
+		snd.close();
+		snd.open();
+	}
+
+	// Need someone to drive the io service to finish all asynch callbacks
+	{
+		std::thread t1(PollWTimeout, std::ref(ioServ), 500);
+		t1.join();
+	}
+
 }

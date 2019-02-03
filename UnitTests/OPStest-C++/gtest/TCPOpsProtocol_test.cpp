@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018 Lennart Andersson.
+* Copyright (C) 2018-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -20,8 +20,6 @@
 
 #include "gtest/gtest.h"
 
-#include <thread>
-
 #include "TCPOpsProtocol.h"
 
 using namespace ops;
@@ -38,62 +36,125 @@ public:
 
 	bool _connected = false;
 
-	bool isConnected(TCPProtocol* prot) override
+	bool isConnected(TCPProtocol& prot) override
 	{
-		EXPECT_EQ(_prot, prot);
+		EXPECT_EQ(_prot, &prot);
 		return _connected;
 	}
 
 	char* _dstPtr = nullptr;
 	int _toRead = 0;
 
-	void startAsyncRead(TCPProtocol* prot, char* bytes, int size) override
+	void startAsyncRead(TCPProtocol& prot, char* bytes, uint32_t size) override
 	{
-		EXPECT_EQ(_prot, prot);
+		EXPECT_EQ(_prot, &prot);
 		_dstPtr = bytes;
 		_toRead = size;
 	}
 
 	BytesSizePair _event = { nullptr, 0 };
 
-	void onEvent(TCPProtocol* prot, BytesSizePair arg) override
+	void onEvent(TCPProtocol& prot, BytesSizePair arg) override
 	{
-		EXPECT_EQ(_prot, prot);
+		EXPECT_EQ(_prot, &prot);
 		_event = arg;
 	}
 
 	char sbuf[1024];
 	int sbuf_idx = 0;
+	int send_count = 0;
 
-	int sendBuffer(TCPProtocol* prot, char* bytes, int size) override
+	void ClearBuf()
 	{
-		EXPECT_EQ(_prot, prot);
+		memset(sbuf, 0, sizeof(sbuf));
+		sbuf_idx = 0;
+		send_count = 0;
+	}
+
+	int sendBuffer(TCPProtocol& prot, char* bytes, uint32_t size) override
+	{
+		send_count++;
+
+		EXPECT_EQ(_prot, &prot);
 
 		int space = (int)sizeof(sbuf) - sbuf_idx;
-		if (size > space) return -1;
+		if (size > (uint32_t)space) return -1;
 
 		memcpy(&sbuf[sbuf_idx], bytes, size);
 		sbuf_idx += size;
 
 		return size;
 	}
+
+	void verifyProbeMessage()
+	{
+		EXPECT_EQ(sbuf_idx, 23);
+
+		int sndlen = *((int*)(sbuf + 18));
+		EXPECT_EQ(sndlen, 1);
+
+		int version = *((int*)(sbuf + 8));
+		EXPECT_EQ(version, 2);
+
+		char save = sbuf[8];
+		sbuf[8] = '\0';
+
+		EXPECT_STREQ(sbuf, "opsprobe");
+
+		sbuf[8] = save;
+	}
+
+	void verifyHeartBeatMessage()
+	{
+		EXPECT_EQ(sbuf_idx, 22);
+
+		int sndlen = *((int*)(sbuf + 18));
+		EXPECT_EQ(sndlen, 0);
+
+		int version = *((int*)(sbuf + 8));
+		EXPECT_EQ(version, 2);
+
+		char save = sbuf[8];
+		sbuf[8] = '\0';
+
+		EXPECT_STREQ(sbuf, "opsprobe");
+
+		sbuf[8] = save;
+	}
 };
 
-TEST(Test_TCPProtocol, TestTCPProtocol) {
+struct MyTime
+{
+	static int64_t _now;
 
-	TCPOpsProtocol prot;
+	static int64_t clock()
+	{
+		return _now;
+	}
+};
+int64_t MyTime::_now = 0;
+
+// ===============================
+
+TEST(Test_TCPProtocol, TestTCPProtocolVer1) {
+
+	// No user data used in this test case
+	TCPOpsProtocol prot(&MyTime::clock);
 	MyTcpProtClient client(&prot);
 
 	char buffer[1024];
 
+	// --------------------
 	// Too small buffer
-	EXPECT_FALSE(prot.startReceive(buffer, 21));
+	EXPECT_FALSE(prot.startReceive(buffer, 22));
 
+	// --------------------
 	// No connected client
 	EXPECT_FALSE(prot.startReceive(buffer, sizeof(buffer)));
 
 	prot.connect(&client);
 
+	// --------------------
 	// Buffer large enough
 	EXPECT_TRUE(prot.startReceive(buffer, sizeof(buffer)));
 	EXPECT_EQ(client._dstPtr, &buffer[0]);
@@ -104,28 +165,31 @@ TEST(Test_TCPProtocol, TestTCPProtocol) {
 	EXPECT_FALSE(prot.handleReceivedData(0, 18));
 	prot.connect(&client);
 
+	// --------------------
 	EXPECT_TRUE(prot.startReceive(buffer, sizeof(buffer)));
 	EXPECT_EQ(client._dstPtr, &buffer[0]);
 	EXPECT_EQ(client._toRead, 22);
 
 	// Data when not connected
-	EXPECT_FALSE(client.isConnected(&prot));
+	EXPECT_FALSE(client.isConnected(prot));
 	EXPECT_FALSE(prot.handleReceivedData(0, 18));
 	EXPECT_EQ(client._event.bytes, nullptr);
 	EXPECT_EQ(client._event.size, -2);
 	client._event.size = 0;
 
+	// --------------------
 	EXPECT_TRUE(prot.startReceive(buffer, sizeof(buffer)));
 	EXPECT_EQ(client._dstPtr, &buffer[0]);
 	EXPECT_EQ(client._toRead, 22);
 
 	// Data when connected, but with an error
 	client._connected = true;
-	EXPECT_TRUE(client.isConnected(&prot));
+	EXPECT_TRUE(client.isConnected(prot));
 	EXPECT_FALSE(prot.handleReceivedData(1, 18));
 	EXPECT_EQ(client._event.bytes, nullptr);
 	EXPECT_EQ(client._event.size, 0);
 
+	// --------------------
 	EXPECT_TRUE(prot.startReceive(buffer, sizeof(buffer)));
 	EXPECT_EQ(client._dstPtr, &buffer[0]);
 	EXPECT_EQ(client._toRead, 22);
@@ -142,6 +206,7 @@ TEST(Test_TCPProtocol, TestTCPProtocol) {
 	buffer[21] = 0;
 	EXPECT_FALSE(prot.handleReceivedData(0, 4));
 
+	// --------------------
 	EXPECT_TRUE(prot.startReceive(buffer, sizeof(buffer)));
 	EXPECT_EQ(client._dstPtr, &buffer[0]);
 	EXPECT_EQ(client._toRead, 22);
@@ -172,12 +237,15 @@ TEST(Test_TCPProtocol, TestTCPProtocol) {
 	EXPECT_EQ(client._event.bytes, &buffer[0]);
 	EXPECT_EQ(client._event.size, 0x245);
 
-	// --------------------------------------------------------
+	EXPECT_EQ(prot.detectedVersion(), 1);
 
+	// --------------------
 	// Send with OK buffer and amount
 	memset(client.sbuf, 0, sizeof(client.sbuf));
 	memset(buffer, 0, sizeof(buffer));
-#pragma warning( disable : 4996 )
+#ifdef _MSC_VER
+  #pragma warning( disable : 4996 )
+#endif
 	strcpy(buffer, "Hej hopp i lingonskogen");
 
 	EXPECT_EQ(prot.sendData(buffer, strlen(buffer)), (int)strlen(buffer));
@@ -186,16 +254,220 @@ TEST(Test_TCPProtocol, TestTCPProtocol) {
 	int sndlen = *((int*)(client.sbuf + 18));
 	EXPECT_EQ(sndlen, (int)strlen(buffer));
 
-
 	client.sbuf[18] = '\0';
 	EXPECT_STREQ(client.sbuf, "opsp_tcp_size_info");
 	EXPECT_STREQ(&client.sbuf[22], "Hej hopp i lingonskogen");
 
+	// --------------------
 	// Send with failed write of header
 	client.sbuf_idx = sizeof(client.sbuf) - 10;
 	EXPECT_EQ(prot.sendData(buffer, 10), -1);
 
+	// --------------------
 	// Send with failed write of data
 	client.sbuf_idx = sizeof(client.sbuf) - 50;
 	EXPECT_EQ(prot.sendData(buffer, 60), -1);
+}
+
+static bool MyTCPUserDataCalled = false;
+
+class MyTCPUserData : public TCPUserBase
+{
+	~MyTCPUserData() { MyTCPUserDataCalled = true; }
+};
+
+TEST(Test_TCPProtocol, TestTCPProtocolVer2) {
+
+	{
+		TCPOpsProtocol prot(&MyTime::clock);
+		MyTcpProtClient client(&prot);
+
+		prot.userData = new MyTCPUserData();
+
+		prot.connect(&client);
+		client._connected = true;
+
+		char buffer[1024];
+
+		// --------------------
+		// Send Probe message
+		client.ClearBuf();
+
+		EXPECT_EQ(prot.sendProbe(), 23);
+		client.verifyProbeMessage();
+
+		// Save Probe message for use below
+		memcpy(buffer, client.sbuf, 23);
+
+		// --------------------
+		// Receive Probe Message
+		EXPECT_TRUE(prot.startReceive(buffer, sizeof(buffer)));
+		EXPECT_EQ(client._dstPtr, &buffer[0]);
+		EXPECT_EQ(client._toRead, 22);
+
+		// Data when connected and no error
+		EXPECT_TRUE(prot.handleReceivedData(0, 22));
+		EXPECT_EQ(client._dstPtr, &buffer[22]);
+		EXPECT_EQ(client._toRead, 1);
+
+		EXPECT_TRUE(prot.handleReceivedData(0, 1));
+		EXPECT_EQ(client._dstPtr, &buffer[0]);
+		EXPECT_EQ(client._toRead, 22);
+
+		EXPECT_EQ(prot.detectedVersion(), 2);
+
+		// --------------------
+		// Send Heartbeat message
+		client.ClearBuf();
+
+		EXPECT_EQ(prot.sendHeartbeat(), 22);
+		client.verifyHeartBeatMessage();
+
+		// Save Probe message for use below
+		memcpy(buffer, client.sbuf, 23);
+
+		// --------------------
+		// Receive Heartbeat Message
+		EXPECT_TRUE(prot.startReceive(buffer, sizeof(buffer)));
+		EXPECT_EQ(client._dstPtr, &buffer[0]);
+		EXPECT_EQ(client._toRead, 22);
+
+		// Data when connected and no error
+		EXPECT_TRUE(prot.handleReceivedData(0, 22));
+		EXPECT_EQ(client._dstPtr, &buffer[0]);
+		EXPECT_EQ(client._toRead, 22);
+
+		EXPECT_EQ(prot.detectedVersion(), 2);
+
+		// --------------------
+		// Reset protocol
+		prot.resetProtocol();
+		EXPECT_EQ(prot.detectedVersion(), 1);
+
+		// Data when connected and no error
+		EXPECT_TRUE(prot.handleReceivedData(0, 22));
+		EXPECT_EQ(client._dstPtr, &buffer[0]);
+		EXPECT_EQ(client._toRead, 22);
+
+		EXPECT_EQ(prot.detectedVersion(), 2);
+	}
+
+	// Verify delete of userdata
+	EXPECT_TRUE(MyTCPUserDataCalled);
+}
+
+TEST(Test_TCPProtocol, TestTCPProtocolPeriodic) {
+
+	char buffer[1024];
+
+	{
+		TCPOpsProtocol prot(&MyTime::clock);
+		MyTcpProtClient client(&prot);
+
+		prot.connect(&client);
+		client._connected = true;
+
+		// --------------------
+		// Periodic check with version 1
+		EXPECT_EQ(prot.detectedVersion(), 1);
+		EXPECT_TRUE(prot.periodicCheck());
+		EXPECT_EQ(prot.sendData(nullptr, 0), 0);
+
+		// --------------------
+		// Prepare buffer with probe message (needed later to get protocol to version 2)
+		client.ClearBuf();
+		EXPECT_EQ(prot.sendProbe(), 23);
+		client.verifyProbeMessage();
+		memcpy(buffer, client.sbuf, 23);
+	}
+
+	{
+		TCPOpsProtocol prot(&MyTime::clock);
+		MyTcpProtClient client(&prot);
+		MyTime::_now = 10000;
+
+		prot.connect(&client);
+		client._connected = true;
+
+		EXPECT_EQ(prot.detectedVersion(), 1);
+
+		// Change protocol to version 2 by providing the earlier prepared probe message
+		EXPECT_TRUE(prot.startReceive(buffer, sizeof(buffer)));
+
+		EXPECT_TRUE(prot.handleReceivedData(0, 22));
+		EXPECT_EQ(client._dstPtr, &buffer[22]);
+		EXPECT_EQ(client._toRead, 1);
+
+		EXPECT_TRUE(prot.handleReceivedData(0, 1));
+		EXPECT_EQ(client._dstPtr, &buffer[0]);
+		EXPECT_EQ(client._toRead, 22);
+
+		EXPECT_EQ(prot.detectedVersion(), 2);
+
+		// --------------------
+		client.ClearBuf();
+
+		// Periodic check with version 2. Should lead to a sent heartbeat
+		EXPECT_TRUE(prot.periodicCheck());
+		EXPECT_EQ(client.send_count, 1);
+		client.verifyHeartBeatMessage();
+
+		// No new send before time is right
+		MyTime::_now = 10999;
+		EXPECT_TRUE(prot.periodicCheck());
+		EXPECT_EQ(client.send_count, 1);
+
+		MyTime::_now = 11000;
+		EXPECT_TRUE(prot.periodicCheck());
+		EXPECT_EQ(client.send_count, 2);
+
+		MyTime::_now = 12000;
+		EXPECT_TRUE(prot.periodicCheck());
+		EXPECT_EQ(client.send_count, 3);
+
+		MyTime::_now = 12999;
+		EXPECT_TRUE(prot.periodicCheck());
+		EXPECT_EQ(client.send_count, 3);
+
+		MyTime::_now = 13000;
+		EXPECT_FALSE(prot.periodicCheck());
+		EXPECT_EQ(client.send_count, 4);
+	}
+
+	{
+		TCPOpsProtocol prot(&MyTime::clock);
+		MyTcpProtClient client(&prot);
+		MyTime::_now = 10000;
+
+		prot.connect(&client);
+		client._connected = true;
+
+		EXPECT_EQ(prot.detectedVersion(), 1);
+
+		// Change protocol to version 2 by providing the earlier prepared probe message
+		EXPECT_TRUE(prot.startReceive(buffer, sizeof(buffer)));
+
+		EXPECT_TRUE(prot.handleReceivedData(0, 22));
+		EXPECT_EQ(client._dstPtr, &buffer[22]);
+		EXPECT_EQ(client._toRead, 1);
+
+		EXPECT_TRUE(prot.handleReceivedData(0, 1));
+		EXPECT_EQ(client._dstPtr, &buffer[0]);
+		EXPECT_EQ(client._toRead, 22);
+
+		EXPECT_EQ(prot.detectedVersion(), 2);
+
+		// --------------------
+		client.ClearBuf();
+
+		// Periodic check with version 2. Should lead to a sent heartbeat
+		EXPECT_EQ(prot.sendData(nullptr, 0), 0);
+		EXPECT_EQ(client.send_count, 1);
+		client.verifyHeartBeatMessage();
+
+		// Failure to send heartbeat, should lead to failed send
+		MyTime::_now = 11000;
+		client.sbuf_idx = sizeof(client.sbuf);
+		EXPECT_EQ(prot.sendData(nullptr, 0), -1);
+	}
 }

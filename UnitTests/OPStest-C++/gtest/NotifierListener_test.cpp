@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018 Lennart Andersson.
+* Copyright (C) 2018-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -160,6 +160,16 @@ TEST(Test_NotifierListener, TestDataNotifierListener) {
 
 	EXPECT_EQ(listener1.counter, 7);
 	EXPECT_EQ(listener2.counter, 7);
+
+	// Test listener using a closure
+	int counter = 0;
+	notifier.addDataListener([&](ops::DataNotifier* sender) { counter++; });
+
+	notifier.notify();
+
+	EXPECT_EQ(listener1.counter, 9);
+	EXPECT_EQ(listener2.counter, 9);
+	EXPECT_EQ(counter, 1);
 }
 
 // ===============================
@@ -193,4 +203,14 @@ TEST(Test_NotifierListener, TestDeadlineMissedListener) {
 
 	EXPECT_EQ(listener1.counter, 2);
 	EXPECT_EQ(listener2.counter, 1);
+
+	// Test listener using a closure
+	int counter = 0;
+	notifier.addDeadlineMissedListener([&](ops::DeadlineMissedEvent* sender) { counter++; });
+
+	notifier.notifyDeadlineMissed();
+
+	EXPECT_EQ(listener1.counter, 3);
+	EXPECT_EQ(listener2.counter, 2);
+	EXPECT_EQ(counter, 1);
 }
