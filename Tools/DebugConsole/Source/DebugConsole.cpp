@@ -50,11 +50,11 @@ public:
 
 				switch (data->Entity) {
 				case 0: // Debug
-					if ((data->Result1 == 2) || (data->Result1 == 3)) {
-						if (data->Result1 == 2) {
-							std::cout << "Publisher Topics:" << std::endl;
-						} else {
-							std::cout << "Subscriber Topics:" << std::endl;
+					if ((data->Result1 >= 1) && (data->Result1 <= 3)) {
+						switch (data->Result1) {
+						case 1: std::cout << "Instance key:" << std::endl; break;
+						case 2:	std::cout << "Publisher Topics:" << std::endl; break;
+						case 3:	std::cout << "Subscriber Topics:" << std::endl; break;
 						}
 						for (unsigned int i = 0; i < data->Param3.size(); i++) {
 							std::cout << "    " << data->Param3[i] << std::endl;
@@ -127,7 +127,7 @@ void CommandLoop(ops::Participant* part)
 void Usage()
 {
 	std::cout << std::endl;
-	std::cout << "Version 2018-06-24" << std::endl;
+	std::cout << "Version 2019-02-06" << std::endl;
 	std::cout << std::endl;
 	std::cout << "  Usage:" << std::endl;
 	std::cout << "    DebugConsole [-?] -cfg file -d domain -k key -e n -n name -c cmd -p1 num" << std::endl;
