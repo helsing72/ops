@@ -889,6 +889,126 @@ public:
 			std::endl;
 	}
 	//
+	void ShowDebugEntity(opsidls::DebugRequestResponseData* data)
+	{
+		switch (data->Command) {
+		case 0:
+			std::cout << "  Response, ";
+			switch (data->Result1) {
+			case 1:	std::cout << "Filter key in Param3: "; break;
+			case 2:	std::cout << "Publishers in Param3: "; break;
+			case 3: std::cout << "Suscribers in Param3: "; break;
+			case 50:std::cout << "Generic command"; break;
+			}
+			std::cout << std::endl;
+			break;
+		case 1:
+			std::cout << "  Request status\n";
+			break;
+		case 2:
+			switch (data->Param1) {
+			case 1: std::cout << "  List Instance Key\n"; break;
+			case 2: std::cout << "  List Publishers\n"; break;
+			case 3: std::cout << "  List Subscribers\n"; break;
+			}
+			break;
+		case 50:
+			std::cout << "  Generic command\n";
+			break;
+		}
+	}
+	void ShowPubEntity(opsidls::DebugRequestResponseData* data)
+	{
+		switch (data->Command) {
+		case 0:
+			std::cout << "  Publisher Response, ";
+			std::cout << "Enabled: " << (data->Enabled ? "True" : "False");
+			std::cout << ", Pub Cnt: " << data->Result1;
+			std::cout << ", #sends to skip: " << data->Result2;
+			std::cout << ", msg to send: " << (data->Result3 ? "True" : "False");
+			std::cout << std::endl;
+			break;
+		case 1:
+			std::cout << "  Request status\n";
+			break;
+		case 2:
+			switch (data->Param1) {
+			case 0: std::cout << "  Disable Publisher\n"; break;
+			case 1: std::cout << "  Enable Publisher\n"; break;
+			}
+			break;
+		case 3:
+			std::cout << "  Increment Pub Id with " << data->Param1 << std::endl;
+			break;
+		case 4:
+			std::cout << "  Skip " << data->Param1 << " sends\n";
+			break;
+		case 5:
+			std::cout << "  Send message in Objs[0] directly\n";
+			break;
+		case 6:
+			std::cout << "  Send message(s) in Objs instead of ordinary sends\n";
+			break;
+		}
+	}
+	void ShowSubEntity(opsidls::DebugRequestResponseData* data)
+	{
+		switch (data->Command) {
+		case 0:
+			std::cout << "  Subscriber Response, ";
+			std::cout << "Enabled: " << (data->Enabled ? "True" : "False");
+			std::cout << ", #msg rcvd: " << data->Result1;
+			std::cout << ", #rcvs to skip: " << data->Result2;
+			std::cout << ", key filter active: " << (data->Result3 ? "True" : "False");
+			std::cout << std::endl;
+			break;
+		case 1:
+			std::cout << "  Request status\n";
+			break;
+		case 2:
+			switch (data->Param1) {
+			case 0: std::cout << "  Disable Subscriber\n"; break;
+			case 1: std::cout << "  Enable Subscriber\n"; break;
+			}
+			break;
+		case 4:
+			std::cout << "  Skip " << data->Param1 << " receives\n";
+			break;
+		}
+	}
+	void ShowDebugMessage(TEntry& ent, ops::OPSMessage* mess, opsidls::DebugRequestResponseData* data)
+	{
+		// Show Debug Request/Response data
+		std::string str = "";
+		if (logTime) {
+			str += "[" + sds::sdsSystemTimeToLocalTime(ent.time) + "] ";
+		}
+		std::cout << str <<
+			"Key: " << data->getKey() <<
+			", Entity: " << data->Entity <<
+			", Name: " << data->Name <<
+			", Command: " << data->Command <<
+			", Param1: " << data->Param1 <<
+			", Enabled: " << data->Enabled <<
+			", Result1: " << data->Result1 <<
+			", Result2: " << data->Result2 <<
+			", Result3: " << data->Result3 <<
+			", " << source(mess, data) <<
+			std::endl;
+
+		switch (data->Entity) {
+		case 0: ShowDebugEntity(data); break;
+		case 2: ShowPubEntity(data); break;
+		case 3: ShowSubEntity(data); break;
+		}
+
+		for (unsigned int i = 0; i < data->Param3.size(); ++i) {
+			std::cout << "    Param3(" << i << "): " << data->Param3[i] << '\n';
+		}
+
+		//Objs
+	}
+	//
 	void WorkOnList(int numMess)
 	{
 		/// Don't loop to much, to not loose mmi responsiveness
@@ -977,29 +1097,7 @@ public:
 				}
 			
 			} else if (debugData) {
-				// Show Debug Request/Response data
-				std::string str = "";
-				if (logTime) {
-					str += "[" + sds::sdsSystemTimeToLocalTime(ent.time) + "] ";
-				}
-				std::cout << str << 
-					"Key: " << debugData->getKey() <<
-					", Entity: " << debugData->Entity <<
-					", Name: " << debugData->Name <<
-					", Command: " << debugData->Command <<
-					", Param1: " << debugData->Param1 <<
-					", Enabled: " << debugData->Enabled <<
-					", Result1: " << debugData->Result1 <<
-					", Result2: " << debugData->Result2 <<
-					", Result3: " << debugData->Result3 <<
-					", " << source(mess, opsData) <<
-					std::endl;
-
-				for (unsigned int i = 0; i < debugData->Param3.size(); ++i) {
-					std::cout << "    Param3(" << i << "): " << debugData->Param3[i] << '\n';
-				}
-
-				//Objs
+				ShowDebugMessage(ent, mess, debugData);
 
 			} else {
 				// Ordinary Topic
