@@ -124,19 +124,25 @@ namespace ops {
 
 						case 1: // Participant
 							if (req->getKey() == "*") return;
-							break;
+							// For now no response
+							return;
 
 						case 2: // Publisher
 							if (req->getKey() == "*") return;
-							if (_pubMap.find(req->Name) == _pubMap.end()) break;
+							// Don't respond on unknown topics
+							if (_pubMap.find(req->Name) == _pubMap.end()) return;
 							_pubMap[req->Name]->onRequest(*req, _response);
 							break;
 
 						case 3: // Subscriber
 							if (req->getKey() == "*") return;
-							if (_subMap.find(req->Name) == _subMap.end()) break;
+							// Don't respond on unknown topics
+							if (_subMap.find(req->Name) == _subMap.end()) return;
 							_subMap[req->Name]->onRequest(*req, _response);
 							break;
+						default: 
+							// Unknown entity, don't send a response
+							return;
 						}
 					}
 					_response.Entity = req->Entity;
