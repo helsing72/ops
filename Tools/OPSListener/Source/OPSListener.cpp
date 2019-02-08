@@ -921,24 +921,24 @@ public:
 	{
 		switch (data->Command) {
 		case 0:
-			std::cout << "  Publisher Response, ";
+			std::cout << "  '" << data->Name << "' Publisher Response, ";
 			std::cout << "Enabled: " << (data->Enabled ? "True" : "False");
-			std::cout << ", Pub Cnt: " << data->Result1;
+			std::cout << ", Pub Id: " << data->Result1;
 			std::cout << ", #sends to skip: " << data->Result2;
 			std::cout << ", msg to send: " << (data->Result3 ? "True" : "False");
-			std::cout << std::endl;
+			std::cout << std::endl << std::endl;
 			break;
 		case 1:
-			std::cout << "  Request status\n";
+			std::cout << "  Request '" << data->Name << "' Publisher status\n";
 			break;
 		case 2:
 			switch (data->Param1) {
-			case 0: std::cout << "  Disable Publisher\n"; break;
-			case 1: std::cout << "  Enable Publisher\n"; break;
+			case 0: std::cout << "  Disable '" << data->Name << "' Publisher\n"; break;
+			case 1: std::cout << "  Enable '" << data->Name << "' Publisher\n"; break;
 			}
 			break;
 		case 3:
-			std::cout << "  Increment Pub Id with " << data->Param1 << std::endl;
+			std::cout << "  Increment '" << data->Name << "' Pub Id with " << data->Param1 << std::endl;
 			break;
 		case 4:
 			std::cout << "  Skip " << data->Param1 << " sends\n";
@@ -955,20 +955,20 @@ public:
 	{
 		switch (data->Command) {
 		case 0:
-			std::cout << "  Subscriber Response, ";
+			std::cout << "  '" << data->Name << "' Subscriber Response, ";
 			std::cout << "Enabled: " << (data->Enabled ? "True" : "False");
 			std::cout << ", #msg rcvd: " << data->Result1;
 			std::cout << ", #rcvs to skip: " << data->Result2;
 			std::cout << ", key filter active: " << (data->Result3 ? "True" : "False");
-			std::cout << std::endl;
+			std::cout << std::endl << std::endl;
 			break;
 		case 1:
-			std::cout << "  Request status\n";
+			std::cout << "  Request '" << data->Name << "' Subscriber status\n";
 			break;
 		case 2:
 			switch (data->Param1) {
-			case 0: std::cout << "  Disable Subscriber\n"; break;
-			case 1: std::cout << "  Enable Subscriber\n"; break;
+			case 0: std::cout << "  Disable '" << data->Name << "' Subscriber\n"; break;
+			case 1: std::cout << "  Enable '" << data->Name << "' Subscriber\n"; break;
 			}
 			break;
 		case 4:
@@ -1005,6 +1005,8 @@ public:
 		for (unsigned int i = 0; i < data->Param3.size(); ++i) {
 			std::cout << "    Param3(" << i << "): " << data->Param3[i] << '\n';
 		}
+
+		if (data->Param3.size() > 0) std::cout << std::endl;
 
 		//Objs
 	}
@@ -1166,7 +1168,7 @@ int _kbhit() {
 
 int main(int argc, char* argv[])
 {
-	std::cout << std::endl << "OPSListener Version 2019-01-26" << std::endl << std::endl;
+	std::cout << std::endl << "OPSListener Version 2019-02-07" << std::endl << std::endl;
 
 	sds::sdsSystemTimeInit();
 
