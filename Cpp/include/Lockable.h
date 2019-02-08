@@ -24,14 +24,7 @@
 #include "OPSExport.h"
 #include "OPSTypeDefs.h"
 
-#ifdef USE_C11
-  #include <mutex>
-#else
-namespace boost
-{
-    class recursive_mutex;
-}
-#endif
+#include <mutex>
 
 namespace ops
 {
@@ -41,11 +34,7 @@ namespace ops
 	{
 		friend class SafeLock;
 	private:
-#ifdef USE_C11
 		std::recursive_mutex* mutex;
-#else
-		boost::recursive_mutex* mutex;
-#endif
 
 	public:
 		Lockable();

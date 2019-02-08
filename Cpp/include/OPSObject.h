@@ -22,7 +22,7 @@
 #define ops_OPSObject_h
 
 #include "OPSTypeDefs.h"
-#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+#if defined(DEBUG_OPSOBJECT_COUNTER)
 #include <atomic>
 #endif
 
@@ -36,7 +36,7 @@ namespace ops
     class OPS_EXPORT OPSObject : public Serializable
     {
     private:
-#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+#if defined(DEBUG_OPSOBJECT_COUNTER)
         static std::atomic<uint32_t> _NumOpsObjects;
 #endif
 
@@ -77,14 +77,12 @@ namespace ops
         virtual ~OPSObject();
 
         OPSObject(const OPSObject& other);                      // Copy constructor
-#ifdef OPS_C11_DETECTED
 		OPSObject(OPSObject&& other);                           // Move constructor
-#endif
 
         OPSObject& operator= (OPSObject other);                 // Copy assignment operator
         //OPSObject& operator= (OPSObject&& other) = delete;    // Move assignment operator
 
-#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+#if defined(DEBUG_OPSOBJECT_COUNTER)
         static uint32_t NumOpsObjects() { return _NumOpsObjects; }
 #endif
     };

@@ -1,32 +1,49 @@
-/* 
+/**
+ *
+ * Copyright (C) 2006-2010 Anton Gravestam.
+ * Copyright (C) 2018-2019 Lennart Andersson.
+*
+ * This file is part of OPS (Open Publish Subscribe).
+ *
+ * OPS (Open Publish Subscribe) is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+
+ * OPS (Open Publish Subscribe) is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+ /*
  * File:   OPSTypeDefs.h
  * Author: gravanto
  *
  * Created on February 18, 2010, 9:52 PM
  */
 
-#ifndef _OPSTYPEDEFS_H
-#define _OPSTYPEDEFS_H
+#pragma once
 
 #include <string>
 #include <sstream>
 
 // -----------------------------------------------------------------------------
 // Some OPS configurations
-#define USE_C11             // Enables use of C++11 std::mutex, std::thread, std::condition_variable
-							// instead of boost or WIN32/Linux specific calls
 
-#ifdef OVERRIDE_DEFAULT_NO_C11	// Give possibility to override default settings for backward compatibility
-#undef USE_C11					// This will use boost and WIN32/Linux specific calls instead of C++11
-#endif
-
-// noexcept specifier, nullptr and USE_C11 requires a c++11 compiler.
+// We require a c++11 compiler.
 #if __cplusplus >= 201103L		// Value according to standard for full C++11 conformity
 	#define OPS_C11_DETECTED
 #elif defined(_MSC_VER) && (_MSC_VER >= 1900)
 	// VS2015 still defines _cplusplus to 199711L but supports the features we need.
 	// VS2013 an earlier also defines _cplusplus to 199711L but does not support the features.
 	#define OPS_C11_DETECTED
+#endif
+#ifndef OPS_C11_DETECTED
+#error C++11 Compiler required
 #endif
 
 #if __cplusplus >= 201402L		// Value according to standard for full C++14 conformity
@@ -45,13 +62,7 @@
 	#endif
 #endif
 
-#ifdef OPS_C11_DETECTED
-	#define NOEXCEPT noexcept
-#else
-	#define NOEXCEPT
-	#define nullptr NULL
-	#undef USE_C11
-#endif
+#define NOEXCEPT noexcept
 
 
 //#define OPSSLIM_NORESERVE			// Removes Reservable from OPSMessage
@@ -155,7 +166,7 @@ namespace ops {
 //
 //#define ON_BIG_ENDIAN_MACHINE
 
-// Define this to add counting of create/delete of OPSObject() (only if also USE_C11 is defined)
+// Define this to add counting of create/delete of OPSObject()
 // Also adds a debug function for reading the current number of living OPSObjects
 //#define DEBUG_OPSOBJECT_COUNTER
 
@@ -181,12 +192,7 @@ InternalString_T NumberToString(T Number)
 
 // Defines for integer types
 #ifdef _WIN32
-#ifndef OPS_C11_DETECTED
 
-typedef __int64 int64_t;
-typedef __int16 int16_t;
-
-#endif
 #else 
 
 // Linux
@@ -207,11 +213,7 @@ typedef int16_t __int16;	// - " -
 	#define COMPILESIGNATURE_FIXED "STD"
 #endif
 
-#ifdef USE_C11
-	#define COMPILESIGNATURE_CXX "C11"
-#else
-	#define COMPILESIGNATURE_CXX ""
-#endif
+#define COMPILESIGNATURE_CXX "C11"
 
 #ifdef OPSSLIM_NORESERVE
 	#define COMPILESIGNATURE_SLIM "SLIM"
@@ -246,4 +248,3 @@ typedef int16_t __int16;	// - " -
 
 #define OPS_COMPILESIGNATURE (COMPILESIGNATURE_FIXED COMPILESIGNATURE_CXX COMPILESIGNATURE_SLIM COMPILESIGNATURE_DBGHND COMPILESIGNATURE_STRINGS COMPILESIGNATURE_CTR)
 
-#endif	/* _OPSTYPEDEFS_H */

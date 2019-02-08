@@ -24,7 +24,7 @@
 namespace ops
 {
 
-#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+#if defined(DEBUG_OPSOBJECT_COUNTER)
     std::atomic<uint32_t> OPSObject::_NumOpsObjects = 0;
 #endif
 
@@ -32,7 +32,7 @@ namespace ops
     {
         key = "k";
         typesString = "";
-#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+#if defined(DEBUG_OPSOBJECT_COUNTER)
         _NumOpsObjects++;
 #endif
     }
@@ -43,12 +43,11 @@ namespace ops
         key = other.key;
         typesString = other.typesString;
         spareBytes = other.spareBytes;
-#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+#if defined(DEBUG_OPSOBJECT_COUNTER)
         _NumOpsObjects++;
 #endif
     }
 
-#ifdef OPS_C11_DETECTED
 	// Move constructor
 	OPSObject::OPSObject(OPSObject&& other)
 	{
@@ -56,11 +55,10 @@ namespace ops
 		key = other.key;
 		typesString = other.typesString;
 		spareBytes = other.spareBytes;
-#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+#if defined(DEBUG_OPSOBJECT_COUNTER)
 		_NumOpsObjects++;
 #endif
 	}
-#endif
 
 	// Copy assignment operator
     OPSObject& OPSObject::operator= (OPSObject other)
@@ -112,7 +110,7 @@ namespace ops
 	
     OPSObject::~OPSObject()
     {
-#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+#if defined(DEBUG_OPSOBJECT_COUNTER)
         _NumOpsObjects--;
 #endif
     }

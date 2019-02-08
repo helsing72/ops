@@ -19,13 +19,10 @@
 */
 
 #include "Thread.h"
-#ifndef USE_C11
-#include "boost/thread.hpp"
-#endif
 
 namespace ops
 {
-    Thread::Thread() : threadRunning(false), thread(NULL)
+    Thread::Thread() : threadRunning(false), thread(nullptr)
     {
     }
     
@@ -37,13 +34,9 @@ namespace ops
     
     int Thread::start()
     {
-        if (thread == NULL)
+        if (thread == nullptr)
         {
-#ifdef USE_C11
 			thread = new std::thread(&Thread::EntryPoint, this);
-#else
-			thread = new boost::thread(&Thread::EntryPoint, this);
-#endif
 		}
         return 0;
     }
@@ -54,17 +47,13 @@ namespace ops
             // Wait for thread to exit before we delete it
             thread->join();
             delete thread;
-            thread = NULL;
+            thread = nullptr;
         }
         return true;
     }
     
     void Thread::stop()
     {
-#ifndef USE_C11
-		// Boost unique feature
-		if (thread) thread->interrupt();
-#endif
 	}
     
     /*static */ void Thread::EntryPoint(void* pthis)

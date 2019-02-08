@@ -80,12 +80,10 @@ public:
 		bytes = small_width_vector;
 		bytes[0] = segment;
 	}
-#ifdef OPS_C11_DETECTED
 	MemoryMap(MemoryMap const&) = delete;
 	MemoryMap(MemoryMap&&) = delete;
 	MemoryMap& operator =(MemoryMap&&) = delete;
 	MemoryMap& operator =(MemoryMap const&) = delete;
-#endif
 
 	// Method to initialize/re-initialize object
 	// Fails if object is created as a data owner

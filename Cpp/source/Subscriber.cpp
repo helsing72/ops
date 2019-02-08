@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018 Lennart Andersson.
+ * Copyright (C) 2018-2019 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -25,13 +25,7 @@
 #include "Participant.h"
 #include "BasicError.h" 
 
-#ifdef USE_C11
 #include <chrono>
-#else
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/condition_variable.hpp>
-#include "boost/date_time/local_time/local_time.hpp"
-#endif
 
 namespace ops
 {
@@ -58,10 +52,6 @@ namespace ops
         participant = Participant::getInstance(topic.getDomainID(), topic.getParticipantID());
         deadlineTimer = DeadlineTimer::create(participant->getIOService());
         
-#ifndef USE_C11
-        newDataMutex = new boost::mutex();
-        newDataEvent = new boost::condition_variable;
-#endif
         timeLastData = TimeHelper::currentTimeMillis();
 
 #ifdef OPS_ENABLE_DEBUG_HANDLER
@@ -83,10 +73,6 @@ namespace ops
 			messageBuffer.back()->unreserve();
 			messageBuffer.pop_back();
 		}
-#ifndef USE_C11
-        delete newDataMutex;
-        delete newDataEvent;
-#endif
 	}
 
     void Subscriber::start()
@@ -174,17 +160,10 @@ namespace ops
                 notifyNewData();
 
                 // Signal any waiting thread(s)
-#ifdef USE_C11
 				std::unique_lock<std::mutex> lock(newDataMutex);
 				hasUnreadData = true;
 				newDataEvent.notify_all();
 				lock.unlock();
-#else
-                boost::unique_lock<boost::mutex> lock(*newDataMutex);
-                hasUnreadData = true;
-                newDataEvent->notify_all();
-                lock.unlock();
-#endif
 
 				// Update deadline variables
                 timeLastDataForTimeBase = TimeHelper::currentTimeMillis();
@@ -303,22 +282,11 @@ namespace ops
             return true;
         }
 
-#ifdef USE_C11
 		std::unique_lock<std::mutex> lock(newDataMutex);
 
 		if (newDataEvent.wait_for(lock, std::chrono::milliseconds(timeoutMs), [this] { return this->newDataExist(); })) {
 			return true;
 		}
-#else
-		boost::unique_lock<boost::mutex> lock(*newDataMutex);
-
-        boost::system_time time = boost::get_system_time();
-        time += boost::posix_time::milliseconds(timeoutMs);
-
-        if(newDataEvent->timed_wait(lock, time)) {
-            return true;
-        }
-#endif
 		return false;
     }
 

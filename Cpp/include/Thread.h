@@ -24,16 +24,10 @@
 #include "OPSTypeDefs.h"
 #include "OPSExport.h"
 
-#ifdef USE_C11
 #include <thread>
-#else
-//Forward declaration
-namespace boost{class thread;}
-#endif
 
 namespace ops
 {
-
     ///Abstract Thread class for other classes that wishes to be "Active".
     class OPS_EXPORT Thread
     {
@@ -48,12 +42,7 @@ namespace ops
     
     protected:
         bool threadRunning;
-#ifdef USE_C11
 		std::thread* thread;
-#else
-		boost::thread* thread;
-#endif
 	};
 }
-
 #endif

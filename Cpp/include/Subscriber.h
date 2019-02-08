@@ -39,17 +39,8 @@
 #include "PubIdChecker.h"
 #include "DebugHandler.h"
 
-#ifdef USE_C11
 #include <mutex>
 #include <condition_variable>
-#else
-// Forward declarations
-namespace boost
-{
-    class mutex;
-    class condition_variable;
-}
-#endif
 
 namespace ops
 {
@@ -193,13 +184,8 @@ namespace ops
         void addToBuffer(OPSMessage* mess);
 
         Lockable filterQoSPolicyMutex;
-#ifdef USE_C11
 		std::mutex newDataMutex;
 		std::condition_variable newDataEvent;
-#else
-		boost::mutex* newDataMutex;
-		boost::condition_variable* newDataEvent;
-#endif
 
         int64_t timeLastData;
         int64_t timeLastDataForTimeBase;
