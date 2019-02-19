@@ -92,6 +92,8 @@ public class OpsCompiler
         System.out.println("  -s <feature>      special, generate with given feature");
         System.out.println("  -t <dir>          set template directory (overrides built-in templates)");
         System.out.println("");
+        System.out.println("  -dll <file>       used when building C# to give any dll dependencies (eg. OpsLibrary.dll)");
+        System.out.println("");
         System.out.println("FEATURE");
         System.out.println("  for generate: ALL, ada, cpp, csharp, delphi, java, json, python, debug");
         System.out.println("  for build:    ALL, csharp, java");
@@ -305,10 +307,13 @@ public class OpsCompiler
             } else if((arg.equals("-b") || arg.equals("-B")) && (i < extraArgs.size())) {
                 i++;
                 updateBuildProp(extraArgs.elementAt(i), arg.equals("-b"));
-            //} else if(arg.equals("-d")) {
-            // -d is handled in first step above
-            //} else if(arg.equals("-dd")) {
-            // -dd is handled in first step above
+              //} else if(arg.equals("-d")) {
+              // -d is handled in first step above
+              //} else if(arg.equals("-dd")) {
+              // -dd is handled in first step above
+            } else if (arg.equals("-dll") && (i < extraArgs.size())) {
+                i++;
+                _props.csBuildDllDependencies.add(new JarDependency(extraArgs.elementAt(i)));
             } else if (arg.equals("-dump")) {
                 _dumpFlag = true;
             } else if (arg.equals("-fac")) {
