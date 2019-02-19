@@ -1,2 +1,4 @@
-OPSListener
+.vs/
+Debug/
 *.o
+*.vcxproj.user
