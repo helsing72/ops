@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018 Lennart Andersson.
+* Copyright (C) 2018-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -174,6 +174,7 @@ namespace ops {
 			_sub->addFilterQoSPolicy(new KeyFilterQoSPolicy(keyStrings));
 			_sub->start();
 			_pub = new Publisher(_part->createDebugTopic());
+			_pub->setKey(gKey);
 			_pub->start();
 		}
 
