@@ -292,7 +292,8 @@ public class OpsCompiler
             if(arg.equals("-o") && i < extraArgs.size()) {
                 i++;
                 arg = extraArgs.elementAt(i);
-                _props.setProperty(new Property("outputPath", arg));
+                File tmp = new File(arg + "");
+                _props.setProperty(new Property("outputPath", tmp.getAbsolutePath()));
                 System.out.println("Info: Output path set to " + _props.getPropertyValue("outputPath", null));
             } else if(arg.equals("-t") && (i < extraArgs.size())) {
                 i++;
