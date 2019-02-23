@@ -72,7 +72,7 @@ public:
 
 int InitObject(SerDesObject_Core& obj)
 {
-	int size = 4 + obj.getKey().size();     // From OPSObject()
+	int size = 4 + (int)obj.getKey().size();     // From OPSObject()
 	obj.bo = true; size += 1;
 	obj.ch = 'm'; size += 1;
 	obj.i16 = -456; size += 2;
@@ -80,8 +80,8 @@ int InitObject(SerDesObject_Core& obj)
 	obj.i64 = 99999; size += 8;
 	obj.f32 = 678.98f; size += 4;
 	obj.d64 = 123456789.0; size += 8;
-	obj.str = "Test std::string"; size += 4 + obj.str.size();
-	obj.fstr = "Test strings:fixed_string..."; size += 4 + obj.fstr.size();
+	obj.str = "Test std::string"; size += 4 + (int)obj.str.size();
+	obj.fstr = "Test strings:fixed_string..."; size += 4 + (int)obj.fstr.size();
 	for (int i = 0; i < (int)sizeof(obj.buffer); i++) obj.buffer[i] = i;
 	size += sizeof(obj.buffer);
 	return size;
@@ -187,7 +187,7 @@ public:
 
 int InitObject(SerDesObject_Vectors& obj)
 {
-	int size = 4 + obj.getKey().size();     // From OPSObject()
+	int size = 4 + (int)obj.getKey().size();     // From OPSObject()
 	obj.bo = { true, false, false, true }; size += 4 + (4 * 1);
 	obj.ch = { 'm', 's' }; size += 4 + (2 * 1);
 	obj.i16 = { -456 }; size += 4 + (1 * 2);
@@ -195,8 +195,8 @@ int InitObject(SerDesObject_Vectors& obj)
 	obj.i64 = { 99999, -7777 }; size += 4 + (2 * 8);
 	obj.f32 = { 678.98f, -4.654f }; size += 4 + (2 * 4);
 	obj.d64 = { 123456789.0, -999.87654 }; size += 4 + (2 * 8);
-	obj.str = { "Test", "std::string" }; size += 4 + (4 + obj.str[0].size()) + (4 + obj.str[1].size());
-	obj.fstr = { "Test", "strings:fixed_string..." }; size += 4 + (4 + obj.fstr[0].size()) + (4 + obj.fstr[1].size());
+	obj.str = { "Test", "std::string" }; size += 4 + (4 + (int)obj.str[0].size()) + (4 + (int)obj.str[1].size());
+	obj.fstr = { "Test", "strings:fixed_string..." }; size += 4 + (4 + (int)obj.fstr[0].size()) + (4 + (int)obj.fstr[1].size());
 	return size;
 }
 
@@ -300,7 +300,7 @@ public:
 
 int InitObject(SerDesObject_Fixarrays& obj)
 {
-	int size = 4 + obj.getKey().size();     // From OPSObject()
+	int size = 4 + (int)obj.getKey().size();     // From OPSObject()
 	obj.bo[0] = true;  obj.bo[1] = false;  obj.bo[2] = false; obj.bo[3] = true;
 	size += 4 + (4 * 1);
 
@@ -323,11 +323,11 @@ int InitObject(SerDesObject_Fixarrays& obj)
 	size += 4 + (2 * 8);
 
 	obj.str[0] = "Test";  obj.str[1] = "std::string";
-	size += 4 + (4 + obj.str[0].size()) + (4 + obj.str[1].size());
+	size += 4 + (4 + (int)obj.str[0].size()) + (4 + (int)obj.str[1].size());
 
 	obj.fstr[0] = "Test";
 	obj.fstr[1] = "strings:fixed_string...";
-    size += 4 + (4 + obj.fstr[0].size()) + (4 + obj.fstr[1].size());
+    size += 4 + (4 + (int)obj.fstr[0].size()) + (4 + (int)obj.fstr[1].size());
 	return size;
 }
 
@@ -507,39 +507,39 @@ public:
 
 int InitObject(SerDesObject_Serializables& obj)
 {
-	int size = 4 + obj.getKey().size();				// From OPSObject()
+	int size = 4 + (int)obj.getKey().size();				// From OPSObject()
 	
-	size += 4 + obj.obj1.getTypeString().size();	// Objects have their type first
+	size += 4 + (int)obj.obj1.getTypeString().size();	// Objects have their type first
 	size += InitObject(obj.obj1);
 
-	size += 4 + obj.obj2->getTypeString().size();	// Objects have their type first
+	size += 4 + (int)obj.obj2->getTypeString().size();	// Objects have their type first
 	size += InitObject(*obj.obj2);
 
-	size += 4 + obj.obj3->getTypeString().size();	// Objects have their type first
+	size += 4 + (int)obj.obj3->getTypeString().size();	// Objects have their type first
 	size += InitObject(*obj.obj3);
 
 	obj.vobj1.resize(2);
 	size += 4;											// Vector size
-	size += 4 + obj.vobj1[0].getTypeString().size();	// Objects have their type first
+	size += 4 + (int)obj.vobj1[0].getTypeString().size();	// Objects have their type first
 	size += InitObject(obj.vobj1[0]);
-	size += 4 + obj.vobj1[1].getTypeString().size();	// Objects have their type first
+	size += 4 + (int)obj.vobj1[1].getTypeString().size();	// Objects have their type first
 	size += InitObject(obj.vobj1[1]);
 
 	obj.vobj2.push_back(new SerDesObject_Core());
 	size += 4;											// Vector size
-	size += 4 + obj.vobj2[0]->getTypeString().size();	// Objects have their type first
+	size += 4 + (int)obj.vobj2[0]->getTypeString().size();	// Objects have their type first
 	size += InitObject(*obj.vobj2[0]);
 
 	size += 4;											// Vector size
-	size += 4 + obj.fixarr1[0].getTypeString().size();	// Objects have their type first
+	size += 4 + (int)obj.fixarr1[0].getTypeString().size();	// Objects have their type first
 	size += InitObject(obj.fixarr1[0]);
-	size += 4 + obj.fixarr1[1].getTypeString().size();	// Objects have their type first
+	size += 4 + (int)obj.fixarr1[1].getTypeString().size();	// Objects have their type first
 	size += InitObject(obj.fixarr1[1]);
 
 	size += 4;											// Vector size
-	size += 4 + obj.fixarr2[0]->getTypeString().size();	// Objects have their type first
+	size += 4 + (int)obj.fixarr2[0]->getTypeString().size();	// Objects have their type first
 	size += InitObject(*obj.fixarr2[0]);
-	size += 4 + obj.fixarr2[1]->getTypeString().size();	// Objects have their type first
+	size += 4 + (int)obj.fixarr2[1]->getTypeString().size();	// Objects have their type first
 	size += InitObject(*obj.fixarr2[1]);
 
 	return size;
