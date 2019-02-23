@@ -348,7 +348,7 @@ public:
 		while (!feof(stream) && returnValue) {
 			if (fgets(buffer, sizeof(buffer), stream) == nullptr) break;
 
-			int len = strlen(buffer);
+			int len = (int)strlen(buffer);
 			if (len == 0) continue;
 			if (buffer[0] == '#') continue;
 
