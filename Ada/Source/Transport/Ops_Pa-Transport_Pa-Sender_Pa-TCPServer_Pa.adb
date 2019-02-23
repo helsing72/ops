@@ -224,6 +224,9 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
           Self.LastErrorCode := Self.TcpServer.GetLatestError;
           Report(Self, "Run", "Socket could not be created");
         end if;
+        if not Self.TcpServer.SetReuseAddress(True) then
+          Report(Self, "Run", "Failed to set REUSE_ADDRESS for server socket");
+        end if;
         if not Self.TcpServer.Bind( Self.IpAddress.all, Self.Port ) then
           Self.LastErrorCode := Self.TcpServer.GetLatestError;
           Report(Self, "Run", "Socket could not be bound");
