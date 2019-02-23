@@ -193,14 +193,14 @@ TEST(Test_ByteBuffer, TestCoretypes) {
 
 	std::string str1 = TEST_STRING;
 	buf.WriteString(str1);
-	size += 4 + TEST_STRING.size();
+	size += 4 + (int)TEST_STRING.size();
 	EXPECT_STREQ(str1.c_str(), TEST_STRING.c_str());
 	EXPECT_EQ(buf.GetSize(), size);
 	EXPECT_EQ(buf.GetIndex(), size);
 
 	str1 = TEST_STRING;
 	buf.WriteString(str1);
-	size += 4 + TEST_STRING.size();
+	size += 4 + (int)TEST_STRING.size();
 	EXPECT_STREQ(str1.c_str(), TEST_STRING.c_str());
 	EXPECT_EQ(buf.GetSize(), size);
 	EXPECT_EQ(buf.GetIndex(), size);
@@ -214,7 +214,7 @@ TEST(Test_ByteBuffer, TestCoretypes) {
 
 	strings::fixed_string<100> fstr1 = TEST_FIXSTRING;
 	buf.WriteString(fstr1);
-	size += 4 + TEST_FIXSTRING.size();
+	size += 4 + (int)TEST_FIXSTRING.size();
 	EXPECT_STREQ(fstr1.c_str(), TEST_FIXSTRING.c_str());
 	EXPECT_EQ(buf.GetSize(), size);
 	EXPECT_EQ(buf.GetIndex(), size);
@@ -265,13 +265,13 @@ TEST(Test_ByteBuffer, TestCoretypes) {
 	EXPECT_EQ(buf.GetIndex(), size);
 
 	std::string str2 = buf.ReadString();
-	size += 4 + TEST_STRING.size();
+	size += 4 + (int)TEST_STRING.size();
 	EXPECT_STREQ(str2.c_str(), TEST_STRING.c_str());
 	EXPECT_EQ(buf.GetIndex(), size);
 
 	str2 = "";
 	buf.ReadString(str2);
-	size += 4 + TEST_STRING.size();
+	size += 4 + (int)TEST_STRING.size();
 	EXPECT_STREQ(str2.c_str(), TEST_STRING.c_str());
 	EXPECT_EQ(buf.GetIndex(), size);
 
@@ -282,7 +282,7 @@ TEST(Test_ByteBuffer, TestCoretypes) {
 
 	strings::fixed_string<100> fstr2;
 	buf.ReadString(fstr2);
-	size += 4 + TEST_FIXSTRING.size();
+	size += 4 + (int)TEST_FIXSTRING.size();
 	EXPECT_STREQ(fstr2.c_str(), TEST_FIXSTRING.c_str());
 	EXPECT_EQ(buf.GetIndex(), size);
 
@@ -485,42 +485,42 @@ TEST(Test_ByteBuffer, TestVectors) {
 	// Write vectors to buffer
 	std::vector<float> fv(FLOAT_VECTOR);
 	buf.WriteFloats(fv);
-	size += 4 + (fv.size() * 4);
+	size += 4 + ((int)fv.size() * 4);
 	VectorCompare<float>(fv, FLOAT_VECTOR, "Write Float vector");
 	EXPECT_EQ(buf.GetSize(), size);
 	EXPECT_EQ(buf.GetIndex(), size);
 
 	std::vector<double> dv(DOUBLE_VECTOR);
 	buf.WriteDoubles(dv);
-	size += 4 + (dv.size() * 8);
+	size += 4 + ((int)dv.size() * 8);
 	VectorCompare<double>(dv, DOUBLE_VECTOR, "Write Double vector");
 	EXPECT_EQ(buf.GetSize(), size);
 	EXPECT_EQ(buf.GetIndex(), size);
 
 	std::vector<char> cv(CHAR_VECTOR);
 	buf.WriteBytes(cv);
-	size += 4 + cv.size();
+	size += 4 + (int)cv.size();
 	VectorCompare<char>(cv, CHAR_VECTOR, "Write Char vector");
 	EXPECT_EQ(buf.GetSize(), size);
 	EXPECT_EQ(buf.GetIndex(), size);
 
 	std::vector<int16_t> sv(SHORT_VECTOR);
 	buf.WriteShorts(sv);
-	size += 4 + (sv.size() * 2);
+	size += 4 + ((int)sv.size() * 2);
 	VectorCompare<int16_t>(sv, SHORT_VECTOR, "Write Short vector");
 	EXPECT_EQ(buf.GetSize(), size);
 	EXPECT_EQ(buf.GetIndex(), size);
 
 	std::vector<int> iv(INT_VECTOR);
 	buf.WriteInts(iv);
-	size += 4 + (iv.size() * 4);
+	size += 4 + ((int)iv.size() * 4);
 	VectorCompare<int>(iv, INT_VECTOR, "Write Int vector");
 	EXPECT_EQ(buf.GetSize(), size);
 	EXPECT_EQ(buf.GetIndex(), size);
 
 	std::vector<int64_t> lv(LONG_VECTOR);
 	buf.WriteLongs(lv);
-	size += 4 + (lv.size() * 8);
+	size += 4 + ((int)lv.size() * 8);
 	VectorCompare<int64_t>(lv, LONG_VECTOR, "Write Long vector");
 	EXPECT_EQ(buf.GetSize(), size);
 	EXPECT_EQ(buf.GetIndex(), size);
@@ -528,14 +528,14 @@ TEST(Test_ByteBuffer, TestVectors) {
 	std::vector<std::string> strv(STRING_VECTOR);
 	buf.WriteStrings(strv);
 	size += 4;
-	for (unsigned int i = 0; i < strv.size(); i++) size += 4 + strv[i].size();
+	for (unsigned int i = 0; i < strv.size(); i++) size += 4 + (int)strv[i].size();
 	VectorCompare(strv, STRING_VECTOR, "Write String vector");
 	EXPECT_EQ(buf.GetSize(), size);
 	EXPECT_EQ(buf.GetIndex(), size);
 
 	std::vector<bool> bv(BOOL_VECTOR);
 	buf.WriteBooleans(bv);
-	size += 4 + bv.size();
+	size += 4 + (int)bv.size();
 	VectorCompare<bool>(bv, BOOL_VECTOR, "Write Bool vector");
 	EXPECT_EQ(buf.GetSize(), size);
 	EXPECT_EQ(buf.GetIndex(), size);
@@ -550,50 +550,50 @@ TEST(Test_ByteBuffer, TestVectors) {
 	// Read the vectors from the buffer
 	std::vector<float> fvv;
 	buf.ReadFloats(fvv);
-	size += 4 + (fv.size() * 4);
+	size += 4 + ((int)fv.size() * 4);
 	VectorCompare<float>(fv, fvv, "Read Float vector");
 	EXPECT_EQ(buf.GetIndex(), size);
 
 	std::vector<double> dvv;
 	buf.ReadDoubles(dvv);
-	size += 4 + (dv.size() * 8);
+	size += 4 + ((int)dv.size() * 8);
 	VectorCompare<double>(dv, dvv, "Read Double vector");
 	EXPECT_EQ(buf.GetIndex(), size);
 
 	std::vector<char> cvv;
 	buf.ReadBytes(cvv);
-	size += 4 + cv.size();
+	size += 4 + (int)cv.size();
 	VectorCompare<char>(cv, cvv, "Read Char vector");
 	EXPECT_EQ(buf.GetIndex(), size);
 
 	std::vector<int16_t> svv;
 	buf.ReadShorts(svv);
-	size += 4 + (sv.size() * 2);
+	size += 4 + ((int)sv.size() * 2);
 	VectorCompare<int16_t>(sv, svv, "Read Short vector");
 	EXPECT_EQ(buf.GetIndex(), size);
 
 	std::vector<int> ivv;
 	buf.ReadInts(ivv);
-	size += 4 + (iv.size() * 4);
+	size += 4 + ((int)iv.size() * 4);
 	VectorCompare<int>(iv, ivv, "Read Int vector");
 	EXPECT_EQ(buf.GetIndex(), size);
 
 	std::vector<int64_t> lvv;
 	buf.ReadLongs(lvv);
-	size += 4 + (lv.size() * 8);
+	size += 4 + ((int)lv.size() * 8);
 	VectorCompare<int64_t>(lv, lvv, "Read Long vector");
 	EXPECT_EQ(buf.GetIndex(), size);
 
 	std::vector<std::string> strvv;
 	buf.ReadStrings(strvv);
 	size += 4;
-	for (unsigned int i = 0; i < strv.size(); i++) size += 4 + strv[i].size();
+	for (unsigned int i = 0; i < strv.size(); i++) size += 4 + (int)strv[i].size();
 	VectorCompare(strv, strvv, "Read String vector");
 	EXPECT_EQ(buf.GetIndex(), size);
 
 	std::vector<bool> bvv;
 	buf.ReadBooleans(bvv);
-	size += 4 + bv.size();
+	size += 4 + (int)bv.size();
 	VectorCompare<bool>(bv, bvv, "Read Bool vector");
 	EXPECT_EQ(buf.GetIndex(), size);
 }
@@ -752,12 +752,12 @@ TEST(Test_ByteBuffer, TestSegmentsMinimal) {
 
 	std::string str1 = TEST_STRING;
 	buf.WriteString(str1);
-	size += 15 * (4 + TEST_STRING.size());
+	size += 15 * (4 + (int)TEST_STRING.size());
 	EXPECT_EQ(buf.GetSize(), size);
 
 	strings::fixed_string<100> fstr1 = TEST_FIXSTRING;
 	buf.WriteString(fstr1);
-	size += 15 * (4 + TEST_FIXSTRING.size());
+	size += 15 * (4 + (int)TEST_FIXSTRING.size());
 	EXPECT_EQ(buf.GetSize(), size);
 	EXPECT_EQ(buf.getNrOfSegments(), 58);
 
