@@ -93,6 +93,7 @@ public class OpsCompiler
         System.out.println("  -t <dir>          set template directory (overrides built-in templates)");
         System.out.println("");
         System.out.println("  -dll <file>       used when building C# to give any dll dependencies (eg. OpsLibrary.dll)");
+        System.out.println("  -jar <file>       used when building Java to give any jar dependencies");
         System.out.println("");
         System.out.println("FEATURE");
         System.out.println("  for generate: ALL, ada, cpp, csharp, delphi, java, json, python, debug");
@@ -324,6 +325,9 @@ public class OpsCompiler
                 updateGenerateProp(extraArgs.elementAt(i), arg.equals("-g"));
             //} else if(arg.equals("-idls")) {
             // -idls are handled in first step above
+            } else if (arg.equals("-jar") && (i < extraArgs.size())) {
+                i++;
+                _props.javaBuildJarDependencies.add(new JarDependency(extraArgs.elementAt(i)));
             } else if(arg.equals("-parse")) {
                 _bOnlyParse = true;
             } else if(arg.equals("-?") || arg.equals("-h") || arg.equals("--help")) {
