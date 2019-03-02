@@ -15,6 +15,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.ClassLoader;
 import java.util.List;
 import java.util.Vector;
+import java.util.Arrays;
 import parsing.AbstractTemplateBasedIDLCompiler;
 import parsing.IDLClass;
 import parsing.IDLField;
@@ -143,6 +144,13 @@ public class JavaCompiler extends opsc.Compiler
         return "JavaCompiler";
     }
 
+    protected String getFieldName(IDLField field)
+    {
+        String name = field.getName();
+        if (isReservedName(name)) return name + "_";
+        return name;
+    }
+
     protected void compilePublisher(IDLClass idlClass) throws IOException
     {
         String className = idlClass.getClassName();
@@ -248,34 +256,30 @@ public class JavaCompiler extends opsc.Compiler
         String ret = "";
         for (IDLField field : idlClass.getFields())
         {
+            String fieldName = getFieldName(field);
             if (field.isIdlType())
             {
                 if (!field.isArray())
                 {
-                    ret += tab(2) + "cloneResult." +  field.getName() + " = (" + field.getType() + ")this." + field.getName() + ".clone();" + endl();
+                    ret += tab(2) + "cloneResult." +  fieldName + " = (" + field.getType() + ")this." + fieldName + ".clone();" + endl();
                 }
                 else
                 {
-                    ret += tab(2) + "java.util.Collections.copy(" + "cloneResult." +  field.getName() + ", this." + field.getName() + ");" + endl();
-
+                    ret += tab(2) + "java.util.Collections.copy(" + "cloneResult." +  fieldName + ", this." + fieldName + ");" + endl();
                 }
             }
 
             //"Arrays.copyOf(original, newLength)";
             else if (field.isArray())
             {
-
-                ret += tab(2) + "java.util.Collections.copy(" + "cloneResult." +  field.getName() + ", this." + field.getName() + ");" + endl();
-
+                ret += tab(2) + "java.util.Collections.copy(" + "cloneResult." +  fieldName + ", this." + fieldName + ");" + endl();
             }
             else
             {
-                ret += tab(2) + "cloneResult." +  field.getName() + " = this." + field.getName() + ";" + endl();
+                ret += tab(2) + "cloneResult." +  fieldName + " = this." + fieldName + ";" + endl();
             }
-
         }
         return ret;
-
     }
 
     private String getEnumDeclarations(IDLClass idlClass)
@@ -294,6 +298,7 @@ public class JavaCompiler extends opsc.Compiler
         String ret = "";
         for (IDLField field : idlClass.getFields())
         {
+            String fieldName = getFieldName(field);
             if (!field.getComment().equals(""))
             {
                 String comment = field.getComment();
@@ -312,24 +317,23 @@ public class JavaCompiler extends opsc.Compiler
             }
             else if (field.getType().equals("string"))
             {
-                ret += tab(1) + "public " + languageType(field.getType()) + " " + field.getName() + " = \"\";" + endl();
+                ret += tab(1) + "public " + languageType(field.getType()) + " " + fieldName + " = \"\";" + endl();
             }
             else if (field.isIdlType())
             {
-                ret += tab(1) + "public " + languageType(field.getType()) + " " + field.getName() + " = new " + languageType(field.getType()) + "();" + endl();
+                ret += tab(1) + "public " + languageType(field.getType()) + " " + fieldName + " = new " + languageType(field.getType()) + "();" + endl();
             }
             else //Simple primitive type
             {
-                ret += tab(1) + "public " + languageType(field.getType()) + " " + field.getName() + ";" + endl();
+                ret += tab(1) + "public " + languageType(field.getType()) + " " + fieldName + ";" + endl();
             }
-
         }
         return ret;
     }
 
     protected String getDeclareVector(IDLField field)
     {
-        return languageType(field.getType()) + " " + field.getName() + " = new " + languageType(field.getType()) + "();" + endl();
+        return languageType(field.getType()) + " " + getFieldName(field) + " = new " + languageType(field.getType()) + "();" + endl();
     }
 
     protected String languageType(String s)
@@ -415,15 +419,16 @@ public class JavaCompiler extends opsc.Compiler
         String ret = "";
         for (IDLField field : idlClass.getFields())
         {
+            String fieldName = getFieldName(field);
             if (field.isIdlType())
             {
                 if (!field.isArray())
                 {
-                    ret += tab(2) + field.getName() + " = (" + field.getType() + ") archive.inout(\"" + field.getName() + "\", " + field.getName() + ");" + endl();
+                    ret += tab(2) + fieldName + " = (" + field.getType() + ") archive.inout(\"" + field.getName() + "\", " + fieldName + ");" + endl();
                 }
                 else
                 {
-                    ret += tab(2) + field.getName() + " = (" + languageType(field.getType()) + ") archive.inoutSerializableList(\"" + field.getName() + "\", " + field.getName() + ");" + endl();
+                    ret += tab(2) + fieldName + " = (" + languageType(field.getType()) + ") archive.inoutSerializableList(\"" + field.getName() + "\", " + fieldName + ");" + endl();
 
                 }
             }
@@ -431,40 +436,40 @@ public class JavaCompiler extends opsc.Compiler
             {
                 if (field.getType().equals("int[]"))
                 {
-                    ret += tab(2) + field.getName() + " = (" + languageType(field.getType()) + ") archive.inoutIntegerList(\"" + field.getName() + "\", " + field.getName() + ");" + endl();
+                    ret += tab(2) + fieldName + " = (" + languageType(field.getType()) + ") archive.inoutIntegerList(\"" + field.getName() + "\", " + fieldName + ");" + endl();
                 }
                 else if (field.getType().equals("byte[]"))
                 {
-                    ret += tab(2) + field.getName() + " = (" + languageType(field.getType()) + ") archive.inoutByteList(\"" + field.getName() + "\", " + field.getName() + ");" + endl();
+                    ret += tab(2) + fieldName + " = (" + languageType(field.getType()) + ") archive.inoutByteList(\"" + field.getName() + "\", " + fieldName + ");" + endl();
                 }
                 else if (field.getType().equals("short[]"))
                 {
-                    ret += tab(2) + field.getName() + " = (" + languageType(field.getType()) + ") archive.inoutShortList(\"" + field.getName() + "\", " + field.getName() + ");" + endl();
+                    ret += tab(2) + fieldName + " = (" + languageType(field.getType()) + ") archive.inoutShortList(\"" + field.getName() + "\", " + fieldName + ");" + endl();
                 }
                 else if (field.getType().equals("long[]"))
                 {
-                    ret += tab(2) + field.getName() + " = (" + languageType(field.getType()) + ") archive.inoutLongList(\"" + field.getName() + "\", " + field.getName() + ");" + endl();
+                    ret += tab(2) + fieldName + " = (" + languageType(field.getType()) + ") archive.inoutLongList(\"" + field.getName() + "\", " + fieldName + ");" + endl();
                 }
                 else if (field.getType().equals("boolean[]"))
                 {
-                    ret += tab(2) + field.getName() + " = (" + languageType(field.getType()) + ") archive.inoutBooleanList(\"" + field.getName() + "\", " + field.getName() + ");" + endl();
+                    ret += tab(2) + fieldName + " = (" + languageType(field.getType()) + ") archive.inoutBooleanList(\"" + field.getName() + "\", " + fieldName + ");" + endl();
                 }
                 else if (field.getType().equals("float[]"))
                 {
-                    ret += tab(2) + field.getName() + " = (" + languageType(field.getType()) + ") archive.inoutFloatList(\"" + field.getName() + "\", " + field.getName() + ");" + endl();
+                    ret += tab(2) + fieldName + " = (" + languageType(field.getType()) + ") archive.inoutFloatList(\"" + field.getName() + "\", " + fieldName + ");" + endl();
                 }
                 else if (field.getType().equals("double[]"))
                 {
-                    ret += tab(2) + field.getName() + " = (" + languageType(field.getType()) + ") archive.inoutDoubleList(\"" + field.getName() + "\", " + field.getName() + ");" + endl();
+                    ret += tab(2) + fieldName + " = (" + languageType(field.getType()) + ") archive.inoutDoubleList(\"" + field.getName() + "\", " + fieldName + ");" + endl();
                 }
                 else if (field.getType().equals("string[]"))
                 {
-                    ret += tab(2) + field.getName() + " = (" + languageType(field.getType()) + ") archive.inoutStringList(\"" + field.getName() + "\", " + field.getName() + ");" + endl();
+                    ret += tab(2) + fieldName + " = (" + languageType(field.getType()) + ") archive.inoutStringList(\"" + field.getName() + "\", " + fieldName + ");" + endl();
                 }
             }
             else
             {
-                ret += tab(2) + field.getName() + " = archive.inout(\"" + field.getName() + "\", " + field.getName() + ");" + endl();
+                ret += tab(2) + fieldName + " = archive.inout(\"" + field.getName() + "\", " + fieldName + ");" + endl();
             }
 
         }
@@ -695,6 +700,31 @@ public class JavaCompiler extends opsc.Compiler
         {
           createdFiles += "\"" + string + "\"\n";
         }
-
     }
+
+    public boolean isReservedName(String name)
+    {
+        return Arrays.binarySearch(reservedNames, name) >= 0;
+    }
+
+    // Array of all reserved keywords in ascending order (for binarySearch() to work)
+    private static final String[] reservedNames = {
+      "abstract", "assert",
+      "boolean", "break", "byte",
+      "case", "catch", "char", "class", "const", "continue",
+      "default", "do", "double",
+      "else", "enum", "extends",
+      "final", "finally", "float", "for",
+      "goto",
+      "if", "implements", "import", "instanceof", "int", "interface",
+      "long",
+      "native", "new",
+      "package", "private", "protected", "public",
+      "return",
+      "short", "static", "strictfp", "super", "switch", "synchronized",
+      "this", "throw", "throws", "transient", "try",
+      "void", "volatile",
+      "while"
+    };
+
 }

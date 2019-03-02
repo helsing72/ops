@@ -26,6 +26,7 @@ import java.util.logging.Logger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Vector;
+import java.util.Arrays;
 import parsing.IDLClass;
 import parsing.IDLField;
 //import parsing.TopicInfo;
@@ -315,6 +316,13 @@ public class PythonCompiler extends opsc.CompilerSupport
     public String getName()
     {
         return "PythonCompiler";
+    }
+
+    protected String getFieldName(IDLField field)
+    {
+        String name = field.getName();
+        if (isReservedName(name)) return name + "_";
+        return name;
     }
 
     public PythonCompiler(String projectName)
@@ -615,7 +623,7 @@ public class PythonCompiler extends opsc.CompilerSupport
         String ret = "";
         for (IDLField field : idlClass.getFields())
         {
-
+            String fieldName = getFieldName(field);
             if (!field.getComment().equals(""))
             {
                 String comment = field.getComment();
@@ -631,7 +639,7 @@ public class PythonCompiler extends opsc.CompilerSupport
             {
                 //ret += tab(1) + "" + getDeclareVector(field);
                 //ret += "#### VECTOR ####" + endl();
-                ret += tab(2) + "self." + field.getName() + " = []"+endl();
+                ret += tab(2) + "self." + fieldName + " = []"+endl();
             }
             else
             {
@@ -642,11 +650,11 @@ public class PythonCompiler extends opsc.CompilerSupport
                     {
                         typeName = typeName.substring(packageName.length());
                     }
-                    ret += tab(2) + "self." + field.getName() + " = " + typeName + "()" + endl();
+                    ret += tab(2) + "self." + fieldName + " = " + typeName + "()" + endl();
                 }
                 else
                 {
-                    ret += tab(2) + "self." + field.getName() + " = " +getTypeInitialization(field.getType()) +endl();
+                    ret += tab(2) + "self." + fieldName + " = " +getTypeInitialization(field.getType()) +endl();
                 }
             }
 
@@ -673,9 +681,10 @@ public class PythonCompiler extends opsc.CompilerSupport
         for (IDLField field : idlClass.getFields())
         {
             String seralizerString = "archiver.";
+            String fieldName = getFieldName(field);
             if (field.isArray()==false)
             {
-                seralizerString = "self." + field.getName() + " = " + seralizerString;
+                seralizerString = "self." + fieldName + " = " + seralizerString;
             }
 
             if (field.isIdlType())
@@ -687,7 +696,7 @@ public class PythonCompiler extends opsc.CompilerSupport
                     seralizerString +="Vector";
                     typeName = typeName.substring(0,typeName.length() - 2);
                 }
-                seralizerString += "(\"" + field.getName() + "\", self." + field.getName();
+                seralizerString += "(\"" + field.getName() + "\", self." + fieldName;
 
                 {
                     int splitIndex = typeName.lastIndexOf(".");
@@ -703,7 +712,7 @@ public class PythonCompiler extends opsc.CompilerSupport
             }
             else
             {
-                seralizerString += getArchiverCall(field) + "(\"" + field.getName() + "\", self." + field.getName() + ")";
+                seralizerString += getArchiverCall(field) + "(\"" + field.getName() + "\", self." + fieldName + ")";
             }
             ret += tab(2) + seralizerString + endl();
         }
@@ -715,13 +724,12 @@ public class PythonCompiler extends opsc.CompilerSupport
         String ret = "";
         for (IDLField field : idlClass.getFields())
         {
-                String fieldName = "self." + field.getName();
+                String fieldName = "self." + getFieldName(field);
                 String typeName = field.getType();
 
                 //ret+=tab(2) + "print \"Checking " + fieldName + " for " + typeName + "\"" + endl();
 
                 int tabs = 2;
-
 
                 if (field.isIdlType())
                 {
@@ -735,7 +743,7 @@ public class PythonCompiler extends opsc.CompilerSupport
                 if (field.isArray())
                 {
                     typeName = typeName.substring(0,typeName.length() - 2);
-                    ret += tab(tabs++) + "for x in self." + field.getName() + ":" + endl();
+                    ret += tab(tabs++) + "for x in " + fieldName + ":" + endl();
                     fieldName = "x";
                 }
                 if (field.isIdlType()==false)
@@ -751,6 +759,7 @@ public class PythonCompiler extends opsc.CompilerSupport
         }
         return ret;
     }
+
     protected String getValidationString(String type)
     {
         if (type.equals("byte") || type.equals("short") || type.equals("int"))
@@ -805,5 +814,30 @@ public class PythonCompiler extends opsc.CompilerSupport
         else if (s.equals("byte"))    return "Int8";
         return "### ERROR";
     }
+
+    public boolean isReservedName(String name)
+    {
+        return Arrays.binarySearch(reservedNames, name.toLowerCase()) >= 0;
+    }
+
+    // Array of all reserved keywords in ascending order (for binarySearch() to work)
+    private static final String[] reservedNames = {
+      "and", "assert",
+      "break",
+      "class", "continue",
+      "def", "del",
+      "elif", "else", "except", "exec",
+      "finally", "for", "from",
+      "global",
+      "if", "import", "in", "is",
+      "lambda",
+      "not",
+      "or",
+      "pass", "print",
+      "raise", "return",
+      "try",
+      "while",
+      "yield"
+    };
 
 }

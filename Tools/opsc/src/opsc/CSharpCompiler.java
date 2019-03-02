@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Vector;
+import java.util.Arrays;
 //import javax.swing.JOptionPane;
 //import ops.netbeansmodules.idlsupport.projectproperties.JarDependency;
 //import ops.netbeansmodules.util.FileHelper;
@@ -149,6 +150,13 @@ public class CSharpCompiler extends opsc.Compiler
         return "CsFactoryIDLCompiler";
     }
 
+    protected String getFieldName(IDLField field)
+    {
+        String name = field.getName();
+        if (isReservedName(name)) return name + "_";
+        return name;
+    }
+
 //    private void compilePublisher(IDLClass idlClass) throws IOException
 //    {
 //        String className = idlClass.getClassName();
@@ -263,18 +271,19 @@ public class CSharpCompiler extends opsc.Compiler
         String ret = "";
         for (IDLField field : idlClass.getFields())
         {
+            String fieldName = getFieldName(field);
             if (field.isIdlType())
             {
                 if (!field.isArray())
                 {
-                    ret += tab(3) + "cloneResult." +  field.getName() + " = (" + field.getType() + ")this." + field.getName() + ".Clone();" + endl();
+                    ret += tab(3) + "cloneResult." +  fieldName + " = (" + field.getType() + ")this." + fieldName + ".Clone();" + endl();
                 }
                 else
                 {
                     String s = field.getType();
                     s = s.substring(0, s.indexOf('['));
-                    ret += tab(3) + "cloneResult." +  field.getName() + " = new " + languageType(field.getType()) + "(this." + field.getName() + ".Count);" + endl();
-                    ret += tab(3) + "this." +  field.getName() + ".ForEach((item) => { cloneResult." + field.getName() + ".Add((" + s + ")item.Clone()); });" + endl();
+                    ret += tab(3) + "cloneResult." +  fieldName + " = new " + languageType(field.getType()) + "(this." + fieldName + ".Count);" + endl();
+                    ret += tab(3) + "this." +  fieldName + ".ForEach((item) => { cloneResult." + fieldName + ".Add((" + s + ")item.Clone()); });" + endl();
                 }
             }
 
@@ -282,12 +291,12 @@ public class CSharpCompiler extends opsc.Compiler
             else if (field.isArray())
             {
 
-                ret += tab(3) + "cloneResult." +  field.getName() + " = new " + languageType(field.getType()) + "(this." + field.getName() + ");" + endl();
+                ret += tab(3) + "cloneResult." +  fieldName + " = new " + languageType(field.getType()) + "(this." + fieldName + ");" + endl();
 
             }
             else
             {
-                ret += tab(3) + "cloneResult." +  field.getName() + " = this." + field.getName() + ";" + endl();
+                ret += tab(3) + "cloneResult." +  fieldName + " = this." + fieldName + ";" + endl();
             }
 
         }
@@ -316,6 +325,7 @@ public class CSharpCompiler extends opsc.Compiler
         String ret = "";
         for (IDLField field : idlClass.getFields())
         {
+            String fieldName = getFieldName(field);
             if(!field.getComment().equals(""))
             {
                 String comment = field.getComment();
@@ -330,34 +340,34 @@ public class CSharpCompiler extends opsc.Compiler
             }
             if (field.isArray())
             {
-                ret += tab(2) + "private " + languageType(field.getType()) + " _" + field.getName() +
+                ret += tab(2) + "private " + languageType(field.getType()) + " _" + fieldName +
                         " = new " + languageType(field.getType()) + "();" + endl();
                 if(field.getType().equals("string[]")) {
                     ret += tab(2) + "[Editor(@\"System.Windows.Forms.Design.StringCollectionEditor,\" +" + endl() +
                            tab(3) + "\"System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a\"," + endl() +
                            tab(3) + "typeof(System.Drawing.Design.UITypeEditor))]" + endl();
                 }
-                ret += tab(2) + "public " + languageType(field.getType()) + " " + field.getName() +
-                        " { get { return " + " _" + field.getName() + "; } set { _" + field.getName() + " = value; } } " + endl() + endl();
+                ret += tab(2) + "public " + languageType(field.getType()) + " " + fieldName +
+                        " { get { return " + " _" + fieldName + "; } set { _" + fieldName + " = value; } } " + endl() + endl();
             }
             else if(field.getType().equals("string"))
             {
                 ///TEST gives a description and category in a propertygrid
                 /// ret += tab(2) + "[Description(\"TBD\"), Category(\"" + idlClass.getClassName() + "\")]" + endl();
                 ///TEST
-                ret += tab(2) + "public " + languageType(field.getType()) + " " + field.getName() + " { get; set; }" + endl() + endl();
+                ret += tab(2) + "public " + languageType(field.getType()) + " " + fieldName + " { get; set; }" + endl() + endl();
             }
             else if(field.isIdlType())
             {
-                    ret += tab(2) + "private " + languageType(field.getType()) + " _" + field.getName() +
+                    ret += tab(2) + "private " + languageType(field.getType()) + " _" + fieldName +
                             " = new " + languageType(field.getType()) + "();" + endl();
                     ret += tab(2) + "[System.ComponentModel.TypeConverter(typeof(System.ComponentModel.ExpandableObjectConverter))]" + endl();
-                    ret += tab(2) + "public " + languageType(field.getType()) + " " + field.getName() +
-                            " { get { return " + " _" + field.getName() + "; } set { _" + field.getName() + " = value; } } " + endl() + endl();
+                    ret += tab(2) + "public " + languageType(field.getType()) + " " + fieldName +
+                            " { get { return " + " _" + fieldName + "; } set { _" + fieldName + " = value; } } " + endl() + endl();
             }
             else //Simple primitive type
             {
-                    ret += tab(2) + "public " + languageType(field.getType()) + " " + field.getName() + " { get; set; }" + endl() + endl();
+                    ret += tab(2) + "public " + languageType(field.getType()) + " " + fieldName + " { get; set; }" + endl() + endl();
             }
 
         }
@@ -447,15 +457,16 @@ public class CSharpCompiler extends opsc.Compiler
         String ret = "";
         for (IDLField field : idlClass.getFields())
         {
+            String fieldName = getFieldName(field);
             if(field.isIdlType())
             {
                 if(!field.isArray())
                 {
-                    ret += tab(3) + "_" + field.getName() + " = (" + field.getType() + ") archive.Inout(\"" + field.getName() + "\", _" + field.getName() + ");" + endl();
+                    ret += tab(3) + "_" + fieldName + " = (" + field.getType() + ") archive.Inout(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
                 }
                 else
                 {
-                    ret += tab(3) + "_" + field.getName() + " = (" + languageType(field.getType()) + ") archive.InoutSerializableList(\"" + field.getName() + "\", _" + field.getName() + ");" + endl();
+                    ret += tab(3) + "_" + fieldName + " = (" + languageType(field.getType()) + ") archive.InoutSerializableList(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
 
                 }
             }
@@ -463,40 +474,40 @@ public class CSharpCompiler extends opsc.Compiler
             {
                 if(field.getType().equals("int[]"))
                 {
-                    ret += tab(3) + "_" + field.getName() + " = (" + languageType(field.getType()) + ") archive.InoutIntegerList(\"" + field.getName() + "\", _" + field.getName() + ");" + endl();
+                    ret += tab(3) + "_" + fieldName + " = (" + languageType(field.getType()) + ") archive.InoutIntegerList(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
                 }
                 else if(field.getType().equals("short[]"))
                 {
-                    ret += tab(3) + "_" + field.getName() + " = (" + languageType(field.getType()) + ") archive.InoutShortList(\"" + field.getName() + "\", _" + field.getName() + ");" + endl();
+                    ret += tab(3) + "_" + fieldName + " = (" + languageType(field.getType()) + ") archive.InoutShortList(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
                 }
                 else if(field.getType().equals("byte[]"))
                 {
-                    ret += tab(3) + "_" + field.getName() + " = (" + languageType(field.getType()) + ") archive.InoutByteList(\"" + field.getName() + "\", _" + field.getName() + ");" + endl();
+                    ret += tab(3) + "_" + fieldName + " = (" + languageType(field.getType()) + ") archive.InoutByteList(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
                 }
                 else if(field.getType().equals("long[]"))
                 {
-                    ret += tab(3) + "_" + field.getName() + " = (" + languageType(field.getType()) + ") archive.InoutLongList(\"" + field.getName() + "\", _" + field.getName() + ");" + endl();
+                    ret += tab(3) + "_" + fieldName + " = (" + languageType(field.getType()) + ") archive.InoutLongList(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
                 }
                 else if(field.getType().equals("boolean[]"))
                 {
-                    ret += tab(3) + "_" + field.getName() + " = (" + languageType(field.getType()) + ") archive.InoutBooleanList(\"" + field.getName() + "\", _" + field.getName() + ");" + endl();
+                    ret += tab(3) + "_" + fieldName + " = (" + languageType(field.getType()) + ") archive.InoutBooleanList(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
                 }
                 else if(field.getType().equals("float[]"))
                 {
-                    ret += tab(3) + "_" + field.getName() + " = (" + languageType(field.getType()) + ") archive.InoutFloatList(\"" + field.getName() + "\", _" + field.getName() + ");" + endl();
+                    ret += tab(3) + "_" + fieldName + " = (" + languageType(field.getType()) + ") archive.InoutFloatList(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
                 }
                 else if(field.getType().equals("double[]"))
                 {
-                    ret += tab(3) + "_" + field.getName() + " = (" + languageType(field.getType()) + ") archive.InoutDoubleList(\"" + field.getName() + "\", _" + field.getName() + ");" + endl();
+                  ret += tab(3) + "_" + fieldName + " = (" + languageType(field.getType()) + ") archive.InoutDoubleList(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
                 }
                 else if(field.getType().equals("string[]"))
                 {
-                    ret += tab(3) + "_" + field.getName() + " = (" + languageType(field.getType()) + ") archive.InoutStringList(\"" + field.getName() + "\", _" + field.getName() + ");" + endl();
+                    ret += tab(3) + "_" + fieldName + " = (" + languageType(field.getType()) + ") archive.InoutStringList(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
                 }
             }
             else
             {
-                ret += tab(3) + field.getName() + " = archive.Inout(\"" + field.getName() + "\", " + field.getName() + ");" + endl();
+                ret += tab(3) + fieldName + " = archive.Inout(\"" + field.getName() + "\", " + fieldName + ");" + endl();
             }
 
         }
@@ -582,5 +593,33 @@ public class CSharpCompiler extends opsc.Compiler
         System.out.println("Error: " + e.getMessage());
       }
     }
+
+    public boolean isReservedName(String name)
+    {
+        return Arrays.binarySearch(reservedNames, name.toLowerCase()) >= 0;
+    }
+
+    // Array of all reserved keywords in ascending order (for binarySearch() to work)
+    private static final String[] reservedNames = {
+      "abstract", "as",
+      "base", "bool", "break", "byte",
+      "case", "catch", "char", "checked", "class", "const", "continue",
+      "decimal", "default", "delegate", "do", "double",
+      "else", "enum", "event", "explicit", "extern",
+      "false", "finally", "fixed", "float", "for", "foreach",
+      "goto",
+      "if", "implicit", "in", "int", "interface", "internal", "is",
+      "lock", "long",
+      "namespace", "new", "null",
+      "object", "operator", "out", "override",
+      "params", "private", "protected", "public",
+      "readonly", "ref", "return",
+      "sbyte", "sealed", "short", "sizeof", "stackalloc", "static", "string",
+      "struct", "switch",
+      "this", "throw", "true", "try", "typeof",
+      "uint", "ulong", "unchecked", "unsafe", "ushort", "using",
+      "virtual", "void", "volatile",
+      "while"
+    };
 
 }
