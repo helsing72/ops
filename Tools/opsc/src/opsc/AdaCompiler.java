@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
+import java.util.Arrays;
 import parsing.AbstractTemplateBasedIDLCompiler;
 import parsing.IDLClass;
 import parsing.IDLField;
@@ -596,11 +597,12 @@ public class AdaCompiler extends opsc.Compiler
 
     protected String getFieldName(IDLField field)
     {
+        String name = field.getName();
+        if (isReservedName(name)) name = name + "_";
         // Ada don't allow leading and trailing "_" so change them
-        String s = field.getName();
-        if (s.charAt(0) == '_') s = "a" + s;
-        if (s.charAt(s.length()-1) == '_') s = s + "a";
-        return s;
+        if (name.charAt(0) == '_') name = "a" + name;
+        if (name.charAt(name.length()-1) == '_') name = name + "a";
+        return name;
     }
 
     protected String getInitValue(String s)
@@ -803,5 +805,34 @@ public class AdaCompiler extends opsc.Compiler
         }
         return ret;
     }
+
+    public boolean isReservedName(String name)
+    {
+        return Arrays.binarySearch(reservedNames, name.toLowerCase()) >= 0;
+    }
+
+    // Array of all reserved keywords in ascending order (for binarySearch() to work)
+    private static final String[] reservedNames = {
+      "abort", "abs", "abstract", "accept", "access", "aliased", "all", "and",
+      "array", "at",
+      "begin", "body",
+      "case", "constant",
+      "declare", "delay", "delta", "digits", "do",
+      "else", "elsif", "end", "entry", "exception", "exit",
+      "for", "function",
+      "generic", "goto",
+      "if", "in", "interface", "is",
+      "limited", "loop",
+      "mod",
+      "new", "not", "null",
+      "of", "or", "others", "out", "overriding",
+      "package", "pragma", "private", "procedure", "protected",
+      "raise", "range", "record", "rem", "renames", "requeue", "return", "reverse",
+      "select", "separate", "some", "subtype", "synchronized",
+      "tagged", "task", "terminate", "then", "type",
+      "until", "use",
+      "when", "while", "with",
+      "xor"
+    };
 
 }
