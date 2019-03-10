@@ -271,6 +271,7 @@ public class CSharpCompiler extends opsc.Compiler
         String ret = "";
         for (IDLField field : idlClass.getFields())
         {
+            if (field.isStatic()) continue;
             String fieldName = getFieldName(field);
             if (field.isIdlType())
             {
@@ -352,22 +353,32 @@ public class CSharpCompiler extends opsc.Compiler
             }
             else if(field.getType().equals("string"))
             {
-                ///TEST gives a description and category in a propertygrid
-                /// ret += tab(2) + "[Description(\"TBD\"), Category(\"" + idlClass.getClassName() + "\")]" + endl();
-                ///TEST
-                ret += tab(2) + "public " + languageType(field.getType()) + " " + fieldName + " { get; set; }" + endl() + endl();
+                if (field.isStatic()) {
+                    ret += tab(2) + "public const " + languageType(field.getType()) + " " + fieldName + " = " + field.getValue() + ";" + endl() + endl();
+                } else {
+                    ///TEST gives a description and category in a propertygrid
+                    /// ret += tab(2) + "[Description(\"TBD\"), Category(\"" + idlClass.getClassName() + "\")]" + endl();
+                    ///TEST
+                    ret += tab(2) + "public " + languageType(field.getType()) + " " + fieldName + " { get; set; }" + endl() + endl();
+                }
             }
             else if(field.isIdlType())
             {
-                    ret += tab(2) + "private " + languageType(field.getType()) + " _" + fieldName +
-                            " = new " + languageType(field.getType()) + "();" + endl();
-                    ret += tab(2) + "[System.ComponentModel.TypeConverter(typeof(System.ComponentModel.ExpandableObjectConverter))]" + endl();
-                    ret += tab(2) + "public " + languageType(field.getType()) + " " + fieldName +
-                            " { get { return " + " _" + fieldName + "; } set { _" + fieldName + " = value; } } " + endl() + endl();
+                ret += tab(2) + "private " + languageType(field.getType()) + " _" + fieldName +
+                        " = new " + languageType(field.getType()) + "();" + endl();
+                ret += tab(2) + "[System.ComponentModel.TypeConverter(typeof(System.ComponentModel.ExpandableObjectConverter))]" + endl();
+                ret += tab(2) + "public " + languageType(field.getType()) + " " + fieldName +
+                        " { get { return " + " _" + fieldName + "; } set { _" + fieldName + " = value; } } " + endl() + endl();
             }
             else //Simple primitive type
             {
+                if (field.isStatic()) {
+                    String suffix = "";
+                    if (languageType(field.getType()).equals("float")) suffix = "F";
+                    ret += tab(2) + "public const " + languageType(field.getType()) + " " + fieldName + " = " + field.getValue() + suffix + ";" + endl() + endl();
+                } else {
                     ret += tab(2) + "public " + languageType(field.getType()) + " " + fieldName + " { get; set; }" + endl() + endl();
+                }
             }
 
         }
@@ -457,6 +468,7 @@ public class CSharpCompiler extends opsc.Compiler
         String ret = "";
         for (IDLField field : idlClass.getFields())
         {
+            if (field.isStatic()) continue;
             String fieldName = getFieldName(field);
             if(field.isIdlType())
             {
@@ -467,7 +479,6 @@ public class CSharpCompiler extends opsc.Compiler
                 else
                 {
                     ret += tab(3) + "_" + fieldName + " = (" + languageType(field.getType()) + ") archive.InoutSerializableList(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
-
                 }
             }
             else if(field.isArray())

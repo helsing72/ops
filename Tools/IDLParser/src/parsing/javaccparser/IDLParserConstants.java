@@ -11,23 +11,23 @@ public interface IDLParserConstants {
   /** End of File. */
   int EOF = 0;
   /** RegularExpression Id. */
-  int ID = 31;
+  int ID = 34;
   /** RegularExpression Id. */
-  int OCTALINT = 32;
+  int OCTALINT = 35;
   /** RegularExpression Id. */
-  int DECIMALINT = 33;
+  int DECIMALINT = 36;
   /** RegularExpression Id. */
-  int HEXADECIMALINT = 34;
+  int HEXADECIMALINT = 37;
   /** RegularExpression Id. */
-  int FLOATONE = 35;
+  int FLOATONE = 38;
   /** RegularExpression Id. */
-  int FLOATTWO = 36;
+  int FLOATTWO = 39;
   /** RegularExpression Id. */
-  int CHARACTER = 37;
+  int CHARACTER = 40;
   /** RegularExpression Id. */
-  int STRING = 38;
+  int STRING = 41;
   /** RegularExpression Id. */
-  int ANOTATION = 39;
+  int ANOTATION = 42;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -52,6 +52,7 @@ public interface IDLParserConstants {
     "\"}\"",
     "\",\"",
     "\"extends\"",
+    "\"const\"",
     "\"[\"",
     "\"]\"",
     "\"virtual\"",
@@ -65,6 +66,8 @@ public interface IDLParserConstants {
     "\"string\"",
     "\"<\"",
     "\">\"",
+    "\"true\"",
+    "\"false\"",
     "<ID>",
     "<OCTALINT>",
     "<DECIMALINT>",

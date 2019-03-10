@@ -32,6 +32,7 @@ public class AdaCompiler extends opsc.Compiler
     final static String CONSTRUCTOR_BODY_REGEX = "__constructorBody";
     final static String DESTRUCTOR_HEAD_REGEX = "__destructorHead";
     final static String DESTRUCTOR_BODY_REGEX = "__destructorBody";
+    final static String CONSTANTS_REGEX = "__constDeclarations";
     final static String DECLARATIONS_REGEX = "__declarations";
     final static String SERIALIZE_REGEX = "__serialize";
     final static String FILL_CLONE_HEAD_REGEX = "__fillCloneHead";
@@ -193,6 +194,7 @@ public class AdaCompiler extends opsc.Compiler
         templateText = templateText.replace(BASE_CLASS_NAME_REGEX, baseClassName);                  //
         templateText = templateText.replace(PACKAGE_NAME_REGEX, packageName);                       //
         templateText = templateText.replace(DECLARATIONS_REGEX, getDeclarations(idlClass));         //
+        templateText = templateText.replace(CONSTANTS_REGEX, getConstantDeclarations(idlClass));    //
 
         //Save the modified text to the output file.
         saveOutputText(templateText);
@@ -391,6 +393,7 @@ public class AdaCompiler extends opsc.Compiler
       String ret = "";
       int pos = 2;
       for (IDLField field : idlClass.getFields()) {
+          if (field.isStatic()) continue;
           if (field.isIdlType()) {
               if (field.isArray()) {
                   if (alwaysDynArray || (field.getArraySize() == 0)) {
@@ -453,6 +456,7 @@ public class AdaCompiler extends opsc.Compiler
         int pos = 3;
         String className = idlClass.getClassName() + "_Class";
         for (IDLField field : idlClass.getFields()) {
+            if (field.isStatic()) continue;
             String fieldName = getFieldName(field);
             if (field.isIdlType()) {
                 // Idl types
@@ -666,6 +670,7 @@ public class AdaCompiler extends opsc.Compiler
     {
         String ret = "";
         for (IDLField field : idlClass.getFields()) {
+            if (field.isStatic()) continue;
             if(!field.getComment().equals("")) {
                 String comment = field.getComment();
                 int idx;
@@ -689,6 +694,29 @@ public class AdaCompiler extends opsc.Compiler
         }
         if (ret == "") ret = tab(3) + "null;";
         return ret;
+    }
+
+    protected String getConstantDeclarations(IDLClass idlClass)
+    {
+      String ret = "";
+      for (IDLField field : idlClass.getFields()) {
+          if (!field.isStatic()) continue;
+          if(!field.getComment().equals("")) {
+              String comment = field.getComment();
+              int idx;
+              while ((idx = comment.indexOf('\n')) >= 0) {
+                ret += tab(1) + "---" + comment.substring(0,idx).replace("/*", "").replace("*/", "") + endl();
+                comment = comment.substring(idx+1);
+              }
+              ret += tab(1) + "---" + comment.replace("/*", "").replace("*/", "") + endl();
+          }
+
+          String fieldType = languageType(getLastPart(field.getType()));
+          if (fieldType.equals("String_At")) fieldType = "String";
+          ret += tab(1) + getFieldName(field) + " : constant ";
+          ret += fieldType + " := " + field.getValue() + ";" + endl();
+      }
+      return ret;
     }
 
 //    protected String getValidationHead(IDLClass idlClass)
@@ -763,6 +791,7 @@ public class AdaCompiler extends opsc.Compiler
     {
         String ret = "";
         for (IDLField field : idlClass.getFields()) {
+            if (field.isStatic()) continue;
             String fieldName = getFieldName(field);
             if (field.isIdlType()) {
                 if (field.isArray()) {

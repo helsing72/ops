@@ -31,6 +31,7 @@ public class DelphiCompiler extends opsc.Compiler
     final static String DESTRUCTOR_HEAD_REGEX = "__destructorHead";
     final static String DESTRUCTOR_BODY_REGEX = "__destructorBody";
     final static String DECLARATIONS_REGEX = "__declarations";
+    final static String CONSTANTS_REGEX = "__constDeclarations";
     final static String SERIALIZE_REGEX = "__serialize";
     final static String FILL_CLONE_HEAD_REGEX = "__fillCloneHead";
     final static String FILL_CLONE_BODY_REGEX = "__fillCloneBody";
@@ -135,6 +136,7 @@ public class DelphiCompiler extends opsc.Compiler
         templateText = templateText.replace(DESTRUCTOR_HEAD_REGEX, getDestructorHead(idlClass));
         templateText = templateText.replace(DESTRUCTOR_BODY_REGEX, getDestructorBody(idlClass));
         templateText = templateText.replace(DECLARATIONS_REGEX, getDeclarations(idlClass));
+        templateText = templateText.replace(CONSTANTS_REGEX, getConstantDeclarations(idlClass));
         templateText = templateText.replace(SERIALIZE_REGEX, getSerialize(idlClass));
         templateText = templateText.replace(FILL_CLONE_HEAD_REGEX, getFillCloneHead(idlClass));
         templateText = templateText.replace(FILL_CLONE_BODY_REGEX, getFillCloneBody(idlClass));
@@ -239,6 +241,7 @@ public class DelphiCompiler extends opsc.Compiler
     {
       String ret = "";
       for (IDLField field : idlClass.getFields()) {
+          if (field.isStatic()) continue;
           if (field.isIdlType() && field.isArray() && field.getArraySize() > 0) {
               ret += tab(0) + "var" + endl();
               ret += tab(1) +   "i : Integer;" + endl();
@@ -252,6 +255,7 @@ public class DelphiCompiler extends opsc.Compiler
     {
       String ret = "";
       for (IDLField field : idlClass.getFields()) {
+          if (field.isStatic()) continue;
           String fieldName = getFieldName(field);
           if (field.isIdlType()) {
               if (field.isArray()) {
@@ -272,6 +276,7 @@ public class DelphiCompiler extends opsc.Compiler
     {
       String ret = "";
       for (IDLField field : idlClass.getFields()) {
+          if (field.isStatic()) continue;
           if (field.isIdlType() && field.isArray()) {
               ret += tab(0) + "var" + endl();
               ret += tab(1) +   "i : Integer;" + endl();
@@ -285,6 +290,7 @@ public class DelphiCompiler extends opsc.Compiler
     {
       String ret = "";
       for (IDLField field : idlClass.getFields()) {
+          if (field.isStatic()) continue;
           String fieldName = getFieldName(field);
           if (field.isIdlType()) {
               if (field.isArray()) {
@@ -303,6 +309,7 @@ public class DelphiCompiler extends opsc.Compiler
     {
       String ret = "";
       for (IDLField field : idlClass.getFields()) {
+          if (field.isStatic()) continue;
           if (field.isIdlType()) {
               if (field.isArray()) {
                 ret += tab(0) + "var" + endl();
@@ -318,6 +325,7 @@ public class DelphiCompiler extends opsc.Compiler
     {
         String ret = "";
         for (IDLField field : idlClass.getFields()) {
+            if (field.isStatic()) continue;
             String fieldName = getFieldName(field);
             if (field.isIdlType()) {
                 if (!field.isArray()) {
@@ -413,6 +421,7 @@ public class DelphiCompiler extends opsc.Compiler
     {
         String ret = "";
         for (IDLField field : idlClass.getFields()) {
+            if (field.isStatic()) continue;
             String fieldName = getFieldName(field);
             if(!field.getComment().equals("")) {
                 String comment = field.getComment();
@@ -437,11 +446,37 @@ public class DelphiCompiler extends opsc.Compiler
         return ret;
     }
 
+    protected String getConstantDeclarations(IDLClass idlClass)
+    {
+      String ret = "";
+      for (IDLField field : idlClass.getFields()) {
+          if (!field.isStatic()) continue;
+          String fieldName = getFieldName(field);
+          if (!field.getComment().equals("")) {
+              String comment = field.getComment();
+              int idx;
+              while ((idx = comment.indexOf('\n')) >= 0) {
+                ret += tab(3) + "///" + comment.substring(0,idx).replace("/*", "").replace("*/", "") + endl();
+                comment = comment.substring(idx+1);
+              }
+              ret += tab(3) + "///" + comment.replace("/*", "").replace("*/", "") + endl();
+          }
+          String fieldType = getLastPart(field.getType());
+          if (field.getType().equals("string")) {
+              ret += tab(3) + fieldName + " = " + languageType(fieldType) + "(" + field.getValue().replace("\"", "'") + ");" + endl();
+          } else {
+              ret += tab(3) + fieldName + " = " + languageType(fieldType) + "(" + field.getValue() + ");" + endl();
+          }
+      }
+      if (!ret.equals("")) ret = tab(2) + "const" + endl() + ret;
+      return ret;
+    }
+
     protected String getValidationHead(IDLClass idlClass)
     {
       String ret = "";
-      for (IDLField field : idlClass.getFields())
-      {
+      for (IDLField field : idlClass.getFields()) {
+          if (field.isStatic()) continue;
           if (field.isIdlType() && !field.isAbstract()) {
               if (field.isArray()) {
                 ret += tab(0) + "var" + endl();
@@ -457,6 +492,7 @@ public class DelphiCompiler extends opsc.Compiler
     {
       String ret = "";
       for (IDLField field : idlClass.getFields()) {
+          if (field.isStatic()) continue;
           String fieldName = getFieldName(field);
           String fieldType = getLastPart(field.getType());
           if (field.isIdlType() && !field.isAbstract()) {
@@ -503,6 +539,7 @@ public class DelphiCompiler extends opsc.Compiler
     {
         String ret = "";
         for (IDLField field : idlClass.getFields()) {
+            if (field.isStatic()) continue;
             String fieldName = getFieldName(field);
             ret += tab(1);
             if (field.isIdlType()) {

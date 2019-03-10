@@ -254,8 +254,8 @@ public class JavaCompiler extends opsc.Compiler
     protected String getCloneBody(IDLClass idlClass)
     {
         String ret = "";
-        for (IDLField field : idlClass.getFields())
-        {
+        for (IDLField field : idlClass.getFields()) {
+            if (field.isStatic()) continue;
             String fieldName = getFieldName(field);
             if (field.isIdlType())
             {
@@ -308,8 +308,6 @@ public class JavaCompiler extends opsc.Compiler
                   comment = comment.substring(idx+1);
                 }
                 ret += tab(1) + "///" + comment.replace("/*", "").replace("*/", "") + endl();
-//                ret += tab(1) + "///" + field.getComment().replace("/*", "").replace("*/", "") + endl();
-//                ret += tab(1) + "///" + field.getComment() + endl();
             }
             if (field.isArray())
             {
@@ -317,7 +315,11 @@ public class JavaCompiler extends opsc.Compiler
             }
             else if (field.getType().equals("string"))
             {
-                ret += tab(1) + "public " + languageType(field.getType()) + " " + fieldName + " = \"\";" + endl();
+                if (field.isStatic()) {
+                    ret += tab(1) + "public static final " + languageType(field.getType()) + " " + fieldName + " = " + field.getValue() + ";" + endl() + endl();
+                } else {
+                    ret += tab(1) + "public " + languageType(field.getType()) + " " + fieldName + " = \"\";" + endl();
+                }
             }
             else if (field.isIdlType())
             {
@@ -325,7 +327,13 @@ public class JavaCompiler extends opsc.Compiler
             }
             else //Simple primitive type
             {
-                ret += tab(1) + "public " + languageType(field.getType()) + " " + fieldName + ";" + endl();
+                if (field.isStatic()) {
+                    String suffix = "";
+                    if (languageType(field.getType()).equals("float")) suffix = "f";
+                    ret += tab(1) + "public static final " + languageType(field.getType()) + " " + fieldName + " = " + field.getValue() + suffix + ";" + endl() + endl();
+                } else {
+                    ret += tab(1) + "public " + languageType(field.getType()) + " " + fieldName + ";" + endl();
+                }
             }
         }
         return ret;
@@ -417,8 +425,8 @@ public class JavaCompiler extends opsc.Compiler
     protected String getSerialize(IDLClass idlClass)
     {
         String ret = "";
-        for (IDLField field : idlClass.getFields())
-        {
+        for (IDLField field : idlClass.getFields()) {
+            if (field.isStatic()) continue;
             String fieldName = getFieldName(field);
             if (field.isIdlType())
             {

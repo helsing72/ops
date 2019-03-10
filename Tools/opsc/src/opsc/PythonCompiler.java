@@ -39,6 +39,7 @@ public class PythonCompiler extends opsc.CompilerSupport
 //class template
     private final static String BASE_CLASS_NAME_REGEX = "__baseClassName";
     private final static String DECLARATIONS_REGEX = "__declarations";
+    private final static String CONSTANTS_REGEX = "__constDeclarations";
     private final static String SERIALIZE_REGEX = "__serialize";
     private final static String CREATE_BODY_REGEX = "__createBody";
     private final static String CLASS_COMMENT_REGEX = "__classComment";
@@ -418,11 +419,10 @@ public class PythonCompiler extends opsc.CompilerSupport
         templateText = templateText.replace(CLASS_NAME_REGEX, className);
         templateText = templateText.replace(PACKAGE_NAME_REGEX, packageName);
         templateText = templateText.replace(BASE_CLASS_NAME_REGEX, baseClassName);
+        templateText = templateText.replace(CONSTANTS_REGEX, getConstantDeclarations(idlClass));
         templateText = templateText.replace(DECLARATIONS_REGEX, getDeclarations(idlClass));
         templateText = templateText.replace(SERIALIZE_REGEX, getSerialize(idlClass));
         templateText = templateText.replace(VALIDATION_REGEX, getValidation(idlClass));
-
-
 
         helper.setClassDeclaration(templateText);
         checkForImports(helper,idlClass);
@@ -617,12 +617,40 @@ public class PythonCompiler extends opsc.CompilerSupport
         return ret;
     }
 
+    protected String getFieldValue(IDLField field)
+    {
+        String ret = field.getValue();
+        if (ret.equals("true")) ret = "True";
+        if (ret.equals("false")) ret = "False";
+        return ret;
+    }
+
+    protected String getConstantDeclarations(IDLClass idlClass)
+    {
+        String ret = "";
+        for (IDLField field : idlClass.getFields()) {
+            if (!field.isStatic()) continue;
+            String fieldName = getFieldName(field);
+            if (!field.getComment().equals("")) {
+                String comment = field.getComment();
+                int idx;
+                while ((idx = comment.indexOf('\n')) >= 0) {
+                    ret += tab(1) + "#" + comment.substring(0,idx).replace("/*", "").replace("*/", "") + endl();
+                    comment = comment.substring(idx+1);
+                }
+                ret += tab(1) + "#" + comment.replace("/*", "").replace("*/", "") + endl();
+            }
+            ret += tab(1) + "" + fieldName.toUpperCase() + " = " + getFieldValue(field) + endl();
+        }
+        return ret;
+    }
+
     protected String getDeclarations(IDLClass idlClass)
     {
         String packageName = idlClass.getPackageName() + ".";
         String ret = "";
-        for (IDLField field : idlClass.getFields())
-        {
+        for (IDLField field : idlClass.getFields()) {
+            if (field.isStatic()) continue;
             String fieldName = getFieldName(field);
             if (!field.getComment().equals(""))
             {
@@ -654,10 +682,9 @@ public class PythonCompiler extends opsc.CompilerSupport
                 }
                 else
                 {
-                    ret += tab(2) + "self." + fieldName + " = " +getTypeInitialization(field.getType()) +endl();
+                    ret += tab(2) + "self." + fieldName + " = " + getTypeInitialization(field.getType()) + endl();
                 }
             }
-
         }
         return ret;
     }
@@ -678,8 +705,8 @@ public class PythonCompiler extends opsc.CompilerSupport
     {
         String packageName = idlClass.getPackageName() + ".";
         String ret = "";
-        for (IDLField field : idlClass.getFields())
-        {
+        for (IDLField field : idlClass.getFields()) {
+            if (field.isStatic()) continue;
             String seralizerString = "archiver.";
             String fieldName = getFieldName(field);
             if (field.isArray()==false)
@@ -724,6 +751,7 @@ public class PythonCompiler extends opsc.CompilerSupport
         String ret = "";
         for (IDLField field : idlClass.getFields())
         {
+                if (field.isStatic()) continue;
                 String fieldName = "self." + getFieldName(field);
                 String typeName = field.getType();
 
