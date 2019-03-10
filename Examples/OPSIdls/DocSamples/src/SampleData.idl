@@ -1,6 +1,8 @@
 package samples;
 class SampleData
 {
+   const int max = 42;
+
    boolean boo;
    byte b;
    short sh;
@@ -22,4 +24,6 @@ class SampleData
    string[] strings;
    string<43>[] s43vect;
    UserData[] uDatas;
+
+   int[42] intarr;
 }
