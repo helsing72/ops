@@ -1,5 +1,6 @@
 class __className(__baseClassName):
 	TypeName = "__packageName.__className"
+__constDeclarations
 	def __init__(self):
 		super(__className,self).__init__()
 		self.appendType("__packageName.__className")

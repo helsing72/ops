@@ -11,10 +11,12 @@ import java.io.FileNotFoundException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import parsing.IDLField;
+import parsing.javaccparser.ParseException;
 
 public class IDLParser
 {
     private IDLField currentIDLField;
+    private Token currentToken = null;
 
     public ParserEvent<String> packageDeclareEvent = new ParserEvent<String>();
     public ParserEvent<String> idlDeclareEvent = new ParserEvent<String>();
@@ -26,6 +28,16 @@ public class IDLParser
     public ParserEvent<String> enumElementEvent = new ParserEvent<String>();
     public ParserEvent<String> commentEvent = new ParserEvent<String>();
     public ParserEvent<String> directiveEvent = new ParserEvent<String>();
+
+    public void genErrorMessage(String msg) throws parsing.javaccparser.ParseException
+    {
+        if (currentToken != null) {
+            msg += " at line " + currentToken.beginLine + ", column " + currentToken.beginColumn + ".";
+        } else {
+            msg += ".";
+        }
+        throw new parsing.javaccparser.ParseException(msg);
+    }
 
   public static void main(String args[])
   {
@@ -191,15 +203,13 @@ void directive_declare():
 }
 
 String directive_value():
-{ String value = "";}
+{ String value = ""; Long val = 0L;}
 {
     value = <ID>.image {return value;}
 |
-    value = <OCTALINT>.image {return value;}
+    val = integer_literal() {return Long.toString(val);}
 |
-    value = <DECIMALINT>.image {return value;}
-|
-    value = <HEXADECIMALINT>.image {return value;}
+    value = boolean_literal() {return value;}
 }
 
 /* Production 3 */
@@ -261,7 +271,7 @@ void member_list() :
 /* Production 52 */
 
 void member() :
-{String typeName = ""; String fieldName = "";String comment = ""; String tComment = ""; }
+{String typeName = ""; String fieldName = ""; String comment = ""; String tComment = ""; }
 {
     {currentIDLField = new IDLField(fieldName, "");}
 
@@ -280,8 +290,66 @@ void member() :
         fieldDeclareEvent.fireEvent(currentIDLField);
     }
 |
+    {currentIDLField = new IDLField(fieldName, "");}
+
+    "const" const_decl() ";"
+|
     comment = <ANOTATION>.image
     {commentEvent.fireEvent(comment);}
+}
+
+void const_decl() :
+{ String typeName = ""; String fieldName = ""; String cvalue = ""; Long cval = 0L; double dval = 0.0; }
+{
+    typeName = integer_type() fieldName = identifier() "=" cval = integer_literal()
+    {
+        cvalue = Long.toString(cval);
+        if (typeName.equals("byte") && ((cval < 0) || (cval > 255))) {
+            genErrorMessage("Illegal byte value '" + cvalue + "'");
+        }
+        if (typeName.equals("short") && ((cval < -32768) || (cval > 32767))) {
+            genErrorMessage("Illegal short value '" + cvalue + "'");
+        }
+        if (typeName.equals("int") && ((cval < Integer.MIN_VALUE) || (cval > Integer.MAX_VALUE))) {
+            genErrorMessage("Illegal int value '" + cvalue + "'");
+        }
+        currentIDLField.setName(fieldName);
+        currentIDLField.setType(typeName);
+        currentIDLField.setValue(cvalue);
+        currentIDLField.setStatic(true);
+        fieldDeclareEvent.fireEvent(currentIDLField);
+    }
+|
+    typeName = floating_pt_type() fieldName = identifier() "=" dval = floating_pt_literal()
+    {
+        cvalue = Double.toString(dval);
+        if (typeName.equals("float") && ((dval < -Float.MAX_VALUE) || (dval > Float.MAX_VALUE))) {
+            genErrorMessage("Illegal float value '" + cvalue + "'");
+        }
+        currentIDLField.setName(fieldName);
+        currentIDLField.setType(typeName);
+        currentIDLField.setValue(cvalue);
+        currentIDLField.setStatic(true);
+        fieldDeclareEvent.fireEvent(currentIDLField);
+    }
+|
+    typeName = string_type() fieldName = identifier() "=" cvalue = string_literal()
+    {
+        currentIDLField.setName(fieldName);
+        currentIDLField.setType(typeName);
+        currentIDLField.setValue(cvalue);
+        currentIDLField.setStatic(true);
+        fieldDeclareEvent.fireEvent(currentIDLField);
+    }
+|
+    typeName = boolean_type() fieldName = identifier() "=" cvalue = boolean_literal()
+    {
+        currentIDLField.setName(fieldName);
+        currentIDLField.setType(typeName);
+        currentIDLField.setValue(cvalue);
+        currentIDLField.setStatic(true);
+        fieldDeclareEvent.fireEvent(currentIDLField);
+    }
 }
 
 String identifier() :
@@ -292,20 +360,23 @@ String identifier() :
 }
 
 String declarators(IDLField currentIDLField) :
-{String ret = "";
- String size = ""; }
+{ String ret = ""; String size = ""; currentToken = null; }
 {
-  ret = declarator()
-  {return ret;}
+    ret = declarator()
+    {return ret;}
 |
-   "[" [ size = <DECIMALINT>.image ] "]" ret = declarator()
-  {
-     if(!size.equals(""))
-     {
-        currentIDLField.setArraySize(Integer.parseInt(size));
-     }
-
-     return "[] " + ret;}
+    "[" [ currentToken = <DECIMALINT> ] "]" ret = declarator()
+    {
+        if (currentToken != null) size = currentToken.image;
+        if (!size.equals("")) {
+            int asize = Integer.parseInt(size);
+            if (asize <= 0) {
+                genErrorMessage("Illegal array size '" + asize + "'");
+            }
+            currentIDLField.setArraySize(asize);
+        }
+        return "[] " + ret;
+    }
 }
 
 /* Production 35 */
@@ -463,13 +534,17 @@ String boolean_type() :
 }
 
 String string_type() :
-{String size = ""; }
+{ String size = ""; currentToken = null; }
 {
-  "string" [ "<" size = <DECIMALINT>.image ">" ]
+  "string" [ "<" currentToken = <DECIMALINT> ">" ]
   {
-    if(!size.equals(""))
-    {
-      currentIDLField.setStringSize(Integer.parseInt(size));
+    if (currentToken != null) size = currentToken.image;
+    if (!size.equals("")) {
+      int ssize = Integer.parseInt(size);
+      if (ssize <= 0) {
+        genErrorMessage("Illegal string size '" + ssize + "'");
+      }
+      currentIDLField.setStringSize(ssize);
     }
     return "string" ;
   }
@@ -478,20 +553,27 @@ String string_type() :
 
 /* Production 48 */
 
-void integer_literal() :
-{}
+long integer_literal() :
+{ String value = ""; currentToken = null; }
 {
-  <OCTALINT>
+  currentToken = <OCTALINT>
+  { if (currentToken != null) value = currentToken.image;
+    long i = Long.parseLong(value,8); return i; }
 |
-  <DECIMALINT>
+  currentToken = <DECIMALINT>
+  { if (currentToken != null) value = currentToken.image;
+    long i = Long.parseLong(value); return i; }
 |
-  <HEXADECIMALINT>
+  currentToken = <HEXADECIMALINT>
+  { if (currentToken != null) value = currentToken.image;
+    value = value.substring(2); long i = Long.parseLong(value,16); return i; }
 }
 
-void string_literal() :
-{}
+String string_literal() :
+{String value = ""; }
 {
-  <STRING>
+  value = <STRING>.image
+  {return value; }
 }
 
 void character_literal() :
@@ -500,24 +582,38 @@ void character_literal() :
   <CHARACTER>
 }
 
-void floating_pt_literal() :
+double floating_pt_literal() :
+{ String value = ""; currentToken = null; }
+{
+  currentToken = <FLOATONE>
+  { if (currentToken != null) value = currentToken.image;
+    double d = Double.parseDouble(value); return d; }
+|
+  currentToken = <FLOATTWO>
+  { if (currentToken != null) value = currentToken.image;
+    double d = Double.parseDouble(value); return d; }
+}
+
+String boolean_literal() :
 {}
 {
-  <FLOATONE>
+  "true"
+  {return "true" ;}
 |
-  <FLOATTWO>
+  "false"
+  {return "false" ;}
 }
 
 TOKEN :
 {
   <  ID : ["a"-"z","A"-"Z", "_"] (["a"-"z","A"-"Z","0"-"9","_"])* >
-| <  OCTALINT : "0" (["0"-"7"])* (["u","U","l","L"])? >
-| <  DECIMALINT : ["1"-"9"] (["0"-"9"])* (["u","U","l","L"])? >
-| <  HEXADECIMALINT : ("0x"|"0X") (["0"-"9","a"-"f","A"-"F"])+ (["u","U","l","L"])? >
-| <  FLOATONE : ((["0"-"9"])+ "." (["0"-"9"])* | (["0"-"9"])* "." (["0"-"9"])+)
-   (["e","E"] (["-","+"])? (["0"-"9"])+)? (["f","F","l","L"])? >
-| <  FLOATTWO : (["0"-"9"])+ ["e","E"] (["-","+"])?
-   (["0"-"9"])+ (["f","F","l","L"])? >
+| <  OCTALINT : "0" (["0"-"7"])* >
+| <  DECIMALINT : ("-")? ["1"-"9"] (["0"-"9"])* >
+| <  HEXADECIMALINT : ("0x"|"0X") (["0"-"9","a"-"f","A"-"F"])+ >
+| <  FLOATONE : ("-")? ((["0"-"9"])+ "." (["0"-"9"])* | (["0"-"9"])* "." (["0"-"9"])+)
+   (["e","E"] (["-","+"])? (["0"-"9"])+)? >
+| <  FLOATTWO : ("-")? (["0"-"9"])+ ["e","E"] (["-","+"])?
+   (["0"-"9"])+ >
 | <  CHARACTER : "'"
    (   (~["'","\\","\n","\r"])
    | ("\\" (

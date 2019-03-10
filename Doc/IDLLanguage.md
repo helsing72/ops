@@ -17,14 +17,18 @@ class SampleData
 ```
 
 The package definition consists of the reserved word package followed by the name of the package for the data class. Package in OPS IDL is equivalent to package in Java or namespace in C++ or C#. The package shall be expressed as a single word or as a series of dot separated words, e.g. “samples” or “samples.subsamples” etc and the package declaration shall be ended with a “;”.
-The class definition is the word class followed by a single word for the class name followed by a body marked with an opening and a closing brace, “{     }”. Within the body of the class, an arbitrary number of fields can be declared. Each field can be of any of the OPS IDL defined basic types, an array of a basic type, another user defined data class or an array of such a data class.
 
-The following table shows a listing of all available OPS IDL types and their corresponding  representations in common programming languages:
+The class definition is the word class followed by a single word for the class name followed by a body marked with an opening and a closing brace, “{     }”.
+
+Within the body of the class, an arbitrary number of data fields and constants can be declared. Each data field can be of any of the OPS IDL defined basic types, an array of a basic type, another user defined data class or an array of such a data class. Constants can only be of the OPS IDL defined basic types.
+
+The following table shows a listing of all available OPS IDL types and their corresponding representations in common programming languages:
 
 | OPS IDL | C++ | Java | C#  | Delphi | Serialized on the network |
 | ------- | --- | ---- | --- | ------ | ------------------------- |
 | package | namespace | package | namespace | Unit | -          |
 | class   | class | class | class | Class | -                    |
+| const   | static const | static final | const | const | -                    |
 | boolean | bool | boolean | bool | Boolean | 1 byte                   |
 | byte    | char | byte | byte | Byte | 1  byte                  |
 | short   | int16 | short | short | Int16 | 2 bytes                  |
@@ -40,12 +44,16 @@ The following table shows a listing of all available OPS IDL types and their cor
 
 where sizeof( T ) is the serialized size of a string for the datatype plus the serialized size of all fields in T.
 
-Or as IDL code example:
+Defined constants are never sent on the network. They are just generated to the target language source files to be used by the users code.
+
+IDL code example:
 
 ```
 package samples;
 class SampleData
 {
+   const int max = 42;
+
    boolean boo;
    byte b;
    short sh;
@@ -67,6 +75,8 @@ class SampleData
    string[] strings;
    string<43>[] s43vect;
    UserData[] uDatas;
+
+   int[42] intarr;
 }
 ```
 
@@ -84,7 +94,7 @@ class ChildData extends SampleData
 }
 ```
 
-Which in this case makes child data extend all fields from SampleData.
+Which in this case makes ChildData extend all fields from SampleData.
 
 As we saw in the sample above it is possible to declare fields of another user defined type, for example, we could declare a field of our new type as follows:
 
@@ -116,7 +126,7 @@ Case 2. on the other hand, would generate a pointer declaration like this:
 
 Which then allows the implemation of the pointer to be decided and changed by the user dynamically.
 
-Arrays are treated in the same manner, to declare an array of object whos implementation is unknown at compile time use the following approach:
+Arrays are treated in the same manner, to declare an array of objects whos implementation is unknown at compile time use the following approach:
 
 `virtual SampleData[] childDatas;`
 
@@ -139,7 +149,7 @@ There is a special form of comments that is used to give instructions to the OPS
 
 | Directive | Values | Default | Description |
 |-----------|--------|---------|-------------|
-| toplevel  | true / false | true | Publishers/Subscribers are only generated for toplevel classes. This directive is only supported for Ada, C++ and Java |
+| toplevel  | true / false | true | Publishers/Subscribers are only generated for toplevel classes. This directive is currently only supported for Ada, C++ and Java |
 
 Example of usage:
 

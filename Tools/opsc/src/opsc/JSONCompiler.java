@@ -167,10 +167,34 @@ public class JSONCompiler extends CompilerSupport
           res += "]" + endl();
 
         } else {
-          res += tab(t+1) + "\"fields\": [" + endl();
 
+          // Constants
+          String consts = tab(t+1) + "\"constants\": [" + endl();
           boolean first = true;
           for (IDLField field : idlClass.getFields()) {
+            if (!field.isStatic()) continue;
+            if (!first) consts += "," + endl();
+            first = false;
+            consts += tab(t+2) + "{";
+            consts += " \"name\": \"" + field.getName() + "\"";
+            consts += ", \"type\": \"" + makeType(field) + "\"";
+            consts += ", \"value\": \"" + field.getValue().replace("\"", "'") + "\"";
+
+            String comment = field.getComment();
+            comment = comment.replace("/*", "").replace("*/", "").replace("\n", " ").replace("\"", "'").trim();
+            if (comment.length() > 0) {
+              consts += ", \"desc\": \"" + comment + "\"";
+            }
+            consts += " }";
+          }
+          consts += endl() + tab(t+1) + "]," + endl();
+          if (first == false) res += consts;
+
+          // Fields
+          res += tab(t+1) + "\"fields\": [" + endl();
+          first = true;
+          for (IDLField field : idlClass.getFields()) {
+            if (field.isStatic()) continue;
             if (!first) res += "," + endl();
             first = false;
             res += tab(t+2) + "{";
@@ -191,7 +215,6 @@ public class JSONCompiler extends CompilerSupport
             }
             res += " }";
           }
-
           res += endl() + tab(t+1) + "]" + endl();
         }
         res += tab(t) + "}" + endl();

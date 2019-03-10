@@ -22,26 +22,28 @@ class SampleData :
 public:
    static ops::TypeId_T getTypeName(){return ops::TypeId_T("samples.SampleData");}
 
+    static const int max = 42;
     bool boo;
     char b;
     short sh;
     int i;
-    __int64 l;
+    int64_t l;
     float f;
     double d;
     std::string s;
-    ops::fixed_string<25> s25;
+    ops::strings::fixed_string<25> s25;
     UserData uData;
     std::vector<bool> boos;
     std::vector<char> bytes;
     std::vector<short> shorts;
     std::vector<int> ints;
-    std::vector<__int64> longs;
+    std::vector<int64_t> longs;
     std::vector<float> floats;
     std::vector<double> doubles;
     std::vector<std::string> strings;
-    std::vector<ops::fixed_string<43>> s43vect;
+    std::vector<ops::strings::fixed_string<43>> s43vect;
     std::vector<UserData> uDatas;
+    int intarr[42];
 
     ///Default constructor.
     SampleData()
@@ -49,19 +51,21 @@ public:
         , boo(false), b(0), sh(0), i(0), l(0), f(0), d(0)
     {
         OPSObject::appendType(ops::TypeId_T("samples.SampleData"));
-
+        memset(&intarr[0], 0, sizeof(intarr));
 
     }
+
     ///Copy-constructor making full deep copy of a(n) SampleData object.
     SampleData(const SampleData& __c)
        : ops::OPSObject()
         , boo(false), b(0), sh(0), i(0), l(0), f(0), d(0)
     {
         OPSObject::appendType(ops::TypeId_T("samples.SampleData"));
+        memset(&intarr[0], 0, sizeof(intarr));
 
-        __c.fillClone((SampleData*)this);
-
+        __c.fillClone(this);
     }
+
     ///Assignment operator making full deep copy of a(n) SampleData object.
     SampleData& operator = (const SampleData& other)
     {
@@ -94,41 +98,43 @@ public:
         archive->inout("strings", strings);
         archive->inout("s43vect", s43vect);
         archive->inout<UserData>("uDatas", uDatas, UserData());
+        archive->inoutfixarr("intarr", &intarr[0], 42, sizeof(intarr));
 
     }
+
     //Returns a deep copy of this object.
     virtual ops::OPSObject* clone()
     {
         SampleData* ret = new SampleData;
-        this->fillClone(ret);
+        fillClone(ret);
         return ret;
 
     }
 
-    virtual void fillClone(ops::OPSObject* obj) const
+    void fillClone(SampleData* obj) const
     {
-        SampleData* narrRet = (SampleData*)obj;
-        ops::OPSObject::fillClone(narrRet);
-        narrRet->boo = boo;
-        narrRet->b = b;
-        narrRet->sh = sh;
-        narrRet->i = i;
-        narrRet->l = l;
-        narrRet->f = f;
-        narrRet->d = d;
-        narrRet->s = s;
-        narrRet->s25 = s25;
-        narrRet->uData = uData;
-        narrRet->boos = boos;
-        narrRet->bytes = bytes;
-        narrRet->shorts = shorts;
-        narrRet->ints = ints;
-        narrRet->longs = longs;
-        narrRet->floats = floats;
-        narrRet->doubles = doubles;
-        narrRet->strings = strings;
-        narrRet->s43vect = s43vect;
-        narrRet->uDatas = uDatas;
+        ops::OPSObject::fillClone(obj);
+        obj->boo = boo;
+        obj->b = b;
+        obj->sh = sh;
+        obj->i = i;
+        obj->l = l;
+        obj->f = f;
+        obj->d = d;
+        obj->s = s;
+        obj->s25 = s25;
+        obj->uData = uData;
+        obj->boos = boos;
+        obj->bytes = bytes;
+        obj->shorts = shorts;
+        obj->ints = ints;
+        obj->longs = longs;
+        obj->floats = floats;
+        obj->doubles = doubles;
+        obj->strings = strings;
+        obj->s43vect = s43vect;
+        obj->uDatas = uDatas;
+        memcpy(&obj->intarr[0], &intarr[0], sizeof(intarr));
 
     }
 
@@ -138,10 +144,10 @@ public:
 
     }
 
+
 };
 
 }
 
 #endif
-
 ```

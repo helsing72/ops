@@ -344,6 +344,7 @@ public class CppCompiler extends opsc.Compiler
             ret += tab(2) + "ops::OPSObject::fillClone(obj);" + endl();
         }
         for (IDLField field : idlClass.getFields()) {
+            if (field.isStatic()) continue;
             String fieldName = getFieldName(field);
             if (field.isIdlType()) {
                 if (!field.isArray()) {
@@ -433,6 +434,7 @@ public class CppCompiler extends opsc.Compiler
     {
         String ret = tab(2) + "";
         for (IDLField field : idlClass.getFields()) {
+            if (field.isStatic()) continue;
             String fieldName = getFieldName(field);
             if (field.getType().equals("boolean")) {
                 ret += ", " + fieldName + "(false)";
@@ -466,7 +468,12 @@ public class CppCompiler extends opsc.Compiler
                 ret += tab(1) + "" + getDeclareVector(field);
             } else {
                 if (field.getType().equals("string")) {
-                    ret += tab(1) + "" + languageType(field) + " " + fieldName + ";" + endl();
+                    if (field.isStatic()) {
+                        // NOTE strings can't be const in header file, so use a trick with an inline method
+                        ret += tab(1) + "static const char* " + fieldName + "() { return " + field.getValue() + "; }" + endl();
+                    } else {
+                        ret += tab(1) + "" + languageType(field) + " " + fieldName + ";" + endl();
+                    }
                 } else {
                     if (field.isIdlType()) {
                         if (field.isAbstract()) {
@@ -476,7 +483,18 @@ public class CppCompiler extends opsc.Compiler
                         }
                     } else {
                         //Simple primitive type
-                        ret += tab(1) + "" + languageType(field) + " " + fieldName + ";" + endl();
+                        if (field.isStatic()) {
+                            if (languageType(field).equals("float") || languageType(field).equals("double")) {
+                                // NOTE floating point numbers can't be const in header file, so use a trick with an inline method
+                                String pf = "";
+                                if (languageType(field).equals("float")) pf = "f";
+                                ret += tab(1) + "static const " + languageType(field) + " " + fieldName + "() { return " + field.getValue() + pf + "; }" + endl();
+                            } else {
+                                ret += tab(1) + "static const " + languageType(field) + " " + fieldName + " = " + field.getValue() + ";" + endl();
+                            }
+                        } else {
+                            ret += tab(1) + "" + languageType(field) + " " + fieldName + ";" + endl();
+                        }
                     }
                 }
             }
@@ -638,6 +656,7 @@ public class CppCompiler extends opsc.Compiler
             ret += "ops::OPSObject::serialize(archive);" + endl();
         }
         for (IDLField field : idlClass.getFields()) {
+            if (field.isStatic()) continue;
             String fieldName = getFieldName(field);
             ret += tab(2);
             if (field.isIdlType()) {

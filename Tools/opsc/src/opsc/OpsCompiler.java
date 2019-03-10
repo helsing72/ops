@@ -611,7 +611,7 @@ public class OpsCompiler
         if(!opsc.parseCommandLineArgs(args)) {
             System.out.println("Error: Bad args in command line");
             // return with an exit code
-            System.exit( -1 );
+            System.exit( 1 );
         }
 
         // Debug output
@@ -624,9 +624,9 @@ public class OpsCompiler
 
         if(opsc._listInputFiles.isEmpty()) {
             System.out.println("Error: No input files. Run command with -h for help.");
-            return;
+            // return with an exit code
+            System.exit( 2 );
         }
-
 
         // iterate over all idl files on the cmd line
         for(String input : opsc._listInputFiles) {
@@ -649,6 +649,11 @@ public class OpsCompiler
         if (opsc._dumpFlag) opsc.dump();
 
         System.out.flush();
+
+        if (opsc._parser.getNrErrors() > 0) {
+            // return with an exit code
+            System.exit( 3 );
+        }
 
         ///TODO Check that all types, which are not prefixed with a 'name.',
         /// are core types or defined with the idl's we parsed.

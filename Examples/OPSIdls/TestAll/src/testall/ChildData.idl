@@ -4,6 +4,14 @@ package TestAll;
 //including aggregating a third data type TestData
 class ChildData extends BaseData
 {
+    /* Test of constants */
+    const byte c_b = 8;
+    const int c_i = 17;
+    const float c_f = 17.6;
+    const double c_d = 898.6;
+    const string c_s = "hej hopp";
+    const boolean c_flag = true;
+
     /* */
     boolean bo;
     /* */
@@ -61,8 +69,8 @@ class ChildData extends BaseData
     virtual TestData[] secondVirtArray;
     virtual TestData[7] fsecondVirtArray;
     /* */
-    TestData[] test2s2;
-    TestData[4] ftest2s2;
+    TestAll.TestData[] test2s2;
+    TestAll.TestData[4] ftest2s2;
     /* */
     Fruit[] fruitarr;
     Fruit[15] ffruitarr;
