@@ -9,36 +9,42 @@ To compile IDL files into target languages, OPS comes with a command line tool c
 The following shows the available command arguments:
 
 ```
-D:\OPS\OPS4>deploy\lib\ops\opsc.bat -h
+D:\OPS\ops4>Tools\opsc\opsc.bat -h
 
-Invoking script at: D:\OPS\OPS4\deploy\lib\ops\
-Current working directory: D:\OPS\OPS4
+Invoking script at: D:\OPS\ops4\Tools\opsc\
+Current working directory: D:\OPS\ops4
 
-  opsc -P <IDL_proj_dir> [options]
-    or
-  opsc [options] idlfiles...
+opsc -P <IDL_proj_dir> [options]
+  or
+opsc [options] idlfiles...
 
-  OPTIONS
-    -? | -h | --help  show this help
-    -b <feature>      build given feature
-    -B <feature>      don't build given feature
-    -d                verbose output
-    -dump             print all parsed objects
-    -fac              only generate factories for given features
-    -g <feature>      generate given feature
-    -G <feature>      don't generate given feature
-    -o <dir>          set output directory
-    -P <IDL_proj_dir> use as project directory with pre-defined subdirectories
-    -p <projname>     set project name
-    -parse            only parse, don't generate
-    -pp <file>        name an ops IDL project.properties file
-    -printProps       print system props
-    -t <dir>          set template directory (overrides built-in templates)
+OPTIONS
+  -? | -h | --help  show this help
+  -b <feature>      build given feature
+  -B <feature>      don't build given feature
+  -d                verbose output
+  -dump             print all parsed objects
+  -fac              only generate factories for given features
+  -g <feature>      generate given feature
+  -G <feature>      don't generate given feature
+  -idls <file>      get idl-filenames from given file
+                    (one filename per line in file, paths relative to <file>)
+  -o <dir>          set output directory
+  -p <projname>     set project name
+  -P <IDL_proj_dir> use as project directory with pre-defined subdirectories
+  -parse            only parse, don't generate
+  -pp <file>        name an ops IDL project.properties file
+  -printProps       print system props
+  -s <feature>      special, generate with given feature
+  -t <dir>          set template directory (overrides built-in templates)
 
-  FEATURE
-    for generate: ALL, ada, cpp, csharp, delphi, java, json, python, debug
-    for build:    ALL, csharp, java    
+  -dll <file>       used when building C# to give any dll dependencies (eg. OpsLibrary.dll)
+  -jar <file>       used when building Java to give any jar dependencies
 
+FEATURE
+  for generate: ALL, ada, cpp, csharp, delphi, java, json, python, debug
+  for build:    ALL, csharp, java
+  for special:  mempool
 ```
 
 Examples of usage:

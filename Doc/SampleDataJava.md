@@ -12,6 +12,8 @@ import java.io.IOException;
 
 public class SampleData extends OPSObject
 {
+    public static final int max = 42;
+
     public boolean boo;
     public byte b;
     public short sh;
@@ -32,6 +34,7 @@ public class SampleData extends OPSObject
     public java.util.Vector<String> strings = new java.util.Vector<String>();
     public java.util.Vector<String> s43vect = new java.util.Vector<String>();
     public java.util.Vector<UserData> uDatas = new java.util.Vector<UserData>();
+    public java.util.Vector<Integer> intarr = new java.util.Vector<Integer>();
 
 
     private static SerializableFactory factory = new TypeFactory();
@@ -72,6 +75,7 @@ public class SampleData extends OPSObject
         strings = (java.util.Vector<String>) archive.inoutStringList("strings", strings);
         s43vect = (java.util.Vector<String>) archive.inoutStringList("s43vect", s43vect);
         uDatas = (java.util.Vector<UserData>) archive.inoutSerializableList("uDatas", uDatas);
+        intarr = (java.util.Vector<Integer>) archive.inoutIntegerList("intarr", intarr);
 
     }
     @Override
@@ -107,6 +111,7 @@ public class SampleData extends OPSObject
         java.util.Collections.copy(cloneResult.strings, this.strings);
         java.util.Collections.copy(cloneResult.s43vect, this.s43vect);
         java.util.Collections.copy(cloneResult.uDatas, this.uDatas);
+        java.util.Collections.copy(cloneResult.intarr, this.intarr);
 
     }
 
