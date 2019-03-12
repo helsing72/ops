@@ -29,6 +29,9 @@ end;
 var
   arg : string;
 begin
+{$IFDEF WIN32}
+  ReportMemoryLeaksOnShutdown := True; //DebugHook <> 0;
+{$ENDIF}
   CoInitializeEx(nil, 0);    // Needed for the TXMLDocument
   try
     if ParamCount >= 1 then begin

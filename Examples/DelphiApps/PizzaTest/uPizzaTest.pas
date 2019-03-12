@@ -212,7 +212,8 @@ begin
   DeleteSubscriber(False);
   ClearStorage;
   FreeAndNil(FStorage);
-  FReeAndNil(FMutex);
+  FreeAndNil(FMutex);
+  FreeAndNil(Data);
 end;
 
 procedure THelper<DataType, DataTypePublisher, DataTypeSubscriber>.Log(mess : string);
@@ -750,12 +751,18 @@ var
   i : Integer;
   info : TItemInfo;
 begin
+  Timer1.Enabled := False;
   for i := 0 to FItemInfoList.Count - 1 do begin
     info := FItemInfoList[i];
 		FreeAndNil(info.Helper);
+    FItemInfoList[i].Free;
   end;
+  FItemInfoList.Clear;
+  FreeAndNil(FItemInfoList);
   FreeAndNil(FParticipant);
   FreeAndNil(FOtherParticipant);
+  FreeAndNil(FMutex);
+  FreeAndNil(FMsgLog);
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);

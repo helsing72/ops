@@ -72,6 +72,9 @@ uses
 {$R *.res}
 
 begin
+{$IFDEF WIN32}
+  ReportMemoryLeaksOnShutdown := DebugHook <> 0;
+{$ENDIF}
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TForm1, Form1);
