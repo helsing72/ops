@@ -2,7 +2,7 @@ unit uOps.Domain;
 
 (**
 *
-* Copyright (C) 2016-2017 Lennart Andersson.
+* Copyright (C) 2016-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -112,6 +112,8 @@ var
 begin
   // Delete all topics
   for i := 0 to Length(FTopics)-1 do FreeAndNil(FTopics[i]);
+  for i := 0 to Length(FChannels)-1 do FreeAndNil(FChannels[i]);
+  for i := 0 to Length(FTransports)-1 do FreeAndNil(FTransports[i]);
   inherited;
 end;
 

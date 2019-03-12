@@ -9,7 +9,7 @@ procedure Verify(Log : TLogger);
 
 implementation
 
-uses SysUtils,
+uses SysUtils, Windows,
      uOps.OPSObject,
      uOps.Participant,
      uOps.Topic,
@@ -472,6 +472,7 @@ var
   sub : ChildDataSubscriber;
   pub : ChildDataPublisher;
   Flag : Boolean;
+  Limit : UInt64;
 begin
   OpsLogger := TStdOutLogger.Create;
   Logger := Log;
@@ -548,7 +549,8 @@ begin
 
   Log('Finished');
 
-  Log('Waiting for more data... (Press Ctrl-C to terminate)');
+  Log('Waiting for more data... (Press Ctrl-C to terminate or wait 60 seconds)');
+  Limit := GetTickCount64 + 60000;
   while True do begin
     if (sub.waitForNewData(100)) then begin
       Log('Received new data. Checking...');
@@ -559,6 +561,7 @@ begin
       checkObjects(cd3, cd1);
       Log('Data check done');
     end;
+    if Limit < GetTickCount64 then Break;
   end;
 
   FreeAndNil(pub);
@@ -568,6 +571,9 @@ begin
   FreeAndNil(cd3);
   FreeAndNil(cd2);
   FreeAndNil(cd1);
+
+  FreeAndNil(OpsLogger);
 end;
 
 end.
+

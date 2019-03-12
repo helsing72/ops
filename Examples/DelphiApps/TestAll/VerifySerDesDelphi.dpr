@@ -67,14 +67,19 @@ uses
   TestAll.ChildData in '..\..\OPSIdls\TestAll\Generated\Delphi\TestAll\TestAll.ChildData.pas',
   TestAll.Fruit in '..\..\OPSIdls\TestAll\Generated\Delphi\TestAll\TestAll.Fruit.pas',
   TestAll.TestAllTypeFactory in '..\..\OPSIdls\TestAll\Generated\Delphi\TestAll\TestAll.TestAllTypeFactory.pas',
-  TestAll.TestData in '..\..\OPSIdls\TestAll\Generated\Delphi\TestAll\TestAll.TestData.pas';
+  TestAll.TestData in '..\..\OPSIdls\TestAll\Generated\Delphi\TestAll\TestAll.TestData.pas',
+  uOps.NetworkSupport in '..\..\..\Delphi\Source\uOps.NetworkSupport.pas',
+  TestAll.NoData in '..\..\OPSIdls\TestAll\Generated\Delphi\TestAll\TestAll.NoData.pas';
 
-  procedure Logger(str : string);
+procedure Logger(str : string);
   begin
     Writeln(str);
   end;
 
 begin
+{$IFDEF WIN32}
+  ReportMemoryLeaksOnShutdown := True; //DebugHook <> 0;
+{$ENDIF}
   try
     { TODO -oUser -cConsole Main : Insert code here }
 
