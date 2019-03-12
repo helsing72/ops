@@ -2,7 +2,7 @@ unit uOps.ParticipantInfoData;
 
 (**
 *
-* Copyright (C) 2016-2017 Lennart Andersson.
+* Copyright (C) 2016-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -81,7 +81,15 @@ begin
 end;
 
 destructor TParticipantInfoData.Destroy;
+var
+  i : Integer;
 begin
+  for i := 0 to Length(subscribeTopics) - 1 do begin
+    FreeAndNil(subscribeTopics[i]);
+  end;
+  for i := 0 to Length(publishTopics) - 1 do begin
+    FreeAndNil(publishTopics[i]);
+  end;
   inherited;
 end;
 

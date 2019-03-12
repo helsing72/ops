@@ -2,7 +2,7 @@ unit uOps.Transport.McUdpSendDataHandler;
 
 (**
 *
-* Copyright (C) 2016-2017 Lennart Andersson.
+* Copyright (C) 2016-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -110,9 +110,22 @@ begin
 end;
 
 destructor TMcUdpSendDataHandler.Destroy;
+var
+  Key, Key2 : string;
+  portMap : TDictionary<string, TIpPortPair>;
+  ipPort : TIpPortPair;
 begin
   FMutex.Acquire;
   try
+    // Free objects in sink map
+    for Key in FTopSinkMap.Keys do begin
+      portMap := FTopSinkMap.Items[Key].portMap;
+      for Key2 in portMap.Keys do begin
+        ipPort := portMap.Items[Key2];
+        FreeAndNil(ipPort);
+      end;
+      FreeAndNil(portMap);
+    end;
     FreeAndNil(FTopSinkMap);
     FreeandNil(FSender);
   finally
