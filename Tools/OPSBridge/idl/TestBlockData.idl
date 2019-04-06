@@ -1,0 +1,7 @@
+package opsbridge;
+
+class TestBlockData
+{
+    long    BlockNumber;
+    byte[]  Data;
+}

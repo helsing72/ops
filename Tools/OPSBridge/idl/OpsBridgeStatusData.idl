@@ -1,0 +1,18 @@
+package opsbridge;
+
+class OpsBridgeStatusData
+{
+    /* Sample's Key value will be the "name" of the bridge */
+
+    /* Status for command Pause/Continue, 0 ==> Running, <> 0 ==> Paused */
+    int Paused;
+
+    /* Information about traffic handled by this bridge */
+    /* Num messages queued for sending */
+    long NumQueuedSend;
+    /* Num messages queued on other side */
+    long NumQueuedRecv;         
+    /* Num bytes buffered for sending */
+    long NumBufferedBytes;      
+    
+}

@@ -24,7 +24,7 @@ all: debug opt
 	$(MAKE) install
 
 .PHONY : clean
-clean: clean_debug clean_opt clean_deploy clean_bootstrap
+clean: clean_debug clean_opt clean_deploy clean_bootstrap clean_tools
 
 .PHONY : clean_bootstrap
 clean_bootstrap:
@@ -43,8 +43,14 @@ clean_opt:
 	rm -rf $(BUILD_OPT)
 
 .PHONY : clean_deploy
-clean_deploy :
+clean_deploy:
+	@echo "Cleaning deploy"
 	rm -rf $(INSTALL_PREFIX)
+
+.PHONY : clean_tools
+clean_tools:
+	@echo "Cleaning tools"
+	rm -rf Tools/OPSBridge/idl/Generated
 
 .PHONY : bootstrap
 bootstrap: $(BUILD_BOOTSTRAP)/Makefile

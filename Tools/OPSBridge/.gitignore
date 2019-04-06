@@ -1,0 +1,4 @@
+Debug/
+Release/
+*.VC.*
+*.vcxproj.*

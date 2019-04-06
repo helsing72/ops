@@ -1,0 +1,10 @@
+package opsbridge;
+
+class OpsBridgeCommandData
+{
+    /* Sample's Key value should be the "name" of the bridge */
+
+    /* Command, 1 = Pause, 2 = Continue, 99 = Terminate program */
+    int Command;
+
+}
