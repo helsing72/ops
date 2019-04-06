@@ -196,12 +196,22 @@ namespace ops
 
 		int getLocalPort()
 		{
-			return _serverPort;
+			boost::system::error_code error;
+			boost::asio::ip::tcp::endpoint localEndPoint;
+			int port;
+			localEndPoint = sock->local_endpoint(error);
+			port = localEndPoint.port();
+			return port;
 		}
 
 		Address_T getLocalAddress()
 		{
-			return ipaddress;
+			boost::system::error_code error;
+			boost::asio::ip::tcp::endpoint localEndPoint;
+			Address_T address;
+			localEndPoint = sock->local_endpoint(error);
+			address = localEndPoint.address().to_string().c_str();
+			return address;
 		}
 
 	private:
