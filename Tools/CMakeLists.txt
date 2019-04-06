@@ -13,6 +13,8 @@ if(NOT CMAKE_BUILD_TYPE MATCHES "Bootstrap")
   add_subdirectory(VerifyOPSConfig)
 
   add_subdirectory(DebugConsole)
+
+  add_subdirectory(OPSBridge)
 endif()
 
 # install the latest template files

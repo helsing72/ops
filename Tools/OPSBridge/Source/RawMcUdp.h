@@ -1,0 +1,82 @@
+/**
+*
+* Copyright (C) 2018-2019 Lennart Andersson.
+*
+* This file is part of OPS (Open Publish Subscribe).
+*
+* OPS (Open Publish Subscribe) is free software: you can redistribute it and/or modify
+* it under the terms of the GNU Lesser General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+
+* OPS (Open Publish Subscribe) is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU Lesser General Public License for more details.
+*
+* You should have received a copy of the GNU Lesser General Public License
+* along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#pragma once
+
+#include <string>
+#include <map>
+#include <set>
+
+#include "IOService.h"
+#include "SingleThreadPool.h"
+#include "Receiver.h"
+#include "Sender.h"
+
+#include "BridgeMessages.h"
+
+namespace opsbridge {
+
+	class RawMcUdp;
+
+	class RawMcUdpListener
+	{
+	public:
+		virtual void onUdpMcMessage(RawMcUdp* sender, TUdpMcMessage& mess, char* data) = 0;
+	};
+
+	class RawMcUdp : ops::Runnable, ops::Listener<ops::BytesSizePair>
+	{
+	public:
+		RawMcUdp(RawMcUdpListener* client);
+		~RawMcUdp();
+		bool AddReceiver(ops::Address_T ip, uint16_t port, ops::Address_T ifc);
+		void AddTranslation(ops::Address_T ip, int port, ops::Address_T newIp, int newPort, ops::Address_T ifc = "", int ttl = 1);
+
+		void Write(TUdpMcMessage& mess, char* data);
+
+	private:
+		bool _keepRunning = true;
+		bool _started = false;
+		RawMcUdpListener* _client;
+		ops::IOService* _ioService = nullptr;
+		ops::ThreadPool* _threadPool = nullptr;
+		struct entry_t {
+			ops::Receiver* receiver = nullptr;
+			char buffer[65536];
+		};
+		std::map<ops::InternalKey_T, entry_t> _receivers;
+		struct translation_t {
+			ops::Address_T dstIp;
+			int dstPort = 0;
+			ops::Address_T Ifc = "127.0.0.1";
+			int ttl = 1;
+		};
+		std::map<ops::InternalKey_T, translation_t> _translations;
+		struct SEntry_t {
+			ops::Sender* sender = nullptr;
+			translation_t t;
+		};
+		std::map<ops::InternalKey_T, SEntry_t> _senders;
+		std::set<int> _senderPorts;
+
+		virtual void run();
+		void onNewEvent(ops::Notifier<ops::BytesSizePair>* sender, ops::BytesSizePair byteSizePair);
+	};
+}

@@ -39,6 +39,19 @@ namespace ops
 		return name;
 	}
 
+	// Splits a full topic name on the format 'Domain::TopicName' into its domain and topic
+	static void splitTopicName(ops::ObjectName_T name, ops::ObjectName_T& domainName, ops::ObjectName_T& topicName)
+	{
+		ObjectName_T::size_type index1;
+		if ((index1 = name.find("::")) != std::string::npos) {
+			domainName = name.substr(0, index1);
+			topicName = name.substr(index1 + 2, std::string::npos);
+		} else {
+			domainName = "";
+			topicName = name;
+		}
+	}
+
 	// Returns the topic name part
 	static ObjectName_T topicName(ObjectName_T name)
 	{
