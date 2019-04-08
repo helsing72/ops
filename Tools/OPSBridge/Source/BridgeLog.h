@@ -20,6 +20,11 @@
 
 #pragma once
 
+// For compilers not defining this for C++
+#ifndef PRId64
+	#define PRId64 "ld"
+#endif
+
 // 1 --> Trace and above
 // 2
 // 3
