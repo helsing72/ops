@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
 
 	BL_INFO("\n\nPress ^C to stop bridge ...\n\n");
 
-	for (;;) {}
+	for (;;) { std::this_thread::sleep_for(std::chrono::milliseconds(1000)); }
 
 	return 0;
 }
