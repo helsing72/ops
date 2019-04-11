@@ -92,18 +92,14 @@ Note that if a topic specify _sampleMaxSize_ > 60000, it MUST have its own _Chan
 
 ## Transport Mechanism specifics ##
   * *multicast*: Is a _many-to-many_ transport mechanism. The **port** tag is required. If the **address** tag is specified it overrides the **domainAddress** and lets this topic communicate on its own multicast address.
-
   For an example see [multicast example](MulticastTransport.md).
 
   * *udp*: Without specified **address** and **port** tags, OPS uses the metadata sent by participants to connect publishers and subscribers using dynamic ports. This requires metadata to be enabled to work and it is a _many-to-many_ transport mechanism.
-
   With specified **address** and **port** tags, the metadata is not used and they specify the subscribers address and port. It is a _many-to-one_ transport mechanism.
-
-  For an example see TODO.
+  For an example see [udp example](UdpTransport.md).
 
   * *tcp*: Is a _one-to-many_ transport mechanism. The **adress** and **port** tags are required and specifies the publishers tcp server address and port to which subscribers connect.
-
   For an example see [tcp example](TcpTransport.md).
 
 ## Tools ##
-There is a tool, _VerifyOPSConfig_, that can be used to check the configuration files when they have been edited. The source is in the OPS _Tools_ folder and the built binary in _deploy/bin_ folder.
+There is a tool, _VerifyOPSConfig_, that can be used to check the configuration files when they have been edited. For description see [VerifyOPSConfig](VerifyOPSConfig.md).
