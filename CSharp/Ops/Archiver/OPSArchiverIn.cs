@@ -35,7 +35,7 @@ namespace Ops
             readBuf = buf;
         }
 
-        public bool IsOut()
+        public override bool IsOut()
         {
             return false;
         }
@@ -50,7 +50,7 @@ namespace Ops
 		/// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public int Inout(string name, int v)
+		public override int Inout(string name, int v)
         {
             return readBuf.ReadInt();
         }
@@ -58,7 +58,7 @@ namespace Ops
 		/// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public long Inout(string name, long v)
+		public override long Inout(string name, long v)
         {
             return readBuf.ReadLong();
         }
@@ -66,7 +66,7 @@ namespace Ops
 		/// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public byte Inout(string name, byte v)
+		public override byte Inout(string name, byte v)
         {
             return readBuf.ReadByte();
         }
@@ -74,7 +74,7 @@ namespace Ops
 		/// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public short Inout(string name, short v)
+		public override short Inout(string name, short v)
         {
             return readBuf.ReadShort();
 		}
@@ -82,7 +82,7 @@ namespace Ops
 		/// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public float Inout(string name, float v)
+		public override float Inout(string name, float v)
         {
             return readBuf.ReadFloat();
         }
@@ -90,7 +90,7 @@ namespace Ops
 		/// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public bool Inout(string name, bool v)
+		public override bool Inout(string name, bool v)
         {
             return readBuf.ReadBoolean();
         }
@@ -98,7 +98,7 @@ namespace Ops
 		/// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public string Inout(string name, string v)
+		public override string Inout(string name, string v)
         {
             return readBuf.ReadString();
         }
@@ -106,7 +106,7 @@ namespace Ops
 		/// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public double Inout(string name, double v)
+		public override double Inout(string name, double v)
         {
             return readBuf.ReadDouble();
         }
@@ -114,7 +114,7 @@ namespace Ops
         /// 
         /// <param name="name"></param>
         /// <param name="v"></param>
-        public ISerializable Inout(string name, ISerializable v)
+        public override ISerializable Inout(string name, ISerializable v)
         {
             string types = readBuf.ReadString();
             ISerializable newSer = compositeFactory.Create(types);
@@ -131,7 +131,7 @@ namespace Ops
 		/// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public List<bool> InoutBooleanList(string name, List<bool> v)
+		public override List<bool> InoutBooleanList(string name, List<bool> v)
         {
             return readBuf.ReadBooleanArr();
         }
@@ -139,7 +139,7 @@ namespace Ops
 		/// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public List<byte> InoutByteList(string name, List<byte> v)
+		public override List<byte> InoutByteList(string name, List<byte> v)
         {
             return readBuf.ReadByteArr();
         }
@@ -147,7 +147,7 @@ namespace Ops
 		/// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public List<double> InoutDoubleList(string name, List<double> v)
+		public override List<double> InoutDoubleList(string name, List<double> v)
         {
             return readBuf.ReadDoubleArr();
         }
@@ -155,7 +155,7 @@ namespace Ops
 		/// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public List<float> InoutFloatList(string name, List<float> v)
+		public override List<float> InoutFloatList(string name, List<float> v)
         {
             return readBuf.ReadFloatArr();
         }
@@ -163,7 +163,7 @@ namespace Ops
 		/// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public List<int> InoutIntegerList(string name, List<int> v)
+		public override List<int> InoutIntegerList(string name, List<int> v)
         {
             return readBuf.ReadIntArr();
         }
@@ -171,13 +171,13 @@ namespace Ops
 		/// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public List<long> InoutLongList(string name, List<long> v)
+		public override List<long> InoutLongList(string name, List<long> v)
         {
             return readBuf.ReadLongArr();
         }
 
         // NB! we assume that the object is a List<X> where X implements ISerializable.
-        public IList InoutSerializableList(string name, IList v)
+        public override IList InoutSerializableList(string name, IList v)
         {
             Type type = v.GetType().GetGenericArguments()[0];
             IList list = (IList)Activator.CreateInstance((typeof(List<>).MakeGenericType(type)));
@@ -191,7 +191,7 @@ namespace Ops
 
         // NB! we assume that the object is a List<T> where T implements ISerializable.
         // This method skips the factory for creating the elements 
-        public IList InoutSerializableList<T>(string name, IList v)
+        public override IList InoutSerializableList<T>(string name, IList v)
         {
             Type type = v.GetType().GetGenericArguments()[0];
             IList list = (IList)Activator.CreateInstance((typeof(List<>).MakeGenericType(type)));
@@ -210,7 +210,7 @@ namespace Ops
         /// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public List<short> InoutShortList(string name, List<short> v)
+		public override List<short> InoutShortList(string name, List<short> v)
         {
             return readBuf.ReadShortArr();
         }
@@ -218,7 +218,7 @@ namespace Ops
 		/// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public List<string> InoutStringList(string name, List<string> v)
+		public override List<string> InoutStringList(string name, List<string> v)
         {
             return readBuf.ReadStringArr();
         }

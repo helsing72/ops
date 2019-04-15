@@ -12,6 +12,13 @@
     <AssemblyName>OPSTest</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <TargetFrameworkProfile />
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -24,15 +31,8 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <UpgradeBackupLocation>
-    </UpgradeBackupLocation>
-    <OldToolsVersion>3.5</OldToolsVersion>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -42,6 +42,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -50,6 +51,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -92,6 +94,24 @@
     </Compile>
     <Compile Include="..\..\..\..\Examples\OPSIdls\PizzaProject\Generated\CSharp\sds\MessageHeaderData.cs">
       <Link>GenIDLs\MessageHeaderData.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\..\Examples\OPSIdls\TestAll\Generated\CSharp\TestAll\BaseData.cs">
+      <Link>GenIDLs\BaseData.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\..\Examples\OPSIdls\TestAll\Generated\CSharp\TestAll\ChildData.cs">
+      <Link>GenIDLs\ChildData.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\..\Examples\OPSIdls\TestAll\Generated\CSharp\TestAll\Fruit.cs">
+      <Link>GenIDLs\Fruit.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\..\Examples\OPSIdls\TestAll\Generated\CSharp\TestAll\NoData.cs">
+      <Link>GenIDLs\NoData.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\..\Examples\OPSIdls\TestAll\Generated\CSharp\TestAll\TestAllTypeFactory.cs">
+      <Link>GenIDLs\TestAllTypeFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\..\Examples\OPSIdls\TestAll\Generated\CSharp\TestAll\TestData.cs">
+      <Link>GenIDLs\TestData.cs</Link>
     </Compile>
     <Compile Include="..\..\..\Ops\AckData.cs">
       <Link>Ops\AckData.cs</Link>

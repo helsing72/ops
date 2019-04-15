@@ -70,7 +70,7 @@ namespace Ops
              }
         }
 
-        public bool IsOut()
+        public override bool IsOut()
         {
             return false;
         }
@@ -150,7 +150,7 @@ namespace Ops
         }
 
         // Read a "bool" value with name "name". If not found return the input value "v".
-        public bool Inout(string name, bool v)
+        public override bool Inout(string name, bool v)
         {
             bool ret;
             if (bool.TryParse(GetValue(name), out ret))
@@ -164,7 +164,7 @@ namespace Ops
         }
 
         // Read a "byte" value with name "name". If not found return the input value "v".
-        public byte Inout(string name, byte v)
+        public override byte Inout(string name, byte v)
         {
             byte ret;
             if (byte.TryParse(GetValue(name), out ret))
@@ -178,7 +178,7 @@ namespace Ops
         }
 
         // Read a "double" value with name "name". If not found return the input value "v".
-        public double Inout(string name, double v)
+        public override double Inout(string name, double v)
         {
             double ret;
 
@@ -195,7 +195,7 @@ namespace Ops
         }
 
         // Read a "float" value with name "name". If not found return the input value "v".
-        public float Inout(string name, float v)
+        public override float Inout(string name, float v)
         {
             float ret;
 
@@ -212,7 +212,7 @@ namespace Ops
         }
 
         // Read an "int" value with name "name". If not found return the input value "v".
-        public int Inout(string name, int v) 
+        public override int Inout(string name, int v) 
         {
             int ret;
             if (int.TryParse(GetValue(name), out ret))
@@ -226,7 +226,7 @@ namespace Ops
         }
 
         // Read a "long" value with name "name". If not found return the input value "v".
-        public long Inout(string name, long v)
+        public override long Inout(string name, long v)
         {
             long ret;
             if (long.TryParse(GetValue(name), out ret))
@@ -240,7 +240,7 @@ namespace Ops
         }
 
         // Read a "short" value with name "name". If not found return the input value "v".
-        public short Inout(string name, short v)
+        public override short Inout(string name, short v)
         {
             short ret;
             if (short.TryParse(GetValue(name), out ret))
@@ -254,7 +254,7 @@ namespace Ops
         }
 
         // Read a "string" value with name "name". If not found return an empty string.
-        public string Inout(string name, string v)
+        public override string Inout(string name, string v)
         {
             string ret = GetValue(name);
             if (ret == null)
@@ -265,7 +265,7 @@ namespace Ops
         }
 
         // Read a "ISerializable" item with name "name". 
-        public ISerializable Inout(string name, ISerializable v) 
+        public override ISerializable Inout(string name, ISerializable v) 
         {
             nodeStack.Push(currentNode);
             currentNode = GetNode(name);
@@ -341,56 +341,56 @@ namespace Ops
             return v;
         }
 
-        public List<int> InoutIntegerList(string name, List<int> v)
+        public override List<int> InoutIntegerList(string name, List<int> v)
         {
             return InoutCoretypeList<int>(name, v,
                 (string input, out int res) => { return int.TryParse(input, out res); });
         }
 
-        public List<long> InoutLongList(string name, List<long> v) 
+        public override List<long> InoutLongList(string name, List<long> v) 
         {
             return InoutCoretypeList<long>(name, v,
                 (string input, out long res) => { return long.TryParse(input, out res); });
         }
 
-        public List<Byte> InoutByteList(string name, List<Byte> v) 
+        public override List<Byte> InoutByteList(string name, List<Byte> v) 
         {
             return InoutCoretypeList<Byte>(name, v,
                 (string input, out Byte res) => { return Byte.TryParse(input, out res); });
         }
 
-        public List<short> InoutShortList(string name, List<short> v) 
+        public override List<short> InoutShortList(string name, List<short> v) 
         {
             return InoutCoretypeList<short>(name, v,
                 (string input, out short res) => { return short.TryParse(input, out res); });
         }
 
-        public List<float> InoutFloatList(string name, List<float> v) 
+        public override List<float> InoutFloatList(string name, List<float> v) 
         {
             return InoutCoretypeList<float>(name, v,
                 (string input, out float res) => { return float.TryParse(input, numberStyles, numberFormatInfo, out res); });
         }
 
-        public List<bool> InoutBooleanList(string name, List<bool> v) 
+        public override List<bool> InoutBooleanList(string name, List<bool> v) 
         {
             return InoutCoretypeList<bool>(name, v,
                 (string input, out bool res) => { return bool.TryParse(input, out res); });
         }
 
-        public List<string> InoutStringList(string name, List<string> v) 
+        public override List<string> InoutStringList(string name, List<string> v) 
         {
             return InoutCoretypeList<string>(name, v,
                 (string input, out string res) => { res = input; return true; });
         }
 
-        public List<double> InoutDoubleList(string name, List<double> v) 
+        public override List<double> InoutDoubleList(string name, List<double> v) 
         {
             return InoutCoretypeList<double>(name, v, 
                 (string input, out double res) => { return double.TryParse(input, numberStyles, numberFormatInfo, out res); } );
         }
 
         // NB! We assume that object "v" is a generic list.
-        public IList InoutSerializableList(string name, IList v)
+        public override IList InoutSerializableList(string name, IList v)
         {
             Type type = v.GetType().GetGenericArguments()[0];
             IList list = (IList)Activator.CreateInstance((typeof(List<>).MakeGenericType(type)));
@@ -403,7 +403,7 @@ namespace Ops
         }
 
         // NB! We assume that object "v" is a generic list.
-        public IList InoutSerializableList<T>(string name, IList v)
+        public override IList InoutSerializableList<T>(string name, IList v)
         {
             return InoutSerializableList(name, v);
         }

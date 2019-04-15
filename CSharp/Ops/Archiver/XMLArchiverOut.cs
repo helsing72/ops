@@ -68,7 +68,7 @@ namespace Ops
 
         }
 
-        public bool IsOut()
+        public override bool IsOut()
         {
             return true;
         }
@@ -280,55 +280,55 @@ namespace Ops
             PutXMLLeaf(name, "" + v, typeAdd);
         }
 
-        public int Inout(string name, int v) 
+        public override int Inout(string name, int v) 
         {
             Put(name, v);
             return v;
         }
 
-        public long Inout(string name, long v) 
+        public override long Inout(string name, long v) 
         {
             Put(name, v);
             return v;
         }
 
-        public byte Inout(string name, byte v) 
+        public override byte Inout(string name, byte v) 
         {
             Put(name, v);
             return v;
         }
 
-        public short Inout(string name, short v) 
+        public override short Inout(string name, short v) 
         {
             Put(name, v);
             return v;
         }
 
-        public float Inout(string name, float v) 
+        public override float Inout(string name, float v) 
         {
             Put(name, v);
             return v;
         }
 
-        public bool Inout(string name, bool v) 
+        public override bool Inout(string name, bool v) 
         {
             Put(name, v);
             return v;
         }
 
-        public string Inout(string name, string v) 
+        public override string Inout(string name, string v) 
         {
             Put(name, v);
             return v;
         }
 
-        public double Inout(string name, double v) 
+        public override double Inout(string name, double v) 
         {
             Put(name, v);
             return v;
         }
 
-        public ISerializable Inout(string name, ISerializable v) 
+        public override ISerializable Inout(string name, ISerializable v) 
         {
             string typeName = compositeFactory.Create(v);
 
@@ -365,42 +365,42 @@ namespace Ops
             return v;
         }
 
-        public List<int> InoutIntegerList(string name, List<int> v) 
+        public override List<int> InoutIntegerList(string name, List<int> v) 
         {
             throw new System.NotSupportedException("Not supported yet.");
         }
 
-        public List<long> InoutLongList(string name, List<long> v) 
+        public override List<long> InoutLongList(string name, List<long> v) 
         {
             throw new System.NotSupportedException("Not supported yet.");
         }
 
-        public List<byte> InoutByteList(string name, List<byte> v) 
+        public override List<byte> InoutByteList(string name, List<byte> v) 
         {
             throw new System.NotSupportedException("Not supported yet.");
         }
 
-        public List<short> InoutShortList(string name, List<short> v) 
+        public override List<short> InoutShortList(string name, List<short> v) 
         {
             throw new System.NotSupportedException("Not supported yet.");
         }
 
-        public List<float> InoutFloatList(string name, List<float> v) 
+        public override List<float> InoutFloatList(string name, List<float> v) 
         {
             throw new System.NotSupportedException("Not supported yet.");
         }
 
-        public List<bool> InoutBooleanList(string name, List<bool> v) 
+        public override List<bool> InoutBooleanList(string name, List<bool> v) 
         {
             throw new System.NotSupportedException("Not supported yet.");
         }
 
-        public List<string> InoutStringList(string name, List<string> v) 
+        public override List<string> InoutStringList(string name, List<string> v) 
         {
             throw new System.NotSupportedException("Not supported yet.");
         }
 
-        public List<double> InoutDoubleList(string name, List<double> v) 
+        public override List<double> InoutDoubleList(string name, List<double> v) 
         {
             throw new System.NotSupportedException("Not supported yet.");
         }
@@ -416,7 +416,7 @@ namespace Ops
         }
 
         // NB! we assume that the object is a List<X> where X implements ISerializable.
-        public IList InoutSerializableList(string name, IList v)
+        public override IList InoutSerializableList(string name, IList v)
         {
             string typeAdd = writType ? TYPE_ADD_CLASS + "\"" + "list" + "\"" : "";
             string nodeString = Tab(currentTabDepth) + "<" + name + typeAdd + ">" + LINE_CHANGE;
@@ -434,7 +434,7 @@ namespace Ops
         }
 
         // NB! we assume that the object is a List<T> where T implements ISerializable.
-        public IList InoutSerializableList<T>(string name, IList v)
+        public override IList InoutSerializableList<T>(string name, IList v)
         {
             return InoutSerializableList(name, v);
         }
