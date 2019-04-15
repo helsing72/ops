@@ -2,7 +2,7 @@ unit uOps.ArchiverInOut;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -75,10 +75,10 @@ type
         class procedure inoutfixarr(archiver : TArchiverInOut; const name : string; var value : array of T; numElements : Integer);
       end;
 
-  protected
     function beginList(const name : String; size : Integer) : Integer; virtual; abstract;
     procedure endList(const name : String); virtual; abstract;
 
+  protected
     procedure SetTypesString(obj : TSerializable; types : AnsiString);
   end;
 

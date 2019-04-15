@@ -2,7 +2,7 @@ unit uOps.OpsArchiverIn;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -70,7 +70,6 @@ type
 
     procedure inout(const name : string; var value : TDynSerializableArray); overload; override;
 
-  protected
     function beginList(const name : String; size : Integer) : Integer; override;
     procedure endList(const name : String); override;
   end;

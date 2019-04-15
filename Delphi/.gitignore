@@ -1,4 +1,5 @@
-Debug
+Win32/
+Debug/
 *.dproj.local
 *.dsk
 *.identcache
