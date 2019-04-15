@@ -15,13 +15,10 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Vector;
 import java.util.Arrays;
-//import javax.swing.JOptionPane;
-//import ops.netbeansmodules.idlsupport.projectproperties.JarDependency;
-//import ops.netbeansmodules.util.FileHelper;
-//import org.openide.windows.InputOutput;
 import parsing.AbstractTemplateBasedIDLCompiler;
 import parsing.IDLClass;
 import parsing.IDLField;
+import parsing.IDLEnumType;
 
 /**
  *
@@ -263,6 +260,16 @@ public class CSharpCompiler extends opsc.Compiler
     protected String getConstructorBody(IDLClass idlClass)
     {
         String ret = "";
+        for (IDLField field : idlClass.getFields()) {
+            if (field.isStatic()) continue;
+            if (field.isArray() && (field.getArraySize() > 0)) {
+                String fieldName = getFieldName(field);
+                String eType = elementType(field.getType());
+                // for (int i = 0; i < 5; i++) _stringFixArr.Add("");
+                ret += tab(3) + "for (int i = 0; i < " + field.getArraySize() + "; i++) _" + fieldName + ".Add(" + initValue(eType) + ");" + endl();
+
+            }
+        }
         return ret;
     }
 
@@ -321,9 +328,35 @@ public class CSharpCompiler extends opsc.Compiler
         return "";
     }
 
-    protected String getDeclarations(IDLClass idlClass)
+    protected String getEnumTypeDeclarations(IDLClass idlClass)
     {
         String ret = "";
+        for (IDLEnumType et : idlClass.getEnumTypes()) {
+            if (!et.getComment().equals("")) {
+                String comment = et.getComment();
+                int idx;
+                while ((idx = comment.indexOf('\n')) >= 0) {
+                    ret += tab(2) + "///" + comment.substring(0,idx).replace("/*", "").replace("*/", "") + endl();
+                    comment = comment.substring(idx+1);
+                }
+                ret += tab(2) + "///" + comment.replace("/*", "").replace("*/", "") + endl();
+            }
+            ret += tab(2) + "public enum " + et.getName() + " : short {" + endl();
+            String values = "";
+            for (String eName : et.getEnumNames()) {
+                if (values != "") values += ", ";
+                values += eName;
+            }
+            ret += tab(3) + values + endl();
+            ret += tab(2) + "};" + endl();
+        }
+        if (ret != "") ret += endl();
+        return ret;
+    }
+
+    protected String getDeclarations(IDLClass idlClass)
+    {
+        String ret = getEnumTypeDeclarations(idlClass);
         for (IDLField field : idlClass.getFields())
         {
             String fieldName = getFieldName(field);
@@ -387,140 +420,88 @@ public class CSharpCompiler extends opsc.Compiler
 
     protected String languageType(String s)
     {
-        if (s.equals("string"))
-        {
-            return "string";
-        }
-        else if (s.equals("boolean"))
-        {
-            return "bool";
-        }
-        else if (s.equals("short"))
-        {
-            return "short";
-        }
-        else if (s.equals("int"))
-        {
-            return "int";
-        }
-        else if (s.equals("long"))
-        {
-            return "long";
-        }
-        else if (s.equals("double"))
-        {
-            return "double";
-        }
-        else if (s.equals("float"))
-        {
-            return "float";
-        }
-        else if (s.equals("byte"))
-        {
-            return "byte";
-        }
-        else if (s.equals("string[]"))
-        {
-            return "List<string>";
-        }
-        else if (s.equals("short[]"))
-        {
-            return "List<short>";
-        }
-        else if (s.equals("int[]"))
-        {
-            return "List<int>";
-        }
-        else if (s.equals("long[]"))
-        {
-            return "List<long>";
-        }
-        else if (s.equals("double[]"))
-        {
-            return "List<double>";
-        }
-        else if (s.equals("float[]"))
-        {
-            return "List<float>";
-        }
-        else if (s.equals("byte[]"))
-        {
-            return "List<byte>";
-        }
-        else if (s.equals("boolean[]"))
-        {
-            return "List<bool>";
-        }
-        else if (s.endsWith("[]"))
-        {
-            return "List<" + s.substring(0, s.indexOf('[')) + ">";
-        }
-        else if (s.equals("static string"))
-        {
-            return "static const string";
-        }
+        if (s.equals("string")) return "string";
+        if (s.equals("boolean")) return "bool";
+        if (s.equals("short")) return "short";
+        if (s.equals("int")) return "int";
+        if (s.equals("long")) return "long";
+        if (s.equals("double")) return "double";
+        if (s.equals("float")) return "float";
+        if (s.equals("byte")) return "byte";
+        if (s.equals("string[]")) return "List<string>";
+        if (s.equals("short[]")) return "List<short>";
+        if (s.equals("int[]")) return "List<int>";
+        if (s.equals("long[]")) return "List<long>";
+        if (s.equals("double[]")) return "List<double>";
+        if (s.equals("float[]")) return "List<float>";
+        if (s.equals("byte[]")) return "List<byte>";
+        if (s.equals("boolean[]")) return "List<bool>";
+        if (s.endsWith("[]")) return "List<" + s.substring(0, s.indexOf('[')) + ">";
+        if (s.equals("static string")) return "static const string";
         return s;
     }
 
+    protected String elementType(String s)
+    {
+        if (s.endsWith("[]")) return s.substring(0, s.indexOf('['));
+        return s;
+    }
+
+    protected String initValue(String s)
+    {
+        s = elementType(s);
+        if (s.equals("string")) return "\"\"";
+        if (s.equals("boolean")) return "false";
+        if (s.equals("short")) return "0";
+        if (s.equals("int")) return "0";
+        if (s.equals("long")) return "0";
+        if (s.equals("double")) return "0.0";
+        if (s.equals("float")) return "0.0f";
+        if (s.equals("byte")) return "0";
+        return "new " + s + "()";
+    }
 
     protected String getSerialize(IDLClass idlClass)
     {
         String ret = "";
-        for (IDLField field : idlClass.getFields())
-        {
+        for (IDLField field : idlClass.getFields()) {
             if (field.isStatic()) continue;
             String fieldName = getFieldName(field);
-            if(field.isIdlType())
-            {
-                if(!field.isArray())
-                {
+            if (field.isIdlType()) {
+                if (!field.isArray()) {
                     ret += tab(3) + "_" + fieldName + " = (" + field.getType() + ") archive.Inout(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
-                }
-                else
-                {
+                } else {
                     ret += tab(3) + "_" + fieldName + " = (" + languageType(field.getType()) + ") archive.InoutSerializableList(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
                 }
-            }
-            else if(field.isArray())
-            {
-                if(field.getType().equals("int[]"))
-                {
-                    ret += tab(3) + "_" + fieldName + " = (" + languageType(field.getType()) + ") archive.InoutIntegerList(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
+            } else if (field.isEnumType()) {
+                if (!field.isArray()) {
+                    ret += tab(3) + fieldName + " = archive.InoutEnum(\"" + field.getName() + "\", " + fieldName + ");" + endl();
+                } else {
+                    ret += tab(3) + fieldName + " = archive.InoutEnumList(\"" + field.getName() + "\", " + fieldName + ");" + endl();
                 }
-                else if(field.getType().equals("short[]"))
-                {
-                    ret += tab(3) + "_" + fieldName + " = (" + languageType(field.getType()) + ") archive.InoutShortList(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
+            } else if (field.isArray()) {
+                ret += tab(3) + "_" + fieldName + " = (" + languageType(field.getType()) + ") archive.Inout";
+                if (field.getType().equals("int[]")) {
+                    ret += "Integer";
+                } else if(field.getType().equals("short[]")) {
+                    ret += "Short";
+                } else if(field.getType().equals("byte[]"))  {
+                    ret += "Byte";
+                } else if(field.getType().equals("long[]"))  {
+                    ret += "Long";
+                } else if(field.getType().equals("boolean[]")) {
+                    ret += "Boolean";
+                } else if(field.getType().equals("float[]")) {
+                    ret += "Float";
+                } else if(field.getType().equals("double[]")) {
+                    ret += "Double";
+                } else if(field.getType().equals("string[]")) {
+                    ret += "String";
                 }
-                else if(field.getType().equals("byte[]"))
-                {
-                    ret += tab(3) + "_" + fieldName + " = (" + languageType(field.getType()) + ") archive.InoutByteList(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
-                }
-                else if(field.getType().equals("long[]"))
-                {
-                    ret += tab(3) + "_" + fieldName + " = (" + languageType(field.getType()) + ") archive.InoutLongList(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
-                }
-                else if(field.getType().equals("boolean[]"))
-                {
-                    ret += tab(3) + "_" + fieldName + " = (" + languageType(field.getType()) + ") archive.InoutBooleanList(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
-                }
-                else if(field.getType().equals("float[]"))
-                {
-                    ret += tab(3) + "_" + fieldName + " = (" + languageType(field.getType()) + ") archive.InoutFloatList(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
-                }
-                else if(field.getType().equals("double[]"))
-                {
-                  ret += tab(3) + "_" + fieldName + " = (" + languageType(field.getType()) + ") archive.InoutDoubleList(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
-                }
-                else if(field.getType().equals("string[]"))
-                {
-                    ret += tab(3) + "_" + fieldName + " = (" + languageType(field.getType()) + ") archive.InoutStringList(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
-                }
-            }
-            else
-            {
+                ret += "List(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
+            } else {
                 ret += tab(3) + fieldName + " = archive.Inout(\"" + field.getName() + "\", " + fieldName + ");" + endl();
             }
-
         }
         return ret;
     }

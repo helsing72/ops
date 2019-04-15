@@ -2,6 +2,7 @@
  ***************************************************************************
  *  @file   opsc/Compiler.java
  *  @author Mattias Helsing <mattias.helsing@saabgroup.com>
+ *          Updated/Modified by Lennart Andersson
  *
  * Baseclass for my specialized compilers in this package
  *
@@ -52,7 +53,7 @@ public abstract class Compiler extends CompilerSupport
 
     protected abstract String getDeclarations(IDLClass idlClass);
 
-    protected abstract String getDeclareVector(IDLField field);
+    //protected abstract String getDeclareVector(IDLField field);
 
     protected abstract String languageType(String s);
 

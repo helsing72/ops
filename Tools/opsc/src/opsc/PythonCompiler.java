@@ -2,6 +2,7 @@
 ***************************************************************************
 *  @file   opsc/PythonCompiler.java
 *  @author Jakob Lindgren <jakob.lindgren@saabgroup.com>
+*          Updated/Modified by Lennart Andersson
 *
 * This file is based on:
 *   Tools/NBOPSIDLSupport/src/ops/netbeansmodules/idlsupport/PythonCompiler.java
@@ -29,6 +30,7 @@ import java.util.Vector;
 import java.util.Arrays;
 import parsing.IDLClass;
 import parsing.IDLField;
+import parsing.IDLEnumType;
 //import parsing.TopicInfo;
 
 
@@ -398,13 +400,10 @@ public class PythonCompiler extends opsc.CompilerSupport
             baseClassName  = baseClassName.substring(splitIndex+1);
         }
 
-        for (IDLField field : idlClass.getFields())
-        {
-            if (field.isIdlType())
-            {
+        for (IDLField field : idlClass.getFields()) {
+            if (field.isIdlType()) {
                 String typeName = field.getType();
-                if (field.isArray())
-                {
+                if (field.isArray()) {
                     typeName = typeName.substring(0,typeName.length() - 2);
                 }
                 helper.addDependency(typeName);
@@ -415,11 +414,11 @@ public class PythonCompiler extends opsc.CompilerSupport
         setTemplateTextFromResource(stream);
         String templateText = getTemplateText();
 
-//Replace regular expressions in the template file.
+        //Replace regular expressions in the template file.
         templateText = templateText.replace(CLASS_NAME_REGEX, className);
         templateText = templateText.replace(PACKAGE_NAME_REGEX, packageName);
         templateText = templateText.replace(BASE_CLASS_NAME_REGEX, baseClassName);
-        templateText = templateText.replace(CONSTANTS_REGEX, getConstantDeclarations(idlClass));
+        templateText = templateText.replace(CONSTANTS_REGEX, getConstantDeclarations(idlClass) + getEnumClassDeclarations(idlClass));
         templateText = templateText.replace(DECLARATIONS_REGEX, getDeclarations(idlClass));
         templateText = templateText.replace(SERIALIZE_REGEX, getSerialize(idlClass));
         templateText = templateText.replace(VALIDATION_REGEX, getValidation(idlClass));
@@ -645,6 +644,21 @@ public class PythonCompiler extends opsc.CompilerSupport
         return ret;
     }
 
+    protected String getEnumClassDeclarations(IDLClass idlClass)
+    {
+        String ret = "";
+        for (IDLEnumType et : idlClass.getEnumTypes()) {
+            ret += endl();
+            ret += tab(1) + "class " + et.getName() + "(object):" + endl();
+            int num = 0;
+            for (String eName : et.getEnumNames()) {
+                ret += tab(2) + eName + " = " + num + endl();
+                num++;
+            }
+        }
+        return ret;
+    }
+
     protected String getDeclarations(IDLClass idlClass)
     {
         String packageName = idlClass.getPackageName() + ".";
@@ -652,42 +666,42 @@ public class PythonCompiler extends opsc.CompilerSupport
         for (IDLField field : idlClass.getFields()) {
             if (field.isStatic()) continue;
             String fieldName = getFieldName(field);
-            if (!field.getComment().equals(""))
-            {
+            if (!field.getComment().equals("")) {
                 String comment = field.getComment();
                 int idx;
-                while ((idx = comment.indexOf('\n')) >= 0)
-                {
+                while ((idx = comment.indexOf('\n')) >= 0) {
                     ret += tab(2) + "#" + comment.substring(0,idx).replace("/*", "").replace("*/", "") + endl();
                     comment = comment.substring(idx+1);
                 }
                 ret += tab(2) + "#" + comment.replace("/*", "").replace("*/", "") + endl();
             }
-            if (field.isArray())
-            {
+            if (field.isArray()) {
                 //ret += tab(1) + "" + getDeclareVector(field);
                 //ret += "#### VECTOR ####" + endl();
-                ret += tab(2) + "self." + fieldName + " = []"+endl();
-            }
-            else
-            {
-                if (field.isIdlType())
-                {
+                ret += tab(2) + "self." + fieldName + " = []" + endl();
+            } else {
+                if (field.isIdlType()) {
                     String typeName = field.getType();
-                    if (typeName.startsWith(packageName))
-                    {
+                    if (typeName.startsWith(packageName)) {
                         typeName = typeName.substring(packageName.length());
                     }
                     ret += tab(2) + "self." + fieldName + " = " + typeName + "()" + endl();
-                }
-                else
-                {
+                } else if (field.isEnumType()) {
+                    //Set first enum value as init value
+                    for (IDLEnumType et : idlClass.getEnumTypes()) {
+                        if (et.getName().equals(field.getType())) {
+                            ret += tab(2) + "self." + fieldName + " = " + idlClass.getClassName() + "." + et.getName() + "." + et.getEnumNames().get(0) + endl();
+                            break;
+                        }
+                    }
+                } else {
                     ret += tab(2) + "self." + fieldName + " = " + getTypeInitialization(field.getType()) + endl();
                 }
             }
         }
         return ret;
     }
+
 /*
     protected String getDeclareVector(IDLField field)
     {
@@ -709,17 +723,14 @@ public class PythonCompiler extends opsc.CompilerSupport
             if (field.isStatic()) continue;
             String seralizerString = "archiver.";
             String fieldName = getFieldName(field);
-            if (field.isArray()==false)
-            {
+            if (!field.isArray()) {
                 seralizerString = "self." + fieldName + " = " + seralizerString;
             }
 
-            if (field.isIdlType())
-            {
+            if (field.isIdlType()) {
                 String typeName = field.getType();
                 seralizerString += "Ops";
-                if (field.isArray())
-                {
+                if (field.isArray()) {
                     seralizerString +="Vector";
                     typeName = typeName.substring(0,typeName.length() - 2);
                 }
@@ -730,15 +741,13 @@ public class PythonCompiler extends opsc.CompilerSupport
                     typeName  = typeName.substring(splitIndex+1);
                 }
 
-                if (field.isAbstract()==false)
-                {
+                if (!field.isAbstract()) {
                     seralizerString += ", " + typeName;
                 }
 
                 seralizerString += ")";
-            }
-            else
-            {
+
+            } else {
                 seralizerString += getArchiverCall(field) + "(\"" + field.getName() + "\", self." + fieldName + ")";
             }
             ret += tab(2) + seralizerString + endl();
@@ -754,13 +763,19 @@ public class PythonCompiler extends opsc.CompilerSupport
                 if (field.isStatic()) continue;
                 String fieldName = "self." + getFieldName(field);
                 String typeName = field.getType();
+                if (field.isEnumType()) {
+                    if (field.isArray()) {
+                        typeName = "short[]";
+                    } else {
+                        typeName = "short";
+                    }
+                }
 
                 //ret+=tab(2) + "print \"Checking " + fieldName + " for " + typeName + "\"" + endl();
 
                 int tabs = 2;
 
-                if (field.isIdlType())
-                {
+                if (field.isIdlType()) {
                     int splitIndex = typeName.lastIndexOf(".");
                     typeName   = typeName.substring(splitIndex+1);
 
@@ -768,20 +783,17 @@ public class PythonCompiler extends opsc.CompilerSupport
                     if (typeName.equals("OPSObject")) typeName = "OPS_Object";
                     if (typeName.equals("OPSObject[]")) typeName = "OPS_Object[]";
                 }
-                if (field.isArray())
-                {
+                if (field.isArray()) {
                     typeName = typeName.substring(0,typeName.length() - 2);
                     ret += tab(tabs++) + "for x in " + fieldName + ":" + endl();
                     fieldName = "x";
                 }
-                if (field.isIdlType()==false)
-                {
+                if (!field.isIdlType()) {
                     typeName = getValidationString(typeName);
                 }
                 ret += tab(tabs++) + "if not isinstance(" + fieldName + "," + typeName +"):"+endl();
                 ret += tab(tabs--) + "raise ValueError()" + endl();
-                if (field.isIdlType())
-                {
+                if (field.isIdlType()) {
                     ret += tab(tabs++) + fieldName + ".validate()"+endl();
                 }
         }
@@ -820,12 +832,16 @@ public class PythonCompiler extends opsc.CompilerSupport
     protected String getArchiverCall(IDLField field)
     {
         String s = field.getType();
-        if (field.isArray())
-        {
-            return getArchiverCall(s.substring(0, s.length() - 2)) + "Vector";
+        if (field.isEnumType()) {
+            if (field.isArray()) {
+                s = "short[]";
+            } else {
+                s = "short";
+            }
         }
-        else
-        {
+        if (field.isArray()) {
+            return getArchiverCall(s.substring(0, s.length() - 2)) + "Vector";
+        } else {
             return getArchiverCall(s);
         }
     }

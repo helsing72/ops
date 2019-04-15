@@ -2,10 +2,11 @@
  ***************************************************************************
  *  @file   IDLParser.java
  *  @author Mattias Helsing <mattias.helsing@saabgroup.com>
+ *          Updated/Modified by Lennart Andersson
  *
  * This file is based on:
  *   Tools/NBOPSIDLSupport/src/ops/netbeansmodules/idlsupport/ProjectIDLParser.java
- *************************************************************************** 
+ ***************************************************************************
  */
 
 package opsc;

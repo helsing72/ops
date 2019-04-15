@@ -17,6 +17,7 @@ import java.util.Arrays;
 import parsing.AbstractTemplateBasedIDLCompiler;
 import parsing.IDLClass;
 import parsing.IDLField;
+import parsing.IDLEnumType;
 
 /**
  *
@@ -32,6 +33,7 @@ public class DelphiCompiler extends opsc.Compiler
     final static String DESTRUCTOR_BODY_REGEX = "__destructorBody";
     final static String DECLARATIONS_REGEX = "__declarations";
     final static String CONSTANTS_REGEX = "__constDeclarations";
+    final static String SERIALIZE_HEAD_REGEX = "__serializeHead";
     final static String SERIALIZE_REGEX = "__serialize";
     final static String FILL_CLONE_HEAD_REGEX = "__fillCloneHead";
     final static String FILL_CLONE_BODY_REGEX = "__fillCloneBody";
@@ -136,7 +138,8 @@ public class DelphiCompiler extends opsc.Compiler
         templateText = templateText.replace(DESTRUCTOR_HEAD_REGEX, getDestructorHead(idlClass));
         templateText = templateText.replace(DESTRUCTOR_BODY_REGEX, getDestructorBody(idlClass));
         templateText = templateText.replace(DECLARATIONS_REGEX, getDeclarations(idlClass));
-        templateText = templateText.replace(CONSTANTS_REGEX, getConstantDeclarations(idlClass));
+        templateText = templateText.replace(CONSTANTS_REGEX, getConstantDeclarations(idlClass) + getEnumTypeDeclarations(idlClass));
+        templateText = templateText.replace(SERIALIZE_HEAD_REGEX, getSerializeHead(idlClass));
         templateText = templateText.replace(SERIALIZE_REGEX, getSerialize(idlClass));
         templateText = templateText.replace(FILL_CLONE_HEAD_REGEX, getFillCloneHead(idlClass));
         templateText = templateText.replace(FILL_CLONE_BODY_REGEX, getFillCloneBody(idlClass));
@@ -244,7 +247,7 @@ public class DelphiCompiler extends opsc.Compiler
           if (field.isStatic()) continue;
           if (field.isIdlType() && field.isArray() && field.getArraySize() > 0) {
               ret += tab(0) + "var" + endl();
-              ret += tab(1) +   "i : Integer;" + endl();
+              ret += tab(1) +   "i : Integer;";
               break;
           }
       }
@@ -279,7 +282,7 @@ public class DelphiCompiler extends opsc.Compiler
           if (field.isStatic()) continue;
           if (field.isIdlType() && field.isArray()) {
               ret += tab(0) + "var" + endl();
-              ret += tab(1) +   "i : Integer;" + endl();
+              ret += tab(1) +   "i : Integer;";
               break;
           }
       }
@@ -313,7 +316,7 @@ public class DelphiCompiler extends opsc.Compiler
           if (field.isIdlType()) {
               if (field.isArray()) {
                 ret += tab(0) + "var" + endl();
-                ret += tab(1) +   "__i__ : Integer;" + endl();
+                ret += tab(1) +   "__i__ : Integer;";
                 break;
               }
           }
@@ -448,28 +451,59 @@ public class DelphiCompiler extends opsc.Compiler
 
     protected String getConstantDeclarations(IDLClass idlClass)
     {
-      String ret = "";
-      for (IDLField field : idlClass.getFields()) {
-          if (!field.isStatic()) continue;
-          String fieldName = getFieldName(field);
-          if (!field.getComment().equals("")) {
-              String comment = field.getComment();
-              int idx;
-              while ((idx = comment.indexOf('\n')) >= 0) {
-                ret += tab(3) + "///" + comment.substring(0,idx).replace("/*", "").replace("*/", "") + endl();
-                comment = comment.substring(idx+1);
-              }
-              ret += tab(3) + "///" + comment.replace("/*", "").replace("*/", "") + endl();
-          }
-          String fieldType = getLastPart(field.getType());
-          if (field.getType().equals("string")) {
-              ret += tab(3) + fieldName + " = " + languageType(fieldType) + "(" + field.getValue().replace("\"", "'") + ");" + endl();
-          } else {
-              ret += tab(3) + fieldName + " = " + languageType(fieldType) + "(" + field.getValue() + ");" + endl();
-          }
-      }
-      if (!ret.equals("")) ret = tab(2) + "const" + endl() + ret;
-      return ret;
+        String ret = "";
+        for (IDLField field : idlClass.getFields()) {
+            if (!field.isStatic()) continue;
+            String fieldName = getFieldName(field);
+            if (!field.getComment().equals("")) {
+                String comment = field.getComment();
+                int idx;
+                while ((idx = comment.indexOf('\n')) >= 0) {
+                    ret += tab(3) + "///" + comment.substring(0,idx).replace("/*", "").replace("*/", "") + endl();
+                    comment = comment.substring(idx+1);
+                }
+                ret += tab(3) + "///" + comment.replace("/*", "").replace("*/", "") + endl();
+            }
+            String fieldType = getLastPart(field.getType());
+            if (field.getType().equals("string")) {
+                ret += tab(3) + fieldName + " = " + languageType(fieldType) + "(" + field.getValue().replace("\"", "'") + ");" + endl();
+            } else {
+                ret += tab(3) + fieldName + " = " + languageType(fieldType) + "(" + field.getValue() + ");" + endl();
+            }
+        }
+        if (!ret.equals("")) ret = tab(2) + "const" + endl() + ret;
+        return ret;
+    }
+
+    protected String getEnumTypeDeclarations(IDLClass idlClass)
+    {
+        String ret = "";
+        for (IDLEnumType et : idlClass.getEnumTypes()) {
+            if (!et.getComment().equals("")) {
+                String comment = et.getComment();
+                int idx;
+                while ((idx = comment.indexOf('\n')) >= 0) {
+                    ret += tab(3) + "///" + comment.substring(0,idx).replace("/*", "").replace("*/", "").replace("\r", "") + endl();
+                    comment = comment.substring(idx+1);
+                }
+                ret += tab(3) + "///" + comment.replace("/*", "").replace("*/", "") + endl();
+            }
+            ret += tab(3) + et.getName() + " = (" + endl();
+            String values = "";
+            for (String eName : et.getEnumNames()) {
+                if (values != "") values += ", ";
+                values += eName;
+            }
+            ret += tab(4) + values + endl();
+            ret += tab(3) + ");" + endl();
+        }
+        if (ret != "") {
+            ret = tab(2) + "type " + endl() +
+                tab(3) + "{$SCOPEDENUMS ON}" + endl() +
+                ret +
+                tab(3) + "{$SCOPEDENUMS OFF}" + endl();
+        }
+        return ret;
     }
 
     protected String getValidationHead(IDLClass idlClass)
@@ -480,7 +514,7 @@ public class DelphiCompiler extends opsc.Compiler
           if (field.isIdlType() && !field.isAbstract()) {
               if (field.isArray()) {
                 ret += tab(0) + "var" + endl();
-                ret += tab(1) +   "__i__ : Integer;" + endl();
+                ret += tab(1) +   "__i__ : Integer;";
                 break;
               }
           }
@@ -535,6 +569,28 @@ public class DelphiCompiler extends opsc.Compiler
       return s;
     }
 
+    protected String getSerializeHead(IDLClass idlClass)
+    {
+        String ret = "";
+        boolean enumFound = false;
+        boolean arrayFound = false;
+        for (IDLField field : idlClass.getFields()) {
+            if (field.isStatic()) continue;
+            if (field.isEnumType()) {
+                enumFound = true;
+                if (field.isArray()) arrayFound = true;
+            }
+        }
+        if (enumFound) {
+            ret += "var" + endl();
+            if (arrayFound) {
+                ret += tab(1) + "__i__, __num__ : Integer;" + endl();
+            }
+            ret += tab(1) + "__tmp__ : Int16;";
+        }
+        return ret;
+    }
+
     protected String getSerialize(IDLClass idlClass)
     {
         String ret = "";
@@ -554,6 +610,26 @@ public class DelphiCompiler extends opsc.Compiler
                     } else {
                         ret += "archiver.Inout('" + field.getName() + "', TDynSerializableArray(" + fieldName + "));" + endl();
                     }
+                }
+            } else if (field.isEnumType()) {
+                // Enum type
+                if (field.isArray()) {
+                    ret += "__num__ := archiver.beginList('" + field.getName() + "', ";
+                    if (field.getArraySize() == 0) {
+                        ret += "Length(" + fieldName + "));" + endl();
+                        ret += tab(1) + "if Length(" + fieldName + ") <> __num__ then Setlength(" + fieldName + ", __num__);" + endl();
+                    } else {
+                        ret += field.getArraySize() + ");" + endl();
+                        ret += tab(1) + "if __num__ <> " + field.getArraySize() + " then raise EArchiverException.Create('Illegal size of fix array received. name: " + fieldName + "');" + endl();
+                    }
+                    ret += tab(1) + "for __i__ := 0 to __num__-1 do begin" + endl();
+                    fieldName += "[__i__]";
+                    ret += tab(2);
+                }
+                ret += "__tmp__ := Int16(" + fieldName + "); archiver.Inout('" + field.getName() + "', __tmp__); " + fieldName + " := " + elementType(field.getType()) + "(__tmp__); " + endl();
+                if (field.isArray()) {
+                    ret += tab(1) + "end;" + endl();
+                    ret += tab(1) + "archiver.endList('" + field.getName() + "');" + endl();
                 }
             } else {
                 // core types

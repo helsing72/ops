@@ -47,6 +47,8 @@ __declarations
     constructor Create(t : TTopic);
     destructor Destroy; override;
 
+    // NOTE: write() only serializes the object content and sends it.
+    // The object is still owned by the caller.
     procedure write(data : __className);
   end;
 
@@ -71,7 +73,8 @@ var
 
 implementation
 
-uses SysUtils;
+uses SysUtils,
+     uOps.Exceptions;
 
 { __className }
 
@@ -96,6 +99,7 @@ begin
 end;
 
 procedure __className.Serialize(archiver : TArchiverInOut);
+__serializeHead
 begin
 	inherited Serialize(archiver);
 __serialize
