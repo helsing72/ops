@@ -4,6 +4,14 @@ package TestAll;
 //including aggregating a third data type TestData
 class ChildData extends BaseData
 {
+    /* Test of enums */
+    enum Order {ABC, DEF, GHI, JKL};
+    Order enu1;
+    Order[] enuVec;
+    Order[6] enuFixArr;
+
+    enum Command {START, STOP, PAUSE, CONTINUE};
+
     /* Test of constants */
     const byte c_b = 8;
     const int c_i = 17;
