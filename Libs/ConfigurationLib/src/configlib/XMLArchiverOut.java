@@ -11,7 +11,7 @@ import java.util.List;
  *
  * @author Anton Gravestam
  */
-public class XMLArchiverOut implements ArchiverInOut
+public class XMLArchiverOut extends ArchiverInOut
 {
     private static String LINE_CHANGE = "\n";
     private static String  HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?>" + LINE_CHANGE;
@@ -260,6 +260,8 @@ public class XMLArchiverOut implements ArchiverInOut
         String typeAdd = writType ? TYPE_ADD_BOOLEAN : "";
         putXMLLeaf(name, "" + v, typeAdd);
     }
+
+    public boolean isOut() { return true; }
 
     public int inout(String name, int v) throws IOException
     {

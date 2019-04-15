@@ -34,7 +34,7 @@ import ops.ReadByteBuffer;
  *
  * @author angr
  */
-public class OPSArchiverIn implements ArchiverInOut
+public class OPSArchiverIn extends ArchiverInOut
 {
 
     private SerializableCompositeFactory compositeFactory;
@@ -45,6 +45,8 @@ public class OPSArchiverIn implements ArchiverInOut
         compositeFactory = OPSObjectFactory.getInstance();
         readBuf = buf;
     }
+
+    public boolean isOut() { return false; }
 
     public boolean remove(Object o)
     {
