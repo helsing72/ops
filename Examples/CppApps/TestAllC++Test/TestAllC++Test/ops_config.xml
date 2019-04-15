@@ -12,8 +12,10 @@
                 <domainAddress>234.5.6.8</domainAddress>
                 <!--optional <timeToLive>1</timeToLive>-->
                 <localInterface>127.0.0.1</localInterface>
+                <localInterface>192.168.0.0/24</localInterface>
                 <!--optional <inSocketBufferSize>16000000</inSocketBufferSize>-->
                 <outSocketBufferSize>16000000</outSocketBufferSize>
+                <metaDataMcPort>0</metaDataMcPort>
                 <topics>
                     <element type = "Topic">
                         <name>ChildTopic</name>
@@ -28,12 +30,9 @@
                         <name>BaseTopic</name>
                         <port>6689</port>
                         <dataType>TestAll.BaseData</dataType>
-                        <transport>tcp</transport>
-                        <address>127.0.0.1</address>
                         <outSocketBufferSize>260000000</outSocketBufferSize>
                         <inSocketBufferSize>160000000</inSocketBufferSize>
                       </element>
-                    <!-- TODO: Add more topics here... -->
                 </topics>
             </element>
 

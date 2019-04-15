@@ -34,6 +34,19 @@
 //TestAll::TestData::MemoryPool TestAll::TestData::_pool(100);
 
 
+std::ostream& operator<<(std::ostream& os, TestAll::ChildData::Order c)
+{
+	switch (c)
+	{
+	case TestAll::ChildData::Order::ABC: os << "ABC";    break;
+	case TestAll::ChildData::Order::DEF: os << "DEF";    break;
+	case TestAll::ChildData::Order::GHI: os << "GHI";    break;
+	case TestAll::ChildData::Order::JKL: os << "JKL";    break;
+	default: os.setstate(std::ios_base::failbit);
+	}
+	return os;
+}
+
 bool gTestFailed = false;
 
 template <typename T>
@@ -81,6 +94,12 @@ void checkEmpty(TestAll::ChildData& data)
 	for (int i = 0; i < 10; i++) AssertEQ<ops::strings::fixed_string<16>>(data.fixLengthStringFixArr[i], "");
 
 	// ChildData
+	//  enums
+	AssertEQ<TestAll::ChildData::Order>(data.enu1, TestAll::ChildData::Order::ABC);
+	AssertEQ<size_t>(data.enuVec.size(), 0);
+	for (int i = 0; i < 6; i++) AssertEQ<TestAll::ChildData::Order>(data.enuFixArr[i], TestAll::ChildData::Order::ABC);
+
+	//  core types
 	AssertEQ<bool>(data.bo, false, "data.bo");
     AssertEQ<char>(data.b, 0, "data.b");
     AssertEQ<short>(data.sh, 0);
@@ -178,6 +197,13 @@ void checkObjects(TestAll::ChildData& data, TestAll::ChildData& exp)
 	for (int i = 0; i < 10; i++) AssertEQ<ops::strings::fixed_string<16>>(data.fixLengthStringFixArr[i], exp.fixLengthStringFixArr[i], "fixLengthStringFixArr");
 
 	// Test fields in ChildData
+	//  enums
+	AssertEQ<TestAll::ChildData::Order>(data.enu1, exp.enu1);
+	AssertEQ<size_t>(data.enuVec.size(), exp.enuVec.size());
+	for (unsigned int i = 0; i < data.enuVec.size(); i++) AssertEQ<TestAll::ChildData::Order>(data.enuVec[i], exp.enuVec[i]);
+	for (int i = 0; i < 6; i++) AssertEQ<TestAll::ChildData::Order>(data.enuFixArr[i], exp.enuFixArr[i]);
+
+	//  core types
 	AssertEQ<bool>(data.bo, exp.bo, "data.bo");
     AssertEQ<char>(data.b, exp.b, "data.b");
     AssertEQ<short>(data.sh, exp.sh);
@@ -293,6 +319,20 @@ void fillChildData(TestAll::ChildData& data)
 	data.fixLengthStringFixArr[9] = "fsf 9";
 
 	// Data for fields in ChildData
+	//  enums
+	data.enu1 = TestAll::ChildData::Order::GHI;
+
+	data.enuVec.push_back(TestAll::ChildData::Order::GHI);
+	data.enuVec.push_back(TestAll::ChildData::Order::JKL);
+	data.enuVec.push_back(TestAll::ChildData::Order::JKL);
+	data.enuVec.push_back(TestAll::ChildData::Order::ABC);
+	data.enuVec.push_back(TestAll::ChildData::Order::DEF);
+
+	data.enuFixArr[0] = TestAll::ChildData::Order::DEF;
+	data.enuFixArr[4] = TestAll::ChildData::Order::JKL;
+	data.enuFixArr[5] = TestAll::ChildData::Order::DEF;
+
+	//  core types
 	data.bo = true;
     data.b = 7;
     data.sh = -99;
@@ -428,7 +468,7 @@ void SignalHandler(int signal)
 
 int main(int argc, const char* args[])
 {
-#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+#if defined(DEBUG_OPSOBJECT_COUNTER)
 	std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
 #endif
 	try {
@@ -469,7 +509,7 @@ int main(int argc, const char* args[])
 		TestAll::ChildData cd2;
 		TestAll::ChildData cd3;
 
-#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+#if defined(DEBUG_OPSOBJECT_COUNTER)
 		std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
 #endif
 
@@ -482,7 +522,7 @@ int main(int argc, const char* args[])
 		checkObjects(cd1, cd2);
 		std::cout << "Finished " << std::endl;
 
-#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+#if defined(DEBUG_OPSOBJECT_COUNTER)
 		std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
 #endif
 
@@ -508,7 +548,7 @@ int main(int argc, const char* args[])
 		}
 		std::cout << "Print Archiver Test Finished " << std::endl;
 
-#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+#if defined(DEBUG_OPSOBJECT_COUNTER)
 		std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
 #endif
 
@@ -521,9 +561,10 @@ int main(int argc, const char* args[])
 		std::cout << "  GetSize()= " << buf.GetSize() << std::endl;
 		ao.inout("data", cd1);
 		std::cout << "  GetSize()= " << buf.GetSize() << std::endl;
+		AssertEQ(buf.GetSize(), 3194, "Serialized size error");
 		std::cout << "Serialize finished" << std::endl;
 
-#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+#if defined(DEBUG_OPSOBJECT_COUNTER)
 		std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
 #endif
 
@@ -539,7 +580,7 @@ int main(int argc, const char* args[])
 		}
 		participant->addTypeSupport(new TestAll::TestAllTypeFactory());
 
-#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+#if defined(DEBUG_OPSOBJECT_COUNTER)
 		std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
 #endif
 
@@ -566,9 +607,10 @@ int main(int argc, const char* args[])
 
 			// Setup & start publisher
 			TestAll::ChildDataPublisher pub(topic);
+			pub.setName("C++");
 			pub.start();
 
-#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+#if defined(DEBUG_OPSOBJECT_COUNTER)
 			std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
 #endif
 			// Publish data
@@ -595,14 +637,16 @@ int main(int argc, const char* args[])
 
 			std::cout << "Finished " << std::endl;
 
-#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+#if defined(DEBUG_OPSOBJECT_COUNTER)
 			std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
 #endif
 
 			std::cout << "Waiting for more data... (Press Ctrl-C to terminate)" << std::endl;
 			while (!gTerminate) {
 				if (sub.waitForNewData(100)) {
-					std::cout << "Received new data. Checking..." << std::endl;
+					sub.aquireMessageLock();
+					std::cout << "Received new data from " << sub.getMessage()->getPublisherName() << ". Checking..." << std::endl;
+					sub.releaseMessageLock();
 					sub.getData(cd3);
 					sub.aquireMessageLock();
 					AssertEQ<size_t>(sub.getMessage()->spareBytes.size(), 0, "spareBytes");
@@ -613,7 +657,7 @@ int main(int argc, const char* args[])
 			}
 		}
 
-#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+#if defined(DEBUG_OPSOBJECT_COUNTER)
 		std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
 #endif
 
@@ -625,7 +669,7 @@ int main(int argc, const char* args[])
 		std::cout << "Caugth std:exception: " << e.what() << std::endl;
 		gTestFailed = true;
 	}
-#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+#if defined(DEBUG_OPSOBJECT_COUNTER)
 	std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
 #endif
 
