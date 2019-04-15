@@ -45,14 +45,25 @@ public class WriteByteBuffer
     //private ByteBuffer tempByteBuffer;
 
     /** Creates a new instance of WriteByteBuffer */
-    public WriteByteBuffer(/*byte[] bytes*/ByteBuffer buffer, int segmentSize)
+    public WriteByteBuffer(ByteBuffer buffer, int segmentSize)
     {
-        outBuffer = buffer;//ByteBuffer.wrap(bytes);
-
-        //tempByteBuffer = ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN);
+        outBuffer = buffer;
         outBuffer.order(ByteOrder.LITTLE_ENDIAN); //Only default value, this should be dynamic in future OPS
         this.segmentSize = segmentSize;
         nextSegmentAt = 0;
+        currentSegment = 0;
+    }
+
+    public WriteByteBuffer(ByteBuffer buffer, int segmentSize, boolean skipLeadingSegmentHeader)
+    {
+        outBuffer = buffer;
+        outBuffer.order(ByteOrder.LITTLE_ENDIAN); //Only default value, this should be dynamic in future OPS
+        this.segmentSize = segmentSize;
+        if (skipLeadingSegmentHeader) {
+            nextSegmentAt = segmentSize;
+        } else {
+            nextSegmentAt = 0;
+        }
         currentSegment = 0;
     }
 

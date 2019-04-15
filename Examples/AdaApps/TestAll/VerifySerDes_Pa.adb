@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2017 Lennart Andersson.
+-- Copyright (C) 2017-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -157,6 +157,7 @@ package body VerifySerDes_Pa is
   procedure AssertEQ is new AssertIntEQ(Int64);
 
   procedure AssertEQ is new AssertIntEQ(Ops_Pa.OpsObject_Pa.TestAll_Fruit.enum);
+  procedure AssertEQ is new AssertIntEQ(Ops_Pa.OpsObject_Pa.TestAll_ChildData.Order);
 
   -- ---------------------
 
@@ -196,6 +197,10 @@ package body VerifySerDes_Pa is
   procedure AssertPtrEQ is new AssertAccessEQ0(Float32, Float32_Arr, Float32_Arr_At);
   procedure AssertPtrEQ is new AssertAccessEQ0(Float64, Float64_Arr, Float64_Arr_At);
   procedure AssertPtrEQ is new AssertAccessEQ0(String_At, String_Arr, String_Arr_At);
+
+  procedure AssertPtrEQ is new AssertAccessEQ0(Ops_Pa.OpsObject_Pa.TestAll_ChildData.Order,
+                                               Ops_Pa.OpsObject_Pa.TestAll_ChildData.Order_Arr,
+                                               Ops_Pa.OpsObject_Pa.TestAll_ChildData.Order_Arr_At);
 
   generic
     type Item is private;
@@ -243,6 +248,11 @@ package body VerifySerDes_Pa is
   procedure AssertArrEQ is new AssertArrayEQ0(Float32, Float32_Arr, Float32_Arr_At, AssertEQ);
   procedure AssertArrEQ is new AssertArrayEQ0(Float64, Float64_Arr, Float64_Arr_At, AssertEQ);
   procedure AssertArrEQ is new AssertArrayEQ0(String_At, String_Arr, String_Arr_At, AssertEQ);
+
+  procedure AssertArrEQ is new AssertArrayEQ0(Ops_Pa.OpsObject_Pa.TestAll_ChildData.Order,
+                                              Ops_Pa.OpsObject_Pa.TestAll_ChildData.Order_Arr,
+                                              Ops_Pa.OpsObject_Pa.TestAll_ChildData.Order_Arr_At,
+                                              AssertEQ);
 
   generic
     type Item is private;
@@ -499,6 +509,12 @@ package body VerifySerDes_Pa is
 
 
     -- ChildData
+    -- enums
+    AssertEQ(data.enu1, ABC);
+    AssertPtrEQ(data.enuVec, null);
+    for i in data.enuFixArr'Range loop AssertEQ(data.enuFixArr(i), ABC); end loop;
+
+    -- core types
     dummy := AssertEQ(data.bo, false, "data.bo");
     AssertEQ(data.b, 0, "data.b");
     AssertEQ(data.sh, 0);
@@ -605,6 +621,12 @@ package body VerifySerDes_Pa is
 
 
     -- ChildData
+    -- enums
+    AssertEQ(data.enu1, exp.enu1);
+    AssertArrEQ(data.enuVec, exp.enuVec);
+    AssertArrEQ(data.enuFixArr, exp.enuFixArr);
+
+    -- core types
     AssertEQ(data.bo, exp.bo, "data.bo");
     AssertEQ(data.b, exp.b, "data.b");
     AssertEQ(data.sh, exp.sh);
@@ -722,6 +744,20 @@ package body VerifySerDes_Pa is
     data.fixLengthStringFixArr(9) := Copy("fsf 9");
 
     -- ChildData
+    -- enums
+    data.enu1 := GHI;
+    data.enuVec := new Order_Arr(0..4);
+    data.enuVec(0) := GHI;
+    data.enuVec(1) := JKL;
+    data.enuVec(2) := JKL;
+    data.enuVec(3) := ABC;
+    data.enuVec(4) := DEF;
+
+    data.enuFixArr(0) := DEF;
+    data.enuFixArr(4) := JKL;
+    data.enuFixArr(5) := DEF;
+
+    -- core types
     data.bo := true;
     data.b := 7;
     data.sh := -99;
@@ -1007,6 +1043,7 @@ package body VerifySerDes_Pa is
     Put_line("  GetSize()= " & UInt32'Image(FBuf.GetSize));
     ao.inout("data", Serializable_Class_At(cd1));
     Put_Line("  GetSize()= " & UInt32'Image(FBuf.GetSize));
+    AssertEQ(Int32(FBuf.GetSize), Int32(3194), "Serialized size error");
     Log("Serialize finished");
 
 --      declare
@@ -1055,6 +1092,7 @@ package body VerifySerDes_Pa is
 
         -- Setup & start publisher
         pub := Create( top );
+        pub.SetName("Ada");
         pub.Start;
 
         -- Publish data
@@ -1087,7 +1125,14 @@ package body VerifySerDes_Pa is
         begin
           while not gTerminate and Ops_Pa.GetTimeInMs < stopTime loop
             if (sub.waitForNewData(100)) then
-              Log("Received new data. Checking...");
+              declare
+                msg : Ops_Pa.OpsObject_Pa.OPSMessage_Pa.OPSMessage_Class_At;
+              begin
+                sub.acquireMessageLock;
+                msg := sub.getMessage;
+                Log("Received new data from " & msg.PublisherName & ". Checking...");
+                sub.releaseMessageLock;
+              end;
               flag := sub.getData(cd3);
               declare
                 s : Ops_Pa.Subscriber_Pa.Scope_MessageLock( Subscriber_Class_At(sub) );

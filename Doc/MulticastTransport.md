@@ -9,7 +9,7 @@ _Note, this is the default transport mechanism for OPS 4 and is the only one ful
 
 By default, messages communicated with OPS are sent over an IP multicast transport (Multicast Transport). Communication model is simple, each topic belongs to a combination of a multicast address and a port. Both multicast address and port can be used by any number of topics, but separating them into different address/port combinations can greatly improve performance and network usage.
 
-When you create a subscriber and start it, OPS will add a multicast membership to the address/port attached to the topic of the subscriber and start listening for messages on that port. Whenever data is received, the communication layer of OPS will check if the messages is intended to the subscriber and if it is, deserialize the data into an object of the data class of the topic and deliver it your subscriber.
+When you create a subscriber and start it, OPS will add a multicast membership to the address/port attached to the topic of the subscriber and start listening for messages on that port. Whenever data is received, the communication layer of OPS will check if the messages is intended to the subscriber and if it is, deserialize the data into an object of the data class of the topic and deliver it to your subscriber.
 
 In the same way, a publisher will setup a multicast communication with the parameters of your topic and when ever you issue a write on the publisher serialize the data into bytes and send them with UDP messages to the multicast address/port of the topic.
 

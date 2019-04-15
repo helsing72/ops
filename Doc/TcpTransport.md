@@ -3,7 +3,7 @@
 
 The TCP Transport of OPS is based on TCP/IP as opposed to Multicast Transport which use UDP as the basis for communication. When you use TCP as the transport for a topic, OPS sets up a server on the publisher side of a topic which accepts connections from subscribers and sends data to the subscribers one by one over TCP when a write operation is called on the publisher.
 
-The TCP transport can be useful in network environments with high IP package losses and/or for communicating over the Internet.
+The TCP transport can be useful in network environments with high IP package losses and/or for communicating over the Internet or other complex networks where routers may block multicast traffic.
 
 When using TCP Transport, a topic can only have one publisher but any number of subscribers to a topic.
 

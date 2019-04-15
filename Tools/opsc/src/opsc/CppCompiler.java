@@ -2,6 +2,7 @@
  ***************************************************************************
  *  @file   opsc/CppCompiler.java
  *  @author Mattias Helsing <mattias.helsing@saabgroup.com>
+ *          Updated/Modified by Lennart Andersson
  *
  * This file is based on:
  *   Tools/NBOPSIDLSupport/src/ops/netbeansmodules/idlsupport/CppCompiler.java
@@ -26,6 +27,7 @@ import java.util.Arrays;
 import parsing.AbstractTemplateBasedIDLCompiler;
 import parsing.IDLClass;
 import parsing.IDLField;
+import parsing.IDLEnumType;
 
 /**
  *
@@ -413,16 +415,26 @@ public class CppCompiler extends opsc.Compiler
                 ret += tab(2) + fieldName + " = new " + languageType(field).replace("*", "()") + ";" + endl();
             }
             if (field.isArray() && (field.getArraySize() > 0)) {
-                if (!field.isIdlType()) {
-                    if (!field.getType().equals("string[]")) {
-                        // int kalle[356]; --> memset(&kalle[0], 0, sizeof(kalle));
-                        ret += tab(2) + "memset(&" + fieldName + "[0], 0, sizeof(" + fieldName + "));" + endl();
-                    }
-                } else {
+                if (field.isIdlType()) {
                     if (field.isAbstract()) {
                         ret += tab(2) + "for(unsigned int __i = 0; __i < " + field.getArraySize() + "; __i++) {" + endl();
                         ret += tab(3) +   fieldName + "[__i] = new " + languageType(field).replace("*", "()") + ";" + endl();
                         ret += tab(2) + "}" + endl();
+                    }
+                } else if (field.isEnumType()) {
+                    //Set first enum value as init value
+                    for (IDLEnumType et : idlClass.getEnumTypes()) {
+                        if (et.getName().equals(field.getType().replace("[]",""))) {
+                            ret += tab(2) + "for(unsigned int __i = 0; __i < " + field.getArraySize() + "; __i++) {" + endl();
+                            ret += tab(3) +   fieldName + "[__i] = " + et.getName() + "::" + et.getEnumNames().get(0) + ";" + endl();
+                            ret += tab(2) + "}" + endl();
+                            break;
+                        }
+                    }
+                } else {
+                    if (!field.getType().equals("string[]")) {
+                        // int kalle[356]; --> memset(&kalle[0], 0, sizeof(kalle));
+                        ret += tab(2) + "memset(&" + fieldName + "[0], 0, sizeof(" + fieldName + "));" + endl();
                     }
                 }
             }
@@ -430,7 +442,7 @@ public class CppCompiler extends opsc.Compiler
         return ret;
     }
 
-    private CharSequence getConstructorHead(IDLClass idlClass)
+    private String getConstructorHead(IDLClass idlClass)
     {
         String ret = tab(2) + "";
         for (IDLField field : idlClass.getFields()) {
@@ -438,21 +450,53 @@ public class CppCompiler extends opsc.Compiler
             String fieldName = getFieldName(field);
             if (field.getType().equals("boolean")) {
                 ret += ", " + fieldName + "(false)";
-            } else {
-                if (field.getType().equals("string") || field.isArray() || field.isIdlType()) {
-                    //Do nothing in head
-                } else {
-                    //Numeric
-                    ret += ", " + fieldName + "(0)";
+            } else if (field.getType().equals("string") || field.isArray() || field.isIdlType()) {
+                //Do nothing in head
+            } else if (field.isEnumType()) {
+                //Set first enum value as init value
+                for (IDLEnumType et : idlClass.getEnumTypes()) {
+                    if (et.getName().equals(field.getType())) {
+                        ret += ", " + fieldName + "(" + et.getName() + "::" + et.getEnumNames().get(0) + ")";
+                        break;
+                    }
                 }
+            } else {
+                //Numeric
+                ret += ", " + fieldName + "(0)";
             }
         }
         return ret;
     }
 
+    protected String getEnumTypeDeclarations(IDLClass idlClass)
+    {
+      String ret = "";
+      for (IDLEnumType et : idlClass.getEnumTypes()) {
+          if (!et.getComment().equals("")) {
+              String comment = et.getComment();
+              int idx;
+              while ((idx = comment.indexOf('\n')) >= 0) {
+                  ret += tab(1) + "///" + comment.substring(0,idx).replace("/*", "").replace("*/", "").replace("\r", "") + endl();
+                  comment = comment.substring(idx+1);
+              }
+              ret += tab(1) + "///" + comment.replace("/*", "").replace("*/", "") + endl();
+          }
+          ret += tab(1) + "enum class " + et.getName() + " {" + endl();
+          String values = "";
+          for (String eName : et.getEnumNames()) {
+              if (values != "") values += ", ";
+              values += eName;
+          }
+          ret += tab(2) + values + endl();
+          ret += tab(1) + "};" + endl();
+      }
+      if (ret != "") ret += endl();
+      return ret;
+    }
+
     protected String getDeclarations(IDLClass idlClass)
     {
-        String ret = "";
+        String ret = getEnumTypeDeclarations(idlClass);
         for (IDLField field : idlClass.getFields()) {
             String fieldName = getFieldName(field);
             if (!field.getComment().equals("")) {
@@ -683,6 +727,17 @@ public class CppCompiler extends opsc.Compiler
                         }
                     }
                 }
+            } else if (field.isEnumType()) {
+                // Enum types
+                // archive->inoutenum<Order>("enu1", enu1);
+                // archive->inoutenum<Order>("enuVec", enuVec);
+                // archive->inoutenum<Order>("enuFixArr", enuFixArr, 6);
+                String arrSize = "";
+                if (field.isArray() && (field.getArraySize() > 0)) {
+                    arrSize = ", " + field.getArraySize();
+                }
+                ret += "archive->inoutenum(\"" + field.getName() + "\", " + fieldName + arrSize + ");" + endl();
+
             } else {
                 // core types
                 if (field.isArray()) {

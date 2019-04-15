@@ -14,6 +14,7 @@
                 <localInterface>127.0.0.1</localInterface>
                 <!--optional <inSocketBufferSize>16000000</inSocketBufferSize>-->
                 <outSocketBufferSize>16000000</outSocketBufferSize>
+                <metaDataMcPort>0</metaDataMcPort>
                 <topics>
                     <element type = "Topic">
                         <name>ChildTopic</name>
@@ -28,18 +29,9 @@
                         <name>BaseTopic</name>
                         <port>6689</port>
                         <dataType>TestAll.BaseData</dataType>
-                        <transport>tcp</transport>
-                        <address>127.0.0.1</address>
                         <outSocketBufferSize>260000000</outSocketBufferSize>
                         <inSocketBufferSize>160000000</inSocketBufferSize>
                       </element>
-          <element type = "Topic">
-            <name>zzzChildTopic</name>
-            <port>6689</port>
-            <dataType>TestAll.ChildData</dataType>
-            <transport>tcp</transport>
-            <address>127.0.0.1</address>
-          </element>
                 </topics>
             </element>
 

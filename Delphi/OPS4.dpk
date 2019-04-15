@@ -87,6 +87,7 @@ contains
   uOps.Transport.UDPSender in 'Source\Transport\uOps.Transport.UDPSender.pas',
   uOps.RequestReply in 'Source\RequestReply\uOps.RequestReply.pas',
   uOps.RequestReply.Reply in 'Source\RequestReply\uOps.RequestReply.Reply.pas',
-  uOps.RequestReply.Request in 'Source\RequestReply\uOps.RequestReply.Request.pas';
+  uOps.RequestReply.Request in 'Source\RequestReply\uOps.RequestReply.Request.pas',
+  uOps.NetworkSupport in 'Source\uOps.NetworkSupport.pas';
 
 end.

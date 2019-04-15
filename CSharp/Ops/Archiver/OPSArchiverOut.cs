@@ -19,7 +19,7 @@ namespace Ops
             this.writeBuf = buf;
         }
 
-        public bool IsOut()
+        public override bool IsOut()
         {
             return true;
         }
@@ -27,7 +27,7 @@ namespace Ops
 		/// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public int Inout(string name, int v)
+		public override int Inout(string name, int v)
         {
             writeBuf.Write(v);
             return v;
@@ -36,7 +36,7 @@ namespace Ops
 		/// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public long Inout(string name, long v)
+		public override long Inout(string name, long v)
         {
             writeBuf.Write(v);
             return v;
@@ -45,7 +45,7 @@ namespace Ops
 		/// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public byte Inout(string name, byte v)
+		public override byte Inout(string name, byte v)
         {
             writeBuf.Write(v);
             return v;
@@ -54,7 +54,7 @@ namespace Ops
 		/// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public short Inout(string name, short v)
+		public override short Inout(string name, short v)
         {
             writeBuf.Write(v);
             return v;
@@ -63,7 +63,7 @@ namespace Ops
 		/// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public float Inout(string name, float v)
+		public override float Inout(string name, float v)
         {
             writeBuf.Write(v);
             return v;
@@ -72,7 +72,7 @@ namespace Ops
 		/// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public bool Inout(string name, bool v)
+		public override bool Inout(string name, bool v)
         {
             writeBuf.Write(v);
             return v;
@@ -81,7 +81,7 @@ namespace Ops
 		/// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public string Inout(string name, string v)
+		public override string Inout(string name, string v)
         {
             writeBuf.Write(v);
             return v;
@@ -90,7 +90,7 @@ namespace Ops
 		/// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public double Inout(string name, double v)
+		public override double Inout(string name, double v)
         {
             writeBuf.Write(v);
             return v;
@@ -99,7 +99,7 @@ namespace Ops
 		/// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public ISerializable Inout(string name, ISerializable v)
+		public override ISerializable Inout(string name, ISerializable v)
         {
             writeBuf.Write(((OPSObject)v).GetTypesString());
             v.Serialize(this);
@@ -109,7 +109,7 @@ namespace Ops
 		/// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public List<bool> InoutBooleanList(string name, List<bool> v)
+		public override List<bool> InoutBooleanList(string name, List<bool> v)
         {
             writeBuf.WriteBooleanArr(v);
             return v;
@@ -118,7 +118,7 @@ namespace Ops
 		/// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public List<byte> InoutByteList(string name, List<byte> v)
+		public override List<byte> InoutByteList(string name, List<byte> v)
         {
             writeBuf.WriteByteArr(v);
             return v;
@@ -127,7 +127,7 @@ namespace Ops
 		/// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public List<double> InoutDoubleList(string name, List<double> v)
+		public override List<double> InoutDoubleList(string name, List<double> v)
         {
             writeBuf.WriteDoubleArr(v);
             return v;
@@ -136,7 +136,7 @@ namespace Ops
 		/// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public List<float> InoutFloatList(string name, List<float> v)
+		public override List<float> InoutFloatList(string name, List<float> v)
         {
             writeBuf.WriteFloatArr(v);
             return v;
@@ -145,7 +145,7 @@ namespace Ops
 		/// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public List<int> InoutIntegerList(string name, List<int> v)
+		public override List<int> InoutIntegerList(string name, List<int> v)
         {
             writeBuf.WriteIntArr(v);
             return v;
@@ -154,14 +154,14 @@ namespace Ops
 		/// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public List<long> InoutLongList(string name, List<long> v)
+		public override List<long> InoutLongList(string name, List<long> v)
         {
             writeBuf.WriteLongArr(v);
             return v;
         }
 
         // NB! we assume that the object is a List<X> where X implements ISerializable.
-        public IList InoutSerializableList(string name, IList v)
+        public override IList InoutSerializableList(string name, IList v)
         {
             writeBuf.Write(((IList)v).Count);
             foreach (ISerializable obj in (IList)v)
@@ -173,7 +173,7 @@ namespace Ops
         }
 
         // NB! we assume that the object is a List<T> where T implements ISerializable.
-        public IList InoutSerializableList<T>(string name, IList v)
+        public override IList InoutSerializableList<T>(string name, IList v)
         {
             return InoutSerializableList(name, v);
         }
@@ -181,7 +181,7 @@ namespace Ops
         /// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public List<short> InoutShortList(string name, List<short> v)
+		public override List<short> InoutShortList(string name, List<short> v)
         {
             writeBuf.WriteShortArr(v);
             return v;
@@ -190,7 +190,7 @@ namespace Ops
 		/// 
 		/// <param name="name"></param>
 		/// <param name="v"></param>
-		public List<string> InoutStringList(string name, List<string> v)
+		public override List<string> InoutStringList(string name, List<string> v)
         {
             writeBuf.WriteStringArr(v);
             return v;

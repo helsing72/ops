@@ -14,6 +14,9 @@ class SampleData
    string<25> s25;
    UserData uData;
 
+   enum Order { UNDEFINED, START, STOP };
+   Order command;
+
    boolean[] boos;
    byte[] bytes;
    short[] shorts;

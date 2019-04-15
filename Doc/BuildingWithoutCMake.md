@@ -28,8 +28,7 @@ Build the solution for all configurations (both x86 and x64):
 Verify they all compile alright (you will have some warnings).
 
 ## Building OPS Core for C# with Visual Studio ##
-Open the solution/project with Visual Studio (has been used with
-VS2010, VS2012, VS2013, VS2015 and VS2017) in directory
+Open the solution/project with Visual Studio (VS2017 version 15.7 or later) in directory
 
 > "OPS_DIR\CSharp\Projects\OpsLibrary\OpsLibrary.sln"
 

@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -19,6 +19,42 @@
 with Ada.Unchecked_Deallocation;
 
 package body Ops_Pa.ArchiverInOut_Pa is
+
+  procedure inoutenum( archiver : ArchiverInOut_Class_At; name : String; value : in out Enum) is
+    tmp : Int16 := Enum'Pos(value);
+  begin
+    archiver.inout(name, tmp);
+    value := Enum'Val(tmp);
+  end;
+
+  procedure inoutenumdynarr( archiver : ArchiverInOut_Class_At; name : String; value : in out Enum_Arr_At) is
+
+    procedure Dispose is new Ada.Unchecked_Deallocation( Enum_Arr, Enum_Arr_At );
+
+    num : Integer := 0;
+  begin
+    if value /= null then
+      num := Integer(value.all'Length);
+    end if;
+    num := archiver.beginList(name, num);
+
+    if not archiver.IsOut then
+      Dispose(value);
+
+      if num > 0 then
+        -- Create new array
+        value := new Enum_Arr(0..Integer(num-1));
+      end if;
+    end if;
+
+    if value /= null then
+      for i in value.all'Range loop
+        inoutenum(archiver, name, value(i));
+      end loop;
+    end if;
+
+    archiver.endList(name);
+  end;
 
   procedure SetTypesString( Self : in out Serializable_Class; types : String ) is
   begin

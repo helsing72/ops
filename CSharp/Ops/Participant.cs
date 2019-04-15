@@ -93,7 +93,7 @@ namespace Ops
             this.participantID = participantID;
             try
             {
-                if (configFile == "")
+                if (string.IsNullOrEmpty(configFile))
                 {
                     this.config = OPSConfig.GetConfig();
                     this.domain = this.config.GetDomain(domainID);

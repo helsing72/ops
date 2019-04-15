@@ -24,7 +24,7 @@ import org.xml.sax.SAXException;
  *
  * @author Anton Gravestam
  */
-public class XMLArchiverIn implements ArchiverInOut
+public class XMLArchiverIn extends ArchiverInOut
 {
 
     private InputStream is;
@@ -105,6 +105,8 @@ public class XMLArchiverIn implements ArchiverInOut
             throw new FormatException("Caused by underlying IOException: " + ex.getMessage());
         }
     }
+
+    public boolean isOut() { return false; }
 
     public byte getByte(String name)
     {

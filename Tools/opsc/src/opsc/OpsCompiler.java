@@ -2,6 +2,7 @@
  ***************************************************************************
  *  @file   opsc/OpsCompiler.java
  *  @author Mattias Helsing <mattias.helsing@saabgroup.com>
+ *          Updated/Modified by Lennart Andersson
  *
  * An attempt to create a command line application for generating
  * Cpp files from OPS IDL files.
@@ -28,6 +29,7 @@ import java.net.URL;
 
 import parsing.IDLClass;
 import parsing.IDLField;
+import parsing.IDLEnumType;
 
 /**
  *
@@ -587,6 +589,15 @@ public class OpsCompiler
           }
           System.out.println("");
         } else {
+          for (IDLEnumType et : idlClass.getEnumTypes()) {
+            System.out.println("  et.getName()        : " + et.getName());
+            System.out.println("    et.getComment()   : " + et.getComment());
+            System.out.println("    et.getEnumNames() : ");
+            for (String val : et.getEnumNames()) {
+              System.out.println("         : " + val);
+            }
+            System.out.println("");
+          }
           for (IDLField field : idlClass.getFields()) {
             System.out.println("  field.getName()        : " + field.getName());
             System.out.println("    field.getArraySize() : " + field.getArraySize());
@@ -595,6 +606,7 @@ public class OpsCompiler
             System.out.println("    field.getComment()   : " + field.getComment());
             System.out.println("    field.getValue()     : " + field.getValue());
             System.out.println("    field.isIdlType()    : " + field.isIdlType());
+            System.out.println("    field.isEnumType()   : " + field.isEnumType());
             System.out.println("    field.isArray()      : " + field.isArray());
             System.out.println("    field.isStatic()     : " + field.isStatic());
             System.out.println("    field.isAbstract()   : " + field.isAbstract());

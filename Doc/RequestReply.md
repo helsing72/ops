@@ -113,10 +113,10 @@ while(true)
   //Send the request and wait for reply 1000 milliseconds.
   //Notice that the reply is a copy of the underlying data
   //and you need to delete it when you no longer want to use it.
-	reply = requestReplyHelper.request(&request, 1000);
+  reply = requestReplyHelper.request(&request, 1000);
 
   if(reply != NULL)
-	{
+  {
     if(reply->requestAccepted)
     {
       std::cout << "Reply received and request was accepted: " << reply->helloString  <<  std::endl;
@@ -125,10 +125,10 @@ while(true)
     }
 
     delete reply;
-	} else {
-	    std::cout << "No reply." << std::endl;
-	}
-	Sleep(1000);
+  } else {
+    std::cout << "No reply." << std::endl;
+  }
+  Sleep(1000);
 }
 ```
 

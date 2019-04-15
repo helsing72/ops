@@ -205,7 +205,7 @@ namespace Ops
         }
 
         // This is the default implementation for when new data has arrived.
-        // The method can be overriden to implament a type safe callback event.
+        // The method can be overriden to implement a type safe callback event.
         protected virtual void NewDataArrived(OPSObject o)
         {
             // Use a delegate to send data to interested receivers.

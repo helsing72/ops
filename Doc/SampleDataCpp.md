@@ -22,6 +22,10 @@ class SampleData :
 public:
    static ops::TypeId_T getTypeName(){return ops::TypeId_T("samples.SampleData");}
 
+    enum class Order {
+        UNDEFINED, START, STOP
+    };
+
     static const int max = 42;
     bool boo;
     char b;
@@ -33,6 +37,7 @@ public:
     std::string s;
     ops::strings::fixed_string<25> s25;
     UserData uData;
+    Order command;
     std::vector<bool> boos;
     std::vector<char> bytes;
     std::vector<short> shorts;
@@ -48,7 +53,7 @@ public:
     ///Default constructor.
     SampleData()
         : ops::OPSObject()
-        , boo(false), b(0), sh(0), i(0), l(0), f(0), d(0)
+        , boo(false), b(0), sh(0), i(0), l(0), f(0), d(0), command(Order::UNDEFINED)
     {
         OPSObject::appendType(ops::TypeId_T("samples.SampleData"));
         memset(&intarr[0], 0, sizeof(intarr));
@@ -58,7 +63,7 @@ public:
     ///Copy-constructor making full deep copy of a(n) SampleData object.
     SampleData(const SampleData& __c)
        : ops::OPSObject()
-        , boo(false), b(0), sh(0), i(0), l(0), f(0), d(0)
+        , boo(false), b(0), sh(0), i(0), l(0), f(0), d(0), command(Order::UNDEFINED)
     {
         OPSObject::appendType(ops::TypeId_T("samples.SampleData"));
         memset(&intarr[0], 0, sizeof(intarr));
@@ -88,6 +93,7 @@ public:
         archive->inout("s", s);
         archive->inout("s25", s25);
         archive->inout("uData", uData);
+        archive->inoutenum("command", command);
         archive->inout("boos", boos);
         archive->inout("bytes", bytes);
         archive->inout("shorts", shorts);
@@ -124,6 +130,7 @@ public:
         obj->s = s;
         obj->s25 = s25;
         obj->uData = uData;
+        obj->command = command;
         obj->boos = boos;
         obj->bytes = bytes;
         obj->shorts = shorts;

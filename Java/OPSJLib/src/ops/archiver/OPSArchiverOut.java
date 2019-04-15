@@ -31,7 +31,7 @@ import ops.WriteByteBuffer;
  *
  * @author angr
  */
-public class OPSArchiverOut implements ArchiverInOut
+public class OPSArchiverOut extends ArchiverInOut
 {
     WriteByteBuffer writeBuf;
 //
@@ -48,6 +48,8 @@ public class OPSArchiverOut implements ArchiverInOut
     {
         return writeBuf.getBytes();
     }
+
+    public boolean isOut() { return true; }
 
     public int inout(String name, int v) throws IOException
     {

@@ -126,7 +126,7 @@ if(WIN32)
   add_custom_command(OUTPUT ${OPS_TARGET}
     #COMMAND "${VS80COMNTOOLS}vsvars32.bat x86"
     COMMAND "${VCVARSALL}" ${VSVARSALL_ARCHITECTURE}
-    COMMAND ${CSCOMPILER} /noconfig ${OPS_CSHARP_FLAGS} /nowarn:1701,1702 /warn:4 /define:TRACE /lib:${CSREFERENCE_NATIVEPATH} /reference:System.dll,System.Drawing.dll,System.Windows.Forms.dll,System.Xml.dll,System.Linq.dll,System.Web.dll,System.Web.Services.dll /target:library /out:${OPS_TARGET} ${OPS_CS_SOURCE_LIST}
+    COMMAND ${CSCOMPILER} /noconfig ${OPS_CSHARP_FLAGS} -langversion:7.3 /nowarn:1701,1702 /warn:4 /define:TRACE /lib:${CSREFERENCE_NATIVEPATH} /reference:System.dll,System.Drawing.dll,System.Windows.Forms.dll,System.Xml.dll,System.Linq.dll,System.Web.dll,System.Web.Services.dll /target:library /out:${OPS_TARGET} ${OPS_CS_SOURCE_LIST}
     DEPENDS ${OPS_CS_SOURCE}
     COMMENT "Building C# sources using ${CSCOMPILER}"
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}

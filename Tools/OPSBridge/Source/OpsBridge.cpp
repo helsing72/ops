@@ -33,15 +33,17 @@
 int BL_log_level = 0;
 std::string cfgfile = "opsbridge_config.xml";
 int bridgeNumber = 0;
+std::string bridgeName = "";
 
 void menu()
 {
 	std::cout << "\n";
 	std::cout << "Usage: OPSBridge <commands>\n";
 	std::cout << "\n";
-	std::cout << "  -b n            Bridge number to use from configuration file (" << bridgeNumber << ")\n";
-	std::cout << "  -c cfgfile      OPSBridge configuration file to use (" << cfgfile << ")\n";
-	std::cout << "  -l n            Log level to use 0..9 (" << BL_log_level << ")(higher value --> less logging)\n";
+	std::cout << "  -b n            Bridge to use from configuration file (sequence number) [" << bridgeNumber << "]\n";
+	std::cout << "  -n name         Named bridge to use from configuration file [" << bridgeName << "]\n";
+	std::cout << "  -c cfgfile      OPSBridge configuration file to use [" << cfgfile << "]\n";
+	std::cout << "  -l n            Log level to use 0..9 (higher value --> less logging) [" << BL_log_level << "]\n";
 	std::cout << "  -h | -?         Show this help\n";
 	std::cout << "\n";
 }
@@ -49,6 +51,7 @@ void menu()
 int main(int argc, char* argv[])
 {
 	bool show_menu = false;
+	int cnt = 0;
 
 	for (int i = 1; i < argc; ) {
 		std::string arg = argv[i++];
@@ -58,12 +61,17 @@ int main(int argc, char* argv[])
 
 		if (arg == "-b") {
 			intp = &bridgeNumber;
+			cnt++;
 		}
 		if (arg == "-c") {
 			stringp = &cfgfile;
 		}
 		if (arg == "-l") {
 			intp = &BL_log_level;
+		}
+		if (arg == "-n") {
+			stringp = &bridgeName;
+			cnt++;
 		}
 		if ((arg == "-?") || (arg == "-h")) {
 			show_menu = true;
@@ -79,13 +87,36 @@ int main(int argc, char* argv[])
 		exit(0);
 	}
 
+	if (cnt != 1) {
+		std::cout << "\nError: Must have exactly one '-b' or '-n' argument\n\n";
+		exit(1);
+	}
+
 	opsbridge::BridgeConfig cfg(cfgfile);
 
 	// Setup the OPS static error service (common for all participants, reports errors during participant creation)
 	ops::ErrorWriter* errorWriterStatic = new ops::ErrorWriter(std::cout);
 	ops::Participant::getStaticErrorService()->addListener(errorWriterStatic);
 
-	if ((int)cfg.vBridges.size() <= bridgeNumber) return 2;
+	if (bridgeName != "") {
+		bool found = false;
+		for (int i = 0; i < (int)cfg.vBridges.size(); i++) {
+			if (bridgeName == cfg.vBridges[i].sBridgeName) {
+				bridgeNumber = i;
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			std::cout << "\nError: Named bridge not found in configuration file\n\n";
+			exit(2);
+		}
+	}
+
+	if ((int)cfg.vBridges.size() <= bridgeNumber) {
+		std::cout << "\nError: Numbered bridge not found in configuration file\n\n";
+		exit(3);
+	}
 
 	opsbridge::BridgeConfig::TBridgeConfig bc = cfg.vBridges[bridgeNumber];
 
@@ -94,7 +125,7 @@ int main(int argc, char* argv[])
 	opsbridge::CTransport* transport = nullptr;
 	switch (bc.endpoint.eType) {
 	case opsbridge::BridgeConfig::local: 
-		return 3;
+		exit(4);
 		break;
 	case opsbridge::BridgeConfig::tcpClient: 
 		transport = new opsbridge::CTcpTransportClient(bc.endpoint.remoteHost, bc.endpoint.remotePort);

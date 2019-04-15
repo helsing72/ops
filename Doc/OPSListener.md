@@ -46,3 +46,5 @@ Usage:
 
 Examples of usage:
 TBD
+
+The source for the tool is in the OPS _Tools_ folder and the built binary in the _deploy/bin_ folder.

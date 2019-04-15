@@ -2,6 +2,7 @@
  ***************************************************************************
  *  @file   opsc/CompilerSupport.java
  *  @author Mattias Helsing <mattias.helsing@saabgroup.com>
+ *          Updated/Modified by Lennart Andersson
  *
  * Baseclass for my specialized compilers in this package
  *

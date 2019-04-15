@@ -15,4 +15,4 @@ void serialize(ops::ArchiverInOut* archive)
 
 The above method is taken from the generated C++ class ExtendedUserData from the ChatExample which extends UserData.
 
-The visitor, ArchiverInOut, is a pure virtual interface and one of its implementations serialize the data to the bytes sent by OPS. Of course you are free to create your own implementations of this interface if you want to serialize your data to something else, e.g. a log message or to a ini-file. Note that the arguments to inout are references and therefor can both serialize and deserialize this object depending on the implementation of ArchiverInOut (hence the name).
+The visitor, ArchiverInOut, is a pure virtual interface and one of its implementations serialize the data to the bytes sent by OPS. Of course you are free to create your own implementations of this interface if you want to serialize your data to something else, e.g. a log message or to an ini-file. Note that the arguments to inout are references and therefor can both serialize and deserialize this object depending on the implementation of ArchiverInOut (hence the name).

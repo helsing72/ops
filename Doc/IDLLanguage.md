@@ -16,26 +16,39 @@ class SampleData
 }
 ```
 
-The package definition consists of the reserved word package followed by the name of the package for the data class. Package in OPS IDL is equivalent to package in Java or namespace in C++ or C#. The package shall be expressed as a single word or as a series of dot separated words, e.g. “samples” or “samples.subsamples” etc and the package declaration shall be ended with a “;”.
+The package definition consists of the reserved word **package** followed by the name of the package for the data class. Package in OPS IDL is equivalent to package in Java or namespace in C++ or C#. The package shall be expressed as a single word or as a series of dot separated words, e.g. “samples” or “samples.subsamples” etc and the package declaration shall be ended with a “;”.
 
-The class definition is the word class followed by a single word for the class name followed by a body marked with an opening and a closing brace, “{     }”.
+The class definition is the reserved word **class** followed by a single word for the class name followed by a body marked with an opening and a closing brace, “{     }”.
 
-Within the body of the class, an arbitrary number of data fields and constants can be declared. Each data field can be of any of the OPS IDL defined basic types, an array of a basic type, another user defined data class or an array of such a data class. Constants can only be of the OPS IDL defined basic types.
+Within the body of the class, an arbitrary number of enum type definitions, constants and data fields can be declared.
+```
+enum Order { UNDEFINED, START, STOP };
+
+const int max = 42;
+
+double d;
+```
+An enum type definition is the reserved word **enum** followed by the enum name and a list of enumeration values within braces.
+
+A constant is the reserved word **const** followed by the type, a name and assignment of a value. Constants can only be of the OPS IDL defined basic types.
+
+A data field can be of any of the OPS IDL defined basic types, an array of a basic type, another user defined data class or an array of such a data class.
 
 The following table shows a listing of all available OPS IDL types and their corresponding representations in common programming languages:
 
 | OPS IDL | C++ | Java | C#  | Delphi | Serialized on the network |
 | ------- | --- | ---- | --- | ------ | ------------------------- |
-| package | namespace | package | namespace | Unit | -          |
-| class   | class | class | class | Class | -                    |
-| const   | static const | static final | const | const | -                    |
-| boolean | bool | boolean | bool | Boolean | 1 byte                   |
-| byte    | char | byte | byte | Byte | 1  byte                  |
-| short   | int16 | short | short | Int16 | 2 bytes                  |
-| int     | int32 | int | int | Int32 | 4 bytes                  |
+| package | namespace | package | namespace | Unit | -            |
+| class   | class | class | class | Class | -                     |
+| enum    | enum class | short | enum | ( , , ) | 2 bytes         |
+| const   | static const | static final | const | const | -       |
+| boolean | bool | boolean | bool | Boolean | 1 byte              |
+| byte    | char | byte | byte | Byte | 1  byte                   |
+| short   | int16 | short | short | Int16 | 2 bytes               |
+| int     | int32 | int | int | Int32 | 4 bytes                   |
 | long    | int64 | long| long | Int64 | 8 bytes                  |
-| float   | float | float| float | Single | 4 byte                   |
-| double  | double | double | double | Double | 8 bytes                  |
+| float   | float | float| float | Single | 4 byte                |
+| double  | double | double | double | Double | 8 bytes           |
 | string  | std::string | String | string | AnsiString | 4 bytes (size) + 1 byte per character (8-bit) |
 | string`<size>` | fixed_string`<size>` | String | string | AnsiString | 4 bytes (size) + 1 byte per character (8-bit) |
 | T       | T  | T  | T | T | sizeof( T ) |
@@ -64,6 +77,9 @@ class SampleData
    string s;
    string<25> s25;
    UserData uData;
+
+   enum Order { UNDEFINED, START, STOP };
+   Order command;
 
    boolean[] boos;
    byte[] bytes;

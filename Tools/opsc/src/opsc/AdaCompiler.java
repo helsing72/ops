@@ -17,6 +17,7 @@ import java.util.Arrays;
 import parsing.AbstractTemplateBasedIDLCompiler;
 import parsing.IDLClass;
 import parsing.IDLField;
+import parsing.IDLEnumType;
 
 /**
  *
@@ -188,13 +189,13 @@ public class AdaCompiler extends opsc.Compiler
         String templateText = getTemplateText();
 
         //Replace regular expressions in the template file.
-        templateText = templateText.replace(UNIT_REGEX, getUnitName(className));                    //
-        templateText = templateText.replace(IMPORTS_REGEX, getImports(idlClass));                   //
-        templateText = templateText.replace(CLASS_NAME_REGEX, className);                           //
-        templateText = templateText.replace(BASE_CLASS_NAME_REGEX, baseClassName);                  //
-        templateText = templateText.replace(PACKAGE_NAME_REGEX, packageName);                       //
-        templateText = templateText.replace(DECLARATIONS_REGEX, getDeclarations(idlClass));         //
-        templateText = templateText.replace(CONSTANTS_REGEX, getConstantDeclarations(idlClass));    //
+        templateText = templateText.replace(UNIT_REGEX, getUnitName(className));
+        templateText = templateText.replace(IMPORTS_REGEX, getImports(idlClass));
+        templateText = templateText.replace(CLASS_NAME_REGEX, className);
+        templateText = templateText.replace(BASE_CLASS_NAME_REGEX, baseClassName);
+        templateText = templateText.replace(PACKAGE_NAME_REGEX, packageName);
+        templateText = templateText.replace(DECLARATIONS_REGEX, getDeclarations(idlClass));
+        templateText = templateText.replace(CONSTANTS_REGEX, getConstantDeclarations(idlClass) + endl() + getEnumTypeDeclarations(idlClass));
 
         //Save the modified text to the output file.
         saveOutputText(templateText);
@@ -609,17 +610,26 @@ public class AdaCompiler extends opsc.Compiler
         return name;
     }
 
-    protected String getInitValue(String s)
+    protected String getInitValue(IDLField field, IDLClass idlClass)
     {
-      s = s.replace("[]", "");
-      if (s.equals("string"))    return "null";
-      if (s.equals("boolean"))   return "False";
-      if (s.equals("double"))    return "0.0";
-      if (s.equals("float"))     return "0.0";
+      String fieldType = getLastPart(field.getType());
+      fieldType = fieldType.replace("[]", "");
+      if (fieldType.equals("string"))    return "null";
+      if (fieldType.equals("boolean"))   return "False";
+      if (fieldType.equals("double"))    return "0.0";
+      if (fieldType.equals("float"))     return "0.0";
+      if (field.isEnumType()) {
+        //Set first enum value as init value
+        for (IDLEnumType et : idlClass.getEnumTypes()) {
+          if (et.getName().equals(fieldType)) {
+            return et.getEnumNames().get(0);
+          }
+        }
+      }
       return "0";
     }
 
-    protected String getDeclareVector(IDLField field)
+    protected String getDeclareVector(IDLField field, IDLClass idlClass)
     {
         String fieldType = getLastPart(field.getType());
         String ret = "";
@@ -639,7 +649,7 @@ public class AdaCompiler extends opsc.Compiler
                     tickStr = "'";
                 } else {
                     typeStr = elementType(fieldType) + "_Arr";
-                    initStr = " => " + getInitValue(fieldType);
+                    initStr = " => " + getInitValue(field, idlClass);
                     tickStr = "'";
                 }
             }
@@ -657,9 +667,9 @@ public class AdaCompiler extends opsc.Compiler
                 ret += elementType(fieldType) + "_Class_At" + arrDecl + " := (others => null);" + endl();
             } else {
                 if (elementType(fieldType) == "String_At") {
-                    ret += "String" + arrDecl + " := (others => " + getInitValue(field.getType()) + ");" + endl();
+                    ret += "String" + arrDecl + " := (others => " + getInitValue(field, idlClass) + ");" + endl();
                 } else {
-                    ret += elementType(fieldType) + arrDecl + " := (others => " + getInitValue(field.getType()) + ");" + endl();
+                    ret += elementType(fieldType) + arrDecl + " := (others => " + getInitValue(field, idlClass) + ");" + endl();
                 }
             }
         }
@@ -683,13 +693,13 @@ public class AdaCompiler extends opsc.Compiler
             String fieldType = getLastPart(field.getType());
             ret += tab(3) + getFieldName(field) + " : ";
             if (field.isArray()) {
-                ret += getDeclareVector(field);
+                ret += getDeclareVector(field, idlClass);
             } else if ((!alwaysDynObject) && field.isIdlType() && !field.isAbstract()) {
                 ret += "aliased " + languageType(fieldType) + "_Class;" + endl();
             } else if (field.isIdlType()) {
                 ret += languageType(fieldType) + "_Class_At := null;" + endl();
             } else {
-                ret += languageType(fieldType) + " := " + getInitValue(fieldType) + ";" + endl();
+                ret += languageType(fieldType) + " := " + getInitValue(field, idlClass) + ";" + endl();
             }
         }
         if (ret == "") ret = tab(3) + "null;";
@@ -715,6 +725,44 @@ public class AdaCompiler extends opsc.Compiler
           if (fieldType.equals("String_At")) fieldType = "String";
           ret += tab(1) + getFieldName(field) + " : constant ";
           ret += fieldType + " := " + field.getValue() + ";" + endl();
+      }
+      return ret;
+    }
+
+    protected String getEnumTypeDeclarations(IDLClass idlClass)
+    {
+      String ret = "";
+      for (IDLEnumType et : idlClass.getEnumTypes()) {
+          if (!et.getComment().equals("")) {
+              String comment = et.getComment();
+              int idx;
+              while ((idx = comment.indexOf('\n')) >= 0) {
+                ret += tab(1) + "---" + comment.substring(0,idx).replace("/*", "").replace("*/", "") + endl();
+                comment = comment.substring(idx+1);
+              }
+              ret += tab(1) + "---" + comment.replace("/*", "").replace("*/", "") + endl();
+          }
+          ret += tab(1) + "type " + et.getName() + " is (" + endl();
+          String values = "";
+          for (String eName : et.getEnumNames()) {
+              if (values != "") values += ", ";
+              values += eName;
+          }
+          ret += tab(4) + values + endl();
+          ret += tab(3) + ");" + endl();
+
+          //type Order_Arr is array(Integer range <>) of aliased Order;
+          //type Order_Arr_At is access all Order_Arr;
+          ret += tab(1) + "type " + et.getName() + "_Arr is array(Integer range <>) of aliased " + et.getName() + ";" + endl();
+          ret += tab(1) + "type " + et.getName() + "_Arr_At is access all " + et.getName() + "_Arr;" + endl();
+
+          //procedure Dispose is new Ada.Unchecked_Deallocation( Order_Arr, Order_Arr_At );
+          ret += tab(1) + "procedure Dispose is new Ada.Unchecked_Deallocation( " + et.getName() + "_Arr, " + et.getName() + "_Arr_At );" + endl();
+
+          // procedure inout is new inoutenum(Order);
+          // procedure inout is new inoutenumdynarr(Order, Order_Arr, Order_Arr_At, inout);
+          ret += tab(1) + "procedure inout is new inoutenum(" + et.getName() + ");" + endl();
+          ret += tab(1) + "procedure inout is new inoutenumdynarr(" + et.getName() + ", " + et.getName() + "_Arr, " + et.getName() + "_Arr_At, inout);" + endl() + endl();
       }
       return ret;
     }
@@ -816,6 +864,12 @@ public class AdaCompiler extends opsc.Compiler
                         ret += tab(2) + "end;" + endl();
                     }
                 }
+            } else if (field.isEnumType()) {
+                // Enum types
+                // Inout(archiver, "enu1", Self.enu1);
+                ret += tab(2);
+                ret += "Inout(archiver, \"" + field.getName() + "\", Self." + fieldName + ");" + endl();
+
             } else {
                 ret += tab(2);
                 // core types
@@ -828,7 +882,7 @@ public class AdaCompiler extends opsc.Compiler
                         ret += "archiver.Inout(\"" + field.getName() + "\", Self." + fieldName + ");" + endl();
                     }
                 } else {
-                  ret += "archiver.Inout(\"" + field.getName() + "\", Self." + fieldName + ");" + endl();
+                    ret += "archiver.Inout(\"" + field.getName() + "\", Self." + fieldName + ");" + endl();
                 }
             }
         }

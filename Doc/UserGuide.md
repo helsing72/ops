@@ -16,11 +16,14 @@
   * Transports
     * [Multicast](MulticastTransport.md)
     * [TCP](TcpTransport.md)
+    * [UDP](UdpTransport.md)
   * Tools
     * [IDL Builder](IDLCompilerTutorial.md)
     * [IDL Compiler](IDLCommandlineCompiler.md)
-    * [OPS Listener](OPSListener.md)
+    * [OPS Bridge](OPSBridge.md)
     * [OPS Debugger](OPSDebugger.md)
+    * [OPS Listener](OPSListener.md)
+    * [VerifyOPSConfig](VerifyOPSConfig.md)
     * [Syntax highlighters](SyntaxHighlighters.md)
   * Advanced Concepts and Features
     * [Understanding OPSObject and OPSMessage](OpsMessage.md)

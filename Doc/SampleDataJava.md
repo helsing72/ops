@@ -12,6 +12,10 @@ import java.io.IOException;
 
 public class SampleData extends OPSObject
 {
+    public enum Order {
+        UNDEFINED, START, STOP
+    };
+
     public static final int max = 42;
 
     public boolean boo;
@@ -24,6 +28,7 @@ public class SampleData extends OPSObject
     public String s = "";
     public String s25 = "";
     public UserData uData = new UserData();
+    public Order command;
     public java.util.Vector<Boolean> boos = new java.util.Vector<Boolean>();
     public java.util.Vector<Byte> bytes = new java.util.Vector<Byte>();
     public java.util.Vector<Short> shorts = new java.util.Vector<Short>();
@@ -50,6 +55,8 @@ public class SampleData extends OPSObject
     {
         super();
         appendType(getTypeName());
+        command = Order.UNDEFINED;
+        for (int i = 0; i < 42; i++) intarr.add(0);
 
     }
     public void serialize(ArchiverInOut archive) throws IOException
@@ -65,6 +72,7 @@ public class SampleData extends OPSObject
         s = archive.inout("s", s);
         s25 = archive.inout("s25", s25);
         uData = (UserData) archive.inout("uData", uData);
+        command = archive.inoutEnum("command", command, Order.values());
         boos = (java.util.Vector<Boolean>) archive.inoutBooleanList("boos", boos);
         bytes = (java.util.Vector<Byte>) archive.inoutByteList("bytes", bytes);
         shorts = (java.util.Vector<Short>) archive.inoutShortList("shorts", shorts);
@@ -101,17 +109,19 @@ public class SampleData extends OPSObject
         cloneResult.s = this.s;
         cloneResult.s25 = this.s25;
         cloneResult.uData = (UserData)this.uData.clone();
-        java.util.Collections.copy(cloneResult.boos, this.boos);
-        java.util.Collections.copy(cloneResult.bytes, this.bytes);
-        java.util.Collections.copy(cloneResult.shorts, this.shorts);
-        java.util.Collections.copy(cloneResult.ints, this.ints);
-        java.util.Collections.copy(cloneResult.longs, this.longs);
-        java.util.Collections.copy(cloneResult.floats, this.floats);
-        java.util.Collections.copy(cloneResult.doubles, this.doubles);
-        java.util.Collections.copy(cloneResult.strings, this.strings);
-        java.util.Collections.copy(cloneResult.s43vect, this.s43vect);
-        java.util.Collections.copy(cloneResult.uDatas, this.uDatas);
-        java.util.Collections.copy(cloneResult.intarr, this.intarr);
+        cloneResult.command = this.command;
+        cloneResult.boos = (java.util.Vector)this.boos.clone();
+        cloneResult.bytes = (java.util.Vector)this.bytes.clone();
+        cloneResult.shorts = (java.util.Vector)this.shorts.clone();
+        cloneResult.ints = (java.util.Vector)this.ints.clone();
+        cloneResult.longs = (java.util.Vector)this.longs.clone();
+        cloneResult.floats = (java.util.Vector)this.floats.clone();
+        cloneResult.doubles = (java.util.Vector)this.doubles.clone();
+        cloneResult.strings = (java.util.Vector)this.strings.clone();
+        cloneResult.s43vect = (java.util.Vector)this.s43vect.clone();
+        cloneResult.uDatas = new java.util.Vector<UserData>();
+        this.uDatas.forEach((item) -> cloneResult.uDatas.add((UserData)item.clone()));
+        cloneResult.intarr = (java.util.Vector)this.intarr.clone();
 
     }
 

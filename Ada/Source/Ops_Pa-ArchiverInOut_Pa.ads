@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -69,6 +69,17 @@ package Ops_Pa.ArchiverInOut_Pa is
   procedure inout( Self : in out ArchiverInOut_Class; name : String; value : in out Float32_Arr) is abstract;
   procedure inout( Self : in out ArchiverInOut_Class; name : String; value : in out Float64_Arr) is abstract;
   procedure inout( Self : in out ArchiverInOut_Class; name : String; value : in out String_Arr) is abstract;
+
+  generic
+    type Enum is (<>);
+  procedure inoutenum( archiver : ArchiverInOut_Class_At; name : String; value : in out Enum);
+
+  generic
+    type Enum is (<>);
+    type Enum_Arr is array(Integer range <>) of aliased Enum;
+    type Enum_Arr_At is access all Enum_Arr;
+    with procedure inoutenum(archiver : ArchiverInOut_Class_At; name : String; value : in out Enum);
+  procedure inoutenumdynarr( archiver : ArchiverInOut_Class_At; name : String; value : in out Enum_Arr_At);
 
   type Serializable_Class_Arr is array(Integer range <>) of Serializable_Class_At;
   type Serializable_Class_Arr_At is access all Serializable_Class_Arr;

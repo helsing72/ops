@@ -384,11 +384,17 @@ public class Participant
                         Logger.getLogger(Participant.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
+                System.out.println("participant thread exit");
             }
         });
 
         thread.setName("ParticipantThread_" + domainID + "_" + participantID);
         thread.start();
+    }
+
+    public void stopThread()
+    {
+        keepRunning = false;
     }
 
 }

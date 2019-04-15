@@ -28,16 +28,19 @@ public class IDLClass
     private String comment;
     private String directive;
     private ArrayList<IDLField> fields;
+    private ArrayList<IDLEnumType> enumTypes;    // Used for enum types defined in a class
 
+    // Used for the depracated enum on IDL-level, ie. when type == ENUM_TYPE
     private ArrayList<String> enumNames = new ArrayList<String>();
+
     /** Creates a new instance of IDLClass */
     public IDLClass(String className, String packageName, ArrayList<IDLField> fields)
     {
         this.className = className;
         this.packageName = packageName;
         this.fields = fields;
+        this.enumTypes = new ArrayList<IDLEnumType>();
     }
-
     public IDLClass(String className, String packageName)
     {
         this(className, packageName, new ArrayList<IDLField>());
@@ -51,56 +54,72 @@ public class IDLClass
     {
         fields.add(f);
     }
+    public void addIDLEnumType(IDLEnumType et)
+    {
+        enumTypes.add(et);
+    }
+
+    // ------------------------
     public String getPackageName()
     {
         return packageName;
     }
-
     public void setPackageName(String packageName)
     {
         this.packageName = packageName;
     }
 
+    // ------------------------
     public String getClassName()
     {
         return className;
     }
-
     public void setClassName(String className)
     {
         this.className = className;
     }
 
+    // ------------------------
     public String getDirective()
     {
         return directive;
     }
-
     public void setDirective(String directive)
     {
         this.directive = directive;
     }
 
+    // ------------------------
     public String getComment()
     {
         return comment;
     }
-
     public void setComment(String comment)
     {
         this.comment = comment;
     }
 
+    // ------------------------
     public ArrayList<IDLField> getFields()
     {
         return fields;
     }
-
     public void setFields(ArrayList<IDLField> fields)
     {
         this.fields = fields;
     }
 
+    // ------------------------
+    public ArrayList<IDLEnumType> getEnumTypes()
+    {
+        return enumTypes;
+    }
+    public void setEnumTypes(ArrayList<IDLEnumType> enumTypes)
+    {
+        this.enumTypes = enumTypes;
+    }
+
+    // ------------------------
     public void setBaseClassName(String bcName)
     {
         baseClassName = bcName;
@@ -110,21 +129,22 @@ public class IDLClass
         return baseClassName;
     }
 
+    // ------------------------
     public int getType()
     {
         return type;
     }
-
     public void setType(int type)
     {
         this.type = type;
     }
 
+    // ------------------------
+    // Used for the deprecated enum type on IDL-level (type == ENUM_TYPE)
     public ArrayList<String> getEnumNames()
     {
         return enumNames;
     }
-
     public void setEnumNames(ArrayList<String> enumNames)
     {
         this.enumNames = enumNames;

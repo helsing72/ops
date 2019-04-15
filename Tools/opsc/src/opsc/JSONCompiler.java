@@ -16,6 +16,7 @@ import java.util.Vector;
 import parsing.AbstractTemplateBasedIDLCompiler;
 import parsing.IDLClass;
 import parsing.IDLField;
+import parsing.IDLEnumType;
 
 /**
  *
@@ -45,6 +46,7 @@ public class JSONCompiler extends CompilerSupport
         for (IDLClass iDLClass : idlClasses)
         {
             res += tab(1) + "," + endl();
+            res += generateEnumTypeDeclarations(1, iDLClass);
             res += generateJSONobject(1, iDLClass);
         }
         res += "]" + endl();
@@ -146,11 +148,41 @@ public class JSONCompiler extends CompilerSupport
       }
     }
 
+    protected String generateEnumTypeDeclarations(int t, IDLClass idlClass)
+    {
+      String ret = "";
+      String thisClassName = idlClass.getPackageName() + "." + idlClass.getClassName();
+      for (IDLEnumType et : idlClass.getEnumTypes()) {
+          ret += tab(t) + "{" + endl();
+          ret += tab(t+1) + "\"type\": \"" + thisClassName + "." + et.getName() + "\"," + endl();
+          ret += tab(t+1) + "\"basetype\": \"short\"," + endl();
+
+          String comment = et.getComment();
+          comment = comment.replace("/*", "").replace("*/", "").replace("\n", " ").replace("\"", "'").trim();
+          if (comment.length() > 0) {
+            ret += tab(t+1) + "\"desc\": \"" + comment + "\"," + endl();
+          }
+          ret += tab(t+1) + "\"enum_definition\": [" + endl();
+
+          int idx = 0;
+          for (String eName : et.getEnumNames()) {
+              if (idx > 0) ret += "," + endl();
+              ret += tab(t+2) + "{ \"enum\": \"" + eName + "\", \"value\": " + idx + " }";
+              idx += 1;
+          }
+          ret += endl() + tab(t+1) + "]" + endl();
+          ret += tab(t) + "}" + endl();
+          ret += tab(t) + "," + endl();
+      }
+      return ret;
+    }
+
     protected String generateJSONobject(int t, IDLClass idlClass)
     {
         String res = "";
+        String thisClassName = idlClass.getPackageName() + "." + idlClass.getClassName();
         res += tab(t) + "{" + endl();
-        res += tab(t+1) + "\"type\": \"" + idlClass.getPackageName() + "." + idlClass.getClassName() + "\"," + endl();
+        res += tab(t+1) + "\"type\": \"" + thisClassName + "\"," + endl();
         String baseClass = "ops.OPSObject";
         if (idlClass.getBaseClassName() != null) {
           baseClass = idlClass.getBaseClassName();
@@ -206,7 +238,9 @@ public class JSONCompiler extends CompilerSupport
               res += ", \"type\": ";
 
             }
-            res += "\"" + makeType(field) + "\"";
+            String ttype = makeType(field);
+            if (field.isEnumType()) ttype = thisClassName + "." + ttype;
+            res += "\"" + ttype + "\"";
 
             String comment = field.getComment();
             comment = comment.replace("/*", "").replace("*/", "").replace("\n", " ").replace("\"", "'").trim();
