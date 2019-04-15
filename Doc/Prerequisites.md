@@ -38,7 +38,9 @@ Version 3.1.0 or later is required to build OPS with CMake. Make sure the cmake 
 OPS has been used with CMake version 3.5.0 and later.
 
 ## Visual Studio (Windows) ##
-OPS has been used with VS2008, VS2010, VS2012, VS2013, VS2015 and VS2017.
+OPS for C++ has been used with VS2008, VS2010, VS2012, VS2013, VS2015 and VS2017.
+
+OPS for C# requires language version 7.3 or later (due to generics and constraining type parameters to System.Enum), i.e. Visual Studio 2017 version 15.7 or later.
 
 ## gcc (Linux) ##
 OPS has been used with 4.4.7, 5.3.0, 5.4.0, 6.2.1, 6.4.1 and 7.3.1.
@@ -56,7 +58,7 @@ OPS uses JavaCC version 6.0.
 Experimental support exist for Python 2.7.
 
 ## Delphi ##
-OPS has been used with Delphi XE2 and Delphi 10.1 Berlin.
+OPS has been used with Delphi XE2, Delphi 10.1 and Delphi 10.2.
 
 ## Ada ##
 The Ada implementation requires Ada 2012 support.
