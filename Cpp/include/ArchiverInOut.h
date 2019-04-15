@@ -1,6 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
+ * Copyright (C) 2019 Lennart Andersson.
  *
  * This notice apply to all source files, *.cpp, *.h, *.java, and *.cs in this directory
  * and all its subdirectories if nothing else is explicitly stated within the source file itself.
@@ -88,6 +89,14 @@ namespace ops
 			if (!isOut()) value.resize(); // recalculate size for an input archiver
 		}
 
+		template <class T>
+		void inoutenum(InoutName_T name, T& value)
+		{
+			int16_t tmp = static_cast<int16_t>(value);
+			inout(name, tmp);
+			value = static_cast<T>(tmp);
+		}
+
 		virtual void inout(InoutName_T name, char* buffer, int bufferSize) = 0;
 
 		virtual Serializable* inout(InoutName_T name, Serializable* value) = 0;
@@ -107,21 +116,35 @@ namespace ops
 		void inout(InoutName_T name, std::vector<strings::fixed_string<N>>& vec)
 		{
 			int size = beginList(name, (int)vec.size());
-			if ((int)vec.size() != size)
-			{
+			if ((int)vec.size() != size) {
 				vec.clear();
 				vec.reserve(size);
 				vec.resize(size);
-				for (int i = 0; i < size; i++)
-				{
+				for (int i = 0; i < size; i++) {
+					inout("element", vec[i], i);
+				}
+			} else {
+				for (int i = 0; i < size; i++) {
 					inout("element", vec[i], i);
 				}
 			}
-			else
-			{
-				for (int i = 0; i < size; i++)
-				{
-					inout("element", vec[i], i);
+			endList(name);
+		}
+
+		template <class T>
+		void inoutenum(InoutName_T name, std::vector<T>& vec)
+		{
+			int size = beginList(name, (int)vec.size());
+			if ((int)vec.size() != size) {
+				vec.clear();
+				vec.reserve(size);
+				vec.resize(size);
+				for (int i = 0; i < size; i++) {
+					inoutenum<T>("element", vec[i]); ///TODO , i);
+				}
+			} else {
+				for (int i = 0; i < size; i++) {
+					inoutenum<T>("element", vec[i]); ///TODO , i);
 				}
 			}
 			endList(name);
@@ -143,6 +166,17 @@ namespace ops
 			if (size != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
 			for (int i = 0; i < size; i++) {
 				inout("element", value[i], i);
+			}
+			endList(name);
+		}
+
+		template <class T>
+		void inoutenum(InoutName_T name, T* value, int numElements)
+		{
+			int size = beginList(name, numElements);
+			if (size != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
+			for (int i = 0; i < size; i++) {
+				inoutenum("element", value[i]); ///TODO , i);
 			}
 			endList(name);
 		}
