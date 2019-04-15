@@ -8,6 +8,7 @@ import java.io.ByteArrayInputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import parsing.IDLClass;
+import parsing.IDLEnumType;
 import parsing.IDLField;
 import parsing.IDLFileParser;
 import parsing.ParseException;
@@ -25,7 +26,6 @@ public class FileParser implements IDLFileParser
 
     public IDLClass parse(String content) throws ParseException
     {
-
         idlClass = new IDLClass();
         IDLParser parser = new IDLParser(new ByteArrayInputStream(content.getBytes()));
 
@@ -104,6 +104,17 @@ public class FileParser implements IDLFileParser
                 pendingComment = "";
                 pendingDirective = "";
             }
+        });
+
+        parser.enumTypeDeclareEvent.add(new ParserEventCallback<IDLEnumType>()
+        {
+          public void onEvent(IDLEnumType eventData, ParserEvent e)
+          {
+              eventData.setComment(pendingComment);
+              idlClass.addIDLEnumType(eventData);
+              pendingComment = "";
+              pendingDirective = "";
+          }
         });
 
         parser.extendsEvent.add(new ParserEventCallback<String>()

@@ -10,13 +10,17 @@ package parsing.javaccparser;
 import java.io.FileNotFoundException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.ArrayList;
 import parsing.IDLField;
+import parsing.IDLEnumType;
 import parsing.javaccparser.ParseException;
 
 public class IDLParser
 {
+    private IDLEnumType currentIDLEnumType = null;
     private IDLField currentIDLField;
     private Token currentToken = null;
+    private ArrayList<String> enumTypes = new ArrayList<String>();
 
     public ParserEvent<String> packageDeclareEvent = new ParserEvent<String>();
     public ParserEvent<String> idlDeclareEvent = new ParserEvent<String>();
@@ -24,6 +28,7 @@ public class IDLParser
     public ParserEvent<String> idlCloseEvent = new ParserEvent<String>();
     public ParserEvent<String> enumCloseEvent = new ParserEvent<String>();
     public ParserEvent<IDLField> fieldDeclareEvent = new ParserEvent<IDLField>();
+    public ParserEvent<IDLEnumType> enumTypeDeclareEvent = new ParserEvent<IDLEnumType>();
     public ParserEvent<String> extendsEvent = new ParserEvent<String>();
     public ParserEvent<String> enumElementEvent = new ParserEvent<String>();
     public ParserEvent<String> commentEvent = new ParserEvent<String>();
@@ -39,101 +44,6 @@ public class IDLParser
         throw new parsing.javaccparser.ParseException(msg);
     }
 
-  public static void main(String args[])
-  {
-    try
-    {
-        IDLParser parser;
-        parser = new IDLParser(new java.io.FileInputStream("TestIDL.idl"));
-
-        parser.idlDeclareEvent.add(new ParserEventCallback<String>() {
-
-                public void onEvent(String eventData, ParserEvent e)
-                {
-                    System.out.println("class " + eventData + " declared.");
-                }
-            });
-        parser.idlCloseEvent.add(new ParserEventCallback<String>() {
-
-                public void onEvent(String eventData, ParserEvent e)
-                {
-                    System.out.println("class " + eventData + " done.");
-                }
-            });
-
-        parser.packageDeclareEvent.add(new ParserEventCallback<String>() {
-
-                public void onEvent(String eventData, ParserEvent e)
-                {
-                    System.out.println("package " + eventData + " declared.");
-                }
-            });
-
-        parser.enumDeclareEvent.add(new ParserEventCallback<String>() {
-
-                public void onEvent(String eventData, ParserEvent e)
-                {
-                    System.out.println("enum " + eventData + " declared.");
-                }
-            });
-        parser.enumCloseEvent.add(new ParserEventCallback<String>() {
-
-                public void onEvent(String eventData, ParserEvent e)
-                {
-                    System.out.println("enum " + eventData + " done.");
-                }
-            });
-        parser.enumElementEvent.add(new ParserEventCallback<String>() {
-
-                public void onEvent(String eventData, ParserEvent e)
-                {
-                    System.out.println("enum element " + eventData + ".");
-                }
-            });
-        parser.fieldDeclareEvent.add(new ParserEventCallback<IDLField>() {
-
-                public void onEvent(IDLField eventData, ParserEvent e)
-                {
-                    System.out.println("  eventData.getName()      : " + eventData.getName());
-                    System.out.println("  eventData.getArraySize() : " + eventData.getArraySize());
-                    System.out.println("  eventData.getStringSize(): " + eventData.getStringSize());
-                    System.out.println("  eventData.getType()      : " + eventData.getType());
-                    System.out.println("  eventData.getComment()   : " + eventData.getComment());
-                    System.out.println("  eventData.getValue()     : " + eventData.getValue());
-                    System.out.println("  eventData.isIdlType()    : " + eventData.isIdlType());
-                    System.out.println("  eventData.isArray()      : " + eventData.isArray());
-                    System.out.println("  eventData.isStatic()     : " + eventData.isStatic());
-                    System.out.println("  eventData.isAbstract()   : " + eventData.isAbstract());
-                    System.out.println("");
-                }
-            });
-        parser.extendsEvent.add(new ParserEventCallback<String>() {
-
-                public void onEvent(String eventData, ParserEvent e)
-                {
-                    System.out.println("extends  " + eventData + ".");
-                }
-            });
-        parser.directiveEvent.add(new ParserEventCallback<String>() {
-
-                public void onEvent(String eventData, ParserEvent e)
-                {
-                    System.out.println("directive:  " + eventData + ".");
-                }
-            });
-
-
-        parser.specification();
-    }
-    catch (ParseException ex)
-    {
-        Logger.getLogger(IDLParser.class.getName()).log(Level.SEVERE, null, ex);
-    }
-    catch (FileNotFoundException ex)
-    {
-        Logger.getLogger(IDLParser.class.getName()).log(Level.SEVERE, null, ex);
-    }
-  }
 }
 
 PARSER_END(IDLParser)
@@ -294,8 +204,26 @@ void member() :
 
     "const" const_decl() ";"
 |
+    {currentIDLEnumType = new IDLEnumType(typeName, "");}
+
+    "enum" enum_decl() ";"
+|
     comment = <ANOTATION>.image
     {commentEvent.fireEvent(comment);}
+}
+
+void enum_decl() :
+{ String typeName = ""; String eName = ""; }
+{
+    typeName = identifier() "{"
+            eName = identifier() { currentIDLEnumType.getEnumNames().add(eName); }
+            ( "," eName = identifier() { currentIDLEnumType.getEnumNames().add(eName); })*
+        "}"
+    {
+        enumTypes.add(typeName);  // So we can check if type is internal or an IDLType
+        currentIDLEnumType.setName(typeName);
+        enumTypeDeclareEvent.fireEvent(currentIDLEnumType);
+    }
 }
 
 void const_decl() :
@@ -426,7 +354,11 @@ String base_type_spec() :
 |
   typeName = idl_type()
   {
-    currentIDLField.setIdlType(true);
+    if (enumTypes.contains(typeName)) {
+      currentIDLField.setEnumType(true);
+    } else {
+      currentIDLField.setIdlType(true);
+    }
     return typeName;
   }
 |

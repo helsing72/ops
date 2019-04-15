@@ -3,6 +3,7 @@ set(OPSCOMPILERLIB_SRC
   parsing/AbstractTemplateBasedIDLCompiler.java
   parsing/IDLClass.java
   parsing/IDLCompiler.java
+  parsing/IDLEnumType.java
   parsing/IDLField.java
   parsing/TopicInfo.java
   parsing/Topic.java

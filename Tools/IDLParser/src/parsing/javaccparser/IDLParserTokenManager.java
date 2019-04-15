@@ -4,7 +4,9 @@ package parsing.javaccparser;
 import java.io.FileNotFoundException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.ArrayList;
 import parsing.IDLField;
+import parsing.IDLEnumType;
 import parsing.javaccparser.ParseException;
 
 /** Token Manager. */
