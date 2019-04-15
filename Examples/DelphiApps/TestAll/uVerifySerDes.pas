@@ -56,6 +56,11 @@ begin
   if val <> exp then Log('Failed: ' + str + ', value= ' + FloatToStr(val) + ', expected= ' + FloatToStr(exp));
 end;
 
+procedure AssertEQ(val, exp : ChildData.Order; str : string = ''); overload;
+begin
+  if val <> exp then Log('Failed: ' + str);
+end;
+
 procedure AssertEQ(val : Boolean; str : string = ''); overload;
 begin
   if not val then Log('Failed: ' + str);
@@ -96,6 +101,12 @@ begin
   for i := 0 to 9 do AssertEQ(data.fixLengthStringFixArr[i], '', 'fixLengthStringFixArr');
 
   // ChildData
+	//  enums
+	AssertEQ(data.enu1, ChildData.Order.ABC);
+	AssertEQ(Length(data.enuVec), 0);
+	for i := 0 to 5 do AssertEQ(data.enuFixArr[i], ChildData.Order.ABC);
+
+	//  core types
   AssertEQ(data.bo, false, 'data.bo');
   AssertEQ(data.b, 0, 'data.b');
   AssertEQ(data.sh, 0);
@@ -199,6 +210,13 @@ begin
   for i := 0 to 9 do AssertEQ(data.fixLengthStringFixArr[i], exp.fixLengthStringFixArr[i], 'fixLengthStringFixArr');
 
   // ChildData
+	//  enums
+	AssertEQ(data.enu1, exp.enu1);
+	AssertEQ(Length(data.enuVec), Length(exp.enuVec));
+	for i := 0 to Length(data.enuVec)-1 do AssertEQ(data.enuVec[i], exp.enuVec[i]);
+	for i := 0 to 5 do AssertEQ(data.enuFixArr[i], exp.enuFixArr[i]);
+
+	//  core types
   AssertEQ(data.bo, exp.bo, 'data.bo');
   AssertEQ(data.b, exp.b, 'data.b');
   AssertEQ(data.sh, exp.sh);
@@ -311,6 +329,21 @@ begin
   data.fixLengthStringFixArr[9] := 'fsf 9';
 
   // ChildData
+	//  enums
+	data.enu1 := ChildData.Order.GHI;
+
+  SetLength(data.enuVec, 5);
+	data.enuVec[0] := ChildData.Order.GHI;
+	data.enuVec[1] := ChildData.Order.JKL;
+	data.enuVec[2] := ChildData.Order.JKL;
+	data.enuVec[3] := ChildData.Order.ABC;
+	data.enuVec[4] := ChildData.Order.DEF;
+
+	data.enuFixArr[0] := ChildData.Order.DEF;
+	data.enuFixArr[4] := ChildData.Order.JKL;
+	data.enuFixArr[5] := ChildData.Order.DEF;
+
+	//  core types
   data.bo := true;
   data.b := 7;
   data.sh := -99;
@@ -529,6 +562,7 @@ begin
 
   // Setup & start publisher
   pub := ChildDataPublisher.Create(topic);
+  pub.Name := 'Delphi';
   pub.Start;
 
   // Publish data
@@ -553,7 +587,9 @@ begin
   Limit := GetTickCount64 + 60000;
   while True do begin
     if (sub.waitForNewData(100)) then begin
-      Log('Received new data. Checking...');
+      sub.aquireMessageLock;
+      Log('Received new data from ' + string(sub.getMessage().PublisherName) + '. Checking...');
+      sub.releaseMessageLock;
       sub.getData(cd3);
       sub.aquireMessageLock;
       AssertEQ(Length(sub.getMessage.spareBytes), 0, 'spareBytes');
