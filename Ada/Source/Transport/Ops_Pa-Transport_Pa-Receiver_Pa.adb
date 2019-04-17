@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2018 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -29,21 +29,6 @@ with Ops_Pa.Socket_Pa;
 package body Ops_Pa.Transport_Pa.Receiver_Pa is
 
   use type Ops_Pa.Signal_Pa.Event_T;
-
-  function ErrorService( Self : Receiver_Class ) return ErrorService_Class_At is
-  begin
-    return Self.ErrorService;
-  end;
-
-  procedure SetErrorService( Self : in out Receiver_Class; es : ErrorService_Class_At ) is
-  begin
-    Self.ErrorService := es;
-  end;
-
-  function LastErrorCode( Self : Receiver_Class ) return Integer is
-  begin
-    return Self.LastErrorCode;
-  end;
 
   procedure InitInstance( Self : in out Receiver_Class; SelfAt : Receiver_Class_At ) is
   begin

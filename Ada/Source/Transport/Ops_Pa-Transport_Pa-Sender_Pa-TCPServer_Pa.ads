@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2018 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -20,7 +20,8 @@ with Ada.Containers.Vectors;
 
 with Ops_Pa.Socket_Pa,
      Ops_Pa.Signal_Pa,
-     Ops_Pa.Mutex_Pa;
+     Ops_Pa.Mutex_Pa,
+     Ops_Pa.Transport_Pa.TCPConnection_Pa;
 
 package Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
 
@@ -47,10 +48,10 @@ private
 -- ==========================================================================
 --
 -- ==========================================================================
-  function Equal( Left, Right : Ops_Pa.Socket_Pa.TCPClientSocket_Class_At ) return Boolean;
+  function Equal( Left, Right : TCPConnection_Pa.TCPConnection_Class_At ) return Boolean;
 
   subtype MyIndex_T is Integer range 0..Integer'Last;
-  package MyVector_Pa is new Ada.Containers.Vectors(MyIndex_T, Ops_Pa.Socket_Pa.TCPClientSocket_Class_At, Equal);
+  package MyVector_Pa is new Ada.Containers.Vectors(MyIndex_T, TCPConnection_Pa.TCPConnection_Class_At, Equal);
 
 -- ==========================================================================
 --

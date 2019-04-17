@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2018 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -21,6 +21,7 @@ with Ops_Pa.Socket_Pa;
 package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
 
   use type Ops_Pa.Socket_Pa.TCPClientSocket_Class_At;
+  use type TCPConnection_Pa.TCPConnection_Class_At;
 
   procedure Trace(Self : TCPClientReceiver_Class; Msg : String) is
     NameStr : String := "TcpClient (" & Integer'Image(Self.Port) & ")";
@@ -48,6 +49,7 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
                           serverPort : Integer;
                           inSocketBufferSize : Int64 ) is
   begin
+    Self.SelfAt := SelfAt;
     InitInstance( Receiver_Class(Self), Receiver_Class_At(SelfAt) );
 
     Self.IpAddress := Copy(serverIP);
@@ -56,6 +58,8 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
 
     -- Create socket
     Self.TcpClient := Ops_Pa.Socket_Pa.Create;
+    Self.Connection := TCPConnection_Pa.Create( Self.TcpClient, Self.Port );
+    Self.Connection.addListener( TCPConnection_Pa.ReceiveNotifier_Pa.Listener_Interface_At(SelfAt) );
   end;
 
   overriding procedure Finalize( Self : in out TCPClientReceiver_Class ) is
@@ -64,13 +68,21 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
 
     Finalize( Receiver_Class(Self) );  -- Make sure thread is terminated
 
-    if Self.TcpClient /= null then
-      Ops_Pa.Socket_Pa.Free(Self.TcpClient);
+    if Self.Connection /= null then
+      Self.Connection.removeListener( TCPConnection_Pa.ReceiveNotifier_Pa.Listener_Interface_At(Self.SelfAt) );
+      TCPConnection_Pa.Free(Self.Connection);
     end if;
 
     if Self.IpAddress /= null then
       Dispose(Self.IpAddress);
     end if;
+  end;
+
+  -- Called whenever the connection has new data.
+  procedure OnNotify( Self : in out TCPClientReceiver_Class; Sender : in Ops_Class_At; Item : in BytesSizePair_T ) is
+  begin
+    -- Forward notification to upper layer with the data packet
+    Self.DataNotifier.DoNotify(Item);
   end;
 
   procedure Report( Self : in out TCPClientReceiver_Class; method : string; mess : string ) is
@@ -81,6 +93,12 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
       Self.ErrorService.Report(Error_Class_At(error));
     end if;
     if TraceEnabled then Self.Trace(method & ": " & mess & ", Error: " & Integer'Image(Self.LastErrorCode)); end if;
+  end;
+
+  overriding procedure SetErrorService( Self : in out TCPClientReceiver_Class; es : ErrorService_Class_At ) is
+  begin
+    SetErrorService( Receiver_Class(Self), es );
+    Self.Connection.SetErrorService( es );
   end;
 
   -- Start():
@@ -102,10 +120,9 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
     end if;
 
     Self.StopFlag := False;
-    Self.Buffer := bytes;
-    Self.BufferSize := size;
+    Self.Connection.SetReceiveBuffer(bytes, size);
 
-    if Self.Buffer /= null then
+    if bytes /= null then
       -- Start a thread running our run() method
       Self.EventsToTask.Signal(StartEvent_C);
     end if;
@@ -130,8 +147,7 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
   -- Should only be called from the callback.
   overriding procedure SetReceiveBuffer( Self : in out TCPClientReceiver_Class; bytes : Byte_Arr_At; size : Integer) is
   begin
-    Self.Buffer := bytes;
-    Self.BufferSize := size;
+    Self.Connection.SetReceiveBuffer(bytes, size);
   end;
 
   -- Stop():
@@ -143,6 +159,7 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
     Self.StopFlag := True;
 
     if Self.TcpClient.IsOpen then
+      Self.Connection.Stop;
       -- Thread is probably waiting in a read, so we must close the socket
       dummy := Self.TcpClient.Shutdown;
       dummy := Self.TcpClient.Disconnect;
@@ -151,8 +168,7 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
         Self.LastErrorCode := Self.TcpClient.GetLatestError;
       end if;
 
-      Self.Buffer := null;
-      Self.BufferSize := 0;
+      Self.Connection.SetReceiveBuffer(null, 0);
     end if;
   end;
 
@@ -172,56 +188,7 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
   end;
 
   overriding procedure Run( Self : in out TCPClientReceiver_Class ) is
-    SizeInfoSize_C : constant Byte_Arr_Index_T := 22;
-    type TPhase is (phSize, phPayload);
-
-    Res : Integer := 0;
-    BufferIdx : Byte_Arr_Index_T := 0;
-    BufferIdxLast : Byte_Arr_Index_T := 0;
-    Phase : TPhase := phSize;
-    ErrorDetected : Boolean := False;
     dummy : Boolean;
-
-    procedure SetupForReadingSize is
-    begin
-      Phase := phSize;
-      BufferIdx := Self.Buffer'First;
-      BufferIdxLast := BufferIdx + SizeInfoSize_C - 1;
-    end;
-
-    procedure HandleSizeInfo is
-      BytesToRead : Byte_Arr_Index_T;
-    begin
-      -- Get size of data packet from the received size packet
-      BytesToRead :=
-        16#0000_0001# * Byte_Arr_Index_T(Self.Buffer(Self.Buffer'First+18)) +
-        16#0000_0100# * Byte_Arr_Index_T(Self.Buffer(Self.Buffer'First+19)) +
-        16#0001_0000# * Byte_Arr_Index_T(Self.Buffer(Self.Buffer'First+20)) +
-        16#0100_0000# * Byte_Arr_Index_T(Self.Buffer(Self.Buffer'First+21));
-
-      if BytesToRead > Byte_Arr_Index_T(Self.BufferSize) then
-        -- This is an error, we are not able to receive more than the buffer size
-        Self.LastErrorCode := Ops_Pa.Socket_Pa.SOCKET_ERROR_C;
-        Self.Report("HandleSizeInfo", "Error in read size info");
-        --notifyNewEvent(BytesSizePair(NULL, -1));
-        ErrorDetected := True;
-      end if;
-
-      Phase := phPayload;
-      BufferIdx := Self.Buffer'First;
-      BufferIdxLast := BufferIdx + BytesToRead - 1;
-    end;
-
-    procedure HandlePayload is
-    begin
-      if TraceEnabled then Self.Trace("Notify(data packet received)"); end if;
-
-      -- Notify upper layer with a data packet
-      Self.DataNotifier.DoNotify(BytesSizePair_T'(Self.Buffer, Res));
-
-      -- Set up for reading a new size info
-      SetupForReadingSize;
-    end;
 
     procedure OpenAndConnect is
     begin
@@ -267,52 +234,9 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
 
 --      notifyNewEvent(BytesSizePair(NULL, -5)); //Connection was down but has been reastablished.
 
-        -- Set up for reading a new size info
-        SetupForReadingSize;
+        -- Do the transfer phase while the connection is established
+        Self.Connection.Run;
 
-        ErrorDetected := False;
-
-        -- Read data loop
-        while (not Self.StopFlag) and (Self.TcpClient.IsConnected) loop
-          if TraceEnabled then Self.Trace("Wait for Data..."); end if;
-          Res := Self.TcpClient.ReceiveBuf( Self.Buffer(BufferIdx..BufferIdxLast) );
-          if TraceEnabled then Self.Trace("Got some Data"); end if;
-
-          exit when Self.StopFlag;
-
-          if Res = 0 then
-            -- Connection closed gracefully
-            if TraceEnabled then Self.Trace("Connection closed gracefully"); end if;
-            DisconnectAndClose;
-            exit;
-
-          elsif Res < 0 then
-            -- Some error
-            Self.LastErrorCode := Self.TcpClient.GetLatestError;
-            Self.Report("Run", "Read failed");
-            --          notifyNewEvent(BytesSizePair(NULL, -2));
-            DisconnectAndClose;
-            exit;
-
-          else
-            -- Read OK
-            BufferIdx := BufferIdx + Byte_Arr_Index_T(Res);
-            if BufferIdx > BufferIdxLast then
-              -- Expected number of bytes read
-              case Phase is
-                when phSize => HandleSizeInfo;
-                when phPayload => HandlePayload;
-              end case;
-              if ErrorDetected then
-                DisconnectAndClose;
-                exit;
-              end if;
-            else
-              -- Continue to read bytes
-              null;
-            end if;
-          end if;
-        end loop;
         DisconnectAndClose;
       exception
         when others =>

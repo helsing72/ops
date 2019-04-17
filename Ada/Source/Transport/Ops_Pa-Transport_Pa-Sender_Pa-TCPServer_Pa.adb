@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2018 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -25,9 +25,10 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
 
   use type Ada.Containers.Count_Type;
   use type Ops_Pa.Socket_Pa.TCPClientSocket_Class_At;
+  use type TCPConnection_Pa.TCPConnection_Class_At;
   use type Ops_Pa.Signal_Pa.Event_T;
 
-  function Equal( Left, Right : Ops_Pa.Socket_Pa.TCPClientSocket_Class_At ) return Boolean is
+  function Equal( Left, Right : TCPConnection_Pa.TCPConnection_Class_At ) return Boolean is
   begin
     return Left = Right;
   end;
@@ -112,7 +113,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
       begin
         for i in Self.ConnectedSockets.First_Index .. Self.ConnectedSockets.Last_Index loop
           if Self.ConnectedSockets.Element(i) /= null then
-            Ops_Pa.Socket_Pa.Free(Self.ConnectedSockets.Element(i));
+            TCPConnection_Pa.Free(Self.ConnectedSockets.Element(i));
           end if;
         end loop;
       end;
@@ -129,55 +130,17 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
     return Self.Port;
   end;
 
-  subtype ByteArr4_T is Byte_Arr(0..3);
-  function ToByteArr is new Ada.Unchecked_Conversion(Integer, ByteArr4_T);
-  function ToByte    is new Ada.Unchecked_Conversion(Character, Byte);
-
-  opsp_tcp_size_info_header : Byte_Arr(0..17) :=
-    (ToByte('o'),
-     ToByte('p'),
-     ToByte('s'),
-     ToByte('p'),
-     ToByte('_'),
-     ToByte('t'),
-     ToByte('c'),
-     ToByte('p'),
-     ToByte('_'),
-     ToByte('s'),
-     ToByte('i'),
-     ToByte('z'),
-     ToByte('e'),
-     ToByte('_'),
-     ToByte('i'),
-     ToByte('n'),
-     ToByte('f'),
-     ToByte('o')
-    );
-
   -- Sends buf to any Receiver connected to this Sender, ip and port are discarded and can be left blank.
   overriding function sendTo( Self : in out TCPServerSender_Class; buf : Byte_Arr_At; size : Integer; ip : string; port : Integer) return Boolean is
-    sizeInfo : Byte_Arr(0..21);
     errorFlag : Boolean;
     S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.ConnectedSocketsMutex'Access);
   begin
-    -- First, prepare a package of fixed length 22 with information about the size of the data package
-    sizeinfo(0 ..17) := opsp_tcp_size_info_header;
-    sizeinfo(18..21) := ToByteArr(size);
-
     -- Send to anyone connected. Loop backwards to avoid problems when removing broken sockets
     for i in reverse Self.ConnectedSockets.First_Index .. Self.ConnectedSockets.Last_Index loop
       ErrorFlag := False;
       begin
         if Self.ConnectedSockets.Element(i) /= null then
-          -- Send prepared size info
-          if Self.ConnectedSockets.Element(i).SendBuf(sizeInfo) = 22 then
-            -- Send the actual data
-            if Self.ConnectedSockets.Element(i).SendBuf(buf.all(buf'first..buf'first+Byte_Arr_Index_T(size)-1)) /= size then
-              ErrorFlag := True;
-            end if;
-          else
-            ErrorFlag := True;
-          end if;
+          Self.ConnectedSockets.Element(i).SendData(buf, size, ErrorFlag);
         end if;
       exception
         when others =>
@@ -185,9 +148,9 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
       end;
 
       if ErrorFlag then
-        Self.LastErrorCode := Self.ConnectedSockets.Element(i).GetLatestError;
+        Self.LastErrorCode := Self.ConnectedSockets.Element(i).LastErrorCode;
         Report(Self, "sendTo", "Error sending");
-        Ops_Pa.Socket_Pa.Free( Self.ConnectedSockets.Element(i) );
+        TCPConnection_Pa.Free( Self.ConnectedSockets.Element(i) );
         Self.ConnectedSockets.Delete(i);
       end if;
     end loop;
@@ -266,8 +229,12 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
             -- and put it in list and then wait for another connection
             declare
               S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.ConnectedSocketsMutex'Access);
+              Port : Integer := 0;
+              Conn : TCPConnection_Pa.TCPConnection_Class_At := null;
             begin
-              Self.ConnectedSockets.Append( tcpClient );
+              if tcpClient.GetBoundPort(Port) then null; end if;
+              Conn := TCPConnection_Pa.Create( tcpClient, Port );
+              Self.ConnectedSockets.Append( Conn );
             end;
             tcpClient := null;   -- Clear ref since list now owns object
           end loop;

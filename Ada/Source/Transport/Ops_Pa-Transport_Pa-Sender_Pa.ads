@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -16,15 +16,12 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
-with Ops_Pa.Error_Pa;
-use Ops_Pa.Error_Pa;
-
 package Ops_Pa.Transport_Pa.Sender_Pa is
 
 -- ==========================================================================
 --      C l a s s    D e c l a r a t i o n.
 -- ==========================================================================
-  type Sender_Class    is abstract new Ops_Class with private;
+  type Sender_Class    is abstract new Transport_Class with private;
   type Sender_Class_At is access all Sender_Class'Class;
 
   -- Interface used to send data
@@ -36,12 +33,6 @@ package Ops_Pa.Transport_Pa.Sender_Pa is
   procedure Open( Self : in out Sender_Class ) is abstract;
   procedure Close( Self : in out Sender_Class ) is abstract;
 
-  -- Getters/Setters
-  function ErrorService( Self : Sender_Class ) return ErrorService_Class_At;
-  procedure SetErrorService( Self : in out Sender_Class; es : ErrorService_Class_At );
-
-  function LastErrorCode( Self : Sender_Class ) return Integer;
-
   -- Sender Factory (creates a sender)
   function createMCSender(localInterface : string := "0.0.0.0"; ttl : Integer := 1; outSocketBufferSize : Int64 := 16000000) return Sender_Class_At;
   function createUDPSender(localInterface : string := "0.0.0.0"; ttl : Integer := 1; outSocketBufferSize : Int64 := 16000000) return Sender_Class_At;
@@ -51,13 +42,9 @@ private
 -- ==========================================================================
 --
 -- ==========================================================================
-  type Sender_Class is abstract new Ops_Class with
+  type Sender_Class is abstract new Transport_Class with
     record
-      -- Borrowed reference
-      ErrorService : ErrorService_Class_At := null;
-
-      -- Result from socket lib on error
-      LastErrorCode : Integer := 0;
+      null;
     end record;
 
 end Ops_Pa.Transport_Pa.Sender_Pa;

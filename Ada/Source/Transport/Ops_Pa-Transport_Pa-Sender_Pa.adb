@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -20,21 +20,6 @@ with Ops_Pa.Transport_Pa.Sender_Pa.Udp_Pa,
      Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa;
 
 package body Ops_Pa.Transport_Pa.Sender_Pa is
-
-  function ErrorService( Self : Sender_Class ) return ErrorService_Class_At is
-  begin
-    return Self.ErrorService;
-  end;
-
-  procedure SetErrorService( Self : in out Sender_Class; es : ErrorService_Class_At ) is
-  begin
-    Self.ErrorService := es;
-  end;
-
-  function LastErrorCode( Self : Sender_Class ) return Integer is
-  begin
-    return Self.LastErrorCode;
-  end;
 
   -- --------------------------------------------------------------------------
 
