@@ -25,13 +25,30 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
 
   use type Ada.Containers.Count_Type;
   use type Ops_Pa.Socket_Pa.TCPClientSocket_Class_At;
-  use type TCPConnection_Pa.TCPConnection_Class_At;
+  use type TCPConnection_Pa.TCPServerConnection_Class_At;
   use type Ops_Pa.Signal_Pa.Event_T;
 
-  function Equal( Left, Right : TCPConnection_Pa.TCPConnection_Class_At ) return Boolean is
+  function Equal( Left, Right : TCPConnection_Pa.TCPServerConnection_Class_At ) return Boolean is
   begin
     return Left = Right;
   end;
+
+  procedure Trace(Self : TCPServerSender_Class; Msg : String) is
+    NameStr : String := "TcpServer (" & Integer'Image(Self.Port) & ")";
+  begin
+    Trace(NameStr, Msg);
+  end;
+
+  procedure Report( Self : in out TCPServerSender_Class; method : string; mess : string ) is
+    error : SocketError_Class_At := null;
+  begin
+    if Self.ErrorService /= null then
+      error := SocketError("TCPServerSender", method, mess, Self.LastErrorCode);
+      Self.ErrorService.Report(Error_Class_At(error));
+    end if;
+  end;
+
+  -- ==========================================================================
 
   function Create(serverIP : String;
                   serverPort : Integer;
@@ -57,6 +74,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
     Self.OutSocketBufferSize := outSocketBufferSize;
 
     Self.TcpServer := Ops_Pa.Socket_Pa.Create;
+    Self.SocketWaits := Ops_Pa.Socket_Pa.Create;
 
     Self.Server_Pr.Start;
   end;
@@ -69,6 +87,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
     Self.EventsToTask.Signal(TerminateEvent_C);
     Self.Server_Pr.Finish;
 
+    Ops_Pa.Socket_Pa.Free(Self.SocketWaits);
     Ops_Pa.Socket_Pa.Free(Self.TcpServer);
 
     if Self.IpAddress /= null then
@@ -76,14 +95,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
     end if;
   end;
 
-  procedure Report( Self : in out TCPServerSender_Class; method : string; mess : string ) is
-    error : SocketError_Class_At := null;
-  begin
-    if Self.ErrorService /= null then
-      error := SocketError("TCPServerSender", method, mess, Self.LastErrorCode);
-      Self.ErrorService.Report(Error_Class_At(error));
-    end if;
-  end;
+  -- ==========================================================================
 
   overriding procedure Open( Self : in out TCPServerSender_Class ) is
   begin
@@ -104,6 +116,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
 
       -- Tell thread to terminate
       Self.StopFlag := True;
+      Self.SocketWaits.AbortWait;
 
       dummy := Self.TcpServer.Close;
 
@@ -113,12 +126,15 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
       begin
         for i in Self.ConnectedSockets.First_Index .. Self.ConnectedSockets.Last_Index loop
           if Self.ConnectedSockets.Element(i) /= null then
+            Self.SocketWaits.Remove( Socket_Pa.Socket_Class_At(Self.ConnectedSockets.Element(i).GetSocket) );
             TCPConnection_Pa.Free(Self.ConnectedSockets.Element(i));
           end if;
         end loop;
       end;
     end if;
   end;
+
+  -- ==========================================================================
 
   overriding function getAddress( Self : in out TCPServerSender_Class ) return String is
   begin
@@ -128,6 +144,18 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
   overriding function getPort( Self : in out TCPServerSender_Class ) return Integer is
   begin
     return Self.Port;
+  end;
+
+  -- ==========================================================================
+
+  -- Should only be called while lock is held
+  procedure HandleErrorAndDeleteConnection( Self : in out TCPServerSender_Class; i : MyIndex_T; method : string; mess : string  ) is
+  begin
+    Self.LastErrorCode := Self.ConnectedSockets.Element(i).LastErrorCode;
+    Report(Self, method, mess);
+    Self.SocketWaits.Remove( Socket_Pa.Socket_Class_At(Self.ConnectedSockets.Element(i).GetSocket) );
+    TCPConnection_Pa.Free( Self.ConnectedSockets.Element(i) );
+    Self.ConnectedSockets.Delete(i);
   end;
 
   -- Sends buf to any Receiver connected to this Sender, ip and port are discarded and can be left blank.
@@ -148,14 +176,13 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
       end;
 
       if ErrorFlag then
-        Self.LastErrorCode := Self.ConnectedSockets.Element(i).LastErrorCode;
-        Report(Self, "sendTo", "Error sending");
-        TCPConnection_Pa.Free( Self.ConnectedSockets.Element(i) );
-        Self.ConnectedSockets.Delete(i);
+        Self.HandleErrorAndDeleteConnection( i, "sendTo", "Error sending" );
       end if;
     end loop;
     return True;
   end;
+
+  -- ==========================================================================
 
   task body Server_Pr_T is
     Events : Ops_Pa.Signal_Pa.Event_T;
@@ -179,6 +206,48 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
   procedure Run( Self : in out TCPServerSender_Class ) is
     tcpClient : Ops_Pa.Socket_Pa.TCPClientSocket_Class_At := null;
     dummy : Boolean;
+
+    procedure DoAccept is
+    begin
+      if tcpClient = null then
+        -- Create a client socket ready for the calling client
+        tcpClient := Ops_Pa.Socket_Pa.Create;
+      end if;
+
+      -- accept()
+      if not Self.TcpServer.AcceptClient(tcpClient) then
+        return;
+      end if;
+      if Self.StopFlag then
+        return;
+      end if;
+
+      -- Now we have a connected client, setup some parameters
+      if Self.OutSocketBufferSize > 0 then
+        dummy:= tcpClient.SetSendBufferSize(Integer(Self.OutSocketBufferSize));
+        if tcpClient.GetSendBufferSize /= Integer(Self.OutSocketBufferSize) then
+          Self.LastErrorCode := Ops_Pa.Socket_Pa.SOCKET_ERROR_C;
+          Report(Self, "Run", "Socket buffer size could not be set");
+        end if;
+      end if;
+
+      -- Disable Nagle algorithm
+      dummy := tcpClient.SetTcpNoDelay(True);
+
+      -- and put it in list and then wait for another connection
+      declare
+        S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.ConnectedSocketsMutex'Access);
+        Port : Integer := 0;
+        Conn : TCPConnection_Pa.TCPServerConnection_Class_At := null;
+      begin
+        Self.SocketWaits.Add( Socket_Pa.Socket_Class_At(tcpClient) );
+        if tcpClient.GetBoundPort(Port) then null; end if;
+        Conn := TCPConnection_Pa.Create( tcpClient, Port );
+        Self.ConnectedSockets.Append( Conn );
+      end;
+      tcpClient := null;   -- Clear ref since list now owns object
+    end;
+
   begin
     while not Self.StopFlag loop
       begin
@@ -203,40 +272,48 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
           Self.LastErrorCode := Self.TcpServer.GetLatestError;
 
         else
+          Self.SocketWaits.Clear;
+          Self.SocketWaits.Add( Socket_Pa.Socket_Class_At(Self.TcpServer) );
+
           -- Keep listening for connecting clients
           while not Self.StopFlag loop
-            -- Create a client socket ready for the calling client
-            tcpClient := Ops_Pa.Socket_Pa.Create;
-
-            -- accept()
-            while not Self.StopFlag and not Self.TcpServer.AcceptClient(tcpClient) loop
-              delay 0.010;
-            end loop;
+            -- Wait for accept or data from one or more clients
+            if TraceEnabled then Self.Trace("Wait..."); end if;
+            Self.SocketWaits.Wait( Dur => 1.0, Timedout => dummy );
             exit when Self.StopFlag;
 
-            -- Now we have a connected client, setup some parameters
-            if Self.OutSocketBufferSize > 0 then
-              dummy:= tcpClient.SetSendBufferSize(Integer(Self.OutSocketBufferSize));
-              if tcpClient.GetSendBufferSize /= Integer(Self.OutSocketBufferSize) then
-                Self.LastErrorCode := Ops_Pa.Socket_Pa.SOCKET_ERROR_C;
-                Report(Self, "Run", "Socket buffer size could not be set");
-              end if;
+            if TraceEnabled then Self.Trace("Wait exited"); end if;
+
+            -- Check our server if there is any waiting connects
+            if Self.SocketWaits.IsSet( Socket_Pa.Socket_Class_At(Self.TcpServer) ) then
+              -- Server ready for an accept call
+              if TraceEnabled then Self.Trace("Do Accept..."); end if;
+              DoAccept;
             end if;
+            exit when Self.StopFlag;
 
-            -- Disable Nagle algorithm
-            dummy := tcpClient.SetTcpNoDelay(True);
-
-            -- and put it in list and then wait for another connection
+            -- Check if any of the connected sockets have data and also do the periodic check
             declare
               S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.ConnectedSocketsMutex'Access);
-              Port : Integer := 0;
-              Conn : TCPConnection_Pa.TCPConnection_Class_At := null;
+              ErrorDetected : Boolean;
             begin
-              if tcpClient.GetBoundPort(Port) then null; end if;
-              Conn := TCPConnection_Pa.Create( tcpClient, Port );
-              Self.ConnectedSockets.Append( Conn );
+              -- Loop over connected sockets, Loop backwards to avoid problems when removing broken sockets
+              for i in reverse Self.ConnectedSockets.First_Index .. Self.ConnectedSockets.Last_Index loop
+                ErrorDetected := False;
+                begin
+                  if Self.SocketWaits.IsSet( Socket_Pa.Socket_Class_At(Self.ConnectedSockets.Element(i).GetSocket) ) then
+                    -- This connection have data to read
+                    Self.ConnectedSockets.Element(i).Poll( ErrorDetected );
+                  end if;
+                  Self.ConnectedSockets.Element(i).PeriodicCheck( ErrorDetected );
+                exception
+                  when others => ErrorDetected := True;
+                end;
+                if ErrorDetected then
+                  Self.HandleErrorAndDeleteConnection( i, "run", "Read/Send error" );
+                end if;
+              end loop;
             end;
-            tcpClient := null;   -- Clear ref since list now owns object
           end loop;
         end if;
       exception

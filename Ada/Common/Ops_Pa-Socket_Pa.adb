@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2017-2018 Lennart Andersson.
+-- Copyright (C) 2017-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -63,6 +63,9 @@ package body Ops_Pa.Socket_Pa is
     if Self.IsOpen then
       dummy := Self.Shutdown;
       dummy := Self.Close;
+    end if;
+    if Self.Timeout_Used then
+      GNAT.Sockets.Close_Selector( Self.Timeout_Selector );
     end if;
   end;
 
@@ -263,6 +266,42 @@ package body Ops_Pa.Socket_Pa is
       return -1;
   end;
 
+  function ReceiveBuf( Self : in out Socket_Class;
+                       Buf : out Ada.Streams.Stream_Element_Array;
+                       Dur : GNAT.Sockets.Timeval_Duration;
+                       Timedout : out Boolean ) return Integer is
+    Last : Ada.Streams.Stream_Element_Offset;
+    sst_R : GNAT.Sockets.Socket_Set_Type;
+    sst_W : GNAT.Sockets.Socket_Set_Type;
+    Status : GNAT.Sockets.Selector_Status;
+    use type GNAT.Sockets.Selector_Status;
+  begin
+    if not Self.Timeout_Used then
+      GNAT.Sockets.Create_Selector( Self.Timeout_Selector );
+      Self.Timeout_Used := True;
+    end if;
+    GNAT.Sockets.Set( sst_R, Self.SocketID );
+    GNAT.Sockets.Check_Selector( Self.Timeout_Selector,
+                                 sst_R, sst_W,
+                                 Status,
+                                 Dur );
+    if Status = GNAT.Sockets.Expired then
+      Timedout := True;
+      return 0;
+    end if;
+    Timedout := False;
+
+    GNAT.Sockets.Receive_Socket( Self.SocketID,
+                                 Buf,
+                                 Last );
+    -- Last is the index to the last element read, but we want to return the number of elements so add 1
+    return Integer(Last)-Integer(Buf'First)+1;
+  exception
+    when e: others =>
+      Self.ExtractErrorCode( e );
+      return -1;
+  end;
+
   -- Saves from address internally and it is available via API
   function ReceiveFrom( Self : in out Socket_Class; Buf : out Ada.Streams.Stream_Element_Array ) return Integer is
     Last : Ada.Streams.Stream_Element_Offset;
@@ -306,6 +345,72 @@ package body Ops_Pa.Socket_Pa is
     when e: others =>
       Self.ExtractErrorCode( e );
       return -1;
+  end;
+
+  --------------------------------------------------------------------------
+
+  function Create return Selector_Class_At is
+     Self : Selector_Class_At := null;
+  begin
+    Self := new Selector_Class;
+    InitInstance( Self.all );
+    return Self;
+  exception
+    when others =>
+      Free(Self);
+      raise;
+  end;
+
+  procedure InitInstance( Self : in out Selector_Class ) is
+  begin
+    GNAT.Sockets.Create_Selector( Self.Selector );
+  end;
+
+  overriding procedure Finalize( Self : in out Selector_Class ) is
+  begin
+    GNAT.Sockets.Close_Selector( Self.Selector );
+  end;
+
+  procedure Clear( Self : in out Selector_Class ) is
+  begin
+    GNAT.Sockets.Empty( Self.sst_R );
+    GNAT.Sockets.Empty( Self.sst_W );
+    GNAT.Sockets.Empty( Self.sst_latest );
+  end;
+
+  procedure Add( Self : in out Selector_Class; Socket : Socket_Class_At ) is
+  begin
+    GNAT.Sockets.Set( Self.sst_R, Socket.SocketID );
+  end;
+
+  procedure Remove( Self : in out Selector_Class; Socket : Socket_Class_At ) is
+  begin
+    GNAT.Sockets.CLear( Self.sst_R, Socket.SocketID );
+  end;
+
+  procedure Wait( Self : in out Selector_Class;
+                  Dur : GNAT.Sockets.Timeval_Duration := GNAT.Sockets.Forever;
+                  Timedout : out Boolean ) is
+    Status : GNAT.Sockets.Selector_Status;
+    use type GNAT.Sockets.Selector_Status;
+  begin
+    GNAT.Sockets.Empty( Self.sst_latest );
+    GNAT.Sockets.Copy( Self.sst_R, Self.sst_latest );
+    GNAT.Sockets.Check_Selector( Self.Selector,
+                                 Self.sst_latest, Self.sst_W,
+                                 Status,
+                                 Dur );
+    Timedout := Status = GNAT.Sockets.Expired;
+  end;
+
+  procedure AbortWait( Self : in out Selector_Class ) is
+  begin
+    GNAT.Sockets.Abort_Selector( Self.Selector );
+  end;
+
+  function IsSet( Self : Selector_Class; Socket : Socket_Class_At ) return Boolean is
+  begin
+    return GNAT.Sockets.Is_Set( Self.sst_latest, Socket.SocketID );
   end;
 
   --------------------------------------------------------------------------

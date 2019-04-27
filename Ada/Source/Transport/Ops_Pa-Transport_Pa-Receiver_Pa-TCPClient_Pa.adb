@@ -60,10 +60,16 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
     Self.TcpClient := Ops_Pa.Socket_Pa.Create;
     Self.Connection := TCPConnection_Pa.Create( Self.TcpClient, Self.Port );
     Self.Connection.addListener( TCPConnection_Pa.ReceiveNotifier_Pa.Listener_Interface_At(SelfAt) );
+
+    Self.Timer := Timer_Pa.Create( Ops_Class_At(SelfAt), Periodic => True );
+    Self.Timer.addListener( Timer_Pa.DeadlineListener_Interface_At(SelfAt) );
   end;
 
   overriding procedure Finalize( Self : in out TCPClientReceiver_Class ) is
   begin
+    Self.Timer.removeListener( Timer_Pa.DeadlineListener_Interface_At(Self.SelfAt) );
+    Timer_Pa.Free( Self.Timer );
+
     Stop( Self );   -- Make sure socket is closed
 
     Finalize( Receiver_Class(Self) );  -- Make sure thread is terminated
@@ -187,6 +193,12 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
     return Self.TcpClient.GetBoundIP;
   end;
 
+  overriding procedure OnDeadlineMissed( Self : in out TCPClientReceiver_Class; Sender : in Ops_Class_At ) is
+    errorFlag : Boolean := False;
+  begin
+    Self.Connection.SendData( null, 0, errorFlag );
+  end;
+
   overriding procedure Run( Self : in out TCPClientReceiver_Class ) is
     dummy : Boolean;
 
@@ -234,16 +246,22 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
 
 --      notifyNewEvent(BytesSizePair(NULL, -5)); //Connection was down but has been reastablished.
 
+        -- Send a probe to trig newer versions of TCPServers to enable heartbeats
+        Self.Connection.SendProbe( dummy );
+
+        -- Start timer so we send heartbeats on newer versions
+        Self.Timer.Start( 1000 );
+
         -- Do the transfer phase while the connection is established
         Self.Connection.Run;
 
-        DisconnectAndClose;
       exception
         when others =>
           Self.LastErrorCode := Ops_Pa.Socket_Pa.SOCKET_ERROR_C;
           Self.Report("Run", "Exception ");
-          DisconnectAndClose;
       end;
+      Self.Timer.Cancel;
+      DisconnectAndClose;
     end loop;
     if TraceEnabled then Self.Trace("Stopped"); end if;
   end;
