@@ -50,6 +50,9 @@ The header is directly followed by the serialized data from the message, max 600
 
 ## Transport specifics ##
 
+### TCP protocol version 1 ###
+The original TCP protocol only sends data in one direction, from the Publisher (TCPServer) to the Subscribers (TCPClients).
+
 When *TCP* is used as transport, each segment is preceded by the following *TCP* unique header (22 bytes):
 
 ```
@@ -57,4 +60,33 @@ Field                 Type          Bytes
 -----                 ----          -----
 protocol id                         18       = "opsp_tcp_size_info"
 length of data        int           4        size of segment
+```
+
+### TCP protocol version 2 ###
+Version 2 adds heartbeats in both directions to enable faster detection of a broken link. To be backward compatible heartbeats are only enabled if both sides support protocol version 2 or greater.
+
+The version detection is initiated by the TCPClient sending a *Probe message*. A v1 TCPServer don't read anything, so the message will be ignored. A v2 or greater TCPServer reacts by sending a *Heartbeat message*. When the TCPClient gets the *Heartbeat message*, both sides know the version on the other side.
+
+Both sides shall send a *Heartbeat message* if no other data is sent since 1 second.
+The link shall be determined as broken and closed if no bytes are received during 3 seconds.
+
+**Probe Message** (23 bytes)
+```
+Field                 Type          Bytes
+-----                 ----          -----
+protocol id                         8        = "opsprobe"
+protocol version      int           4        = 2
+protocol spare                      6        = "______"
+length of data        int           4        = 1
+data                  byte          1        = 0
+```
+
+**Heartbeat Message** (22 bytes)
+```
+Field                 Type          Bytes
+-----                 ----          -----
+protocol id                         8        = "opsprobe"
+protocol version      int           4        = 2
+protocol spare                      6        = "______"
+length of data        int           4        = 0
 ```
