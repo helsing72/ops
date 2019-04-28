@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2017-2018 Lennart Andersson.
+-- Copyright (C) 2017-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -22,7 +22,7 @@ package body Ops_Pa.Transport_Pa.SendDataHandler_Pa.TCP_Pa is
      Self : TcpSendDataHandler_Class_At := null;
   begin
     Self := new TcpSendDataHandler_Class;
-    InitInstance( Self.all, topic, Reporter );
+    InitInstance( Self.all, Self, topic, Reporter );
     return Self;
   exception
     when others =>
@@ -31,12 +31,14 @@ package body Ops_Pa.Transport_Pa.SendDataHandler_Pa.TCP_Pa is
   end;
 
   procedure InitInstance( Self : in out TcpSendDataHandler_Class;
+                          SelfAt : in TcpSendDataHandler_Class_At;
                           topic : Topic_Class_At;
                           Reporter : ErrorService_Class_At ) is
   begin
-    InitInstance( SendDataHandler_Class(Self) );
+    InitInstance( SendDataHandler_Class(Self), SendDataHandler_Class_At(SelfAt) );
     Self.Sender := createTCPServer( topic.DomainAddress, Integer(topic.Port), topic.OutSocketBufferSize );
     Self.Sender.SetErrorService( Reporter );
+    Self.Sender.SetConnectStatusClient( ConnectStatus_Interface_At(SelfAt) );
   end;
 
   overriding procedure Finalize( Self : in out TcpSendDataHandler_Class ) is

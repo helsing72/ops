@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2018 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -37,7 +37,8 @@ package Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa is
 --      C l a s s    D e c l a r a t i o n.
 -- ==========================================================================
   type ReceiveDataHandler_Class is new Ops_Class and
-    ReceiveNotifier_Pa.Listener_Interface with
+    ReceiveNotifier_Pa.Listener_Interface and
+    ConnectStatus_Interface with
       private;
   type ReceiveDataHandler_Class_At is access all ReceiveDataHandler_Class'Class;
 
@@ -57,6 +58,9 @@ package Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa is
   procedure addListener( Self : in out ReceiveDataHandler_Class; Client : MessageNotifier_Pa.Listener_Interface_At );
   procedure removeListener( Self : in out ReceiveDataHandler_Class; Client : MessageNotifier_Pa.Listener_Interface_At );
 
+  procedure addListener( Self : in out ReceiveDataHandler_Class; Client : ConnectStatusNotifier_Pa.Listener_Interface_At );
+  procedure removeListener( Self : in out ReceiveDataHandler_Class; Client : ConnectStatusNotifier_Pa.Listener_Interface_At );
+
   function getReceiver( Self : ReceiveDataHandler_Class ) return Ops_Pa.Transport_Pa.Receiver_Pa.Receiver_Class_At;
 
   function getSampleMaxSize( Self : ReceiveDataHandler_Class ) return Int32;
@@ -67,7 +71,8 @@ private
 --
 -- ==========================================================================
   type ReceiveDataHandler_Class is new Ops_Class and
-    ReceiveNotifier_Pa.Listener_Interface with
+    ReceiveNotifier_Pa.Listener_Interface and
+    ConnectStatus_Interface with
     record
       SelfAt : ReceiveDataHandler_Class_At := null;
 
@@ -76,6 +81,7 @@ private
 
       -- Used for notifications to users of the ReceiveDataHandler
       DataNotifier : MessageNotifier_Pa.Notifier_Class_At := null;
+      CsNotifier : ConnectStatusNotifier_Pa.Notifier_Class_At := null;
 
       -- The receiver used for this ReceiveHandler.
       Receiver : Ops_Pa.Transport_Pa.Receiver_Pa.Receiver_Class_At := null;
@@ -108,6 +114,14 @@ private
 
   -- Called whenever the receiver has new data.
   procedure OnNotify( Self : in out ReceiveDataHandler_Class; Sender : in Ops_Class_At; Item : in BytesSizePair_T );
+
+  procedure OnConnect( Self : in out ReceiveDataHandler_Class;
+                       Sender : in Ops_Class_At;
+                       Status : in ConnectStatus_T );
+
+  procedure OnDisconnect( Self : in out ReceiveDataHandler_Class;
+                          Sender : in Ops_Class_At;
+                          Status : in ConnectStatus_T );
 
   -- Handles spare bytes, i.e. extra bytes in buffer not consumed by created message
   procedure calculateAndSetSpareBytes( Self : in out ReceiveDataHandler_Class; mess : Ops_Pa.OpsObject_Pa.OPSMessage_Pa.OPSMessage_Class_At; segmentPaddingSize : Integer);

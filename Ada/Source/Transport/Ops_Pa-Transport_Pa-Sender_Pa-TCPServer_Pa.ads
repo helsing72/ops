@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2018 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -20,7 +20,8 @@ with Ada.Containers.Vectors;
 
 with Ops_Pa.Socket_Pa,
      Ops_Pa.Signal_Pa,
-     Ops_Pa.Mutex_Pa;
+     Ops_Pa.Mutex_Pa,
+     Ops_Pa.Transport_Pa.TCPConnection_Pa;
 
 package Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
 
@@ -43,14 +44,17 @@ package Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
   overriding procedure Open( Self : in out TCPServerSender_Class );
   overriding procedure Close( Self : in out TCPServerSender_Class );
 
+  -- Set this flag to enable trace from the TCP Server
+  TraceEnabled : Boolean := False;
+
 private
 -- ==========================================================================
 --
 -- ==========================================================================
-  function Equal( Left, Right : Ops_Pa.Socket_Pa.TCPClientSocket_Class_At ) return Boolean;
+  function Equal( Left, Right : TCPConnection_Pa.TCPServerConnection_Class_At ) return Boolean;
 
   subtype MyIndex_T is Integer range 0..Integer'Last;
-  package MyVector_Pa is new Ada.Containers.Vectors(MyIndex_T, Ops_Pa.Socket_Pa.TCPClientSocket_Class_At, Equal);
+  package MyVector_Pa is new Ada.Containers.Vectors(MyIndex_T, TCPConnection_Pa.TCPServerConnection_Class_At, Equal);
 
 -- ==========================================================================
 --
@@ -67,26 +71,28 @@ private
 --
 -- ==========================================================================
   type TCPServerSender_Class is new Sender_Class with
-     record
-       Port : Integer := 0;
-       IpAddress : String_At := null;
-       OutSocketBufferSize : Int64 := -1;
+    record
+      Opened : Boolean := False;
 
-       TcpServer : Ops_Pa.Socket_Pa.TCPServerSocket_Class_At := null;
+      Port : Integer := 0;
+      IpAddress : String_At := null;
+      OutSocketBufferSize : Int64 := -1;
 
-       ConnectedSockets : MyVector_Pa.Vector;
-       ConnectedSocketsMutex : aliased Ops_Pa.Mutex_Pa.Mutex;
+      TcpServer : Ops_Pa.Socket_Pa.TCPServerSocket_Class_At := null;
+      SocketWaits : Ops_Pa.Socket_Pa.Selector_Class_At := null;
 
-       -- Our thread running our Run() method
-       Server_Pr : Server_Pr_T(TCPServerSender_Class'Access);
-       StopFlag : aliased Boolean := False;
-       pragma volatile(StopFlag);
-       TerminateFlag : aliased Boolean := False;
-       pragma volatile(TerminateFlag);
-       EventsToTask : Ops_Pa.Signal_Pa.Signal_T;
+      ConnectedSockets : MyVector_Pa.Vector;
+      ConnectedSocketsMutex : aliased Ops_Pa.Mutex_Pa.Mutex;
 
-       Opened : Boolean := False;
-     end record;
+      -- Our thread running our Run() method
+      StopFlag : aliased Boolean := False;
+      pragma volatile(StopFlag);
+      TerminateFlag : aliased Boolean := False;
+      pragma volatile(TerminateFlag);
+      EventsToTask : Ops_Pa.Signal_Pa.Signal_T;
+
+      Server_Pr : Server_Pr_T(TCPServerSender_Class'Access);
+    end record;
 
   -- Will by called by the thread
   procedure Run( Self : in out TCPServerSender_Class );

@@ -6,6 +6,8 @@ with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
 with Ops_Pa.OpsObject_Pa.OPSConfig_Pa;
 
 with Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa;
+with Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa;
+with Ops_Pa.Transport_Pa.TCPConnection_Pa;
 
 with Ops_Pa,
      Ops_Pa.Error_Pa,
@@ -102,7 +104,9 @@ package body PizzaTest_Pa is
     type Helper_Class is new Ops_Class and
       Helper_Interfaces_Pa.IHelper_Interface and
       Ops_Pa.Subscriber_Pa.MessageNotifier_Pa.Listener_Interface and
-      Ops_Pa.Subscriber_Pa.Deadline_Pa.DeadlineListener_Interface with private;
+      Ops_Pa.Subscriber_Pa.Deadline_Pa.DeadlineListener_Interface and
+      Ops_Pa.Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface with
+        private;
     type Helper_Class_At is access all Helper_Class'Class;
 
     function Create(client : z.Listener_Interface_At) return Helper_Class_At;
@@ -124,7 +128,8 @@ package body PizzaTest_Pa is
     type Helper_Class is new Ops_Class and
       Helper_Interfaces_Pa.IHelper_Interface and
       Ops_Pa.Subscriber_Pa.MessageNotifier_Pa.Listener_Interface and
-      Ops_Pa.Subscriber_Pa.Deadline_Pa.DeadlineListener_Interface with
+      Ops_Pa.Subscriber_Pa.Deadline_Pa.DeadlineListener_Interface and
+      Ops_Pa.Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface with
        record
          SelfAt : Helper_Class_At := null;
          data : DataType_At := null;
@@ -137,6 +142,7 @@ package body PizzaTest_Pa is
                         Sender : in Ops_Class_At;
                         Item : in OPSMessage_Class_At );
     procedure OnDeadlineMissed( Self : in out Helper_Class; Sender : in Ops_Class_At );
+    procedure OnNotify( Self : in out Helper_Class; Sender : in Ops_Class_At; Item : in Ops_Pa.Transport_Pa.ConnectStatus_T );
 
     procedure InitInstance( Self : in out Helper_Class; SelfAt : Helper_Class_At; client : z.Listener_Interface_At );
     procedure Finalize( Self : in out Helper_Class );
@@ -208,6 +214,7 @@ package body PizzaTest_Pa is
 
           --          myStream << " Win(" << _getpid() << ")" << std::ends;
           Self.pub.SetName("Ada Testprog ( TBD )");
+          Self.pub.addListener( Ops_Pa.Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface_At(Self.SelfAt) );
         end;
       end if;
     exception
@@ -285,6 +292,7 @@ package body PizzaTest_Pa is
           Self.sub := Create(topic);
           Self.sub.addListener( MessageNotifier_Pa.Listener_Interface_At(Self.SelfAt) );
           Self.sub.addDeadlineListener( Deadline_Pa.DeadlineListener_Interface_At(Self.SelfAt) );
+          Self.sub.addListener( Ops_Pa.Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface_At(Self.SelfAt) );
 
 --          -- Add a publication ID Checker
 --          sub->pubIdChecker = new ops::PublicationIdChecker;
@@ -358,6 +366,38 @@ package body PizzaTest_Pa is
         Self.expectedPubId := Item.PublicationID + 1;
 --      procedure onData( Self : in out Listener_Interface; sub : Subscriber_Class_At; data : DataType_T ) is abstract;
         Self.client.onData(Self.sub, DataType_At(Item.Data));
+      end if;
+    end;
+
+    procedure OnNotify( Self : in out Helper_Class;
+                        Sender : in Ops_Class_At;
+                        Item : in Ops_Pa.Transport_Pa.ConnectStatus_T ) is
+    begin
+      if Sender.all in Ops_Pa.Subscriber_Pa.Subscriber_Class'Class then
+        declare
+          sub : Subscriber_Class_At := Subscriber_Class_At(Sender);
+        begin
+          Ada.Text_IO.Put("[Topic: " & sub.Topic.Name & "] Subscriber ");
+          if Item.Connected then
+            Ada.Text_IO.Put_Line("OnConnect, IP: " & Item.Address & "::" & Integer'Image(Item.Port));
+          else
+            Ada.Text_IO.Put_Line("OnDisconnect, IP: " & Item.Address & "::" & Integer'Image(Item.Port));
+          end if;
+        end;
+      elsif Sender.all in Ops_Pa.PublisherAbs_Pa.Publisher_Pa.Publisher_Class'Class then
+        declare
+          pub : Publisher_Class_At := Publisher_Class_At(Sender);
+        begin
+          Ada.Text_IO.Put("[Topic: " & pub.Topic.Name & "] Publisher ");
+          if Item.Connected then
+            Ada.Text_IO.Put("OnConnect, IP: " & Item.Address & "::" & Integer'Image(Item.Port));
+          else
+            Ada.Text_IO.Put("OnDisconnect, IP: " & Item.Address & "::" & Integer'Image(Item.Port));
+          end if;
+          Ada.Text_IO.Put_Line(", TotalNo: " & Integer'Image(Item.TotalNo));
+        end;
+      else
+        Ada.Text_IO.Put_Line(" >>>>>>> OnNotify() UNKNOWN Sender ");
       end if;
     end;
 
@@ -699,8 +739,10 @@ package body PizzaTest_Pa is
     dummy : Boolean;
   begin
     -- Enable TCP Client trace
-    --Ops_Pa.InstallTrace(MyTraceProc'Access);
-    --Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa.TraceEnabled := True;
+--        Ops_Pa.InstallTrace(MyTraceProc'Access);
+--        Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa.TraceEnabled := True;
+--        Ops_Pa.Transport_Pa.TCPConnection_Pa.TraceEnabled := True;
+--        Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa.TraceEnabled := True;
 
     -- Setup the OPS static error service (common for all participants, reports errors during participant creation)
     StaticErrorService.addListener(ErrorLog'Access, null);

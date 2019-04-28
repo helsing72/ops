@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2018 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -22,7 +22,7 @@ package body Ops_Pa.Transport_Pa.SendDataHandler_Pa.Mc_Pa is
      Self : McSendDataHandler_Class_At := null;
   begin
     Self := new McSendDataHandler_Class;
-    InitInstance( Self.all, topic, localInterface, ttl, Reporter );
+    InitInstance( Self.all, Self, topic, localInterface, ttl, Reporter );
     return Self;
   exception
     when others =>
@@ -36,12 +36,13 @@ package body Ops_Pa.Transport_Pa.SendDataHandler_Pa.Mc_Pa is
   end;
 
   procedure InitInstance( Self : in out McSendDataHandler_Class;
+                          SelfAt : McSendDataHandler_Class_At;
                           topic : Topic_Class_At;
                           localInterface : String;
                           ttl : Integer;
                           Reporter : ErrorService_Class_At ) is
   begin
-    InitInstance( SendDataHandler_Class(Self) );
+    InitInstance( SendDataHandler_Class(Self), SendDataHandler_Class_At(SelfAt) );
     Self.Sender := createMCSender(localInterface, ttl, topic.OutSocketBufferSize);
     Self.Sender.SetErrorService( Reporter );
   end;

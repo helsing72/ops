@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -42,11 +42,28 @@ package body Ops_Pa.PublisherAbs_Pa.Publisher_Pa is
   overriding procedure Start( Self : in out Publisher_Class ) is
   begin
     Self.SendDataHandler.addUser( Ops_Class_At(Self.SelfAt) );
+    Self.SendDataHandler.addListener( Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface_At(Self.SelfAt) );
   end;
 
   overriding procedure Stop( Self : in out Publisher_Class ) is
   begin
+    Self.SendDataHandler.removeListener( Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface_At(Self.SelfAt) );
     Self.SendDataHandler.removeUser( Ops_Class_At(Self.SelfAt) );
+  end;
+
+  procedure addListener( Self : in out Publisher_Class; Client : Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface_At ) is
+  begin
+    Self.CsNotifier.addListener( Client );
+  end;
+
+  procedure removeListener( Self : in out Publisher_Class; Client : Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface_At ) is
+  begin
+    Self.CsNotifier.removeListener( Client );
+  end;
+
+  procedure OnNotify( Self : in out Publisher_Class; Sender : in Ops_Class_At; Item : in Transport_Pa.ConnectStatus_T ) is
+  begin
+    Self.CsNotifier.doNotify( Item );
   end;
 
   overriding procedure WriteOPSObject( Self : in out Publisher_Class; obj : OpsObject_Class_At) is
@@ -117,6 +134,8 @@ package body Ops_Pa.PublisherAbs_Pa.Publisher_Pa is
     Self.Participant := getInstance(t.DomainID, t.ParticipantID);
     Self.SendDataHandler := Self.Participant.getSendDataHandler(Self.Topic);
 
+    Self.CsNotifier := Transport_Pa.ConnectStatusNotifier_Pa.Create( Ops_Class_At(SelfAt) );
+
     Self.Message := Create;
     if Self.Name /= null then
       Self.Message.SetPublisherName( Self.Name.all );
@@ -132,6 +151,8 @@ package body Ops_Pa.PublisherAbs_Pa.Publisher_Pa is
     Stop( Self );
 
     Self.Participant.releaseSendDataHandler(Self.Topic);
+
+    Transport_Pa.ConnectStatusNotifier_Pa.Free(Self.CsNotifier);
 
     Free( Self.Message );
     Free( Self.Archive );

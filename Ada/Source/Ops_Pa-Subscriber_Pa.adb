@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2018 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -47,6 +47,7 @@ package body Ops_Pa.Subscriber_Pa is
     Self.Topic := t;
 
     Self.DataNotifier := MessageNotifier_Pa.Create( Ops_Class_At(SelfAt) );
+    Self.CsNotifier := Transport_Pa.ConnectStatusNotifier_Pa.Create( Ops_Class_At(SelfAt) );
     Self.DeadlineNotifier := Deadline_Pa.Create( Ops_Class_At(SelfAt), Periodic => True );
 
     Self.Participant := Participant_Interface_At(Ops_Pa.Participant_Pa.getInstance(t.DomainID, t.ParticipantID));
@@ -79,6 +80,7 @@ package body Ops_Pa.Subscriber_Pa is
     end;
 
     Deadline_Pa.Free(Self.DeadlineNotifier);
+    Transport_Pa.ConnectStatusNotifier_Pa.Free(Self.CsNotifier);
     MessageNotifier_Pa.Free(Self.DataNotifier);
   end;
 
@@ -99,6 +101,7 @@ package body Ops_Pa.Subscriber_Pa is
     if not Self.Started then
       Self.ReceiveDataHandler := Self.Participant.GetReceiveDataHandler(Self.Topic);
       Self.ReceiveDataHandler.addListener(Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa.MessageNotifier_Pa.Listener_Interface_At(Self.SelfAt));
+      Self.ReceiveDataHandler.addListener(Ops_Pa.Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface_At(Self.SelfAt));
 
       if Self.DeadlineTimeout > 0 then
         Self.DeadlineNotifier.Start( Self.DeadlineTimeout );
@@ -116,6 +119,7 @@ package body Ops_Pa.Subscriber_Pa is
         Self.DeadlineNotifier.Cancel;
       end if;
 
+      Self.ReceiveDataHandler.removeListener(Ops_Pa.Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface_At(Self.SelfAt));
       Self.ReceiveDataHandler.removeListener(Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa.MessageNotifier_Pa.Listener_Interface_At(Self.SelfAt));
       Self.ReceiveDataHandler := null;
       Self.Participant.ReleaseReceiveDataHandler(Self.Topic);
@@ -237,6 +241,16 @@ package body Ops_Pa.Subscriber_Pa is
     Self.DataNotifier.removeListener(Client);
   end;
 
+  procedure addListener( Self : in out Subscriber_Class; Client : Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface_At ) is
+  begin
+    Self.CsNotifier.addListener( Client );
+  end;
+
+  procedure removeListener( Self : in out Subscriber_Class; Client : Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface_At ) is
+  begin
+    Self.CsNotifier.removeListener( Client );
+  end;
+
   procedure acquireMessageLock( Self : in out Subscriber_Class ) is
   begin
     Self.ReceiveDataHandler.acquireMessageLock;
@@ -245,6 +259,11 @@ package body Ops_Pa.Subscriber_Pa is
   procedure releaseMessageLock( Self : in out Subscriber_Class ) is
   begin
     Self.ReceiveDataHandler.releaseMessageLock;
+  end;
+
+  procedure OnNotify( Self : in out Subscriber_Class; Sender : in Ops_Class_At; Item : in Transport_Pa.ConnectStatus_T ) is
+  begin
+    Self.CsNotifier.doNotify( Item );
   end;
 
   -- Message listener callback (called from receive thread)

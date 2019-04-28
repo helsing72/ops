@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2018 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -31,13 +31,17 @@ package Ops_Pa.Transport_Pa.SendDataHandler_Pa is
 -- ==========================================================================
 --      C l a s s    D e c l a r a t i o n.
 -- ==========================================================================
-  type SendDataHandler_Class    is abstract new Ops_Class with private;
+  type SendDataHandler_Class    is abstract new Ops_Class and
+    ConnectStatus_Interface with private;
   type SendDataHandler_Class_At is access all SendDataHandler_Class'Class;
 
   function sendData( Self : in out SendDataHandler_Class; buf : Byte_Arr_At; bufSize : Integer; topic : Topic_Class_At) return Boolean is abstract;
 
   procedure addUser( Self : in out SendDataHandler_Class; client : Ops_Class_At );
   procedure removeUser( Self : in out SendDataHandler_Class; client : Ops_Class_At );
+
+  procedure addListener( Self : in out SendDataHandler_Class; Client : ConnectStatusNotifier_Pa.Listener_Interface_At );
+  procedure removeListener( Self : in out SendDataHandler_Class; Client : ConnectStatusNotifier_Pa.Listener_Interface_At );
 
 private
 -- ==========================================================================
@@ -51,15 +55,29 @@ private
 -- ==========================================================================
 --
 -- ==========================================================================
-  type SendDataHandler_Class is abstract new Ops_Class with
+  type SendDataHandler_Class is abstract new Ops_Class and
+    ConnectStatus_Interface with
     record
+      SelfAt : SendDataHandler_Class_At := null;
       Users : MyVector_Pa.Vector;
+
+      CsNotifier : ConnectStatusNotifier_Pa.Notifier_Class_At := null;
 
       Sender : Sender_Class_At;
       Mutex : aliased Ops_Pa.Mutex_Pa.Mutex;
     end record;
 
-  procedure InitInstance( Self : in out SendDataHandler_Class );
+  procedure InitInstance( Self : in out SendDataHandler_Class;
+                          SelfAt : in SendDataHandler_Class_At );
+
+  procedure OnConnect( Self : in out SendDataHandler_Class;
+                       Sender : in Ops_Class_At;
+                       Status : in ConnectStatus_T );
+
+  procedure OnDisconnect( Self : in out SendDataHandler_Class;
+                          Sender : in Ops_Class_At;
+                          Status : in ConnectStatus_T );
+
 
   --------------------------------------------------------------------------
   --  Finalize the object

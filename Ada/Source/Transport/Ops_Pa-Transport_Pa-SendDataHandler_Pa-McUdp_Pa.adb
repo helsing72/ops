@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2017-2018 Lennart Andersson.
+-- Copyright (C) 2017-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -91,7 +91,7 @@ package body Ops_Pa.Transport_Pa.SendDataHandler_Pa.McUdp_Pa is
     Self : McUdpSendDataHandler_Class_At := null;
   begin
     Self := new McUdpSendDataHandler_Class;
-    InitInstance( Self.all, localInterface, ttl, outSocketBufferSize, Reporter );
+    InitInstance( Self.all, Self, localInterface, ttl, outSocketBufferSize, Reporter );
     return Self;
   exception
     when others =>
@@ -188,12 +188,13 @@ package body Ops_Pa.Transport_Pa.SendDataHandler_Pa.McUdp_Pa is
   end;
 
   procedure InitInstance( Self : in out McUdpSendDataHandler_Class;
+                          SelfAt : McUdpSendDataHandler_Class_At;
                           localInterface : String;
                           ttl : Integer;
                           outSocketBufferSize : Int64;
                           Reporter : ErrorService_Class_At ) is
   begin
-    InitInstance( SendDataHandler_Class(Self) );
+    InitInstance( SendDataHandler_Class(Self), SendDataHandler_Class_At(SelfAt) );
     Self.Sender := createUDPSender(localInterface, ttl, OutSocketBufferSize);
     Self.Sender.SetErrorService( Reporter );
   end;

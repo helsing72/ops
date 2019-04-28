@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -37,6 +37,7 @@ private
 -- ==========================================================================
 
   procedure InitInstance( Self : in out McSendDataHandler_Class;
+                          SelfAt : McSendDataHandler_Class_At;
                           topic : Topic_Class_At;
                           localInterface : String;
                           ttl : Integer;

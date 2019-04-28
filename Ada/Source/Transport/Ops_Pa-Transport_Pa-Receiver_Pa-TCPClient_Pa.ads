@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2018 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -17,13 +17,20 @@
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
 with Ops_Pa.Socket_Pa;
+with Ops_Pa.Transport_Pa.TCPConnection_Pa;
+with Ops_Pa.DeadlineNotifier_Pa;
 
 package Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
+
+  package Timer_Pa is new DeadlineNotifier_Pa(10);
 
 -- ==========================================================================
 --      C l a s s    D e c l a r a t i o n.
 -- ==========================================================================
-  type TCPClientReceiver_Class    is new Receiver_Class with private;
+  type TCPClientReceiver_Class is new Receiver_Class and
+    TCPConnection_Pa.ReceiveNotifier_Pa.Listener_Interface and
+    Timer_Pa.DeadlineListener_Interface with
+      private;
   type TCPClientReceiver_Class_At is access all TCPClientReceiver_Class'Class;
 
   function Create( serverIP : string;
@@ -55,6 +62,8 @@ package Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
   overriding function Port( Self : TCPClientReceiver_Class ) return Integer;
   overriding function Address( Self : TCPClientReceiver_Class ) return String;
 
+  overriding procedure SetErrorService( Self : in out TCPClientReceiver_Class; es : ErrorService_Class_At );
+
   -- Set this flag to enable trace from the TCP Client
   TraceEnabled : Boolean := False;
 
@@ -62,22 +71,29 @@ private
 -- ==========================================================================
 --
 -- ==========================================================================
-  type TCPClientReceiver_Class is new Receiver_Class with
-     record
-       Port : Integer := 0;
-       IpAddress : String_At := null;
-       InSocketBufferSize : Int64 := 0;
+  type TCPClientReceiver_Class is new Receiver_Class and
+    TCPConnection_Pa.ReceiveNotifier_Pa.Listener_Interface and
+    Timer_Pa.DeadlineListener_Interface with
+    record
+      SelfAt : TCPClientReceiver_Class_At := null;
+      Port : Integer := 0;
+      IpAddress : String_At := null;
+      InSocketBufferSize : Int64 := 0;
 
-       TcpClient : Ops_Pa.Socket_Pa.TCPClientSocket_Class_At := null;
+      TcpClient : Ops_Pa.Socket_Pa.TCPClientSocket_Class_At := null;
+      Connection : Ops_Pa.Transport_Pa.TCPConnection_Pa.TCPConnection_Class_At := null;
 
-       -- Current read buffer from user
-       Buffer : Byte_Arr_At := null;
-       BufferSize : Integer := 0;
-     end record;
+      Timer : Timer_Pa.DeadlineNotifier_Class_At := null;
+    end record;
 
   overriding procedure Run( Self : in out TCPClientReceiver_Class );
 
   procedure Report( Self : in out TCPClientReceiver_Class; method : string; mess : string);
+
+  -- Called whenever the receiver has new data.
+  procedure OnNotify( Self : in out TCPClientReceiver_Class; Sender : in Ops_Class_At; Item : in BytesSizePair_T );
+
+  overriding procedure OnDeadlineMissed( Self : in out TCPClientReceiver_Class; Sender : in Ops_Class_At );
 
   procedure InitInstance( Self : in out TCPClientReceiver_Class;
                           SelfAt : TCPClientReceiver_Class_At;

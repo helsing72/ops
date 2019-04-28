@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2017-2018 Lennart Andersson.
+-- Copyright (C) 2017-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -49,7 +49,10 @@ package Ops_Pa.Socket_Pa is
 
   function Bind( Self : in out Socket_Class; Ip : String; Port : Integer ) return Boolean;
   function GetBoundIP( Self : in out Socket_Class ) return String;
-  function GetBoundPort( Self : in out Socket_Class; Port : in out Integer ) return Boolean;
+  function GetBoundPort( Self : in out Socket_Class) return Integer;
+
+  function GetPeerIP( Self : Socket_Class ) return String;
+  function GetPeerPort( Self : Socket_Class ) return Integer;
 
   function SetReceiveBufferSize( Self : in out Socket_Class; Value : Integer ) return Boolean;
   function GetReceiveBufferSize( Self : in out Socket_Class ) return Integer;
@@ -63,11 +66,38 @@ package Ops_Pa.Socket_Pa is
   function GetSourcePort( Self : in out Socket_Class ) return Integer;
 
   function ReceiveBuf( Self : in out Socket_Class; Buf : out Ada.Streams.Stream_Element_Array ) return Integer;
+  function ReceiveBuf( Self : in out Socket_Class;
+                       Buf : out Ada.Streams.Stream_Element_Array;
+                       Dur : GNAT.Sockets.Timeval_Duration;
+                       Timedout : out Boolean ) return Integer;
 
   function SendTo( Self : in out Socket_Class; Buf : Ada.Streams.Stream_Element_Array; Ip : String; Port : Integer ) return Integer;
 
   function SendBuf( Self : in out Socket_Class; Buf : Ada.Streams.Stream_Element_Array ) return Integer;
 
+-- ==========================================================================
+--      C l a s s    D e c l a r a t i o n.
+-- ==========================================================================
+  -- Helper class to be able to wait for several sockets to be ready
+  -- for accept or read of data
+  type Selector_Class is new Ops_Class with private;
+  type Selector_Class_At is access all Selector_Class'Class;
+
+  function Create return Selector_Class_At;
+
+  -- Empty list of sockets to wait for
+  procedure Clear( Self : in out Selector_Class );
+  procedure Add( Self : in out Selector_Class; Socket : Socket_Class_At );
+  procedure Remove( Self : in out Selector_Class; Socket : Socket_Class_At );
+
+  -- Wait for any of the sockets to be ready
+  procedure Wait( Self : in out Selector_Class;
+                  Dur : GNAT.Sockets.Timeval_Duration := GNAT.Sockets.Forever;
+                  Timedout : out Boolean );
+  procedure AbortWait( Self : in out Selector_Class );
+
+  -- Check if the specific socket was ready after the last wait call
+  function IsSet( Self : Selector_Class; Socket : Socket_Class_At ) return Boolean;
 
 -- ==========================================================================
 --      C l a s s    D e c l a r a t i o n.
@@ -129,18 +159,22 @@ private
 --
 -- ==========================================================================
   type Socket_Class is new Ops_Class with
-     record
-       SelfAt : Socket_Class_At := null;
-       SocketType : GNAT.Sockets.Mode_Type := GNAT.Sockets.Socket_Datagram;
-       SocketID : GNAT.Sockets.Socket_Type := GNAT.Sockets.No_Socket;
-       StartupOK : Boolean := False;
+    record
+      SelfAt : Socket_Class_At := null;
+      SocketType : GNAT.Sockets.Mode_Type := GNAT.Sockets.Socket_Datagram;
+      SocketID : GNAT.Sockets.Socket_Type := GNAT.Sockets.No_Socket;
+      StartupOK : Boolean := False;
 
-       -- Latest error
-       LatestErrorCode : Integer := 0;
+      -- Latest error
+      LatestErrorCode : Integer := 0;
 
-       -- Last source for read data
-       FromAddress : GNAT.Sockets.Sock_Addr_Type := GNAT.Sockets.No_Sock_Addr;
-     end record;
+      -- Last source for read data
+      FromAddress : GNAT.Sockets.Sock_Addr_Type := GNAT.Sockets.No_Sock_Addr;
+
+      -- For read timeout handling ReceiveBuf( with duration )
+      Timeout_Selector : GNAT.Sockets.Selector_Type;
+      Timeout_Used : Boolean := False;
+    end record;
 
   procedure ExtractErrorCode( Self : in out Socket_Class; e : Ada.Exceptions.Exception_Occurrence );
 
@@ -149,6 +183,26 @@ private
                           SocketType : GNAT.Sockets.Mode_Type );
 
   overriding procedure Finalize( Self : in out Socket_Class );
+
+
+-- ==========================================================================
+--
+-- ==========================================================================
+  type Selector_Class is new Ops_Class with
+    record
+      Selector : GNAT.Sockets.Selector_Type;
+
+      -- Holder sets
+      sst_R : GNAT.Sockets.Socket_Set_Type;
+      sst_W : GNAT.Sockets.Socket_Set_Type;
+
+      -- Set from latest wait()
+      sst_latest : GNAT.Sockets.Socket_Set_Type;
+    end record;
+
+  procedure InitInstance( Self : in out Selector_Class );
+
+  overriding procedure Finalize( Self : in out Selector_Class );
 
 
 -- ==========================================================================
@@ -212,3 +266,4 @@ private
   overriding procedure Finalize( Self : in out TCPServerSocket_Class );
 
 end Ops_Pa.Socket_Pa;
+
