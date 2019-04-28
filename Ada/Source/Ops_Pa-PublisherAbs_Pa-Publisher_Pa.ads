@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -39,7 +39,9 @@ package Ops_Pa.PublisherAbs_Pa.Publisher_Pa is
 -- ==========================================================================
 --      C l a s s    D e c l a r a t i o n.
 -- ==========================================================================
-  type Publisher_Class is new PublisherAbs_Class with private;
+  type Publisher_Class is new PublisherAbs_Class and
+    Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface with
+      private;
   type Publisher_Class_At is access all Publisher_Class'Class;
 
   -- Constructors
@@ -48,13 +50,17 @@ package Ops_Pa.PublisherAbs_Pa.Publisher_Pa is
   overriding procedure Start( Self : in out Publisher_Class );
   overriding procedure Stop( Self : in out Publisher_Class );
 
+  procedure addListener( Self : in out Publisher_Class; Client : Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface_At );
+  procedure removeListener( Self : in out Publisher_Class; Client : Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface_At );
+
   overriding procedure WriteOPSObject( Self : in out Publisher_Class; obj : OpsObject_Class_At);
 
 private
 -- ==========================================================================
 --
 -- ==========================================================================
-  type Publisher_Class is new PublisherAbs_Class with
+  type Publisher_Class is new PublisherAbs_Class and
+    Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface with
     record
       SelfAt : Publisher_Class_At := null;
       CurrentPublicationID : Int64 := 0;
@@ -64,6 +70,8 @@ private
       Archive : ArchiverOut_Class_At := null;
       Message : OPSMessage_Class_At := null;
 
+      CsNotifier : Transport_Pa.ConnectStatusNotifier_Pa.Notifier_Class_At := null;
+
       -- The Participant to which this Publisher belongs (NOTE: we don't own the object)
       Participant : Participant_Class_At := null;
 
@@ -72,6 +80,8 @@ private
     end record;
 
   procedure Write( Self : in out Publisher_Class; data : OpsObject_Class_At);
+
+  procedure OnNotify( Self : in out Publisher_Class; Sender : in Ops_Class_At; Item : in Transport_Pa.ConnectStatus_T );
 
   procedure InitInstance( Self : in out Publisher_Class;
                           SelfAt : Publisher_Class_At;

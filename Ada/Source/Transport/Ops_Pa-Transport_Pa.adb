@@ -18,6 +18,12 @@
 
 package body Ops_Pa.Transport_Pa is
 
+  procedure SetConnectStatusClient( Self : in out Transport_Class;
+                                    Client : ConnectStatus_Interface_At ) is
+  begin
+    Self.CsClient := Client;
+  end;
+
   function ErrorService( Self : Transport_Class ) return ErrorService_Class_At is
   begin
     return Self.ErrorService;

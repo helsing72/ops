@@ -17,6 +17,7 @@
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
 with Ada.Unchecked_Conversion;
+with Ada.Strings.Fixed;
 
 with Ops_Pa.Socket_Pa,
      Ops_Pa.Signal_Pa;
@@ -108,6 +109,21 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
     end if;
   end;
 
+  -- Should only be called while lock is held
+  procedure DeleteConnection( Self : in out TCPServerSender_Class; i : MyIndex_T; Total : Integer ) is
+    tcpClient : Ops_Pa.Socket_Pa.TCPClientSocket_Class_At := Self.ConnectedSockets.Element(i).GetSocket;
+    Status : ConnectStatus_T;
+  begin
+    Self.SocketWaits.Remove( Socket_Pa.Socket_Class_At(tcpClient) );
+    if Self.CsClient /= null then
+      Ada.Strings.Fixed.Move( tcpClient.GetPeerIP, Status.Address, Drop => Ada.Strings.Right );
+      Status.Port := tcpClient.GetPeerPort;
+      Status.TotalNo := Total;
+      Self.CsClient.OnDisconnect( null, Status );
+    end if;
+    TCPConnection_Pa.Free( Self.ConnectedSockets.Element(i) );
+  end;
+
   overriding procedure Close( Self : in out TCPServerSender_Class ) is
     dummy : Boolean;
   begin
@@ -126,8 +142,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
       begin
         for i in Self.ConnectedSockets.First_Index .. Self.ConnectedSockets.Last_Index loop
           if Self.ConnectedSockets.Element(i) /= null then
-            Self.SocketWaits.Remove( Socket_Pa.Socket_Class_At(Self.ConnectedSockets.Element(i).GetSocket) );
-            TCPConnection_Pa.Free(Self.ConnectedSockets.Element(i));
+            Self.DeleteConnection( i, 0 );
           end if;
         end loop;
       end;
@@ -153,8 +168,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
   begin
     Self.LastErrorCode := Self.ConnectedSockets.Element(i).LastErrorCode;
     Report(Self, method, mess);
-    Self.SocketWaits.Remove( Socket_Pa.Socket_Class_At(Self.ConnectedSockets.Element(i).GetSocket) );
-    TCPConnection_Pa.Free( Self.ConnectedSockets.Element(i) );
+    Self.DeleteConnection( i, Integer(Self.ConnectedSockets.Length)-1 );
     Self.ConnectedSockets.Delete(i);
   end;
 
@@ -239,11 +253,19 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
         S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.ConnectedSocketsMutex'Access);
         Port : Integer := 0;
         Conn : TCPConnection_Pa.TCPServerConnection_Class_At := null;
+        Status : ConnectStatus_T;
       begin
         Self.SocketWaits.Add( Socket_Pa.Socket_Class_At(tcpClient) );
-        if tcpClient.GetBoundPort(Port) then null; end if;
+        Port := tcpClient.GetBoundPort;
         Conn := TCPConnection_Pa.Create( tcpClient, Port );
         Self.ConnectedSockets.Append( Conn );
+        if Self.CsClient /= null then
+          Ada.Strings.Fixed.Move( tcpClient.GetPeerIP, Status.Address, Drop => Ada.Strings.Right );
+          Status.Port := tcpClient.GetPeerPort;
+          Status.TotalNo := Integer(Self.ConnectedSockets.Length);
+          Status.Connected := True;
+          Self.CsClient.OnConnect( null, Status );
+        end if;
       end;
       tcpClient := null;   -- Clear ref since list now owns object
     end;

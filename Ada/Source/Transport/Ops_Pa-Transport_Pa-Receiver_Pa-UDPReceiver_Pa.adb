@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2018 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -76,10 +76,7 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.UDPReceiver_Pa is
     end if;
 
     -- Get actual port that socket is bound to (in case bind port = 0)
-    if not Self.UdpSocket.GetBoundPort( Self.Port ) then
-      Self.LastErrorCode := Self.UdpSocket.GetLatestError;
-      Report(Self, "Start", "Failed to get bound port");
-    end if;
+    Self.Port := Self.UdpSocket.GetBoundPort;
 
     -- Set socket buffer size
     if InSocketBufferSize > 0 then

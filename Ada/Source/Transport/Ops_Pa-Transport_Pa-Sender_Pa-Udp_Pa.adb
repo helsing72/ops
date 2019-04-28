@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2018 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -140,13 +140,8 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.Udp_Pa is
   end;
 
   overriding function getPort( Self : in out UdpSender_Class ) return Integer is
-    Port : Integer := 0;
   begin
-    if not Self.UdpSocket.GetBoundPort( Port ) then
-      Self.LastErrorCode := Self.UdpSocket.GetLatestError;
-      Report(Self, "getPort", "Failed to get bound port");
-    end if;
-    return Port;
+    return Self.UdpSocket.GetBoundPort;
   end;
 
   overriding function sendTo( Self : in out UdpSender_Class; buf : Byte_Arr_At; size : Integer; ip : string; port : Integer) return Boolean is

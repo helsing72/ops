@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2017 Lennart Andersson.
+-- Copyright (C) 2017-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -88,6 +88,7 @@ private
      end record;
 
   procedure InitInstance( Self : in out McUdpSendDataHandler_Class;
+                          SelfAt : McUdpSendDataHandler_Class_At;
                           localInterface : String;
                           ttl : Integer;
                           outSocketBufferSize : Int64;

@@ -16,6 +16,8 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
+with Ada.Strings.Fixed;
+
 with Ops_Pa.Socket_Pa;
 
 package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
@@ -179,13 +181,8 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
   end;
 
   overriding function Port( Self : TCPClientReceiver_Class ) return Integer is
-    Port : Integer := 0;
   begin
-    if Self.TcpClient.GetBoundPort( Port ) then
-      return Port;
-    else
-      return 0;
-    end if;
+    return Self.TcpClient.GetBoundPort;
   end;
 
   overriding function Address( Self : TCPClientReceiver_Class ) return String is
@@ -201,6 +198,7 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
 
   overriding procedure Run( Self : in out TCPClientReceiver_Class ) is
     dummy : Boolean;
+    Status : ConnectStatus_T;
 
     procedure OpenAndConnect is
     begin
@@ -246,6 +244,14 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
 
 --      notifyNewEvent(BytesSizePair(NULL, -5)); //Connection was down but has been reastablished.
 
+        if Self.CsClient /= null then
+          Ada.Strings.Fixed.Move(Self.TcpClient.GetPeerIP, Status.Address, Drop => Ada.Strings.Right);
+          Status.Port := Self.TcpClient.GetPeerPort;
+          Status.TotalNo := 1;
+          Status.Connected := True;
+          Self.CsClient.OnConnect( null, Status );
+        end if;
+
         -- Send a probe to trig newer versions of TCPServers to enable heartbeats
         Self.Connection.SendProbe( dummy );
 
@@ -260,6 +266,11 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
           Self.LastErrorCode := Ops_Pa.Socket_Pa.SOCKET_ERROR_C;
           Self.Report("Run", "Exception ");
       end;
+      if Self.CsClient /= null then
+        Status.TotalNo := 0;
+        Status.Connected := False;
+        Self.CsClient.OnDisconnect( null, Status );
+      end if;
       Self.Timer.Cancel;
       DisconnectAndClose;
     end loop;

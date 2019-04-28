@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2018 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -60,14 +60,40 @@ package body Ops_Pa.Transport_Pa.SendDataHandler_Pa is
     return Left = Right;
   end;
 
-  procedure InitInstance( Self : in out SendDataHandler_Class ) is
+  procedure InitInstance( Self : in out SendDataHandler_Class;
+                          SelfAt : in SendDataHandler_Class_At ) is
   begin
-    null;
+    Self.SelfAt := SelfAt;
+    Self.CsNotifier := ConnectStatusNotifier_Pa.Create( Ops_Class_At(SelfAt) );
   end;
 
   overriding procedure Finalize( Self : in out SendDataHandler_Class ) is
   begin
-    null;
+    ConnectStatusNotifier_Pa.Free(Self.CsNotifier);
+  end;
+
+  procedure addListener( Self : in out SendDataHandler_Class; Client : ConnectStatusNotifier_Pa.Listener_Interface_At ) is
+  begin
+    Self.CsNotifier.addListener( Client );
+  end;
+
+  procedure removeListener( Self : in out SendDataHandler_Class; Client : ConnectStatusNotifier_Pa.Listener_Interface_At ) is
+  begin
+    Self.CsNotifier.removeListener( Client );
+  end;
+
+  procedure OnConnect( Self : in out SendDataHandler_Class;
+                       Sender : in Ops_Class_At;
+                       Status : in ConnectStatus_T ) is
+  begin
+    Self.CsNotifier.doNotify( Status );
+  end;
+
+  procedure OnDisconnect( Self : in out SendDataHandler_Class;
+                          Sender : in Ops_Class_At;
+                          Status : in ConnectStatus_T ) is
+  begin
+    Self.CsNotifier.doNotify( Status );
   end;
 
 end Ops_Pa.Transport_Pa.SendDataHandler_Pa;

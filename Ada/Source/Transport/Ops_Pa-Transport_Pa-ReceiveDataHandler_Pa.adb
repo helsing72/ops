@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2018 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -60,6 +60,7 @@ package body Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa is
     Self.ErrorService := Reporter;
 
     Self.DataNotifier := MessageNotifier_Pa.Create( Ops_Class_At(SelfAt) );
+    Self.CsNotifier := ConnectStatusNotifier_Pa.Create( Ops_Class_At(SelfAt) );
 
     Self.MemMap := Ops_Pa.MemoryMap_Pa.Create(UInt32((top.SampleMaxSize / PACKET_MAX_SIZE) + 1), PACKET_MAX_SIZE);
     Self.Buffer := Ops_Pa.ByteBuffer_Pa.Create(Self.MemMap);
@@ -75,7 +76,7 @@ package body Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa is
     if Self.Receiver = null then
       raise ECommException;
     end if;
-
+    Self.Receiver.SetConnectStatusClient( ConnectStatus_Interface_At(SelfAt) );
     Ops_Pa.Transport_Pa.Receiver_Pa.addListener(Self.Receiver.all, ReceiveNotifier_Pa.Listener_Interface_At(SelfAt));
   end;
 
@@ -92,6 +93,7 @@ package body Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa is
     Free(Self.Archiver);
     Free(Self.Buffer);
     Free(Self.MemMap);
+    ConnectStatusNotifier_Pa.Free(Self.CsNotifier);
     MessageNotifier_Pa.Free(Self.DataNotifier);
   end;
 
@@ -128,6 +130,16 @@ package body Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa is
     end if;
   end;
 
+  procedure addListener( Self : in out ReceiveDataHandler_Class; Client : ConnectStatusNotifier_Pa.Listener_Interface_At ) is
+  begin
+    Self.CsNotifier.addListener( Client );
+  end;
+
+  procedure removeListener( Self : in out ReceiveDataHandler_Class; Client : ConnectStatusNotifier_Pa.Listener_Interface_At ) is
+  begin
+    Self.CsNotifier.removeListener( Client );
+  end;
+
   function getReceiver( Self : ReceiveDataHandler_Class ) return Ops_Pa.Transport_Pa.Receiver_Pa.Receiver_Class_At is
   begin
     return Self.Receiver;
@@ -141,6 +153,20 @@ package body Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa is
   function getNumListeners( Self : ReceiveDataHandler_Class ) return Int32 is
   begin
     return Int32(Self.DataNotifier.numListeners);
+  end;
+
+  procedure OnConnect( Self : in out ReceiveDataHandler_Class;
+                       Sender : in Ops_Class_At;
+                       Status : in ConnectStatus_T ) is
+  begin
+    Self.CsNotifier.doNotify( Status );
+  end;
+
+  procedure OnDisconnect( Self : in out ReceiveDataHandler_Class;
+                          Sender : in Ops_Class_At;
+                          Status : in ConnectStatus_T ) is
+  begin
+    Self.CsNotifier.doNotify( Status );
   end;
 
   -- Called whenever the receiver has new data.

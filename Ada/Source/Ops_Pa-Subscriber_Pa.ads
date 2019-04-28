@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2018 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -45,7 +45,8 @@ package Ops_Pa.Subscriber_Pa is
 --      C l a s s    D e c l a r a t i o n.
 -- ==========================================================================
   type Subscriber_Class is new Ops_Class and
-    Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa.MessageNotifier_Pa.Listener_Interface with
+    Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa.MessageNotifier_Pa.Listener_Interface and
+    Ops_Pa.Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface with
       private;
   type Subscriber_Class_At is access all Subscriber_Class'Class;
 
@@ -68,6 +69,9 @@ package Ops_Pa.Subscriber_Pa is
 
   procedure addListener( Self : in out Subscriber_Class; Client : MessageNotifier_Pa.Listener_Interface_At );
   procedure removeListener( Self : in out Subscriber_Class; Client : MessageNotifier_Pa.Listener_Interface_At );
+
+  procedure addListener( Self : in out Subscriber_Class; Client : Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface_At );
+  procedure removeListener( Self : in out Subscriber_Class; Client : Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface_At );
 
   package Deadline_Pa is new Ops_Pa.DeadlineNotifier_Pa(10);
 
@@ -155,7 +159,8 @@ private
 --
 -- ==========================================================================
   type Subscriber_Class is new Ops_Class and
-    Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa.MessageNotifier_Pa.Listener_Interface with
+    Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa.MessageNotifier_Pa.Listener_Interface and
+    Ops_Pa.Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface with
     record
       -- Name of this subscriber
       Name : String_At := null;
@@ -170,6 +175,7 @@ private
 
       -- Used for notifications to users of the subscriber
       DataNotifier : MessageNotifier_Pa.Notifier_Class_At := null;
+      CsNotifier : Transport_Pa.ConnectStatusNotifier_Pa.Notifier_Class_At := null;
 
       -- Used for notifications to users of the subscriber
       DeadlineNotifier : Deadline_Pa.DeadlineNotifier_Class_At := null;
@@ -214,6 +220,8 @@ private
 
   -- Message listener callback
   procedure OnNotify( Self : in out Subscriber_Class; Sender : in Ops_Class_At; Item : in OPSMessage_Class_At );
+
+  procedure OnNotify( Self : in out Subscriber_Class; Sender : in Ops_Class_At; Item : in Transport_Pa.ConnectStatus_T );
 
   procedure InitInstance( Self : in out Subscriber_Class;
                           SelfAt : Subscriber_Class_At;

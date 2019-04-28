@@ -49,7 +49,10 @@ package Ops_Pa.Socket_Pa is
 
   function Bind( Self : in out Socket_Class; Ip : String; Port : Integer ) return Boolean;
   function GetBoundIP( Self : in out Socket_Class ) return String;
-  function GetBoundPort( Self : in out Socket_Class; Port : in out Integer ) return Boolean;
+  function GetBoundPort( Self : in out Socket_Class) return Integer;
+
+  function GetPeerIP( Self : Socket_Class ) return String;
+  function GetPeerPort( Self : Socket_Class ) return Integer;
 
   function SetReceiveBufferSize( Self : in out Socket_Class; Value : Integer ) return Boolean;
   function GetReceiveBufferSize( Self : in out Socket_Class ) return Integer;

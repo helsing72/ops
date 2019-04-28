@@ -187,12 +187,25 @@ package body Ops_Pa.Socket_Pa is
     return GNAT.Sockets.Image(addr.Addr);
   end;
 
-  function GetBoundPort( Self : in out Socket_Class; Port : in out Integer ) return Boolean is
+  function GetBoundPort( Self : in out Socket_Class ) return Integer is
     addr : GNAT.Sockets.Sock_Addr_Type;
   begin
     addr := GNAT.Sockets.Get_Socket_Name( Self.SocketID );
-    Port := Integer(addr.Port);
-    return True;
+    return Integer(addr.Port);
+  end;
+
+  function GetPeerIP( Self : Socket_Class ) return String is
+    addr : GNAT.Sockets.Sock_Addr_Type;
+  begin
+    addr := GNAT.Sockets.Get_Peer_Name( Self.SocketID );
+    return GNAT.Sockets.Image(addr.Addr);
+  end;
+
+  function GetPeerPort( Self : Socket_Class ) return Integer is
+    addr : GNAT.Sockets.Sock_Addr_Type;
+  begin
+    addr := GNAT.Sockets.Get_Peer_Name( Self.SocketID );
+    return Integer(addr.Port);
   end;
 
   function SetReceiveBufferSize( Self : in out Socket_Class; Value : Integer ) return Boolean is
