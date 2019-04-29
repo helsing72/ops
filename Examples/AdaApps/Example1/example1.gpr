@@ -1,4 +1,4 @@
-with "ops4.gpr";
+with "../../../Ada/ops4.gpr";
 with "../../OPSIdls/TestAll/Generated/Ada/TestAll.gpr";
 
 project Example1 is
