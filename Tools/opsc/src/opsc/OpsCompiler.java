@@ -43,6 +43,7 @@ public class OpsCompiler
     boolean _bOnlyParse = false;
     boolean _bOnlyGenFactories = false;
     boolean _bGenMemoryPool = false;
+    String _strOps4GprPath = "";
 
     /** An instance of ProjectProperties is used to hold defaults
      *  as well is modifications to defaults either read from the
@@ -94,6 +95,8 @@ public class OpsCompiler
         System.out.println("  -s <feature>      special, generate with given feature");
         System.out.println("  -t <dir>          set template directory (overrides built-in templates)");
         System.out.println("");
+        System.out.println("  -gpr <path>       explicit path to ops4.gpr when generating Ada");
+        System.out.println("                    (default is to use GPR_PROJECT_PATH to find ops4.gpr)");
         System.out.println("  -dll <file>       used when building C# to give any dll dependencies (eg. OpsLibrary.dll)");
         System.out.println("  -jar <file>       used when building Java to give any jar dependencies");
         System.out.println("");
@@ -325,6 +328,9 @@ public class OpsCompiler
             } else if((arg.equals("-g") || arg.equals("-G")) && (i < extraArgs.size())) {
                 i++;
                 updateGenerateProp(extraArgs.elementAt(i), arg.equals("-g"));
+            } else if (arg.equals("-gpr") && (i < extraArgs.size())) {
+                i++;
+                _strOps4GprPath = extraArgs.elementAt(i);
             //} else if(arg.equals("-idls")) {
             // -idls are handled in first step above
             } else if (arg.equals("-jar") && (i < extraArgs.size())) {
@@ -511,6 +517,7 @@ public class OpsCompiler
         _AdaCompiler = new opsc.AdaCompiler(_strProjectName);
         _AdaCompiler.setVerbose(_verbose);
         _AdaCompiler.setGenOnlyTypeSupport(_bOnlyGenFactories);
+        _AdaCompiler.ops4GprPath = _strOps4GprPath;
         Property propTemplatePath = _props.getProperty("templatePath");
         if(propTemplatePath != null)
             _AdaCompiler.setTemplateDir(propTemplatePath.value);

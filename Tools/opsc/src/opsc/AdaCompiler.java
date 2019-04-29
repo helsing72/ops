@@ -46,10 +46,12 @@ public class AdaCompiler extends opsc.Compiler
     private static String BASE_CLASS_NAME_REGEX = "__baseClassName";
     private static String CREATE_MAKE_BODY_REGEX = "__createMakeBody";
     private static String PROJNAME_REGEX = "__projName";
+    private static String PROJDEPEND_REGEX = "__projDepend";
 
     private boolean alwaysDynArray = true;
     private boolean alwaysDynObject = true;
 
+    String ops4GprPath = "";
     String createdFiles = "";
 
     public AdaCompiler(String projname)
@@ -291,8 +293,16 @@ public class AdaCompiler extends opsc.Compiler
       //Get the template file as a String
       String templateText = getTemplateText();
 
+      // Default dependency
+      String projectDependencies = "-- This requires that environment symbol GPR_PROJECT_PATH includes path to ops4.gpr file" + endl();
+      if (ops4GprPath != "") {
+        projectDependencies = "-- Path to ops4.gpr file from command line when generating files" + endl();
+      }
+      projectDependencies += "with \"" + ops4GprPath + "ops4.gpr\";";
+
       //Replace regular expressions in the template file.
       templateText = templateText.replace(PROJNAME_REGEX, projectName);
+      templateText = templateText.replace(PROJDEPEND_REGEX, projectDependencies);
 
       saveOutputText(templateText);
       createdFiles += "\"" + getOutputFileName() + "\"\n";

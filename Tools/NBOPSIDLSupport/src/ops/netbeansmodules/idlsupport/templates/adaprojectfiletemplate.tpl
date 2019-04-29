@@ -1,6 +1,5 @@
 -- Auto generated OPS-code. DO NOT MODIFY!
--- This requires that environment symbol GPR_PROJECT_PATH includes path to ops4.gpr file
-with "ops4.gpr";
+__projDepend
 
 project __projName is
 
