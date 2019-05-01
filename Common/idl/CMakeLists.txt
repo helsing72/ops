@@ -10,7 +10,7 @@ set(IDL_SRCS
 set(WANTED_OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/Generated/Cpp/opsidls/DebugRequestResponseData.h)
 
 add_custom_command(OUTPUT ${WANTED_OUTPUT}
-  COMMAND ${OPS_COMPILER} -g ALL -B ALL -o ${CMAKE_CURRENT_SOURCE_DIR}/Generated -p opsidls ${IDL_SRCS}
+  COMMAND ${OPS_COMPILER} -g ALL -B ALL -gpr ../../../../Ada/ -o ${CMAKE_CURRENT_SOURCE_DIR}/Generated -p opsidls ${IDL_SRCS}
   DEPENDS ${IDL_SRCS}
   COMMENT "Generating source files from IDL's in ${CMAKE_CURRENT_SOURCE_DIR}"
   VERBATIM

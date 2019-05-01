@@ -38,6 +38,8 @@ OPTIONS
   -s <feature>      special, generate with given feature
   -t <dir>          set template directory (overrides built-in templates)
 
+  -gpr <path>       explicit path to ops4.gpr when generating Ada
+                    (default is to use GPR_PROJECT_PATH to find ops4.gpr)
   -dll <file>       used when building C# to give any dll dependencies (eg. OpsLibrary.dll)
   -jar <file>       used when building Java to give any jar dependencies
 
@@ -61,5 +63,5 @@ environment symbol **OPS_CSC_PATH** to the directory where the wanted compiler b
 Example:
 
 ```
-OPS_CSC_PATH=C:\Windows\Microsoft.NET\Framework\v4.0.30319  
+OPS_CSC_PATH=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\Roslyn
 ```
