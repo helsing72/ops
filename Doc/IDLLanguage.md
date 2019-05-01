@@ -40,7 +40,7 @@ The following table shows a listing of all available OPS IDL types and their cor
 | ------- | --- | ---- | --- | ------ | ------------------------- |
 | package | namespace | package | namespace | Unit | -            |
 | class   | class | class | class | Class | -                     |
-| enum    | enum class | short | enum | ( , , ) | 2 bytes         |
+| enum    | enum class | enum | enum | ( , , ) | 2 bytes          |
 | const   | static const | static final | const | const | -       |
 | boolean | bool | boolean | bool | Boolean | 1 byte              |
 | byte    | char | byte | byte | Byte | 1  byte                   |
