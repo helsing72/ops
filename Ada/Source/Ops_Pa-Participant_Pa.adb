@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2018 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -81,6 +81,8 @@ package body Ops_Pa.Participant_Pa is
         Result := Create(domainID, participantID, configFile);
         gInstances.Insert(key, Result);
       exception
+        when EConfigException =>
+          StaticErrorService.Report( "Participant", "Participant", "Configuration Error" );
         when others =>
           StaticErrorService.Report( "Participant", "Participant", "Unknown Exception" );
       end;
@@ -231,20 +233,24 @@ package body Ops_Pa.Participant_Pa is
   task body Participant_Pr_T is
     Events : Ops_Pa.Signal_Pa.Event_T;
   begin
-    accept Start;
-    while not Self.TerminateFlag loop
-      begin
-        Self.EventsToTask.WaitForAny(Events);
-        exit when (Events and TerminateEvent_C) /= Ops_Pa.Signal_Pa.NoEvent_C;
-        if (Events and StartEvent_C) /= Ops_Pa.Signal_Pa.NoEvent_C then
-          Self.Run;
-        end if;
-      exception
-        when others =>
-          Self.ErrorService.Report( "Participant", "Part_Pr", "Got exception from Run()" );
-      end;
-    end loop;
-    accept Finish;
+    select
+      accept Start;
+      while not Self.TerminateFlag loop
+        begin
+          Self.EventsToTask.WaitForAny(Events);
+          exit when (Events and TerminateEvent_C) /= Ops_Pa.Signal_Pa.NoEvent_C;
+          if (Events and StartEvent_C) /= Ops_Pa.Signal_Pa.NoEvent_C then
+            Self.Run;
+          end if;
+        exception
+          when others =>
+            Self.ErrorService.Report( "Participant", "Part_Pr", "Got exception from Run()" );
+        end;
+      end loop;
+      accept Finish;
+    or
+      accept Finish;
+    end select;
   end Participant_Pr_T;
 
   procedure Run( Self : in out Participant_Class ) is

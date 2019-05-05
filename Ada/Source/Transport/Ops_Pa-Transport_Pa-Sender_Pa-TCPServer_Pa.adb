@@ -201,20 +201,24 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
   task body Server_Pr_T is
     Events : Ops_Pa.Signal_Pa.Event_T;
   begin
-    accept Start;
-    while not Self.TerminateFlag loop
-      begin
-        Self.EventsToTask.WaitForAny(Events);
-        exit when (Events and TerminateEvent_C) /= Ops_Pa.Signal_Pa.NoEvent_C;
-        if (Events and StartEvent_C) /= Ops_Pa.Signal_Pa.NoEvent_C then
-          Self.Run;
-        end if;
-      exception
-        when others =>
-          Self.ErrorService.Report( "TCPServer", "Server_Pr", "Got exception from Run()" );
-      end;
-    end loop;
-    accept Finish;
+    select
+      accept Start;
+      while not Self.TerminateFlag loop
+        begin
+          Self.EventsToTask.WaitForAny(Events);
+          exit when (Events and TerminateEvent_C) /= Ops_Pa.Signal_Pa.NoEvent_C;
+          if (Events and StartEvent_C) /= Ops_Pa.Signal_Pa.NoEvent_C then
+            Self.Run;
+          end if;
+        exception
+          when others =>
+            Self.ErrorService.Report( "TCPServer", "Server_Pr", "Got exception from Run()" );
+        end;
+      end loop;
+      accept Finish;
+    or
+      accept Finish;
+    end select;
   end Server_Pr_T;
 
   procedure Run( Self : in out TCPServerSender_Class ) is

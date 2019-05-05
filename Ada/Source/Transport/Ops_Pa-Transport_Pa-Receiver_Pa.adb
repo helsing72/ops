@@ -57,20 +57,24 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa is
   task body Receiver_Pr_T is
     Events : Ops_Pa.Signal_Pa.Event_T;
   begin
-    accept Start;
-    while not Self.TerminateFlag loop
-      begin
-        Self.EventsToTask.WaitForAny(Events);
-        exit when (Events and TerminateEvent_C) /= Ops_Pa.Signal_Pa.NoEvent_C;
-        if (Events and StartEvent_C) /= Ops_Pa.Signal_Pa.NoEvent_C then
-          Self.Run;
-        end if;
-      exception
-        when others =>
-          Self.ErrorService.Report( "Receiver", "Receiver_Pr", "Got exception from Receiver.Run()" );
-      end;
-    end loop;
-    accept Finish;
+    select
+      accept Start;
+      while not Self.TerminateFlag loop
+        begin
+          Self.EventsToTask.WaitForAny(Events);
+          exit when (Events and TerminateEvent_C) /= Ops_Pa.Signal_Pa.NoEvent_C;
+          if (Events and StartEvent_C) /= Ops_Pa.Signal_Pa.NoEvent_C then
+            Self.Run;
+          end if;
+        exception
+          when others =>
+            Self.ErrorService.Report( "Receiver", "Receiver_Pr", "Got exception from Receiver.Run()" );
+        end;
+      end loop;
+      accept Finish;
+    or
+      accept Finish;
+    end select;
   end Receiver_Pr_T;
 
   procedure Run( Self : in out Receiver_Class ) is
