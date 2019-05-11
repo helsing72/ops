@@ -16,5 +16,5 @@ add_custom_command(OUTPUT ${WANTED_OUTPUT}
   VERBATIM
   )
 
-add_custom_target(${BUILD_NAME} DEPENDS ${WANTED_OUTPUT})
+add_custom_target(${BUILD_NAME} ALL DEPENDS ${WANTED_OUTPUT})
 add_dependencies(${BUILD_NAME} opsc)

@@ -11,7 +11,8 @@
 @IF NOT EXIST %BOOTSTRAP_DIR% mkdir %BOOTSTRAP_DIR%
 @cd %BOOTSTRAP_DIR%
 cmake -DCMAKE_BUILD_TYPE=Bootstrap -DCMAKE_INSTALL_PREFIX=%INSTALL_PREFIX% -A x64 ..
-cmake --build . --target opsidls --config Debug
+cmake --build . --target ALL_BUILD --config Debug
+cmake -DBUILD_TYPE=Bootstrap -DCMAKE_INSTALL_PREFIX=%INSTALL_PREFIX% -P cmake_install.cmake
 @popd
 
 @rem build and install Debug

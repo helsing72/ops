@@ -24,6 +24,7 @@ endif()
 # add the source
 add_subdirectory(source)
 
+if(NOT CMAKE_BUILD_TYPE MATCHES "Bootstrap")
 ################################################################################
 # Documentation
 
@@ -44,5 +45,5 @@ if(BUILD_DOCUMENTATION AND DOXYGEN)
     DESTINATION doc/ops
     COMPONENT ops_doc
   )
-
+endif()
 endif()

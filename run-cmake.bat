@@ -6,12 +6,13 @@
 @set BOOTSTRAP_DIR=%~dp0\build.bootstrap
 @set INSTALL_PREFIX=%~dp0\deploy
 
-@rem Perform the bootstrap process that generates source files neded by the other targets
+@rem Perform the bootstrap process that generates source files needed by the other targets
 @pushd %~dp0
 @IF NOT EXIST %BOOTSTRAP_DIR% mkdir %BOOTSTRAP_DIR%
 @cd %BOOTSTRAP_DIR%
 cmake -DCMAKE_BUILD_TYPE=Bootstrap -DCMAKE_INSTALL_PREFIX=%INSTALL_PREFIX% ..
-cmake --build . --target opsidls --config Debug
+cmake --build . --target ALL_BUILD --config Debug
+cmake -DBUILD_TYPE=Bootstrap -DCMAKE_INSTALL_PREFIX=%INSTALL_PREFIX% -P cmake_install.cmake
 @popd
 
 @rem build and install Debug
