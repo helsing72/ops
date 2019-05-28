@@ -11,11 +11,13 @@
 
 #include "Configuration.h"
 
-const std::string sVersion = "Version 2019-01-15";
+const std::string sVersion = "Version 2019-05-28";
 
 
+bool gErrorGiven = false;
 bool gWarningGiven = false;
 
+#define LOG_ERROR(message) { std::cout << message; gErrorGiven = true; } 
 #define LOG_WARN(message) { std::cout << message; gWarningGiven = true; } 
 #define LOG_INFO(message) { std::cout << "Info: " << message; }
 #define LOG_DEBUG(message) { if (bDebug) std::cout << message; } 
@@ -50,7 +52,7 @@ public:
 			// Some error control. 
 			s = config.getParseResult();
 			if (s != "") {
-				LOG_WARN( ">>> Error parsing file, Result: " << s << std::endl );
+				LOG_ERROR( ">>> Error parsing file, Result: " << s << std::endl );
 				return;
 			}
 
@@ -69,7 +71,7 @@ public:
 			verifyOnlyOneEntry(config, "root", "File");
 
 			if (!config.enter("root")) {
-				LOG_WARN( ">>> Missing <root>" << std::endl );
+				LOG_ERROR( ">>> Missing <root>" << std::endl );
 				return;
 			}
 
@@ -84,11 +86,11 @@ public:
 			verifyOnlyOneEntry(config, "ops_config", "<root>");
 
 			if (!config.enter("ops_config")) {
-				LOG_WARN( ">>> Missing <ops_config ...>" << std::endl );
+				LOG_ERROR( ">>> Missing <ops_config ...>" << std::endl );
 				return;
 			}
 			if (config.getAttribute("type") != "DefaultOPSConfigImpl") {
-				LOG_WARN( ">>> Unknown <ops_config type=" << config.getAttribute("type") << "> " << std::endl );
+				LOG_ERROR( ">>> Unknown <ops_config type=" << config.getAttribute("type") << "> " << std::endl );
 			}
 
 			// Check for unknown attributes
@@ -105,7 +107,7 @@ public:
 			verifyOnlyOneEntry(config, "domains", "<ops_config>");
 
 			if (!config.enter("domains")) {
-				LOG_WARN( ">>> Missing <domains>" << std::endl );
+				LOG_ERROR( ">>> Missing <domains>" << std::endl );
 				return;
 			}
 
@@ -125,8 +127,9 @@ public:
 				}
 			}
 		}
-		catch (...)
+		catch (std::exception& e)
 		{
+			LOG_ERROR( ">>> ERROR: Exception: " << e.what() << std::endl );
 		}
 		LOG_DEBUG("Total # domains: " << iNumDomains << std::endl);
 
@@ -198,6 +201,38 @@ public:
 	{
 		std::vector<std::string> known = { "" };
 		CheckForUnknownAttributes(config, known, msg);
+	}
+
+	void verifyMCAddress(std::string address, std::string msg)
+	{
+		// check that domainaddress is a MC address
+		if (!ops::isValidMCAddress(address)) {
+			LOG_ERROR(">>> Invalid MC address '" << address << "' detected " << msg << std::endl);
+		}
+	}
+
+	void verifyValidAddress(std::string address, std::string linkType, std::string msg)
+	{
+		if (address == "") return;
+		if ((linkType == "multicast") || (linkType == "")) {
+			verifyMCAddress(address, msg);
+		}
+		else if ((linkType == "udp") || (linkType == "tcp")) {
+			// subscriber address or tcp server address
+			if (!ops::isValidNodeAddress(address)) {
+				LOG_ERROR(">>> Invalid Node address '" << address << "' detected " << msg << std::endl);
+			}
+		}
+	}
+
+	void verifyLocalInterface(std::string localIf, std::string msg)
+	{
+		ops::IOService* ioServ = ops::IOService::create();
+		ops::Address_T subnetIf = ops::doSubnetTranslation(localIf, ioServ);
+		LOG_INFO(msg + ": localInterface " << localIf << " --> " << subnetIf << std::endl);
+		if (!ops::isValidNodeAddress(subnetIf)) {
+			LOG_ERROR(">>> Invalid Node address '" << subnetIf << "' extracted from localInterface '" << localIf << "'" << std::endl);
+		}
 	}
 
 	bool CheckExist(std::string name, std::vector<std::string>& vect)
@@ -291,7 +326,8 @@ public:
 			LOG_WARN( ">>> Missing <domainAddress> for domain: " << domainName << std::endl );
 		}
 
-		///TODO check that domainaddress is a MC address
+		// check that domainaddress is a MC address
+		verifyMCAddress(domainAddress, "for domain: " + domainName);
 
 		// metaDataMcPort, optional but necessary if UDP transports are used.
 		// If not set to 0, then DomainAddress::metaDataMcPort should be unique
@@ -319,9 +355,7 @@ public:
 		verifyOnlyOneEntry(config, "localInterface", "<domains> <element> section for domainID '" + domainName + "'");
 		std::string localIf = config.getString("localInterface");
 		if (localIf.size() > 0) {
-			ops::IOService* ioServ = ops::IOService::create();
-			ops::Address_T subnetIf = ops::doSubnetTranslation(localIf, ioServ);
-			LOG_INFO("Domain '" << domainName << "': localInterface " << localIf << " --> " << subnetIf << std::endl);
+			verifyLocalInterface(localIf, "Domain '" + domainName + "'");
 		}
 
 		verifyOnlyOneEntry(config, "timeToLive", "<domains> <element> section for domainID '" + domainName + "'");
@@ -478,13 +512,12 @@ public:
 				}
 			}
 		}
+		verifyValidAddress(address, linkType, "for channel '" + channelName + "' in domain '" + domainName + "'");
 
 		verifyOnlyOneEntry(config, "localInterface", "<channels> <element> section in domain: " + domainName + " with name: " + channelName);
 		std::string localIf = config.getString("localInterface");
 		if (localIf.size() > 0) {
-			ops::IOService* ioServ = ops::IOService::create();
-			ops::Address_T subnetIf = ops::doSubnetTranslation(localIf, ioServ);
-			LOG_INFO("Domain '" << domainName << "', Channel '" << channelName << "': localInterface " << localIf << " --> " << subnetIf << std::endl);
+			verifyLocalInterface(localIf, "Domain '" + domainName + "', Channel '" + channelName + "'");
 		}
 
 		verifyOnlyOneEntry(config, "timeToLive", "<channels> <element> section in domain: " + domainName + " with name: " + channelName);
@@ -663,6 +696,7 @@ public:
 				}
 			}
 		}
+		verifyValidAddress(address, linkType, "for topic '" + topicName + "' in domain '" + domainName + "'");
 
 		// inSocketBufferSize optional
 		// outSocketBufferSize optional
@@ -735,11 +769,13 @@ int main(int argc, char* argv[])
 
 		CVerifyOPSConfig verify(infile, debug);
 
-		if (!gWarningGiven) std::cout << "Check OK  " << std::endl;
+		if ((!gErrorGiven) && (!gWarningGiven)) std::cout << "Check OK  " << std::endl;
 
 		std::cout << std::endl;
 	}
 
+	if (gErrorGiven) return 10;
+	if (gWarningGiven) return 1;
 	return 0;
 }
 
