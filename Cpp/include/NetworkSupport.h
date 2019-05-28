@@ -1,6 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -28,6 +29,7 @@ namespace ops
 	extern uint32_t IPString2Addr(Address_T addr);
 	extern Address_T IPAddr2String(uint32_t addr);
 
+	extern bool isValidMCAddress(Address_T addr);
 	extern bool isValidNodeAddress(Address_T addr);
 	extern bool isMyNodeAddress(Address_T addr, IOService* ioServ);
 
