@@ -29,6 +29,7 @@ public class AdaCompiler extends opsc.Compiler
     final static String UNIT_PUB_REGEX = "__pubUnitName";
     final static String UNIT_SUB_REGEX = "__subUnitName";
     final static String IMPORTS_REGEX = "__importUnits";
+    final static String CLASS_COMMENT_REGEX = "__classComment";
     final static String CONSTRUCTOR_HEAD_REGEX = "__constructorHead";
     final static String CONSTRUCTOR_BODY_REGEX = "__constructorBody";
     final static String DESTRUCTOR_HEAD_REGEX = "__destructorHead";
@@ -75,15 +76,17 @@ public class AdaCompiler extends opsc.Compiler
             if (!_onlyGenTypeSupport) {
               for (IDLClass iDLClass : idlClasses) {
                 if (iDLClass.getType() == IDLClass.ENUM_TYPE) {
-                    compileEnum(iDLClass);
+                  compileEnum(iDLClass);
                 } else {
-                    compileDataClass(iDLClass);
+                  compileDataClass(iDLClass);
+                  if (!isOnlyDefinition(iDLClass)) {
                     if (!isTopLevel(iDLClass)) {
                       System.out.println("Info: Ada, skipping generation of publisher/subscriber for " + iDLClass.getClassName());
                     } else {
                       compileSubscriber(iDLClass);
                       compilePublisher(iDLClass);
                     }
+                  }
                 }
               }
             }
@@ -148,6 +151,7 @@ public class AdaCompiler extends opsc.Compiler
       //Replace regular expressions in the template file.
       templateText = templateText.replace(UNIT_REGEX, getUnitName(className));
       templateText = templateText.replace(CLASS_NAME_REGEX, className);
+      templateText = templateText.replace(CLASS_COMMENT_REGEX, getClassComment(idlClass));
       templateText = templateText.replace(PACKAGE_NAME_REGEX, packageName);
       templateText = templateText.replace(DECLARATIONS_REGEX, getEnumDeclarations(idlClass));
 
@@ -167,6 +171,23 @@ public class AdaCompiler extends opsc.Compiler
         compileEnumHelper(idlClass, className, packageName, "adabodyenumtemplate.tpl", baseFileName + ".adb");
     }
 
+    private String getClassComment(IDLClass idlClass)
+    {
+        String ret = "";
+        if (idlClass.getComment() != null) {
+            if (!idlClass.getComment().equals("")) {
+                String comment = idlClass.getComment();
+                int idx;
+                while ((idx = comment.indexOf('\n')) >= 0) {
+                    ret += tab(1) + "--- " + comment.substring(0,idx).replace("/*", "").replace("*/", "").replace("\r", "") + endl();
+                    comment = comment.substring(idx+1);
+                }
+                ret += tab(1) + "--- " + comment.replace("/*", "").replace("*/", "") + endl();
+            }
+        }
+        return ret;
+    }
+
     public void compileDataClass(IDLClass idlClass) throws IOException
     {
         String className = idlClass.getClassName();
@@ -184,7 +205,12 @@ public class AdaCompiler extends opsc.Compiler
         String packageFilePart = packageName.replace(".", "/");
         setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + getUnitName(className).replace(".", "-") + ".ads");
 
-        java.io.InputStream stream = findTemplateFile("adaspectemplate.tpl");
+        java.io.InputStream stream;
+        if (isOnlyDefinition(idlClass)) {
+          stream = findTemplateFile("adaspectemplatebare.tpl");
+        } else {
+          stream = findTemplateFile("adaspectemplate.tpl");
+        }
         setTemplateTextFromResource(stream);
 
         //Get the template file as a String
@@ -194,6 +220,7 @@ public class AdaCompiler extends opsc.Compiler
         templateText = templateText.replace(UNIT_REGEX, getUnitName(className));
         templateText = templateText.replace(IMPORTS_REGEX, getImports(idlClass));
         templateText = templateText.replace(CLASS_NAME_REGEX, className);
+        templateText = templateText.replace(CLASS_COMMENT_REGEX, getClassComment(idlClass));
         templateText = templateText.replace(BASE_CLASS_NAME_REGEX, baseClassName);
         templateText = templateText.replace(PACKAGE_NAME_REGEX, packageName);
         templateText = templateText.replace(DECLARATIONS_REGEX, getDeclarations(idlClass));
@@ -202,6 +229,8 @@ public class AdaCompiler extends opsc.Compiler
         //Save the modified text to the output file.
         saveOutputText(templateText);
         createdFiles += "\"" + getOutputFileName() + "\"\n";
+
+        if (isOnlyDefinition(idlClass)) return;
 
         setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + getUnitName(className).replace(".", "-") + ".adb");
 
@@ -266,6 +295,8 @@ public class AdaCompiler extends opsc.Compiler
         String includes = "";
 
         for (IDLClass iDLClass : idlClasses) {
+            if (isOnlyDefinition(iDLClass)) continue;
+
             createBodyText += tab(2) + "if types = \"" + iDLClass.getPackageName() + "." + iDLClass.getClassName() + "\" then" + endl();
             createBodyText += tab(3) +   "return Serializable_Class_At(" + getUnitName(iDLClass.getClassName()) + ".Create);" + endl();
             createBodyText += tab(2) + "end if;" + endl();
@@ -551,7 +582,7 @@ public class AdaCompiler extends opsc.Compiler
                         } else {
                             ret += tab(pos) + "Dispose(" + className + "(obj.all)." + fieldName + ");" + endl();
                             ret += tab(pos) + "if Self." + fieldName + " /= null then" + endl();
-                            ret += tab(pos+1) + className + "(obj.all)." + fieldName + " := new " + elementType(field.getType()) + "_Arr'(Self." + fieldName + ".all);" + endl();
+                            ret += tab(pos+1) + className + "(obj.all)." + fieldName + " := new " + elementType(getLastPart(field.getType())) + "_Arr'(Self." + fieldName + ".all);" + endl();
                             ret += tab(pos) + "end if;" + endl();
                         }
                     }
@@ -592,6 +623,10 @@ public class AdaCompiler extends opsc.Compiler
                 typesToInclude.put(unit, unit);
             }
         }
+        for (String s : idlClass.getImports()) {
+            String unit = getUnitName(s);
+            typesToInclude.put(unit, unit);
+        }
         for (String includeType : typesToInclude.values()) {
             ret += tab(1) + includeType + "," + endl();
         }
@@ -630,10 +665,8 @@ public class AdaCompiler extends opsc.Compiler
       if (fieldType.equals("float"))     return "0.0";
       if (field.isEnumType()) {
         //Set first enum value as init value
-        for (IDLEnumType et : idlClass.getEnumTypes()) {
-          if (et.getName().equals(fieldType)) {
-            return et.getEnumNames().get(0);
-          }
+        if (field.getValue().length() > 0) {
+            return field.getValue();
         }
       }
       return "0";

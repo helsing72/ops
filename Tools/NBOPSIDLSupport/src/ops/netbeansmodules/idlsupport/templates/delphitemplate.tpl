@@ -13,6 +13,7 @@ __importUnits
   uOps.ArchiverInOut;
 
 type
+__classComment
   __className = class(__baseClassName)
   public
     ///-----------------------------------------------------------------------

@@ -25,46 +25,59 @@ if(CMAKE_BUILD_TYPE MATCHES "Bootstrap")
 
   set(TMPL_PATH NBOPSIDLSupport/src/ops/netbeansmodules/idlsupport/templates)
   set(OPS_TEMPLATE_FILES
-    ${TMPL_PATH}/adaspectemplate.tpl
-    ${TMPL_PATH}/adabodytemplate.tpl
-    ${TMPL_PATH}/adaspecenumtemplate.tpl
     ${TMPL_PATH}/adabodyenumtemplate.tpl
-    ${TMPL_PATH}/adaspecpublishertemplate.tpl
     ${TMPL_PATH}/adabodypublishertemplate.tpl
-    ${TMPL_PATH}/adaspecsubscribertemplate.tpl
     ${TMPL_PATH}/adabodysubscribertemplate.tpl
-    ${TMPL_PATH}/adaspectypefactorytemplate.tpl
+    ${TMPL_PATH}/adabodytemplate.tpl
     ${TMPL_PATH}/adabodytypefactorytemplate.tpl
     ${TMPL_PATH}/adaprojectfiletemplate.tpl
+    ${TMPL_PATH}/adaspecenumtemplate.tpl
+    ${TMPL_PATH}/adaspecpublishertemplate.tpl
+    ${TMPL_PATH}/adaspecsubscribertemplate.tpl
+    ${TMPL_PATH}/adaspectemplate.tpl
+    ${TMPL_PATH}/adaspectemplatebare.tpl
+    ${TMPL_PATH}/adaspectypefactorytemplate.tpl
+
     ${TMPL_PATH}/cppenumtemplate.tpl
     ${TMPL_PATH}/cpppublishertemplate.tpl
     ${TMPL_PATH}/cppsubscribertemplate.tpl
     ${TMPL_PATH}/cpptemplate.tpl
+    ${TMPL_PATH}/cpptemplatebare.tpl
     ${TMPL_PATH}/cpptypefactorytemplate.tpl
+
     ${TMPL_PATH}/csenumtemplate.tpl
     ${TMPL_PATH}/cspublishertemplate.tpl
     ${TMPL_PATH}/cssubscribertemplate.tpl
     ${TMPL_PATH}/cstemplate.tpl
+    ${TMPL_PATH}/cstemplatebare.tpl
     ${TMPL_PATH}/cstypefactorytemplate.tpl
+
     ${TMPL_PATH}/debugproj.tpl
+
     ${TMPL_PATH}/delphienumtemplate.tpl
     ${TMPL_PATH}/delphitemplate.tpl
+    ${TMPL_PATH}/delphitemplatebare.tpl
     ${TMPL_PATH}/delphitypefactorytemplate.tpl
+
     ${TMPL_PATH}/javaconfig.tpl
     ${TMPL_PATH}/javaenumtemplate.tpl
     ${TMPL_PATH}/javapublishertemplate.tpl
     ${TMPL_PATH}/javasubscribertemplate.tpl
     ${TMPL_PATH}/javatemplate.tpl
+    ${TMPL_PATH}/javatemplatebare.tpl
     ${TMPL_PATH}/javatypefactorytemplate.tpl
+
+    ${TMPL_PATH}/pythonclasstemplate.tpl
+    ${TMPL_PATH}/pythonclasstemplatebare.tpl
+    ${TMPL_PATH}/pythonenumtemplate.tpl
+    ${TMPL_PATH}/pythonpackagetemplate.tpl
+    ${TMPL_PATH}/pythontypefactorytemplate.tpl
+
     ${TMPL_PATH}/vs_pub_cpp.tpl
     ${TMPL_PATH}/vs_pub_proj.tpl
     ${TMPL_PATH}/vs_sln.tpl
     ${TMPL_PATH}/vs_sub_cpp.tpl
     ${TMPL_PATH}/vs_sub_proj.tpl
-    ${TMPL_PATH}/pythonclasstemplate.tpl
-    ${TMPL_PATH}/pythonenumtemplate.tpl
-    ${TMPL_PATH}/pythonpackagetemplate.tpl
-    ${TMPL_PATH}/pythontypefactorytemplate.tpl
   )
 
   source_group("Template Files" FILES ${OPS_TEMPLATE_FILES})

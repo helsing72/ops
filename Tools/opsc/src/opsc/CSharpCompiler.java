@@ -31,6 +31,7 @@ public class CSharpCompiler extends opsc.Compiler
     final static String SERIALIZE_REGEX = "__serialize";
     final static String DESERIALIZE_REGEX = "__deserialize";
     final static String CLONE_BODY_REGEX = "__cloneBody";
+    final static String CLASS_COMMENT_REGEX = "__classComment";
     final static String SIZE_REGEX = "__size";
     final static String CS_DIR = "CSharp";
     private String projectDirectory;
@@ -105,6 +106,23 @@ public class CSharpCompiler extends opsc.Compiler
         createdFiles += "\"" + getOutputFileName() + "\"\n";
     }
 
+    private String getClassComment(IDLClass idlClass)
+    {
+        String ret = "";
+        if (idlClass.getComment() != null) {
+            if (!idlClass.getComment().equals("")) {
+                String comment = idlClass.getComment();
+                int idx;
+                while ((idx = comment.indexOf('\n')) >= 0) {
+                    ret += tab(1) + "///" + comment.substring(0,idx).replace("/*", "").replace("*/", "").replace("\r", "") + endl();
+                    comment = comment.substring(idx+1);
+                }
+                ret += tab(1) + "///" + comment.replace("/*", "").replace("*/", "") + endl();
+            }
+        }
+        return ret;
+    }
+
     public void compileDataClass(IDLClass idlClass) throws IOException
     {
         String className = idlClass.getClassName();
@@ -123,7 +141,12 @@ public class CSharpCompiler extends opsc.Compiler
         //setOutputFileName(projectDirectory + CS_DIR + "/" + packageFilePart + "/" + className + ".cs");
         setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + className + ".cs");
 
-        java.io.InputStream stream = findTemplateFile("cstemplate.tpl");
+        java.io.InputStream stream;
+        if (isOnlyDefinition(idlClass)) {
+            stream = findTemplateFile("cstemplatebare.tpl");
+        } else {
+            stream = findTemplateFile("cstemplate.tpl");
+        }
         setTemplateTextFromResource(stream);
 
         //Get the template file as a String
@@ -131,6 +154,7 @@ public class CSharpCompiler extends opsc.Compiler
 
         //Replace regular expressions in the template file.
         templateText = templateText.replace(CLASS_NAME_REGEX, className);
+        templateText = templateText.replace(CLASS_COMMENT_REGEX, getClassComment(idlClass));
         templateText = templateText.replace(BASE_CLASS_NAME_REGEX, baseClassName);
         templateText = templateText.replace(PACKAGE_NAME_REGEX, packageName);
         templateText = templateText.replace(CONSTRUCTOR_BODY_REGEX, getConstructorBody(idlClass));
@@ -232,6 +256,8 @@ public class CSharpCompiler extends opsc.Compiler
 
         for (IDLClass iDLClass : idlClasses)
         {
+            if (isOnlyDefinition(iDLClass)) continue;
+
             createObjectBodyText += tab(3) + "if (type.Equals(\"" + iDLClass.getPackageName() + "." + iDLClass.getClassName() + "\"))" + endl();
             createObjectBodyText += tab(3) + "{" + endl();
             createObjectBodyText += tab(4) +      "return new " + iDLClass.getPackageName() + "." + iDLClass.getClassName() + "();" + endl();

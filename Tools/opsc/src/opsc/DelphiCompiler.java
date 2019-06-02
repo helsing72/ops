@@ -27,6 +27,7 @@ public class DelphiCompiler extends opsc.Compiler
 {
     final static String UNIT_REGEX = "__unitName";
     final static String IMPORTS_REGEX = "__importUnits";
+    final static String CLASS_COMMENT_REGEX = "__classComment";
     final static String CONSTRUCTOR_HEAD_REGEX = "__constructorHead";
     final static String CONSTRUCTOR_BODY_REGEX = "__constructorBody";
     final static String DESTRUCTOR_HEAD_REGEX = "__destructorHead";
@@ -82,7 +83,7 @@ public class DelphiCompiler extends opsc.Compiler
 
     protected void compileEnum(IDLClass idlClass) throws IOException
     {
-        String className = idlClass.getClassName();
+        String className = getClassName(idlClass);
 
         String packageName = idlClass.getPackageName();
         String packageFilePart = packageName.replace(".", "/");
@@ -104,9 +105,26 @@ public class DelphiCompiler extends opsc.Compiler
         createdFiles += "\"" + getOutputFileName() + "\"\n";
     }
 
+    private String getClassComment(IDLClass idlClass)
+    {
+        String ret = "";
+        if (idlClass.getComment() != null) {
+            if (!idlClass.getComment().equals("")) {
+                String comment = idlClass.getComment();
+                int idx;
+                while ((idx = comment.indexOf('\n')) >= 0) {
+                    ret += tab(1) + "///" + comment.substring(0,idx).replace("/*", "").replace("*/", "").replace("\r", "") + endl();
+                    comment = comment.substring(idx+1);
+                }
+                ret += tab(1) + "///" + comment.replace("/*", "").replace("*/", "") + endl();
+            }
+        }
+        return ret;
+    }
+
     public void compileDataClass(IDLClass idlClass) throws IOException
     {
-        String className = idlClass.getClassName();
+        String className = getClassName(idlClass);
         String baseClassName = "TOPSObject";
         if (idlClass.getBaseClassName() != null) {
           baseClassName = idlClass.getBaseClassName();
@@ -122,7 +140,12 @@ public class DelphiCompiler extends opsc.Compiler
         String packageFilePart = packageName.replace(".", "/");
         setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + packageName + "." + className + ".pas");
 
-        java.io.InputStream stream = findTemplateFile("delphitemplate.tpl");
+        java.io.InputStream stream;
+        if (isOnlyDefinition(idlClass)) {
+          stream = findTemplateFile("delphitemplatebare.tpl");
+        } else {
+          stream = findTemplateFile("delphitemplate.tpl");
+        }
         setTemplateTextFromResource(stream);
 
         //Get the template file as a String
@@ -131,6 +154,7 @@ public class DelphiCompiler extends opsc.Compiler
         //Replace regular expressions in the template file.
         templateText = templateText.replace(IMPORTS_REGEX, getImports(idlClass));
         templateText = templateText.replace(CLASS_NAME_REGEX, className);
+        templateText = templateText.replace(CLASS_COMMENT_REGEX, getClassComment(idlClass));
         templateText = templateText.replace(BASE_CLASS_NAME_REGEX, baseClassName);
         templateText = templateText.replace(PACKAGE_NAME_REGEX, packageName);
         templateText = templateText.replace(CONSTRUCTOR_HEAD_REGEX, getConstructorHead(idlClass));
@@ -179,7 +203,9 @@ public class DelphiCompiler extends opsc.Compiler
         String includes = "";
 
         for (IDLClass iDLClass : idlClasses) {
-            createBodyText += tab(1) + "if types = '" + iDLClass.getPackageName() + "." + iDLClass.getClassName() + "' then begin" + endl();
+            if (isOnlyDefinition(iDLClass)) continue;
+
+            createBodyText += tab(1) + "if types = '" + iDLClass.getPackageName() + "." + getClassName(iDLClass) + "' then begin" + endl();
             createBodyText += tab(2) + "Result := " + getFullyQualifiedClassName(iDLClass.getClassName()) + ".Create;" + endl();
             createBodyText += tab(2) + "Exit;" + endl();
             createBodyText += tab(1) + "end;" + endl();
@@ -198,11 +224,20 @@ public class DelphiCompiler extends opsc.Compiler
       }
     }
 
-    protected String getFieldName(IDLField field)
+    protected String checkReservedName(String name)
     {
-        String name = field.getName();
         if (isReservedName(name)) return name + "_";
         return name;
+    }
+
+    protected String getClassName(IDLClass idlclass)
+    {
+        return checkReservedName(idlclass.getClassName());
+    }
+
+    protected String getFieldName(IDLField field)
+    {
+        return checkReservedName(field.getName());
     }
 
     private String elementType(String type)
@@ -225,7 +260,7 @@ public class DelphiCompiler extends opsc.Compiler
       String s = getLastPart(className);
       for (IDLClass cl : this._idlClasses) {
         if (cl.getClassName().equals(s)) {
-          return cl.getPackageName() + "." + cl.getClassName();
+          return cl.getPackageName() + "." + getClassName(cl);
         }
       }
       // Didn't find class in list so it is from another "project"
@@ -237,7 +272,7 @@ public class DelphiCompiler extends opsc.Compiler
     protected String getFullyQualifiedClassName(String className)
     {
       // We return the unitname.classname
-      return getUnitName(className) + "." + getLastPart(className);
+      return getUnitName(className) + "." + checkReservedName(getLastPart(className));
     }
 
     protected String getConstructorHead(IDLClass idlClass)
@@ -379,6 +414,10 @@ public class DelphiCompiler extends opsc.Compiler
                 typesToInclude.put(unit, unit);
             }
         }
+        for (String s : idlClass.getImports()) {
+            String unit = getUnitName(s);
+            typesToInclude.put(unit, unit);
+        }
         for (String includeType : typesToInclude.values()) {
             ret += tab(1) + includeType + "," + endl();
         }
@@ -435,13 +474,13 @@ public class DelphiCompiler extends opsc.Compiler
                 }
                 ret += tab(2) + "///" + comment.replace("/*", "").replace("*/", "") + endl();
             }
-            String fieldType = getLastPart(field.getType());
+            String fieldType = field.getType(); ///TEST getLastPart(field.getType());
             if (field.isArray()) {
                 ret += tab(2) + getDeclareVector(field);
             } else if(field.getType().equals("string")) {
                 ret += tab(2) + fieldName + " : " + languageType(fieldType) + ";" + endl();
             } else if(field.isIdlType()) {
-                ret += tab(2) + fieldName + " : " + languageType(fieldType) + ";" + endl();
+                ret += tab(2) + fieldName + " : " + languageType(getFullyQualifiedClassName(fieldType)) + ";" + endl();
             } else {
                 ret += tab(2) + fieldName + " : " + languageType(fieldType) + ";" + endl();
             }

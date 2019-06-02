@@ -184,6 +184,7 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
     protected boolean isTopLevel(IDLClass idlClass)
     {
         String s = idlClass.getDirective();
+        if (s == null) return false;
         int idx = s.indexOf("toplevel");
         if (idx != -1) {
             int idx2 = s.indexOf(",", idx);
@@ -198,6 +199,20 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
             if (sub.toLowerCase().indexOf("false") != -1) return false;
         }
         return true;  //default
+    }
+
+    // Returns true if class is an onlydefinition class
+    protected boolean isOnlyDefinition(IDLClass idlClass)
+    {
+        String s = idlClass.getDirective();
+        if (s == null) return false;
+        //System.out.println("Info: isOnlyDefinition(), class: '" + idlClass.getClassName() + "', getDirective() = " + s);
+        int idx = s.indexOf("onlydefinition");
+        if (idx != -1) {
+            //System.out.println("Info: isOnlyDefinition(), " + idlClass.getClassName());
+            return true;
+        }
+        return false;  //default
     }
 
 }

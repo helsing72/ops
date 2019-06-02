@@ -29,6 +29,7 @@ public class IDLClass
     private String directive;
     private ArrayList<IDLField> fields;
     private ArrayList<IDLEnumType> enumTypes;    // Used for enum types defined in a class
+    private ArrayList<String> imports = new ArrayList<String>();
 
     // Used for the depracated enum on IDL-level, ie. when type == ENUM_TYPE
     private ArrayList<String> enumNames = new ArrayList<String>();
@@ -57,6 +58,10 @@ public class IDLClass
     public void addIDLEnumType(IDLEnumType et)
     {
         enumTypes.add(et);
+    }
+    public void addImport(String s)
+    {
+        imports.add(s);
     }
 
     // ------------------------
@@ -117,6 +122,16 @@ public class IDLClass
     public void setEnumTypes(ArrayList<IDLEnumType> enumTypes)
     {
         this.enumTypes = enumTypes;
+    }
+
+    // ------------------------
+    public ArrayList<String> getImports()
+    {
+        return imports;
+    }
+    public void setImports(ArrayList<String> imports)
+    {
+        this.imports = imports;
     }
 
     // ------------------------
