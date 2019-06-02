@@ -10,7 +10,8 @@ class ChildData extends BaseData
     Order[] enuVec;
     Order[6] enuFixArr;
 
-    enum Command {START, STOP, PAUSE, CONTINUE};
+    Definitions.Command cmd;
+    Definitions.Command[2] cmds;
 
     /* Test of constants */
     const byte c_b = 8;

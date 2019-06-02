@@ -33,6 +33,7 @@ use Ops_Pa.ArchiverInOut_Pa;
 use Ops_Pa.ArchiverInOut_Pa.ArchiverOut_Pa;
 
 with Ops_Pa.OpsObject_Pa;
+with Ops_Pa.OpsObject_Pa.TestAll_Definitions;
 with Ops_Pa.OpsObject_Pa.TestAll_BaseData;
 with Ops_Pa.OpsObject_Pa.TestAll_TestData;
 with Ops_Pa.OpsObject_Pa.TestAll_ChildData;
@@ -40,6 +41,7 @@ with Ops_Pa.OpsObject_Pa.TestAll_Fruit;
 with Ops_Pa.SerializableFactory_Pa.TestAll_TestAllTypeFactory;
 
 use Ops_Pa.OpsObject_Pa;
+use Ops_Pa.OpsObject_Pa.TestAll_Definitions;
 use Ops_Pa.OpsObject_Pa.TestAll_BaseData;
 use Ops_Pa.OpsObject_Pa.TestAll_TestData;
 use Ops_Pa.OpsObject_Pa.TestAll_ChildData;
@@ -93,6 +95,9 @@ package body VerifySerDes_Pa is
   begin
     Put_Line(str);
   end;
+
+  EnumTest : TestAll_Definitions.Command := TestAll_Definitions.PAUSE;
+
 
   -- ---------------------
 
@@ -158,6 +163,7 @@ package body VerifySerDes_Pa is
 
   procedure AssertEQ is new AssertIntEQ(Ops_Pa.OpsObject_Pa.TestAll_Fruit.enum);
   procedure AssertEQ is new AssertIntEQ(Ops_Pa.OpsObject_Pa.TestAll_ChildData.Order);
+  procedure AssertEQ is new AssertIntEQ(Ops_Pa.OpsObject_Pa.TestAll_Definitions.Command);
 
   -- ---------------------
 
@@ -252,6 +258,10 @@ package body VerifySerDes_Pa is
   procedure AssertArrEQ is new AssertArrayEQ0(Ops_Pa.OpsObject_Pa.TestAll_ChildData.Order,
                                               Ops_Pa.OpsObject_Pa.TestAll_ChildData.Order_Arr,
                                               Ops_Pa.OpsObject_Pa.TestAll_ChildData.Order_Arr_At,
+                                              AssertEQ);
+  procedure AssertArrEQ is new AssertArrayEQ0(Ops_Pa.OpsObject_Pa.TestAll_Definitions.Command,
+                                              Ops_Pa.OpsObject_Pa.TestAll_Definitions.Command_Arr,
+                                              Ops_Pa.OpsObject_Pa.TestAll_Definitions.Command_Arr_At,
                                               AssertEQ);
 
   generic
@@ -513,6 +523,8 @@ package body VerifySerDes_Pa is
     AssertEQ(data.enu1, ABC);
     AssertPtrEQ(data.enuVec, null);
     for i in data.enuFixArr'Range loop AssertEQ(data.enuFixArr(i), ABC); end loop;
+    AssertEQ(data.cmd, START);
+    for i in data.cmds'Range loop AssertEQ(data.cmds(i), START); end loop;
 
     -- core types
     dummy := AssertEQ(data.bo, false, "data.bo");
@@ -625,6 +637,8 @@ package body VerifySerDes_Pa is
     AssertEQ(data.enu1, exp.enu1);
     AssertArrEQ(data.enuVec, exp.enuVec);
     AssertArrEQ(data.enuFixArr, exp.enuFixArr);
+    AssertEQ(data.cmd, exp.cmd);
+    AssertArrEQ(data.cmds, exp.cmds);
 
     -- core types
     AssertEQ(data.bo, exp.bo, "data.bo");
@@ -756,6 +770,10 @@ package body VerifySerDes_Pa is
     data.enuFixArr(0) := DEF;
     data.enuFixArr(4) := JKL;
     data.enuFixArr(5) := DEF;
+
+    data.cmd := CONTINUE;
+    data.cmds(0) := PAUSE;
+    data.cmds(1) := STOP;
 
     -- core types
     data.bo := true;
@@ -1043,7 +1061,7 @@ package body VerifySerDes_Pa is
     Put_line("  GetSize()= " & UInt32'Image(FBuf.GetSize));
     ao.inout("data", Serializable_Class_At(cd1));
     Put_Line("  GetSize()= " & UInt32'Image(FBuf.GetSize));
-    AssertEQ(Int32(FBuf.GetSize), Int32(3194), "Serialized size error");
+    AssertEQ(Int32(FBuf.GetSize), Int32(3204), "Serialized size error");
     Log("Serialize finished");
 
 --      declare

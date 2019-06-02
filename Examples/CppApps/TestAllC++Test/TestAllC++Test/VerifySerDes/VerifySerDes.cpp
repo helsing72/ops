@@ -13,6 +13,10 @@
 #include <fstream>
 #include <signal.h>
 
+#include "TestAll/Definitions.h"
+TestAll::Definitions::Command cmd = TestAll::Definitions::Command::PAUSE;
+byte arr[TestAll::Definitions::const_b];
+
 //Include a publisher for the data type we want to publish, generated from our IDL project TestAll.
 #include "TestAll/ChildDataPublisher.h"
 #include "TestAll/ChildDataSubscriber.h"
@@ -33,6 +37,19 @@
 //TestAll::Fruit::MemoryPool TestAll::Fruit::_pool(50);
 //TestAll::TestData::MemoryPool TestAll::TestData::_pool(100);
 
+
+std::ostream& operator<<(std::ostream& os, TestAll::Definitions::Command c)
+{
+	switch (c)
+	{
+	case TestAll::Definitions::Command::CONTINUE: os << "CONTINUE"; break;
+	case TestAll::Definitions::Command::PAUSE: os << "PAUSE";       break;
+	case TestAll::Definitions::Command::START: os << "START";       break;
+	case TestAll::Definitions::Command::STOP: os << "STOP";         break;
+	default: os.setstate(std::ios_base::failbit);
+	}
+	return os;
+}
 
 std::ostream& operator<<(std::ostream& os, TestAll::ChildData::Order c)
 {
@@ -98,6 +115,8 @@ void checkEmpty(TestAll::ChildData& data)
 	AssertEQ<TestAll::ChildData::Order>(data.enu1, TestAll::ChildData::Order::ABC);
 	AssertEQ<size_t>(data.enuVec.size(), 0);
 	for (int i = 0; i < 6; i++) AssertEQ<TestAll::ChildData::Order>(data.enuFixArr[i], TestAll::ChildData::Order::ABC);
+	AssertEQ< TestAll::Definitions::Command>(data.cmd, TestAll::Definitions::Command::START);
+	for (int i = 0; i < 2; i++) AssertEQ<TestAll::Definitions::Command>(data.cmds[i], TestAll::Definitions::Command::START);
 
 	//  core types
 	AssertEQ<bool>(data.bo, false, "data.bo");
@@ -202,6 +221,8 @@ void checkObjects(TestAll::ChildData& data, TestAll::ChildData& exp)
 	AssertEQ<size_t>(data.enuVec.size(), exp.enuVec.size());
 	for (unsigned int i = 0; i < data.enuVec.size(); i++) AssertEQ<TestAll::ChildData::Order>(data.enuVec[i], exp.enuVec[i]);
 	for (int i = 0; i < 6; i++) AssertEQ<TestAll::ChildData::Order>(data.enuFixArr[i], exp.enuFixArr[i]);
+	AssertEQ< TestAll::Definitions::Command>(data.cmd, exp.cmd);
+	for (int i = 0; i < 2; i++) AssertEQ<TestAll::Definitions::Command>(data.cmds[i], exp.cmds[i]);
 
 	//  core types
 	AssertEQ<bool>(data.bo, exp.bo, "data.bo");
@@ -331,6 +352,10 @@ void fillChildData(TestAll::ChildData& data)
 	data.enuFixArr[0] = TestAll::ChildData::Order::DEF;
 	data.enuFixArr[4] = TestAll::ChildData::Order::JKL;
 	data.enuFixArr[5] = TestAll::ChildData::Order::DEF;
+
+	data.cmd = TestAll::Definitions::Command::CONTINUE;
+	data.cmds[0] = TestAll::Definitions::Command::PAUSE;
+	data.cmds[1] = TestAll::Definitions::Command::STOP;
 
 	//  core types
 	data.bo = true;
@@ -561,7 +586,7 @@ int main(int argc, const char* args[])
 		std::cout << "  GetSize()= " << buf.GetSize() << std::endl;
 		ao.inout("data", cd1);
 		std::cout << "  GetSize()= " << buf.GetSize() << std::endl;
-		AssertEQ(buf.GetSize(), 3194, "Serialized size error");
+		AssertEQ(buf.GetSize(), 3204, "Serialized size error");
 		std::cout << "Serialize finished" << std::endl;
 
 #if defined(DEBUG_OPSOBJECT_COUNTER)

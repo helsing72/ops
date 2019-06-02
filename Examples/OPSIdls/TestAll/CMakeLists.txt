@@ -4,6 +4,7 @@ set(CURRENT_SRCS
     opsproject/project.properties
     src/testall/BaseData.idl
     src/testall/ChildData.idl
+    src/testall/Definitions.idl
     src/testall/Fruit.idl
     src/testall/TestData.idl
     )

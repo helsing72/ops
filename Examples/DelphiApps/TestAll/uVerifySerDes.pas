@@ -12,8 +12,13 @@ implementation
 uses SysUtils, Windows,
      uOps.OPSObject,
      uOps.Participant,
+     uOps.MemoryMap,
+     uOps.ByteBuffer,
+     uOps.ArchiverInOut,
+     uOps.OpsArchiverOut,
      uOps.Topic,
      uOps.Error,
+     TestAll.Definitions,
      TestAll.TestAllTypeFactory,
      TestAll.ChildData,
      TestAll.TestData,
@@ -21,6 +26,7 @@ uses SysUtils, Windows,
 
 const
   ToStr : array[Boolean] of string = ('False', 'True');
+  EnumTest : Definitions.Command = Definitions.Command.PAUSE;
 
 var
   Logger : TLogger;
@@ -57,6 +63,11 @@ begin
 end;
 
 procedure AssertEQ(val, exp : ChildData.Order; str : string = ''); overload;
+begin
+  if val <> exp then Log('Failed: ' + str);
+end;
+
+procedure AssertEQ(val, exp : Definitions.Command; str : string = ''); overload;
 begin
   if val <> exp then Log('Failed: ' + str);
 end;
@@ -105,6 +116,8 @@ begin
 	AssertEQ(data.enu1, ChildData.Order.ABC);
 	AssertEQ(Length(data.enuVec), 0);
 	for i := 0 to 5 do AssertEQ(data.enuFixArr[i], ChildData.Order.ABC);
+	AssertEQ(data.cmd, Definitions.Command.START);
+	for i := 0 to 1 do AssertEQ(data.cmds[i], Definitions.Command.START);
 
 	//  core types
   AssertEQ(data.bo, false, 'data.bo');
@@ -215,6 +228,8 @@ begin
 	AssertEQ(Length(data.enuVec), Length(exp.enuVec));
 	for i := 0 to Length(data.enuVec)-1 do AssertEQ(data.enuVec[i], exp.enuVec[i]);
 	for i := 0 to 5 do AssertEQ(data.enuFixArr[i], exp.enuFixArr[i]);
+	AssertEQ(data.cmd, exp.cmd);
+	for i := 0 to 1 do AssertEQ(data.cmds[i], exp.cmds[i]);
 
 	//  core types
   AssertEQ(data.bo, exp.bo, 'data.bo');
@@ -342,6 +357,10 @@ begin
 	data.enuFixArr[0] := ChildData.Order.DEF;
 	data.enuFixArr[4] := ChildData.Order.JKL;
 	data.enuFixArr[5] := ChildData.Order.DEF;
+
+  data.cmd := Definitions.Command.CONTINUE;
+	data.cmds[0] := Definitions.Command.PAUSE;
+	data.cmds[1] := Definitions.Command.STOP;
 
 	//  core types
   data.bo := true;
@@ -506,6 +525,9 @@ var
   pub : ChildDataPublisher;
   Flag : Boolean;
   Limit : UInt64;
+  map : TMemoryMap;
+  buf : TByteBuffer;
+  ao : TOPSArchiverOut;
 begin
   OpsLogger := TStdOutLogger.Create;
   Logger := Log;
@@ -539,6 +561,16 @@ begin
 
 	Log('Finished');
 
+	Log('Serialize filled object');
+	map := TMemoryMap.Create(1, 65536);
+	buf := TByteBuffer.Create(map);
+	ao := TOPSArchiverOut.Create(buf);
+
+	Log('  GetSize()= ' + IntToStr(buf.GetSize()));
+  ao.inout('data', TSerializable(cd1));
+	Log('  GetSize()= ' + IntToStr(buf.GetSize()));
+  AssertEQ(buf.GetSize(), 3204, 'Serialized size error');
+	Log('Serialize finished');
 
   Log('Test publish/subscribe');
 
@@ -603,6 +635,10 @@ begin
   FreeAndNil(pub);
   FreeAndNil(sub);
   FreeAndNil(participant);
+
+	FreeAndNil(map);
+	FreeAndNil(buf);
+	FreeAndNil(ao);
 
   FreeAndNil(cd3);
   FreeAndNil(cd2);
