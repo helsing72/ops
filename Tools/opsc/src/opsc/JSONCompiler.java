@@ -239,7 +239,9 @@ public class JSONCompiler extends CompilerSupport
 
             }
             String ttype = makeType(field);
-            if (field.isEnumType()) ttype = thisClassName + "." + ttype;
+            if (field.isEnumType()) {
+              ttype = field.getFullyQualifiedType().replace("[]", "");
+            }
             res += "\"" + ttype + "\"";
 
             String comment = field.getComment();

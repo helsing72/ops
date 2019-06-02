@@ -26,6 +26,7 @@ public class IDLField
     private boolean _abstract;
     private int arraySize = 0;
     private int stringSize = 0;
+    private String fullyQualifiedType;
 
     /** Creates a new instance of IDLField */
     public IDLField(String name, String type, String comment, String value)
@@ -38,17 +39,14 @@ public class IDLField
     public IDLField(String name, String type, String comment)
     {
         this(name, type, comment, "");
-
     }
     public IDLField(String name, String type)
     {
         this(name, type, "", "");
-
     }
     public IDLField()
     {
         this(null, "", "", "");
-
     }
 
     public String getName()
@@ -85,6 +83,17 @@ public class IDLField
     public void setType(String type)
     {
         this.type = type;
+    }
+
+    public String getFullyQualifiedType()
+    {
+        if (fullyQualifiedType == null) return getType();
+        if (fullyQualifiedType.equals("")) return getType();
+        return fullyQualifiedType;
+    }
+    public void setFullyQualifiedType(String type)
+    {
+        this.fullyQualifiedType = type;
     }
 
     public String getComment()

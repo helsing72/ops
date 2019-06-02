@@ -23,6 +23,7 @@ import ops.protocol.OPSMessage;
 import ops.WriteByteBuffer;
 import ops.StaticManager;
 
+import TestAll.Definitions;
 import TestAll.BaseData;
 import TestAll.ChildData;
 import TestAll.ChildDataSubscriber;
@@ -39,6 +40,9 @@ public class testallmain implements ops.Listener<ops.Error> {
 
   private Participant participant = null;
   private boolean gTestFailed = false;
+
+  public Definitions.Command enumTest = Definitions.Command.PAUSE;
+
 
   public void OnLog(final String str) {
     System.out.println (str);
@@ -193,6 +197,10 @@ public class testallmain implements ops.Listener<ops.Error> {
       AssertCountEQ(data.enuVec, 0);
       if (AssertCountEQ(data.enuFixArr, 6)) {
           for (int i = 0; i < 6; i++) AssertEQ(data.enuFixArr.elementAt(i), ChildData.Order.ABC);
+      }
+      AssertEQ(data.cmd, Definitions.Command.START);
+      if (AssertCountEQ(data.cmds, 2)) {
+          for (int i = 0; i < 2; i++) AssertEQ(data.cmds.elementAt(i), Definitions.Command.START);
       }
 
       //  core types
@@ -353,6 +361,10 @@ public class testallmain implements ops.Listener<ops.Error> {
       if (AssertCountEQ(data.enuFixArr, exp.enuFixArr, 6, "enuFixArr")) {
           for (int i = 0; i < 6; i++) AssertEQ(data.enuFixArr.elementAt(i), exp.enuFixArr.elementAt(i), "enuFixArr");
       }
+      AssertEQ(data.cmd, exp.cmd);
+      if (AssertCountEQ(data.cmds, exp.cmds, 2)) {
+          for (int i = 0; i < 2; i++) AssertEQ(data.cmds.elementAt(i), exp.cmds.elementAt(i));
+      }
 
       //  core types
       AssertEQ(data.bo, exp.bo, "data.bo");
@@ -512,6 +524,10 @@ public class testallmain implements ops.Listener<ops.Error> {
       data.enuFixArr.set(0, ChildData.Order.DEF);
       data.enuFixArr.set(4, ChildData.Order.JKL);
       data.enuFixArr.set(5, ChildData.Order.DEF);
+
+      data.cmd = Definitions.Command.CONTINUE;
+    	data.cmds.set(0, Definitions.Command.PAUSE);
+    	data.cmds.set(1, Definitions.Command.STOP);
 
       //  core types
       data.bo = true;
@@ -674,7 +690,7 @@ public class testallmain implements ops.Listener<ops.Error> {
           ex.printStackTrace();
       }
       OnLog("  Position()= " + buf.position());
-      AssertEQ(buf.position(), 3194, "Serialization size error");
+      AssertEQ(buf.position(), 3204, "Serialization size error");
       OnLog("Serialize finished");
 
 

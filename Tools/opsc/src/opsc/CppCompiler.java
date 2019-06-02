@@ -8,7 +8,7 @@
  *   Tools/NBOPSIDLSupport/src/ops/netbeansmodules/idlsupport/CppCompiler.java
  * It is a complete copy of the said file but with dependencies to NB
  * completely removed. I have also added support for runtime configuration
- * of where output should ge and where templates can be found
+ * of where output should go and where templates can be found
  *
  ***************************************************************************
  */
@@ -78,11 +78,13 @@ public class CppCompiler extends opsc.Compiler
                 compileEnum(idlClass);
             } else {
                 compileDataClass(idlClass);
-                if (!isTopLevel(idlClass)) {
-                    System.out.println("Info: Cpp, skipping generation of publisher/subscriber for " + idlClass.getClassName());
-                } else {
-                    compileSubscriber(idlClass);
-                    compilePublisher(idlClass);
+                if (!isOnlyDefinition(idlClass)) {
+                    if (!isTopLevel(idlClass)) {
+                        System.out.println("Info: Cpp, skipping generation of publisher/subscriber for " + idlClass.getClassName());
+                    } else {
+                        compileSubscriber(idlClass);
+                        compilePublisher(idlClass);
+                    }
                 }
             }
         } catch (IOException ioe) {
@@ -110,7 +112,7 @@ public class CppCompiler extends opsc.Compiler
 
     public void compileDataClass(IDLClass idlClass) throws IOException
     {
-        String className = idlClass.getClassName();
+        String className = getClassName(idlClass);
         String baseClassName = "ops::OPSObject";
         if (idlClass.getBaseClassName() != null) {
             baseClassName = idlClass.getBaseClassName();
@@ -120,7 +122,12 @@ public class CppCompiler extends opsc.Compiler
         String packageFilePart = packageName.replace(".", "/");
         setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + className + ".h");
 
-        java.io.InputStream stream = findTemplateFile("cpptemplate.tpl");
+        java.io.InputStream stream;
+        if (isOnlyDefinition(idlClass)) {
+            stream = findTemplateFile("cpptemplatebare.tpl");
+        } else {
+            stream = findTemplateFile("cpptemplate.tpl");
+        }
         setTemplateTextFromResource(stream);
 
         //Get the template file as a String
@@ -152,7 +159,7 @@ public class CppCompiler extends opsc.Compiler
 
     protected void compileEnum(IDLClass idlClass) throws IOException
     {
-        String className = idlClass.getClassName();
+        String className = getClassName(idlClass);
 
         String packageName = idlClass.getPackageName();
         String packageFilePart = packageName.replace(".", "/");
@@ -183,7 +190,7 @@ public class CppCompiler extends opsc.Compiler
     {
         String ret = "";
         if (_genMemoryPool) {
-            ret += tab(1) + "typedef ops::memory_pools::memory_pool_nd<" + idlClass.getClassName() + "> memory_pool_type;" + endl();
+            ret += tab(1) + "typedef ops::memory_pools::memory_pool_nd<" + getClassName(idlClass) + "> memory_pool_type;" + endl();
             ret += endl();
             ret += tab(1) + "void* operator new(size_t size) { return _pool.getEntry(size); }" + endl();
           	ret += tab(1) + "void operator delete(void *p) { _pool.returnEntry(p); }" + endl();
@@ -192,7 +199,7 @@ public class CppCompiler extends opsc.Compiler
           	ret += tab(1) + "static memory_pool_type _pool;" + endl();
             ret += endl();
             ret += tab(1) + "/// To define the pool, you need to add the following to a cpp-file:" + endl();
-            ret += tab(1) + "///   " + idlClass.getClassName() + "::memory_pool_type " + idlClass.getClassName() + "::_pool(<max_number_of_objects>);";
+            ret += tab(1) + "///   " + getClassName(idlClass) + "::memory_pool_type " + getClassName(idlClass) + "::_pool(<max_number_of_objects>);";
         }
         return ret;
     }
@@ -212,16 +219,25 @@ public class CppCompiler extends opsc.Compiler
         return "CppCompiler";
     }
 
-    protected String getFieldName(IDLField field)
+    protected String checkReservedName(String name)
     {
-        String name = field.getName();
         if (isReservedName(name)) return name + "_";
         return name;
     }
 
+    protected String getClassName(IDLClass idlclass)
+    {
+        return checkReservedName(idlclass.getClassName());
+    }
+
+    protected String getFieldName(IDLField field)
+    {
+        return checkReservedName(field.getName());
+    }
+
     protected void compilePublisher(IDLClass idlClass) throws IOException
     {
-        String className = idlClass.getClassName();
+        String className = getClassName(idlClass);
         String packageName = idlClass.getPackageName();
 
         String packageFilePart = packageName.replace(".", "/");
@@ -248,7 +264,7 @@ public class CppCompiler extends opsc.Compiler
 
     protected void compileSubscriber(IDLClass idlClass) throws IOException
     {
-        String className = idlClass.getClassName();
+        String className = getClassName(idlClass);
         String packageName = idlClass.getPackageName();
 
         String packageFilePart = packageName.replace(".", "/");
@@ -301,12 +317,14 @@ public class CppCompiler extends opsc.Compiler
         String includes = "";
 
         for (IDLClass iDLClass : idlClasses) {
-            createBodyText += tab(2) + "if(type == \"" + iDLClass.getPackageName() + "." + iDLClass.getClassName() + "\")" + endl();
+            if (isOnlyDefinition(iDLClass)) continue;
+
+            createBodyText += tab(2) + "if(type == \"" + iDLClass.getPackageName() + "." + getClassName(iDLClass) + "\")" + endl();
             createBodyText += tab(2) + "{" + endl();
-            createBodyText += tab(3) +   "return new " + applyLanguagePackageSeparator(iDLClass.getPackageName()) + "::" + iDLClass.getClassName() + "();" + endl();
+            createBodyText += tab(3) +   "return new " + applyLanguagePackageSeparator(iDLClass.getPackageName()) + "::" + getClassName(iDLClass) + "();" + endl();
             createBodyText += tab(2) + "}" + endl();
 
-            includes += tab(0) + "#include \"" + getSlashedType(iDLClass.getPackageName()) + "/" + getSlashedType(iDLClass.getClassName()) + ".h\"" + endl();
+            includes += tab(0) + "#include \"" + getSlashedType(iDLClass.getPackageName()) + "/" + getSlashedType(getClassName(iDLClass)) + ".h\"" + endl();
         }
         createBodyText += tab(2) + "return nullptr;" + endl();
 
@@ -329,7 +347,7 @@ public class CppCompiler extends opsc.Compiler
 
     private String getClone(IDLClass idlClass)
     {
-        String ret = tab(2) + idlClass.getClassName() + "* ret = new " + applyLanguagePackageSeparator(idlClass.getClassName()) + ";" + endl();
+        String ret = tab(2) + getClassName(idlClass) + "* ret = new " + applyLanguagePackageSeparator(getClassName(idlClass)) + ";" + endl();
         ret += tab(2) + "fillClone(ret);" + endl();
         ret += tab(2) + "return ret;" + endl();
 
@@ -422,14 +440,10 @@ public class CppCompiler extends opsc.Compiler
                         ret += tab(2) + "}" + endl();
                     }
                 } else if (field.isEnumType()) {
-                    //Set first enum value as init value
-                    for (IDLEnumType et : idlClass.getEnumTypes()) {
-                        if (et.getName().equals(field.getType().replace("[]",""))) {
-                            ret += tab(2) + "for(unsigned int __i = 0; __i < " + field.getArraySize() + "; __i++) {" + endl();
-                            ret += tab(3) +   fieldName + "[__i] = " + et.getName() + "::" + et.getEnumNames().get(0) + ";" + endl();
-                            ret += tab(2) + "}" + endl();
-                            break;
-                        }
+                    if (field.getValue().length() > 0) {
+                      ret += tab(2) + "for(unsigned int __i = 0; __i < " + field.getArraySize() + "; __i++) {" + endl();
+                      ret += tab(3) +   fieldName + "[__i] = " + languageType(field) + "::" + field.getValue() + ";" + endl();
+                      ret += tab(2) + "}" + endl();
                     }
                 } else {
                     if (!field.getType().equals("string[]")) {
@@ -453,12 +467,8 @@ public class CppCompiler extends opsc.Compiler
             } else if (field.getType().equals("string") || field.isArray() || field.isIdlType()) {
                 //Do nothing in head
             } else if (field.isEnumType()) {
-                //Set first enum value as init value
-                for (IDLEnumType et : idlClass.getEnumTypes()) {
-                    if (et.getName().equals(field.getType())) {
-                        ret += ", " + fieldName + "(" + et.getName() + "::" + et.getEnumNames().get(0) + ")";
-                        break;
-                    }
+                if (field.getValue().length() > 0) {
+                    ret += ", " + fieldName + "(" + languageType(field) + "::" + field.getValue() + ")";
                 }
             } else {
                 //Numeric
@@ -629,6 +639,9 @@ public class CppCompiler extends opsc.Compiler
                 }
                 typesToInclude.put(type, type);
             }
+        }
+        for (String s : idlClass.getImports()) {
+            typesToInclude.put(s, s);
         }
         if(_genMemoryPool) {
             ret += tab(0) + "#include \"memory_pool.h\"" + endl();

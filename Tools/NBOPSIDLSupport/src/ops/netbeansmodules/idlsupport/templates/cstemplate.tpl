@@ -9,6 +9,7 @@ namespace __packageName
 {
     // Message
 
+__classComment
     [Serializable]
     public class __className : __baseClassName
     {
@@ -27,7 +28,7 @@ __constructorBody
             base.Serialize(archive);
 __serialize
         }
-    
+
         public override object Clone()
         {
             __className cloneResult = new __className();

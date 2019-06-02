@@ -1,0 +1,15 @@
+package TestAll;
+
+/* Some common definitions */
+//@onlydefinition
+class Definitions
+{
+    /* Test of constants */
+    const byte const_b = 077;
+    const short const_s = 32767;
+    const int const_i = -17;
+    const int const_j = 19;
+
+    /* Test of enums */
+    enum Command {START, STOP, PAUSE, CONTINUE};
+}

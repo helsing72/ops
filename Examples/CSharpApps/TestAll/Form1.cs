@@ -21,6 +21,8 @@ namespace TestAll
         ChildDataPublisher pub = null;
         ChildData cd1 = null;
 
+        Definitions.Command EnumTest = Definitions.Command.PAUSE;
+
         private ConcurrentQueue<string> LogList = new ConcurrentQueue<string>();
 
         public Form1()
@@ -94,6 +96,11 @@ namespace TestAll
         }
 
         public void AssertEQ(ChildData.Order val, ChildData.Order exp, string mess = "")
+        {
+            if (!val.Equals(exp)) LogError("Failed: " + mess + ", value= " + val + ", expected= " + exp);
+        }
+
+        public void AssertEQ(Definitions.Command val, Definitions.Command exp, string mess = "")
         {
             if (!val.Equals(exp)) LogError("Failed: " + mess + ", value= " + val + ", expected= " + exp);
         }
@@ -185,6 +192,11 @@ namespace TestAll
             if (AssertCountEQ(data.enuFixArr, 6))
             {
                 for (int i = 0; i < 6; i++) AssertEQ(data.enuFixArr[i], ChildData.Order.ABC);
+            }
+            AssertEQ(data.cmd, Definitions.Command.START);
+            if (AssertCountEQ(data.cmds, 2))
+            {
+                for (int i = 0; i < 2; i++) AssertEQ(data.cmds[i], Definitions.Command.START);
             }
 
             //  core types
@@ -339,6 +351,11 @@ namespace TestAll
             if (AssertCountEQ(data.enuFixArr, exp.enuFixArr, 6, "enuFixArr"))
             {
                 for (int i = 0; i < 6; i++) AssertEQ(data.enuFixArr[i], exp.enuFixArr[i], "enuFixArr");
+            }
+            AssertEQ(data.cmd, exp.cmd);
+            if (AssertCountEQ(data.cmds, 2))
+            {
+                for (int i = 0; i < 2; i++) AssertEQ(data.cmds[i], exp.cmds[i]);
             }
 
             //  core types
@@ -522,6 +539,10 @@ namespace TestAll
             data.enuFixArr[4] = ChildData.Order.JKL;
             data.enuFixArr[5] = ChildData.Order.DEF;
 
+            data.cmd = Definitions.Command.CONTINUE;
+            data.cmds[0] = Definitions.Command.PAUSE;
+            data.cmds[1] = Definitions.Command.STOP;
+
             //  core types
             data.bo = true;
             data.b = 7;
@@ -678,7 +699,7 @@ namespace TestAll
             LogNL("  Position()= " + buf.Position());
             ao.Inout("data", cd1);
             LogNL("  Position()= " + buf.Position());
-            AssertEQ(buf.Position(), 3194, "Serialized size error");
+            AssertEQ(buf.Position(), 3204, "Serialized size error");
             LogNL("Serialize finished");
 
             // ==============================================================

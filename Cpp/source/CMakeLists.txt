@@ -34,13 +34,14 @@ set(LIB_BOTTOM_LAYER_SRC
 # ide grouping, doesn't matter for makefile projects
 source_group("Header Files" FILES ${LIB_PUBLIC_HEADERS})
 
+if(NOT CMAKE_BUILD_TYPE MATCHES "Bootstrap")
+
 # generate the library target
 add_library(${LIB_NAME} SHARED
     ${LIB_OPS_CORE_SRCS}
     ${LIB_BOTTOM_LAYER_SRC}
     ${LIB_OPS_PUBLIC_HEADERS}
 )
-
 
 set_target_properties(${LIB_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
 # adds -DOPS_LIBRARY to commandline. Can't use add_definitions here
@@ -69,8 +70,7 @@ set_target_properties(${LIB_STATIC} PROPERTIES RELEASE_POSTFIX "-opt")
 
 target_link_libraries(${LIB_STATIC} ${Boost_LIBRARIES})
 
-# library and headers installation
-set(INSTALL_INCDIR include)
+  # library installation
 set(INSTALL_BINDIR bin)
 if(WIN32 AND NOT CYGWIN)
   set(INSTALL_LIBDIR bin)
@@ -86,7 +86,11 @@ install(TARGETS ${LIB_NAME} ${LIB_STATIC}
   ARCHIVE DESTINATION ${INSTALL_ARCHIVEDIR}
   )
 
-
+else()
 # install headers separately to keep the include file hierarchy
+  # Only done in Bootstrap phase
+  set(INSTALL_INCDIR include)
 install(DIRECTORY ${OPS_HEADER_PATH}/ DESTINATION ${INSTALL_INCDIR}/${LIB_NAME})
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/Common/idl/Generated/Cpp/ DESTINATION ${INSTALL_INCDIR}/${LIB_NAME})
+
+endif()

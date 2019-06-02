@@ -8,6 +8,7 @@ __importUnits
 
 package __unitName is
 
+__classComment
 __constDeclarations
 
 -- ==========================================================================

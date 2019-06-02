@@ -54,7 +54,7 @@ void ShowUsage()
 	std::cout << "              [-GA | -G domain [-G domain [...]]]" << std::endl;
 	std::cout << "              [-IA | -I domain [-I domain [...]] [-O]]" << std::endl;
 	std::cout << "              [-SA | -S domain [-S domain [...]]]" << std::endl;
-	std::cout << "              [-D default_domain] [-C [-E]] [-n] Topic [Topic ...]" << std::endl;
+	std::cout << "              [-D default_domain] [-C [-E]] [-u] [-n] Topic [Topic ...]" << std::endl;
 	std::cout << std::endl;
 	std::cout << "    -?                 Shows a short description" << std::endl;
 	std::cout << "    -a arg_file        File with command line arguments" << std::endl;
@@ -83,6 +83,7 @@ void ShowUsage()
 	std::cout << "    -S domain          Subscribe to all topics in given domain" << std::endl;
 	std::cout << "    -SA                Subscribe to all topics in all domains in given configuration files" << std::endl;
 	std::cout << "    -t                 Print receive time for each message" << std::endl;
+	std::cout << "    -u                 Force subscription to UDP static route topics (may interfere with real subscriber)" << std::endl;
 	std::cout << "    -v                 Verbose output during parsing of command line arguments" << std::endl;
 	std::cout << std::endl;
 	std::cout << std::endl;
@@ -129,6 +130,7 @@ public:
 	bool doPubIdCheck = false;
 	bool doMinimizeOutput = false;
 	bool skipTopics = false;
+	bool dontSkipUdpStaticRoute = false;
 
 	CArguments() : indent(""), printFormat(""), defaultDomain(getDefaultDomain())
 	{
@@ -279,6 +281,12 @@ public:
 
 			if (argument == "-t") {
 				logTime = true;
+				continue;
+			}
+
+			// Force subscription to UDP static route topics
+			if (argument == "-u") {
+				dontSkipUdpStaticRoute = true;
 				continue;
 			}
 
@@ -744,6 +752,19 @@ public:
 
 			Topic topic = part->createTopic(ops::utilities::topicName(topName));
 
+			// Need to skip Topics using UDP with static route, to not interfere with the real subscriber
+			ops::InternalKey_T key(topic.getTransport());
+			if (topic.getTransport() == ops::Topic::TRANSPORT_UDP) {
+				if (isMyNodeAddress(topic.getDomainAddress(), part->getIOService())) {
+					if (args.dontSkipUdpStaticRoute) {
+						std::cout << "##### Subscribing to '" << topName << "' may interfere with real subscriber (UDP static route)" << std::endl;
+					} else {
+						std::cout << "##### Skipping topic '" << topName << "' to not interfere with real subscriber (UDP static route)" << std::endl;
+						continue;
+					}
+				}
+			}
+
 			LogTopic(ops::utilities::domainName(topName), topic);
 
 			ops::Subscriber* sub;
@@ -1168,7 +1189,7 @@ int _kbhit() {
 
 int main(int argc, char* argv[])
 {
-	std::cout << std::endl << "OPSListener Version 2019-02-07" << std::endl << std::endl;
+	std::cout << std::endl << "OPSListener Version 2019-05-30" << std::endl << std::endl;
 
 	sds::sdsSystemTimeInit();
 

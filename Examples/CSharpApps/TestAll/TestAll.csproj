@@ -287,6 +287,9 @@
     <Compile Include="..\..\OPSIdls\TestAll\Generated\CSharp\TestAll\ChildData.cs">
       <Link>genIDLs\ChildData.cs</Link>
     </Compile>
+    <Compile Include="..\..\OPSIdls\TestAll\Generated\CSharp\TestAll\Definitions.cs">
+      <Link>genIDLs\Definitions.cs</Link>
+    </Compile>
     <Compile Include="..\..\OPSIdls\TestAll\Generated\CSharp\TestAll\Fruit.cs">
       <Link>genIDLs\Fruit.cs</Link>
     </Compile>

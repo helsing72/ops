@@ -13,7 +13,7 @@ set(CURRENT_SRCS
 set(JAR_OUTPUT ${CMAKE_BINARY_DIR}/bin/ChatExample.jar)
 
 add_custom_command(OUTPUT ${JAR_OUTPUT}
-  COMMAND ${OPS_COMPILER} -P ${CMAKE_CURRENT_SOURCE_DIR} -g ALL -gpr ../../../../../Ada/
+  COMMAND ${OPSC_COMPILER} -P ${CMAKE_CURRENT_SOURCE_DIR} -g ALL -gpr ../../../../../Ada/
   COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/Generated/Java/ChatExample.jar ${JAR_OUTPUT}
   DEPENDS ${CURRENT_SRCS}
   COMMENT "Generating ${JAR_OUTPUT} from ${CMAKE_CURRENT_SOURCE_DIR}"
@@ -21,4 +21,3 @@ add_custom_command(OUTPUT ${JAR_OUTPUT}
   )
 
 add_custom_target(ChatExample ALL DEPENDS ${JAR_OUTPUT})
-add_dependencies(ChatExample opsc)

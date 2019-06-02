@@ -394,6 +394,21 @@ public class OpsCompiler
         String filename_wo_ext = inputfile.getName().substring(0, inputfile.getName().lastIndexOf("."));
         parsing.IDLClass idlclass = _parser.parse(filename_wo_ext, fileString);
 
+        // Check that onlydefinition classes don't have fields
+        if (idlclass != null) {
+          String s = idlclass.getDirective();
+          if (s != null) {
+              int idx = s.indexOf("onlydefinition");
+              if (idx != -1) {
+                  for (IDLField field : idlclass.getFields()) {
+                      if (field.isStatic()) continue;
+                      System.out.println("Error: " + inputfile.getName() + " set as 'onlydefinition' and contains fields");
+                      return false;
+                  }
+              }
+          }
+        }
+
         return true;
     }
 
@@ -579,11 +594,66 @@ public class OpsCompiler
 
     // ------------------------------------------------------------------------
 
+    // Called for idlTypes to check if we can narrow them to more specific types
+    protected void lookupType(IDLClass cl, IDLField field)
+    {
+      String fieldTypeName = field.getType().replace("[]","");
+      String cName = "", tName = "";
+      int idx = fieldTypeName.indexOf('.');
+      if (idx > 0) {
+        cName = fieldTypeName.substring(0, idx);
+        tName = fieldTypeName.substring(idx+1);
+      }
+      if (cName.equals("")) return;
+      //System.out.println(">>>> lookupType(), cName: " + cName + " tName: " + tName);
+      for (IDLClass idlClass : _parser._idlClasses) {
+        if (idlClass.getClassName().equals(cName)) {
+          for (IDLEnumType et : idlClass.getEnumTypes()) {
+            if (et.getName().equals(tName)) {
+              // Change this type to an enum from another idl and define the init value
+              field.setIdlType(false);
+              field.setEnumType(true);
+              field.setValue(et.getEnumNames().get(0));
+              field.setFullyQualifiedType(idlClass.getPackageName() + "." + field.getType());
+              // Add an import so that we include the class containing the enum definition
+              cl.addImport(cName);
+            }
+          }
+        }
+      }
+    }
+
+    protected void secondStage()
+    {
+      for (IDLClass idlClass : _parser._idlClasses) {
+        for (IDLField field : idlClass.getFields()) {
+          // Parser only set enumType for our locally defined enums
+          // Set first enum value as init value for enum fields
+          if (field.isEnumType()) {
+            // look up type in local scope
+            for (IDLEnumType et : idlClass.getEnumTypes()) {
+              if (et.getName().equals(field.getType().replace("[]",""))) {
+                field.setValue(et.getEnumNames().get(0));
+                field.setFullyQualifiedType(idlClass.getPackageName() + "." + idlClass.getClassName() + "." + field.getType());
+                break;
+              }
+            }
+          }
+          // Check if any idl types actually are enum types from other idls
+          // ex: Definitions.Command
+          if (field.isIdlType()) {
+            lookupType(idlClass, field);
+          }
+        }
+      }
+    }
+
+    // ------------------------------------------------------------------------
+
     protected void dump()
     {
       System.out.println("");
-      for (IDLClass idlClass : _parser._idlClasses)
-      {
+      for (IDLClass idlClass : _parser._idlClasses) {
         System.out.println("idlClass.getPackageName()   : " + idlClass.getPackageName());
         System.out.println("idlClass.getClassName()     : " + idlClass.getClassName());
         System.out.println("idlClass.getBaseClassName() : " + idlClass.getBaseClassName());
@@ -607,16 +677,17 @@ public class OpsCompiler
           }
           for (IDLField field : idlClass.getFields()) {
             System.out.println("  field.getName()        : " + field.getName());
-            System.out.println("    field.getArraySize() : " + field.getArraySize());
-            System.out.println("    field.getStringSize(): " + field.getStringSize());
-            System.out.println("    field.getType()      : " + field.getType());
-            System.out.println("    field.getComment()   : " + field.getComment());
-            System.out.println("    field.getValue()     : " + field.getValue());
-            System.out.println("    field.isIdlType()    : " + field.isIdlType());
-            System.out.println("    field.isEnumType()   : " + field.isEnumType());
-            System.out.println("    field.isArray()      : " + field.isArray());
-            System.out.println("    field.isStatic()     : " + field.isStatic());
-            System.out.println("    field.isAbstract()   : " + field.isAbstract());
+            System.out.println("    field.getArraySize()          : " + field.getArraySize());
+            System.out.println("    field.getStringSize()         : " + field.getStringSize());
+            System.out.println("    field.getType()               : " + field.getType());
+            System.out.println("    field.getFullyQualifiedType() : " + field.getFullyQualifiedType());
+            System.out.println("    field.getComment()            : " + field.getComment());
+            System.out.println("    field.getValue()              : " + field.getValue());
+            System.out.println("    field.isIdlType()             : " + field.isIdlType());
+            System.out.println("    field.isEnumType()            : " + field.isEnumType());
+            System.out.println("    field.isArray()               : " + field.isArray());
+            System.out.println("    field.isStatic()              : " + field.isStatic());
+            System.out.println("    field.isAbstract()            : " + field.isAbstract());
             System.out.println("");
           }
         }
@@ -656,7 +727,9 @@ public class OpsCompiler
 
             if(input.endsWith(".idl")) {
                 java.io.File inputfile = new java.io.File(input);
-                opsc.parseFile(inputfile);
+                if (!opsc.parseFile(inputfile)) {
+                    System.exit(4);
+                }
 
             } else if(input.endsWith(".prj")) {
                 System.out.println("Error: We dont support prj files");
@@ -664,6 +737,8 @@ public class OpsCompiler
                 System.out.println("Error: " + input + " unknown input type");
             }
         }
+
+        opsc.secondStage();
 
         if (opsc._dumpFlag) opsc.dump();
 

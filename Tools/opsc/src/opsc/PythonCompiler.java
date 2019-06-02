@@ -410,7 +410,12 @@ public class PythonCompiler extends opsc.CompilerSupport
             }
         }
 
-        java.io.InputStream stream = findTemplateFile("pythonclasstemplate.tpl");
+        java.io.InputStream stream;
+        if (isOnlyDefinition(idlClass)) {
+            stream = findTemplateFile("pythonclasstemplatebare.tpl");
+        } else {
+            stream = findTemplateFile("pythonclasstemplate.tpl");
+        }
         setTemplateTextFromResource(stream);
         String templateText = getTemplateText();
 
@@ -579,12 +584,12 @@ public class PythonCompiler extends opsc.CompilerSupport
         //Get the template file as a String
         String templateText = getTemplateText();
 
-
         ArrayList<String> importString = new ArrayList<String>();
         ArrayList<String> createBodyText = new ArrayList<String>();
 
         for (IDLClass idlClass : idlClasses)
         {
+            if (isOnlyDefinition(idlClass)) continue;
             importString.add("from " + idlClass.getPackageName().replace(".","_") + " import " + idlClass.getClassName() + endl());
             createBodyText.add(tab(2)+"self.addType(\"" + idlClass.getPackageName() + "." + idlClass.getClassName() + "\"," + idlClass.getClassName() + ")" + endl());
         }
@@ -688,11 +693,12 @@ public class PythonCompiler extends opsc.CompilerSupport
                     ret += tab(2) + "self." + fieldName + " = " + typeName + "()" + endl();
                 } else if (field.isEnumType()) {
                     //Set first enum value as init value
-                    for (IDLEnumType et : idlClass.getEnumTypes()) {
-                        if (et.getName().equals(field.getType())) {
-                            ret += tab(2) + "self." + fieldName + " = " + idlClass.getClassName() + "." + et.getName() + "." + et.getEnumNames().get(0) + endl();
-                            break;
+                    if (field.getValue().length() > 0) {
+                        String typeName = field.getFullyQualifiedType();
+                        if (typeName.startsWith(packageName)) {
+                            typeName = typeName.substring(packageName.length());
                         }
+                        ret += tab(2) + "self." + fieldName + " = " + typeName + "." + field.getValue() + endl();
                     }
                 } else {
                     ret += tab(2) + "self." + fieldName + " = " + getTypeInitialization(field.getType()) + endl();

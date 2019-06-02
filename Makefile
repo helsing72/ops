@@ -54,7 +54,7 @@ clean_tools:
 
 .PHONY : bootstrap
 bootstrap: $(BUILD_BOOTSTRAP)/Makefile
-	$(MAKE) -C $(BUILD_BOOTSTRAP) --no-print-directory opsidls
+	$(MAKE) -C $(BUILD_BOOTSTRAP) --no-print-directory all install
 
 $(BUILD_BOOTSTRAP)/Makefile : %/Makefile :
 	export CC=$(CC) && \

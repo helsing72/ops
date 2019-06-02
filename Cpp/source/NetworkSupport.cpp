@@ -1,6 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -42,6 +43,17 @@ namespace ops
 	Address_T IPAddr2String(uint32_t addr)
 	{
 		return boost::asio::ip::address_v4(addr).to_string();
+	}
+
+	// Return true if a valid MC address (224.0.0.0 to 239.255.255.255)
+	bool isValidMCAddress(Address_T addr)
+	{
+		//std::cout << "isValidNodeAddress(): " << addr << std::endl;
+		if (addr == "") return false;
+		unsigned long Ip = boost::asio::ip::address_v4::from_string(addr.c_str()).to_ulong();
+		//std::cout << "isValidNodeAddress(): " << std::hex << Ip << std::dec << std::endl;
+		if ((Ip >= 0xE0000000) && (Ip < 0xF0000000)) return true;
+		return false;
 	}
 
 	// Return true if a valid node address

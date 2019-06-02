@@ -102,6 +102,8 @@ def CheckEmptyChildData(data):
 	AssertEQ(data.enu1, TestAll.ChildData.Order.ABC)
 	AssertEQ(len(data.enuVec), 0)
 	AssertEQ(len(data.enuFixArr), 0)
+	AssertEQ(data.cmd, TestAll.Definitions.Command.START)
+	AssertEQ(len(data.cmds), 0)
 
 	#  core types
 	AssertEQ(data.bo, False)
@@ -209,6 +211,8 @@ def CompareChildData(data, exp):
 	AssertEQ(data.enu1, exp.enu1)
 	AssertListEQ(data.enuVec, exp.enuVec)
 	AssertListEQ(data.enuFixArr, exp.enuFixArr)
+	AssertEQ(data.cmd, exp.cmd)
+	AssertListEQ(data.cmds, exp.cmds)
 
 	#  core types
 	AssertEQ(data.bo, exp.bo)
@@ -295,6 +299,9 @@ def FillChildData(data):
 
 	data.enuFixArr = [ TestAll.ChildData.Order.DEF, TestAll.ChildData.Order.ABC, TestAll.ChildData.Order.ABC, TestAll.ChildData.Order.ABC,
 					   TestAll.ChildData.Order.JKL, TestAll.ChildData.Order.DEF ]
+
+	data.cmd = TestAll.Definitions.Command.CONTINUE;
+	data.cmds = [ TestAll.Definitions.Command.PAUSE, TestAll.Definitions.Command.STOP ]
 
 	#  core types
 	data.bo = True
@@ -405,6 +412,9 @@ def onChildData(sub,mess):
 
 print "Test initial state..."
 
+enumTest = TestAll.Definitions.Command.PAUSE
+constTest = TestAll.Definitions.CONST_B
+
 cd1 = TestAll.ChildData()
 cd2 = TestAll.ChildData()
 cd3 = TestAll.ChildData()
@@ -435,7 +445,7 @@ archiver = OPS_Archiver.OPS_Archiver_Out(65536)
 print "  GetSize()= " + str(archiver.index)
 archiver.Ops("data",cd1)
 print "  GetSize()= " + str(archiver.index)
-AssertEQ(archiver.index, 3194)
+AssertEQ(archiver.index, 3204)
 
 print "Serialize finished"
 print "Test publish/subscribe..."

@@ -105,21 +105,39 @@ find_jar(JAXMEJS_JAR jaxmejs
   VERSIONS 0.5.2
   DOC "Path to jaxmejs.jar"
   )
-# Find swing-layout.jar. This is anextension to swing required by NetBeans
+# Find swing-layout.jar. This is an extension to swing required by NetBeans
 find_jar(SWINGLAYOUT_JAR swing-layout
   PATHS Tools/IDLCompiler/dist/lib
 #  VERSIONS 1.0.4
   DOC "Path to swing-layout jar"
   )
 
+# set path to where jars should be installed
+set(OPS_JAR_REL_INSTALL_PATH lib/ops)
+
+if(NOT CMAKE_BUILD_TYPE MATCHES "Bootstrap")
+  # Use opsc script from Bootstrap phase, will be used in all subdirs under this one
+  if(WIN32)
+    find_file(OPSC_COMPILER NAMES opsc.bat PATHS ${CMAKE_INSTALL_PREFIX}/lib/ops NO_DEFAULT_PATH)
+  else()
+    find_file(OPSC_COMPILER NAMES opsc.sh PATHS ${CMAKE_INSTALL_PREFIX}/lib/ops NO_DEFAULT_PATH)
+  endif()
+  message(">>>> OPSC_COMPILER= " ${OPSC_COMPILER})
+
+  # Find Java libraries built during the Bootstrap phase
+  set(OPSJAR_PATH ${CMAKE_INSTALL_PREFIX}/${OPS_JAR_REL_INSTALL_PATH})
+
+  find_jar(OPSJLIB_JAR OPSJLib PATHS ${OPSJAR_PATH})
+  message(">>>> OPSJLIB_JAR= " ${OPSJLIB_JAR})
+  find_jar(CONFIGURATIONLIB_JAR ConfigurationLib PATHS ${OPSJAR_PATH})
+  message(">>>> CONFIGURATIONLIB_JAR= " ${CONFIGURATIONLIB_JAR})
+endif()
+
 ################################################################################
 # User Options
 
 include(${CMAKE_ROOT}/Modules/Documentation.cmake OPTIONAL)
 mark_as_advanced(CLEAR BUILD_DOCUMENTATION)
-
-# set path to where jars should be installed
-set(OPS_JAR_REL_INSTALL_PATH lib/ops)
 
 ################################################################################
 # Build the source
@@ -137,9 +155,17 @@ if(Java_JAVAC_EXECUTABLE)
   add_subdirectory(Tools)
 endif()
 
-if(NOT CMAKE_BUILD_TYPE MATCHES "Bootstrap")
+if(PYTHONINTERP_FOUND)
+  add_subdirectory(Python)
+endif()
+
   add_subdirectory(CSharp)
 
+if(CMAKE_BUILD_TYPE MATCHES "Bootstrap")
+  # Need to add the install of C++ headers, which is independent on Debug or Opt builds
+  add_subdirectory(Cpp)
+
+else()
   # add the C++ source, only if Boost is loaded
   if(Boost_FOUND)
     add_subdirectory(Cpp)
@@ -153,19 +179,12 @@ if(NOT CMAKE_BUILD_TYPE MATCHES "Bootstrap")
     message(WARNING "install Boost to build OPS C++ libraries")
   endif()
 
-  if(PYTHONINTERP_FOUND)
-    add_subdirectory(Python)
-  endif()
-
   ################################################################################
   # Build Examples
-
-  # we need the opsc compiler to generate code for the examples
-  if(TARGET opsc)
+  # We need the opsc compiler from the Bootstrap phase to generate code for the examples
     option(OPS_BUILD_EXAMPLES "Enable to build the example applications" ON)
     if(OPS_BUILD_EXAMPLES AND CMAKE_BUILD_TYPE MATCHES "Debug")
       add_subdirectory(Examples)
-   endif()
   endif()
 endif()
 

@@ -27,6 +27,7 @@ import parsing.IDLEnumType;
  */
 public class JavaCompiler extends opsc.Compiler
 {
+    final static String CLASS_COMMENT_REGEX = "__classComment";
     final static String CONSTRUCTOR_BODY_REGEX = "__constructorBody";
     final static String DECLARATIONS_REGEX = "__declarations";
     final static String SERIALIZE_REGEX = "__serialize";
@@ -58,18 +59,20 @@ public class JavaCompiler extends opsc.Compiler
               {
                 if (iDLClass.getType() == IDLClass.ENUM_TYPE)
                 {
-                    //System.out.println("Compile enum");
-                    compileEnum(iDLClass);
+                  //System.out.println("Compile enum");
+                  compileEnum(iDLClass);
                 }
                 else
                 {
-                    compileDataClass(iDLClass);
+                  compileDataClass(iDLClass);
+                  if (!isOnlyDefinition(iDLClass)) {
                     if (!isTopLevel(iDLClass)) {
-                        System.out.println("Info: Java, skipping generation of publisher/subscriber for " + iDLClass.getClassName());
+                      System.out.println("Info: Java, skipping generation of publisher/subscriber for " + iDLClass.getClassName());
                     } else {
-                        compileSubscriber(iDLClass);
-                        compilePublisher(iDLClass);
+                      compileSubscriber(iDLClass);
+                      compilePublisher(iDLClass);
                     }
+                  }
                 }
               }
             }
@@ -107,6 +110,23 @@ public class JavaCompiler extends opsc.Compiler
         createdFiles += "\"" + getOutputFileName() + "\"\n";
     }
 
+    private String getClassComment(IDLClass idlClass)
+    {
+        String ret = "";
+        if (idlClass.getComment() != null) {
+            if (!idlClass.getComment().equals("")) {
+                String comment = idlClass.getComment();
+                int idx;
+                while ((idx = comment.indexOf('\n')) >= 0) {
+                    ret += tab(0) + "///" + comment.substring(0,idx).replace("/*", "").replace("*/", "").replace("\r", "") + endl();
+                    comment = comment.substring(idx+1);
+                }
+                ret += tab(0) + "///" + comment.replace("/*", "").replace("*/", "") + endl();
+            }
+        }
+        return ret;
+    }
+
     public void compileDataClass(IDLClass idlClass) throws IOException
     {
         String className = idlClass.getClassName();
@@ -120,7 +140,12 @@ public class JavaCompiler extends opsc.Compiler
 
         setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + className + ".java");
 
-        java.io.InputStream stream = findTemplateFile("javatemplate.tpl");
+        java.io.InputStream stream;
+        if (isOnlyDefinition(idlClass)) {
+            stream = findTemplateFile("javatemplatebare.tpl");
+        } else {
+            stream = findTemplateFile("javatemplate.tpl");
+        }
         setTemplateTextFromResource(stream);
 
         //Get the template file as a String
@@ -128,6 +153,7 @@ public class JavaCompiler extends opsc.Compiler
 
         //Replace regular expressions in the template file.
         templateText = templateText.replace(CLASS_NAME_REGEX, className);
+        templateText = templateText.replace(CLASS_COMMENT_REGEX, getClassComment(idlClass));
         templateText = templateText.replace(BASE_CLASS_NAME_REGEX, baseClassName);
         templateText = templateText.replace(PACKAGE_NAME_REGEX, packageName);
         templateText = templateText.replace(CONSTRUCTOR_BODY_REGEX, getConstructorBody(idlClass));
@@ -227,6 +253,8 @@ public class JavaCompiler extends opsc.Compiler
 
         for (IDLClass iDLClass : idlClasses)
         {
+            if (isOnlyDefinition(iDLClass)) continue;
+
             createBodyText += tab(2) + "if(type.equals(\"" + iDLClass.getPackageName() + "." + iDLClass.getClassName() + "\"))" + endl();
             createBodyText += tab(2) + "{" + endl();
             createBodyText += tab(3) + "return new " + iDLClass.getPackageName() + "." + iDLClass.getClassName() + "();" + endl();
@@ -255,11 +283,8 @@ public class JavaCompiler extends opsc.Compiler
             String eType = elementType(field.getType());
             if (field.isEnumType()) {
                 //Set first enum value as init value
-                for (IDLEnumType et : idlClass.getEnumTypes()) {
-                    if (et.getName().equals(eType)) {
-                        iVal = eType + "." + et.getEnumNames().get(0);
-                        break;
-                    }
+                if (field.getValue().length() > 0) {
+                    iVal = eType + "." + field.getValue();
                 }
             }
             String fieldName = getFieldName(field);
