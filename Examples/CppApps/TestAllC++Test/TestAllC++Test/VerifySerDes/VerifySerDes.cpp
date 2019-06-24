@@ -15,7 +15,7 @@
 
 #include "TestAll/Definitions.h"
 TestAll::Definitions::Command cmd = TestAll::Definitions::Command::PAUSE;
-byte arr[TestAll::Definitions::const_b];
+char arr[TestAll::Definitions::const_b];
 
 //Include a publisher for the data type we want to publish, generated from our IDL project TestAll.
 #include "TestAll/ChildDataPublisher.h"
