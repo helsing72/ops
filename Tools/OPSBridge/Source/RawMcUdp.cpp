@@ -187,7 +187,7 @@ namespace opsbridge {
 
 			if (_senders[key].sender != nullptr) {
 				// Store local ports for filtering on receive side above
-				int localPort = _senders[key].sender->getPort();
+				int localPort = _senders[key].sender->getLocalPort();
 				if (_senderPorts.find(localPort) == _senderPorts.end()) {
 					_senderPorts.insert(localPort);
 				}
