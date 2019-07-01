@@ -273,7 +273,9 @@ namespace ops
         virtual Serializable* inout(InoutName_T name, Serializable* value, int element)
         {
 			UNUSED(name);
-			UNUSED(value);
+
+            if (value) delete value;
+            value = nullptr;
 
             PushNode(currentNode);
             currentNode = currentNode.getChildNode("element", element);
@@ -306,6 +308,8 @@ namespace ops
 
         virtual Serializable* inout(InoutName_T name, Serializable* value)
         {
+            if (value) delete value;
+            value = nullptr;
             if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
 				PushNode(currentNode);
