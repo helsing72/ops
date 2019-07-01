@@ -65,7 +65,7 @@ namespace ops
 		}
 
 	protected:
-        Sender* sender;
+        Sender* sender = nullptr;
         Lockable mutex;
 
 		// Called from senders (TCPServer)

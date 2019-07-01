@@ -6,15 +6,12 @@
 namespace ops
 {
 
-	Reservable::Reservable():
-		nrOfReservations(0)
+	Reservable::Reservable()
 	{
-		referenceHandler = NULL;
 	}
 	Reservable::Reservable(const Reservable& r)
 	{
 		UNUSED(r);
-		referenceHandler = NULL;
 	}
 	Reservable& Reservable::operator = (const Reservable& l)
 	{

@@ -168,7 +168,7 @@ namespace ops
         };
 
 		typedef struct {
-			bool staticRoute;
+			bool staticRoute = false;
 			std::map<InternalKey_T, IpPortPair> portMap;
 		} Entry_T;
 

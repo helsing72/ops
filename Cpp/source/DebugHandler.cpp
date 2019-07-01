@@ -45,7 +45,7 @@ namespace ops {
 	class DebugHandler::InternalDebugListener : public DataListener
 	{
 	public:
-		InternalDebugListener(Participant* part) : _part(part), _sub(nullptr), _pub(nullptr) {}
+		InternalDebugListener(Participant* part) : _part(part), _sub(nullptr), _pub(nullptr), _appCallback(nullptr) {}
 		virtual ~InternalDebugListener() { remove(); }
 
 		// Used by application to set a handler for "Generic Command" (50)

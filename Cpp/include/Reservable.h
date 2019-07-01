@@ -42,8 +42,8 @@ namespace ops
 		virtual ~Reservable();
 	private:
 		Lockable incLock;
-		int nrOfReservations;
-		ReferenceHandler* referenceHandler;
+		int nrOfReservations = 0;
+		ReferenceHandler* referenceHandler = nullptr;
 	};
 
 }

@@ -2,7 +2,7 @@
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
  * Copyright (C) 2018 Lennart Andersson.
-*
+ *
  * This file is part of OPS (Open Publish Subscribe).
  *
  * OPS (Open Publish Subscribe) is free software: you can redistribute it and/or modify
