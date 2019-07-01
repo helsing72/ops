@@ -167,6 +167,7 @@ There is a special form of comments that is used to give instructions to the OPS
 |-----------|--------|---------|-------------|
 | toplevel  | true / false | true | Publishers/Subscribers are only generated for toplevel classes. This directive is currently only supported for Ada, C++ and Java |
 | onlydefinition | - | - | Class only contains definitions (constants and enums) and should not be part of data objects published. Useful for defining common constants and enums |
+
 Example of usage:
 
 ```
