@@ -144,6 +144,9 @@ TEST(Test_NotifierListener, TestDataNotifierListener) {
 	EXPECT_EQ(listener1.counter, 2);
 	EXPECT_EQ(listener2.counter, 1);
 
+#if defined(_MSC_VER)
+#pragma warning(disable : 4996) 
+#endif
 	notifier.addDataListener(MyCallback, (void*)&listener2);
 	notifier.notify();
 

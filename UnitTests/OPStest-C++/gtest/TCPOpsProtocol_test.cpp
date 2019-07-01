@@ -248,7 +248,7 @@ TEST(Test_TCPProtocol, TestTCPProtocolVer1) {
 #endif
 	strcpy(buffer, "Hej hopp i lingonskogen");
 
-	EXPECT_EQ(prot.sendData(buffer, strlen(buffer)), (int)strlen(buffer));
+	EXPECT_EQ(prot.sendData(buffer, (uint32_t)strlen(buffer)), (int)strlen(buffer));
 	EXPECT_EQ(client.sbuf_idx, 22 + (int)strlen(buffer));
 
 	int sndlen = *((int*)(client.sbuf + 18));

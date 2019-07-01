@@ -19,7 +19,7 @@
 */
 
 // TODO:
-// *  NumOpsObjects when USE_C11 && DEBUG_OPSOBJECT_COUNTER is defined
+// *  NumOpsObjects when DEBUG_OPSOBJECT_COUNTER is defined
 
 #include "gtest/gtest.h"
 

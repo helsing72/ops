@@ -615,4 +615,7 @@ TEST(Test_OPSConfigObjects, TestOPSConfig_File) {
 	dom = cfg->getDomain("DummyDomain");
 	ASSERT_NE(dom, nullptr);
 	EXPECT_EQ(dom->getDebugMcPort(), 9991);
+
+	delete cfg;
 }
+

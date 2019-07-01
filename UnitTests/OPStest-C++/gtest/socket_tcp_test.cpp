@@ -246,7 +246,7 @@ TEST(Test_Sockets, TestTCPdefault) {
 	PollWTimeout(ioServ, 100);
 
 	EXPECT_TRUE(snd.sendTo(&sndbuf[10], 90, "", 0));
-	PollWTimeout(ioServ, 100);
+	PollWTimeout(ioServ, 200);
 
 	EXPECT_FALSE(ServerCB.cst.connected);
 	EXPECT_STREQ(ServerCB.cst.addr.c_str(), connectedIP.c_str());
