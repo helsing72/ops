@@ -70,7 +70,7 @@ namespace ops
 					{
 						//references[i]->removeListener(this);
 						delete references[i];
-						references[i] = NULL;
+						references[i] = nullptr;
 					}
 
 					std::vector<Reservable*>::iterator p = references.begin();

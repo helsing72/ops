@@ -108,7 +108,7 @@ void Domain::serialize(ArchiverInOut* archiver)
 
 	// To not break binary compatibility we only do this when we know we are
 	// reading from an XML-file
-	if (dynamic_cast<XMLArchiverIn*>(archiver) != NULL) { 
+	if (dynamic_cast<XMLArchiverIn*>(archiver) != nullptr) { 
 		archiver->inout<Channel>("channels", channels);
 		archiver->inout<Transport>("transports", transports);
 		archiver->inout("debugMcPort", debugMcPort);
@@ -123,7 +123,7 @@ Channel* Domain::findChannel(ChannelId_T id)
 			if (id == channels[i]->channelID) return channels[i];
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 Topic* Domain::findTopic(ObjectName_T id)
@@ -133,7 +133,7 @@ Topic* Domain::findTopic(ObjectName_T id)
 			if (id == topics[i]->getName()) return topics[i];
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 void Domain::checkTransports()
@@ -143,7 +143,7 @@ void Domain::checkTransports()
 	for (unsigned int i = 0; i < transports.size(); i++) {
 		// Get channel
 		Channel* channel = findChannel(transports[i]->channelID);
-		if (channel == NULL) {
+		if (channel == nullptr) {
 			ExceptionMessage_T msg("Non existing channelID: '");
 			msg += transports[i]->channelID;
 			msg += "' used in transport specification.";
@@ -151,7 +151,7 @@ void Domain::checkTransports()
 		} else {
 			for (unsigned int j = 0; j < transports[i]->topics.size(); j++) {
 				Topic* top = findTopic(transports[i]->topics[j]);
-				if (top == NULL) {
+				if (top == nullptr) {
 					ExceptionMessage_T msg("Non existing topicID: '");
 					msg += transports[i]->topics[j];
 					msg += "' used in transport specification.";

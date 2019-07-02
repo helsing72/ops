@@ -217,7 +217,7 @@ namespace ops
         {
             if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
-                if (currentNode.getChildNode(NAME(name)).getText() != NULL)
+                if (currentNode.getChildNode(NAME(name)).getText() != nullptr)
                 {
 					std::string s(currentNode.getChildNode(NAME(name)).getText());
                     value = s;
@@ -233,7 +233,7 @@ namespace ops
 		{
 			if (!currentNode.getChildNode(NAME(name), idx).isEmpty())
 			{
-				if (currentNode.getChildNode(NAME(name), idx).getText() != NULL)
+				if (currentNode.getChildNode(NAME(name), idx).getText() != nullptr)
 				{
 					std::string s(currentNode.getChildNode(NAME(name), idx).getText());
 					int len = (int)s.size();
@@ -253,7 +253,7 @@ namespace ops
         {
 			if (!currentNode.getChildNode(NAME(name)).isEmpty())
 			{
-				if (currentNode.getChildNode(NAME(name)).getText() != NULL)
+				if (currentNode.getChildNode(NAME(name)).getText() != nullptr)
 				{
 					std::string s(currentNode.getChildNode(NAME(name)).getText());
 					std::istringstream is(s);
@@ -281,7 +281,7 @@ namespace ops
             currentNode = currentNode.getChildNode("element", element);
 			TypeId_T types(currentNode.getAttribute("type"));
             Serializable* newSer = factory->create(types);
-            if (newSer != NULL)
+            if (newSer != nullptr)
             {
                 newSer->serialize(this);
             }
@@ -316,7 +316,7 @@ namespace ops
 				currentNode = currentNode.getChildNode(NAME(name));
 				TypeId_T types(currentNode.getAttribute("type"));
                 Serializable* newSer = factory->create(types);
-                if (newSer != NULL)
+                if (newSer != nullptr)
                 {
                     newSer->serialize(this);
                 }

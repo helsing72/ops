@@ -123,7 +123,7 @@ namespace ops
         {
 			UNUSED(element)
 			OPSObject* opsO = dynamic_cast<OPSObject*> (value);
-			if (opsO != NULL)
+			if (opsO != nullptr)
 			{
 				os << tab() << name << " type = " << opsO->getTypeString() << "\n";
 				currentTabDepth++;
@@ -137,7 +137,7 @@ namespace ops
         {
             OPSObject* opsO = dynamic_cast<OPSObject*> (value);
 
-            if (opsO != NULL)
+            if (opsO != nullptr)
             {
                 os << tab() << name << " type = " << opsO->getTypeString() << "\n";
                 currentTabDepth++;
@@ -151,7 +151,7 @@ namespace ops
         {
             OPSObject* opsO = dynamic_cast<OPSObject*> (&value);
 
-            if (opsO != NULL)
+            if (opsO != nullptr)
             {
                 os << tab() << name << " type = " << opsO->getTypeString() << "\n";
                 currentTabDepth++;

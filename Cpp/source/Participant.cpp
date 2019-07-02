@@ -56,7 +56,7 @@ namespace ops
 	// If it exist, "reportStaticError()" will use this instead of using all participants errorservices
 	// which leads to duplicated error messages when several participants exist.
 	// This static errorservice also has the advantage that errors during Participant creation can be logged.
-	static ErrorService* staticErrorService = NULL;
+	static ErrorService* staticErrorService = nullptr;
 
 	ErrorService* Participant::getStaticErrorService()
 	{
@@ -94,19 +94,19 @@ namespace ops
 				msg += ex.what();
 				BasicError err("Participant", "Participant", msg);
 				reportStaticError(&err);
-				return NULL;
+				return nullptr;
 			}
 			catch (ops::exceptions::CommException& ex)
 			{
 				BasicError err("Participant", "Participant", ex.what());
 				reportStaticError(&err);
-				return NULL;
+				return nullptr;
 			}
 			catch(...)
 			{
 				BasicError err("Participant", "Participant", "Unknown Exception");
 				reportStaticError(&err);
-				return NULL;
+				return nullptr;
 			}
 		}
 		return instances[key];
@@ -126,22 +126,22 @@ namespace ops
 		debugHandler(this),
 #endif
 		_policy(policy),
-		ioService(NULL),
-		config(NULL),
+		ioService(nullptr),
+		config(nullptr),
 		ownsConfig(false),
-		errorService(NULL),
-		threadPool(NULL),
-		aliveDeadlineTimer(NULL),
-		partInfoPub(NULL),
-		domain(NULL),
-		partInfoListener(NULL),
-		receiveDataHandlerFactory(NULL),
-		sendDataHandlerFactory(NULL),
+		errorService(nullptr),
+		threadPool(nullptr),
+		aliveDeadlineTimer(nullptr),
+		partInfoPub(nullptr),
+		domain(nullptr),
+		partInfoListener(nullptr),
+		receiveDataHandlerFactory(nullptr),
+		sendDataHandlerFactory(nullptr),
 		domainID(domainID_),
 		participantID(participantID_),
 		keepRunning(true),
 		aliveTimeout(1000),
-		objectFactory(NULL)
+		objectFactory(nullptr)
 	{
 		ioService = IOService::create();
 
@@ -228,6 +228,8 @@ namespace ops
 
 	Participant::~Participant()
 	{
+		OPS_TRACE("Part: Destructor()...");
+
 		// We assume that the user has deleted all publishers and subscribers connected to this Participant.
 		// We also assume that the user has cancelled eventual deadlinetimers etc. connected to the ioService.
 		// We also assume that the user has unreserved() all messages that he has reserved().
@@ -244,7 +246,7 @@ namespace ops
 			// We have indicated shutdown in progress. Delete the partInfoData Publisher.
 			// Note that this uses our sendDataHandlerFactory.
 			if (partInfoPub) delete partInfoPub;
-			partInfoPub = NULL;
+			partInfoPub = nullptr;
 		}
 
 		// Stop the subscriber for partInfoData. This requires ioService to be running.
@@ -253,7 +255,7 @@ namespace ops
 
 		// Now delete our send factory
 		if (sendDataHandlerFactory) delete sendDataHandlerFactory;
-		sendDataHandlerFactory = NULL;
+		sendDataHandlerFactory = nullptr;
 
 		// Our timer is required for ReceiveDataHandlers to be cleaned up so it shouldn't be stopped
 		// before receiveDataHandlerFactory is finished.
@@ -266,11 +268,11 @@ namespace ops
 		// Now stop and delete our timer (NOTE requires ioService to be running).
 		// If the timer is in the callback, the delete will wait for it to finish and then the object is deleted.
 		if (aliveDeadlineTimer) delete aliveDeadlineTimer;
-		aliveDeadlineTimer = NULL;
+		aliveDeadlineTimer = nullptr;
 
 		// Now time to delete our receive factory
 		if (receiveDataHandlerFactory) delete receiveDataHandlerFactory;
-		receiveDataHandlerFactory = NULL;
+		receiveDataHandlerFactory = nullptr;
 
 		// There should now not be anything left requiring the ioService to be running.
 
@@ -280,7 +282,7 @@ namespace ops
 
 		// Now we delete the threadpool, which will wait for the thread(s) to finish
 		if (threadPool) delete threadPool;
-		threadPool = NULL;
+		threadPool = nullptr;
 
 		// Now when the threads are gone, it's safe to delete the rest of our objects
 		if (partInfoListener) delete partInfoListener;
@@ -289,6 +291,8 @@ namespace ops
 		if (ownsConfig && config) delete config;
 		// All objects connected to this ioservice should now be deleted, so it should be safe to delete it
 		if (ioService) delete ioService;
+
+		OPS_TRACE("Part: Destructor() Finished");
 	}
 
 	ops::Topic Participant::createParticipantInfoTopic()
@@ -368,7 +372,7 @@ namespace ops
 			try {
 				// Create the meta data publisher if user hasn't disabled it for the domain.
 				// The meta data publisher is only necessary if we have topics using transport UDP.
-				if ( (partInfoPub == NULL) && (domain->getMetaDataMcPort() > 0) )
+				if ( (partInfoPub == nullptr) && (domain->getMetaDataMcPort() > 0) )
 				{
 					partInfoPub = new Publisher(createParticipantInfoTopic());
 				}
@@ -379,7 +383,7 @@ namespace ops
 			} catch (std::exception& ex)
 			{
 				ErrorMessage_T errMessage;
-				if (partInfoPub == NULL) {
+				if (partInfoPub == nullptr) {
 					errMessage = "Failed to create publisher for ParticipantInfoTopic. Check localInterface and metaDataMcPort in configuration file.";
 				} else {
 					errMessage = "Failed to publish ParticipantInfoTopic data.";

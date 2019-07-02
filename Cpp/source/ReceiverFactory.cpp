@@ -16,7 +16,7 @@ namespace ops
         //This should never happen, log an internal error and return nullptr;
         if (ioService == nullptr)
         {
-			BasicError err("ReceiverFactory", "getReceiver", "Unexpected error, ioServide == NULL");
+			BasicError err("ReceiverFactory", "getReceiver", "Unexpected error, ioServide == nullptr");
             participant->reportError(&err);
             return receiver;
         }

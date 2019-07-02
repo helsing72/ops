@@ -138,7 +138,7 @@ namespace ops
         //Deadline listener callback
         void onNewEvent(Notifier<int>* sender, int message);
 
-		//Default NULL. Create a PublicationIdChecker if you want OPS to perform Publication Id checking.
+		//Default nullptr. Create a PublicationIdChecker if you want OPS to perform Publication Id checking.
 		//The check is performed before any QoS filtering, so it sees all messages.
 		//Add listerner(s) to the checker and you will be notified when:
 		// - A new publisher is detected (Ip & Port of publisher is used)

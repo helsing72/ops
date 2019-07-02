@@ -48,7 +48,7 @@ namespace ops
 					return domains[i];
 				}
 			}
-			return NULL;
+			return nullptr;
 		}
 
 		void serialize(ArchiverInOut* archiver)
