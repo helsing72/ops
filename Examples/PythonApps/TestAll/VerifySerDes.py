@@ -405,12 +405,12 @@ def onChildData(sub,mess):
 	data=mess.data
 	tempStr = "[From: " + mess.publisherName
 	tempStr +="] (From " + addr + ":" + port + ") Comparing..."
-	print tempStr
+	print(tempStr)
 	#prt.printObject("data", data)
 	CompareChildData(data, cd1)
-	print "Comparing finished"
+	print("Comparing finished")
 
-print "Test initial state..."
+print("Test initial state...")
 
 enumTest = TestAll.Definitions.Command.PAUSE
 constTest = TestAll.Definitions.CONST_B
@@ -424,40 +424,40 @@ CheckEmptyChildData(cd3)
 
 CompareChildData(cd1, cd2)
 
-print "Finished"
-print "Test filled object..."
+print("Finished")
+print("Test filled object...")
 
 FillChildData(cd1)
 FillChildData(cd2)
 
 CompareChildData(cd1, cd2)
 
-print "Finished"
-print "Test Print Archiver..."
+print("Finished")
+print("Test Print Archiver...")
 
 prt = Print_Archiver.Print_Archiver_Out()
 prt.printObject("cd1", cd1)
 
-print "Print Archiver Test Finished"
-print "Serialize filled object..."
+print("Print Archiver Test Finished")
+print("Serialize filled object...")
 
 archiver = OPS_Archiver.OPS_Archiver_Out(65536)
-print "  GetSize()= " + str(archiver.index)
+print("  GetSize()= " + str(archiver.index))
 archiver.Ops("data",cd1)
-print "  GetSize()= " + str(archiver.index)
+print("  GetSize()= " + str(archiver.index))
 AssertEQ(archiver.index, 3204)
 
-print "Serialize finished"
-print "Test publish/subscribe..."
+print("Serialize finished")
+print("Test publish/subscribe...")
 
 participant = Participant.Participant.getInstance("TestAllDomain", "TestAllDomain")
 if participant == None:
-	print "Failed to create Participant. Missing ops_config.xml ??"
+	print("Failed to create Participant. Missing ops_config.xml ??")
 	sys.exit(-1)
 participant.addTypeSupport(TestAllTypeFactory.TestAllTypeFactory())
 
 topic = participant.createTopic("ChildTopic");
-print "Created topic " + topic.name + " [" + topic.transport + "." + topic.domainAddress +"." + str(topic.port) + "]"
+print("Created topic " + topic.name + " [" + topic.transport + "." + topic.domainAddress +"." + str(topic.port) + "]")
 
 sub = Subscriber.Subscriber(topic)
 sub.addCallback(onChildData)
@@ -469,7 +469,7 @@ pub.start()
 
 pub.write(cd1)
 
-print "Waiting for data (60 seconds) ..."
+print("Waiting for data (60 seconds) ...")
 
 time.sleep(60)
 
