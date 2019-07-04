@@ -21,7 +21,7 @@ def onPizzaData(sub,mess):
 		tempStr +="] (From " + addr + ":" + port
 		tempStr +=") Pizza:: Cheese: " + data.cheese
 		tempStr +=",  Tomato sauce: " + data.tomatoSauce
-		print tempStr
+		print(tempStr)
 
 def onVessuvioData(sub,mess):
 	if not beQuite:
@@ -32,7 +32,7 @@ def onVessuvioData(sub,mess):
 		tempStr +=") Vessuvio:: Cheese: " + data.cheese
 		tempStr +=",  Tomato sauce: " + data.tomatoSauce
 		tempStr +=", Ham length: " + str(len(data.ham))
-		print tempStr
+		print(tempStr)
 
 def onExtraAllt(sub,mess):
 	if not beQuite:
@@ -43,7 +43,7 @@ def onExtraAllt(sub,mess):
 		tempStr +=") Pizza:: Cheese: " + data.cheese
 		tempStr +=",  Tomato sauce: " + data.tomatoSauce
 		tempStr +=", Num strings: " + str(len(data.strings))
-		print tempStr
+		print(tempStr)
 
 class IHelper(object):
 	def __init__(self):
@@ -91,48 +91,48 @@ class CHelper(IHelper):
 
 	def CreatePublisher(self,part,topicName):
 		if self.pub is not None:
-			print "Publisher already exist for topic " + self.pub.getTopic().getName()
+			print("Publisher already exist for topic " + self.pub.getTopic().getName())
 		else:
 			topic = part.createTopic(topicName);
-			print "Created topic " + topic.name + " [" + topic.transport + "." + topic.domainAddress +"." + str(topic.port) + "]"
+			print("Created topic " + topic.name + " [" + topic.transport + "." + topic.domainAddress +"." + str(topic.port) + "]")
 			self.pub = Publisher.Publisher(topic)
 			self.pub.name = "PythonTest " + platform.system() + ("(%s)" % os.getpid())
 
 	def DeletePublisher(self,doLog = True):
 		if self.pub is not None:
-			print "Deleting publisher for topic " + self.pub.topic.name
+			print("Deleting publisher for topic " + self.pub.topic.name)
 			del self.pub
 			self.pub = None
 		else:
 			if doLog:
-				print "Publisher must be created first!!"
+				print("Publisher must be created first!!")
 
 	def StartPublisher(self):
 		if self.pub is not None:
 			self.pub.start();
 		else:
-			print "Publisher must be created first!!"
+			print("Publisher must be created first!!")
 
 	def StopPublisher(self):
 		if self.pub is not None:
 			self.pub.stop();
 		else:
-			print "Publisher must be created first!!"
+			print("Publisher must be created first!!")
 
 	def Write(self):
 		if self.pub is not None:
 			self.pub.write(self.data);
 		else:
-			print "Publisher must be created first!!"
+			print("Publisher must be created first!!")
 
 
 
 	def CreateSubscriber(self,part,topicName):
 		if self.sub is not None:
-			print "Subscriber already exist for topic " + self.sub.getTopic().getName()
+			print("Subscriber already exist for topic " + self.sub.getTopic().getName())
 		else:
 			topic = part.createTopic(topicName);
-			print "Created topic " + topic.name + " [" + topic.transport + "." + topic.domainAddress +"." + str(topic.port) + "]"
+			print("Created topic " + topic.name + " [" + topic.transport + "." + topic.domainAddress +"." + str(topic.port) + "]")
 			self.sub = Subscriber.Subscriber(topic)
 			#self.sub.addCallback(self.listener.onNewData)
 			if self.callback is not None:
@@ -142,26 +142,26 @@ class CHelper(IHelper):
 
 	def DeleteSubscriber(self,doLog = True):
 		if self.sub:
-			print "Deleting subscriber for topic " + self.sub.getTopic().getName()
+			print("Deleting subscriber for topic " + self.sub.getTopic().getName())
 			self.sub.stop();
 			self.sub = None;
 		else:
 			if doLog:
-				print "Subscriber must be created first!!"
+				print("Subscriber must be created first!!")
 
 	def StartSubscriber(self):
 		if self.sub is not None:
-			print "Starting subscriber for topic " + self.sub.getTopic().getName()
+			print("Starting subscriber for topic " + self.sub.getTopic().getName())
 			self.sub.start();
 		else:
-			print "Subscriber must be created first!!"
+			print("Subscriber must be created first!!")
 
 	def StopSubscriber(self):
 		if sub:
-			print "Stoping subscriber for topic " + self.sub.getTopic().getName()
+			print("Stoping subscriber for topic " + self.sub.getTopic().getName())
 			self.sub.stop()
 		else:
-			print "Subscriber must be created first!!"
+			print("Subscriber must be created first!!")
 
 
 
@@ -192,6 +192,7 @@ def WriteToAllSelected():
 
 		if info.TypeName == pizza.PizzaData.TypeName:
 			info.helper.data.cheese = "Pizza from Python: " + str(WriteToAllSelected.Counter)
+			##info.helper.data.spareBytes = [1,2,3,4]	#test
 
 		if info.TypeName == pizza.VessuvioData.TypeName:
 			info.helper.data.cheese = "Vessuvio from Python: " + str(WriteToAllSelected.Counter)
@@ -215,24 +216,24 @@ def ResendToAllSelected():
 
 def menu():
 	for i,k in enumerate(ItemInfoList):
-		print ("\t %s " % i) + str(k)
-	print ""
-	print "\t PC    Create Publishers"
-	print "\t PD    Delete Publishers"
-	print "\t PS    Start Publishers"
-	print "\t PT    Stop Publishers"
-	print "\t SC    Create Subscriber"
-	print "\t SD    Delete Subscriber"
-	print "\t SS    Start Subscriber"
-	print "\t ST    Stop Subscriber"
-	print "\t L num Set num Vessuvio Bytes [%s]" % NumVessuvioBytes
-	print "\t T ms  Set deadline timeout [ms]"
-	print "\t V ms  Set send period [ms] [%s]" % sendPeriod
-	print "\t A     Start/Stop periodical Write with set period"
-	print "\t W     Write data"
-	print "\t R     Resend data"
-	print "\t Q     Quite (minimize program output)"
-	print "\t X     Exit program"
+		print( ("\t %s " % i) + str(k))
+	print("")
+	print("\t PC    Create Publishers")
+	print("\t PD    Delete Publishers")
+	print("\t PS    Start Publishers")
+	print("\t PT    Stop Publishers")
+	print("\t SC    Create Subscriber")
+	print("\t SD    Delete Subscriber")
+	print("\t SS    Start Subscriber")
+	print("\t ST    Stop Subscriber")
+	print("\t L num Set num Vessuvio Bytes [%s]" % NumVessuvioBytes)
+	print("\t T ms  Set deadline timeout [ms]")
+	print("\t V ms  Set send period [ms] [%s]" % sendPeriod)
+	print("\t A     Start/Stop periodical Write with set period")
+	print("\t W     Write data")
+	print("\t R     Resend data")
+	print("\t Q     Quite (minimize program output)")
+	print("\t X     Exit program")
 
 
 
@@ -260,13 +261,13 @@ ItemInfoList[0].selected = True
 
 participant = Participant.Participant.getInstance("PizzaDomain", "PizzaDomain")
 if participant == None:
-	print "Failed to create Participant. Missing ops_config.xml ??"
+	print("Failed to create Participant. Missing ops_config.xml ??")
 	sys.exit(-1)
 participant.addTypeSupport(PizzaProjectTypeFactory.PizzaProjectTypeFactory())
 
 otherParticipant = Participant.Participant.getInstance("OtherPizzaDomain", "OtherPizzaDomain")
 if otherParticipant == None:
-	print "Failed to create Participant. Missing ops_config.xml ??"
+	print("Failed to create Participant. Missing ops_config.xml ??")
 	sys.exit(-1)
 otherParticipant.addTypeSupport(PizzaProjectTypeFactory.PizzaProjectTypeFactory())
 
@@ -287,20 +288,32 @@ for info in ItemInfoList:
 		info.helper.data = pizza_special.ExtraAllt()
 		info.helper.callback = onExtraAllt
 	else:
-		print "no matching typename for " + info.TypeName
+		print("no matching typename for " + info.TypeName)
 
 	if info.Domain == "PizzaDomain":
 		info.part = participant
 	elif info.Domain == "OtherPizzaDomain":
 		info.part = otherParticipant
 	else:
-		print "no matching domain for " + info.Domain
+		print("no matching domain for " + info.Domain)
 
 doExit = False
 menu()
+p3 = False
 
 while not doExit:
-	commands = re.split(" |\t", raw_input(" (? = menu) > ").upper())
+	if p3 == False:
+		try:
+			inp = raw_input(" (? = menu) > ")
+		except NameError:
+			p3 = True
+	if p3 == True:
+		try:
+			inp = input(" (? = menu) > ")
+		except NameError:
+			p3 = False
+
+	commands = re.split(" |\t", inp.upper())
 
 	while len(commands)>0:
 
@@ -309,7 +322,7 @@ while not doExit:
 			if 0 <= index < len(ItemInfoList):
 				ItemInfoList[index].selected = not ItemInfoList[index].selected
 			else:
-				print "ERROR: Index to large. Max = %s" % (len(ItemInfoList)-1)
+				print("ERROR: Index to large. Max = %s" % (len(ItemInfoList)-1))
 			del commands[0]
 
 		elif (commands[0]=="?"):
@@ -379,11 +392,12 @@ while not doExit:
 		elif (commands[0]=="L"):
 			if commands[1].isdigit():
 				num = int(commands[1])
+				print("length=",num)
 				if num>=0:
 					FillerStr=" "*num
 					NumVessuvioBytes = num
-			del commands[0:1]
+			del commands[0:2]
 
 		else:
-			print "unknown command: " + commands[0]
+			print("unknown command: " + commands[0])
 			del commands[0]
