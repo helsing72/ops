@@ -215,7 +215,7 @@ namespace ops
                 vec.reserve(size);
                 for (int i = 0; i < size; i++)
                 {
-                    vec.push_back((SerializableType*) inout(name, (Serializable*) NULL, i));
+                    vec.push_back((SerializableType*) inout(name, (Serializable*) nullptr, i));
                 }
             }
             else

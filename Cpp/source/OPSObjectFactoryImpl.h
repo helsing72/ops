@@ -80,7 +80,7 @@ namespace ops
 				return new opsidls::DebugRequestResponseData();
 			}
 #endif
-			return NULL;
+			return nullptr;
         }
     };
 

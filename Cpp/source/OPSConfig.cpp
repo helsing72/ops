@@ -41,8 +41,8 @@ namespace ops
 			return getConfig(inStream);
 		} else {
 #ifdef _WIN32
-			char* buffer = NULL;
-			buffer = _getcwd(NULL, 0);
+			char* buffer = nullptr;
+			buffer = _getcwd(nullptr, 0);
 			if (buffer) {
 				ErrorMessage_T msg("Failed to open ");
 				msg += configFile;
@@ -53,7 +53,7 @@ namespace ops
 			}
 #endif
 		}
-		return NULL;
+		return nullptr;
 	}
 #endif
 
@@ -66,7 +66,7 @@ namespace ops
 	OPSConfig* OPSConfig::getConfig(std::istream& inStream)
 	{
 		XMLArchiverIn archiver(inStream, "root", OPSObjectFactory::getInstance());
-		OPSConfig* theConfig = NULL;
+		OPSConfig* theConfig = nullptr;
 		return (OPSConfig*)archiver.inout("ops_config", theConfig);
 	}
 

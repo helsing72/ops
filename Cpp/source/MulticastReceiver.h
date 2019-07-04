@@ -46,9 +46,9 @@ namespace ops
 		  _ipaddress(mcAddress),
 		  _localInterface(localInterface),
 		  _inSocketBufferSizent(inSocketBufferSizent),
-		  sock(NULL), localEndpoint(NULL),
+		  sock(nullptr), localEndpoint(nullptr),
 		  max_length(65535),
-		  data(NULL),
+		  data(nullptr),
 		  cancelled(false), m_asyncCallActive(false), m_working(false)
 		{
 			boost::asio::io_service* ioService = dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService;

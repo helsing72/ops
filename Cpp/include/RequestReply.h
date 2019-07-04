@@ -67,7 +67,7 @@ namespace ops
 					}
 				}
 			}
-			return NULL;
+			return nullptr;
 		}
 		~RequestReply()
 		{

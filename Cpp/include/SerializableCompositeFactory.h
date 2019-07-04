@@ -57,12 +57,12 @@ public:
 
 	virtual Serializable* create(const TypeId_T& type)
 	{
-        Serializable* obj = NULL;
+        Serializable* obj = nullptr;
 
 		for(unsigned int i = 0; i < childFactories.size(); i++ )
 		{
 			obj = childFactories[i]->create(type);
-			if(obj != NULL)
+			if(obj != nullptr)
 			{
 				return obj;
 			}

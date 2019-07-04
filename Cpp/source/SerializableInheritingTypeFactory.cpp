@@ -47,11 +47,11 @@ namespace ops
 
 		for (unsigned int i = 0; i < types.size(); i++) {
 			Serializable* serializable = SerializableCompositeFactory::create(types[i]);
-			if (serializable != NULL) {
+			if (serializable != nullptr) {
 				return serializable;
 			}
 		}
-		return NULL;
+		return nullptr;
 	}
 
 }

@@ -48,7 +48,7 @@ namespace ops
         {
             SafeLock lock(&mutex);
             delete sender;
-			sender = NULL;
+			sender = nullptr;
         }
 
     };

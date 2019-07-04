@@ -131,7 +131,7 @@ namespace ops
 			TypeId_T types;
 			buf->ReadString(types);
             Serializable* newSer = factory->create(types);
-            if (newSer != NULL) {
+            if (newSer != nullptr) {
                 newSer->serialize(this);
             }
             return newSer;
@@ -140,14 +140,14 @@ namespace ops
         Serializable* inout(InoutName_T name, Serializable* value)
         {
             UNUSED(name)
-            if (value != NULL)//Either we do this or we initiialize object to NULL in generated code.
+            if (value != nullptr)//Either we do this or we initialize object to nullptr in generated code.
             {
                 delete value;
             }
 			TypeId_T types;
 			buf->ReadString(types);
             Serializable* newSer = factory->create(types);
-            if (newSer != NULL) {
+            if (newSer != nullptr) {
                 //Do this to preserve type information even if slicing has occured.
                 ((OPSObject*) newSer)->typesString = types;
 

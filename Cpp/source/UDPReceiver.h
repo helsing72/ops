@@ -41,7 +41,7 @@ namespace ops
     public:
 
         UDPReceiver(int bindPort, IOService* ioServ, Address_T localInterface = "0.0.0.0", int64_t inSocketBufferSizent = 16000000) :
-	        sock(NULL), localEndpoint(NULL), max_length(65535), data(nullptr),
+	        sock(nullptr), localEndpoint(nullptr), max_length(65535), data(nullptr),
 			cancelled(false), m_asyncCallActive(false), m_working(false)
         {
             boost::asio::io_service* ioService = dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService;
