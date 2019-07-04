@@ -242,3 +242,4 @@ class OPS_Archiver_Out(Archiver_Out):
 	def Spare(self,data):
 		if data is not None:
 			self.buffer[self.index : ] = data
+			self.index += len(data)

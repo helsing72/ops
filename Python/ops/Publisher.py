@@ -7,8 +7,8 @@ from ops.Constants import *
 
 class Publisher(object):
 	@staticmethod
-	def chunkstring(string, length):
-		return [string[0+i:length+i] for i in range(0, len(string), length)]
+	def chunkstring(string, length, limit):
+		return [string[0+i:min(length,limit+i)] for i in range(0, length, limit)]
 
 	@staticmethod
 	def create(domainID,topicname):
@@ -42,7 +42,7 @@ class Publisher(object):
 		archiver.Ops("message",self.message)
 		archiver.Spare(data.spareBytes)
 
-		blocks = Publisher.chunkstring(archiver.buffer,PACKET_MAX_SIZE - SEGMENTSIZE)
+		blocks = Publisher.chunkstring(archiver.buffer,archiver.index,PACKET_MAX_SIZE - SEGMENTSIZE)
 		for i in range(len(blocks)):
 			segment = Segment()
 			segment.NumberOfSegments = len(blocks)
