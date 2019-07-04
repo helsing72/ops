@@ -811,9 +811,9 @@ public class PythonCompiler extends opsc.CompilerSupport
         if (type.equals("byte") || type.equals("short") || type.equals("int"))
             return "int";
         if (type.equals("long"))
-            return "(int,long)";
+            return "integer_types"; // Defined in the 'pythonpackagetemplate.tpl' to handle Python2/3 differences
         if (type.equals("float") || type.equals("double"))
-            return "(float,int,long)";
+            return "numeric_types"; // Defined in the 'pythonpackagetemplate.tpl' to handle Python2/3 differences
         if (type.equals("string"))
             return "str";
         if (type.equals("boolean"))
