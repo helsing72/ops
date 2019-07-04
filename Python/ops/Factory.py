@@ -1,5 +1,5 @@
-import opsTypes
-import ParticipantInfoData
+import ops.opsTypes
+import ops.ParticipantInfoData
 
 class AbstractFactory(object):
 	def __init__(self):
@@ -19,15 +19,23 @@ class BasicFactory(AbstractFactory):
 
 	def create(self,typesString):
 		#print "Factory:create",typesString
+		try:
+			typs = self.types.iteritems()
+		except AttributeError:
+			typs = self.types.items()	# Python 2 and 3 difference
 		for s in typesString.split(' '):
-			for k, v in self.types.iteritems():
+			for k, v in typs:
 				if k == s:
 					return v()
 		return None
 
 	def __str__(self):
 		string = "Factory"
-		for k, v in self.types.iteritems():
+		try:
+			typs = self.types.iteritems()
+		except AttributeError:
+			typs = self.types.items()	# Python 2 and 3 difference
+		for k, v in typs:
 			string += "\n  " + k
 		return string
 
@@ -48,12 +56,12 @@ class OpsDefaultFactory(CompositFactory):
 	def __init__(self):
 		super(OpsDefaultFactory, self).__init__()
 		b = BasicFactory()
-		b.addType('ops.protocol.OPSMessage',opsTypes.Message)
-		b.addType('Topic',opsTypes.Topic)
-		b.addType('Channel',opsTypes.Channel)
-		b.addType('Transport',opsTypes.Transport)
-		b.addType('Domain',opsTypes.Domain)
-		b.addType("MulticastDomain",opsTypes.Domain)
-		b.addType("DefaultOPSConfigImpl",opsTypes.DefaultOPSConfigImpl)
-		b.addType("ops.ParticipantInfoData", ParticipantInfoData.ParticipantInfoData)
+		b.addType('ops.protocol.OPSMessage',ops.opsTypes.Message)
+		b.addType('Topic',ops.opsTypes.Topic)
+		b.addType('Channel',ops.opsTypes.Channel)
+		b.addType('Transport',ops.opsTypes.Transport)
+		b.addType('Domain',ops.opsTypes.Domain)
+		b.addType("MulticastDomain",ops.opsTypes.Domain)
+		b.addType("DefaultOPSConfigImpl",ops.opsTypes.DefaultOPSConfigImpl)
+		b.addType("ops.ParticipantInfoData", ops.ParticipantInfoData.ParticipantInfoData)
 		self.addFactory(b)

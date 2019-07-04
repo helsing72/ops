@@ -1,7 +1,7 @@
-from opsTypes import Message
-from Participant import Participant
-from OPS_Archiver import OPS_Archiver_In
-from Constants import *
+from ops.opsTypes import Message
+from ops.Participant import Participant
+from ops.OPS_Archiver import OPS_Archiver_In
+from ops.Constants import *
 
 class Subscriber(object):
 	def __init__(self,topic):

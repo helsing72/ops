@@ -1,8 +1,8 @@
-from opsTypes import Config,Topic
-from Factory import OpsDefaultFactory
-import SendDataHandler
-import ReceiveDataHandler
-import ParticipantInfoData
+from ops.opsTypes import Config,Topic
+from ops.Factory import OpsDefaultFactory
+import ops.SendDataHandler
+import ops.ReceiveDataHandler
+import ops.ParticipantInfoData
 
 from socket import gethostname
 from os import getpid
@@ -35,7 +35,7 @@ class Participant(object):
 		self.domain = self.config.getDomain(domainID)
 		self.objectFactory = OpsDefaultFactory()
 
-		self.partInfoData = ParticipantInfoData.ParticipantInfoData()
+		self.partInfoData = ops.ParticipantInfoData.ParticipantInfoData()
 
 		self.partInfoData.name = gethostname() + "(" + str(getpid()) + ")"
 		self.partInfoData.languageImplementation = "Python"
@@ -56,9 +56,9 @@ class Participant(object):
 	def addTypeSupport(self,typeSupport):
 		self.objectFactory.addFactory(typeSupport)
 	def getSendDataHandler(self,topic):
-		return SendDataHandler.getSendDataHandler(self,topic)
+		return ops.SendDataHandler.getSendDataHandler(self,topic)
 	def getReceiveDataHandler(self,topic):
-		return ReceiveDataHandler.getReceiveDataHandler(self,topic)
+		return ops.ReceiveDataHandler.getReceiveDataHandler(self,topic)
 
 	def createParticipantInfoTopic(self):
 		topic = Topic()

@@ -1,6 +1,6 @@
 #import Factory
 #from XML_Archiver import XML_Archiver_In
-from Constants import *
+from ops.Constants import *
 import copy
 
 class ConfigError(Exception):
@@ -266,7 +266,7 @@ class Transport(OPS_Object):
 				raise ValueError()
 
 
-from XML_Archiver import XML_Archiver_In
+from ops.XML_Archiver import XML_Archiver_In
 
 class Domain(OPS_Object):
 	"""docstring for Domain"""
@@ -395,7 +395,7 @@ class Domain(OPS_Object):
 						chn.populateTopic(top)
 
 
-import Factory
+import ops.Factory
 
 class Config(OPS_Object):
 	def __init__(self):
@@ -411,7 +411,7 @@ class Config(OPS_Object):
 
 	@staticmethod
 	def getConfig(filename="ops_config.xml"):
-		xmlArchiver = XML_Archiver_In(Factory.OpsDefaultFactory(),filename,"root")
+		xmlArchiver = XML_Archiver_In(ops.Factory.OpsDefaultFactory(),filename,"root")
 		config = xmlArchiver.Ops("ops_config",None)
 		return config
 

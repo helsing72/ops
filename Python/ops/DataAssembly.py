@@ -1,5 +1,20 @@
 import struct
-import OPS_Archiver
+import sys
+
+import ops.OPS_Archiver
+
+#Helper to handle Python 2 and 3 differences
+if sys.version_info < (3,):
+	def b(x):
+		return x
+	def zzz(x):
+		return x
+else:
+	import codecs
+	def b(x):
+		return codecs.latin_1_encode(x)[0]
+	def zzz(x):
+		return codecs.latin_1_decode(x)[0]
 
 class Segment(object):
 	"""docstring for OPS_Segment"""
@@ -17,7 +32,6 @@ class Segment(object):
 			self.data=None
 		else:
 			self.deserialize(data)
-		
 
 	def __str__(self):
 		return "OPS_Segment:\n  type=%s\n  version=%s\n  NumberOfSegments=%s\n  currentSegment=%s" % (self.type,self.version,self.NumberOfSegments,self.currentSegment)
@@ -26,10 +40,12 @@ class Segment(object):
 		return (self.type==self.OPS_IDENTIFIER) and (self.version==self.OPS_CURRENT_VERSION)
 
 	def serialize(self):
-		return struct.pack('<4shii',self.type,self.version,self.NumberOfSegments,self.currentSegment)
+		return struct.pack('<4shii',b(self.type),self.version,self.NumberOfSegments,self.currentSegment)
 
 	def deserialize(self,bs):
-		self.type,self.version,self.NumberOfSegments,self.currentSegment = struct.unpack_from('<4shii',bs)
+		typ,self.version,self.NumberOfSegments,self.currentSegment = struct.unpack_from('<4shii',bs)
+		self.type = zzz(typ)
+		##print(self)
 		self.data=bs[struct.calcsize('<4shii') : ]
 
 class Assembler(object):
@@ -66,7 +82,10 @@ class Assembler(object):
 		return True
 
 	def createOPS(self,factory):
-		data = OPS_Archiver.OPS_Archiver_In(factory,"".join(self.buffers))
+		if sys.version_info < (3,):
+			data = ops.OPS_Archiver.OPS_Archiver_In(factory,"".join(self.buffers))
+		else:
+			data = ops.OPS_Archiver.OPS_Archiver_In(factory,b''.join(self.buffers))
 		message = data.Ops("message",None)
 		message.spareBytes = data.Spare()
 		return message

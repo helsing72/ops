@@ -1,9 +1,9 @@
-from Participant import Participant
-from opsTypes import Message
+from ops.Participant import Participant
+from ops.opsTypes import Message
 
-from OPS_Archiver import OPS_Archiver_Out
-from DataAssembly import Segment
-from Constants import *
+from ops.OPS_Archiver import OPS_Archiver_Out
+from ops.DataAssembly import Segment
+from ops.Constants import *
 
 class Publisher(object):
 	@staticmethod

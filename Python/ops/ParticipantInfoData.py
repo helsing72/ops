@@ -1,4 +1,4 @@
-from opsTypes import OPS_Object
+from ops.opsTypes import OPS_Object
 
 class TopicInfoData(OPS_Object):
 	def __init__(self,topic=None):

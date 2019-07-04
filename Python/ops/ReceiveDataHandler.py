@@ -1,11 +1,14 @@
 #ReceiveDataHandler
 
 import socket
-import thread
+try:
+	import thread
+except ImportError:
+	import _thread as thread	# module renamed in Python3
 
-import Support
-from Constants import *
-import DataAssembly
+import ops.Support
+from ops.Constants import *
+import ops.DataAssembly
 
 class AbstractReceiveDataHandler(object):
 	def __init__(self,localInterface,topic):
@@ -16,19 +19,21 @@ class AbstractReceiveDataHandler(object):
 		self.subscrubers = set()
 
 	def segmentReceived(self,data,addr):
-		segment = DataAssembly.Segment(data)
+		segment = ops.DataAssembly.Segment(data)
 		if segment.isValid():
 			if (self.assembler==None):
-				self.assembler = DataAssembly.Assembler()
+				self.assembler = ops.DataAssembly.Assembler()
 
 			if (self.assembler.addSegment(segment)==False):
-				self.assembler = DataAssembly.Assembler()
+				self.assembler = ops.DataAssembly.Assembler()
 			else:
 				if (self.assembler.isFull()):
 					obj = self.assembler.createOPS(self.topic.participant.objectFactory)
 					obj.setSource(addr)
 					self.distributeMessage(obj)
 					self.assembler = None
+		else:
+			print("Not a valid segment")
 
 	def addSubscriber(self,subs):
 		self.subscrubers.add(subs)
@@ -63,8 +68,8 @@ class UdpReceiveDataHandler(AbstractReceiveDataHandler):
 		sock.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
 		sock.bind(('',self.topic.port))
 
-  		if self.topic.inSocketBufferSize > 0:
-  			sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, self.topic.inSocketBufferSize)
+		if self.topic.inSocketBufferSize > 0:
+			sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, self.topic.inSocketBufferSize)
 
 		while self.shouldRun:
 			try:
@@ -88,8 +93,8 @@ class McReceiveDataHandler(AbstractReceiveDataHandler):
 		iface = socket.inet_aton(self.localInterface)
 
 		sock.setsockopt(socket.IPPROTO_IP,socket.IP_ADD_MEMBERSHIP,group + iface)
-  		if self.topic.inSocketBufferSize > 0:
-  			sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, self.topic.inSocketBufferSize)
+		if self.topic.inSocketBufferSize > 0:
+			sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, self.topic.inSocketBufferSize)
 
 		while self.shouldRun:
 			try:
@@ -119,9 +124,9 @@ def getReceiveDataHandler(participant,topic):
 			else:
 				message += "Same port (%s)" % topic.port
 			message += " is used with Topics with 'sampleMaxSize' > %s" % PACKET_MAX_SIZE
-			print message
+			print(message)
 	else:
-		localInterface = Support.doSubnetTranslation(topic.localInterface)
+		localInterface = ops.Support.doSubnetTranslation(topic.localInterface)
 		if topic.transport == TRANSPORT_MC:
 			rdh = McReceiveDataHandler(localInterface,topic)
 		if topic.transport == TRANSPORT_UDP:

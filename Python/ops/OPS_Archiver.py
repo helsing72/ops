@@ -1,5 +1,20 @@
-from Archiver import Archiver_In,Archiver_Out
 import struct
+import sys
+
+from ops.Archiver import Archiver_In,Archiver_Out
+
+#Helper to handle Python 2 and 3 differences
+if sys.version_info < (3,):
+	def b(x):
+		return x
+	def zzz(x):
+		return x
+else:
+	import codecs
+	def b(x):
+		return codecs.latin_1_encode(x)[0]
+	def zzz(x):
+		return codecs.latin_1_decode(x)[0]
 
 class OPS_Archiver_In(Archiver_In):
 	def __init__(self,factory,data):
@@ -44,13 +59,13 @@ class OPS_Archiver_In(Archiver_In):
 	def String(self,name,value):
 		fmt = '<%ss' % struct.unpack_from('<i',self.buffer,self.index)[0]
 		self.index += struct.calcsize('<i')
-		res =  struct.unpack_from(fmt,self.buffer,self.index)[0]
+		res = zzz(struct.unpack_from(fmt,self.buffer,self.index)[0])
 		self.index += struct.calcsize(fmt)
 		return res
 	def Ops(self,name,value,prototype=None):
 		fmt = '<%ss' % struct.unpack_from('<i',self.buffer,self.index)[0]
 		self.index += struct.calcsize('<i')
-		typename =  struct.unpack_from(fmt,self.buffer,self.index)[0]
+		typename = zzz(struct.unpack_from(fmt,self.buffer,self.index)[0])
 		self.index += struct.calcsize(fmt)
 
 		res = None
@@ -112,7 +127,7 @@ class OPS_Archiver_In(Archiver_In):
 		for i in range(stringCount):
 			fmt = '<%ss' % struct.unpack_from('<i',self.buffer,self.index)[0]
 			self.index += struct.calcsize('<i')
-			value.append(struct.unpack_from(fmt,self.buffer,self.index)[0])
+			value.append(zzz(struct.unpack_from(fmt,self.buffer,self.index)[0]))
 			self.index += struct.calcsize(fmt)
 	def OpsVector(self,name,value,prototype=None):
 		del value[:]
@@ -124,7 +139,7 @@ class OPS_Archiver_In(Archiver_In):
 				value.append(res)
 
 	def Spare(self):
- 		return self.buffer[self.index : ]
+		return self.buffer[self.index : ]
 
 
 class OPS_Archiver_Out(Archiver_Out):
@@ -169,13 +184,13 @@ class OPS_Archiver_Out(Archiver_Out):
 		return value
 	def String(self,name,value):
 		fmt = '<i%ss' % len(value)
-		struct.pack_into(fmt,self.buffer,self.index,len(value),value)
+		struct.pack_into(fmt,self.buffer,self.index,len(value),b(value))
 		self.index += struct.calcsize(fmt)
 		return value
 	def Ops(self,name,value,prototype=None):
 		typesString = value.typesString
 		fmt = '<i%ss' % len(typesString)
-		struct.pack_into(fmt,self.buffer,self.index,len(typesString),typesString)
+		struct.pack_into(fmt,self.buffer,self.index,len(typesString),b(typesString))
 		self.index += struct.calcsize(fmt)
 		value.serialize(self)
 		return value
@@ -213,7 +228,7 @@ class OPS_Archiver_Out(Archiver_Out):
 		self.index += struct.calcsize('<i')
 		for itr in value:
 			fmt = '<i%ss' % len(itr)
-			struct.pack_into(fmt,self.buffer,self.index,len(itr),itr)
+			struct.pack_into(fmt,self.buffer,self.index,len(itr),b(itr))
 			self.index += struct.calcsize(fmt)
 	def OpsVector(self,name,value,prototype=None):
 		struct.pack_into('<i',self.buffer,self.index,len(value))
@@ -221,13 +236,9 @@ class OPS_Archiver_Out(Archiver_Out):
 		for itr in value:
 			typesString = itr.typesString
 			fmt = '<i%ss' % len(typesString)
-			struct.pack_into(fmt,self.buffer,self.index,len(typesString),typesString)
+			struct.pack_into(fmt,self.buffer,self.index,len(typesString),b(typesString))
 			self.index += struct.calcsize(fmt)
 			itr.serialize(self)
 	def Spare(self,data):
 		if data is not None:
 			self.buffer[self.index : ] = data
-		else:
-			self.buffer[self.index : ] = ""
- 		
-

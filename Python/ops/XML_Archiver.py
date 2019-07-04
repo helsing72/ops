@@ -1,6 +1,6 @@
-from Archiver import Archiver_In,Archiver_Out
 import xml.etree.ElementTree as ET
-#import ops
+
+from ops.Archiver import Archiver_In,Archiver_Out
 
 class XML_Archiver_In(Archiver_In):
 	def __init__(self,factory,filename,rootName):
@@ -61,11 +61,11 @@ class XML_Archiver_In(Archiver_In):
 		if prototype is not None:
 			value = prototype()
 		else:
-	 		value = self.factory.create(typename)
+			value = self.factory.create(typename)
 
-	 	if value is not None:
-	 		value.serialize(self)
-	 	return value
+		if value is not None:
+			value.serialize(self)
+		return value
 
 
 	def Ops(self,name,value,prototype=None):
@@ -145,8 +145,8 @@ class XML_Archiver_In(Archiver_In):
 		if newNode is not None:
 			self.stack.append(newNode)
 			for node in self.stack[-1].findall('element'):
-		 		value.append(node.text)
-		 	self.stack.pop()
+				value.append(node.text)
+			self.stack.pop()
 
 	def OpsVector(self,name,values,prototype=None):
 		del values[:]
@@ -155,10 +155,10 @@ class XML_Archiver_In(Archiver_In):
 			self.stack.append(newNode)
 			for node in self.stack[-1].findall('element'):
 				self.stack.append(node)
-		 		data = self.__Ops(None,prototype)
-		 		values.append(data)
-		 		self.stack.pop()
-		 	self.stack.pop()
+				data = self.__Ops(None,prototype)
+				values.append(data)
+				self.stack.pop()
+			self.stack.pop()
 
 class XML_Archiver_Out(Archiver_Out):
 	def __init__(self,filename,rootName):
@@ -188,79 +188,79 @@ class XML_Archiver_Out(Archiver_Out):
 		text = self.getIndent() + ("</%s>\n"  % name)
 		self.file.write(text)
 
- 	def Bool(self,name,value):
- 		self.String(name,str(value))
- 		return value
- 	def Int8(self,name,value):
- 		self.String(name,str(value))
- 		return value
- 	def Int16(self,name,value):
- 		self.String(name,str(value))
- 		return value
- 	def Int32(self,name,value):
- 		self.String(name,str(value))
- 		return value
- 	def Int64(self,name,value):
- 		self.String(name,str(value))
- 		return value
- 	def Float32(self,name,value):
- 		self.String(name,str(value))
- 		return value
- 	def Float64(self,name,value):
- 		self.String(name,str(value))
- 		return value
- 	def String(self,name,value):
- 		text = self.getIndent() + "<%s>%s</%s>\n" % (name,value,name)
- 		self.file.write(text)
- 		return value
- 	def Ops(self,name,value,prototype=None):
- 		self.beginTag(name,{'type' : value.typesString})
- 		value.serialize(self)
- 		self.closeTag(name)
- 		return value
+	def Bool(self,name,value):
+		self.String(name,str(value))
+		return value
+	def Int8(self,name,value):
+		self.String(name,str(value))
+		return value
+	def Int16(self,name,value):
+		self.String(name,str(value))
+		return value
+	def Int32(self,name,value):
+		self.String(name,str(value))
+		return value
+	def Int64(self,name,value):
+		self.String(name,str(value))
+		return value
+	def Float32(self,name,value):
+		self.String(name,str(value))
+		return value
+	def Float64(self,name,value):
+		self.String(name,str(value))
+		return value
+	def String(self,name,value):
+		text = self.getIndent() + "<%s>%s</%s>\n" % (name,value,name)
+		self.file.write(text)
+		return value
+	def Ops(self,name,value,prototype=None):
+		self.beginTag(name,{'type' : value.typesString})
+		value.serialize(self)
+		self.closeTag(name)
+		return value
 
- 	def BoolVector(self,name,value):
- 		self.beginTag(name)
- 		for v in value:
- 			self.String("element",str(v))
- 		self.closeTag(name)
- 	def Int8Vector(self,name,value):
- 		self.beginTag(name)
- 		for v in value:
- 			self.String("element",str(v))
- 		self.closeTag(name)
- 	def Int16Vector(self,name,value):
- 		self.beginTag(name)
- 		for v in value:
- 			self.String("element",str(v))
- 		self.closeTag(name)
- 	def Int32Vector(self,name,value):
- 		self.beginTag(name)
- 		for v in value:
- 			self.String("element",str(v))
- 		self.closeTag(name)
- 	def Int64Vector(self,name,value):
- 		self.beginTag(name)
- 		for v in value:
- 			self.String("element",str(v))
- 		self.closeTag(name)
- 	def Float32Vector(self,name,value):
- 		self.beginTag(name)
- 		for v in value:
- 			self.String("element",str(v))
- 		self.closeTag(name)
- 	def Float64Vector(self,name,value):
- 		self.beginTag(name)
- 		for v in value:
- 			self.String("element",str(v))
- 		self.closeTag(name)
- 	def StringVector(self,name,value):
- 		self.beginTag(name)
- 		for v in value:
- 			self.String("element",v)
- 		self.closeTag(name)
- 	def OpsVector(self,name,value,prototype=None):
- 		self.beginTag(name)
- 		for v in value:
- 			self.Ops("element",v)
- 		self.closeTag(name)
+	def BoolVector(self,name,value):
+		self.beginTag(name)
+		for v in value:
+			self.String("element",str(v))
+		self.closeTag(name)
+	def Int8Vector(self,name,value):
+		self.beginTag(name)
+		for v in value:
+			self.String("element",str(v))
+		self.closeTag(name)
+	def Int16Vector(self,name,value):
+		self.beginTag(name)
+		for v in value:
+			self.String("element",str(v))
+		self.closeTag(name)
+	def Int32Vector(self,name,value):
+		self.beginTag(name)
+		for v in value:
+			self.String("element",str(v))
+		self.closeTag(name)
+	def Int64Vector(self,name,value):
+		self.beginTag(name)
+		for v in value:
+			self.String("element",str(v))
+		self.closeTag(name)
+	def Float32Vector(self,name,value):
+		self.beginTag(name)
+		for v in value:
+			self.String("element",str(v))
+		self.closeTag(name)
+	def Float64Vector(self,name,value):
+		self.beginTag(name)
+		for v in value:
+			self.String("element",str(v))
+		self.closeTag(name)
+	def StringVector(self,name,value):
+		self.beginTag(name)
+		for v in value:
+			self.String("element",v)
+		self.closeTag(name)
+	def OpsVector(self,name,value,prototype=None):
+		self.beginTag(name)
+		for v in value:
+			self.Ops("element",v)
+		self.closeTag(name)

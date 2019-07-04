@@ -1,6 +1,7 @@
 import socket
-import Support
-from Constants import *
+
+import ops.Support
+from ops.Constants import *
 
 class AbstractSendDataHandler(object):
 	def __init__(self):
@@ -31,9 +32,9 @@ class UdpSendDataHandler(AbstractSendDataHandler):
 	def __init__(self,topic):
 		super(UdpSendDataHandler,self).__init__()
 		self.sendAddress = (topic.domainAddress, topic.port)
-  		self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-  		if topic.outSocketBufferSize > 0:
-  			self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, topic.outSocketBufferSize)
+		self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+		if topic.outSocketBufferSize > 0:
+			self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, topic.outSocketBufferSize)
 
 	def sendData(self,block,topic):
 		if self.socket is None:
@@ -53,11 +54,11 @@ class McSendDataHandler(AbstractSendDataHandler):
 	def __init__(self,localInterface,topic,ttl):
 		super(McSendDataHandler,self).__init__()
 		self.sendAddress = (topic.domainAddress, topic.port)
-  		self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-  		self.socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, ttl)
-  		self.socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_IF, socket.inet_aton(localInterface))
-  		if topic.outSocketBufferSize > 0:
-  			self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, topic.outSocketBufferSize)
+		self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+		self.socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, ttl)
+		self.socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_IF, socket.inet_aton(localInterface))
+		if topic.outSocketBufferSize > 0:
+			self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, topic.outSocketBufferSize)
 
 	def sendData(self,block,topic):
 		if self.socket is None:
@@ -65,7 +66,7 @@ class McSendDataHandler(AbstractSendDataHandler):
 		self.socket.sendto(block,self.sendAddress)
 
 def getSendDataHandler(participant,topic):
-	localInterface = Support.doSubnetTranslation(topic.localInterface)
+	localInterface = ops.Support.doSubnetTranslation(topic.localInterface)
 
 	if topic.transport == TRANSPORT_MC:
 		return McSendDataHandler(localInterface,topic,topic.timeToLive)
