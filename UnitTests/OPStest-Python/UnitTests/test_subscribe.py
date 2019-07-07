@@ -120,10 +120,10 @@ class CHelper(object):
 
 	def CreateSubscriber(self,part,topicName):
 		if self.sub is not None:
-			print "Subscriber already exist for topic " + self.sub.getTopic().getName()
+			print("Subscriber already exist for topic " + self.sub.getTopic().getName())
 		else:
 			topic = part.createTopic(topicName);
-			print "Created topic " + topic.name + " [" + topic.transport + "." + topic.domainAddress +"." + str(topic.port) + "]"
+			print("Created topic " + topic.name + " [" + topic.transport + "." + topic.domainAddress +"." + str(topic.port) + "]")
 			self.sub = Subscriber.Subscriber(topic)
 			#self.sub.addCallback(self.listener.onNewData)
 			if self.callback is not None:
@@ -131,7 +131,7 @@ class CHelper(object):
 			self.sub.start()
 			
 	def DeleteSubscriber(self,doLog = True):
-		print "Deleting subscriber for topic " + self.sub.getTopic().getName()
+		print("Deleting subscriber for topic " + self.sub.getTopic().getName())
 		self.sub.stop();
 		self.sub = None;
 
@@ -159,7 +159,7 @@ ItemInfoList.append(ItemInfo("PizzaDomain", "ExtraAlltTopic", "pizza.special.Ext
 
 participant = Participant.Participant.getInstance("PizzaDomain", "PizzaDomain", "ops_config.xml")
 if participant == None:
-	print "Failed to create Participant. Missing ops_config.xml ??"
+	print("Failed to create Participant. Missing ops_config.xml ??")
 	sys.exit(-1)
 participant.addTypeSupport(PizzaProjectTypeFactory.PizzaProjectTypeFactory())
 

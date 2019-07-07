@@ -17,7 +17,7 @@ import InitData
 delta = 0.00001
 
 def test_extraAllt():
-	print "testing extra allt"
+	print("testing extra allt")
 	
 	m_factory = PizzaProjectTypeFactory.PizzaProjectTypeFactory()
 	
@@ -125,7 +125,7 @@ def test_extraAllt():
 	
 def test_vessuvio():
 	m_factory = PizzaProjectTypeFactory.PizzaProjectTypeFactory()
-	print "testing vessuvio"
+	print("testing vessuvio")
 	vessuvioData = InitData.initVessuvioData()
 
 	#serialize

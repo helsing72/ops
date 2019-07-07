@@ -1,4 +1,13 @@
 #Auto generated OPS-code. DO NOT MODIFY!
+import sys
+#Helper for handling Python 2 and 3 differences
+if sys.version_info < (3,):
+  integer_types = (int, long,)
+  numeric_types = (float, int, long,)
+else:
+  integer_types = (int,)
+  numeric_types = (float, int,)
+
 from ops.opsTypes import OPS_Object
 from pizza import CapricosaData
 from pizza import PizzaData
@@ -99,7 +108,7 @@ class ExtraAllt(LHCData):
 			raise ValueError()
 		if not isinstance(self.meetQuality,int):
 			raise ValueError()
-		if not isinstance(self.timestamp,(int,long)):
+		if not isinstance(self.timestamp,integer_types):
 			raise ValueError()
 		if not isinstance(self.timeBakedHours,float):
 			raise ValueError()
@@ -119,7 +128,7 @@ class ExtraAllt(LHCData):
 			if not isinstance(x,int):
 				raise ValueError()
 		for x in self.longs:
-			if not isinstance(x,(int,long)):
+			if not isinstance(x,integer_types):
 				raise ValueError()
 		for x in self.floats:
 			if not isinstance(x,float):
@@ -133,4 +142,3 @@ class ExtraAllt(LHCData):
 #		for x in self.cheeses:
 #			if not isinstance(x,Cheese) or not x.validate():
 #				raise ValueError()
-

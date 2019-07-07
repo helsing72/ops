@@ -1,19 +1,24 @@
 #!/bin/bash
-
+if [ -z "$1" ]
+then
+	PYTHON=python
+else
+	PYTHON=python3
+fi
 
 export PYTHONPATH=$PYTHONPATH:$PWD/Pizzas
 export PYTHONPATH=$PYTHONPATH:"../../Python"
 echo $PYTHONPATH
 
-python -m pytest -rw UnitTests/test_serializeAndDeserialize.py
+$PYTHON -m pytest -rw UnitTests/test_serializeAndDeserialize.py
 exit_des_ser=$?
 
-python -m pytest -rw UnitTests/test_subscribe.py &
+$PYTHON -m pytest -rw UnitTests/test_subscribe.py &
 
 pid_pub_sub=$!
 
 sleep 1
-python  UnitTests/PublishData.py
+$PYTHON UnitTests/PublishData.py
 
 wait $pid_pub_sub
 exit_pub_sub=$?
@@ -26,4 +31,3 @@ then
 else
 	printf "\n\n   $exit_count TEST FAILED  \n\n\n"
 fi
-

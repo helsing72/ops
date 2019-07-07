@@ -23,7 +23,7 @@ class CHelper(object):
 
 	def CreatePublisher(self,part,topicName):
 		if self.pub is not None:
-			print "Publisher already exist for topic " + self.pub.getTopic().getName()
+			print("Publisher already exist for topic " + self.pub.getTopic().getName())
 		else:
 			topic = part.createTopic(topicName)
 			self.pub = Publisher.Publisher(topic)
@@ -61,7 +61,7 @@ info = ItemInfo("PizzaDomain", "ExtraAlltTopic", "pizza.special.ExtraAllt")
 
 participant = Participant.Participant.getInstance("PizzaDomain", "PizzaDomain", "ops_config.xml")
 if participant == None:
-	print "Failed to create Participant. Missing ops_config.xml ??"
+	print("Failed to create Participant. Missing ops_config.xml ??")
 	sys.exit(-1)
 participant.addTypeSupport(PizzaProjectTypeFactory.PizzaProjectTypeFactory())
 
