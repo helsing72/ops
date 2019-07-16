@@ -2,13 +2,6 @@
 
 All configurations are placed in file *OPSTypeDefs.h*.
 
-#### USE_C11 ####
-Defined to enable the use of C++11 *std::mutex*, *std::thread*, *std::condition_variable*
-instead of Boost or WIN32/Linux specific calls.
-
-#### OVERRIDE_DEFAULT_NO_C11 ###
-Define this to override the default settings and disable the use of C++11 features for backward compatibility. This will use the Boost library and WIN32/Linux specific calls instead of C++11.
-
 #### OPSSLIM_NORESERVE ####
 Define this to remove *Reservable* from *OPSMessage*.
 
