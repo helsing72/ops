@@ -1,14 +1,12 @@
-#ifndef __underscoredPackName___classNameSubscriber_h
-#define __underscoredPackName___classNameSubscriber_h
+//Auto generated OPS-code. DO NOT MODIFY!
+#pragma once
 
 #include "Subscriber.h"
 #include "Topic.h"
 #include "OPSObject.h"
 #include "__className.h"
 
-
 __packageDeclaration
-
 
 class __classNameSubscriber : public ops::Subscriber
 {
@@ -56,5 +54,3 @@ public:
 };
 
 __packageCloser
-
-#endif

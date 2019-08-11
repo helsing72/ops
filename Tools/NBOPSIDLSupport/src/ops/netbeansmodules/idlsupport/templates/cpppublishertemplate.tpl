@@ -1,5 +1,5 @@
-#ifndef __underscoredPackName___classNamePublisher_h
-#define __underscoredPackName___classNamePublisher_h
+//Auto generated OPS-code. DO NOT MODIFY!
+#pragma once
 
 #include "Publisher.h"
 #include "Topic.h"
@@ -34,5 +34,3 @@ public:
 };
 
 __packageCloser
-
-#endif

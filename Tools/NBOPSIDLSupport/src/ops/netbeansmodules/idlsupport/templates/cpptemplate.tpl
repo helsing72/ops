@@ -1,7 +1,5 @@
 //Auto generated OPS-code. DO NOT MODIFY!
-
-#ifndef __underscoredPackName___className_h
-#define __underscoredPackName___className_h
+#pragma once
 
 #include "OPSObject.h"
 #include "ArchiverInOut.h"
@@ -17,7 +15,7 @@ class __className :
 	public __baseClassName
 {
 public:
-   static ops::TypeId_T getTypeName(){return ops::TypeId_T("__packageName.__className");}
+  	static ops::TypeId_T getTypeName(){return ops::TypeId_T("__packageName.__className");}
 
 __declarations
     ///Default constructor.
@@ -42,19 +40,21 @@ __constructorBody
     ///Assignment operator making full deep copy of a(n) __className object.
     __className& operator = (const __className& other)
     {
-        other.fillClone(this);
+        if (this != &other) {
+            other.fillClone(this);
+        }
         return *this;
     }
 
     ///This method acceptes an ops::ArchiverInOut visitor which will serialize or deserialize an
     ///instance of this class to a format dictated by the implementation of the ArchiverInout.
-    void serialize(ops::ArchiverInOut* archive)
+    virtual void serialize(ops::ArchiverInOut* archive) override
     {
 __serialize
     }
 
     //Returns a deep copy of this object.
-    virtual ops::OPSObject* clone()
+    virtual ops::OPSObject* clone() override
     {
 __clone
     }
@@ -74,4 +74,3 @@ __memoryPoolDecl
 };
 
 __packageCloser
-#endif

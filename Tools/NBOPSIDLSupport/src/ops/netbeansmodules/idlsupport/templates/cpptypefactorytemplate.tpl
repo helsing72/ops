@@ -1,16 +1,11 @@
-/**
- *
- * OPS generated code, DO NOT MODIFY!
- */
-#ifndef __underscoredPackName___className_h
-#define __underscoredPackName___className_h
+//Auto generated OPS-code. DO NOT MODIFY!
+#pragma once
 
 #include "SerializableFactory.h"
 
 __imports
 
 __packageDeclaration
-
 
 class __className : public ops::SerializableFactory
 {
@@ -22,6 +17,3 @@ __createBody
 };
 
 __packageCloser
-//end namespaces
-
-#endif

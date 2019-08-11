@@ -1,7 +1,5 @@
 //Auto generated OPS-code. DO NOT MODIFY!
-
-#ifndef __underscoredPackName___className_h
-#define __underscoredPackName___className_h
+#pragma once
 
 #include "OPSObject.h"
 #include "ArchiverInOut.h"
@@ -28,7 +26,7 @@ __declarations
 
     ///This method acceptes an ops::ArchiverInOut visitor which will serialize or deserialize an
     ///instance of this class to a format dictated by the implementation of the ArchiverInOut.
-    void serialize(ops::ArchiverInOut* archive)
+    void serialize(ops::ArchiverInOut* archive) override
     {
         ops::OPSObject::serialize(archive);
         archive->inout("value", value);
@@ -38,5 +36,3 @@ __memoryPoolDecl
 };
 
 __packageCloser
-
-#endif
