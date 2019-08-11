@@ -386,19 +386,11 @@ public class CppCompiler extends opsc.Compiler
                         }
                     } else {
                         if (field.getArraySize() > 0) {
-                            ret += tab(2) + "for(unsigned int __i = 0; __i < " + field.getArraySize() + "; __i++) {" + endl();
-                            ret += tab(3) +   "if(" + "obj->" + fieldName + "[__i])" + " delete " + "obj->" + fieldName + "[__i];" + endl();
-                            ret += tab(3) +   "obj->" + fieldName + "[__i] = " + "(" + elementType(field) + "*)" + fieldName + "[__i]->clone();" + endl();
-                            ret += tab(2) + "}" + endl();
+                            // 		ops::cloneFixArrPtr<TestData, 5>(obj->ftest2s, ftest2s);
+                            ret += tab(2) + "ops::cloneFixArrPtr<" + elementType(field) + ", " + field.getArraySize() + ">(obj->" + fieldName + ", " + fieldName + ");" + endl();
                         } else {
-                            ret += tab(2) + "for(unsigned int __i = 0; __i < " + "" + fieldName + ".size(); __i++) {" + endl();
-                            ret += tab(3) +   "if(" + "obj->" + fieldName + ".size() >= __i + 1) {" + endl();
-                            ret += tab(4) +     "if(" + "obj->" + fieldName + "[__i])" + " delete " + "obj->" + fieldName + "[__i];" + endl();
-                            ret += tab(4) +     "obj->" + fieldName + "[__i] = " + "(" + elementType(field) + "*)" + fieldName + "[__i]->clone();" + endl();
-                            ret += tab(3) +   "} else {" + endl();
-                            ret += tab(4) +     "obj->" + fieldName + ".push_back((" + elementType(field) + "*)" + fieldName + "[__i]->clone()); " + endl();
-                            ret += tab(3) +   "}" + endl();
-                            ret += tab(2) + "}" + endl();
+                            //		ops::cloneVectorPtr<TestData>(obj->test2s, test2s);
+                            ret += tab(2) + "ops::cloneVectorPtr<" + elementType(field) + ">(obj->" + fieldName + ", " + fieldName + ");" + endl();
                         }
                     }
                 }
