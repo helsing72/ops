@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -60,7 +61,7 @@ namespace ops
 		ObjectKey_T getKey();
 		const TypeId_T& getTypeString();
 		void setKey(ObjectKey_T k);
-		virtual void serialize(ArchiverInOut* archive);
+		virtual void serialize(ArchiverInOut* archive) override;
 
 		///Bytes that hold unserialized data for this object.
 		///This happens if a type can not be fully understood by a participants type support.

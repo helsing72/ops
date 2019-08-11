@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016-2017 Lennart Andersson.
+* Copyright (C) 2016-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -35,7 +35,7 @@ namespace ops
 
         Transport();
 
-        void serialize(ArchiverInOut* archiver);
+        void serialize(ArchiverInOut* archiver) override;
     };
 }
 #endif

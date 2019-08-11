@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -30,10 +31,17 @@ namespace ops
 	public:
 		std::string requestId;
 
-		void serialize(ops::ArchiverInOut* archiver)
+		void serialize(ops::ArchiverInOut* archiver) override
 		{
 			OPSObject::serialize(archiver);
 			archiver->inout("requestId", requestId);
+		}
+
+		OPSObject* clone() override
+		{
+			Request* obj = new Request;
+			fillClone(obj);
+			return obj;
 		}
 
 		void fillClone(Request* obj) const

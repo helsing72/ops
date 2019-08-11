@@ -77,7 +77,7 @@ namespace ops
 		return obj;
 	}
 
-	void OPSObject::fillClone(OPSObject* obj)const
+	void OPSObject::fillClone(OPSObject* obj) const
 	{
 		obj->key = key;
 		obj->typesString = typesString;

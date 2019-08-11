@@ -1,6 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
+ * Copyright (C) 2019 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -38,7 +39,7 @@ namespace ops
             appendType(TypeId_T("DefaultOPSConfigImpl"));
         }
 
-        void serialize(ArchiverInOut* archiver)
+        void serialize(ArchiverInOut* archiver) override
         {
             OPSConfig::serialize(archiver);
         }

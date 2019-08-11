@@ -1,6 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
+ * Copyright (C) 2019 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -148,7 +149,7 @@ namespace ops
 			port = sourcePort;
 		}
 
-        void serialize(ArchiverInOut* archive)
+        void serialize(ArchiverInOut* archive) override
         {
             OPSObject::serialize(archive);
 			
