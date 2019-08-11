@@ -254,6 +254,32 @@ namespace ops
         virtual int beginList(InoutName_T name, int i) = 0;
         virtual void endList(InoutName_T name) = 0;
     };
+
+	template <typename T>
+	void cloneVectorPtr(std::vector<T*>& dst, const std::vector<T*> src)
+	{
+		for (unsigned int i = 0; i < dst.size(); i++) {
+			if (dst[i]) delete dst[i];
+		}
+		dst.resize(src.size());
+		for (unsigned int i = 0; i < src.size(); i++) {
+			if (dst.size() >= i + 1) {
+				dst[i] = (T*)src[i]->clone();
+			} else {
+				dst.push_back((T*)src[i]->clone());
+			}
+		}
+	}
+
+	template <typename T, unsigned int N>
+	void cloneFixArrPtr(T* dst[], T* const src[])
+	{
+		for (unsigned int i = 0; i < N; i++) {
+			if (dst[i]) delete dst[i];
+			dst[i] = (T*)src[i]->clone();
+		}
+	}
+
 }
 
 #endif
