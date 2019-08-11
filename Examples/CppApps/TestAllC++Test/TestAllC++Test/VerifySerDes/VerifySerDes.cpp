@@ -531,7 +531,7 @@ int main(int argc, const char* args[])
 		UNUSED(argc);
 		UNUSED(args);
 		TestAll::ChildData cd1;
-		TestAll::ChildData cd2;
+		TestAll::ChildData cd2, cd2a;
 		TestAll::ChildData cd3;
 
 #if defined(DEBUG_OPSOBJECT_COUNTER)
@@ -551,8 +551,27 @@ int main(int argc, const char* args[])
 		std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
 #endif
 
-		std::cout << "Test cloning..." << std::endl;
 		fillChildData(cd1);
+
+		std::cout << "Test copy constructor..." << std::endl;
+		TestAll::ChildData cd2c(cd1);
+		checkObjects(cd1, cd2c);
+		std::cout << "Finished " << std::endl;
+
+		std::cout << "Test assignment..." << std::endl;
+		cd2a = cd1;
+		checkObjects(cd1, cd2a);
+		std::cout << "Finished " << std::endl;
+
+		std::cout << "Test cloning..." << std::endl;
+		cd1.fillClone(&cd2);
+		checkObjects(cd1, cd2);
+
+		// Test that all is cleared in cd2 by cloning an empty object
+		cd3.fillClone(&cd2);
+		checkObjects(cd3, cd2);
+
+		// Fill cd2 object again, it is needed below
 		cd1.fillClone(&cd2);
 		checkObjects(cd1, cd2);
 
