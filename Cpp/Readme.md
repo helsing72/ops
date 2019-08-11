@@ -47,5 +47,5 @@ If OPS is compiled for a Big Endian machine (and it need to communicate with a
 little endian machine via OPS) you need to define this to keep the binary compatibility.
 
 #### DEBUG_OPSOBJECT_COUNTER ####
-Define this to add counting of create/delete of OPSObject() (only if also USE_C11 is defined).
-This also adds a debug function for reading the current number of living OPSObjects.
+Define this to add counting of create/delete of *OPSObjects*.
+This also adds a debug function for reading the current number of living *OPSObjects*.

@@ -55,7 +55,7 @@ JavaCC can be downloaded from http://java.net/projects/javacc.
 OPS uses JavaCC version 6.0.
 
 ## Python ##
-Experimental support exist for Python 2.7.
+Limited support exist for Python (2.7 and 3.x) (TCP Transport is still missing).
 
 ## Delphi ##
 OPS has been used with Delphi XE2, Delphi 10.1 and Delphi 10.2.

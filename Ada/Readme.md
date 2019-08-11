@@ -5,9 +5,14 @@ The Ada implementation now has full functionality (i.e. the same as C++) with th
   - Subscribers don't have support for checking publication ID
   - Subscribers don't expose the history buffer
 
-The implementation uses features from *Ada 2012* and uses the *XMLAda* library for parsing ops configuration files and the *GNAT.Sockets* library for socket communication.
+The implementation uses features from *Ada 2012* and uses the *XMLAda* library for parsing
+ops configuration files and the *GNAT.Sockets* library for socket communication.
 
-The implementation has so far only been tested with ***GNAT GPS 2016*** on *Windows 10* and ***GNAT Pro 17.1*** on *Windows* and *Linux*.
+The implementation has so far only been tested with ***GNAT GPS 2016*** on *Windows 10* and
+***GNAT Pro 17.1*** on *Windows* and *Linux*.
 
-Tip:
-Set environment symbol *GPR_PROJECT_PATH* to include path to the *ops4.gpr* file
+When generating Ada code from IDL's, the [opsc](../Doc/IDLCommandlineCompiler.md) compiler
+also generates a GNAT Ada project file (*projectname.gpr*). As default it relies on the
+environment symbol *GPR_PROJECT_PATH* to include the path to the *ops4.gpr* file.
+To avoid this, use the *-gpr* switch on [opsc](../Doc/IDLCommandlineCompiler.md) to
+specify an absolute or relative path to the *ops4.gpr* file.
