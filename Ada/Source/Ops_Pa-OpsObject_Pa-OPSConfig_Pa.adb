@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2018 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -507,6 +507,14 @@ package body Ops_Pa.OpsObject_Pa.OPSConfig_Pa is
   function RepositoryInstance return OPSConfigRepository_Class_At is
   begin
     return gInstance;
+  end;
+
+  procedure Debug_TotalClear is
+  begin
+    if gInstance /= null then
+      Free(gInstance);
+      gInstance := null;
+    end if;
   end;
 
 end Ops_Pa.OpsObject_Pa.OPSConfig_Pa;

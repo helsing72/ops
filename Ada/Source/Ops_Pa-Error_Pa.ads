@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -83,6 +83,13 @@ package Ops_Pa.Error_Pa is
   -- A static error service that user can connect to.
   -- The static error service is e.g. used for errors during Participant creation.
   function StaticErrorService return ErrorService_Class_At;
+
+-- ==========================================================================
+-- Debug/Test helpers
+-- ==========================================================================
+  -- Removes all singleton instances. Note should only be used when looking for memory leaks.
+  -- Requires that all OPS usage has been stopped and all objects freed.
+  procedure Debug_TotalClear;
 
 private
 -- ==========================================================================

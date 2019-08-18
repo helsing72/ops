@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -131,6 +131,14 @@ package body Ops_Pa.SerializableFactory_Pa.CompFactory_Pa.OpsObjectFactory_Pa is
   overriding procedure Finalize( Self : in out OPSObjectFactory_Class ) is
   begin
     Finalize( SerializableInheritingTypeFactory_Class(Self) );
+  end;
+
+  procedure Debug_TotalClear is
+  begin
+    if gInstance /= null then
+      Free(gInstance);
+      gInstance := null;
+    end if;
   end;
 
 end Ops_Pa.SerializableFactory_Pa.CompFactory_Pa.OpsObjectFactory_Pa;

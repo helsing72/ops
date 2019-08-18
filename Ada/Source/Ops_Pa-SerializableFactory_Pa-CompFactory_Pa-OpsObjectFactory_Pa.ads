@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -36,6 +36,13 @@ package Ops_Pa.SerializableFactory_Pa.CompFactory_Pa.OpsObjectFactory_Pa is
 
   -- Constructors
   function Create return OPSObjectFactoryImpl_Class_At;
+
+-- ==========================================================================
+-- Debug/Test helpers
+-- ==========================================================================
+  -- Removes all singleton instances. Note should only be used when looking for memory leaks.
+  -- Requires that all OPS usage has been stopped and all objects freed.
+  procedure Debug_TotalClear;
 
 private
 -- ==========================================================================

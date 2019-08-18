@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -176,6 +176,14 @@ package body Ops_Pa.Error_Pa is
   function StaticErrorService return ErrorService_Class_At is
   begin
     return gStaticErrorService;
+  end;
+
+  procedure Debug_TotalClear is
+  begin
+    if gStaticErrorService /= null then
+      Free(gStaticErrorService);
+      gStaticErrorService := null;
+    end if;
   end;
 
 end Ops_Pa.Error_Pa;

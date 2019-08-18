@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2018 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -121,6 +121,14 @@ package Ops_Pa.OpsObject_Pa.OPSConfig_Pa is
   function getConfig( Self : in out OPSConfigRepository_Class; domainID : string := "" ) return OPSConfig_Class_At;
 
   function domainExist( Self : in out OPSConfigRepository_Class; domainID : string ) return Boolean;
+
+
+-- ==========================================================================
+-- Debug/Test helpers
+-- ==========================================================================
+  -- Removes all singleton instances. Note should only be used when looking for memory leaks.
+  -- Requires that all OPS usage has been stopped and all objects freed.
+  procedure Debug_TotalClear;
 
 private
 -- ==========================================================================
