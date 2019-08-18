@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -64,6 +64,7 @@ package Ops_Pa.ByteBuffer_Pa is
   procedure WriteBoolean( Self : in out ByteBuffer_Class; flag : Boolean );
   --Writes Length(s) followed by s to the buffer as a c-string (8-bit chars) and increments the buffer by Length(s) + 4.
   procedure WriteString( Self : in out ByteBuffer_Class; s : String_At );
+  procedure WriteString( Self : in out ByteBuffer_Class; s : String );
 
   -- Reads 4 bytes from the buffer and returns them as a float. Index is increased by 4.
   procedure ReadFloat( Self : in out ByteBuffer_Class; Value : out Float32 );

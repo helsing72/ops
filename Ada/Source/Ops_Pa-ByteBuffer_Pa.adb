@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -276,20 +276,29 @@ package body Ops_Pa.ByteBuffer_Pa is
   end;
 
   --Writes Length(s) followed by s to the buffer as a c-string (8-bit chars) and increments the buffer by Length(s) + 4.
-  procedure WriteString( Self : in out ByteBuffer_Class; s : String_At ) is
+  procedure WriteString( Self : in out ByteBuffer_Class; s : String ) is
   begin
-    if s = null then
+    if s'Length = 0 then
       Self.WriteInt( 0 );
     else
       declare
-        arr : Byte_Arr(1..Byte_Arr_Index_T(s.all'Length));
+        arr : Byte_Arr(1..Byte_Arr_Index_T(s'Length));
       begin
-        Self.WriteInt( s.all'Length );
+        Self.WriteInt( s'Length );
         for I in arr'range loop
-          arr(I) := ToByte( s.all(Integer(I)) );
+          arr(I) := ToByte( s(Integer(I)) );
         end loop;
         Self.WriteChars( arr );
       end;
+    end if;
+  end;
+
+  procedure WriteString( Self : in out ByteBuffer_Class; s : String_At ) is
+  begin
+    if s = null then
+      Self.WriteString( "" );
+    else
+      Self.WriteString( s.all );
     end if;
   end;
 
