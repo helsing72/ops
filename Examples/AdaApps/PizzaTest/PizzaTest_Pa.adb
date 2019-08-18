@@ -4,6 +4,8 @@ with Ada.Characters.Latin_1; use Ada.Characters.Latin_1;
 with Ada.Strings.Fixed;
 with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
 with Ops_Pa.OpsObject_Pa.OPSConfig_Pa;
+with Ops_Pa.SerializableFactory_Pa.CompFactory_Pa;
+with Ops_Pa.SerializableFactory_Pa.CompFactory_Pa.OpsObjectFactory_Pa;
 
 with Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa;
 with Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa;
@@ -173,6 +175,8 @@ package body PizzaTest_Pa is
     begin
       DeletePublisher(Self, false);
       DeleteSubscriber(Self, false);
+      Free(Self.Data);
+      Self.Data := null;
     end;
 
     function Data( Self : Helper_Class ) return DataType_At is
@@ -976,12 +980,27 @@ package body PizzaTest_Pa is
       end if;
       ItemInfoList(idx).helper := null;
       ItemInfoList(idx).part := null;
+
+      Dispose(ItemInfoList(idx).Domain);
+      Dispose(ItemInfoList(idx).TopicName);
+      Dispose(ItemInfoList(idx).TypeName);
     end loop;
 
     releaseInstance(otherParticipant);
     releaseInstance(participant);
 
+    Free(MyListener);
+    Dispose(FillerStr);
+
+    Ops_Pa.Error_Pa.Debug_TotalClear;
+    Ops_Pa.OpsObject_Pa.OPSConfig_Pa.Debug_TotalClear;
+    Ops_Pa.SerializableFactory_Pa.CompFactory_Pa.OpsObjectFactory_Pa.Debug_TotalClear;
+
     Put_Line("Finished");
+  exception
+    when others =>
+      Put_Line("Exception terminated procedure PizzaTest()");
+
   end;
 
 end PizzaTest_Pa;

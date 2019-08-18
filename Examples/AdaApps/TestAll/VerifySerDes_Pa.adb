@@ -33,6 +33,7 @@ use Ops_Pa.ArchiverInOut_Pa;
 use Ops_Pa.ArchiverInOut_Pa.ArchiverOut_Pa;
 
 with Ops_Pa.OpsObject_Pa;
+with Ops_Pa.OpsObject_Pa.OPSConfig_Pa;
 with Ops_Pa.OpsObject_Pa.TestAll_Definitions;
 with Ops_Pa.OpsObject_Pa.TestAll_BaseData;
 with Ops_Pa.OpsObject_Pa.TestAll_TestData;
@@ -64,6 +65,7 @@ use Ops_Pa.ArchiverInOut_Pa.PrintArchiverOut_Pa;
 with Ops_Pa; use Ops_Pa;
 with Ops_Pa.Error_Pa;
 with Ops_Pa.Participant_Pa;
+with Ops_Pa.SerializableFactory_Pa.CompFactory_Pa.OpsObjectFactory_Pa;
 
 package body VerifySerDes_Pa is
 
@@ -1007,7 +1009,6 @@ package body VerifySerDes_Pa is
     checkObjects(cd1, cd2);
     Log("Initial state test finished");
 
-
     Log("Test cloning of empty object...");
     cd3 := ChildData_Class_At(cd1.Clone);
     Log("  Object cloned");
@@ -1183,6 +1184,11 @@ package body VerifySerDes_Pa is
     Free(FBuf);
     Free(FMap);
     Log("Freeing finished");
+
+    -- Test when looking for memory leaks
+    Ops_Pa.Error_Pa.Debug_TotalClear;
+    Ops_Pa.OpsObject_Pa.OPSConfig_Pa.Debug_TotalClear;
+    Ops_Pa.SerializableFactory_Pa.CompFactory_Pa.OpsObjectFactory_Pa.Debug_TotalClear;
   end;
 
   procedure VerifySerDes is
@@ -1203,3 +1209,4 @@ package body VerifySerDes_Pa is
   end;
 
 end;
+
