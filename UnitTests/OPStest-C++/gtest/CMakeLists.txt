@@ -27,7 +27,7 @@ set(APP_SRCS
   Serialization_test.cpp
   SetupOPSConfig.cpp
   SetupOPSConfig.h
-  socket_tcp_test.cpp
+##  socket_tcp_test.cpp
   TCPOpsProtocol_test.cpp
 )
 
