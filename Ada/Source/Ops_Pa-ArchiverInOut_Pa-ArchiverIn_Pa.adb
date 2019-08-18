@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -74,14 +74,23 @@ package body Ops_Pa.ArchiverInOut_Pa.ArchiverIn_Pa is
 
   procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out String_At) is
   begin
+    if value /= null then
+      Dispose(value);
+    end if;
     Self.FBuf.ReadString(value);
   end;
 
   procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Serializable_Class_At) is
-    typeS : String_At := null;
+    types : String_At := null;
   begin
-    Self.FBuf.ReadString( typeS );
+    if value = null then
+      raise Null_Object_Not_Allowed;
+    end if;
+    Self.FBuf.ReadString( types );
     value.all.Serialize( ArchiverInOut_Class_At(Self.SelfAt) );
+    if types /= null then
+      Dispose(types);
+    end if;
   end;
 
   function inout2( Self : in out ArchiverIn_Class; name : String; value : in out Serializable_Class_At) return Serializable_Class_At is
@@ -91,33 +100,42 @@ package body Ops_Pa.ArchiverInOut_Pa.ArchiverIn_Pa is
     if value /= null then
       Free(value);
     end if;
-    Self.FBuf.ReadString( typeS );
-    result := Self.Factory.Make( types.all );
-    if result /= null then
-      -- We need to preserve the type information since the factory only can create
-      -- objects it knows how to create, and this can be a more generalized (base) object
-      -- than the actual one. The rest of the bytes will be placed in the spareBytes member.
-      SetTypesString(result.all, types.all);
+    Self.FBuf.ReadString( types );
+    if types /= null then
+      result := Self.Factory.Make( types.all );
+      if result /= null then
+        -- We need to preserve the type information since the factory only can create
+        -- objects it knows how to create, and this can be a more generalized (base) object
+        -- than the actual one. The rest of the bytes will be placed in the spareBytes member.
+        SetTypesString(result.all, types.all);
 
-      result.Serialize(ArchiverInOut_Class_At(Self.SelfAt));
+        result.Serialize(ArchiverInOut_Class_At(Self.SelfAt));
+      end if;
+      Dispose(types);
     end if;
     return result;
   end;
 
   function inout( Self : in out ArchiverIn_Class; name : String; value : in out Serializable_Class_At; element : Integer) return Serializable_Class_At is
-    typeS : String_At := null;
+    types : String_At := null;
     result : Serializable_Class_At := null;
   begin
-    Self.FBuf.ReadString( typeS );
-    result := Self.Factory.Make( types.all );
-    if result /= null then
-      result.Serialize(ArchiverInOut_Class_At(Self.SelfAt));
+    Self.FBuf.ReadString( types );
+    if types /= null then
+      result := Self.Factory.Make( types.all );
+      if result /= null then
+        result.Serialize(ArchiverInOut_Class_At(Self.SelfAt));
+      end if;
+      Dispose(types);
     end if;
     return result;
   end;
 
   procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Boolean_Arr_At) is
   begin
+    if value /= null then
+      Dispose(value);
+    end if;
     Self.FBuf.ReadBooleans(value);
   end;
 
@@ -128,6 +146,9 @@ package body Ops_Pa.ArchiverInOut_Pa.ArchiverIn_Pa is
 
   procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Byte_Arr_At) is
   begin
+    if value /= null then
+      Dispose(value);
+    end if;
     Self.FBuf.ReadBytes(value);
   end;
 
@@ -138,6 +159,9 @@ package body Ops_Pa.ArchiverInOut_Pa.ArchiverIn_Pa is
 
   procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Int32_Arr_At) is
   begin
+    if value /= null then
+      Dispose(value);
+    end if;
     Self.FBuf.ReadInts(value);
   end;
 
@@ -148,6 +172,9 @@ package body Ops_Pa.ArchiverInOut_Pa.ArchiverIn_Pa is
 
   procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Int16_Arr_At) is
   begin
+    if value /= null then
+      Dispose(value);
+    end if;
     Self.FBuf.ReadShorts(value);
   end;
 
@@ -158,6 +185,9 @@ package body Ops_Pa.ArchiverInOut_Pa.ArchiverIn_Pa is
 
   procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Int64_Arr_At) is
   begin
+    if value /= null then
+      Dispose(value);
+    end if;
     Self.FBuf.ReadLongs(value);
   end;
 
@@ -168,6 +198,9 @@ package body Ops_Pa.ArchiverInOut_Pa.ArchiverIn_Pa is
 
   procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Float32_Arr_At) is
   begin
+    if value /= null then
+      Dispose(value);
+    end if;
     Self.FBuf.ReadFloats(value);
   end;
 
@@ -178,6 +211,9 @@ package body Ops_Pa.ArchiverInOut_Pa.ArchiverIn_Pa is
 
   procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Float64_Arr_At) is
   begin
+    if value /= null then
+      Dispose(value);
+    end if;
     Self.FBuf.ReadDoubles(value);
   end;
 
@@ -188,11 +224,14 @@ package body Ops_Pa.ArchiverInOut_Pa.ArchiverIn_Pa is
 
   procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out String_Arr_At) is
   begin
+    Clear(value);
+    Dispose(value);
     Self.FBuf.ReadStrings(value);
   end;
 
   procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out String_Arr) is
   begin
+    Clear(value);
     Self.FBuf.ReadStrings(value);
   end;
 

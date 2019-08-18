@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -50,7 +50,7 @@ package body Ops_Pa.OpsObject_Pa.Channel_Pa is
       Self.linktype := Copy(LINKTYPE_MC);
 
     elsif Self.Linktype.all = "" then
-      Self.linktype := Copy(LINKTYPE_MC);
+      Replace(Self.linktype, LINKTYPE_MC);
 
     elsif (Self.linktype.all /= LINKTYPE_MC) and
         (Self.Linktype.all /= LINKTYPE_TCP) and

@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2018 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -157,10 +157,14 @@ package body Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
       Replace(OPSMessage_Class(obj.all).address, Self.address);
       if OPSMessage_Class(obj.all).data /= null then
         Free(OPSMessage_Class(obj.all).data);
+        OPSMessage_Class(obj.all).data := null;
       end if;
       if Self.data /= null then
         OPSMessage_Class(obj.all).data := Ops_Pa.OpsObject_Pa.OPSObject_Class_At(Clone(Self.data.all));
       end if;
+      OPSMessage_Class(obj.all).DataOwner := Self.DataOwner;
+      OPSMessage_Class(obj.all).SourcePort := Self.SourcePort;
+      Replace(OPSMessage_Class(obj.all).SourceIP, Self.SourceIP);
     end if;
   end;
 
@@ -195,6 +199,9 @@ package body Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
     end if;
     if Self.DataOwner and Self.data /= null then
       Free(Self.data);
+    end if;
+    if Self.SourceIP /= null then
+      Dispose(Self.SourceIP);
     end if;
 
     Finalize( OpsObject_Class(Self) );

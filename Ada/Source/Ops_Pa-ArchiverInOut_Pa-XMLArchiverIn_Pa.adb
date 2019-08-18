@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2017 Lennart Andersson.
+-- Copyright (C) 2017-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -243,7 +243,7 @@ package body Ops_Pa.ArchiverInOut_Pa.XMLArchiverIn_Pa is
   begin
     if tempNode /= null and then DOM.Core.Nodes.Has_Child_Nodes( tempNode ) then
       tempNode := DOM.Core.Nodes.First_Child( tempNode );
-      value := Copy(DOM.Core.Nodes.Node_Value( tempNode ));
+      Replace(value, DOM.Core.Nodes.Node_Value( tempNode ));
     end if;
   end;
 

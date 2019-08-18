@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --  
 -- This file is part of OPS (Open Publish Subscribe).
 --  
@@ -97,8 +97,8 @@ package body Ops_Pa.OpsObject_pa is
   --------------------------------------------------------------------------
   procedure FillClone( Self : OpsObject_Class; obj : OpsObject_Class_At ) is
   begin
-    obj.all.Key := Copy(Self.Key);
-    obj.all.TypesString := Copy(Self.TypesString);
+    Replace(obj.all.Key, Self.Key);
+    Replace(obj.all.TypesString, Self.TypesString);
     if Self.SpareBytes /= null then
       obj.all.spareBytes := new Byte_Arr'(Self.SpareBytes.all);
     end if;

@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -77,36 +77,30 @@ package body Ops_Pa.ArchiverInOut_Pa.ArchiverOut_Pa is
   end;
 
   procedure inout( Self : in out ArchiverOut_Class; name : String; value : in out Serializable_Class_At) is
-    typeS : String_At;
   begin
     if value = null then
       raise Null_Object_Not_Allowed;
     end if;
-    typeS := new String'(value.TypesString);
-    Self.FBuf.WriteString( typeS );
+    Self.FBuf.WriteString( value.TypesString );
     value.all.Serialize( ArchiverInOut_Class_At(Self.SelfAt) );
   end;
 
   function inout2( Self : in out ArchiverOut_Class; name : String; value : in out Serializable_Class_At) return Serializable_Class_At is
-    typeS : String_At;
   begin
     if value = null then
       raise Null_Object_Not_Allowed;
     end if;
-    typeS := new String'(value.TypesString);
-    Self.FBuf.WriteString( typeS );
+    Self.FBuf.WriteString( value.TypesString );
     value.all.Serialize( ArchiverInOut_Class_At(Self.SelfAt) );
     return value;
   end;
 
   function inout( Self : in out ArchiverOut_Class; name : String; value : in out Serializable_Class_At; element : Integer) return Serializable_Class_At is
-    typeS : String_At;
   begin
     if value = null then
       raise Null_Object_Not_Allowed;
     end if;
-    typeS := new String'(value.TypesString);
-    Self.FBuf.WriteString( typeS );
+    Self.FBuf.WriteString( value.TypesString );
     value.all.Serialize( ArchiverInOut_Class_At(Self.SelfAt) );
     return value;
   end;

@@ -305,7 +305,7 @@ package body Ops_Pa.Participant_Pa is
   procedure OnUdpTransport( Self : in out Participant_Class; ipaddress : String; port : Int32 ) is
     S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.PartInfoDataMutex'Access);
   begin
-    Self.PartInfoData.ip := Copy(ipaddress);
+    Replace(Self.PartInfoData.ip, ipaddress);
     Self.PartInfoData.mc_udp_port := port;
   end;
 
