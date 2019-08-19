@@ -45,12 +45,6 @@ include_directories(
 add_executable(${APP_NAME} ${APP_SRCS})
 add_executable(${APP2_NAME} ${APP2_SRCS})
 
-if(MSVC)
-elseif(MINGW)
-else()
-  set(GTEST_LIBRARIES "gtest ${GTEST_LIBRARIES}")
-endif()
-
 target_link_libraries(${APP_NAME} ${Boost_LIBRARIES} ${GTEST_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ops-static)
 target_link_libraries(${APP2_NAME} ${Boost_LIBRARIES} ${GTEST_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ops-static)
 
