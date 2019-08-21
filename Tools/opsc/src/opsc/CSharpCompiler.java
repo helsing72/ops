@@ -256,7 +256,7 @@ public class CSharpCompiler extends opsc.Compiler
 
         for (IDLClass iDLClass : idlClasses)
         {
-            if (isOnlyDefinition(iDLClass)) continue;
+            if (isOnlyDefinition(iDLClass) || isNoFactory(iDLClass)) continue;
 
             createObjectBodyText += tab(3) + "if (type.Equals(\"" + iDLClass.getPackageName() + "." + iDLClass.getClassName() + "\"))" + endl();
             createObjectBodyText += tab(3) + "{" + endl();

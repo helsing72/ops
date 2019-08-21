@@ -317,7 +317,7 @@ public class CppCompiler extends opsc.Compiler
         String includes = "";
 
         for (IDLClass iDLClass : idlClasses) {
-            if (isOnlyDefinition(iDLClass)) continue;
+            if (isOnlyDefinition(iDLClass) || isNoFactory(iDLClass)) continue;
 
             createBodyText += tab(2) + "if(type == \"" + iDLClass.getPackageName() + "." + getClassName(iDLClass) + "\")" + endl();
             createBodyText += tab(2) + "{" + endl();

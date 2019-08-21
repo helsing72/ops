@@ -589,7 +589,7 @@ public class PythonCompiler extends opsc.CompilerSupport
 
         for (IDLClass idlClass : idlClasses)
         {
-            if (isOnlyDefinition(idlClass)) continue;
+            if (isOnlyDefinition(idlClass) || isNoFactory(idlClass)) continue;
             importString.add("from " + idlClass.getPackageName().replace(".","_") + " import " + idlClass.getClassName() + endl());
             createBodyText.add(tab(2)+"self.addType(\"" + idlClass.getPackageName() + "." + idlClass.getClassName() + "\"," + idlClass.getClassName() + ")" + endl());
         }

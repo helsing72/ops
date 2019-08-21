@@ -203,7 +203,7 @@ public class DelphiCompiler extends opsc.Compiler
         String includes = "";
 
         for (IDLClass iDLClass : idlClasses) {
-            if (isOnlyDefinition(iDLClass)) continue;
+            if (isOnlyDefinition(iDLClass) || isNoFactory(iDLClass)) continue;
 
             createBodyText += tab(1) + "if types = '" + iDLClass.getPackageName() + "." + getClassName(iDLClass) + "' then begin" + endl();
             createBodyText += tab(2) + "Result := " + getFullyQualifiedClassName(iDLClass.getClassName()) + ".Create;" + endl();

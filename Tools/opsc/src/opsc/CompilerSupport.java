@@ -185,6 +185,7 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
     {
         String s = idlClass.getDirective();
         if (s == null) return false;
+        if (isNoFactory(idlClass)) return false;
         int idx = s.indexOf("toplevel");
         if (idx != -1) {
             int idx2 = s.indexOf(",", idx);
@@ -210,6 +211,20 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
         int idx = s.indexOf("onlydefinition");
         if (idx != -1) {
             //System.out.println("Info: isOnlyDefinition(), " + idlClass.getClassName());
+            return true;
+        }
+        return false;  //default
+    }
+
+    // Returns true if class is a nofactory class
+    protected boolean isNoFactory(IDLClass idlClass)
+    {
+        String s = idlClass.getDirective();
+        if (s == null) return false;
+        //System.out.println("Info: isNoFactory(), class: '" + idlClass.getClassName() + "', getDirective() = " + s);
+        int idx = s.indexOf("nofactory");
+        if (idx != -1) {
+            //System.out.println("Info: isNoFactory(), " + idlClass.getClassName());
             return true;
         }
         return false;  //default

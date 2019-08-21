@@ -295,7 +295,7 @@ public class AdaCompiler extends opsc.Compiler
         String includes = "";
 
         for (IDLClass iDLClass : idlClasses) {
-            if (isOnlyDefinition(iDLClass)) continue;
+            if (isOnlyDefinition(iDLClass) || isNoFactory(iDLClass)) continue;
 
             createBodyText += tab(2) + "if types = \"" + iDLClass.getPackageName() + "." + iDLClass.getClassName() + "\" then" + endl();
             createBodyText += tab(3) +   "return Serializable_Class_At(" + getUnitName(iDLClass.getClassName()) + ".Create);" + endl();

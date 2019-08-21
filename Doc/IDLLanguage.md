@@ -166,6 +166,7 @@ There is a special form of comments that is used to give instructions to the OPS
 | Directive | Values | Default | Description |
 |-----------|--------|---------|-------------|
 | toplevel  | true / false | true | Publishers/Subscribers are only generated for toplevel classes. This directive is currently only supported for Ada, C++ and Java |
+| nofactory | - | - | Class is only ment to be a base class in a class hierarchy, so don't generate factory code for it (i.e. an object of this type can't be created by the OPS factory and therfore no field can be of this type). This also implies that the *toplevel* directive is false. |
 | onlydefinition | - | - | Class only contains definitions (constants and enums) and should not be part of data objects published. Useful for defining common constants and enums |
 
 Example of usage:

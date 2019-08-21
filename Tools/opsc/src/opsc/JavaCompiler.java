@@ -253,7 +253,7 @@ public class JavaCompiler extends opsc.Compiler
 
         for (IDLClass iDLClass : idlClasses)
         {
-            if (isOnlyDefinition(iDLClass)) continue;
+            if (isOnlyDefinition(iDLClass) || isNoFactory(iDLClass)) continue;
 
             createBodyText += tab(2) + "if(type.equals(\"" + iDLClass.getPackageName() + "." + iDLClass.getClassName() + "\"))" + endl();
             createBodyText += tab(2) + "{" + endl();
