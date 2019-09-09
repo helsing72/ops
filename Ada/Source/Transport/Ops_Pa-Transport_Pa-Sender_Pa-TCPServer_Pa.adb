@@ -116,8 +116,13 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
   begin
     Self.SocketWaits.Remove( Socket_Pa.Socket_Class_At(tcpClient) );
     if Self.CsClient /= null then
-      Ada.Strings.Fixed.Move( tcpClient.GetPeerIP, Status.Address, Drop => Ada.Strings.Right );
-      Status.Port := tcpClient.GetPeerPort;
+      begin
+        Ada.Strings.Fixed.Move( tcpClient.GetPeerIP, Status.Address, Drop => Ada.Strings.Right );
+        Status.Port := tcpClient.GetPeerPort;
+      exception
+        when others =>
+          null;
+      end;
       Status.TotalNo := Total;
       Self.CsClient.OnDisconnect( null, Status );
     end if;
