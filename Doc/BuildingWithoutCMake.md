@@ -12,7 +12,7 @@ Run the bat-file 'OPS_DIR\Common\idl\build.bat'. This will generate the needed s
 
 ## Build OPS Core for C++ with Visual Studio ##
 Open the solution/project for your version of Visual Studio (has been used with
-VS2008, VS2010, VS2012, VS2013, VS2015 and VS2017) in directory
+VS2008, VS2010, VS2012, VS2013, VS2015, VS2017 and VS2019) in directory
 
 > "OPS\_DIR\Cpp\Visual C++\OPSCrossPlatformCppSolution_20xx\OPSCrossPlatformCppLib_20xx.sln"
 

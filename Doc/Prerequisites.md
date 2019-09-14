@@ -30,7 +30,7 @@ Make sure you have boost installed, otherwise download pre-built binaries for bo
     * Boost System
     * Boost Thread
 
-OPS has been used with Boost versions 1.38, 1.48, 1.53, 1.55, 1.60, 1.64, 1.66 and 1.67.
+OPS has been used with Boost versions 1.38, 1.48, 1.53, 1.55, 1.60, 1.64, 1.66, 1.67 and 1.71.
 
 ## CMake ##
 Version 3.1.0 or later is required to build OPS with CMake. Make sure the cmake command is in your path. CMake can be downloaded at https://cmake.org/.
@@ -38,7 +38,7 @@ Version 3.1.0 or later is required to build OPS with CMake. Make sure the cmake 
 OPS has been used with CMake version 3.5.0 and later.
 
 ## Visual Studio (Windows) ##
-OPS for C++ has been used with VS2008, VS2010, VS2012, VS2013, VS2015 and VS2017.
+OPS for C++ has been used with VS2008, VS2010, VS2012, VS2013, VS2015, VS2017 and VS2019.
 
 OPS for C# requires language version 7.3 or later (due to generics and constraining type parameters to System.Enum), i.e. Visual Studio 2017 version 15.7 or later.
 
