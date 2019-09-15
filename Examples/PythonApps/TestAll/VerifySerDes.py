@@ -92,18 +92,18 @@ def CheckEmptyChildData(data):
 	# Data for fields in BaseData
 	AssertEQ(data.baseText, "")
 	AssertEQ(len(data.stringOpenArr), 0)
-	AssertEQ(len(data.stringFixArr), 0)
+	AssertEQ(len(data.stringFixArr), 5)
 	AssertEQ(data.fixLengthString, "")
 	AssertEQ(len(data.fixLengthStringOpenArr), 0)
-	AssertEQ(len(data.fixLengthStringFixArr), 0)
+	AssertEQ(len(data.fixLengthStringFixArr), 10)
 
 	# Data for fields in ChildData
 	#  enums
 	AssertEQ(data.enu1, TestAll.ChildData.Order.ABC)
 	AssertEQ(len(data.enuVec), 0)
-	AssertEQ(len(data.enuFixArr), 0)
+	AssertEQ(len(data.enuFixArr), 6)
 	AssertEQ(data.cmd, TestAll.Definitions.Command.START)
-	AssertEQ(len(data.cmds), 0)
+	AssertEQ(len(data.cmds), 2)
 
 	#  core types
 	AssertEQ(data.bo, False)
@@ -121,51 +121,51 @@ def CheckEmptyChildData(data):
 
 	AssertEQ(len(data.bos), 0)
 	#	bool fbos[11];
-	AssertEQ(len(data.fbos), 0)
+	AssertEQ(len(data.fbos), 11)
 
 	AssertEQ(len(data.bs), 0)
 	#	char fbs[256];
-	AssertEQ(len(data.fbs), 0)
+	AssertEQ(len(data.fbs), 256)
 
 	AssertEQ(len(data.shs), 0)
 	#	short fshs[4];
-	AssertEQ(len(data.fshs), 0)
+	AssertEQ(len(data.fshs), 4)
 
 	AssertEQ(len(data.is_), 0)
 	#	int fis_[3];
-	AssertEQ(len(data.fis_), 0)
+	AssertEQ(len(data.fis_), 3)
 
 	AssertEQ(len(data.ls), 0)
 	#	int64_t fls[6];
-	AssertEQ(len(data.fls), 0)
+	AssertEQ(len(data.fls), 6)
 
 	AssertEQ(len(data.fs), 0)
 	#    float ffs[77];
-	AssertEQ(len(data.ffs), 0)
+	AssertEQ(len(data.ffs), 77)
 
 	AssertEQ(len(data.ds), 0)
 	#    double fds[5];
-	AssertEQ(len(data.fds), 0)
+	AssertEQ(len(data.fds), 5)
 
 	AssertEQ(len(data.ss), 0)
 	#    std::string fss[10];
-	AssertEQ(len(data.fss), 0)
+	AssertEQ(len(data.fss), 10)
 
 	AssertEQ(len(data.test2s), 0)
 	#    TestData* ftest2s[5];
-	AssertEQ(len(data.ftest2s), 0)
+	AssertEQ(len(data.ftest2s), 5)
 
 	AssertEQ(len(data.secondVirtArray), 0)
 	#    TestData* fsecondVirtArray[7];
-	AssertEQ(len(data.fsecondVirtArray), 0)
+	AssertEQ(len(data.fsecondVirtArray), 7)
 
 	AssertEQ(len(data.test2s2), 0)
 	#    TestData ftest2s2[4];
-	AssertEQ(len(data.ftest2s2), 0)
+	AssertEQ(len(data.ftest2s2), 4)
 
 	AssertEQ(len(data.fruitarr), 0)
 	#    Fruit ffruitarr[15];
-	AssertEQ(len(data.ffruitarr), 0)
+	AssertEQ(len(data.ffruitarr), 15)
 
 ## =========================================================
 
@@ -312,7 +312,7 @@ def FillChildData(data):
 	data.f = 123.4567
 	data.d = 987.12345678901
 	data.s = "Test of [de]serializing"
-	
+
 	data.test2.text = "TestData"
 	data.test2.value = 555.5
 
@@ -377,7 +377,7 @@ def FillChildData(data):
 
 	#   std::vector<TestData*> secondVirtArray;
 	data.secondVirtArray = [ TestAll.TestData(), TestAll.TestData() ]
-	
+
 	#   TestData* fsecondVirtArray[7];
 	data.fsecondVirtArray = [ TestAll.TestData(), TestAll.TestData(), TestAll.TestData(), TestAll.TestData(), TestAll.TestData(), TestAll.TestData(), TestAll.TestData() ]
 	data.fsecondVirtArray[5].text = "Index 5"
@@ -385,7 +385,7 @@ def FillChildData(data):
 
 	#   std::vector<TestData> test2s2;
 	data.test2s2 = [ TestAll.TestData() for i in range(11) ]
-	
+
 	#   TestData ftest2s2[4];
 	data.ftest2s2 = [ TestAll.TestData() for i in range(4) ]
 	data.ftest2s2[3].text = ""

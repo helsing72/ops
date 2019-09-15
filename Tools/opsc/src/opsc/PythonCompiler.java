@@ -680,28 +680,42 @@ public class PythonCompiler extends opsc.CompilerSupport
                 }
                 ret += tab(2) + "#" + comment.replace("/*", "").replace("*/", "") + endl();
             }
-            if (field.isArray()) {
-                //ret += tab(1) + "" + getDeclareVector(field);
-                //ret += "#### VECTOR ####" + endl();
-                ret += tab(2) + "self." + fieldName + " = []" + endl();
-            } else {
-                if (field.isIdlType()) {
-                    String typeName = field.getType();
+            // Get type initialization value
+            String typeInit = "";
+            if (field.isIdlType()) {
+                String typeName = field.getType().replace("[]", "");
+                if (typeName.startsWith(packageName)) {
+                    typeName = typeName.substring(packageName.length());
+                }
+                typeInit = typeName + "()";
+            } else if (field.isEnumType()) {
+                //Set first enum value as init value
+                if (field.getValue().length() > 0) {
+                    String typeName = field.getFullyQualifiedType().replace("[]", "");
                     if (typeName.startsWith(packageName)) {
                         typeName = typeName.substring(packageName.length());
                     }
-                    ret += tab(2) + "self." + fieldName + " = " + typeName + "()" + endl();
+                    typeInit = typeName + "." + field.getValue();
+                }
+            } else {
+                typeInit = getTypeInitialization(field.getType().replace("[]", ""));
+            }
+            if (field.isArray()) {
+                ret += tab(2) + "self." + fieldName + " = [";
+                if (field.getArraySize() > 0) {
+                    ret += typeInit + " for x in range(" + field.getArraySize() + ")";
+                }
+                ret +=  "]" + endl();
+            } else {
+                if (field.isIdlType()) {
+                    ret += tab(2) + "self." + fieldName + " = " + typeInit + endl();
                 } else if (field.isEnumType()) {
                     //Set first enum value as init value
                     if (field.getValue().length() > 0) {
-                        String typeName = field.getFullyQualifiedType();
-                        if (typeName.startsWith(packageName)) {
-                            typeName = typeName.substring(packageName.length());
-                        }
-                        ret += tab(2) + "self." + fieldName + " = " + typeName + "." + field.getValue() + endl();
+                        ret += tab(2) + "self." + fieldName + " = " + typeInit + endl();
                     }
                 } else {
-                    ret += tab(2) + "self." + fieldName + " = " + getTypeInitialization(field.getType()) + endl();
+                    ret += tab(2) + "self." + fieldName + " = " + typeInit + endl();
                 }
             }
         }
@@ -790,6 +804,10 @@ public class PythonCompiler extends opsc.CompilerSupport
                     if (typeName.equals("OPSObject[]")) typeName = "OPS_Object[]";
                 }
                 if (field.isArray()) {
+                    if (field.getArraySize() > 0) {
+                        ret += tab(tabs++) + "if len(" + fieldName + ") != " + field.getArraySize() + ":" + endl();
+                        ret += tab(tabs--) + "raise ValueError()" + endl();
+                    }
                     typeName = typeName.substring(0,typeName.length() - 2);
                     ret += tab(tabs++) + "for x in " + fieldName + ":" + endl();
                     fieldName = "x";
