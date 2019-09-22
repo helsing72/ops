@@ -116,7 +116,8 @@ TEST(Test_memory_pools, Test_memory_pool_nd) {
 	EXPECT_EQ(mem_pool_obj2::_pool.size(), (size_t)1);
 
 	// Try to destroy marker for check of pool corruption detection
-	memset(a, 1, sizeof(mem_pool_obj2) + 4);
+	void* rawptr = (void*)a;
+	memset(rawptr, 1, sizeof(mem_pool_obj2) + 4);
 	delete a;
 	EXPECT_THROW(mem_pool_obj2::_pool.checkException(), mem_pool_obj2::memory_pool_type::pool_corruption);
 	EXPECT_EQ(mem_pool_obj2::_pool.capacity(), (size_t)2);
