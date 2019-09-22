@@ -16,14 +16,14 @@
 
 class BaseTypeFactory : public ops::SerializableFactory
 {
-	public:
-    ops::Serializable* create(const ops::TypeId_T& type)
+public:
+    virtual ops::Serializable* create(const ops::TypeId_T& type) override
     {
 		if(type == "TestAll.BaseData")
 		{
 			return new TestAll::BaseData();
 		}
-		return NULL;
+		return nullptr;
     }
 
 };
@@ -32,21 +32,21 @@ class BaseTypeFactory : public ops::SerializableFactory
 class Main : ops::DataListener, ops::DeadlineMissedListener
 {
 public:
-	ops::Subscriber* baseSub;
-	TestAll::BaseDataPublisher* basePub;
-	long counter;
+	ops::Subscriber* baseSub = nullptr;
+	TestAll::BaseDataPublisher* basePub = nullptr;
+	long counter = 0;
 
 public:
-	Main(ops::FileName_T configFile): counter(0)
+	Main(ops::FileName_T const configFile)
 	{
 		using namespace TestAll;
 		using namespace ops;
 
 		//Create a topic from configuration.
-		ops::Participant* participant = Participant::getInstance("TestAllDomain", "TestAllDomain", configFile);
+		ops::Participant* const participant = Participant::getInstance("TestAllDomain", "TestAllDomain", configFile);
 		participant->addTypeSupport(new BaseTypeFactory());
 
-		ErrorWriter* errorWriter = new ErrorWriter(std::cout);
+		ErrorWriter* const errorWriter = new ErrorWriter(std::cout);
 		participant->addListener(errorWriter);
 
 		Topic topic = participant->createParticipantInfoTopic();
@@ -64,25 +64,23 @@ public:
 
 	}
 	///Override from ops::DataListener, called whenever new data arrives.
-	void onNewData(ops::DataNotifier* subscriber)
+	virtual void onNewData(ops::DataNotifier* const subscriber) override
 	{
 		UNUSED(subscriber);
 		counter++;
 
 		/*TestAll::BaseData* data;
 		data = (TestAll::BaseData*)baseSub->getMessage()->getData();
-		if(data == NULL) return;
+		if(data == nullptr) return;
 		std::cout << data->baseText << " " << baseSub->getMessage()->getPublicationID() << " From: " << baseSub->getMessage()->getPublisherName() << std::endl;
 		data->setKey("relay");
 		basePub->write(data);*/
 		std::cout << "Data received! " << counter << std::endl;
 
 		//std::cout << ((ops::ParticipantInfoData*)baseSub->getMessage()->getData())->ips[0] << ":" <<((ops::ParticipantInfoData*)baseSub->getMessage()->getData())->mc_udp_port << std::endl;
-	
-	
 	}
 	///Override from ops::DeadlineMissedListener, called if no new data has arrived within deadlineQoS.
-	void onDeadlineMissed(ops::DeadlineMissedEvent* evt)
+	virtual void onDeadlineMissed(ops::DeadlineMissedEvent* const evt) override
 	{
 		UNUSED(evt);
 		std::cout << "Deadline Missed!" << std::endl;
@@ -92,11 +90,6 @@ public:
 	}
 
 };
-
-void newData()
-{
-
-}
 
 //Application entry point
 int main(int argc, char* args[])

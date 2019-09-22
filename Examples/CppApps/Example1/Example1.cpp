@@ -26,14 +26,14 @@ void PublisherExample()
 	// Create OPS participant to access a domain in the default configuration file
 	// "ops_config.xml" in current working directory. There are other overloads to
 	// create a participant for a specific configuration file.
-	ops::Participant* participant = ops::Participant::getInstance("TestAllDomain");
+	ops::Participant* const participant = ops::Participant::getInstance("TestAllDomain");
 
 	// Add our generated factory so OPS can create our data objects
 	participant->addTypeSupport(new TestAll::TestAllTypeFactory());
 
 	// Add an errorwriter instance to the participant to catch ev. internal OPS errors
 	// We can easily write our own if we want to log data in another way.
-	ops::ErrorWriter* errorWriter = new ops::ErrorWriter(std::cout);
+	ops::ErrorWriter* const errorWriter = new ops::ErrorWriter(std::cout);
 	participant->addListener(errorWriter);
 
 	// Create the topic to publish on, might throw ops::NoSuchTopicException
@@ -82,14 +82,14 @@ void PollingSubscriberExample()
 	// Create OPS participant to access a domain in the default configuration file
 	// "ops_config.xml" in current working directory. There are other overloads to
 	// create a participant for a specific configuration file.
-	ops::Participant* participant = ops::Participant::getInstance("TestAllDomain");
+	ops::Participant* const participant = ops::Participant::getInstance("TestAllDomain");
 
 	// Add our generated factory so OPS can create our data objects
 	participant->addTypeSupport(new TestAll::TestAllTypeFactory());
 
 	// Add an errorwriter instance to the participant to catch ev. internal OPS errors
 	// We can easily write our own if we want to log data in another way.
-	ops::ErrorWriter* errorWriter = new ops::ErrorWriter(std::cout);
+	ops::ErrorWriter* const errorWriter = new ops::ErrorWriter(std::cout);
 	participant->addListener(errorWriter);
 
 	// Create the topic to subscribe to, might throw ops::NoSuchTopicException
@@ -143,14 +143,14 @@ void CallbackSubscriberExample()
 	// Create OPS participant to access a domain in the default configuration file
 	// "ops_config.xml" in current working directory. There are other overloads to
 	// create a participant for a specific configuration file.
-	ops::Participant* participant = ops::Participant::getInstance("TestAllDomain");
+	ops::Participant* const participant = ops::Participant::getInstance("TestAllDomain");
 
 	// Add our generated factory so OPS can create our data objects
 	participant->addTypeSupport(new TestAll::TestAllTypeFactory());
 
 	// Add an errorwriter instance to the participant to catch ev. internal OPS errors
 	// We can easily write our own if we want to log data in another way.
-	ops::ErrorWriter* errorWriter = new ops::ErrorWriter(std::cout);
+	ops::ErrorWriter* const errorWriter = new ops::ErrorWriter(std::cout);
 	participant->addListener(errorWriter);
 
 	// Create the topic to subscribe to, might throw ops::NoSuchTopicException
@@ -182,18 +182,18 @@ void CallbackSubscriberExample()
 	}
 }
 
-void CallbackFunc(ops::DataNotifier* sender, void* userData)
+void CallbackFunc(ops::DataNotifier* const sender, void* const userData)
 {
-	ChildDataSubscriber* sub = (ChildDataSubscriber*)sender;
-	size_t user = (size_t)userData;
+	ChildDataSubscriber* const sub = dynamic_cast<ChildDataSubscriber*>(sender);
+	size_t const user = (size_t)userData;
 
 	// The OPSMessage contains some metadata for the received message
 	// eg. publisher name, publication id (message counter), ...
 	// These may be of interrest
-	ops::OPSMessage* newMess = sub->getMessage();
+	ops::OPSMessage* const newMess = sub->getMessage();
 
 	// Get the actual data object published
-	ChildData* data = (ChildData*)newMess->getData();
+	ChildData* const data = dynamic_cast<ChildData*>(newMess->getData());
 
 	// Use the data
 	std::cout << "callback(" << user << "): Received ChildTopic with " << data->l << std::endl;
@@ -211,22 +211,20 @@ void CallbackFunc(ops::DataNotifier* sender, void* userData)
 
 class SubscriptionHandler : ops::DataListener, ops::DeadlineMissedListener
 {
-private:
-	TestAll::ChildDataSubscriber* sub;
 public:
 	SubscriptionHandler()
 	{
 		// Create OPS participant to access a domain in the default configuration file
 		// "ops_config.xml" in current working directory. There are other overloads to
 		// create a participant for a specific configuration file.
-		ops::Participant* participant = ops::Participant::getInstance("TestAllDomain");
+		ops::Participant* const participant = ops::Participant::getInstance("TestAllDomain");
 
 		// Add our generated factory so OPS can create our data objects
 		participant->addTypeSupport(new TestAll::TestAllTypeFactory());
 
 		// Add an errorwriter instance to the participant to catch ev. internal OPS errors
 		// We can easily write our own if we want to log data in another way.
-		ops::ErrorWriter* errorWriter = new ops::ErrorWriter(std::cout);
+		ops::ErrorWriter* const errorWriter = new ops::ErrorWriter(std::cout);
 		participant->addListener(errorWriter);
 
 		// Create the topic to subscribe to, might throw ops::NoSuchTopicException
@@ -262,7 +260,7 @@ public:
 	}
 
 	// Override from ops::DataListener, called whenever new data arrives.
-	void onNewData(ops::DataNotifier* subscriber)
+	virtual void onNewData(ops::DataNotifier* const subscriber) override
 	{
 		// NOTE: It's important that we keep this callback fast, it will block
 		// the receive for all topics belonging to the participant (currently a single
@@ -277,10 +275,10 @@ public:
 			// The OPSMessage contains some metadata for the received message
 			// eg. publisher name, publication id (message counter), ...
 			// These may be of interrest
-			ops::OPSMessage* newMess = sub->getMessage();
+			ops::OPSMessage* const newMess = sub->getMessage();
 
 			// Get the actual data object published
-			ChildData* data = (ChildData*)newMess->getData();
+			ChildData* const data = dynamic_cast<ChildData*>(newMess->getData());
 
 			// Use the data
 			std::cout << "Received ChildTopic with " << data->l << std::endl;
@@ -297,11 +295,13 @@ public:
 	}
 
 	// Override from ops::DeadlineMissedListener, called if no new data has arrived within deadlineQoS.
-	void onDeadlineMissed(ops::DeadlineMissedEvent* evt)
+	virtual void onDeadlineMissed(ops::DeadlineMissedEvent* const evt) override
 	{
 		UNUSED(evt);
 		std::cout << "Deadline Missed!" << std::endl;
 	}
+private:
+	TestAll::ChildDataSubscriber* sub;
 };
 
 void ObjectSubscriberExample()
@@ -320,7 +320,7 @@ void usage()
 	std::cout << "" << std::endl;
 }
 
-int main(int argc, char**argv)
+int main(int argc, char* argv[])
 {
 	if (argc > 1) {
 		std::string arg(argv[1]);

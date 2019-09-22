@@ -24,14 +24,14 @@ public:
 	Main()
 	{
 		//Create a Participant (i.e. an entry point for using ops.), compare with your ops_config.xml
-		ops::Participant* participant = ops::Participant::getInstance("HelloDomain");
+		ops::Participant* const participant = ops::Participant::getInstance("HelloDomain");
 		if(!participant)
 		{
 			std::cout << "Create participant failed. do you have ops_config.xml in your rundirectory?" << std::endl;
 #ifdef _WIN32
 			Sleep(10000); exit(1);
 #else
-                        exit(1);
+			exit(1);
 #endif
 		}
 
@@ -56,7 +56,7 @@ public:
 
 	}
 	///Override from ops::DataListener, called whenever new data arrives.
-	void onNewData(ops::DataNotifier* subscriber)
+	virtual void onNewData(ops::DataNotifier* const subscriber) override
 	{
 		hello::HelloData data;
 		if(sub == subscriber)

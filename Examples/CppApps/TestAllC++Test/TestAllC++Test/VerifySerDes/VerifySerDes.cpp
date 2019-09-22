@@ -38,7 +38,7 @@ char arr[TestAll::Definitions::const_b];
 //TestAll::TestData::MemoryPool TestAll::TestData::_pool(100);
 
 
-std::ostream& operator<<(std::ostream& os, TestAll::Definitions::Command c)
+std::ostream& operator<<(std::ostream& os, TestAll::Definitions::Command const c)
 {
 	switch (c)
 	{
@@ -46,12 +46,12 @@ std::ostream& operator<<(std::ostream& os, TestAll::Definitions::Command c)
 	case TestAll::Definitions::Command::PAUSE: os << "PAUSE";       break;
 	case TestAll::Definitions::Command::START: os << "START";       break;
 	case TestAll::Definitions::Command::STOP: os << "STOP";         break;
-	default: os.setstate(std::ios_base::failbit);
+	default: os.setstate(std::ios_base::failbit); break;
 	}
 	return os;
 }
 
-std::ostream& operator<<(std::ostream& os, TestAll::ChildData::Order c)
+std::ostream& operator<<(std::ostream& os, TestAll::ChildData::Order const c)
 {
 	switch (c)
 	{
@@ -59,7 +59,7 @@ std::ostream& operator<<(std::ostream& os, TestAll::ChildData::Order c)
 	case TestAll::ChildData::Order::DEF: os << "DEF";    break;
 	case TestAll::ChildData::Order::GHI: os << "GHI";    break;
 	case TestAll::ChildData::Order::JKL: os << "JKL";    break;
-	default: os.setstate(std::ios_base::failbit);
+	default: os.setstate(std::ios_base::failbit); break;
 	}
 	return os;
 }
@@ -130,7 +130,7 @@ void checkEmpty(TestAll::ChildData& data)
 
 	checkEmpty(data.test2);
 
-	AssertNEQ<void*>(data.testPointer, NULL);
+	AssertNEQ<void*>(data.testPointer, nullptr);
 	checkEmpty(*data.testPointer);
 
 	AssertEQ<int>(data.fruit.value, TestAll::Fruit::APPLE);
@@ -236,11 +236,11 @@ void checkObjects(TestAll::ChildData& data, TestAll::ChildData& exp)
 
 	checkObjects(data.test2, exp.test2);
 
-	AssertNEQ<void*>(data.testPointer, NULL, "data.testPointer");
-	AssertNEQ<void*>(exp.testPointer, NULL, "exp.testPointer");
+	AssertNEQ<void*>(data.testPointer, nullptr, "data.testPointer");
+	AssertNEQ<void*>(exp.testPointer, nullptr, "exp.testPointer");
 	AssertNEQ<void*>(data.testPointer, exp.testPointer, "data.testPointer");
-	AssertNEQ<void*>(dynamic_cast<TestAll::TestData*>(data.testPointer), NULL, "data.testPointer");
-	AssertNEQ<void*>(dynamic_cast<TestAll::TestData*>(exp.testPointer), NULL, "data.testPointer");
+	AssertNEQ<void*>(dynamic_cast<TestAll::TestData*>(data.testPointer), nullptr, "data.testPointer");
+	AssertNEQ<void*>(dynamic_cast<TestAll::TestData*>(exp.testPointer), nullptr, "data.testPointer");
 
 	checkObjects(*data.testPointer, *exp.testPointer);
 
@@ -486,9 +486,9 @@ void fillChildData(TestAll::ChildData& data)
 
 volatile bool gTerminate = false;
 
-void SignalHandler(int signal)
+void SignalHandler(int const signal)
 {
-	if (signal == SIGINT) gTerminate = true;
+	if (signal == SIGINT) { gTerminate = true; }
 }
 
 int main(int argc, const char* args[])
@@ -584,11 +584,8 @@ int main(int argc, const char* args[])
 
 		std::cout << "Test Print Archiver" << std::endl;
 		{
-			ops::PrintArchiverOut* prt = new ops::PrintArchiverOut(std::cout);
-
-			prt->printObject("data", &cd1);
-
-			delete prt;
+			ops::PrintArchiverOut prt(std::cout);
+			prt.printObject("data", &cd1);
 		}
 		std::cout << "Print Archiver Test Finished " << std::endl;
 
@@ -617,7 +614,7 @@ int main(int argc, const char* args[])
 
 		ops::Participant::getStaticErrorService()->addListener(new ops::ErrorWriter(std::cout));
 
-		ops::Participant* participant = ops::Participant::getInstance("TestAllDomain");
+		ops::Participant* const participant = ops::Participant::getInstance("TestAllDomain");
 		if (!participant) {
 			std::cout << "Create participant failed. do you have ops_config.xml on your rundirectory?" << std::endl;
 			throw std::exception();
@@ -630,22 +627,19 @@ int main(int argc, const char* args[])
 
 		std::cout << "Dump of configuration" << std::endl;
 		{
-			ops::PrintArchiverOut* prt = new ops::PrintArchiverOut(std::cout);
-
-			prt->printObject("ops_config", participant->getConfig());
-
-			delete prt;
+			ops::PrintArchiverOut prt(std::cout);
+			prt.printObject("ops_config", participant->getConfig());
 		}
 		std::cout << "Dump of configuration Finished " << std::endl;
 
 		// Add an errorwriter instance to the participant to catch ev. internal OPS errors
 		// We can easily write our own if we want to log data in another way.
-		ops::ErrorWriter* errorWriter = new ops::ErrorWriter(std::cout);
+		ops::ErrorWriter* const errorWriter = new ops::ErrorWriter(std::cout);
 		participant->addListener(errorWriter);
 
 		{
 			// Setup & start subscriber w polling
-			ops::Topic topic = participant->createTopic("ChildTopic");
+			ops::Topic const topic = participant->createTopic("ChildTopic");
 			TestAll::ChildDataSubscriber sub(topic);
 			sub.start();
 
@@ -666,10 +660,10 @@ int main(int argc, const char* args[])
 
 			// Check received values against sent values
 			AssertEQ<bool>(sub.waitForNewData(100), true, "No data received");
-			bool flag = AssertEQ<bool>(sub.getData(cd3), true, "No received data");
+			bool const flag = AssertEQ<bool>(sub.getData(cd3), true, "No received data");
 
 			sub.aquireMessageLock();
-			if (sub.getMessage()) {
+			if (sub.getMessage() != nullptr) {
 				AssertEQ<size_t>(sub.getMessage()->spareBytes.size(), 0, "spareBytes");
 			} else {
 				std::cout << "Failed: sub.getMessage() == NULL" << std::endl;
@@ -677,7 +671,7 @@ int main(int argc, const char* args[])
 			}
 			sub.releaseMessageLock();
 
-			if (flag) checkObjects(cd1, cd3);
+			if (flag) { checkObjects(cd1, cd3); }
 
 			std::cout << "Finished " << std::endl;
 

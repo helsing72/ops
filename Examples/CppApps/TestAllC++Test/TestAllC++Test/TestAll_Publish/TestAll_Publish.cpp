@@ -32,7 +32,7 @@
 
 int64_t getNow()
 {
-    struct timespec ts;
+    timespec ts;
     memset(&ts, 0, sizeof(ts));
     clock_gettime(CLOCK_REALTIME, &ts);
     return ((1000 * ts.tv_sec) + (ts.tv_nsec / 1000000));
@@ -53,7 +53,7 @@ int _kbhit() {
         tcgetattr(STDIN, &term);
         term.c_lflag &= ~ICANON;
         tcsetattr(STDIN, TCSANOW, &term);
-        setbuf(stdin, NULL);
+        setbuf(stdin, nullptr);
         initialized = true;
     }
 
@@ -106,7 +106,7 @@ int main(int argc, const char* args[])
 	bP.push_back(new TestData());
 	bP.clear();
 
-	ops::Participant* participant = Participant::getInstance("TestAllDomain");
+	ops::Participant* const participant = Participant::getInstance("TestAllDomain");
 	if(!participant)
 	{
 		std::cout << "Create participant failed. do you have ops_config.xml on your rundirectory?" << std::endl;
@@ -116,7 +116,7 @@ int main(int argc, const char* args[])
 	//Add type support for our types, to make this participant understand what we are talking
 	participant->addTypeSupport(new TestAll::TestAllTypeFactory());
 
-	ErrorWriter* errorWriter = new ErrorWriter(std::cout);
+	ErrorWriter* const errorWriter = new ErrorWriter(std::cout);
 	participant->addListener(errorWriter);
 
 	/*Sleep(2000);
@@ -131,7 +131,7 @@ int main(int argc, const char* args[])
 
 
 	//Create topic, might throw ops::NoSuchTopicException
-	Topic topic = participant->createTopic("ChildTopic");
+	Topic const topic = participant->createTopic("ChildTopic");
 
 	/*{
 		Topic scoopedTopic;
@@ -149,7 +149,7 @@ int main(int argc, const char* args[])
 
 
 
-	Topic baseTopic = participant->createTopic("BaseTopic");
+	Topic const baseTopic = participant->createTopic("BaseTopic");
 
 	BaseDataPublisher basePub(baseTopic);
 	basePub.setName("BasePublisher");
@@ -173,7 +173,7 @@ int main(int argc, const char* args[])
 	testData.value = 3456.0;
 	data.test2 = testData;
 
-	data.testPointer = (TestData*)testData.clone();
+	data.testPointer = dynamic_cast<TestData*>(testData.clone());
 
 	//
 	//Set primitives
@@ -237,16 +237,16 @@ int main(int argc, const char* args[])
 	//ops::XMLArchiverIn archiverIn(iStream, "file");
 
 	//
-	//ops::Serializable* ser = archiverIn.inout(std::string("data"), (OPSObject*)NULL);
+	//ops::Serializable* ser = archiverIn.inout(std::string("data"), (OPSObject*)nullptr);
 
 
 
 	//return 0;
 
-	ChildData* dataClone = (ChildData*)data.clone();
+	ChildData* const dataClone = dynamic_cast<ChildData*>(data.clone());
 
 	double theta = 0.0;
-	double pi = 3.1415926535;
+	double const pi = 3.1415926535;
 	double fact = 1.0;
 	double dist = 0.1;
 	double offset = 0.0;
@@ -280,21 +280,21 @@ int main(int argc, const char* args[])
 
 		ops::TimeHelper::sleep(mainSleep);
 
-		if (_kbhit()) {
+		if (_kbhit() != 0) {
 #ifdef _WIN32
-			char ch = _getch();
+			char const ch = _getch();
 #else
-			char ch = getchar();
+			char const ch = getchar();
 #endif
 			if (ch == '+') {
-				if (fact >= (15.0 * dist)) dist = 10.0 * dist; 
+				if (fact >= (15.0 * dist)) { dist = 10.0 * dist; }
 				fact = fact + dist;
 			}
 			if (ch == '-') {
-				if (fact <= 1.5 * dist) dist = dist / 10.0;
+				if (fact <= 1.5 * dist) { dist = dist / 10.0; }
 				fact = fact - dist;
 			}
-			if (fact < dist) fact = dist;
+			if (fact < dist) { fact = dist; }
 			if (ch == '0') {
 				offset = 0.0;
 			}

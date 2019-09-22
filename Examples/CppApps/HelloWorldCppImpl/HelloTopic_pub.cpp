@@ -22,7 +22,7 @@ int main(int argc, const char* args[])
 	using namespace ops;
 
 	//Create a Participant (i.e. an entry point for using ops.), compare with your ops_config.xml
-	ops::Participant* participant = Participant::getInstance("HelloDomain");
+	ops::Participant* const participant = Participant::getInstance("HelloDomain");
 	if(!participant)
 	{
 		std::cout << "Create participant failed. do you have ops_config.xml on your rundirectory?" << std::endl;
@@ -37,7 +37,7 @@ int main(int argc, const char* args[])
 	participant->addTypeSupport(new HelloWorld::HelloWorldTypeFactory());
 
 	//Now, create the Topic we wish to publish on. Might throw ops::NoSuchTopicException if no such Topic exist in ops_config.xml
-	Topic topic = participant->createTopic("HelloTopic");
+	Topic const topic = participant->createTopic("HelloTopic");
 
 	//Create a publisher on that topic
 	hello::HelloDataPublisher pub(topic);
@@ -49,7 +49,7 @@ int main(int argc, const char* args[])
 	data.helloString = "Hello World From C++!!";
 
 	//Publish the data peridically 
-	int mainSleep = 1000;
+	int const mainSleep = 1000;
 	while(true)
 	{
 		pub.write(&data);

@@ -26,7 +26,7 @@ public:
 	Main()
 	{
 		//Create a Participant (i.e. an entry point for using ops.), compare with your ops_config.xml
-		ops::Participant* participant = ops::Participant::getInstance("HelloDomain");
+		ops::Participant* const participant = ops::Participant::getInstance("HelloDomain");
 		if(!participant)
 		{
 			std::cout << "Create participant failed. do you have ops_config.xml in your rundirectory?" << std::endl;
@@ -63,7 +63,7 @@ public:
 		sub->start();
 	}
 	///Override from ops::DataListener, called whenever new data arrives.
-	void onNewData(ops::DataNotifier* subscriber)
+	virtual void onNewData(ops::DataNotifier* const subscriber) override
 	{
 		hello::RequestHelloData data;
 		if(sub == subscriber)
@@ -79,7 +79,7 @@ public:
 		}
 	}
 	///Override from ops::DeadlineMissedListener, called if no new data has arrived within deadlineQoS.
-	void onDeadlineMissed(ops::DeadlineMissedEvent* evt)
+	virtual void onDeadlineMissed(ops::DeadlineMissedEvent* const evt) override
 	{
 		UNUSED(evt);
 		std::cout << "Deadline Missed!" << std::endl;
