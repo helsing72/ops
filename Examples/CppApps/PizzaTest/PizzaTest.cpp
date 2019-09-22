@@ -35,7 +35,8 @@
 #include "SdsSystemTime.h"
 #endif
 
-//#define USE_MEMORY_POOLS
+#define USE_LAMDAS
+#undef USE_MEMORY_POOLS
 
 #ifdef USE_MEMORY_POOLS
 sds::MessageHeaderData::memory_pool_type sds::MessageHeaderData::_pool(1);
@@ -77,7 +78,7 @@ int _kbhit() {
         tcgetattr(STDIN, &term);
         term.c_lflag &= ~ICANON;
         tcsetattr(STDIN, TCSANOW, &term);
-        setbuf(stdin, NULL);
+        setbuf(stdin, nullptr);
         initialized = true;
     }
 
@@ -97,6 +98,7 @@ class CHelperListener
 {
 public:
 	virtual void onData(ops::Subscriber* sub, DataType* data) = 0;
+	virtual ~CHelperListener() {};
 };
 
 class IHelper
@@ -118,20 +120,21 @@ public:
 };
 
 template <class DataType, class DataTypePublisher, class DataTypeSubscriber>
-class CHelper : public IHelper, ops::DataListener, ops::DeadlineMissedListener, ops::Listener<ops::PublicationIdNotification_T>
+class CHelper : 
+	public IHelper, 
+#ifndef USE_LAMDAS
+	ops::DataListener,
+	ops::DeadlineMissedListener,
+#endif
+	ops::Listener<ops::PublicationIdNotification_T>,
+	ops::Listener<ops::ConnectStatus>
 {
-private:
-	CHelperListener<DataType>* client;
-	//ops::Publisher* pub;
-	DataTypePublisher* pub;
-	ops::Subscriber* sub;
-	int64_t expectedPubId;
-
 public:
 	DataType data;
 
 	CHelper(CHelperListener<DataType>* client):
-		pub(NULL), sub(NULL), expectedPubId(-1)
+		pub(nullptr), sub(nullptr)
+		//, expectedPubId(-1)
 	{
 		this->client = client;
 	}
@@ -142,10 +145,10 @@ public:
 		DeleteSubscriber(false);
 	}
 
-	bool HasPublisher() { return pub != NULL; }
-	bool HasSubscriber() { return sub != NULL; }
+	virtual bool HasPublisher() override { return pub != nullptr; }
+	virtual bool HasSubscriber() override { return sub != nullptr; }
 
-	void CreatePublisher(ops::Participant* part, ops::ObjectName_T topicName)
+	virtual void CreatePublisher(ops::Participant* part, ops::ObjectName_T topicName) override
 	{
 		if (pub) {
 			std::cout << "Publisher already exist for topic " << pub->getTopic().getName() << std::endl;
@@ -163,10 +166,13 @@ public:
 				std::cout <<
 					"  InSocketBufferSize: " << topic.getInSocketBufferSize() << std::endl <<
 					"  OutSocketBufferSize: " << topic.getOutSocketBufferSize() << std::endl <<
-					"  SampleMaxSize: " << topic.getSampleMaxSize() << std::endl;
+					"  SampleMaxSize: " << topic.getSampleMaxSize() << std::endl <<
+					"  LocalInterface: " << topic.getLocalInterface() << std::endl
+					;
 
 				//Create a publisher on that topic
 				pub = new DataTypePublisher(topic);
+				pub->addListener(this);
 
 				std::ostringstream myStream;
 #ifdef _WIN32
@@ -182,19 +188,18 @@ public:
 		}
 	}
 
-	void DeletePublisher(bool doLog = true)
+	virtual void DeletePublisher(bool doLog = true) override
 	{
 		if (pub) {
 			std::cout << "Deleting publisher for topic " << pub->getTopic().getName() << std::endl;
-			//pub->stop();
 			delete pub;
-			pub = NULL;
+			pub = nullptr;
 		} else {
 			if (doLog) std::cout << "Publisher must be created first!!" << std::endl;
 		}
 	}
 
-	void StartPublisher()
+	virtual void StartPublisher() override
 	{
 		if (pub) {
 			pub->start();
@@ -203,7 +208,7 @@ public:
 		}
 	}
 
-	void StopPublisher()
+	virtual void StopPublisher() override
 	{
 		if (pub) {
 			pub->stop();
@@ -212,7 +217,7 @@ public:
 		}
 	}
 
-	void Write()
+	virtual void Write() override
 	{
 		if (pub) {
 			try {
@@ -226,7 +231,7 @@ public:
 		}
 	}
 
-	void CreateSubscriber(ops::Participant* part, ops::ObjectName_T topicName)
+	virtual void CreateSubscriber(ops::Participant* part, ops::ObjectName_T topicName) override 
 	{
 		if (sub) {
 			std::cout << "Subscriber already exist for topic " << sub->getTopic().getName() << std::endl;
@@ -244,12 +249,33 @@ public:
 				std::cout <<
 					"  InSocketBufferSize: " << topic.getInSocketBufferSize() << std::endl <<
 					"  OutSocketBufferSize: " << topic.getOutSocketBufferSize() << std::endl <<
-					"  SampleMaxSize: " << topic.getSampleMaxSize() << std::endl;
+					"  SampleMaxSize: " << topic.getSampleMaxSize() << std::endl <<
+					"  LocalInterface: " << topic.getLocalInterface() << std::endl
+					;
 
 				//Create a subscriber on that topic.
 				sub = new DataTypeSubscriber(topic);
+
+				// Setup listeners
+#ifdef USE_LAMDAS
+				sub->addDataListener(
+					[&](ops::DataNotifier* /*subscriber*/) {
+						//std::cout << "Lambda[] for topic '" << sub->getTopic().getName() << "'" << std::endl;
+						ops::OPSMessage* newMess = sub->getMessage();
+						client->onData(sub, dynamic_cast<DataType*>(newMess->getData()));
+					}
+				);
+				sub->deadlineMissedEvent.addDeadlineMissedListener(
+					[&](ops::DeadlineMissedEvent* /*sender*/) {
+						//std::cout << "Deadline Lambda[] for topic '" << sub->getTopic().getName() << "'" << std::endl;
+						std::cout << "Deadline Missed for topic " << sub->getTopic().getName() << std::endl;
+					}
+				);
+#else
 				sub->addDataListener(this);
 				sub->deadlineMissedEvent.addDeadlineMissedListener(this);
+#endif
+				sub->addListener(this);
 
 				// Add a publication ID Checker
 				sub->pubIdChecker = new ops::PublicationIdChecker;
@@ -263,19 +289,19 @@ public:
 		}
 	}
 
-	void DeleteSubscriber(bool doLog = true)
+	virtual void DeleteSubscriber(bool doLog = true) override
 	{
 		if (sub) {
 			std::cout << "Deleting subscriber for topic " << sub->getTopic().getName() << std::endl;
 			sub->stop();
 			delete sub;
-			sub = NULL;
+			sub = nullptr;
 		} else {
 			if (doLog) std::cout << "Subscriber must be created first!!" << std::endl;
 		}
 	}
 
-	void StartSubscriber()
+	virtual void StartSubscriber() override
 	{
 		if (sub) {
 			std::cout << "Starting subscriber for topic " << sub->getTopic().getName() << std::endl;
@@ -286,7 +312,7 @@ public:
 
 	}
 
-	void StopSubscriber()
+	virtual void StopSubscriber() override
 	{
 		if (sub) {
 			std::cout << "Stoping subscriber for topic " << sub->getTopic().getName() << std::endl;
@@ -296,7 +322,7 @@ public:
 		}
 	}
 
-	void SetDeadlineQos(int64_t timeoutMs)
+	virtual void SetDeadlineQos(int64_t timeoutMs) override
 	{
 		if (sub) {
 			std::cout << "Setting deadlineQos to " << timeoutMs << " [ms] for topic " << sub->getTopic().getName() << std::endl;
@@ -306,7 +332,7 @@ public:
 		}
 	}
 
-	virtual void onNewEvent(ops::Notifier<ops::PublicationIdNotification_T>* sender, ops::PublicationIdNotification_T arg)
+	virtual void onNewEvent(ops::Notifier<ops::PublicationIdNotification_T>* sender, ops::PublicationIdNotification_T arg) override
 	{
 		UNUSED(sender);
 		ops::Address_T address;
@@ -323,8 +349,28 @@ public:
 			std::endl;
 	}
 
+	virtual void onNewEvent(ops::Notifier<ops::ConnectStatus>* sender, ops::ConnectStatus arg) override
+	{
+		ops::Publisher* pb = dynamic_cast<ops::Publisher*>(sender);
+		if (pb) {
+			std::cout << "[Publisher on " << pb->getTopic().getName() << "] ";
+		}
+		ops::Subscriber* sb = dynamic_cast<ops::Subscriber*>(sender);
+		if (sb) {
+			std::cout << "[Subscriber on " << sb->getTopic().getName() << "] ";
+		}
+		std::cout << "IP: " << arg.addr << "::" << arg.port;
+		if (arg.connected) {
+			std::cout << " Connected.";
+		} else {
+			std::cout << " Disconnected.";
+		}
+		std::cout << " Total: " << arg.totalNo << std::endl;
+	}
+	
+#ifndef USE_LAMDAS
 	///Override from ops::DataListener, called whenever new data arrives.
-	void onNewData(ops::DataNotifier* subscriber)
+	virtual void onNewData(ops::DataNotifier* subscriber) override
 	{
 		if(subscriber == sub)
 		{
@@ -339,18 +385,28 @@ public:
 //						". Exp.pubid: " << expectedPubId << " got: " << newMess->getPublicationID() << std::endl;
 //				}
 //			}
-			expectedPubId = newMess->getPublicationID() + 1;
+//			expectedPubId = newMess->getPublicationID() + 1;
+
 			client->onData(sub, dynamic_cast<DataType*>(newMess->getData()));
 		}
 	}
+#endif
 
+#ifndef USE_LAMDAS
 	///Override from ops::DeadlineMissedListener, called if no new data has arrived within deadlineQoS.
-	void onDeadlineMissed(ops::DeadlineMissedEvent* evt)
+	virtual void onDeadlineMissed(ops::DeadlineMissedEvent* evt) override
 	{
 		UNUSED(evt)
 		std::cout << "Deadline Missed for topic " << sub->getTopic().getName() << std::endl;
 	}
+#endif
 
+private:
+	CHelperListener<DataType>* client;
+	//ops::Publisher* pub;
+	DataTypePublisher* pub;
+	ops::Subscriber* sub;
+	//int64_t expectedPubId;
 };
 
 typedef CHelper<pizza::PizzaData, pizza::PizzaDataPublisher, pizza::PizzaDataSubscriber> TPizzaHelper;
@@ -366,13 +422,13 @@ struct ItemInfo {
 	IHelper* helper;
 	ops::Participant* part;
 
-	ItemInfo(ops::ObjectName_T dom, ops::ObjectName_T top, ops::TypeId_T typ)
+	ItemInfo(ops::ObjectName_T const dom, ops::ObjectName_T const top, ops::TypeId_T const typ)
 	{
 		Domain = dom;
 		TopicName = top;
 		TypeName = typ;
-		helper = NULL;
-		part = NULL;
+		helper = nullptr;
+		part = nullptr;
 		selected = false;
 	};
 };
@@ -387,10 +443,10 @@ class MyListener :
 	public CHelperListener<pizza::special::ExtraAllt>
 {
 public:
-	void onData(ops::Subscriber* sub, pizza::PizzaData* data)
+	virtual void onData(ops::Subscriber* const sub, pizza::PizzaData* const data) override
 	{
 		// test for sending derived objects on same topic
-		if (dynamic_cast<pizza::VessuvioData*>(data) != NULL) {
+		if (dynamic_cast<pizza::VessuvioData*>(data) != nullptr) {
 			onData(sub, dynamic_cast<pizza::VessuvioData*>(data));
 			return;
 		}
@@ -407,7 +463,7 @@ public:
 				", Tomato sauce: " << data->tomatoSauce << 
 				", spareBytes: " << data->spareBytes.size() << 
 				std::endl;
-#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+#if defined(DEBUG_OPSOBJECT_COUNTER)
 			std::cout << std::endl << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl << std::endl;
 #endif
 		}
@@ -421,10 +477,10 @@ public:
 
 	}
 
-	void onData(ops::Subscriber* sub, pizza::VessuvioData* data)
-  {
+	virtual void onData(ops::Subscriber* const sub, pizza::VessuvioData* const data) override
+	{
 		// test for sending derived objects on same topic
-		if (dynamic_cast<pizza::special::ExtraAllt*>(data) != NULL) {
+		if (dynamic_cast<pizza::special::ExtraAllt*>(data) != nullptr) {
 			onData(sub, dynamic_cast<pizza::special::ExtraAllt*>(data));
 			return;
 		}
@@ -443,8 +499,8 @@ public:
 		}
 	}
 
-	void onData(ops::Subscriber* sub, pizza::special::ExtraAllt* data)
-  {
+	virtual void onData(ops::Subscriber* const sub, pizza::special::ExtraAllt* const data) override
+	{
 		ops::Address_T addr = "";
 		int port = 0;
 		sub->getMessage()->getSource(addr, port);
@@ -469,9 +525,9 @@ public:
 };
 
 #ifdef OPS_ENABLE_DEBUG_HANDLER
-class MyDebugNotifyInterface : ops::DebugNotifyInterface
+class MyDebugNotifyInterface : public ops::DebugNotifyInterface
 {
-	virtual void onRequest(opsidls::DebugRequestResponseData& req, opsidls::DebugRequestResponseData& resp)
+	virtual void onRequest(opsidls::DebugRequestResponseData& req, opsidls::DebugRequestResponseData& resp) override
 	{
 		std::cout << 
 			"DebugNotifyInterface::onRequest()"  <<
@@ -493,14 +549,14 @@ void WriteToAllSelected()
 	static int64_t Counter = 0;
 
 	for (unsigned int i = 0; i < ItemInfoList.size(); i++) {
-		ItemInfo* info = ItemInfoList[i];
+		ItemInfo* const info = ItemInfoList[i];
 		if (!info->selected) continue;
 		std::stringstream str;
 		str << Counter;
 		std::string CounterStr(str.str());
 		Counter++;
 		if (info->TypeName == pizza::PizzaData::getTypeName()) {
-			TPizzaHelper* hlp = (TPizzaHelper*)info->helper;
+			TPizzaHelper* hlp = dynamic_cast<TPizzaHelper*>(info->helper);
 			hlp->data.cheese = "Pizza from C++: " + CounterStr;
 			hlp->data.tomatoSauce = "Tomato";
 #ifdef USE_MESSAGE_HEADER
@@ -508,7 +564,7 @@ void WriteToAllSelected()
 #endif
 		}
 		if (info->TypeName == pizza::VessuvioData::getTypeName()) {
-			TVessuvioHelper* hlp = (TVessuvioHelper*)info->helper;
+			TVessuvioHelper* hlp = dynamic_cast<TVessuvioHelper*>(info->helper);
 			hlp->data.cheese = "Vessuvio from C++: " + CounterStr;
 			hlp->data.ham = FillerStr;
 #ifdef USE_MESSAGE_HEADER
@@ -516,7 +572,7 @@ void WriteToAllSelected()
 #endif
 		}
 		if (info->TypeName == pizza::special::ExtraAllt::getTypeName()) {
-			TExtraAlltHelper* hlp = (TExtraAlltHelper*)info->helper;
+			TExtraAlltHelper* const hlp = dynamic_cast<TExtraAlltHelper*>(info->helper);
 			hlp->data.cheese = "ExtraAllt from C++: " + CounterStr;
 			if (hlp->data.strings.size() == 0) {
 				for (int k = 0; k < 1000; k++) hlp->data.strings.push_back("hej");
@@ -535,9 +591,9 @@ void WriteToAllSelected()
 	}
 }
 
-void printDomainInfo(ops::Participant* part)
+void printDomainInfo(ops::Participant* const part)
 {
-	ops::Domain* dom = part->getDomain();
+	ops::Domain* const dom = part->getDomain();
 	std::cout << std::endl <<
 		"  DomainID: " << dom->getDomainID() << std::endl <<
 		"  DomainAddress: " << dom->getDomainAddress() << std::endl <<
@@ -566,11 +622,9 @@ void printDomainInfo(ops::Participant* part)
 
 	std::cout << std::endl << "Dump of configuration" << std::endl;
 	{
-		ops::PrintArchiverOut* prt = new ops::PrintArchiverOut(std::cout);
+		ops::PrintArchiverOut prt(std::cout);
 
-		prt->printObject("ops_config", part->getDomain());
-
-		delete prt;
+		prt.printObject("ops_config", part->getDomain());
 	}
 	std::cout << std::endl << "Dump of configuration Finished " << std::endl;
 
@@ -580,7 +634,7 @@ void menu()
 {
 	std::cout << "" << std::endl;
 	for (unsigned int i = 0; i < ItemInfoList.size(); i++) {
-            ItemInfo* ii = ItemInfoList[i];
+		ItemInfo* const ii = ItemInfoList[i];
 		std::cout << "\t " << i <<
 			" " <<
 		(ii->helper->HasPublisher() ? "P" : " ") <<
@@ -607,25 +661,30 @@ void menu()
 	std::cout << "\t Q     Quite (minimize program output)" << std::endl;
 	std::cout << "\t X     Exit program" << std::endl;
 
-#if defined(USE_C11) && defined(DEBUG_OPSOBJECT_COUNTER)
+#if defined(DEBUG_OPSOBJECT_COUNTER)
 	std::cout << std::endl << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl << std::endl;
 #endif
 
 }
 
-int main(int argc, char**argv)
+int main(int argc, char* argv[])
 {
+	ops::ObjectName_T debugKey = "Pizza";
 	ops::execution_policy::Enum policy = ops::execution_policy::threading;
 
 	if (argc > 1) {
-		std::string arg = argv[1];
-		if (arg == "polling") policy = ops::execution_policy::polling;
+		std::string const arg = argv[1];
+		if (arg == "polling") {
+			policy = ops::execution_policy::polling;
+		} else {
+			debugKey = arg;
+		}
 	}
 
 #ifdef _WIN32
 	// --------------------------------------------------------------------
 	// Try to set timer resolution to 1 ms
-	#define TARGET_RESOLUTION 1         // 1-millisecond target resolution
+	UINT const TARGET_RESOLUTION = 1;         // 1-millisecond target resolution
 
 	TIMECAPS tc;
 	UINT     wTimerRes = TARGET_RESOLUTION;
@@ -639,7 +698,7 @@ int main(int argc, char**argv)
 #endif
 
 	// Setup the OPS static error service (common for all participants, reports errors during participant creation)
-	ops::ErrorWriter* errorWriterStatic = new ops::ErrorWriter(std::cout);
+	ops::ErrorWriter* const errorWriterStatic = new ops::ErrorWriter(std::cout);
 	ops::Participant::getStaticErrorService()->addListener(errorWriterStatic);
 
 	// Add all Domain's from given file(s)
@@ -680,8 +739,8 @@ int main(int argc, char**argv)
 
 	// Create participants
 	// NOTE that the second parameter (participantID) must be different for the two participant instances
-	ops::Participant* participant = ops::Participant::getInstance("PizzaDomain", "PizzaDomain", policy);
-    if (participant == NULL) {
+	ops::Participant* const participant = ops::Participant::getInstance("PizzaDomain", "PizzaDomain", policy);
+    if (participant == nullptr) {
 	    std::cout << "Failed to create Participant. Missing ops_config.xml ??" << std::endl;
 		exit(-1);
     }
@@ -689,13 +748,13 @@ int main(int argc, char**argv)
 	printDomainInfo(participant);
 	
 #ifdef OPS_ENABLE_DEBUG_HANDLER
-	ops::DebugHandler::SetKey("Pizza");
+	ops::DebugHandler::SetKey(debugKey);
 	MyDebugNotifyInterface mdni;
-	participant->debugHandler.SetAppCallback((ops::DebugNotifyInterface*)&mdni);
+	participant->debugHandler.SetAppCallback(dynamic_cast<ops::DebugNotifyInterface*>(&mdni));
 #endif
 
-	ops::Participant* otherParticipant = ops::Participant::getInstance("OtherPizzaDomain", "OtherPizzaDomain", policy);
-	if (otherParticipant == NULL) {
+	ops::Participant* const otherParticipant = ops::Participant::getInstance("OtherPizzaDomain", "OtherPizzaDomain", policy);
+	if (otherParticipant == nullptr) {
 		std::cout << "Failed to create Participant. Missing ops_config.xml ??" << std::endl;
         exit(-1);
 	}
@@ -711,7 +770,7 @@ int main(int argc, char**argv)
 
 	// Finish up our ItemInfo's
 	for (unsigned int idx = 0; idx < ItemInfoList.size(); idx++) {
-		ItemInfo* info = ItemInfoList[idx];
+		ItemInfo* const info = ItemInfoList[idx];
 
 		// Create helper
 		if (info->TypeName == pizza::PizzaData::getTypeName()) {
@@ -765,7 +824,7 @@ int main(int argc, char**argv)
 		// Repeated sends
 		if (doPeriodicSend || doPartPolling) {
 			while (!_kbhit()) {
-				int64_t now = (int64_t)getNow();
+				int64_t const now = (int64_t)getNow();
 				if (doPeriodicSend && (now >= nextSendTime)) {
 					// write
 					WriteToAllSelected();
@@ -784,7 +843,7 @@ int main(int argc, char**argv)
 
 		char buffer[1024];
 		char* ptr = fgets(buffer, sizeof(buffer), stdin);
-		if (ptr == NULL) continue;
+		if (ptr == nullptr) continue;
 
 		std::string line(buffer);
 
@@ -851,7 +910,7 @@ int main(int argc, char**argv)
 			case 'c':
 			case 'C':
 				for (unsigned int i = 0; i < ItemInfoList.size(); i++) {
-					ItemInfo* info = ItemInfoList[i];
+					ItemInfo* const info = ItemInfoList[i];
 					if (!info->selected) continue;
 					if (func == PUB) {
 						info->helper->CreatePublisher(info->part, info->TopicName);
@@ -864,7 +923,7 @@ int main(int argc, char**argv)
 			case 'd':
 			case 'D':
 				for (unsigned int i = 0; i < ItemInfoList.size(); i++) {
-					ItemInfo* info = ItemInfoList[i];
+					ItemInfo* const info = ItemInfoList[i];
 					if (!info->selected) continue;
 					if (func == PUB) {
 						info->helper->DeletePublisher();
@@ -877,7 +936,7 @@ int main(int argc, char**argv)
 			case 's':
 			case 'S':
 				for (unsigned int i = 0; i < ItemInfoList.size(); i++) {
-					ItemInfo* info = ItemInfoList[i];
+					ItemInfo* const info = ItemInfoList[i];
 					if (!info->selected) continue;
 					if (func == PUB) {
 						info->helper->StartPublisher();
@@ -890,7 +949,7 @@ int main(int argc, char**argv)
 			case 't':
 			case 'T':
 				for (unsigned int i = 0; i < ItemInfoList.size(); i++) {
-					ItemInfo* info = ItemInfoList[i];
+					ItemInfo* const info = ItemInfoList[i];
 					if (!info->selected) continue;
 					if (func == PUB) {
 						info->helper->StopPublisher();
@@ -941,6 +1000,8 @@ int main(int argc, char**argv)
 			case 'y':
 			case 'Y':
 				break;
+
+			default:;
 		}
 	}
 
@@ -948,22 +1009,23 @@ int main(int argc, char**argv)
 
 	for (unsigned int idx = 0; idx < ItemInfoList.size(); idx++) {
         ii = ItemInfoList[idx];
-		if (ii->helper) delete ii->helper;
-		ii->helper = NULL;
-		ii->part = NULL;
+		if (ii->helper != nullptr) delete ii->helper;
+		ii->helper = nullptr;
+		ii->part = nullptr;
 		delete ItemInfoList[idx];
-		ItemInfoList[idx] = NULL;
+		ItemInfoList[idx] = nullptr;
 	}
 
 	participant->getErrorService()->removeListener(errorWriter);
 	otherParticipant->getErrorService()->removeListener(errorWriter2);
 
-	delete errorWriter; errorWriter = NULL;
-	delete errorWriter2; errorWriter2 = NULL;
+	delete errorWriter; errorWriter = nullptr;
+	delete errorWriter2; errorWriter2 = nullptr;
 
-///TODO this should be done by asking Participant to delete instances??
-/// Participant is a singleton and should not be deleted in this way!!!
-///	delete participant;
+	// We have deleted all publishers and subscribers and we have not connected any timers to
+	// the IoService(). We have also unreserved() all messages that we reserved().
+	delete participant;
+	delete otherParticipant;
 
 #ifdef _WIN32
 	// --------------------------------------------------------------------
