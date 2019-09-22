@@ -22,7 +22,7 @@ opsidls::DebugRequestResponseData request;
 class DebugListener : public ops::DataListener
 {
 public:
-	DebugListener(ops::Participant* part) : _part(part), _sub(nullptr) {}
+	DebugListener(ops::Participant* const part) : _part(part), _sub(nullptr) {}
 	~DebugListener() { removeSubscriber(); }
 
 	void Start()
@@ -35,12 +35,12 @@ public:
 		removeSubscriber();
 	}
 
-	void onNewData(ops::DataNotifier* notifier)
+	virtual void onNewData(ops::DataNotifier* const notifier) override
 	{
-		ops::Subscriber* sub = dynamic_cast<ops::Subscriber*> (notifier);
-		if (sub) {
-			opsidls::DebugRequestResponseData* data = dynamic_cast<opsidls::DebugRequestResponseData*>(sub->getMessage()->getData());
-			if (data) {
+		ops::Subscriber* const sub = dynamic_cast<ops::Subscriber*>(notifier);
+		if (sub != nullptr) {
+			opsidls::DebugRequestResponseData* const data = dynamic_cast<opsidls::DebugRequestResponseData*>(sub->getMessage()->getData());
+			if (data != nullptr) {
 				// Skip All requests
 				if (data->Command != 0) return;
 
@@ -53,13 +53,15 @@ public:
 					if ((data->Result1 >= 1) && (data->Result1 <= 3)) {
 						switch (data->Result1) {
 						case 1: std::cout << "Instance key:" << std::endl; break;
-						case 2:	std::cout << "Publisher Topics:" << std::endl; break;
-						case 3:	std::cout << "Subscriber Topics:" << std::endl; break;
+						case 2:	std::cout << "Publisher Topics (" << data->getKey() << "):" << std::endl; break;
+						case 3:	std::cout << "Subscriber Topics (" << data->getKey() << "):" << std::endl; break;
+						default:; break;
 						}
 						for (unsigned int i = 0; i < data->Param3.size(); i++) {
 							std::cout << "    " << data->Param3[i] << std::endl;
 						}
 						std::cout << std::endl;
+						//data->serialize(&prt);
 					}
 					if (data->Result1 == 50) {
 						std::cout << "Response on Command 50:" << std::endl;
@@ -76,6 +78,9 @@ public:
 
 				case 3: // Subscriber
 					data->serialize(&prt);
+					break;
+
+				default:
 					break;
 				}
 
@@ -98,7 +103,7 @@ private:
 
 	void removeSubscriber()
 	{
-		if (_sub) delete _sub;
+		if (_sub != nullptr) delete _sub;
 		_sub = nullptr;
 	}
 
@@ -116,7 +121,7 @@ void CommandLoop(ops::Participant* part)
 	request.Command = 1;
 	request.Param1 = 1;
 
-	ops::Topic top = part->createDebugTopic();
+	ops::Topic const top = part->createDebugTopic();
 	opsidls::DebugRequestResponseDataPublisher pub(top);
 	pub.start();
 	pub.write(request);
@@ -127,14 +132,23 @@ void CommandLoop(ops::Participant* part)
 void Usage()
 {
 	std::cout << std::endl;
-	std::cout << "Version 2019-02-06" << std::endl;
+	std::cout << "Version 2019-09-22" << std::endl;
 	std::cout << std::endl;
 	std::cout << "  Usage:" << std::endl;
+	std::cout << "    DebugConsole [-?] -cfg file -d domain <high-level-command> [-k key]" << std::endl;
 	std::cout << "    DebugConsole [-?] -cfg file -d domain -k key -e n -n name -c cmd -p1 num" << std::endl;
 	std::cout << std::endl;
 	std::cout << "    -? | -h         Help" << std::endl;
 	std::cout << "    -cfg file       ops_config.xml file to use (default ops_config.xml in CWD)" << std::endl;
 	std::cout << "    -d domain       OPS Domain to use" << std::endl;
+	std::cout << std::endl;
+	std::cout << "  High-level commands:" << std::endl;
+	std::cout << "    -lk             List all instance keys" << std::endl;
+	std::cout << "    -lp             List all publishers (*)" << std::endl;
+	std::cout << "    -ls             List all subscribers (*)" << std::endl;
+	std::cout << "                      * can be limited by giving a key (-k)" << std::endl;
+	std::cout << std::endl;
+	std::cout << "  Low-level commands:" << std::endl;
 	std::cout << "    -k key          Key to set in sent debug message" << std::endl;
 	std::cout << "    -e type         Entity type (2 = Publisher, 3 = Subscriber)" << std::endl;
 	std::cout << "    -n name         Entity name (for pub/sub the topic name)" << std::endl;
@@ -150,7 +164,7 @@ int main(int argc, char* argv[])
 	bool printUsage = false;
 	std::string cfgFile("ops_config.xml");
 	std::string domain = "";
-	std::string key = "";
+	std::string key = "*";
 
 	// Helper variables
 	std::string* strp = nullptr;
@@ -179,6 +193,23 @@ int main(int argc, char* argv[])
 
 		} else if (arg == "-k") {
 			strp = &key;
+
+		} else if (arg == "-lk") {
+			request.Entity = 0;
+			request.Command = 2;
+			request.Param1 = 1;
+
+		}
+		else if (arg == "-lp") {
+			request.Entity = 0;
+			request.Command = 2;
+			request.Param1 = 2;
+
+		}
+		else if (arg == "-ls") {
+			request.Entity = 0;
+			request.Command = 2;
+			request.Param1 = 3;
 
 		} else if (arg == "-n") {
 			strp = &request.Name;
@@ -220,15 +251,15 @@ int main(int argc, char* argv[])
 
 	} else {
 		// Setup the OPS static error service (common for all participants, reports errors during participant creation)
-		ops::ErrorWriter* errorWriterStatic = new ops::ErrorWriter(std::cout);
+		ops::ErrorWriter* const errorWriterStatic = new ops::ErrorWriter(std::cout);
 		ops::Participant::getStaticErrorService()->addListener(errorWriterStatic);
 
 		// Add all Domain's from given file(s)
 		ops::OPSConfigRepository::Instance()->Add(cfgFile);
 
 		// Create participant
-		ops::Participant* participant = ops::Participant::getInstance(domain);
-		if (participant == NULL) {
+		ops::Participant* const participant = ops::Participant::getInstance(domain);
+		if (participant == nullptr) {
 			std::cout << "Failed to create Participant. Missing ops_config.xml ??" << std::endl;
 			exit(-1);
 		}
@@ -239,7 +270,7 @@ int main(int argc, char* argv[])
 
 //		CommandLoop(participant);
 	
-		ops::Topic top = participant->createDebugTopic();
+		ops::Topic const top = participant->createDebugTopic();
 		opsidls::DebugRequestResponseDataPublisher pub(top);
 		pub.start();
 		pub.write(request);
