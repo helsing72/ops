@@ -91,24 +91,6 @@ void ShowUsage()
 
 class CArguments
 {
-private:
-	std::string validFormatChars;
-	std::map<char, bool> validChars;
-	std::string indent;
-
-	std::string toAnsi(LPWSTR wStr)
-	{
-#ifdef _WIN32
-		// Convert current wide string to ANSI (std::string)
-		char tmp[16384];
-		size_t numConverted;
-		wcstombs_s(&numConverted, tmp, sizeof(tmp), wStr, _TRUNCATE);
-		return tmp;
-#else
-		return std::string(wStr);
-#endif
-	}
-
 public:
 	static std::string getValidFormatChars() { return "TknisyS"; }
 	static ops::ObjectName_T getDefaultDomain() { return "SDSDomain"; }
@@ -139,14 +121,16 @@ public:
 		for (unsigned int i = 0; i < validFormatChars.size(); i++) validChars[validFormatChars[i]] = true;
 	}
 
-	bool HandleArguments(LPWSTR* szArglist, int nStart, int nArgs)
+	bool HandleArguments(LPWSTR* const szArglist, int const nStart, int const nArgs)
 	{
-		if (verboseOutput) for (int i = nStart; i < nArgs; i++) {
+		if (verboseOutput) {
+			for (int i = nStart; i < nArgs; i++) {
 #ifdef _WIN32
-			printf("%s %d: %ws\n", indent.c_str(), i, szArglist[i]);
+				printf("%s %d: %ws\n", indent.c_str(), i, szArglist[i]);
 #else
-			printf("%s %d: %s\n", indent.c_str(), i, szArglist[i]);
+				printf("%s %d: %s\n", indent.c_str(), i, szArglist[i]);
 #endif
+			}
 		}
 
 		// Decode arguments
@@ -447,6 +431,24 @@ public:
 
 		return true;
 	}
+
+private:
+	std::string validFormatChars;
+	std::map<char, bool> validChars;
+	std::string indent;
+
+	static std::string toAnsi(LPWSTR const wStr)
+	{
+#ifdef _WIN32
+		// Convert current wide string to ANSI (std::string)
+		char tmp[16384];
+		size_t numConverted;
+		wcstombs_s(&numConverted, tmp, sizeof(tmp), wStr, _TRUNCATE);
+		return tmp;
+#else
+		return std::string(wStr);
+#endif
+	}
 };
 
 // =======================================================================================
@@ -456,18 +458,18 @@ public:
 class AllOpsTypeFactory : public ops::SerializableFactory
 {
 public:
-  ops::Serializable* create(const ops::TypeId_T& type)
-  {
+	virtual ops::Serializable* create(const ops::TypeId_T& type) override
+	{
 		if (type != "") {
 			return new ops::OPSObject();
 		}
 		return nullptr;
-  }
+	}
 };
 
 class MyLogger : public ILogInterface
 {
-	void Log(const char* szFormatString, ...)
+	virtual void Log(const char* szFormatString, ...) override
 	{
 		char buff[1000];
 		memset(buff, 0, sizeof(buff));
@@ -483,15 +485,15 @@ class MyLogger : public ILogInterface
 };
 
 // ---------------------------------------------------------------------------------------
-typedef std::string (*TFormatFunc)(ops::OPSMessage* mess, ops::OPSObject* opsData);
+typedef std::string (*TFormatFunc)(ops::OPSMessage* const mess, ops::OPSObject* const opsData);
 
-std::string publisherName(ops::OPSMessage* mess, ops::OPSObject* opsData)
+std::string publisherName(ops::OPSMessage* const mess, ops::OPSObject* const opsData)
 {
 	UNUSED(opsData);
 	if (!mess) return "";
 	return "Pub: " + std::string(mess->getPublisherName().c_str());
 }
-std::string publicationId(ops::OPSMessage* mess, ops::OPSObject* opsData)
+std::string publicationId(ops::OPSMessage* const mess, ops::OPSObject* const opsData)
 {
 	UNUSED(opsData);
 	if (!mess) return "";
@@ -500,13 +502,13 @@ std::string publicationId(ops::OPSMessage* mess, ops::OPSObject* opsData)
 	std::string IdStr(str.str());
 	return "PubId: " + IdStr;
 }
-std::string topicName(ops::OPSMessage* mess, ops::OPSObject* opsData)
+std::string topicName(ops::OPSMessage* const mess, ops::OPSObject* const opsData)
 {
 	UNUSED(opsData);
 	if (!mess) return "";
 	return "Topic: " + std::string(mess->getTopicName().c_str());
 }
-std::string source(ops::OPSMessage* mess, ops::OPSObject* opsData)
+std::string source(ops::OPSMessage* const mess, ops::OPSObject* const opsData)
 {
 	UNUSED(opsData);
 	if (!mess) return "";
@@ -519,7 +521,7 @@ std::string source(ops::OPSMessage* mess, ops::OPSObject* opsData)
 }
 
 // ---------------------------------------------------------------------------------------
-std::string spareBytes(ops::OPSMessage* mess, ops::OPSObject* opsData)
+std::string spareBytes(ops::OPSMessage* const mess, ops::OPSObject* const opsData)
 {
 	UNUSED(mess);
 	if (!opsData) return "";
@@ -528,13 +530,13 @@ std::string spareBytes(ops::OPSMessage* mess, ops::OPSObject* opsData)
 	std::string SizeStr(str.str());
 	return "Spare: " + SizeStr;
 }
-std::string key(ops::OPSMessage* mess, ops::OPSObject* opsData)
+std::string key(ops::OPSMessage* const mess, ops::OPSObject* const opsData)
 {
 	UNUSED(mess);
 	if (!opsData) return "";
 	return "Key: " + std::string(opsData->getKey().c_str());
 }
-std::string typeString(ops::OPSMessage* mess, ops::OPSObject* opsData)
+std::string typeString(ops::OPSMessage* const mess, ops::OPSObject* const opsData)
 {
 	UNUSED(mess);
 	if (!opsData) return "";
@@ -577,12 +579,12 @@ class Main : ops::DataListener, ops::Listener<ops::PublicationIdNotification_T>
 public:
 	int messDataCounter;
 
-	int numQueued() {return (int)List.size();}
+	int numQueued() const {return (int)List.size();}
 
-	void LogTopic(ops::ObjectName_T domainName, ops::Topic& top)
+	void LogTopic(ops::ObjectName_T const domainName, ops::Topic& top)
 	{
 		// For our purpose we can use any participant
-		ops::Participant* part = opsHelper.getDomainParticipant(opsHelper.vDomains[0]);
+		ops::Participant* const part = opsHelper.getDomainParticipant(opsHelper.vDomains[0]);
 
 		std::cout <<
 			"Subscribing to Topic: " << ops::utilities::fullTopicName(domainName, top.getName()) <<
@@ -616,10 +618,10 @@ public:
 		formatMap['y'] = typeString;
 		formatMap['S'] = source;
 
-		ErrorWriter* errorWriter = new ErrorWriter(std::cout);
+		ErrorWriter* const errorWriter = new ErrorWriter(std::cout);
 
 		// First, Add all domains in given configuration files to the helper
-		for (unsigned int i = 0; i < args.cfgFiles.size(); i++) opsHelper.DomainMapAdd(args.cfgFiles[i]);
+		for (unsigned int i = 0; i < args.cfgFiles.size(); i++) { opsHelper.DomainMapAdd(args.cfgFiles[i]); }
 
 		std::cout << std::endl;
 
@@ -690,7 +692,7 @@ public:
 		// Create a participant for each unique domain
 		for (unsigned int i = 0; i < opsHelper.vDomains.size(); i++) {
 			try {
-				ops::Participant* part = opsHelper.getDomainParticipant(opsHelper.vDomains[i]);
+				ops::Participant* const part = opsHelper.getDomainParticipant(opsHelper.vDomains[i]);
 				if (part == nullptr) {
 					std::cout << "##### Domain '" << opsHelper.vDomains[i] << "' not found. Have you forgot configuration file(s) ?" << std::endl;
 					continue;
@@ -710,15 +712,15 @@ public:
 			ops::ObjectName_T domainName = args.subscribeDomains[i];
 			if (domainName == "") continue;
 
-			ops::Participant* part = opsHelper.getDomainParticipant(domainName);
-			if (!part) continue;
-			ops::Domain* dom = part->getDomain();
-			if (!dom) continue;
+			ops::Participant* const part = opsHelper.getDomainParticipant(domainName);
+			if (part == nullptr) continue;
+			ops::Domain* const dom = part->getDomain();
+			if (dom == nullptr) continue;
 
 			std::vector<ops::Topic*> topics = dom->getTopics();
 
 			for (unsigned int t = 0; t < topics.size(); t++) {
-				ops::ObjectName_T topName = ops::utilities::fullTopicName(domainName, topics[t]->getName());
+				ops::ObjectName_T const topName = ops::utilities::fullTopicName(domainName, topics[t]->getName());
 				bool found = false;
 				for (unsigned int j = 0; j < args.topicNames.size(); j++) {
 					if (args.topicNames[j] == topName) {
@@ -726,7 +728,7 @@ public:
 						break;
 					}
 				}
-				if (!found) args.topicNames.push_back(topName);
+				if (!found) { args.topicNames.push_back(topName); }
 			}
 		}
 
@@ -734,7 +736,7 @@ public:
 
 		// Create subscribers for all existing topics
 		for (unsigned int i = 0; i < args.topicNames.size(); i++) {
-			ops::ObjectName_T topName = args.topicNames[i];
+			ops::ObjectName_T const topName = args.topicNames[i];
 			if (topName == "") continue;
 
 			// if skip topic, continue
@@ -747,8 +749,8 @@ public:
 			}
 			if (found) continue;
 
-			ops::Participant* part = opsHelper.getDomainParticipant(ops::utilities::domainName(topName));
-			if (!part) continue;
+			ops::Participant* const part = opsHelper.getDomainParticipant(ops::utilities::domainName(topName));
+			if (part == nullptr) continue;
 
 			Topic topic = part->createTopic(ops::utilities::topicName(topName));
 
@@ -767,8 +769,7 @@ public:
 
 			LogTopic(ops::utilities::domainName(topName), topic);
 
-			ops::Subscriber* sub;
-			sub = new ops::Subscriber(topic);
+			ops::Subscriber* sub = new ops::Subscriber(topic);
 			sub->addDataListener(this);
 			sub->start();
 
@@ -783,10 +784,10 @@ public:
 		// Create subscribers to all DebugRequestResponseData
 		for (unsigned int i = 0; i < args.debugDomains.size(); i++) {
 			try {
-				ops::ObjectName_T domainName = args.debugDomains[i];
+				ops::ObjectName_T const domainName = args.debugDomains[i];
 				if (domainName == "") continue;
 
-				ops::Participant* part = opsHelper.getDomainParticipant(domainName);
+				ops::Participant* const part = opsHelper.getDomainParticipant(domainName);
 				if (part == nullptr) continue;
 
 				Topic top = part->createDebugTopic();
@@ -794,7 +795,7 @@ public:
 
 				LogTopic(domainName, top);
 
-				ops::Subscriber* sub = new ops::Subscriber(top);
+				ops::Subscriber* const sub = new ops::Subscriber(top);
 				sub->addDataListener(this);
 				sub->start();
 
@@ -812,10 +813,10 @@ public:
 		// Create subscribers to all ParticipantInfoData
 		for (unsigned int i = 0; i < args.infoDomains.size(); i++) {
 			try {
-				ops::ObjectName_T domainName = args.infoDomains[i];
+				ops::ObjectName_T const domainName = args.infoDomains[i];
 				if (domainName == "") continue;
 
-				ops::Participant* part = opsHelper.getDomainParticipant(domainName);
+				ops::Participant* const part = opsHelper.getDomainParticipant(domainName);
 				if (part == nullptr) continue;
 
 				Topic top = part->createParticipantInfoTopic();
@@ -823,7 +824,7 @@ public:
 
 				LogTopic(domainName, top);
 
-				ops::Subscriber* sub = new ops::Subscriber(top);
+				ops::Subscriber* const sub = new ops::Subscriber(top);
 				sub->addDataListener(this);
 				sub->start();
 
@@ -863,11 +864,11 @@ public:
 	}
 	//
 	///Override from ops::DataListener, called whenever new data arrives.
-	void onNewData(ops::DataNotifier* subscriber)
+	virtual void onNewData(ops::DataNotifier* const subscriber) override
 	{
 		ops::Subscriber* sub = dynamic_cast<ops::Subscriber*>(subscriber);
 		if (sub) {
-			ops::OPSMessage* mess = sub->getMessage();
+			ops::OPSMessage* const mess = sub->getMessage();
 			if (mess == nullptr) return;
 
 			// Reserve message and queue, so we don't delay the subscriber thread
@@ -887,14 +888,14 @@ public:
 		}
 	}
 	//
-	void onNewEvent(ops::Notifier<ops::PublicationIdNotification_T>* sender, ops::PublicationIdNotification_T arg)
+	virtual void onNewEvent(ops::Notifier<ops::PublicationIdNotification_T>* const sender, ops::PublicationIdNotification_T arg) override
 	{
 		UNUSED(sender);
 		ops::Address_T address;
 		int port;
 		arg.mess->getSource(address, port);
 
-		std::string newPub = (arg.newPublisher) ? "NEW Publisher" : "SEQ ERROR";
+		std::string const newPub = (arg.newPublisher) ? "NEW Publisher" : "SEQ ERROR";
 
 		std::string str = "";
 		if (logTime) {
@@ -910,7 +911,7 @@ public:
 			std::endl;
 	}
 	//
-	void ShowDebugEntity(opsidls::DebugRequestResponseData* data)
+	static void ShowDebugEntity(opsidls::DebugRequestResponseData* const data)
 	{
 		switch (data->Command) {
 		case 0:
@@ -936,9 +937,11 @@ public:
 		case 50:
 			std::cout << "  Generic command\n";
 			break;
+		default:;
+			break;
 		}
 	}
-	void ShowPubEntity(opsidls::DebugRequestResponseData* data)
+	static void ShowPubEntity(opsidls::DebugRequestResponseData* const data)
 	{
 		switch (data->Command) {
 		case 0:
@@ -970,9 +973,11 @@ public:
 		case 6:
 			std::cout << "  Send message(s) in Objs instead of ordinary sends\n";
 			break;
+		default:;
+			break;
 		}
 	}
-	void ShowSubEntity(opsidls::DebugRequestResponseData* data)
+	static void ShowSubEntity(opsidls::DebugRequestResponseData* const data)
 	{
 		switch (data->Command) {
 		case 0:
@@ -995,9 +1000,11 @@ public:
 		case 4:
 			std::cout << "  Skip " << data->Param1 << " receives\n";
 			break;
+		default:;
+			break;
 		}
 	}
-	void ShowDebugMessage(TEntry& ent, ops::OPSMessage* mess, opsidls::DebugRequestResponseData* data)
+	void ShowDebugMessage(TEntry& ent, ops::OPSMessage* const mess, opsidls::DebugRequestResponseData* const data)
 	{
 		// Show Debug Request/Response data
 		std::string str = "";
@@ -1021,13 +1028,14 @@ public:
 		case 0: ShowDebugEntity(data); break;
 		case 2: ShowPubEntity(data); break;
 		case 3: ShowSubEntity(data); break;
+		default:; break;
 		}
 
 		for (unsigned int i = 0; i < data->Param3.size(); ++i) {
 			std::cout << "    Param3(" << i << "): " << data->Param3[i] << '\n';
 		}
 
-		if (data->Param3.size() > 0) std::cout << std::endl;
+		if (data->Param3.size() > 0) { std::cout << std::endl; }
 
 		//Objs
 	}
@@ -1149,7 +1157,7 @@ public:
 	void periodicalThings()
 	{
 		// Check for disappering participants
-		int64_t limit = sds::sdsSystemTime() - sds::msToSdsSystemTimeUnits(5000);
+		int64_t const limit = sds::sdsSystemTime() - sds::msToSdsSystemTimeUnits(5000);
 		for (std::map<ops::InternalString_T, int64_t>::iterator it = partMap.begin(); it != partMap.end(); ++it) {
 			if (it->second < limit) {
 				std::cout << "[" << partMap.size() - 1 << "] <<<<< Participant '" << it->first << "' has left" << std::endl;
@@ -1189,7 +1197,7 @@ int _kbhit() {
 
 int main(int argc, char* argv[])
 {
-	std::cout << std::endl << "OPSListener Version 2019-05-30" << std::endl << std::endl;
+	std::cout << std::endl << "OPSListener Version 2019-09-22" << std::endl << std::endl;
 
 	sds::sdsSystemTimeInit();
 

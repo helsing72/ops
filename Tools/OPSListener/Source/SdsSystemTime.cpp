@@ -56,12 +56,12 @@ void sdsSystemTimeInit()
 #endif
 }
 
-int64_t msToSdsSystemTimeUnits(int64_t timeInMs)
+int64_t msToSdsSystemTimeUnits(int64_t const timeInMs)
 {
 	return timeInMs * 1000000;			// [ns]
 }
 
-int64_t sdsSystemTimeUnitsToMs(int64_t timeInSdsUnits)
+int64_t sdsSystemTimeUnitsToMs(int64_t const timeInSdsUnits)
 {
 	return timeInSdsUnits / 1000000;	// [ns]
 }
@@ -71,7 +71,7 @@ int64_t sdsSystemTime()
 #ifdef _WIN32
 	return iBaseTime + msToSdsSystemTimeUnits((int64_t)timeGetTime());
 #else
-	struct timespec tt;
+	timespec tt;
         //time_t   tv_sec;        /* seconds */
         //long     tv_nsec;       /* nanoseconds */
 	clock_gettime(CLOCK_REALTIME, &tt);
@@ -83,7 +83,7 @@ std::string sdsSystemTimeToLocalTime(int64_t time)
 {
 #ifdef _WIN32
 	int64_t frac;
-	struct tm tmTime;
+	tm tmTime;
 
 	frac = time;
 	time /= msToSdsSystemTimeUnits(1000);
