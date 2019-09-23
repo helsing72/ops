@@ -101,7 +101,7 @@ public:
 	std::vector<ops::ObjectName_T> infoDomains;
 	std::vector<ops::ObjectName_T> debugDomains;
 	std::vector<ops::ObjectName_T> skipTopicNames;
-	std::string printFormat;
+	std::string printFormat = "";
 	ops::ObjectName_T defaultDomain;
 	bool verboseOutput = false;
 	bool logTime = false;
@@ -114,7 +114,7 @@ public:
 	bool skipTopics = false;
 	bool dontSkipUdpStaticRoute = false;
 
-	CArguments() : indent(""), printFormat(""), defaultDomain(getDefaultDomain())
+	CArguments() : defaultDomain(getDefaultDomain())
 	{
 		// Create a map with all valid format chars, used for validating -p<...> argument
 		validFormatChars = getValidFormatChars();
@@ -435,7 +435,7 @@ public:
 private:
 	std::string validFormatChars;
 	std::map<char, bool> validChars;
-	std::string indent;
+	std::string indent = "";
 
 	static std::string toAnsi(LPWSTR const wStr)
 	{
