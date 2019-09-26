@@ -1,6 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -223,7 +224,7 @@ namespace ops
 		// The actual subscriber won't be created until some one needs it.
 		// We use the information for topics with UDP as transport, to know the destination for UDP sends
 		// ie. we extract ip and port from the information and add it to our McUdpSendDataHandler.
-		partInfoListener = new ParticipantInfoDataListener(this);
+		partInfoListener = new ParticipantInfoDataListener(*this);
 	}
 
 	Participant::~Participant()
@@ -245,52 +246,52 @@ namespace ops
 
 			// We have indicated shutdown in progress. Delete the partInfoData Publisher.
 			// Note that this uses our sendDataHandlerFactory.
-			if (partInfoPub) delete partInfoPub;
+			if (partInfoPub != nullptr) { delete partInfoPub; }
 			partInfoPub = nullptr;
 		}
 
 		// Stop the subscriber for partInfoData. This requires ioService to be running.
 		// Note that this (the subscriber) uses our receiveDataHandlerFactory.
-		if (partInfoListener) partInfoListener->prepareForDelete();
+		if (partInfoListener != nullptr) { partInfoListener->prepareForDelete(); }
 
 		// Now delete our send factory
-		if (sendDataHandlerFactory) delete sendDataHandlerFactory;
+		if (sendDataHandlerFactory != nullptr) { delete sendDataHandlerFactory; }
 		sendDataHandlerFactory = nullptr;
 
 		// Our timer is required for ReceiveDataHandlers to be cleaned up so it shouldn't be stopped
 		// before receiveDataHandlerFactory is finished.
 		// Wait until receiveDataHandlerFactory has no more cleanup to do
 		while (!receiveDataHandlerFactory->cleanUpDone()) {
-			if (_policy == execution_policy::polling) Poll();	// Need to drive timer in case the user forget
+			if (_policy == execution_policy::polling) { Poll(); }	// Need to drive timer in case the user forget
 			TimeHelper::sleep(1);
 		}
 
 		// Now stop and delete our timer (NOTE requires ioService to be running).
 		// If the timer is in the callback, the delete will wait for it to finish and then the object is deleted.
-		if (aliveDeadlineTimer) delete aliveDeadlineTimer;
+		if (aliveDeadlineTimer != nullptr) { delete aliveDeadlineTimer; }
 		aliveDeadlineTimer = nullptr;
 
 		// Now time to delete our receive factory
-		if (receiveDataHandlerFactory) delete receiveDataHandlerFactory;
+		if (receiveDataHandlerFactory != nullptr) { delete receiveDataHandlerFactory; }
 		receiveDataHandlerFactory = nullptr;
 
 		// There should now not be anything left requiring the ioService to be running.
 
 		// Then we request the IO Service to stop the processing (it's running on the threadpool).
 		// The stop() call will not block, it just signals that we want it to finish as soon as possible.
-		if (ioService) ioService->stop();
+		if (ioService != nullptr) { ioService->stop(); }
 
 		// Now we delete the threadpool, which will wait for the thread(s) to finish
-		if (threadPool) delete threadPool;
+		if (threadPool != nullptr) { delete threadPool; }
 		threadPool = nullptr;
 
 		// Now when the threads are gone, it's safe to delete the rest of our objects
-		if (partInfoListener) delete partInfoListener;
-		if (objectFactory) delete objectFactory;
-		if (errorService) delete errorService;
-		if (ownsConfig && config) delete config;
+		if (partInfoListener != nullptr) { delete partInfoListener; }
+		if (objectFactory != nullptr) { delete objectFactory; }
+		if (errorService != nullptr) { delete errorService; }
+		if (ownsConfig && (config != nullptr)) { delete config; }
 		// All objects connected to this ioservice should now be deleted, so it should be safe to delete it
-		if (ioService) delete ioService;
+		if (ioService != nullptr) { delete ioService; }
 
 		OPS_TRACE("Part: Destructor() Finished");
 	}
@@ -328,7 +329,7 @@ namespace ops
 	// Report an error via all participants ErrorServices
 	void Participant::reportStaticError(Error* err)
 	{
-		if (staticErrorService) {
+		if (staticErrorService != nullptr) {
 			staticErrorService->report(err);
 
 		} else {
@@ -376,7 +377,7 @@ namespace ops
 				{
 					partInfoPub = new Publisher(createParticipantInfoTopic());
 				}
-				if (partInfoPub) {
+				if (partInfoPub != nullptr) {
 					SafeLock lock(&partInfoDataMutex);
 					partInfoPub->writeOPSObject(&partInfoData);
 				}
@@ -453,7 +454,7 @@ namespace ops
 	ReceiveDataHandler* Participant::getReceiveDataHandler(Topic top)
 	{
 		ReceiveDataHandler* result = receiveDataHandlerFactory->getReceiveDataHandler(top, this);
-		if (result) {
+		if (result != nullptr) {
 			SafeLock lock(&partInfoDataMutex);
 			//Need to add topic to partInfoData.subscribeTopics (TODO ref count if same topic??)
             partInfoData.subscribeTopics.push_back(TopicInfoData(top));
@@ -478,8 +479,8 @@ namespace ops
 
 	SendDataHandler* Participant::getSendDataHandler(Topic top)
 	{
-		SendDataHandler* result = sendDataHandlerFactory->getSendDataHandler(top, this);
-		if (result) {
+		SendDataHandler* result = sendDataHandlerFactory->getSendDataHandler(top, *this);
+		if (result != nullptr) {
 			SafeLock lock(&partInfoDataMutex);
 			//Need to add topic to partInfoData.subscribeTopics (TODO ref count if same topic??)
             partInfoData.publishTopics.push_back(TopicInfoData(top));
@@ -489,7 +490,7 @@ namespace ops
 
 	void Participant::releaseSendDataHandler(Topic top)
 	{
-		sendDataHandlerFactory->releaseSendDataHandler(top, this);
+		sendDataHandlerFactory->releaseSendDataHandler(top, *this);
 
 		SafeLock lock(&partInfoDataMutex);
 		// Remove topic from partInfoData.publishTopics (TODO the same topic, ref count?)

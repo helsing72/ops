@@ -15,9 +15,11 @@ namespace ops
         mutex = new std::recursive_mutex();
     }
 
-    Lockable & Lockable::operator =(const Lockable&)
+    Lockable& Lockable::operator=(const Lockable& rhs)
     {
-        mutex = new std::recursive_mutex();
+		if (this != &rhs) {
+			mutex = new std::recursive_mutex();
+		}
         return *this;
     }
 

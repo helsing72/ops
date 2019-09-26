@@ -32,7 +32,7 @@ namespace ops
 		incLock.lock();
 		nrOfReservations++;
 		incLock.unlock();
-		if(referenceHandler)
+		if(referenceHandler != nullptr)
 		{
 			referenceHandler->onNewEvent(this, ReserveInfo(this, nrOfReservations));
 		}
@@ -42,7 +42,7 @@ namespace ops
 		incLock.lock();
 		nrOfReservations--;
 		incLock.unlock();
-		if(referenceHandler)
+		if(referenceHandler != nullptr)
 		{
 			referenceHandler->onNewEvent(this, ReserveInfo(this, nrOfReservations));
 		}

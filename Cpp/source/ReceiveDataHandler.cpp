@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018 Lennart Andersson.
+ * Copyright (C) 2018-2019 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -41,7 +41,7 @@ namespace ops
 		expectedSegment(0),
 		firstReceived(false)
     {
-        if (receiver == nullptr) receiver = ReceiverFactory::getReceiver(top, participant);
+		if (receiver == nullptr) { receiver = ReceiverFactory::getReceiver(top, participant); }
 
         if (receiver == nullptr) {
             throw exceptions::CommException("Could not create receiver");
@@ -76,7 +76,7 @@ namespace ops
         SafeLock lock(&messageLock);
 		topicUsage(top, false);
 		Notifier<OPSMessage*>::removeListener(listener);
-		if (Notifier<OPSMessage*>::getNrOfListeners() == 0) receiver->stop();
+		if (Notifier<OPSMessage*>::getNrOfListeners() == 0) { receiver->stop(); }
 	}
 
 	void ReportError(Participant* participant, ErrorMessage_T message, Address_T addr, int port)
@@ -183,10 +183,10 @@ namespace ops
 					msg += e.what();
 					ReportError(participant, msg, addr, port);
 				}
-				if (message)
+				if (message != nullptr)
                 {
 					//Check that we succeded in creating the actual data message
-					if (message->getData()) 
+					if (message->getData() != nullptr) 
 					{
 						//Put spare bytes in data of message
 						if (!calculateAndSetSpareBytes(buf, segmentPaddingSize)) {
@@ -203,7 +203,7 @@ namespace ops
 						//Send it to Subscribers
 						Notifier<OPSMessage*>::notifyNewEvent(message);
 						//This will delete this message if no one reserved it in the application layer.
-						if (oldMessage) oldMessage->unreserve();
+						if (oldMessage != nullptr) { oldMessage->unreserve(); }
 						currentMessageSize = 0;
 					}
 					else
@@ -249,7 +249,7 @@ namespace ops
 		// Need to release the last message we received, if any.
 		// (We always keep a reference to the last message received)
 		// If we don't, the garbage-cleaner won't delete us.
-		if (message) message->unreserve();
+		if (message != nullptr) { message->unreserve(); }
 		message = nullptr;
 
 ///LA ///TTTTT        receiver->stop();

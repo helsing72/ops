@@ -43,12 +43,10 @@ namespace ops
 		SafeLock lock(this);
 
 		// An empty key filter is the same as no filter
-		if (keyStrings.size() == 0) return true;
+		if (keyStrings.size() == 0) { return true; }
 
-		for (unsigned int i = 0; i < keyStrings.size(); i++)
-		{
-			if(o->getKey() == keyStrings[i])
-			{
+		for (unsigned int i = 0; i < keyStrings.size(); i++) {
+			if(o->getKey() == keyStrings[i]) {
 				return true;	// match, so keep this object
 			}
 		}

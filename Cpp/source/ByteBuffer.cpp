@@ -1,6 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
+ * Copyright (C) 2019 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -23,7 +24,7 @@
 namespace ops
 {
 
-    ByteBuffer::ByteBuffer(MemoryMap* mMap, bool _preserveWrittenData):
+    ByteBuffer::ByteBuffer(MemoryMap* const mMap, bool const _preserveWrittenData):
         preserveWrittenData(_preserveWrittenData)
     {
         totalSize = 0;
@@ -37,7 +38,7 @@ namespace ops
 		//   version                    2
 		//   total number of segments   4
 		//   current segment number     4
-		if (memMap->getSegmentSize() <= 14) throw illformed_memmap();
+		if (memMap->getSegmentSize() <= 14) { throw illformed_memmap(); }
     }
 
 	///Resets the whole buffer to creation state
@@ -54,7 +55,7 @@ namespace ops
         return currentSegment + 1;
     }
 
-    int ByteBuffer::getSegmentSize(int i)
+    int ByteBuffer::getSegmentSize(int const i)
     {
         if (i < currentSegment)
         {
@@ -66,17 +67,17 @@ namespace ops
         }
     }
 
-    char* ByteBuffer::getSegment(int i)
+    char* ByteBuffer::getSegment(int const i)
     {
         return memMap->getSegment(i);
     }
 
     void ByteBuffer::finish()
     {
-        int oldIndex = index;
-        int oldNextSegmentAt = nextSegmentAt;
+        int const oldIndex = index;
+        int const oldNextSegmentAt = nextSegmentAt;
         nextSegmentAt = 0;
-        int nrSeg = getNrOfSegments();
+        int const nrSeg = getNrOfSegments();
         for (int i = 0; i < nrSeg; i++)
         {
             index = 6;
@@ -92,7 +93,7 @@ namespace ops
     {
     }
 
-    void ByteBuffer::WriteChars(char* chars, int length)
+    void ByteBuffer::WriteChars(char* const chars, int const length)
     {
         int bytesLeftInSegment = memMap->getSegmentSize() - index;
         if (bytesLeftInSegment >= length)
@@ -117,7 +118,7 @@ namespace ops
     {
         index = 0;
         writeProtocol();
-        int tInt = 0;
+        int const tInt = 0;
         WriteInt(tInt); 
         WriteInt(currentSegment);
     }
@@ -126,7 +127,7 @@ namespace ops
     {
         index = 0;
         nextSegmentAt += memMap->getSegmentSize();
-        bool ok = checkProtocol();
+        bool const ok = checkProtocol();
         int i1 = ReadInt();
         int i2 = ReadInt();
         UNUSED(ok)
@@ -286,7 +287,7 @@ namespace ops
     std::string ByteBuffer::ReadString()
     {
         int length = ReadInt();
-		if (length <= 0) return "";
+		if (length <= 0) { return ""; }
 
 		if (length <= shortStringBufferLength) {
 			ReadChars(shortStringBuffer, length);
@@ -295,7 +296,7 @@ namespace ops
 		}
 
 		// Safety check
-		if (length > memMap->getTotalSize()) throw data_corrupted();
+		if (length > memMap->getTotalSize()) { throw data_corrupted(); }
 
         char* text = new char[length];
         ReadChars(text, length);

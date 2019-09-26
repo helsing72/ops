@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -63,7 +64,7 @@ namespace ops
 	// Copy assignment operator
     OPSObject& OPSObject::operator= (OPSObject other)
     {
-        if (this == &other) return *this;
+		if (this == &other) { return *this; }
         key = other.key;
         typesString = other.typesString;
         spareBytes = other.spareBytes;
@@ -85,7 +86,7 @@ namespace ops
 		size_t len = spareBytes.size();
 		obj->spareBytes.reserve(len);
 		obj->spareBytes.resize(len, 0);
-		if (len > 0) memcpy((void*)&obj->spareBytes[0], (void*)&spareBytes[0], len);
+		if (len > 0) { memcpy((void*)&obj->spareBytes[0], (void*)&spareBytes[0], len); }
 	}
 
 	ObjectKey_T OPSObject::getKey()

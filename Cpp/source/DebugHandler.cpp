@@ -56,7 +56,7 @@ namespace ops {
 		}
 
 		// Register/Unregister with the debug handler
-		void RegisterPub(DebugNotifyInterface* client, ObjectName_T topicName)
+		void RegisterPub(DebugNotifyInterface* const client, ObjectName_T topicName)
 		{
 			std::lock_guard<std::mutex> lck(_mapLock);
 			if (_pubMap.find(topicName) == _pubMap.end()) {
@@ -64,7 +64,7 @@ namespace ops {
 			}
 		}
 
-		void UnregisterPub(DebugNotifyInterface* client, ObjectName_T topicName)
+		void UnregisterPub(DebugNotifyInterface* const client, ObjectName_T topicName)
 		{
 			std::lock_guard<std::mutex> lck(_mapLock);
 			std::map<ObjectName_T, DebugNotifyInterface*>::iterator it = _pubMap.find(topicName);
@@ -73,7 +73,7 @@ namespace ops {
 			_pubMap.erase(it);
 		}
 
-		void RegisterSub(DebugNotifyInterface* client, ObjectName_T topicName)
+		void RegisterSub(DebugNotifyInterface* const client, ObjectName_T topicName)
 		{
 			std::lock_guard<std::mutex> lck(_mapLock);
 			if (_subMap.find(topicName) == _subMap.end()) {
@@ -81,7 +81,7 @@ namespace ops {
 			}
 		}
 
-		void UnregisterSub(DebugNotifyInterface* client, ObjectName_T topicName)
+		void UnregisterSub(DebugNotifyInterface* const client, ObjectName_T topicName)
 		{
 			std::lock_guard<std::mutex> lck(_mapLock);
 			std::map<ObjectName_T, DebugNotifyInterface*>::iterator it = _subMap.find(topicName);
@@ -106,12 +106,12 @@ namespace ops {
 			remove();
 		}
 
-		void onNewData(DataNotifier* notifier)
+		virtual void onNewData(DataNotifier* const notifier) override
 		{
 			Subscriber* sub = dynamic_cast<Subscriber*> (notifier);
-			if (sub) {
+			if (sub != nullptr) {
 				opsidls::DebugRequestResponseData* req = dynamic_cast<opsidls::DebugRequestResponseData*>(sub->getMessage()->getData());
-				if (req) {
+				if (req != nullptr) {
 					if (req->Command == 0) return;  // We don't care about responses
 
 					{
@@ -149,7 +149,7 @@ namespace ops {
 					_response.Name = req->Name;
 					_response.Command = 0;	// Always a response
 
-					if (_pub) _pub->writeOPSObject(&_response);
+					if (_pub != nullptr) { _pub->writeOPSObject(&_response); }
 
 					_response.Param3.clear();
 
@@ -180,9 +180,9 @@ namespace ops {
 
 		void remove()
 		{
-			if (_sub) delete _sub;
+			if (_sub != nullptr) delete _sub;
 			_sub = nullptr;
-			if (_pub) delete _pub;
+			if (_pub != nullptr) delete _pub;
 			_pub = nullptr;
 		}
 
@@ -212,10 +212,12 @@ namespace ops {
 				break;
 
 			case 50: // Generic command
-				if (_appCallback) {
+				if (_appCallback != nullptr) {
 					_appCallback->onRequest(req, resp);
 					resp.Result1 = 50;
 				}
+				break;
+			default:; 
 				break;
 			}
 		}
@@ -238,7 +240,7 @@ namespace ops {
 	
 	DebugHandler::~DebugHandler()
 	{
-		if (_pimpl) delete _pimpl;
+		if (_pimpl != nullptr) delete _pimpl;
 	}
 
 	void DebugHandler::Start()

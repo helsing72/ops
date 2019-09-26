@@ -68,7 +68,7 @@ namespace ops
 		return true;
 	}
 
-	bool isMyNodeAddress(Address_T addr, IOService* ioServ)
+	bool isMyNodeAddress(Address_T addr, IOService* const ioServ)
 	{
 		//std::cout << "isMyNodeAddress(): " << addr << std::endl;
 		if (addr == "") return false;
@@ -103,7 +103,7 @@ namespace ops
 // e.g "192.168.10.0/255.255.255.0" or "192.168.10.0/24"
 // In that case we loop over all interfaces and take the first one that matches
 // i.e. the one whos interface address is on the subnet
-Address_T doSubnetTranslation(Address_T addr, IOService* ioServ)
+Address_T doSubnetTranslation(Address_T addr, IOService* const ioServ)
 {
 	using boost::asio::ip::udp;
 
@@ -138,8 +138,9 @@ Address_T doSubnetTranslation(Address_T addr, IOService* ioServ)
 		boost::asio::ip::address ipaddr = it->endpoint().address();
 		if (ipaddr.is_v4()) {
 			unsigned long Ip = ipaddr.to_v4().to_ulong();
-			if ((Ip & subnetMask) == (subnetIp & subnetMask)) 
+			if ((Ip & subnetMask) == (subnetIp & subnetMask)) {
 				return ipaddr.to_string().c_str();
+			}
 		}
 		++it;
 	}

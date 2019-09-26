@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -45,11 +46,11 @@ Address_T Domain::getDomainAddress()
 
 void Domain::checkTopicValues(Topic* top)
 {
-	if (top->getDomainAddress() == "") top->setDomainAddress(domainAddress);
-	if (top->getLocalInterface() == "") top->setLocalInterface(localInterface);
-	if (top->getTimeToLive() < 0) top->setTimeToLive(timeToLive);
-	if (top->getInSocketBufferSize() < 0) top->setInSocketBufferSize(inSocketBufferSize);
-	if (top->getOutSocketBufferSize() < 0) top->setOutSocketBufferSize(outSocketBufferSize);
+	if (top->getDomainAddress() == "") { top->setDomainAddress(domainAddress); }
+	if (top->getLocalInterface() == "") { top->setLocalInterface(localInterface); }
+	if (top->getTimeToLive() < 0) { top->setTimeToLive(timeToLive); }
+	if (top->getInSocketBufferSize() < 0) { top->setInSocketBufferSize(inSocketBufferSize); }
+	if (top->getOutSocketBufferSize() < 0) { top->setOutSocketBufferSize(outSocketBufferSize); }
 }
 
 std::vector<Topic* > Domain::getTopics()
@@ -120,7 +121,7 @@ Channel* Domain::findChannel(ChannelId_T id)
 {
 	if (id != "") {
 		for (unsigned int i = 0; i < channels.size(); i++) {
-			if (id == channels[i]->channelID) return channels[i];
+			if (id == channels[i]->channelID) { return channels[i]; }
 		}
 	}
 	return nullptr;
@@ -130,7 +131,7 @@ Topic* Domain::findTopic(ObjectName_T id)
 {
 	if (id != "") {
 		for (unsigned int i = 0; i < topics.size(); i++) {
-			if (id == topics[i]->getName()) return topics[i];
+			if (id == topics[i]->getName()) { return topics[i]; }
 		}
 	}
 	return nullptr;

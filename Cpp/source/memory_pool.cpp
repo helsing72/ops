@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2017-2018 Lennart Andersson.
+* Copyright (C) 2017-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -86,7 +86,7 @@ namespace ops {
 
 		void memory_pool_manager::Log(const char* message, std::exception& e)
 		{
-			if (_client) _client->Log(message, e);
+			if (_client != nullptr) { _client->Log(message, e); }
 		}
 
 		memory_pool_abs::memory_pool_abs() : _node(this)

@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -34,8 +35,7 @@ namespace ops
     
     int Thread::start()
     {
-        if (thread == nullptr)
-        {
+        if (thread == nullptr) {
 			thread = new std::thread(&Thread::EntryPoint, this);
 		}
         return 0;
@@ -43,7 +43,7 @@ namespace ops
 
     bool Thread::join()
     {
-        if (thread) {
+        if (thread != nullptr) {
             // Wait for thread to exit before we delete it
             thread->join();
             delete thread;

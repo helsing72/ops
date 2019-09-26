@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -100,7 +101,7 @@ namespace ops
 
 	void UDPSender::close()
 	{
-		if (socket) {
+		if (socket != nullptr) {
 	        socket->close();
 			delete socket;
 			socket = nullptr;
@@ -109,7 +110,7 @@ namespace ops
 
     bool UDPSender::sendTo(char* buf, int size, const Address_T& ip, int port)
     {
-		if (!socket) return false;
+		if (socket == nullptr) { return false; }
         try
         {
             boost::asio::ip::address ipaddress = boost::asio::ip::address::from_string(ip.c_str());

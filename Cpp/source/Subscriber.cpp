@@ -141,7 +141,7 @@ namespace ops
 		//OK, we passed the basic checks
 
 		//If we have a publication ID checker, call it
-		if (pubIdChecker) pubIdChecker->Check(message);
+		if (pubIdChecker != nullptr) { pubIdChecker->Check(message); }
 
 		//Now lets go on and filter on data content...
 
@@ -365,6 +365,8 @@ namespace ops
 			break;
 		case 4: // Skip next x receives
 			_dbgSkip = req.Param1;
+			break;
+		default:;
 			break;
 		}
 

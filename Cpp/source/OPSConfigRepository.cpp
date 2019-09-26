@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016-2018 Lennart Andersson.
+* Copyright (C) 2016-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -91,7 +91,7 @@ bool OPSConfigRepository::Add( FileName_T filename, ObjectName_T domain )
         } else {
             // Need to read file
             config = OPSConfig::getConfig( filename );
-            if (config == nullptr) return retVal;
+			if (config == nullptr) { return retVal; }
             m_configFiles[filename] = config;
         }
     } catch (ops::ConfigException& ex)

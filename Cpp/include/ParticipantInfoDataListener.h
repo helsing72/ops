@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -34,12 +35,12 @@ namespace ops
 	class OPS_EXPORT ParticipantInfoDataListener : public DataListener
 	{
 	public:
-		ParticipantInfoDataListener(Participant* part);
+		ParticipantInfoDataListener(Participant& part);
 
 		void prepareForDelete();
 		virtual ~ParticipantInfoDataListener();
 
-		void onNewData(DataNotifier* notifier);
+		virtual void onNewData(DataNotifier* notifier) override;
 
 		void connectUdp(Topic& top, SendDataHandler* handler);
 		void disconnectUdp(Topic& top, SendDataHandler* handler);
@@ -48,7 +49,7 @@ namespace ops
 		void disconnectTcp(Topic& top, void* handler);
 
 	private:
-		Participant* participant;
+		Participant& participant;
 
 		Lockable mutex;
 		Subscriber* partInfoSub;
@@ -58,10 +59,6 @@ namespace ops
 
 		bool setupSubscriber();
 		void removeSubscriber();
-		
 	};
-
-
 }
-
 #endif
