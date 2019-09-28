@@ -45,7 +45,7 @@ namespace ops {
 	class DebugHandler::InternalDebugListener : public DataListener
 	{
 	public:
-		InternalDebugListener(Participant* part) : _part(part), _sub(nullptr), _pub(nullptr), _appCallback(nullptr) {}
+		InternalDebugListener(Participant& part) : _part(part), _sub(nullptr), _pub(nullptr), _appCallback(nullptr) {}
 		virtual ~InternalDebugListener() { remove(); }
 
 		// Used by application to set a handler for "Generic Command" (50)
@@ -155,25 +155,25 @@ namespace ops {
 
 				} else {
 					BasicError err("DebugHandler", "onNewData", "Data could not be cast as expected.");
-					_part->reportError(&err);
+					_part.reportError(&err);
 				}
 			} else {
 				BasicError err("DebugHandler", "onNewData", "Subscriber could not be cast as expected.");
-				_part->reportError(&err);
+				_part.reportError(&err);
 			}
 		}
 
 	private:
 		void setup()
 		{
-			_sub = new Subscriber(_part->createDebugTopic());
+			_sub = new Subscriber(_part.createDebugTopic());
 			_sub->addDataListener(this);
 			std::vector<ObjectKey_T> keyStrings;
 			keyStrings.push_back(gKey);
 			keyStrings.push_back("*");
 			_sub->addFilterQoSPolicy(new KeyFilterQoSPolicy(keyStrings));
 			_sub->start();
-			_pub = new Publisher(_part->createDebugTopic());
+			_pub = new Publisher(_part.createDebugTopic());
 			_pub->setKey(gKey);
 			_pub->start();
 		}
@@ -222,7 +222,7 @@ namespace ops {
 			}
 		}
 
-		Participant* _part;
+		Participant& _part;
 		Subscriber* _sub;
 		Publisher* _pub;
 
@@ -234,7 +234,7 @@ namespace ops {
 		DebugNotifyInterface* _appCallback;
 	};
 
-	DebugHandler::DebugHandler(Participant* part) : _pimpl(new InternalDebugListener(part))
+	DebugHandler::DebugHandler(Participant& part) : _pimpl(new InternalDebugListener(part))
 	{
 	}
 	

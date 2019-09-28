@@ -43,11 +43,11 @@ namespace ops
 	///      Store info in map so that subscribers can ask if any publisher
 	///      @ disconnect, clear publishers
 
-    TCPReceiveDataHandler::TCPReceiveDataHandler(Topic top, Participant* part) :
+    TCPReceiveDataHandler::TCPReceiveDataHandler(Topic top, Participant& part) :
 		ReceiveDataHandler(top, part, 
 			Receiver::createTCPClient(
 				this, top.getDomainAddress(), top.getPort(), 
-				part->getIOService(), top.getInSocketBufferSize())),
+				part.getIOService(), top.getInSocketBufferSize())),
 		_protocol(nullptr), _connected(false)
     {
 	}

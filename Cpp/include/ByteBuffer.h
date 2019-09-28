@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -35,7 +36,6 @@ namespace ops
     ///from a byte buffer. Usage is simple, create an instance with either an empty
     ///prealocated buffer(for writing) or a buffer containing the data (reading).
     ///Use the public methods to read and write to/from the buffer.
-    //TODO: Decide if this class is to be devided in two, one for read and one for write.
 	class OPS_EXPORT ByteBuffer
 	{
     private:
@@ -46,7 +46,7 @@ namespace ops
         bool preserveWrittenData;
 
         ///Buffer used to store data to be written or read.
-        MemoryMap* memMap;
+        MemoryMap& memMap;
         ///index pointing out where in the buffer to do the next read or write.
         ///This variable is automatically incremented by the read and write operations.
         int index;
@@ -86,7 +86,7 @@ namespace ops
 		};
 
         ///The Write Policy is default to preserve all written data (see description above).
-        ByteBuffer(MemoryMap* mMap, bool _preserveWrittenData = true);
+        ByteBuffer(MemoryMap& mMap, bool _preserveWrittenData = true);
         
         ///Only valid for a ByteBuffer instance used to write data.
         ///Returns the number of bytes containing valid data in the buffer so far.

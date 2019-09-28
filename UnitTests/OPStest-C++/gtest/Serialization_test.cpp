@@ -110,8 +110,8 @@ TEST(Test_Serialization, TestCoreTypes) {
 	ExpectObjects_EQ(obj1, obj1, "Comparing object with itself");
 
 	MemoryMap map(1, 1000);
-	ByteBuffer buf(&map);
-	OPSArchiverOut arcOut(&buf);
+	ByteBuffer buf(map);
+	OPSArchiverOut arcOut(buf);
 	EXPECT_TRUE(arcOut.isOut());
 	EXPECT_EQ(buf.GetSize(), 0);
 	EXPECT_EQ(buf.GetIndex(), 0);
@@ -122,7 +122,7 @@ TEST(Test_Serialization, TestCoreTypes) {
 
 	buf.ResetIndex();
 
-	OPSArchiverIn arcIn(&buf, nullptr);		// No factory needed since we only have core types
+	OPSArchiverIn arcIn(buf, nullptr);		// No factory needed since we only have core types
 	EXPECT_FALSE(arcIn.isOut());
 
 	obj2.serialize(&arcIn);
@@ -223,8 +223,8 @@ TEST(Test_Serialization, TestVectorTypes) {
 	ExpectObjects_EQ(obj1, obj1, "Comparing object with itself");
 
 	MemoryMap map(1, 1000);
-	ByteBuffer buf(&map);
-	OPSArchiverOut arcOut(&buf);
+	ByteBuffer buf(map);
+	OPSArchiverOut arcOut(buf);
 	EXPECT_TRUE(arcOut.isOut());
 	EXPECT_EQ(buf.GetSize(), 0);
 	EXPECT_EQ(buf.GetIndex(), 0);
@@ -235,7 +235,7 @@ TEST(Test_Serialization, TestVectorTypes) {
 
 	buf.ResetIndex();
 
-	OPSArchiverIn arcIn(&buf, nullptr);		// No factory needed since we only have core types
+	OPSArchiverIn arcIn(buf, nullptr);		// No factory needed since we only have core types
 	EXPECT_FALSE(arcIn.isOut());
 
 	obj2.serialize(&arcIn);
@@ -369,8 +369,8 @@ TEST(Test_Serialization, TestFixedArrays) {
 	ExpectObjects_EQ(obj1, obj1, "Comparing object with itself");
 
 	MemoryMap map(1, 1000);
-	ByteBuffer buf(&map);
-	OPSArchiverOut arcOut(&buf);
+	ByteBuffer buf(map);
+	OPSArchiverOut arcOut(buf);
 	EXPECT_TRUE(arcOut.isOut());
 	EXPECT_EQ(buf.GetSize(), 0);
 	EXPECT_EQ(buf.GetIndex(), 0);
@@ -381,7 +381,7 @@ TEST(Test_Serialization, TestFixedArrays) {
 
 	buf.ResetIndex();
 
-	OPSArchiverIn arcIn(&buf, nullptr);		// No factory needed since we only have core types
+	OPSArchiverIn arcIn(buf, nullptr);		// No factory needed since we only have core types
 	EXPECT_FALSE(arcIn.isOut());
 
 	obj2.serialize(&arcIn);
@@ -585,8 +585,8 @@ TEST(Test_Serialization, TestObjects) {
 	ExpectObjects_EQ(obj1, obj1, "Comparing object with itself");
 
 	MemoryMap map(1, 4000);
-	ByteBuffer buf(&map);
-	OPSArchiverOut arcOut(&buf);
+	ByteBuffer buf(map);
+	OPSArchiverOut arcOut(buf);
 	EXPECT_TRUE(arcOut.isOut());
 	EXPECT_EQ(buf.GetSize(), 0);
 	EXPECT_EQ(buf.GetIndex(), 0);
@@ -596,7 +596,7 @@ TEST(Test_Serialization, TestObjects) {
 	EXPECT_EQ(buf.GetIndex(), numSerBytes);
 
 	RAII_FactoryHelper factory;
-	OPSArchiverIn arcIn(&buf, &factory.fact);
+	OPSArchiverIn arcIn(buf, &factory.fact);
 	EXPECT_FALSE(arcIn.isOut());
 
 	// Test Exceptions

@@ -15,7 +15,6 @@ namespace ops
     class SendDataHandlerFactory
     {
     private:
-		Participant* participant;
         SendDataHandler* udpSendDataHandler;
 
         std::map<InternalKey_T, SendDataHandler*> sendDataHandlers;
@@ -23,7 +22,7 @@ namespace ops
         Lockable mutex;
 
     public:
-        explicit SendDataHandlerFactory(Participant* part);
+        explicit SendDataHandlerFactory();
 		// Make sure all SendDataHandlers are released before freeing the instance 
  	    ~SendDataHandlerFactory();
 

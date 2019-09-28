@@ -135,7 +135,7 @@ namespace ops
             data->setKey(key);
         }
 
-        ByteBuffer buf(&memMap);
+        ByteBuffer buf(memMap);
 
         message.setData(data);
 
@@ -144,7 +144,7 @@ namespace ops
 
         buf.writeNewSegment();
 
-        OPSArchiverOut archive(&buf);
+        OPSArchiverOut archive(buf);
 
         archive.inout("message", &message);
 

@@ -14,10 +14,9 @@
 namespace ops
 {
 
-	SendDataHandlerFactory::SendDataHandlerFactory(Participant* part):
-		participant(part), udpSendDataHandler(nullptr)
+	SendDataHandlerFactory::SendDataHandlerFactory():
+		udpSendDataHandler(nullptr)
 	{
-		UNUSED(participant)
 		// There is only one McUdpSendDataHandler for each participant
 	}
 

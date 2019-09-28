@@ -24,21 +24,18 @@
 namespace ops
 {
 
-    ByteBuffer::ByteBuffer(MemoryMap* const mMap, bool const _preserveWrittenData):
-        preserveWrittenData(_preserveWrittenData)
+    ByteBuffer::ByteBuffer(MemoryMap& mMap, bool const _preserveWrittenData):
+        preserveWrittenData(_preserveWrittenData), memMap(mMap),
+		index(0), totalSize(0), currentSegment(0)
     {
-        totalSize = 0;
-        index = 0;
-        memMap = mMap;
-        currentSegment = 0;
-        nextSegmentAt = memMap->getSegmentSize();
+        nextSegmentAt = memMap.getSegmentSize();
 
 		// Check that each segment in map is larger than our needed segment header
 		//   protocolID                 4
 		//   version                    2
 		//   total number of segments   4
 		//   current segment number     4
-		if (memMap->getSegmentSize() <= 14) { throw illformed_memmap(); }
+		if (memMap.getSegmentSize() <= 14) { throw illformed_memmap(); }
     }
 
 	///Resets the whole buffer to creation state
@@ -47,7 +44,7 @@ namespace ops
         totalSize = 0;
         index = 0;
         currentSegment = 0;
-        nextSegmentAt = memMap->getSegmentSize();
+        nextSegmentAt = memMap.getSegmentSize();
 	}
 
     int ByteBuffer::getNrOfSegments()
@@ -59,7 +56,7 @@ namespace ops
     {
         if (i < currentSegment)
         {
-            return memMap->getSegmentSize();
+            return memMap.getSegmentSize();
         }
         else
         {
@@ -69,7 +66,7 @@ namespace ops
 
     char* ByteBuffer::getSegment(int const i)
     {
-        return memMap->getSegment(i);
+        return memMap.getSegment(i);
     }
 
     void ByteBuffer::finish()
@@ -82,7 +79,7 @@ namespace ops
         {
             index = 6;
             currentSegment = i;
-            nextSegmentAt += memMap->getSegmentSize();
+            nextSegmentAt += memMap.getSegmentSize();
             WriteInt(nrSeg);
         }
         index = oldIndex;
@@ -95,19 +92,19 @@ namespace ops
 
     void ByteBuffer::WriteChars(char* const chars, int const length)
     {
-        int bytesLeftInSegment = memMap->getSegmentSize() - index;
+        int bytesLeftInSegment = memMap.getSegmentSize() - index;
         if (bytesLeftInSegment >= length)
         {
-            memcpy((void*) (memMap->getSegment(currentSegment) + index), chars, length);
+            memcpy((void*) (memMap.getSegment(currentSegment) + index), chars, length);
             index += length;
             totalSize += length;
         }
         else
         {
-            memcpy((void*) (memMap->getSegment(currentSegment) + index), chars, bytesLeftInSegment);
+            memcpy((void*) (memMap.getSegment(currentSegment) + index), chars, bytesLeftInSegment);
             index += bytesLeftInSegment;
             totalSize += bytesLeftInSegment;
-            nextSegmentAt += memMap->getSegmentSize();
+            nextSegmentAt += memMap.getSegmentSize();
             currentSegment++;
             writeNewSegment();
             WriteChars(chars + bytesLeftInSegment, length - bytesLeftInSegment);
@@ -126,7 +123,7 @@ namespace ops
     void ByteBuffer::readNewSegment()
     {
         index = 0;
-        nextSegmentAt += memMap->getSegmentSize();
+        nextSegmentAt += memMap.getSegmentSize();
         bool const ok = checkProtocol();
         int i1 = ReadInt();
         int i2 = ReadInt();
@@ -137,16 +134,16 @@ namespace ops
 
     void ByteBuffer::ReadChars(char* chars, int length)
     {
-        int bytesLeftInSegment = memMap->getSegmentSize() - index;
+        int bytesLeftInSegment = memMap.getSegmentSize() - index;
         if (bytesLeftInSegment >= length)
         {
-            memcpy((void*) chars, memMap->getSegment(currentSegment) + index, length);
+            memcpy((void*) chars, memMap.getSegment(currentSegment) + index, length);
             index += length;
             totalSize += length;
         }
         else
         {
-            memcpy((void*) chars, memMap->getSegment(currentSegment) + index, bytesLeftInSegment);
+            memcpy((void*) chars, memMap.getSegment(currentSegment) + index, bytesLeftInSegment);
             index += bytesLeftInSegment;
             currentSegment++;
             totalSize += bytesLeftInSegment;
@@ -296,7 +293,7 @@ namespace ops
 		}
 
 		// Safety check
-		if (length > memMap->getTotalSize()) { throw data_corrupted(); }
+		if (length > memMap.getTotalSize()) { throw data_corrupted(); }
 
         char* text = new char[length];
         ReadChars(text, length);
@@ -347,18 +344,18 @@ namespace ops
 
     void ByteBuffer::ReadBytes(std::vector<char>& out, int offset, int length)
     {
-        int bytesLeftInSegment = memMap->getSegmentSize() - index;
+        int bytesLeftInSegment = memMap.getSegmentSize() - index;
         std::vector<char>::iterator it = out.begin();
         it += offset;
         if (bytesLeftInSegment >= length)
         {
-            std::copy(memMap->getSegment(currentSegment) + index, memMap->getSegment(currentSegment) + index + length, it);
+            std::copy(memMap.getSegment(currentSegment) + index, memMap.getSegment(currentSegment) + index + length, it);
             index += length;
             totalSize += length;
         }
         else
         {
-            std::copy(memMap->getSegment(currentSegment) + index, memMap->getSegment(currentSegment) + index + bytesLeftInSegment, it);
+            std::copy(memMap.getSegment(currentSegment) + index, memMap.getSegment(currentSegment) + index + bytesLeftInSegment, it);
             index += bytesLeftInSegment;
             totalSize += bytesLeftInSegment;
 
@@ -378,22 +375,22 @@ namespace ops
 
     void ByteBuffer::WriteBytes(std::vector<char>& out, int offset, int length)
     {
-        int bytesLeftInSegment = memMap->getSegmentSize() - index;
+        int bytesLeftInSegment = memMap.getSegmentSize() - index;
         std::vector<char>::iterator it = out.begin();
         it += offset;
         if (bytesLeftInSegment >= length)
         {
-            std::copy(it, out.end(), memMap->getSegment(currentSegment) + index);
+            std::copy(it, out.end(), memMap.getSegment(currentSegment) + index);
             index += length;
             totalSize += length;
         }
         else
         {
-            std::copy(it, it + bytesLeftInSegment, memMap->getSegment(currentSegment) + index);
+            std::copy(it, it + bytesLeftInSegment, memMap.getSegment(currentSegment) + index);
             index += bytesLeftInSegment;
             totalSize += bytesLeftInSegment;
 
-            nextSegmentAt += memMap->getSegmentSize();
+            nextSegmentAt += memMap.getSegmentSize();
             currentSegment++;
             writeNewSegment();
 

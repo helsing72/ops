@@ -80,8 +80,8 @@ TEST(Test_OPSObject, Test) {
 	// Test Serialize
 	// Note, Only key of OPSObject is serialized and MyOpsObject don't have any fields that is serialized
 	MemoryMap map(1, 60);
-	ByteBuffer buf(&map);
-	OPSArchiverOut arc(&buf);
+	ByteBuffer buf(map);
+	OPSArchiverOut arc(buf);
 	EXPECT_EQ(buf.GetSize(), 0);
 	EXPECT_EQ(buf.GetIndex(), 0);
 

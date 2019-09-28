@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018 Lennart Andersson.
+* Copyright (C) 2018-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -47,7 +47,7 @@ namespace ops
 	{
 		friend class ReceiveDataHandlerFactory;
 	public:
-		ReceiveDataHandler(Topic top, Participant* part, Receiver* recv = nullptr);
+		ReceiveDataHandler(Topic top, Participant& part, Receiver* recv = nullptr);
 		virtual ~ReceiveDataHandler();
 
 		bool aquireMessageLock();
@@ -102,7 +102,7 @@ namespace ops
 		int sampleMaxSize;
 
 		//The Participant to which this ReceiveDataHandler belongs.
-		Participant* participant;
+		Participant& participant;
 
 		///Current OPSMessage, valid until next sample arrives.
 		OPSMessage* message;

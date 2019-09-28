@@ -46,7 +46,7 @@ namespace ops {
 		friend class Publisher;
 		friend class Subscriber;
 	public:
-		DebugHandler(Participant* part);
+		DebugHandler(Participant& part);
 		~DebugHandler();
 
 		// Key used as filter when listening on the debug topic for DebugRequestResponseData messages.

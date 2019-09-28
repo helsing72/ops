@@ -596,8 +596,8 @@ int main(int argc, const char* args[])
 		// ==============================================================
 		std::cout << "Serialize filled object" << std::endl;
 		ops::MemoryMap map(1, 65536);
-		ops::ByteBuffer buf(&map);
-		ops::OPSArchiverOut ao(&buf);
+		ops::ByteBuffer buf(map);
+		ops::OPSArchiverOut ao(buf);
 
 		std::cout << "  GetSize()= " << buf.GetSize() << std::endl;
 		ao.inout("data", cd1);
@@ -716,6 +716,9 @@ int main(int argc, const char* args[])
 	} else {
 		std::cout << std::endl << "T e s t   O k" << std::endl;
 	}
+
+	std::cout << std::endl << "Sleeping for 5 seconds..." << std::endl;
+	std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 
 	return 0;
 }

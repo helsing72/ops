@@ -124,7 +124,7 @@ namespace ops
 
 	Participant::Participant(ObjectName_T domainID_, ObjectName_T participantID_, FileName_T configFile_, execution_policy::Enum policy):
 #ifdef OPS_ENABLE_DEBUG_HANDLER
-		debugHandler(this),
+		debugHandler(*this),
 #endif
 		_policy(policy),
 		ioService(nullptr),
@@ -201,8 +201,8 @@ namespace ops
 
 		//-----------Create delegate helper classes---
 		errorService = new ErrorService();
-		receiveDataHandlerFactory = new ReceiveDataHandlerFactory(this);
-		sendDataHandlerFactory = new SendDataHandlerFactory(this);
+		receiveDataHandlerFactory = new ReceiveDataHandlerFactory();
+		sendDataHandlerFactory = new SendDataHandlerFactory();
 		//--------------------------------------------
 
 		//------------Create timer for periodic events-
@@ -453,7 +453,7 @@ namespace ops
 
 	ReceiveDataHandler* Participant::getReceiveDataHandler(Topic top)
 	{
-		ReceiveDataHandler* result = receiveDataHandlerFactory->getReceiveDataHandler(top, this);
+		ReceiveDataHandler* result = receiveDataHandlerFactory->getReceiveDataHandler(top, *this);
 		if (result != nullptr) {
 			SafeLock lock(&partInfoDataMutex);
 			//Need to add topic to partInfoData.subscribeTopics (TODO ref count if same topic??)
@@ -464,7 +464,7 @@ namespace ops
 
 	void Participant::releaseReceiveDataHandler(Topic top)
 	{
-		receiveDataHandlerFactory->releaseReceiveDataHandler(top, this);
+		receiveDataHandlerFactory->releaseReceiveDataHandler(top, *this);
 
 		SafeLock lock(&partInfoDataMutex);
 		// Remove topic from partInfoData.subscribeTopics (TODO the same topic, ref count?)

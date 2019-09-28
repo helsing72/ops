@@ -7,21 +7,21 @@
 
 namespace ops
 {
-    Receiver* ReceiverFactory::getReceiver(Topic& top, Participant* participant)
+    Receiver* ReceiverFactory::getReceiver(Topic& top, Participant& participant)
     {
         Receiver* receiver = nullptr;
 
-        IOService* ioService = participant->getIOService();
+        IOService* ioService = participant.getIOService();
 
         //This should never happen, log an internal error and return nullptr;
         if (ioService == nullptr)
         {
 			BasicError err("ReceiverFactory", "getReceiver", "Unexpected error, ioServide == nullptr");
-            participant->reportError(&err);
+            participant.reportError(&err);
             return receiver;
         }
 
-		Address_T localIf = doSubnetTranslation(top.getLocalInterface(), participant->getIOService());
+		Address_T localIf = doSubnetTranslation(top.getLocalInterface(), participant.getIOService());
 
         if (top.getTransport() == Topic::TRANSPORT_MC)
         {

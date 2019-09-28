@@ -29,9 +29,8 @@
 
 namespace ops
 {
-    ReceiveDataHandlerFactory::ReceiveDataHandlerFactory(Participant* const participant)
+    ReceiveDataHandlerFactory::ReceiveDataHandlerFactory()
     {
-        UNUSED(participant);
     }
 
 	InternalKey_T ReceiveDataHandlerFactory::makeKey(Topic& top, IOService* ioServ)
@@ -53,10 +52,10 @@ namespace ops
 		return key;
 	}
 
-    ReceiveDataHandler* ReceiveDataHandlerFactory::getReceiveDataHandler(Topic& top, Participant* participant)
+    ReceiveDataHandler* ReceiveDataHandlerFactory::getReceiveDataHandler(Topic& top, Participant& participant)
     {
 		// Make a key with the transport info that uniquely defines the receiver.
-		InternalKey_T key = makeKey(top, participant->getIOService());
+		InternalKey_T key = makeKey(top, participant.getIOService());
 
         SafeLock lock(&garbageLock);
         if (receiveDataHandlerInstances.find(key) != receiveDataHandlerInstances.end())
@@ -79,7 +78,7 @@ namespace ops
 					msg += NumberToString(OPSConstants::PACKET_MAX_SIZE);
 				}
 				BasicError err("ReceiveDataHandlerFactory", "getReceiveDataHandler", msg);
-				participant->reportError(&err);
+				participant.reportError(&err);
             }
             return rdh;
         }
@@ -100,7 +99,7 @@ namespace ops
 
 			if (key == top.getTransport()) {
 				Receiver* recv = udpReceiveDataHandler->getReceiver();
-				participant->setUdpTransportInfo(recv->getLocalAddress(), recv->getLocalPort());
+				participant.setUdpTransportInfo(recv->getLocalAddress(), recv->getLocalPort());
 			}
             
 			receiveDataHandlerInstances[key] = udpReceiveDataHandler;
@@ -112,15 +111,15 @@ namespace ops
 			ErrorMessage_T msg = "Unknown transport for Topic: ";
 			msg += top.getName();
 			BasicError err("ReceiveDataHandlerFactory", "getReceiveDataHandler", msg);
-			participant->reportError(&err);
+			participant.reportError(&err);
             return nullptr;
         }
     }
 
-    void ReceiveDataHandlerFactory::releaseReceiveDataHandler(Topic& top, Participant* participant)
+    void ReceiveDataHandlerFactory::releaseReceiveDataHandler(Topic& top, Participant& participant)
     {
 		// Make a key with the transport info that uniquely defines the receiver.
-		InternalKey_T key = makeKey(top, participant->getIOService());
+		InternalKey_T key = makeKey(top, participant.getIOService());
 
 		SafeLock lock(&garbageLock);
         if (receiveDataHandlerInstances.find(key) != receiveDataHandlerInstances.end())
@@ -134,7 +133,7 @@ namespace ops
                 rdh->stop();
 
 				if (key == Topic::TRANSPORT_UDP) {
-					participant->setUdpTransportInfo("", 0);
+					participant.setUdpTransportInfo("", 0);
 				}
 
                 garbageReceiveDataHandlers.push_back(rdh);

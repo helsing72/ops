@@ -34,13 +34,13 @@ public:
 
 TEST_F(Test_OPS_Serialization_And_Deserialization, test_Vesuvio_OPSObject) {
 	ops::MemoryMap map(1, 10000);
-	ops::ByteBuffer buf(&map);
+	ops::ByteBuffer buf(map);
 
 	ops::SerializableInheritingTypeFactory fact;
 	fact.add(new PizzaProject::PizzaProjectTypeFactory());
 
-	ops::OPSArchiverOut out(&buf);
-	ops::OPSArchiverIn  in(&buf, &fact);
+	ops::OPSArchiverOut out(buf);
+	ops::OPSArchiverIn  in(buf, &fact);
 
 	out.inout("data", &vessuvio);
 
@@ -61,15 +61,15 @@ TEST_F(Test_OPS_Serialization_And_Deserialization, test_Vesuvio_OPSObject) {
 
 TEST_F(Test_OPS_Serialization_And_Deserialization, test_Vesuvio_OPSMessage) {
 	ops::MemoryMap map(1, 10000);
-	ops::ByteBuffer buf(&map);
+	ops::ByteBuffer buf(map);
 
 	// Setup factory to use when de-serializing a buffer
 	ops::SerializableInheritingTypeFactory fact;
 	fact.add(new PizzaProject::PizzaProjectTypeFactory());
 
 
-	ops::OPSArchiverOut out(&buf);
-	ops::OPSArchiverIn  in(&buf, &fact);
+	ops::OPSArchiverOut out(buf);
+	ops::OPSArchiverIn  in(buf, &fact);
 
 
 	ops::OPSMessage mess;
@@ -103,15 +103,15 @@ TEST_F(Test_OPS_Serialization_And_Deserialization, test_Vesuvio_OPSMessage) {
 
 TEST_F(Test_OPS_Serialization_And_Deserialization, test_ExtraAllt_OPSObject) {
 	ops::MemoryMap map(1, 10000);
-	ops::ByteBuffer buf(&map);
+	ops::ByteBuffer buf(map);
 
 	// Setup factory to use when de-serializing a buffer
 	ops::SerializableInheritingTypeFactory fact;
 	fact.add(new PizzaProject::PizzaProjectTypeFactory());
 
 	// Setup archivers
-	ops::OPSArchiverOut out(&buf);
-	ops::OPSArchiverIn  in(&buf, &fact);
+	ops::OPSArchiverOut out(buf);
+	ops::OPSArchiverIn  in(buf, &fact);
 
 
 	EXPECT_EQ(buf.GetSize(), 0);
@@ -136,15 +136,15 @@ TEST_F(Test_OPS_Serialization_And_Deserialization, test_ExtraAllt_OPSObject) {
 
 TEST_F(Test_OPS_Serialization_And_Deserialization, test_ExtraAllt_OPSMessage) {
 	ops::MemoryMap map(1, 10000);
-	ops::ByteBuffer buf(&map);
+	ops::ByteBuffer buf(map);
 
 	// Setup factory to use when de-serializing a buffer
 	ops::SerializableInheritingTypeFactory fact;
 	fact.add(new PizzaProject::PizzaProjectTypeFactory());
 
 
-	ops::OPSArchiverOut out(&buf);
-	ops::OPSArchiverIn  in(&buf, &fact);
+	ops::OPSArchiverOut out(buf);
+	ops::OPSArchiverIn  in(buf, &fact);
 
 	pizza::special::ExtraAllt extraAllt;
 	init::initExtraAlltNormal(extraAllt);

@@ -37,11 +37,11 @@ TEST(Test_ByteBuffer, TestFundamentals) {
 
 	{
 		MemoryMap illformed(1, 14);
-		EXPECT_THROW(ByteBuffer buf(&illformed), ByteBuffer::illformed_memmap);
+		EXPECT_THROW(ByteBuffer buf(illformed), ByteBuffer::illformed_memmap);
 	}
 
 	MemoryMap map(1, 60);
-	ByteBuffer buf(&map);
+	ByteBuffer buf(map);
 
 	EXPECT_EQ(buf.GetSize(), 0);
 	EXPECT_EQ(buf.GetIndex(), 0);
@@ -142,7 +142,7 @@ const std::string TEST_FIXSTRING = "fixed string test";
 TEST(Test_ByteBuffer, TestCoretypes) {
 
 	MemoryMap map(1, 65000);
-	ByteBuffer buf(&map);
+	ByteBuffer buf(map);
 	int size = 0;
 
 	EXPECT_EQ(buf.GetSize(), size);
@@ -295,7 +295,7 @@ TEST(Test_ByteBuffer, TestCoretypes) {
 TEST(Test_ByteBuffer, TestTooLargeString) {
 
 	MemoryMap map(1, 16);
-	ByteBuffer buf(&map);
+	ByteBuffer buf(map);
 
 	EXPECT_EQ(buf.GetSize(), 0);
 	EXPECT_EQ(buf.GetIndex(), 0);
@@ -354,7 +354,7 @@ TEST(Test_ByteBuffer, TestTooLargeString) {
 TEST(Test_ByteBuffer, TestTooLargeFixedString) {
 
 	MemoryMap map(1, 16);
-	ByteBuffer buf(&map);
+	ByteBuffer buf(map);
 
 	EXPECT_EQ(buf.GetSize(), 0);
 	EXPECT_EQ(buf.GetIndex(), 0);
@@ -474,7 +474,7 @@ void VectorCompare(std::vector<std::string>& a, std::vector<std::string>& b, std
 TEST(Test_ByteBuffer, TestVectors) {
 	
 	MemoryMap map(1, 65000);
-	ByteBuffer buf(&map);
+	ByteBuffer buf(map);
 	int size = 0;
 
 	EXPECT_EQ(buf.GetSize(), size);
@@ -601,7 +601,7 @@ TEST(Test_ByteBuffer, TestVectors) {
 TEST(Test_ByteBuffer, TestSegmentFundamentals) {
 
 	MemoryMap map(4, 16);
-	ByteBuffer buf(&map);
+	ByteBuffer buf(map);
 	int size = 0;
 
 	EXPECT_EQ(buf.GetSize(), size);
@@ -653,7 +653,7 @@ TEST(Test_ByteBuffer, TestSegmentFundamentals) {
 	map.copyToBytes(buffer, 0, 63);
 
 	MemoryMap tmp(buffer, sizeof(buffer));
-	ByteBuffer buf2(&tmp);
+	ByteBuffer buf2(tmp);
 
 	// Segment 0
 	EXPECT_TRUE(buf2.checkProtocol());
@@ -709,7 +709,7 @@ TEST(Test_ByteBuffer, TestSegmentsMinimal) {
 	// Setup a buffer that only have space for a segment header and 1 byte in each segment.
 	// This will lead to all data types (larger than 1 byte) to be split in several segments.
 	MemoryMap map(1000, 15);
-	ByteBuffer buf(&map);
+	ByteBuffer buf(map);
 	int size = 0;
 
 	EXPECT_EQ(buf.GetSize(), size);

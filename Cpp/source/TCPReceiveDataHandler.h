@@ -33,7 +33,7 @@ namespace ops
 	class OPS_EXPORT TCPReceiveDataHandler : public ReceiveDataHandler, TCPClientCallbacks
 	{
 	public:
-		TCPReceiveDataHandler(Topic top, Participant* part);
+		TCPReceiveDataHandler(Topic top, Participant& part);
 		virtual ~TCPReceiveDataHandler();
 
 	protected:

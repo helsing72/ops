@@ -1,6 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
+ * Copyright (C) 2019 Lennart Andersson.
  *
  * This notice apply to all source files, *.cpp, *.h, *.java, and *.cs in this directory
  * and all its subdirectories if nothing else is explicitly stated within the source file itself.
@@ -38,11 +39,9 @@ namespace ops
     class OPSArchiverIn : public ArchiverInOut
     {
     public:
-
-        OPSArchiverIn(ByteBuffer* _buf, SerializableInheritingTypeFactory* factory)
+        OPSArchiverIn(ByteBuffer& _buf, SerializableInheritingTypeFactory* _factory):
+			buf(_buf), factory(_factory)
         {
-            buf = _buf;
-            this->factory = factory;
         }
 
         ~OPSArchiverIn()
@@ -55,71 +54,71 @@ namespace ops
 		void inout(InoutName_T name, bool& value)
         {
             UNUSED(name)
-            value = buf->ReadChar() > 0;
+            value = buf.ReadChar() > 0;
         }
 
         void inout(InoutName_T name, char& value)
         {
             UNUSED(name)
-            value = buf->ReadChar();
+            value = buf.ReadChar();
         }
 
         void inout(InoutName_T name, int& value)
         {
             UNUSED(name)
-            value = buf->ReadInt();
+            value = buf.ReadInt();
         }
 
         void inout(InoutName_T name, int16_t& value)
         {
             UNUSED(name)
-            value = buf->ReadShort();
+            value = buf.ReadShort();
         }
 
         void inout(InoutName_T name, int64_t& value)
         {
             UNUSED(name)
-            value = buf->ReadLong();
+            value = buf.ReadLong();
         }
 
         void inout(InoutName_T name, float& value)
         {
             UNUSED(name)
-            value = buf->ReadFloat();
+            value = buf.ReadFloat();
         }
 
         void inout(InoutName_T name, double& value)
         {
             UNUSED(name)
-            value = buf->ReadDouble();
+            value = buf.ReadDouble();
         }
 
         void inout(InoutName_T name, std::string& value)
         {
             UNUSED(name)
-            value = buf->ReadString();
+            value = buf.ReadString();
         }
 
 		virtual void inoutfixstring(InoutName_T name, char* value, int& size, int max_size, int idx)
 		{
 			UNUSED(name)
 			UNUSED(idx)
-			size = buf->ReadInt();
+			size = buf.ReadInt();
 			if (size > max_size) throw ops::ArchiverException("Illegal size of fix string received. name: ", name);
-			buf->ReadChars(value, size);
+			buf.ReadChars(value, size);
 			value[size] = '\0';
 		}
 
 		void inout(InoutName_T name, char* buffer, int bufferSize)
 		{
             UNUSED(name)
-			buf->ReadChars(buffer, bufferSize);
+			buf.ReadChars(buffer, bufferSize);
 		}
 
 		void inout(InoutName_T name, Serializable& value)
         {
             UNUSED(name)
-            /*std::string types =*/ buf->ReadString();		///TODO Check that types is the expected Serializable Object?
+            /*std::string types =*/ buf.ReadString();		///TODO Check that types is the expected Serializable Object?
             value.serialize(this);
         }
 
@@ -129,7 +128,7 @@ namespace ops
             UNUSED(element)
             if (value) delete value;
 			TypeId_T types;
-			buf->ReadString(types);
+			buf.ReadString(types);
             Serializable* newSer = factory->create(types);
             if (newSer != nullptr) {
                 newSer->serialize(this);
@@ -145,7 +144,7 @@ namespace ops
                 delete value;
             }
 			TypeId_T types;
-			buf->ReadString(types);
+			buf.ReadString(types);
             Serializable* newSer = factory->create(types);
             if (newSer != nullptr) {
                 //Do this to preserve type information even if slicing has occured.
@@ -159,115 +158,115 @@ namespace ops
         void inout(InoutName_T name, std::vector<bool>& value)
         {
             UNUSED(name)
-            buf->ReadBooleans(value);
+            buf.ReadBooleans(value);
         }
 
         void inout(InoutName_T name, std::vector<char>& value)
         {
             UNUSED(name)
-            buf->ReadBytes(value);
+            buf.ReadBytes(value);
         }
 
         void inout(InoutName_T name, std::vector<int>& value)
         {
             UNUSED(name)
-            buf->ReadInts(value);
+            buf.ReadInts(value);
         }
 
         void inout(InoutName_T name, std::vector<int16_t>& value)
         {
             UNUSED(name)
-            buf->ReadShorts(value);
+            buf.ReadShorts(value);
         }
 
         void inout(InoutName_T name, std::vector<int64_t>& value)
         {
             UNUSED(name)
-            buf->ReadLongs(value);
+            buf.ReadLongs(value);
         }
 
         void inout(InoutName_T name, std::vector<float>& value)
         {
             UNUSED(name)
-            buf->ReadFloats(value);
+            buf.ReadFloats(value);
         }
 
         void inout(InoutName_T name, std::vector<double>& value)
         {
             UNUSED(name)
-            buf->ReadDoubles(value);
+            buf.ReadDoubles(value);
         }
 
         void inout(InoutName_T name, std::vector<std::string>& value)
         {
             UNUSED(name)
-            buf->ReadStrings(value);
+            buf.ReadStrings(value);
         }
 
 		///TODO all inoutfixarr methods need to handle byte order on BIG ENDIAN SYSTEMS
 		void inoutfixarr(InoutName_T name, bool* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
-			int num = buf->ReadInt();
+			int num = buf.ReadInt();
 			if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
-			buf->ReadChars((char *)value, totalSize);
+			buf.ReadChars((char *)value, totalSize);
 		}
 
 		void inoutfixarr(InoutName_T name, char* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
-			int num = buf->ReadInt();
+			int num = buf.ReadInt();
 			if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
-			buf->ReadChars((char *)value, totalSize);
+			buf.ReadChars((char *)value, totalSize);
 		}
 
 		void inoutfixarr(InoutName_T name, int* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
-			int num = buf->ReadInt();
+			int num = buf.ReadInt();
 			if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
-			buf->ReadChars((char *)value, totalSize);
+			buf.ReadChars((char *)value, totalSize);
 		}
 
 		void inoutfixarr(InoutName_T name, int16_t* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
-			int num = buf->ReadInt();
+			int num = buf.ReadInt();
 			if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
-			buf->ReadChars((char *)value, totalSize);
+			buf.ReadChars((char *)value, totalSize);
 		}
 
 		void inoutfixarr(InoutName_T name, int64_t* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
-			int num = buf->ReadInt();
+			int num = buf.ReadInt();
 			if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
-			buf->ReadChars((char *)value, totalSize);
+			buf.ReadChars((char *)value, totalSize);
 		}
 
 		void inoutfixarr(InoutName_T name, float* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
-			int num = buf->ReadInt();
+			int num = buf.ReadInt();
 			if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
-			buf->ReadChars((char *)value, totalSize);
+			buf.ReadChars((char *)value, totalSize);
 		}
 
 		void inoutfixarr(InoutName_T name, double* value, int numElements, int totalSize)
 		{
 			UNUSED(name)
-			int num = buf->ReadInt();
+			int num = buf.ReadInt();
 			if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
-			buf->ReadChars((char *)value, totalSize);
+			buf.ReadChars((char *)value, totalSize);
 		}
 
 		void inoutfixarr(InoutName_T name, std::string* value, int numElements)
         {
             UNUSED(name)
-            int num = buf->ReadInt();
+            int num = buf.ReadInt();
             if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
             for(int i = 0; i < numElements; i++) {
-                value[i] = buf->ReadString();
+                value[i] = buf.ReadString();
             }
         }
 
@@ -275,7 +274,7 @@ namespace ops
         {
             UNUSED(name)
             UNUSED(size)
-            return buf->ReadInt();
+            return buf.ReadInt();
         }
 
         void endList(InoutName_T name)
@@ -285,7 +284,7 @@ namespace ops
         }
 
     private:
-        ByteBuffer* buf;
+        ByteBuffer& buf;
         SerializableInheritingTypeFactory* factory;
     };
 

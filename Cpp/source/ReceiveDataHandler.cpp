@@ -32,7 +32,7 @@
 namespace ops
 {
     ///Constructor.
-    ReceiveDataHandler::ReceiveDataHandler(Topic top, Participant* part, Receiver* recv) :
+    ReceiveDataHandler::ReceiveDataHandler(Topic top, Participant& part, Receiver* recv) :
 		receiver(recv),
 		memMap(top.getSampleMaxSize() / OPSConstants::PACKET_MAX_SIZE + 1, OPSConstants::PACKET_MAX_SIZE),
 		sampleMaxSize(top.getSampleMaxSize()),
@@ -79,7 +79,7 @@ namespace ops
 		if (Notifier<OPSMessage*>::getNrOfListeners() == 0) { receiver->stop(); }
 	}
 
-	void ReportError(Participant* participant, ErrorMessage_T message, Address_T addr, int port)
+	void ReportError(Participant& participant, ErrorMessage_T message, Address_T addr, int port)
 	{
 		message += " [";
 		message += addr;
@@ -87,7 +87,7 @@ namespace ops
 		message += NumberToString(port);
 		message += ']';
 		BasicError err("ReceiveDataHandler", "onNewEvent", message);
-		participant->reportError(&err);
+		participant.reportError(&err);
 	}
 
     ///Override from Listener
@@ -104,12 +104,12 @@ namespace ops
             if (byteSizePair.size == -5)
             {
                 BasicError err("ReceiveDataHandler", "onNewEvent", "Connection was lost but is now reconnected.");
-                participant->reportError(&err);
+                participant.reportError(&err);
             }
             else
             {
                 BasicError err("ReceiveDataHandler", "onNewEvent", "Empty message or error.");
-                participant->reportError(&err);
+                participant.reportError(&err);
             }
 
             receiver->asynchWait(memMap.getSegment(expectedSegment), memMap.getSegmentSize());
@@ -123,7 +123,7 @@ namespace ops
 
         //Create a temporay map and buf to peek data before putting it in to memMap
         MemoryMap tMap(memMap.getSegment(expectedSegment), memMap.getSegmentSize());
-        ByteBuffer tBuf(&tMap);
+        ByteBuffer tBuf(tMap);
 
         //Check protocol
         if (tBuf.checkProtocol())
@@ -155,7 +155,7 @@ namespace ops
             {
                 firstReceived = true;
                 expectedSegment = 0;
-                ByteBuffer buf(&memMap);
+                ByteBuffer buf(memMap);
 
                 buf.checkProtocol();
                 int i1 = buf.ReadInt();
@@ -165,7 +165,7 @@ namespace ops
                 int segmentPaddingSize = buf.GetSize();
 
                 //Read of the actual OPSMessage
-                OPSArchiverIn archiver(&buf, participant->getObjectFactory());
+                OPSArchiverIn archiver(buf, participant.getObjectFactory());
 
                 SafeLock lock(&messageLock);
 
