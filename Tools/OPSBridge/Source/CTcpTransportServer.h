@@ -30,7 +30,7 @@ namespace opsbridge {
 	class CTcpTransportServer : public CSocketTransport
 	{
 	public:
-		CTcpTransportServer(uint16_t localPort);
+		CTcpTransportServer(uint16_t const localPort);
 		~CTcpTransportServer();
 
 		void Terminate();

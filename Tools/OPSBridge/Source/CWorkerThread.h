@@ -85,7 +85,7 @@ protected:
 		m_notified = false;
 	}
 
-	bool WaitForNotifyWithTimeout(int64_t millis)
+	bool WaitForNotifyWithTimeout(int64_t const millis)
 	{
 		std::unique_lock<std::mutex> lck(m_mtx);
 		bool notified = m_cv.wait_for(
@@ -164,7 +164,7 @@ class CWorkerThread
 	friend class CWorkItemEx;
     friend class CWorkerThreadManager;
 public:
-	CWorkerThread(CWorkItem*  workItem, bool ownsWorkItem = true);
+	CWorkerThread(CWorkItem* const workItem, bool const ownsWorkItem = true);
 	virtual ~CWorkerThread();
 protected:
 	CWorkItem* m_WorkItem;

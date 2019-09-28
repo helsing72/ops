@@ -36,12 +36,12 @@
 // 9 --> Error and above
 extern int BL_log_level;
 
-#define BL_TRACE3(...) if (BL_log_level <= 1) printf(__VA_ARGS__)
-#define BL_TRACE2(...) if (BL_log_level <= 2) printf(__VA_ARGS__)
-#define BL_TRACE(...)  if (BL_log_level <= 3) printf(__VA_ARGS__)
-#define BL_DEBUG3(...) if (BL_log_level <= 4) printf(__VA_ARGS__)
-#define BL_DEBUG2(...) if (BL_log_level <= 5) printf(__VA_ARGS__)
-#define BL_DEBUG(...)  if (BL_log_level <= 6) printf(__VA_ARGS__)
-#define BL_INFO(...)   if (BL_log_level <= 7) printf(__VA_ARGS__)
-#define BL_WARN(...)   if (BL_log_level <= 8) printf(__VA_ARGS__)
-#define BL_ERROR(...)  if (BL_log_level <= 9) printf(__VA_ARGS__)
+#define BL_TRACE3(...) if (BL_log_level <= 1) { printf(__VA_ARGS__); }
+#define BL_TRACE2(...) if (BL_log_level <= 2) { printf(__VA_ARGS__); }
+#define BL_TRACE(...)  if (BL_log_level <= 3) { printf(__VA_ARGS__); }
+#define BL_DEBUG3(...) if (BL_log_level <= 4) { printf(__VA_ARGS__); }
+#define BL_DEBUG2(...) if (BL_log_level <= 5) { printf(__VA_ARGS__); }
+#define BL_DEBUG(...)  if (BL_log_level <= 6) { printf(__VA_ARGS__); }
+#define BL_INFO(...)   if (BL_log_level <= 7) { printf(__VA_ARGS__); }
+#define BL_WARN(...)   if (BL_log_level <= 8) { printf(__VA_ARGS__); }
+#define BL_ERROR(...)  if (BL_log_level <= 9) { printf(__VA_ARGS__); }

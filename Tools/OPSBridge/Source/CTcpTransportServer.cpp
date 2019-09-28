@@ -30,7 +30,7 @@
 
 namespace opsbridge {
 
-CTcpTransportServer::CTcpTransportServer(uint16_t localPort):
+CTcpTransportServer::CTcpTransportServer(uint16_t const localPort):
 	m_localPort(localPort), m_listenSocket(INVALID_SOCKET)
 #ifdef _WIN32
 	, m_WsaInitialized(false)
@@ -131,18 +131,18 @@ void CTcpTransportServer::Run()
 			std::string remoteIP(inet_ntoa(SockAddr.sin_addr));
 			BL_INFO("# [ TcpServer ] connected to: %s, Port: %d\n", remoteIP.c_str(), SockAddr.sin_port);
 
-			int optVal = 1;
-			int optLen = sizeof(optVal);
+			int const optVal = 1;
+			int const optLen = sizeof(optVal);
 			setsockopt(m_socketCom, IPPROTO_TCP, TCP_NODELAY, (char*)&optVal, optLen);
 
 			m_Connected = true;
-			if (m_user) m_user->onConnect(this);
+			if (m_user != nullptr) m_user->onConnect(this);
 
 			// Handle data from other side while connected
 			HandleData();
 
 			m_Connected = false;
-			if (m_user) m_user->onDisconnect(this);
+			if (m_user != nullptr) m_user->onDisconnect(this);
 
 			BL_INFO("# [ TcpServer ] disconnected from: %s, Port: %d\n", remoteIP.c_str(), SockAddr.sin_port);
 		}

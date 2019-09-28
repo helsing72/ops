@@ -45,7 +45,7 @@ BridgeConfig* BridgeConfig::Instance()
 	return _instance;
 }
 
-int64_t BridgeConfig::parseSize(std::string s, int64_t defaultValue)
+int64_t BridgeConfig::parseSize(std::string s, int64_t const defaultValue)
 {
 	std::basic_string <char>::size_type index1;
 	int64_t factor = 1;
@@ -73,7 +73,7 @@ int64_t BridgeConfig::parseSize(std::string s, int64_t defaultValue)
 	}
 }
 
-BridgeConfig::THandlingType BridgeConfig::ParseHandlingType(std::string str, THandlingType defaultValue)
+BridgeConfig::THandlingType BridgeConfig::ParseHandlingType(std::string const str, THandlingType const defaultValue)
 {
 	// enum THandlingType {discard, keepLatest, keepAll};
 	if (str == "Discard") {
@@ -86,19 +86,20 @@ BridgeConfig::THandlingType BridgeConfig::ParseHandlingType(std::string str, THa
 	return defaultValue;
 }
 
-std::string BridgeConfig::HandlingTypeToStr(THandlingType value)
+std::string BridgeConfig::HandlingTypeToStr(THandlingType const value)
 {
 	switch (value) {
 		case discard:    return "Discard";
 		case keepLatest: return "KeepLatest";
 		case keepAll:    return "KeepAll";
+		default: break;
 	}
 	return "Unknown";
 }
 
 void BridgeConfig::checkTopicDomain(ops::ObjectName_T topicName)
 {
-	ops::ObjectName_T dom = ops::utilities::domainName(topicName);
+	ops::ObjectName_T const dom = ops::utilities::domainName(topicName);
 	if (dom != "") {
 		for (uint32_t i = 0; i < vDomains.size(); i++) {
 			if (dom == vDomains[i]) return;
@@ -107,7 +108,7 @@ void BridgeConfig::checkTopicDomain(ops::ObjectName_T topicName)
 	}
 }
 
-void BridgeConfig::ParseBridgeConfiguration(std::string tracestr, Configuration& config, TBridgeConfig& bc)
+void BridgeConfig::ParseBridgeConfiguration(std::string const tracestr, Configuration& config, TBridgeConfig& bc)
 {
 	std::string s;
 
@@ -121,7 +122,7 @@ void BridgeConfig::ParseBridgeConfiguration(std::string tracestr, Configuration&
 
 	// Check attributes for bridge
 	s = config.getAttribute("name");
-	if (s == "") s = "NotSet";
+	if (s == "") { s = "NotSet"; }
 	bc.sBridgeName = s;
 	if (logConfig) BL_TRACE("# Bridge: name = %s\n", bc.sBridgeName.c_str());
 
@@ -138,9 +139,9 @@ void BridgeConfig::ParseBridgeConfiguration(std::string tracestr, Configuration&
 	// Read Endpoint configuration
 	if (config.enter("endpoint")) {
 		s = config.getAttribute("type");
-		if (s == "tcpserver") bc.endpoint.eType = tcpServer;
-		if (s == "tcpclient") bc.endpoint.eType = tcpClient;
-		if (s == "local") bc.endpoint.eType = local;
+		if (s == "tcpserver") { bc.endpoint.eType = tcpServer; }
+		if (s == "tcpclient") { bc.endpoint.eType = tcpClient; }
+		if (s == "local") { bc.endpoint.eType = local; }
 		if (logConfig) BL_TRACE("#   Endpoint: type = %s\n", s.c_str());
 
 		if (bc.endpoint.eType == local) {
@@ -188,7 +189,7 @@ void BridgeConfig::ParseBridgeConfiguration(std::string tracestr, Configuration&
 			if (logConfig) BL_TRACE("#   Default destDomain  = %s\n", defDestDomain.c_str());
 	
 			s = config.getAttribute("key");
-			if (s != "") defKey = s;
+			if (s != "") { defKey = s; }
 			if (logConfig) BL_TRACE("#   Default key         = %s\n", defKey.c_str());
 	
 			s = config.getAttribute("mintime");
@@ -197,8 +198,8 @@ void BridgeConfig::ParseBridgeConfiguration(std::string tracestr, Configuration&
 
 			s = config.getAttribute("priority");
 			defPriority = config.parseInt(s, defPriority);
-			if (defPriority < 0) defPriority = 0;
-			if (defPriority > HIGHEST_PRIO) defPriority = HIGHEST_PRIO;
+			if (defPriority < 0) { defPriority = 0; }
+			if (defPriority > HIGHEST_PRIO) { defPriority = HIGHEST_PRIO; }
 			if (logConfig) BL_TRACE("#   Default priority    = %d\n", defPriority);
 
 			s = config.getAttribute("connected");
@@ -233,13 +234,13 @@ void BridgeConfig::ParseBridgeConfiguration(std::string tracestr, Configuration&
 				s = config.getAttribute("destName");
 				ops::ObjectName_T dom, top;
 				ops::utilities::splitTopicName(s, dom, top);
-				if (dom == "") dom = defDestDomain;
-				if (top == "") top = ops::utilities::topicName(tc.sTopicName);
+				if (dom == "") { dom = defDestDomain; }
+				if (top == "") { top = ops::utilities::topicName(tc.sTopicName); }
 				tc.sDestTopicName = ops::utilities::fullTopicName(dom, top);
 				if (logConfig) BL_TRACE("#          DestName= %s\n", tc.sDestTopicName.c_str());
 	
 				s = config.getAttribute("key");
-				if (s != "") tc.sKey = s;
+				if (s != "") { tc.sKey = s; }
 				if (logConfig) BL_TRACE("#          Key     = %s\n", tc.sKey.c_str());
 	
 				s = config.getAttribute("mintime");
@@ -248,8 +249,8 @@ void BridgeConfig::ParseBridgeConfiguration(std::string tracestr, Configuration&
 
 				s = config.getAttribute("priority");
 				tc.iPriority = config.parseInt(s, tc.iPriority);
-				if (tc.iPriority < 0) tc.iPriority = 0;
-				if (tc.iPriority > HIGHEST_PRIO) tc.iPriority = HIGHEST_PRIO;
+				if (tc.iPriority < 0) { tc.iPriority = 0; }
+				if (tc.iPriority > HIGHEST_PRIO) { tc.iPriority = HIGHEST_PRIO; }
 				if (logConfig) BL_TRACE("#          Priority= %d\n", tc.iPriority);
 
 				s = config.getAttribute("connected");

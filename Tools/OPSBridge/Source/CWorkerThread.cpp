@@ -38,7 +38,7 @@ CWorkerThreadManager* CWorkerThreadManager::_instance = nullptr;
 CWorkerThreadManager* CWorkerThreadManager::Instance()
 {
 	std::lock_guard<std::mutex> lck(instanceMutex);
-	if (_instance == nullptr) _instance = new CWorkerThreadManager();
+	if (_instance == nullptr) { _instance = new CWorkerThreadManager(); }
 	return _instance;
 }
 
@@ -54,15 +54,15 @@ CWorkerThreadManager::~CWorkerThreadManager()
 }
 
 // Set CWorkerErrorLogger to use for error logging
-void CWorkerThreadManager::SetErrorLogger(CWorkerErrorLogger* logger)
+void CWorkerThreadManager::SetErrorLogger(CWorkerErrorLogger* const logger)
 {
 	m_ErrorLogger = logger;
 }
 
-void CWorkerThreadManager::Add(CWorkerThread *worker)
+void CWorkerThreadManager::Add(CWorkerThread* const worker)
 {
 	std::lock_guard<std::mutex> lck(instanceMutex);
-    if (m_shuttingDown) worker->m_WorkItem->Terminate();
+	if (m_shuttingDown) { worker->m_WorkItem->Terminate(); }
 	m_vWorkers.push_back(worker);
 }
 
@@ -70,7 +70,7 @@ void CWorkerThreadManager::Add(CWorkerThread *worker)
 void CWorkerThreadManager::Add(CWorkItem* workItem, bool ownsWorkItem)
 {
 	// Check that user don't try to add a CWorkItemEx() or derived class
-	if (dynamic_cast<CWorkItemEx*>(workItem)) {
+	if (dynamic_cast<CWorkItemEx*>(workItem) == nullptr) {
 		throw Invalid_Usage();
 	}
 	Add(new CWorkerThread(workItem, ownsWorkItem));
@@ -80,7 +80,7 @@ void CWorkerThreadManager::Add(CWorkItem* workItem, bool ownsWorkItem)
 void CWorkerThreadManager::CleanUp()
 {
 	std::lock_guard<std::mutex> lck(instanceMutex);
-	int num = (int)m_vWorkers.size();
+	int const num = (int)m_vWorkers.size();
     // Loop backwards so we can erase without changing index for not checked ones
     for (int i = (int)m_vWorkers.size() - 1; i >= 0; i--) {
         if (m_vWorkers[i]->IsFinished()) {
@@ -88,7 +88,9 @@ void CWorkerThreadManager::CleanUp()
             m_vWorkers.erase(m_vWorkers.begin() + i);
         }
 	}
-	if (m_ErrorLogger) m_ErrorLogger->onInformation("CWorkerThreadManager::CleanUp() Items: ", num - (int)m_vWorkers.size());
+	if (m_ErrorLogger != nullptr) { 
+		m_ErrorLogger->onInformation("CWorkerThreadManager::CleanUp() Items: ", num - (int)m_vWorkers.size()); 
+	}
 }
 
 void CWorkerThreadManager::StopAll()
@@ -110,7 +112,9 @@ void CWorkerThreadManager::StopAll()
 			m_vWorkers.clear();
 		}
 
-		if (m_ErrorLogger) m_ErrorLogger->onInformation("CWorkerThreadManager::StopAll() Items: ", (unsigned int)list.size());
+		if (m_ErrorLogger != nullptr) {
+			m_ErrorLogger->onInformation("CWorkerThreadManager::StopAll() Items: ", (unsigned int)list.size());
+		}
 
         // We have released the mutex, now delete all objects
         for (uint32_t i = 0; i < list.size(); i++) {
@@ -125,7 +129,7 @@ void CWorkerThreadManager::StopAll()
 
 // ---------------------------------------------------------------------
 
-CWorkerThread::CWorkerThread(CWorkItem* workItem, bool ownsWorkItem) :
+CWorkerThread::CWorkerThread(CWorkItem* const workItem, bool const ownsWorkItem) :
 	m_WorkItem(workItem), m_ownsWorkItem(ownsWorkItem),
 	m_running(true),
 	m_thread(&CWorkerThread::run, this)
@@ -141,13 +145,13 @@ CWorkerThread::~CWorkerThread()
 	WaitFor();
 
 	// Remove owned objects
-	if (m_ownsWorkItem) delete m_WorkItem;
+	if (m_ownsWorkItem) { delete m_WorkItem; }
 }
 
 void CWorkerThread::WaitFor()
 {
 	// Wait for thread to finish
-	if (m_thread.joinable()) m_thread.join();
+	if (m_thread.joinable()) { m_thread.join(); }
 }
 
 bool CWorkerThread::IsFinished()
@@ -164,13 +168,13 @@ void CWorkerThread::run()
 	}
 #ifdef _WIN32
 	catch (utils::SEHException E) {
-		if (CWorkerThreadManager::Instance()->m_ErrorLogger) {
+		if (CWorkerThreadManager::Instance()->m_ErrorLogger != nullptr) {
 			CWorkerThreadManager::Instance()->m_ErrorLogger->onError(std::string(E.what()), E.GetExceptionID());
 		}
 	}
 #endif
 	catch (...) {
-		if (CWorkerThreadManager::Instance()->m_ErrorLogger) {
+		if (CWorkerThreadManager::Instance()->m_ErrorLogger != nullptr) {
 			CWorkerThreadManager::Instance()->m_ErrorLogger->onError("UNKNOWN EXCEPTION RAISED IN WorkItem::Run()", 0);
 		}
 	}
@@ -185,7 +189,7 @@ CWorkItemEx::CWorkItemEx() : m_WorkerThread(nullptr)
 
 CWorkItemEx::~CWorkItemEx()
 {
-	if (m_WorkerThread) delete m_WorkerThread;
+	if (m_WorkerThread != nullptr) { delete m_WorkerThread; }
 }
 
 void CWorkItemEx::Start()
@@ -199,13 +203,13 @@ void CWorkItemEx::Start()
 void CWorkItemEx::Stop()
 {
 	TerminateAndWaitFor();
-	if (m_WorkerThread) delete m_WorkerThread;
+	if (m_WorkerThread != nullptr) { delete m_WorkerThread; }
 	m_WorkerThread = nullptr;
 }
 
 void CWorkItemEx::WaitFor()
 {
-	if (m_WorkerThread) m_WorkerThread->WaitFor();
+	if (m_WorkerThread != nullptr) { m_WorkerThread->WaitFor(); }
 }
 
 void CWorkItemEx::TerminateAndWaitFor()

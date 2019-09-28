@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
 	int cnt = 0;
 
 	for (int i = 1; i < argc; ) {
-		std::string arg = argv[i++];
+		std::string const arg = argv[i++];
 
 		std::string* stringp = nullptr;
 		int* intp = nullptr;
@@ -77,8 +77,8 @@ int main(int argc, char* argv[])
 			show_menu = true;
 		}
 		if (i < argc) {
-			if (stringp) *stringp = argv[i++];
-			if (intp) *intp = atoi(argv[i++]);
+			if (stringp != nullptr) { *stringp = argv[i++]; }
+			if (intp != nullptr) { *intp = atoi(argv[i++]); }
 		}
 	}
 
@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
 	opsbridge::BridgeConfig cfg(cfgfile);
 
 	// Setup the OPS static error service (common for all participants, reports errors during participant creation)
-	ops::ErrorWriter* errorWriterStatic = new ops::ErrorWriter(std::cout);
+	ops::ErrorWriter* const errorWriterStatic = new ops::ErrorWriter(std::cout);
 	ops::Participant::getStaticErrorService()->addListener(errorWriterStatic);
 
 	if (bridgeName != "") {

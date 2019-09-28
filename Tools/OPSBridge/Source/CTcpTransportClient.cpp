@@ -30,7 +30,7 @@
 
 namespace opsbridge {
 
-CTcpTransportClient::CTcpTransportClient(std::string remoteHost, uint16_t remotePort):
+CTcpTransportClient::CTcpTransportClient(std::string remoteHost, uint16_t const remotePort):
 	m_remoteHost(remoteHost), m_remotePort(remotePort)
 #ifdef _WIN32
 	, m_WsaInitialized(false)
@@ -96,18 +96,18 @@ void CTcpTransportClient::Run()
 			// Connected
 			BL_INFO("# [ TcpClient ] CONNECTED\n"); 
 				
-			int optVal = 1;
-			int optLen = sizeof(optVal);
+			int const optVal = 1;
+			int const optLen = sizeof(optVal);
 			setsockopt(m_socketCom, IPPROTO_TCP, TCP_NODELAY, (char*)&optVal, optLen);
 
 			m_Connected = true;
-			if (m_user) m_user->onConnect(this);
+			if (m_user != nullptr) m_user->onConnect(this);
 
 			// Handle data from other side while connected
 			HandleData();
 
 			m_Connected = false;
-			if (m_user) m_user->onDisconnect(this);
+			if (m_user != nullptr) m_user->onDisconnect(this);
 
 			BL_INFO("# [ TcpClient ] DISCONNECTED\n"); 
 		}

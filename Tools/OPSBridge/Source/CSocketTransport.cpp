@@ -78,11 +78,11 @@ void CSocketTransport::Close()
 	m_socketCom = INVALID_SOCKET;
 }
 
-bool CSocketTransport::write(char* buffer, uint32_t length)
+bool CSocketTransport::write(char* const buffer, uint32_t const length)
 {
 	if (!m_Connected) return false;
 	
-	int iResult = send(m_socketCom, buffer, length, 0);
+	int const iResult = send(m_socketCom, buffer, length, 0);
 
 	if (iResult == 0) {
 		BL_TRACE("# [ SocketTransport ] send() returned 0\n");
@@ -96,14 +96,14 @@ bool CSocketTransport::write(char* buffer, uint32_t length)
 	return true;
 }
 
-bool CSocketTransport::writeOpsMessage(ops::OPSObject* mess, 
+bool CSocketTransport::writeOpsMessage(ops::OPSObject* const mess, 
 									   ops::ObjectName_T publisherName,
 									   ops::ObjectName_T topicName,
-									   uint64_t ackCounter)
+									   uint64_t const ackCounter)
 {
 	ops::MemoryMap memMap(1, 65536);
-	ops::ByteBuffer buf(&memMap);
-	ops::OPSArchiverOut archive(&buf);
+	ops::ByteBuffer buf(memMap);
+	ops::OPSArchiverOut archive(buf);
 
 	// Build header
 	//   First a TOpsMessage structure
@@ -136,7 +136,7 @@ bool CSocketTransport::writeOpsMessage(ops::OPSObject* mess,
 	return write(&mess->spareBytes[0], head.DataLength);
 }
 
-bool CSocketTransport::writeAckNak(uint64_t ackCounter, uint32_t errorCode)
+bool CSocketTransport::writeAckNak(uint64_t const ackCounter, uint32_t const errorCode)
 {
 	TAckNakMessage AckNak;
 	AckNak.Head.Type = mtAckNak;
@@ -154,7 +154,7 @@ bool CSocketTransport::writeAckNak(uint64_t ackCounter, uint32_t errorCode)
 bool CSocketTransport::writeCommand(TCommandMessage& cmd)
 {
 	ops::MemoryMap memMap(1, 1000);
-	ops::ByteBuffer buf(&memMap);
+	ops::ByteBuffer buf(memMap);
 
 	//typedef struct {
 	//	THeader Head;
@@ -167,7 +167,7 @@ bool CSocketTransport::writeCommand(TCommandMessage& cmd)
 	cmd.Head.Type = mtCommand;
 	cmd.Head.Length = 0;	// replaced below with real length
 
-	int tmp = cmd.Command;
+	int const tmp = cmd.Command;
 	buf.WriteInt(tmp);
 	buf.WriteString(cmd.DestTopicName);
 	buf.WriteString(cmd.DataType);
@@ -194,7 +194,7 @@ bool CSocketTransport::writeStatus(TStatusMessage& status)
 }
 
 // The .Head field in UdpMc will be overwritten
-bool CSocketTransport::writeUdpMcMessage(TUdpMcMessage& udpMc, char* data)
+bool CSocketTransport::writeUdpMcMessage(TUdpMcMessage& udpMc, char* const data)
 {
 	udpMc.Head.Type = mtUdpMc;
 	udpMc.Head.Length = sizeof(udpMc);
@@ -206,13 +206,13 @@ bool CSocketTransport::writeUdpMcMessage(TUdpMcMessage& udpMc, char* data)
 	return write(data, udpMc.DataLength);
 }
 
-bool CSocketTransport::ReadData(char* buffer, uint32_t numBytes)
+bool CSocketTransport::ReadData(char* buffer, uint32_t const numBytes)
 {
 	uint32_t numRead = 0;
 
     // Loop until the requested number of bytes have been read
 	while (numRead < numBytes) {
-		int iResult = recv(m_socketCom, &buffer[numRead], numBytes - numRead, 0);
+		int const iResult = recv(m_socketCom, &buffer[numRead], numBytes - numRead, 0);
 		
 		if (iResult > 0) {
 			//printf("Bytes received: %d\n", iResult);
@@ -258,8 +258,8 @@ void CSocketTransport::HandleData()
 		case mtOps:
 		{
 			ops::OPSObject* messHead = nullptr;
-			ops::ByteBuffer buf(&memMap);
-			ops::OPSArchiverIn archive(&buf, &m_factory);
+			ops::ByteBuffer buf(memMap);
+			ops::OPSArchiverIn archive(buf, &m_factory);
 
 			// Read rest of data for TOpsMessage
 			OpsMess.Head = Head;
@@ -285,7 +285,7 @@ void CSocketTransport::HandleData()
 
 			// Create OPS Object
 			messHead = dynamic_cast<ops::OPSObject*>(archive.inout("data", messHead));
-			if (!messHead) {
+			if (messHead == nullptr) {
 				BL_ERROR("# [ SocketTransport ] HandleData() Failed to create OPS object\n");
 				return;
 			}
@@ -296,7 +296,7 @@ void CSocketTransport::HandleData()
 			messHead->spareBytes.resize(OpsMess.DataLength);
 			if (ReadData((char*)&messHead->spareBytes[0], OpsMess.DataLength)) {
 				if (!terminated()) {
-					if (m_user) m_user->onOpsMessage(this, messHead, publisherName, topicName, OpsMess.AckCounter);
+					if (m_user != nullptr) { m_user->onOpsMessage(this, messHead, publisherName, topicName, OpsMess.AckCounter); }
 				}
 			}
 			delete messHead;
@@ -318,13 +318,13 @@ void CSocketTransport::HandleData()
 			if (!ReadData(Ptr, Head.Length - sizeof(Head))) return;
 			if (terminated()) return;
 
-			if (m_user) m_user->onAckNakMessage(this, AckNakMess);
+			if (m_user != nullptr) { m_user->onAckNakMessage(this, AckNakMess); }
 		}
 		break;
 
 		case mtCommand:
 		{
-			ops::ByteBuffer buf(&memMap);
+			ops::ByteBuffer buf(memMap);
 
 			//typedef struct {
 			//	THeader Head;
@@ -346,7 +346,7 @@ void CSocketTransport::HandleData()
 			CmdMess.DataType = buf.ReadString();
 			CmdMess.AckCounter = buf.ReadLong();
 
-			if (m_user) m_user->onCommandMessage(this, CmdMess);
+			if (m_user != nullptr) { m_user->onCommandMessage(this, CmdMess); }
 		}
 		break;
 
@@ -365,7 +365,7 @@ void CSocketTransport::HandleData()
 			if (!ReadData(Ptr, Head.Length - sizeof(Head))) return;
 			if (terminated()) return;
 
-			if (m_user) m_user->onStatusMessage(this, StatusMess);
+			if (m_user != nullptr) { m_user->onStatusMessage(this, StatusMess); }
 		}
 		break;
 
@@ -393,7 +393,7 @@ void CSocketTransport::HandleData()
 			if (!ReadData(memMap.getSegment(0), UdpMcMess.DataLength)) return;
 			if (terminated()) return;
 
-			if (m_user) m_user->onUdpMcMessage(this, UdpMcMess, memMap.getSegment(0));
+			if (m_user != nullptr) { m_user->onUdpMcMessage(this, UdpMcMess, memMap.getSegment(0)); }
 		}
 		break;
 

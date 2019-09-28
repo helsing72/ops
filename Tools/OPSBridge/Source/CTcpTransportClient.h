@@ -30,7 +30,7 @@ namespace opsbridge {
 	class CTcpTransportClient : public CSocketTransport
 	{
 	public:
-		CTcpTransportClient(std::string remoteHost, uint16_t remotePort);
+		CTcpTransportClient(std::string remoteHost, uint16_t const remotePort);
 		~CTcpTransportClient();
 
 	protected:

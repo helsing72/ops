@@ -89,23 +89,23 @@ namespace opsbridge {
 
 	protected:
 		// Override from ops::DataListener, called whenever new data arrives.
-		void onNewData(ops::DataNotifier* subscriber);
+		virtual void onNewData(ops::DataNotifier* const subscriber) override;
 
 		// Override from CTransportListener
-		void onConnect(CTransport* sender) override;
-		void onDisconnect(CTransport* sender) override;
-		void onOpsMessage(CTransport* sender, 
-			ops::OPSObject* mess, 
-			ops::ObjectName_T publisherName,
-			ops::ObjectName_T topicName,
-			uint64_t AckCounter) override;
-		void onAckNakMessage(CTransport* sender, TAckNakMessage& ackNak) override;
-		void onCommandMessage(CTransport* sender, TCommandMessage& cmd) override;
-		void onStatusMessage(CTransport* sender, TStatusMessage& status) override;
-		void onUdpMcMessage(CTransport* sender, TUdpMcMessage& udpMc, char* data) override;
+		void onConnect(CTransport* const sender) override;
+		void onDisconnect(CTransport* const sender) override;
+		void onOpsMessage(CTransport* const sender, 
+			ops::OPSObject* const mess, 
+			ops::ObjectName_T const publisherName,
+			ops::ObjectName_T const topicName,
+			uint64_t const AckCounter) override;
+		void onAckNakMessage(CTransport* const sender, TAckNakMessage& ackNak) override;
+		void onCommandMessage(CTransport* const sender, TCommandMessage& cmd) override;
+		void onStatusMessage(CTransport* const sender, TStatusMessage& status) override;
+		void onUdpMcMessage(CTransport* const sender, TUdpMcMessage& udpMc, char* data) override;
 
 		// Override from RawMcUdpListener
-		void onUdpMcMessage(RawMcUdp* sender, TUdpMcMessage& mess, char* data) override;
+		void onUdpMcMessage(RawMcUdp* const sender, TUdpMcMessage& mess, char* data) override;
 
 		void Run();
 

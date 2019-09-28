@@ -25,7 +25,7 @@
 
 namespace opsbridge {
 
-	RawMcUdp::RawMcUdp(RawMcUdpListener* client) : _client(client)
+	RawMcUdp::RawMcUdp(RawMcUdpListener* const client) : _client(client)
 	{
 		_ioService = ops::IOService::create();
 
@@ -50,14 +50,14 @@ namespace opsbridge {
 
 		// Then we request the IO Service to stop the processing (it's running on the threadpool).
 		// The stop() call will not block, it just signals that we want it to finish as soon as possible.
-		if (_ioService) _ioService->stop();
+		if (_ioService != nullptr) { _ioService->stop(); }
 
 		// Now we delete the threadpool, which will wait for the thread(s) to finish
-		if (_threadPool) delete _threadPool;
+		if (_threadPool != nullptr) { delete _threadPool; }
 		_threadPool = nullptr;
 
 		// All objects connected to this ioservice should now be deleted, so it should be safe to delete it
-		if (_ioService) delete _ioService;
+		if (_ioService != nullptr) { delete _ioService; }
 	}
 
 	// This will be called by our threadpool
@@ -66,7 +66,7 @@ namespace opsbridge {
 		_ioService->run();
 	}
 
-	bool RawMcUdp::AddReceiver(ops::Address_T ip, uint16_t port, ops::Address_T ifc)
+	bool RawMcUdp::AddReceiver(ops::Address_T ip, uint16_t const port, ops::Address_T const ifc)
 	{
 		ops::InternalString_T key(ip);
 		key += "::";
@@ -79,7 +79,7 @@ namespace opsbridge {
 		if (_receivers.find(key) != _receivers.end()) return false;
 
 		// Create UdpReceiver or MulticastReceiver
-		uint32_t addr = ops::IPString2Addr(ip);
+		uint32_t const addr = ops::IPString2Addr(ip);
 		if (addr >= 0xE0000000) {
 			// Multicast and above
 			_receivers[key].receiver = ops::Receiver::create(ip, port, _ioService, ifc);
@@ -103,9 +103,9 @@ namespace opsbridge {
 		return true;
 	}
 
-	void RawMcUdp::onNewEvent(ops::Notifier<ops::BytesSizePair>* sender, ops::BytesSizePair byteSizePair)
+	void RawMcUdp::onNewEvent(ops::Notifier<ops::BytesSizePair>* const sender, ops::BytesSizePair byteSizePair)
 	{
-		ops::Receiver* receiver = dynamic_cast<ops::Receiver*>(sender);
+		ops::Receiver* const receiver = dynamic_cast<ops::Receiver*>(sender);
 
 		ops::Address_T localAddr = receiver->getLocalAddress();
 		int localPort = receiver->getLocalPort();
@@ -134,7 +134,7 @@ namespace opsbridge {
 			mess.DataLength = byteSizePair.size;
 
 			// notify client
-			if (_client) _client->onUdpMcMessage(this, mess, byteSizePair.bytes);
+			if (_client != nullptr) { _client->onUdpMcMessage(this, mess, byteSizePair.bytes); }
 		}
 
 		if (_keepRunning) {
@@ -143,7 +143,7 @@ namespace opsbridge {
 		}
 	}
 
-	void RawMcUdp::Write(TUdpMcMessage& mess, char* data)
+	void RawMcUdp::Write(TUdpMcMessage& mess, char* const data)
 	{
 		// For each srcIP,srcPort we create a unique sender (these are the original sender's IP and port).
 		// This enables the receiver of our sent MC and UDP packages, to differentiate
@@ -166,9 +166,9 @@ namespace opsbridge {
 
 			// See if we need to translate some parameters
 			if (_translations.find(translationKey) != _translations.end()) {
-				translation_t t2 = _translations[translationKey];
-				if (t2.dstIp != "") t.dstIp = t2.dstIp;
-				if (t2.dstPort != 0) t.dstPort = t2.dstPort;
+				translation_t const t2 = _translations[translationKey];
+				if (t2.dstIp != "") { t.dstIp = t2.dstIp; }
+				if (t2.dstPort != 0) { t.dstPort = t2.dstPort; }
 				t.Ifc = t2.Ifc;
 				t.ttl = t2.ttl;
 			}
@@ -202,7 +202,7 @@ namespace opsbridge {
 		}
 	}
 
-	void RawMcUdp::AddTranslation(ops::Address_T ip, int port, ops::Address_T newIp, int newPort, ops::Address_T ifc, int ttl)
+	void RawMcUdp::AddTranslation(ops::Address_T ip, int const port, ops::Address_T const newIp, int const newPort, ops::Address_T const ifc, int const ttl)
 	{
 		ops::InternalString_T translationKey(ops::NumberToString(ops::IPString2Addr(ip)));
 		translationKey += "::";
