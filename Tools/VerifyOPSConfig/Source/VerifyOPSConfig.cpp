@@ -20,7 +20,7 @@ bool gWarningGiven = false;
 #define LOG_ERROR(message) { std::cout << message; gErrorGiven = true; } 
 #define LOG_WARN(message) { std::cout << message; gWarningGiven = true; } 
 #define LOG_INFO(message) { std::cout << "Info: " << message; }
-#define LOG_DEBUG(message) { if (bDebug) std::cout << message; } 
+#define LOG_DEBUG(message) { if (bDebug) {std::cout << message;} } 
 
 class CVerifyOPSConfig 
 {
@@ -38,7 +38,7 @@ private:
 	bool bUdpRequireMetadata;
 
 public:
-	CVerifyOPSConfig(std::string filename, bool debug):
+	CVerifyOPSConfig(std::string filename, bool const debug):
 	    bDebug(debug),
 		iNumDomains(0),
 		bUdpRequireMetadata(false)
@@ -136,8 +136,8 @@ public:
 		try {
 			// We have checked the xml-file.
 			// Now do further checks using the ops objects created from the xml-file
-			ops::OPSConfig* cfg = ops::OPSConfig::getConfig(filename.c_str());
-			if (cfg) {
+			ops::OPSConfig* const cfg = ops::OPSConfig::getConfig(filename.c_str());
+			if (cfg != nullptr) {
 				// Trick to get all topics fully initialized
 				std::vector<ops::Domain*> domains = cfg->getRefToDomains();
 				for (unsigned int i = 0; i < domains.size(); i++) {
@@ -160,20 +160,20 @@ public:
 		}
 	}
 
-	void verifyOnlyOneEntry(Configuration& config, std::string name, std::string parent)
+	void verifyOnlyOneEntry(Configuration& config, std::string const name, std::string const parent) const 
 	{
 		if (config.numEntries(name) > 1) {
 			LOG_WARN(">>> " + parent + " should only contain ONE <" + name + ">" << std::endl);
 		}
 	}
 
-	void CheckForUnknown(Configuration& config, std::vector<std::string>& known, std::string msg)
+	void CheckForUnknown(Configuration& config, std::vector<std::string>& known, std::string const msg)
 	{
 		// Check for unknown entries
-		int num = config.numEntries();
+		int const num = config.numEntries();
 		//std::cout << "Num entries=" << num << std::endl;
 		for (int i = 0; i < num; i++) {
-			std::string entryName = config.getNodeName(i);
+			std::string const entryName = config.getNodeName(i);
 			//std::cout << "Name " << i << " = " << entryName << std::endl;
 			// if not a known name, log a warning
 			if (!CheckExist(entryName, known)) {
@@ -182,13 +182,13 @@ public:
 		}
 	}
 
-	void CheckForUnknownAttributes(Configuration& config, std::vector<std::string>& known, std::string msg)
+	void CheckForUnknownAttributes(Configuration& config, std::vector<std::string>& known, std::string const msg)
 	{
 		// Check for unknown attributes
-		int num = config.numAttributes();
+		int const num = config.numAttributes();
 		//std::cout << "Num attributes=" << num << std::endl;
 		for (int i = 0; i < num; i++) {
-			std::string attrName = config.getAttributeName(i);
+			std::string const attrName = config.getAttributeName(i);
 			//std::cout << "Name " << i << " = " << attrName << std::endl;
 			// if not a known name, log a warning
 			if (!CheckExist(attrName, known)) {
@@ -197,13 +197,13 @@ public:
 		}
 	}
 
-	void VerifyNoAttributes(Configuration& config, std::string msg)
+	void VerifyNoAttributes(Configuration& config, std::string const msg)
 	{
 		std::vector<std::string> known = { "" };
 		CheckForUnknownAttributes(config, known, msg);
 	}
 
-	void verifyMCAddress(std::string address, std::string msg)
+	void verifyMCAddress(std::string const address, std::string const msg) const
 	{
 		// check that domainaddress is a MC address
 		if (!ops::isValidMCAddress(address)) {
@@ -211,9 +211,9 @@ public:
 		}
 	}
 
-	void verifyValidAddress(std::string address, std::string linkType, std::string msg)
+	void verifyValidAddress(std::string const address, std::string const linkType, std::string const msg)
 	{
-		if (address == "") return;
+		if (address == "") { return; }
 		if ((linkType == "multicast") || (linkType == "")) {
 			verifyMCAddress(address, msg);
 		}
@@ -225,34 +225,35 @@ public:
 		}
 	}
 
-	void verifyLocalInterface(std::string localIf, std::string msg)
+
+	void verifyLocalInterface(std::string localIf, std::string const msg) const
 	{
-		ops::IOService* ioServ = ops::IOService::create();
-		ops::Address_T subnetIf = ops::doSubnetTranslation(localIf, ioServ);
+		std::unique_ptr<ops::IOService> ioServ(ops::IOService::create());
+		ops::Address_T subnetIf = ops::doSubnetTranslation(localIf, ioServ.get());
 		LOG_INFO(msg + ": localInterface " << localIf << " --> " << subnetIf << std::endl);
 		if (!ops::isValidNodeAddress(subnetIf)) {
 			LOG_ERROR(">>> Invalid Node address '" << subnetIf << "' extracted from localInterface '" << localIf << "'" << std::endl);
 		}
 	}
 
-	bool CheckExist(std::string name, std::vector<std::string>& vect)
+	bool CheckExist(std::string const name, std::vector<std::string>& vect) const
 	{
 		for (unsigned int i = 0; i < vect.size(); i++) {
-			if (vect[i] == name) return true;
+			if (vect[i] == name) { return true; }
 		}
 		return false;
 	}
 
-	bool CheckDuplicate(std::string name, std::vector<std::string>& vect)
+	bool CheckDuplicate(std::string const name, std::vector<std::string>& vect) const
 	{
 		for (unsigned int i = 0; i < vect.size(); i++) {
-			if (vect[i] == name) return true;
+			if (vect[i] == name) { return true; }
 		}
 		vect.push_back(name);
 		return false;
 	}
 
-	bool EraseIfExist(std::string name, std::vector<std::string>& vect)
+	bool EraseIfExist(std::string const name, std::vector<std::string>& vect) const
 	{
 		for (unsigned int i = 0; i < vect.size(); i++) {
 			if (vect[i] == name) {
@@ -265,7 +266,7 @@ public:
 
 	void VerifyDomain(Configuration& config)
 	{
-		std::string domainName, s;
+		std::string domainName;
 		int iNumTopics = 0;
 		vChannels.clear();
 		vTransportTopics.clear();
@@ -296,7 +297,7 @@ public:
 		}
 		verifyOnlyOneEntry(config, "domainID", "<domains> <element> section for domainID '" + domainName + "'");
 
-		std::string domainType = config.getAttribute("type");
+		std::string const domainType = config.getAttribute("type");
 		if ((domainType != "MulticastDomain") && (domainType != "Domain")) {
 			LOG_WARN( ">>> Unknown <element type=" << domainType << "> " << std::endl );
 		}
@@ -321,7 +322,7 @@ public:
 
 		// domainAddress
 		verifyOnlyOneEntry(config, "domainAddress", "<domains> <element> section for domainID '" + domainName + "'");
-		std::string domainAddress = config.getString("domainAddress");
+		std::string const domainAddress = config.getString("domainAddress");
 		if (domainAddress == "") {
 			LOG_WARN( ">>> Missing <domainAddress> for domain: " << domainName << std::endl );
 		}
@@ -332,7 +333,7 @@ public:
 		// metaDataMcPort, optional but necessary if UDP transports are used.
 		// If not set to 0, then DomainAddress::metaDataMcPort should be unique
 		verifyOnlyOneEntry(config, "metaDataMcPort", "<domains> <element> section");
-		std::string metaDataMcPort = config.getString("metaDataMcPort");
+		std::string const metaDataMcPort = config.getString("metaDataMcPort");
 		LOG_DEBUG("metaDataMcPort: '" << metaDataMcPort << "', parsed as: " << config.parseInt(metaDataMcPort, 9494) << std::endl );
 		if (config.parseInt(metaDataMcPort, 9494) != 0) {
 			if (CheckDuplicate(domainAddress + "::" + metaDataMcPort, vDomainMeta)) {
@@ -343,7 +344,7 @@ public:
 		// debugMcPort, optional
 		// If not set to 0, then DomainAddress::debugMcPort should be unique
 		verifyOnlyOneEntry(config, "debugMcPort", "<domains> <element> section");
-		std::string debugMcPort = config.getString("debugMcPort");
+		std::string const debugMcPort = config.getString("debugMcPort");
 		LOG_DEBUG("debugMcPort: '" << debugMcPort << "', parsed as: " << config.parseInt(debugMcPort, 0) << std::endl);
 		if (config.parseInt(debugMcPort, 0) != 0) {
 			if (CheckDuplicate(domainAddress + "::" + debugMcPort, vDomainMeta)) {
@@ -353,7 +354,7 @@ public:
 
 		// localInterface, optional
 		verifyOnlyOneEntry(config, "localInterface", "<domains> <element> section for domainID '" + domainName + "'");
-		std::string localIf = config.getString("localInterface");
+		std::string const localIf = config.getString("localInterface");
 		if (localIf.size() > 0) {
 			verifyLocalInterface(localIf, "Domain '" + domainName + "'");
 		}
@@ -438,10 +439,8 @@ public:
 		LOG_DEBUG( " # Topics: " << iNumTopics << std::endl );
 	}
 
-	void VerifyChannel(Configuration& config, std::string domainName)
+	void VerifyChannel(Configuration& config, std::string const domainName)
 	{
-		std::string s;
-
 		//must have a unique channel name. Check first to get a name to use in later logging
 		std::string channelName = config.getString("name");
 		if (channelName == "") {
@@ -475,9 +474,9 @@ public:
 		verifyOnlyOneEntry(config, "address", "<channels> <element> section in domain: " + domainName + " with name: " + channelName);
 		verifyOnlyOneEntry(config, "port", "<channels> <element> section in domain: " + domainName + " with name: " + channelName);
 
-		std::string linkType = config.getString("linktype");
-		std::string address = config.getString("address");
-		std::string port = config.getString("port");
+		std::string const linkType = config.getString("linktype");
+		std::string const address = config.getString("address");
+		std::string const port = config.getString("port");
 
 		// linktype
 		if (linkType == "") {
@@ -515,7 +514,7 @@ public:
 		verifyValidAddress(address, linkType, "for channel '" + channelName + "' in domain '" + domainName + "'");
 
 		verifyOnlyOneEntry(config, "localInterface", "<channels> <element> section in domain: " + domainName + " with name: " + channelName);
-		std::string localIf = config.getString("localInterface");
+		std::string const localIf = config.getString("localInterface");
 		if (localIf.size() > 0) {
 			verifyLocalInterface(localIf, "Domain '" + domainName + "', Channel '" + channelName + "'");
 		}
@@ -525,7 +524,7 @@ public:
 		verifyOnlyOneEntry(config, "inSocketBufferSize", "<channels> <element> section in domain: " + domainName + " with name: " + channelName);
 	}
 
-	void VerifyTransport(Configuration& config, std::string domainName)
+	void VerifyTransport(Configuration& config, std::string const domainName)
 	{
 		///must have an existing channel name. Check first to have a name for later logging
 		std::string channelName = config.getString("channelID");
@@ -564,7 +563,7 @@ public:
 			CheckForUnknown(config, known, "in <transports> <element> <topics> node for domain: " + domainName + "channel: " + channelName);
 
 			for (int iTopics = 0; iTopics < config.numEntries("element"); iTopics++) {
-				std::string topicName = config.getString("element", iTopics);
+				std::string const topicName = config.getString("element", iTopics);
 				LOG_DEBUG( "    topicName: " << topicName << std::endl );
 				if (CheckDuplicate(topicName, vTransportTopics)) {
 					LOG_WARN( ">>> Duplicate topic detected in transport for domain '" << domainName << "'. Topic name '" << topicName << "' already specified." << std::endl );
@@ -574,9 +573,9 @@ public:
 		}
 	}
 
-	void VerifyTopic(Configuration& config, std::string domainName)
+	void VerifyTopic(Configuration& config, std::string const domainName)
 	{
-		std::string topicName, dataType, s;
+		std::string topicName, dataType;
 		uint64_t sampleMaxSize;
 
 		//<element type = "Topic">
@@ -639,16 +638,16 @@ public:
 		}
 
 		//
-		bool topicDefinedInTransports = EraseIfExist(topicName, vTransportTopics);
+		bool const topicDefinedInTransports = EraseIfExist(topicName, vTransportTopics);
 
 		verifyOnlyOneEntry(config, "transport", "<topics> <element> section in domain: " + domainName + " topic: " + topicName);
 		verifyOnlyOneEntry(config, "address", "<topics> <element> section in domain: " + domainName + " topic: " + topicName);
 		verifyOnlyOneEntry(config, "port", "<topics> <element> section in domain: " + domainName + " topic: " + topicName);
 
 		// transport optional
-		std::string linkType = config.getString("transport");
-		std::string address = config.getString("address");
-		std::string port = config.getString("port");
+		std::string const linkType = config.getString("transport");
+		std::string const address = config.getString("address");
+		std::string const port = config.getString("port");
 
 		if (topicDefinedInTransports) {
 			if (linkType != "") {
@@ -769,13 +768,13 @@ int main(int argc, char* argv[])
 
 		CVerifyOPSConfig verify(infile, debug);
 
-		if ((!gErrorGiven) && (!gWarningGiven)) std::cout << "Check OK  " << std::endl;
+		if ((!gErrorGiven) && (!gWarningGiven)) { std::cout << "Check OK  " << std::endl; }
 
 		std::cout << std::endl;
 	}
 
-	if (gErrorGiven) return 10;
-	if (gWarningGiven) return 1;
+	if (gErrorGiven) { return 10; }
+	if (gWarningGiven) { return 1; }
 	return 0;
 }
 
