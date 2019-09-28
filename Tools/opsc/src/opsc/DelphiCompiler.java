@@ -506,6 +506,8 @@ public class DelphiCompiler extends opsc.Compiler
             String fieldType = getLastPart(field.getType());
             if (field.getType().equals("string")) {
                 ret += tab(3) + fieldName + " = " + languageType(fieldType) + "(" + field.getValue().replace("\"", "'") + ");" + endl();
+            } else if (field.getType().equals("float") || (field.getType().equals("double"))) {
+                ret += tab(3) + fieldName + " = " + field.getValue() + ";" + endl();
             } else {
                 ret += tab(3) + fieldName + " = " + languageType(fieldType) + "(" + field.getValue() + ");" + endl();
             }
