@@ -1202,6 +1202,8 @@ package body VerifySerDes_Pa is
       Log("  VERFIFY == OK ");
     end if;
     Log("");
+    Log("Sleeping for 5 seconds...");
+    delay 5.0;
     GNAT.Ctrl_C.Uninstall_Handler;
   exception
     when others =>

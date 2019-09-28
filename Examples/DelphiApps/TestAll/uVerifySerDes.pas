@@ -30,51 +30,58 @@ const
 
 var
   Logger : TLogger;
+  DetectedError : Boolean;
 
 procedure Log(str : string);
 begin
   if Assigned(Logger) then Logger(str);
 end;
 
+procedure LogError(str : string);
+begin
+  DetectedError := True;
+  if Assigned(Logger) then Logger(str);
+end;
+
 procedure AssertNEQ(val, exp : Pointer; str : string = '');
 begin
-  if val = exp then Log('Failed: ' + str + ', value= ' + IntToHex(UInt64(val), 8) + ', expected= ' + IntToHex(UInt64(exp), 8));
+  if val = exp then LogError('Failed: ' + str + ', value= ' + IntToHex(UInt64(val), 8) + ', expected= ' + IntToHex(UInt64(exp), 8));
 end;
 
 function AssertEQ(val, exp : Boolean; str : string = '') : Boolean; overload;
 begin
   Result := val;
-  if val <> exp then Log('Failed: ' + str + ', value= ' + ToStr[val] + ', expected= ' + ToStr[exp]);
+  if val <> exp then LogError('Failed: ' + str + ', value= ' + ToStr[val] + ', expected= ' + ToStr[exp]);
 end;
 
 procedure AssertEQ(val, exp : AnsiString; str : string = ''); overload;
 begin
-  if val <> exp then Log('Failed: ' + str + ', value= ' + string(val) + ', expected= ' + string(exp));
+  if val <> exp then LogError('Failed: ' + str + ', value= ' + string(val) + ', expected= ' + string(exp));
 end;
 
 procedure AssertEQ(val, exp : Int64; str : string = ''); overload;
 begin
-  if val <> exp then Log('Failed: ' + str + ', value= ' + IntToStr(val) + ', expected= ' + IntToStr(exp));
+  if val <> exp then LogError('Failed: ' + str + ', value= ' + IntToStr(val) + ', expected= ' + IntToStr(exp));
 end;
 
 procedure AssertEQ(val, exp : Double; str : string = ''); overload;
 begin
-  if val <> exp then Log('Failed: ' + str + ', value= ' + FloatToStr(val) + ', expected= ' + FloatToStr(exp));
+  if val <> exp then LogError('Failed: ' + str + ', value= ' + FloatToStr(val) + ', expected= ' + FloatToStr(exp));
 end;
 
 procedure AssertEQ(val, exp : ChildData.Order; str : string = ''); overload;
 begin
-  if val <> exp then Log('Failed: ' + str);
+  if val <> exp then LogError('Failed: ' + str);
 end;
 
 procedure AssertEQ(val, exp : Definitions.Command; str : string = ''); overload;
 begin
-  if val <> exp then Log('Failed: ' + str);
+  if val <> exp then LogError('Failed: ' + str);
 end;
 
 procedure AssertEQ(val : Boolean; str : string = ''); overload;
 begin
-  if not val then Log('Failed: ' + str);
+  if not val then LogError('Failed: ' + str);
 end;
 
 // -----------------------------------------------------------------------------
@@ -529,6 +536,8 @@ var
   buf : TByteBuffer;
   ao : TOPSArchiverOut;
 begin
+  DetectedError := False;
+
   OpsLogger := TStdOutLogger.Create;
   Logger := Log;
 
@@ -580,7 +589,7 @@ begin
 
   participant := TParticipant.getInstance('TestAllDomain');
   if not Assigned(participant) then begin
-    Log('Create participant failed. do you have ops_config.xml on your rundirectory?');
+    LogError('Create participant failed. do you have ops_config.xml on your rundirectory?');
     Exit;
   end;
   participant.addTypeSupport(TestAllTypeFactory.Create);
@@ -616,7 +625,7 @@ begin
   Log('Finished');
 
   Log('Waiting for more data... (Press Ctrl-C to terminate or wait 60 seconds)');
-  Limit := GetTickCount64 + 60000;
+  Limit := GetTickCount + 60000;
   while True do begin
     if (sub.waitForNewData(100)) then begin
       sub.aquireMessageLock;
@@ -629,8 +638,19 @@ begin
       checkObjects(cd3, cd1);
       Log('Data check done');
     end;
-    if Limit < GetTickCount64 then Break;
+    if Limit < GetTickCount then Break;
   end;
+
+  Log('');
+  if DetectedError then begin
+    Log('T E S T   F A I L E D');
+  end else begin
+    Log('T E S T   O K');
+  end;
+  Log('');
+
+  Log('Sleeping for 5 seconds...');
+  Sleep(5000);
 
   FreeAndNil(pub);
   FreeAndNil(sub);
