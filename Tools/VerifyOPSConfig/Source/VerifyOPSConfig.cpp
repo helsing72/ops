@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <vector>
+#include <memory>
 
 #include "OPSConfig.h"
 #include "PrintArchiverOut.h"
@@ -11,7 +12,7 @@
 
 #include "Configuration.h"
 
-const std::string sVersion = "Version 2019-05-28";
+const std::string sVersion = "Version 2019-09-28";
 
 
 bool gErrorGiven = false;

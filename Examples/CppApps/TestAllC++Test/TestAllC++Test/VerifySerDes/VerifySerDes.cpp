@@ -12,6 +12,7 @@
 #include <iostream>
 #include <fstream>
 #include <signal.h>
+#include <thread>
 
 #include "TestAll/Definitions.h"
 TestAll::Definitions::Command cmd = TestAll::Definitions::Command::PAUSE;
