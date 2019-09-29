@@ -18,29 +18,43 @@
 * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "memory_pool.h"
+#include "OPSTypeDefs.h"
 #include "OPSConstants.h"
-
-#include "ReceiveDataPool.h"
+#include "memory_pool.h"
+#include "DataSegmentPool.h"
 
 namespace ops {
 
+	///TODO add an allocator as parameter 
 	static memory_pools::memory_pool_exp<OPSConstants::PACKET_MAX_SIZE> rcvPool(20);
 
-	ReceiveDataPool& ReceiveDataPool::Instance()
+	DataSegmentPool& DataSegmentPool::Instance()
 	{
-		static ReceiveDataPool inst;
+		static DataSegmentPool inst;
 		return inst;
 	};
 
-	char* ReceiveDataPool::getEntry()
+	char* DataSegmentPool::getEntry()
 	{
 		return rcvPool.getEntry();
 	}
 
-	void ReceiveDataPool::returnEntry(char*& ptr)
+	void DataSegmentPool::returnEntry(char*& ptr)
 	{
 		rcvPool.returnEntry(ptr);
 	}
+
+#ifndef REPLACE_NETWORK_ALLOC
+	char* DataSegmentPool::Allocate(unsigned int size)
+	{
+		return new char[size];
+	}
+
+	void DataSegmentPool::Deallocate(char*& ptr)
+	{
+		delete[] ptr;
+		ptr = nullptr;
+	}
+#endif
 
 }

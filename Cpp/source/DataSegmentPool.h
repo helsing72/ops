@@ -22,11 +22,23 @@
 
 namespace ops {
 
-	class ReceiveDataPool {
+	class DataSegmentPool {
 	public:
-		static ReceiveDataPool& Instance();
+		static DataSegmentPool& Instance();
+
 		char* getEntry();
 		void returnEntry(char*& ptr);
+
+		DataSegmentPool(DataSegmentPool const&) = delete;
+		DataSegmentPool(DataSegmentPool&&) = delete;
+		DataSegmentPool& operator =(DataSegmentPool&&) = delete;
+		DataSegmentPool& operator =(DataSegmentPool const&) = delete;
+
+		static char* Allocate(unsigned int size);
+		static void Deallocate(char*& ptr);
+
+	private:
+		DataSegmentPool() = default;
 	};
 
 }
