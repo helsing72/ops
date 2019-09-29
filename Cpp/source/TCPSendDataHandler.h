@@ -54,8 +54,8 @@ namespace ops
 			char buffer[OPSConstants::PACKET_MAX_SIZE];
 			bool sentAtConnect = false;
 
-			///TODO @ creation get buffer from ReceiveDataPool
-			///TODO @ deletion return buffer to ReceiveDataPool
+			///TODO @ creation get buffer from DataSegmentPool
+			///TODO @ deletion return buffer to DataSegmentPool
 		};
 
 	public:

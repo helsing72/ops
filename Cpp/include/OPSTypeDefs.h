@@ -74,6 +74,9 @@
 //#define REPLACE_OPS_CONFIG		// Removes the OPSConfig file reader from library so you can implement 
 									// your own for targets without a filesystem.
 
+//#define REPLACE_NETWORK_ALLOC		// Removes the ops::DataSegmentPool::Allocate/Deallocate from library so you
+									// can use our own implementation.
+
 #define OPS_ENABLE_DEBUG_HANDLER	// Adds some debug functionality
 
 // -----------------------------------------------------------------------------

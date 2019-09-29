@@ -28,13 +28,14 @@
 #include "ReceiverFactory.h"
 #include "CommException.h"
 #include "TCPClientBase.h"
+#include "DataSegmentPool.h"
 
 namespace ops
 {
     ///Constructor.
     ReceiveDataHandler::ReceiveDataHandler(Topic top, Participant& part, Receiver* recv) :
 		receiver(recv),
-		memMap(top.getSampleMaxSize() / OPSConstants::PACKET_MAX_SIZE + 1, OPSConstants::PACKET_MAX_SIZE),
+		memMap(top.getSampleMaxSize() / OPSConstants::PACKET_MAX_SIZE + 1, OPSConstants::PACKET_MAX_SIZE, &DataSegmentAllocator::Instance()),
 		sampleMaxSize(top.getSampleMaxSize()),
 		participant(part), message(nullptr),
 		currentMessageSize(0),

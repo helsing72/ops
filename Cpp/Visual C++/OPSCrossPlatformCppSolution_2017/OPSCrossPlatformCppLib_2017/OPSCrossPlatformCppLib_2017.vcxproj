@@ -373,6 +373,7 @@
     <ClInclude Include="..\..\..\source\BasicWarning.h" />
     <ClInclude Include="..\..\..\source\BoostDeadlineTimerImpl.h" />
     <ClInclude Include="..\..\..\source\BoostIOServiceImpl.h" />
+    <ClInclude Include="..\..\..\source\DataSegmentPool.h" />
     <ClInclude Include="..\..\..\source\DefaultOPSConfigImpl.h" />
     <ClInclude Include="..\..\..\source\McSendDataHandler.h" />
     <ClInclude Include="..\..\..\source\McUdpSendDataHandler.h" />
@@ -380,7 +381,6 @@
     <ClInclude Include="..\..\..\source\MultiThreadPool.h" />
     <ClInclude Include="..\..\..\source\OPSObjectFactoryImpl.h" />
     <ClInclude Include="..\..\..\source\ReceiveDataHandlerFactory.h" />
-    <ClInclude Include="..\..\..\source\ReceiveDataPool.h" />
     <ClInclude Include="..\..\..\source\ReceiverFactory.h" />
     <ClInclude Include="..\..\..\source\SendDataHandlerFactory.h" />
     <ClInclude Include="..\..\..\source\TCPBoostConnection.h" />
@@ -459,6 +459,7 @@
     <ClCompile Include="..\..\..\source\Channel.cpp" />
     <ClCompile Include="..\..\..\source\Compatibility.cpp" />
     <ClCompile Include="..\..\..\source\DataNotifier.cpp" />
+    <ClCompile Include="..\..\..\source\DataSegmentPool.cpp" />
     <ClCompile Include="..\..\..\source\DeadlineTimer.cpp" />
     <ClCompile Include="..\..\..\source\DebugHandler.cpp" />
     <ClCompile Include="..\..\..\source\Domain.cpp" />
@@ -480,7 +481,6 @@
     <ClCompile Include="..\..\..\source\Publisher.cpp" />
     <ClCompile Include="..\..\..\source\ReceiveDataHandler.cpp" />
     <ClCompile Include="..\..\..\source\ReceiveDataHandlerFactory.cpp" />
-    <ClCompile Include="..\..\..\source\ReceiveDataPool.cpp" />
     <ClCompile Include="..\..\..\source\Receiver.cpp" />
     <ClCompile Include="..\..\..\source\ReceiverFactory.cpp" />
     <ClCompile Include="..\..\..\source\RequestReply.cpp" />

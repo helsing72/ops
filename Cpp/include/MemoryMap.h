@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -42,43 +43,65 @@ public:
 	const char* what() const NOEXCEPT { return message.c_str(); }
 };
 
+// TODO: Replace this with a C++ allocator??
+struct MemoryMapAllocator {
+	virtual char* Allocate(unsigned int size) = 0;
+	virtual void Deallocate(char*& ptr) = 0;
+};
+
 class OPS_EXPORT MemoryMap
 {
 public:
 	MemoryMap() :
-		width(0),
-		height(0),
+		no_of_segments(0),
+		segment_size(0),
 		dataCreator(false)
 	{
 		bytes = small_width_vector;
 		bytes[0] = nullptr;
 	}
-	MemoryMap(int width_, int height_): 
-		  width(width_),
-		  height(height_),
-		  dataCreator(true)
+	MemoryMap(int width, int height, MemoryMapAllocator* mma = nullptr): 
+		segment_allocator(mma),
+		no_of_segments(width),
+		segment_size(height),
+		dataCreator(true)
 	{
-		if (width <= smallWidthOpt) {
+		if (no_of_segments <= smallWidthOpt) {
 			// For small maps, use our internal vector as segment pointer array
 			bytes = small_width_vector;
 		} else {
 			// For larger maps, allocate segment pointer array
-			bytes = new char*[width];
+			bytes = new char*[no_of_segments];
 		}
 		// Allocate all segments in one chunk
-		bytes[0] = new char[width*height];
+		if (segment_allocator != nullptr) {
+			bytes[0] = segment_allocator->Allocate(no_of_segments*segment_size);
+		} else {
+			bytes[0] = new char[no_of_segments*segment_size];
+		}
 		// Setup segment pointers to point into the allocated chunk
-		for(int i = 1; i < width; i++) {
-			bytes[i] = bytes[i-1] + height;
+		for(int i = 1; i < no_of_segments; i++) {
+			bytes[i] = bytes[i-1] + segment_size;
 		}
 	}
 	MemoryMap(char* segment, int size):
-		  width(1), 
-		  height(size),
+		  no_of_segments(1), 
+		  segment_size(size),
 		  dataCreator(false)
 	{
 		bytes = small_width_vector;
 		bytes[0] = segment;
+	}
+	~MemoryMap()
+	{
+		if (dataCreator) {
+			if (segment_allocator != nullptr) {
+				segment_allocator->Deallocate(bytes[0]);
+			} else {
+				delete[] bytes[0];
+			}
+		}
+		if (no_of_segments > smallWidthOpt) { delete[] bytes; }
 	}
 	MemoryMap(MemoryMap const&) = delete;
 	MemoryMap(MemoryMap&&) = delete;
@@ -89,33 +112,33 @@ public:
 	// Fails if object is created as a data owner
 	bool set(char* segment, int size)
 	{
-		if ((width > 1) || dataCreator) return false;
-		width = 1;
-		height = size;
+		if ((no_of_segments > 1) || dataCreator) return false;
+		no_of_segments = 1;
+		segment_size = size;
 		bytes[0] = segment;
 		return true;
 	}
 
 	char* getSegment(int i)
 	{
-		if (i >= width) throw MemoryMapException("Allocated MemoryMap too small!!!");
+		if (i >= no_of_segments) throw MemoryMapException("Allocated MemoryMap too small!!!");
 		return bytes[i];
 	}
-	int getSegmentSize()
+	int getSegmentSize() const
 	{
-		return height;
+		return segment_size;
 	}
-	int getNrOfSegments()
+	int getNrOfSegments() const
 	{
-		return width;
+		return no_of_segments;
 	}
-	int getTotalSize()
+	int getTotalSize() const
 	{
-		return width*height;
+		return no_of_segments*segment_size;
 	}
 
 	///Makes a copy of the content of this memory to dest. startIndex and endIndex are memory map relative. 
-	bool copyToBytes(char* dest, int startIndex, int endIndex )
+	bool copyToBytes(char* dest, int startIndex, int endIndex) const
 	{
 		int bytesToCopy = endIndex - startIndex + 1;
 
@@ -126,15 +149,10 @@ public:
 		return true;
 	}
 
-	~MemoryMap()
-	{
-		if (dataCreator) delete[] bytes[0];
-		if (width > smallWidthOpt) delete[] bytes;
-	}
-
 private:
-	int width;
-	int height;
+	MemoryMapAllocator* segment_allocator = nullptr;
+	int no_of_segments;
+	int segment_size;
 	bool dataCreator;
 	char** bytes;
 	static const int smallWidthOpt = 4;

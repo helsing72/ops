@@ -92,6 +92,8 @@ set(LIB_OPS_CORE_SRCS
   ${OPS_SRC_PATH}/Channel.cpp
   ${OPS_SRC_PATH}/Compatibility.cpp
   ${OPS_SRC_PATH}/DataNotifier.cpp
+  ${OPS_SRC_PATH}/DataSegmentPool.cpp
+  ${OPS_SRC_PATH}/DataSegmentPool.h
   ${OPS_SRC_PATH}/DebugHandler.cpp
   ${OPS_SRC_PATH}/DefaultOPSConfigImpl.h
   ${OPS_SRC_PATH}/Domain.cpp
@@ -115,8 +117,6 @@ set(LIB_OPS_CORE_SRCS
   ${OPS_SRC_PATH}/ReceiveDataHandler.cpp
   ${OPS_SRC_PATH}/ReceiveDataHandlerFactory.cpp
   ${OPS_SRC_PATH}/ReceiveDataHandlerFactory.h
-  ${OPS_SRC_PATH}/ReceiveDataPool.cpp
-  ${OPS_SRC_PATH}/ReceiveDataPool.h
   ${OPS_SRC_PATH}/ReceiverFactory.cpp
   ${OPS_SRC_PATH}/ReceiverFactory.h
   ${OPS_SRC_PATH}/RequestReply.cpp

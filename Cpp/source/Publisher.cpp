@@ -25,12 +25,13 @@
 #include "OPSArchiverOut.h"
 #include "OPSConstants.h"
 #include "TimeHelper.h"
+#include "DataSegmentPool.h"
 
 namespace ops
 {
     Publisher::Publisher(Topic t) :
     topic(t),
-    memMap(t.getSampleMaxSize() / OPSConstants::PACKET_MAX_SIZE + 1, OPSConstants::PACKET_MAX_SIZE),
+    memMap(t.getSampleMaxSize() / OPSConstants::PACKET_MAX_SIZE + 1, OPSConstants::PACKET_MAX_SIZE, &DataSegmentAllocator::Instance()),
     currentPublicationID(0),
     name(""),
     key(""),

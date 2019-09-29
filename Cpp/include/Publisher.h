@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018 Lennart Andersson.
+* Copyright (C) 2018-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -60,7 +60,7 @@ protected:
 	void write(OPSObject* data);
 
 	// Called from SendDataHandler (TCPServer)
-	virtual void onNewEvent(Notifier<ConnectStatus>* sender, ConnectStatus arg)
+	virtual void onNewEvent(Notifier<ConnectStatus>* sender, ConnectStatus arg) override
 	{
 		UNUSED(sender)
 		// Forward status to all connected
@@ -86,7 +86,7 @@ private:
 	volatile int64_t _dbgSkip;
 	Lockable _dbgLock;
 	std::vector<OPSObject*> _replace;
-	virtual void onRequest(opsidls::DebugRequestResponseData& req, opsidls::DebugRequestResponseData& resp);
+	virtual void onRequest(opsidls::DebugRequestResponseData& req, opsidls::DebugRequestResponseData& resp) override;
 	void internalWrite(OPSObject* data);
 #endif
 

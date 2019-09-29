@@ -292,7 +292,8 @@ namespace ops
 			return shortStringBuffer;
 		}
 
-		// Safety check
+		// This is just a sanity check so that we don't try to allocate a 
+		// lot of memory below. ReadChars does the actual check on the exact limits.
 		if (length > memMap.getTotalSize()) { throw data_corrupted(); }
 
         char* text = new char[length];

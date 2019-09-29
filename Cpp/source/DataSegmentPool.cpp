@@ -45,12 +45,18 @@ namespace ops {
 	}
 
 #ifndef REPLACE_NETWORK_ALLOC
-	char* DataSegmentPool::Allocate(unsigned int size)
+	MemoryMapAllocator& DataSegmentAllocator::Instance()
+	{
+		static DataSegmentAllocator inst;
+		return inst;
+	}
+
+	char* DataSegmentAllocator::Allocate(unsigned int size)
 	{
 		return new char[size];
 	}
 
-	void DataSegmentPool::Deallocate(char*& ptr)
+	void DataSegmentAllocator::Deallocate(char*& ptr)
 	{
 		delete[] ptr;
 		ptr = nullptr;

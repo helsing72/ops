@@ -20,8 +20,11 @@
 
 #pragma once
 
+#include "MemoryMap.h"
+
 namespace ops {
 
+	// Pool with fixed sized data segments (OPSConstants::PACKET_MAX_SIZE)
 	class DataSegmentPool {
 	public:
 		static DataSegmentPool& Instance();
@@ -34,11 +37,24 @@ namespace ops {
 		DataSegmentPool& operator =(DataSegmentPool&&) = delete;
 		DataSegmentPool& operator =(DataSegmentPool const&) = delete;
 
-		static char* Allocate(unsigned int size);
-		static void Deallocate(char*& ptr);
-
 	private:
 		DataSegmentPool() = default;
+	};
+
+	class DataSegmentAllocator : MemoryMapAllocator {
+	public:
+		static MemoryMapAllocator& Instance();
+
+		virtual char* Allocate(unsigned int size) override;
+		virtual void Deallocate(char*& ptr) override;
+
+		DataSegmentAllocator(DataSegmentAllocator const&) = delete;
+		DataSegmentAllocator(DataSegmentAllocator&&) = delete;
+		DataSegmentAllocator& operator =(DataSegmentAllocator&&) = delete;
+		DataSegmentAllocator& operator =(DataSegmentAllocator const&) = delete;
+
+	private:
+		DataSegmentAllocator() = default;
 	};
 
 }
