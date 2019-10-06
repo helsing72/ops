@@ -25,6 +25,12 @@ public:
 	DebugListener(ops::Participant* const part) : _part(part), _sub(nullptr) {}
 	~DebugListener() { removeSubscriber(); }
 
+	DebugListener() = default;
+	DebugListener(DebugListener const&) = delete;
+	DebugListener(DebugListener&&) = delete;
+	DebugListener& operator =(DebugListener&&) = delete;
+	DebugListener& operator =(DebugListener const&) = delete;
+
 	void Start()
 	{
 		setupSubscriber();
@@ -42,7 +48,7 @@ public:
 			opsidls::DebugRequestResponseData* const data = dynamic_cast<opsidls::DebugRequestResponseData*>(sub->getMessage()->getData());
 			if (data != nullptr) {
 				// Skip All requests
-				if (data->Command != 0) return;
+				if (data->Command != 0) { return; }
 
 				// Only responses come here
 
@@ -61,7 +67,6 @@ public:
 							std::cout << "    " << data->Param3[i] << std::endl;
 						}
 						std::cout << std::endl;
-						//data->serialize(&prt);
 					}
 					if (data->Result1 == 50) {
 						std::cout << "Response on Command 50:" << std::endl;
@@ -103,17 +108,17 @@ private:
 
 	void removeSubscriber()
 	{
-		if (_sub != nullptr) delete _sub;
+		if (_sub != nullptr) { delete _sub; }
 		_sub = nullptr;
 	}
 
-	ops::Participant* _part;
-	ops::Subscriber* _sub;
+	ops::Participant* _part = nullptr;
+	ops::Subscriber* _sub = nullptr;
 
 	opsidls::DebugRequestResponseData _request;
 };
 
-void CommandLoop(ops::Participant* part)
+void CommandLoop(const ops::Participant* part)
 {
 	request.setKey("Pizza");
 	request.Entity = 2;	// Publisher
@@ -158,7 +163,7 @@ void Usage()
 }
 
 
-int main(int argc, char* argv[])
+int main(const int argc, const char* argv[])
 {
 	// Default values
 	bool printUsage = false;
@@ -172,7 +177,7 @@ int main(int argc, char* argv[])
 	int64_t* int64p = nullptr;
 
 	for (int i = 1; i < argc; i++) {
-		std::string arg = argv[i];
+		std::string const arg = argv[i];
 		if (arg == "?") {
 			printUsage = true;
 
@@ -268,8 +273,6 @@ int main(int argc, char* argv[])
 		DebugListener listener(participant);
 		listener.Start();
 
-//		CommandLoop(participant);
-	
 		ops::Topic const top = participant->createDebugTopic();
 		opsidls::DebugRequestResponseDataPublisher pub(top);
 		pub.start();

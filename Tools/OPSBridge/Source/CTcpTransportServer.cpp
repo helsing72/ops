@@ -119,7 +119,7 @@ void CTcpTransportServer::Run()
 		    // Accept a client
 			socklen_t nLen = (socklen_t)sizeof(SockAddr);
 			m_socketCom = accept(m_listenSocket, (sockaddr*)&SockAddr, &nLen);
-		    if (m_socketCom != INVALID_SOCKET) break;
+			if (m_socketCom != INVALID_SOCKET) { break; }
 			BL_ERROR("# [ TcpServer ] accept() failed with error: %d\n", GetError());
 
 			// Wait a short while and then try again
@@ -136,13 +136,13 @@ void CTcpTransportServer::Run()
 			setsockopt(m_socketCom, IPPROTO_TCP, TCP_NODELAY, (char*)&optVal, optLen);
 
 			m_Connected = true;
-			if (m_user != nullptr) m_user->onConnect(this);
+			if (m_user != nullptr) { m_user->onConnect(this); }
 
 			// Handle data from other side while connected
 			HandleData();
 
 			m_Connected = false;
-			if (m_user != nullptr) m_user->onDisconnect(this);
+			if (m_user != nullptr) { m_user->onDisconnect(this); }
 
 			BL_INFO("# [ TcpServer ] disconnected from: %s, Port: %d\n", remoteIP.c_str(), SockAddr.sin_port);
 		}

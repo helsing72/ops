@@ -76,7 +76,7 @@ namespace opsbridge {
 		/// Seem to be necessary for MC atleast
 
 		// If receiver already set up, return false
-		if (_receivers.find(key) != _receivers.end()) return false;
+		if (_receivers.find(key) != _receivers.end()) { return false; }
 
 		// Create UdpReceiver or MulticastReceiver
 		uint32_t const addr = ops::IPString2Addr(ip);

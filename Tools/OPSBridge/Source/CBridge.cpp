@@ -137,7 +137,7 @@ void CBridge::stopAllSubscribers()
 	}
 }
 
-void CBridge::startSubscriber(ops::ObjectName_T topic)
+void CBridge::startSubscriber(ops::ObjectName_T const topic)
 {
 	ops::ObjectName_T domainName, topicName;
 	ops::utilities::splitTopicName(topic, domainName, topicName);
@@ -146,7 +146,7 @@ void CBridge::startSubscriber(ops::ObjectName_T topic)
 
 	for (uint32_t i = 0; i < m_subscribers.size(); i++) {
 		if ((m_subscribers[i].domainName == domainName) && (m_subscribers[i].topicName == topicName)) {
-			if (m_subscribers[i].stopCounter > 0) m_subscribers[i].stopCounter--;
+			if (m_subscribers[i].stopCounter > 0) { m_subscribers[i].stopCounter--; }
 			if (!m_subscribers[i].started && (m_subscribers[i].stopCounter == 0)) {
 				m_subscribers[i].sub->start();
 				m_subscribers[i].started = true;
@@ -159,7 +159,7 @@ void CBridge::startAllSubscribers()
 {
 	ops::SafeLock lock(&m_subscriberLock);
 	for (uint32_t i = 0; i < m_subscribers.size(); i++) {
-		if (m_subscribers[i].stopCounter > 0) m_subscribers[i].stopCounter--;
+		if (m_subscribers[i].stopCounter > 0) { m_subscribers[i].stopCounter--; }
 		if (!m_subscribers[i].started && (m_subscribers[i].stopCounter == 0)) {
 			m_subscribers[i].sub->start();
 			m_subscribers[i].started = true;
@@ -184,7 +184,7 @@ void CBridge::removeAllSubscribers()
 	for (std::vector<TSubscriberEntry>::size_type i = 0; i < m_subscribers.size(); i++) {
 		// Stop subscriber first. This is synchronized so that the BOOST thread can't 
 		// be in onNewData() for this subscriber. But it can be for other subscribers.
-		if (m_subscribers[i].started) m_subscribers[i].sub->stop();
+		if (m_subscribers[i].started) { m_subscribers[i].sub->stop(); }
 
 		// Therfore we don't delete the entry, we just set it to nullptr since we don't
 		// want to delete indexes in case onNewData() loops on the list.
@@ -221,8 +221,8 @@ void CBridge::onNewData(ops::DataNotifier* const subscriber)
 				break;
 			}
 		}
-		if (idx < 0) return;
-		if (m_subscribers[idx].sub == nullptr) return;		// In case removed above
+		if (idx < 0) { return; }
+		if (m_subscribers[idx].sub == nullptr) { return; }		// In case removed above
 
 		// Check if we should skip message 
 		if (m_skipMessages) {
@@ -255,9 +255,9 @@ void CBridge::onNewData(ops::DataNotifier* const subscriber)
 // NOTE called from the reader thread (in OPS (actually BOOST))
 void CBridge::queueMessage(ops::OPSMessage* const mess, TSubscriberEntry& subEntry)
 {
-	BridgeConfig::THandlingType const ht = (m_isConnected) ?  subEntry.tc.eConnectedHandling : subEntry.tc.eDisconnectedHandling;
+	BridgeConfig::THandlingType const ht = (m_isConnected) ? subEntry.tc.eConnectedHandling : subEntry.tc.eDisconnectedHandling;
 
-	if (ht == BridgeConfig::discard) return;
+	if (ht == BridgeConfig::discard) { return; }
 
 ///TODO Check buffersize and decide if that should alter the handling type
 	if ((uint64_t)m_bytesBuffered > m_maxBufferSize) {
@@ -334,7 +334,7 @@ bool CBridge::getHighestPrioMessage(TMessageEntry& me)
 		while (m_queue[prio].size() > 0) {
 			me = m_queue[prio].front();
 			m_queue[prio].pop_front();
-			if (me.mess != nullptr) return true;
+			if (me.mess != nullptr) { return true; }
 		}
 	}
 	me.mess = nullptr;
@@ -351,9 +351,9 @@ void CBridge::clearQueuedMessages()
 
 	for (int prio = HIGHEST_PRIO; prio >= 0; prio--) {
 		while (m_queue[prio].size() > 0) {
-			TMessageEntry me = m_queue[prio].front();
+			TMessageEntry const me = m_queue[prio].front();
 			m_queue[prio].pop_front();
-			if (me.mess != nullptr) me.mess->unreserve();
+			if (me.mess != nullptr) { me.mess->unreserve(); }
 		}
 	}
 	m_myQueued = 0;
@@ -455,14 +455,14 @@ void CBridge::onDisconnect(CTransport* const sender)
 	// Loop over all subscribers
 	// Eventually free queued messages, dependent on topic's disconnect mode
 	for (std::vector<TSubscriberEntry>::size_type idx = 0; idx < m_subscribers.size(); idx++) {
-		if (m_subscribers[idx].tc.eDisconnectedHandling == BridgeConfig::keepAll) continue;
+		if (m_subscribers[idx].tc.eDisconnectedHandling == BridgeConfig::keepAll) { continue; }
 
 		ops::ObjectName_T const topicName = m_subscribers[idx].tc.sTopicName;
 		std::deque<TMessageEntry>* const Ptr = &m_queue[m_subscribers[idx].tc.iPriority];
 
 		// if keepLatest then keep one sample and remove all others
 		bool Keep = false;
-		if (m_subscribers[idx].tc.eDisconnectedHandling == BridgeConfig::keepLatest) Keep = true;
+		if (m_subscribers[idx].tc.eDisconnectedHandling == BridgeConfig::keepLatest) { Keep = true; }
 			
 		// Loop backwards
 		std::deque<TMessageEntry>::reverse_iterator riter;
@@ -559,7 +559,7 @@ void CBridge::onAckNakMessage(CTransport* const sender, TAckNakMessage& ackNak)
 
 	if (m_savedMess.AckNumber == ackNak.AckCounter) {
 		// Calculate approx. buffered size
-		uint32_t bytes = (uint32_t)m_savedMess.mess->getData()->spareBytes.size();
+		uint32_t const bytes = (uint32_t)m_savedMess.mess->getData()->spareBytes.size();
 		m_bytesBuffered -= bytes;
 		
 		// Release message now that we have sent it
@@ -594,7 +594,7 @@ ops::Publisher* CBridge::setupPublisher(ops::Topic& destTopic)
 
 	// Check if publisher already exist
 	for (std::vector<TPublisherData>::iterator iter = m_publishers.begin(); iter != m_publishers.end(); iter++) {
-		if ((*iter).topicName == pd.topicName) return (*iter).pub;
+		if ((*iter).topicName == pd.topicName) { return (*iter).pub; }
 
 	}
 
@@ -672,7 +672,7 @@ void CBridge::onCommandMessage(CTransport* const sender, TCommandMessage& cmd)
 							bool exist = false;
 							try {
 								ops::Domain* const domain = part->getConfig()->getDomain(dom);
-								if (domain) { exist = domain->existsTopic(top); }
+								if (domain != nullptr) { exist = domain->existsTopic(top); }
 							}
 							catch (...) {
 								exist = false;
@@ -766,10 +766,10 @@ void CBridge::TriggSendOPSMessage()
 	ops::SafeLock lock(&m_sendLock);
 
 	// We must be connected 
-	if (!m_isConnected) return;
+	if (!m_isConnected) { return; }
 
 	// if there already is a send "active" exit
-	if (m_savedMess.mess != nullptr) return;
+	if (m_savedMess.mess != nullptr) { return; }
 
 	// No "active" send, so try and start one
 	SendOPSMessage();
@@ -782,7 +782,7 @@ void CBridge::SendOPSMessage()
 	if (m_savedMess.mess == nullptr) {
 		getHighestPrioMessage(m_savedMess);
 	}
-	if (m_savedMess.mess == nullptr) return;
+	if (m_savedMess.mess == nullptr) { return; }
 
 	// Get object to send
 	ops::OPSObject* const messHead = m_savedMess.mess->getData();
@@ -810,7 +810,7 @@ void CBridge::Run()
 		bool const notified = WaitForNotifyWithTimeout(100);
 
 		// =========================================================================
-		if (terminated()) break;
+		if (terminated()) { break; }
 
 		// =========================================================================
 		// Timeout

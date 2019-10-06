@@ -80,7 +80,7 @@ void CSocketTransport::Close()
 
 bool CSocketTransport::write(char* const buffer, uint32_t const length)
 {
-	if (!m_Connected) return false;
+	if (!m_Connected) { return false; }
 	
 	int const iResult = send(m_socketCom, buffer, length, 0);
 
@@ -131,8 +131,8 @@ bool CSocketTransport::writeOpsMessage(ops::OPSObject* const mess,
 	// Send on transport
 	// We need to lock the writes since the complete message requires 3 writes
 	ops::SafeLock lock(&m_writeLock);
-	if (!write((char *)&head, sizeof(head))) return false;
-	if (!write(memMap.getSegment(0), buf.GetSize())) return false;
+	if (!write((char *)&head, sizeof(head))) { return false; }
+	if (!write(memMap.getSegment(0), buf.GetSize())) { return false; }
 	return write(&mess->spareBytes[0], head.DataLength);
 }
 
@@ -179,7 +179,7 @@ bool CSocketTransport::writeCommand(TCommandMessage& cmd)
 	// Send on transport
 	// We need to lock the writes
 	ops::SafeLock lock(&m_writeLock);
-	if (!write((char *)&cmd.Head, sizeof(cmd.Head))) return false;
+	if (!write((char *)&cmd.Head, sizeof(cmd.Head))) { return false; }
 	return write(memMap.getSegment(0), buf.GetSize());
 }
 
@@ -202,7 +202,7 @@ bool CSocketTransport::writeUdpMcMessage(TUdpMcMessage& udpMc, char* const data)
 	// Send on transport
 	// We need to lock the writes
 	ops::SafeLock lock(&m_writeLock);
-	if (!write((char *)&udpMc, sizeof(udpMc))) return false;
+	if (!write((char *)&udpMc, sizeof(udpMc))) { return false; }
 	return write(data, udpMc.DataLength);
 }
 
@@ -247,8 +247,8 @@ void CSocketTransport::HandleData()
 	while (!terminated()) {
 		// All messages start with a THeader with Length and Type
 		// Read data into Head and validate
-		if (!ReadData((char*)&Head, sizeof(Head))) return;
-		if (terminated()) return;
+		if (!ReadData((char*)&Head, sizeof(Head))) { return; }
+		if (terminated()) { return; }
 		if ((Head.Length < sizeof(Head)) || (Head.Length > 2048)) {
 			BL_ERROR("# [ SocketTransport ] HandleData() Head.Length invalid (%u)\n", Head.Length);
 			return;
@@ -266,8 +266,8 @@ void CSocketTransport::HandleData()
 			Ptr = (char*)&OpsMess;
 			Ptr += sizeof(Head);
 
-			if (!ReadData(Ptr, sizeof(OpsMess) - sizeof(Head))) return;
-			if (terminated()) return;
+			if (!ReadData(Ptr, sizeof(OpsMess) - sizeof(Head))) { return; }
+			if (terminated()) { return; }
 
 			if ((Head.Length < sizeof(OpsMess)) || 
 				((Head.Length - sizeof(OpsMess)) > (uint32_t)memMap.getSegmentSize()))
@@ -277,8 +277,8 @@ void CSocketTransport::HandleData()
 			}
 
 			// Read rest of header into buffer for deserializing
-			if (!ReadData(memMap.getSegment(0), Head.Length - sizeof(OpsMess))) return;
-			if (terminated()) return;
+			if (!ReadData(memMap.getSegment(0), Head.Length - sizeof(OpsMess))) { return; }
+			if (terminated()) { return; }
 
 			topicName = buf.ReadString();
 			publisherName = buf.ReadString();
@@ -315,8 +315,8 @@ void CSocketTransport::HandleData()
 				return;
 			}
 
-			if (!ReadData(Ptr, Head.Length - sizeof(Head))) return;
-			if (terminated()) return;
+			if (!ReadData(Ptr, Head.Length - sizeof(Head))) { return; }
+			if (terminated()) { return; }
 
 			if (m_user != nullptr) { m_user->onAckNakMessage(this, AckNakMess); }
 		}
@@ -338,8 +338,8 @@ void CSocketTransport::HandleData()
 			CmdMess.Head = Head;
 
 			// Read rest of header into buffer for deserializing
-			if (!ReadData(memMap.getSegment(0), Head.Length - sizeof(CmdMess.Head))) return;
-			if (terminated()) return;
+			if (!ReadData(memMap.getSegment(0), Head.Length - sizeof(CmdMess.Head))) { return; }
+			if (terminated()) { return; }
 
 			CmdMess.Command = (TCommandType)buf.ReadInt();
 			CmdMess.DestTopicName = buf.ReadString();
@@ -362,8 +362,8 @@ void CSocketTransport::HandleData()
 				return;
 			}
 
-			if (!ReadData(Ptr, Head.Length - sizeof(Head))) return;
-			if (terminated()) return;
+			if (!ReadData(Ptr, Head.Length - sizeof(Head))) { return; }
+			if (terminated()) { return; }
 
 			if (m_user != nullptr) { m_user->onStatusMessage(this, StatusMess); }
 		}
@@ -381,8 +381,8 @@ void CSocketTransport::HandleData()
 				return;
 			}
 
-			if (!ReadData(Ptr, Head.Length - sizeof(Head))) return;
-			if (terminated()) return;
+			if (!ReadData(Ptr, Head.Length - sizeof(Head))) { return; }
+			if (terminated()) { return; }
 
 			if (UdpMcMess.DataLength > (uint32_t)memMap.getSegmentSize()) {
 				BL_ERROR("# [ SocketTransport ] HandleData(UdpMc) DataLength invalid (%u)\n", UdpMcMess.DataLength);
@@ -390,8 +390,8 @@ void CSocketTransport::HandleData()
 			}
 
 			// Read actual data
-			if (!ReadData(memMap.getSegment(0), UdpMcMess.DataLength)) return;
-			if (terminated()) return;
+			if (!ReadData(memMap.getSegment(0), UdpMcMess.DataLength)) { return; }
+			if (terminated()) { return; }
 
 			if (m_user != nullptr) { m_user->onUdpMcMessage(this, UdpMcMess, memMap.getSegment(0)); }
 		}

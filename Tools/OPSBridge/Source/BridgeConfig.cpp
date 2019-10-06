@@ -102,7 +102,7 @@ void BridgeConfig::checkTopicDomain(ops::ObjectName_T topicName)
 	ops::ObjectName_T const dom = ops::utilities::domainName(topicName);
 	if (dom != "") {
 		for (uint32_t i = 0; i < vDomains.size(); i++) {
-			if (dom == vDomains[i]) return;
+			if (dom == vDomains[i]) { return; }
 		}
 		vDomains.push_back(dom);
 	}

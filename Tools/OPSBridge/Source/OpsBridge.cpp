@@ -48,7 +48,7 @@ void menu()
 	std::cout << "\n";
 }
 
-int main(int argc, char* argv[])
+int main(const int argc, const char* argv[])
 {
 	bool show_menu = false;
 	int cnt = 0;

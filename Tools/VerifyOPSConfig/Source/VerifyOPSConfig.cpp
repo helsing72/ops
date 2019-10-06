@@ -12,7 +12,7 @@
 
 #include "Configuration.h"
 
-const std::string sVersion = "Version 2019-09-28";
+const std::string sVersion = "Version 2019-10-05";
 
 
 bool gErrorGiven = false;
@@ -25,20 +25,15 @@ bool gWarningGiven = false;
 
 class CVerifyOPSConfig 
 {
-private:
-	// Arguments
-	bool bDebug;
-	
-	// 
-	int iNumDomains;
-	std::vector<std::string> vDomains;
-	std::vector<std::string> vDomainMeta;
-	std::vector<std::string> vTopics;
-	std::vector<std::string> vChannels;
-	std::vector<std::string> vTransportTopics;
-	bool bUdpRequireMetadata;
-
 public:
+	CVerifyOPSConfig() = delete;
+	~CVerifyOPSConfig() = default;
+
+	CVerifyOPSConfig(CVerifyOPSConfig const&) = delete;
+	CVerifyOPSConfig(CVerifyOPSConfig&&) = delete;
+	CVerifyOPSConfig& operator =(CVerifyOPSConfig&&) = delete;
+	CVerifyOPSConfig& operator =(CVerifyOPSConfig const&) = delete;
+
 	CVerifyOPSConfig(std::string filename, bool const debug):
 	    bDebug(debug),
 		iNumDomains(0),
@@ -168,7 +163,7 @@ public:
 		}
 	}
 
-	void CheckForUnknown(Configuration& config, std::vector<std::string>& known, std::string const msg)
+	void CheckForUnknown(Configuration& config, std::vector<std::string>& known, std::string const msg) const
 	{
 		// Check for unknown entries
 		int const num = config.numEntries();
@@ -183,7 +178,7 @@ public:
 		}
 	}
 
-	void CheckForUnknownAttributes(Configuration& config, std::vector<std::string>& known, std::string const msg)
+	void CheckForUnknownAttributes(Configuration& config, std::vector<std::string>& known, std::string const msg) const
 	{
 		// Check for unknown attributes
 		int const num = config.numAttributes();
@@ -212,7 +207,7 @@ public:
 		}
 	}
 
-	void verifyValidAddress(std::string const address, std::string const linkType, std::string const msg)
+	void verifyValidAddress(std::string const address, std::string const linkType, std::string const msg) const
 	{
 		if (address == "") { return; }
 		if ((linkType == "multicast") || (linkType == "")) {
@@ -230,7 +225,7 @@ public:
 	void verifyLocalInterface(std::string localIf, std::string const msg) const
 	{
 		std::unique_ptr<ops::IOService> ioServ(ops::IOService::create());
-		ops::Address_T subnetIf = ops::doSubnetTranslation(localIf, ioServ.get());
+		ops::Address_T const subnetIf = ops::doSubnetTranslation(localIf, ioServ.get());
 		LOG_INFO(msg + ": localInterface " << localIf << " --> " << subnetIf << std::endl);
 		if (!ops::isValidNodeAddress(subnetIf)) {
 			LOG_ERROR(">>> Invalid Node address '" << subnetIf << "' extracted from localInterface '" << localIf << "'" << std::endl);
@@ -704,6 +699,19 @@ public:
 		verifyOnlyOneEntry(config, "inSocketBufferSize", "<topics> <element> section in domain: " + domainName + " topic: " + topicName);
 	}
 
+private:
+	// Arguments
+	bool bDebug;
+
+	// 
+	int iNumDomains;
+	std::vector<std::string> vDomains;
+	std::vector<std::string> vDomainMeta;
+	std::vector<std::string> vTopics;
+	std::vector<std::string> vChannels;
+	std::vector<std::string> vTransportTopics;
+	bool bUdpRequireMetadata;
+
 };
 
 void PrintDescription()
@@ -732,7 +740,7 @@ void Usage()
 	std::cout << "    -debug      Print some debug info during work" << std::endl;
 }
 
-int main(int argc, char* argv[])
+int main(const int argc, const char* argv[])
 {
 	std::string infile = "";
 	bool printUsage = false;
@@ -740,7 +748,7 @@ int main(int argc, char* argv[])
 	bool debug = false;
 
 	for (int i = 1; i < argc; i++) {
-		std::string arg = argv[i];
+		std::string const arg = argv[i];
 		if (arg == "?") {
 			printUsage = true;
 			printDescription = true;
@@ -767,7 +775,7 @@ int main(int argc, char* argv[])
 	} else {
 		std::cout << std::endl;
 
-		CVerifyOPSConfig verify(infile, debug);
+		CVerifyOPSConfig const verify(infile, debug);
 
 		if ((!gErrorGiven) && (!gWarningGiven)) { std::cout << "Check OK  " << std::endl; }
 

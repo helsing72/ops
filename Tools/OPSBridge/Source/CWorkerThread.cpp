@@ -37,7 +37,7 @@ CWorkerThreadManager* CWorkerThreadManager::_instance = nullptr;
 
 CWorkerThreadManager* CWorkerThreadManager::Instance()
 {
-	std::lock_guard<std::mutex> lck(instanceMutex);
+	std::lock_guard<std::mutex> const lck(instanceMutex);
 	if (_instance == nullptr) { _instance = new CWorkerThreadManager(); }
 	return _instance;
 }
@@ -61,7 +61,7 @@ void CWorkerThreadManager::SetErrorLogger(CWorkerErrorLogger* const logger)
 
 void CWorkerThreadManager::Add(CWorkerThread* const worker)
 {
-	std::lock_guard<std::mutex> lck(instanceMutex);
+	std::lock_guard<std::mutex> const lck(instanceMutex);
 	if (m_shuttingDown) { worker->m_WorkItem->Terminate(); }
 	m_vWorkers.push_back(worker);
 }
@@ -79,7 +79,7 @@ void CWorkerThreadManager::Add(CWorkItem* workItem, bool ownsWorkItem)
 // Cleanup CWorkerThreads that have exited
 void CWorkerThreadManager::CleanUp()
 {
-	std::lock_guard<std::mutex> lck(instanceMutex);
+	std::lock_guard<std::mutex> const lck(instanceMutex);
 	int const num = (int)m_vWorkers.size();
     // Loop backwards so we can erase without changing index for not checked ones
     for (int i = (int)m_vWorkers.size() - 1; i >= 0; i--) {
@@ -99,7 +99,7 @@ void CWorkerThreadManager::StopAll()
     do {
 		std::vector<CWorkerThread*> list;
 		{
-			std::lock_guard<std::mutex> lck(instanceMutex);
+			std::lock_guard<std::mutex> const lck(instanceMutex);
 			for (uint32_t i = 0; i < m_vWorkers.size(); i++) {
 				m_vWorkers[i]->m_WorkItem->Terminate();
 			}

@@ -81,7 +81,7 @@ void CTcpTransportClient::Run()
 				BL_TRACE("# [ TcpClient ] connecting to: %s, Port: %d\n", m_remoteHost.c_str(), m_remotePort);
 			    
 				iResult = connect(m_socketCom, (sockaddr*)&saClient, sizeof(saClient));
-			    if (iResult != SOCKET_ERROR) break;
+				if (iResult != SOCKET_ERROR) { break; }
 
 				BL_ERROR("# [ TcpClient ] connect() failed with error: %d\n", GetError());
 				
@@ -101,13 +101,13 @@ void CTcpTransportClient::Run()
 			setsockopt(m_socketCom, IPPROTO_TCP, TCP_NODELAY, (char*)&optVal, optLen);
 
 			m_Connected = true;
-			if (m_user != nullptr) m_user->onConnect(this);
+			if (m_user != nullptr) { m_user->onConnect(this); }
 
 			// Handle data from other side while connected
 			HandleData();
 
 			m_Connected = false;
-			if (m_user != nullptr) m_user->onDisconnect(this);
+			if (m_user != nullptr) { m_user->onDisconnect(this); }
 
 			BL_INFO("# [ TcpClient ] DISCONNECTED\n"); 
 		}
