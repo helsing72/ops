@@ -57,7 +57,7 @@ pizza::special::ExtraAllt::memory_pool_type pizza::special::ExtraAllt::_pool(20)
 
 int64_t getNow()
 {
-    struct timespec ts;
+    timespec ts;
     memset(&ts, 0, sizeof(ts));
     clock_gettime(CLOCK_REALTIME, &ts);
     return ((1000 * ts.tv_sec) + (ts.tv_nsec / 1000000));
@@ -99,6 +99,11 @@ class CHelperListener
 public:
 	virtual void onData(ops::Subscriber* sub, DataType* data) = 0;
 	virtual ~CHelperListener() {};
+	CHelperListener() = default;
+	CHelperListener(CHelperListener const&) = delete;
+	CHelperListener(CHelperListener&&) = delete;
+	CHelperListener& operator =(CHelperListener&&) = delete;
+	CHelperListener& operator =(CHelperListener const&) = delete;
 };
 
 class IHelper
@@ -117,6 +122,11 @@ public:
 	virtual void StopSubscriber() = 0;
 	virtual void SetDeadlineQos(int64_t timeoutMs) = 0;
 	virtual ~IHelper() {};
+	IHelper() = default;
+	IHelper(IHelper const&) = delete;
+	IHelper(IHelper&&) = delete;
+	IHelper& operator =(IHelper&&) = delete;
+	IHelper& operator =(IHelper const&) = delete;
 };
 
 template <class DataType, class DataTypePublisher, class DataTypeSubscriber>
@@ -132,11 +142,9 @@ class CHelper :
 public:
 	DataType data;
 
-	CHelper(CHelperListener<DataType>* client):
-		pub(nullptr), sub(nullptr)
-		//, expectedPubId(-1)
+	CHelper(CHelperListener<DataType>* cli):
+		client(cli), pub(nullptr), sub(nullptr)
 	{
-		this->client = client;
 	}
 
 	virtual ~CHelper()
@@ -144,6 +152,12 @@ public:
 		DeletePublisher(false);
 		DeleteSubscriber(false);
 	}
+
+	CHelper() = default;
+	CHelper(CHelper const&) = delete;
+	CHelper(CHelper&&) = delete;
+	CHelper& operator =(CHelper&&) = delete;
+	CHelper& operator =(CHelper const&) = delete;
 
 	virtual bool HasPublisher() override { return pub != nullptr; }
 	virtual bool HasSubscriber() override { return sub != nullptr; }
@@ -195,7 +209,7 @@ public:
 			delete pub;
 			pub = nullptr;
 		} else {
-			if (doLog) std::cout << "Publisher must be created first!!" << std::endl;
+			if (doLog) { std::cout << "Publisher must be created first!!" << std::endl; }
 		}
 	}
 
@@ -297,7 +311,7 @@ public:
 			delete sub;
 			sub = nullptr;
 		} else {
-			if (doLog) std::cout << "Subscriber must be created first!!" << std::endl;
+			if (doLog) { std::cout << "Subscriber must be created first!!" << std::endl; }
 		}
 	}
 
@@ -403,10 +417,8 @@ public:
 
 private:
 	CHelperListener<DataType>* client;
-	//ops::Publisher* pub;
 	DataTypePublisher* pub;
 	ops::Subscriber* sub;
-	//int64_t expectedPubId;
 };
 
 typedef CHelper<pizza::PizzaData, pizza::PizzaDataPublisher, pizza::PizzaDataSubscriber> TPizzaHelper;
@@ -422,15 +434,15 @@ struct ItemInfo {
 	IHelper* helper;
 	ops::Participant* part;
 
-	ItemInfo(ops::ObjectName_T const dom, ops::ObjectName_T const top, ops::TypeId_T const typ)
+	ItemInfo(ops::ObjectName_T const dom, ops::ObjectName_T const top, ops::TypeId_T const typ):
+		Domain(dom), TopicName(top), TypeName(typ),
+		selected(false), helper(nullptr), part(nullptr)
 	{
-		Domain = dom;
-		TopicName = top;
-		TypeName = typ;
-		helper = nullptr;
-		part = nullptr;
-		selected = false;
-	};
+	}
+	ItemInfo(ItemInfo const&) = delete;
+	ItemInfo(ItemInfo&&) = delete;
+	ItemInfo& operator =(ItemInfo&&) = delete;
+	ItemInfo& operator =(ItemInfo const&) = delete;
 };
 std::vector<ItemInfo*> ItemInfoList;
 
@@ -443,7 +455,14 @@ class MyListener :
 	public CHelperListener<pizza::special::ExtraAllt>
 {
 public:
-	virtual void onData(ops::Subscriber* const sub, pizza::PizzaData* const data) override
+	MyListener() = default;
+	~MyListener() = default;
+	MyListener(MyListener const&) = delete;
+	MyListener(MyListener&&) = delete;
+	MyListener& operator =(MyListener&&) = delete;
+	MyListener& operator =(MyListener const&) = delete;
+
+	virtual void onData(ops::Subscriber* sub, pizza::PizzaData* data) override
 	{
 		// test for sending derived objects on same topic
 		if (dynamic_cast<pizza::VessuvioData*>(data) != nullptr) {
@@ -468,16 +487,17 @@ public:
 #endif
 		}
 
-//		pizza::PizzaData* ttt = (pizza::PizzaData*)data->clone();
-//		std::cout <<
-//			"Clone PizzaData:: Cheese: " << ttt->cheese <<
-//			", Tomato sauce: " << ttt->tomatoSauce << 
-//			", spareBytes: " << ttt->spareBytes.size() << 
-//			std::endl;
-
+#ifndef NOT_USED_FOR_NOW
+		pizza::PizzaData* ttt = (pizza::PizzaData*)data->clone();
+		std::cout <<
+			"Clone PizzaData:: Cheese: " << ttt->cheese <<
+			", Tomato sauce: " << ttt->tomatoSauce << 
+			", spareBytes: " << ttt->spareBytes.size() << 
+			std::endl;
+#endif
 	}
 
-	virtual void onData(ops::Subscriber* const sub, pizza::VessuvioData* const data) override
+	virtual void onData(ops::Subscriber* sub, pizza::VessuvioData* data) override
 	{
 		// test for sending derived objects on same topic
 		if (dynamic_cast<pizza::special::ExtraAllt*>(data) != nullptr) {
@@ -499,7 +519,7 @@ public:
 		}
 	}
 
-	virtual void onData(ops::Subscriber* const sub, pizza::special::ExtraAllt* const data) override
+	virtual void onData(ops::Subscriber* sub, pizza::special::ExtraAllt* data) override
 	{
 		ops::Address_T addr = "";
 		int port = 0;
@@ -527,6 +547,15 @@ public:
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 class MyDebugNotifyInterface : public ops::DebugNotifyInterface
 {
+public:
+	MyDebugNotifyInterface() = default;
+	~MyDebugNotifyInterface() = default;
+	MyDebugNotifyInterface(MyDebugNotifyInterface const&) = delete;
+	MyDebugNotifyInterface(MyDebugNotifyInterface&&) = delete;
+	MyDebugNotifyInterface& operator =(MyDebugNotifyInterface&&) = delete;
+	MyDebugNotifyInterface& operator =(MyDebugNotifyInterface const&) = delete;
+
+private:
 	virtual void onRequest(opsidls::DebugRequestResponseData& req, opsidls::DebugRequestResponseData& resp) override
 	{
 		std::cout << 
@@ -550,13 +579,13 @@ void WriteToAllSelected()
 
 	for (unsigned int i = 0; i < ItemInfoList.size(); i++) {
 		ItemInfo* const info = ItemInfoList[i];
-		if (!info->selected) continue;
+		if (!info->selected) { continue; }
 		std::stringstream str;
 		str << Counter;
-		std::string CounterStr(str.str());
+		std::string const CounterStr(str.str());
 		Counter++;
 		if (info->TypeName == pizza::PizzaData::getTypeName()) {
-			TPizzaHelper* hlp = dynamic_cast<TPizzaHelper*>(info->helper);
+			TPizzaHelper* const hlp = dynamic_cast<TPizzaHelper*>(info->helper);
 			hlp->data.cheese = "Pizza from C++: " + CounterStr;
 			hlp->data.tomatoSauce = "Tomato";
 #ifdef USE_MESSAGE_HEADER
@@ -564,7 +593,7 @@ void WriteToAllSelected()
 #endif
 		}
 		if (info->TypeName == pizza::VessuvioData::getTypeName()) {
-			TVessuvioHelper* hlp = dynamic_cast<TVessuvioHelper*>(info->helper);
+			TVessuvioHelper* const hlp = dynamic_cast<TVessuvioHelper*>(info->helper);
 			hlp->data.cheese = "Vessuvio from C++: " + CounterStr;
 			hlp->data.ham = FillerStr;
 #ifdef USE_MESSAGE_HEADER
@@ -575,7 +604,7 @@ void WriteToAllSelected()
 			TExtraAlltHelper* const hlp = dynamic_cast<TExtraAlltHelper*>(info->helper);
 			hlp->data.cheese = "ExtraAllt from C++: " + CounterStr;
 			if (hlp->data.strings.size() == 0) {
-				for (int k = 0; k < 1000; k++) hlp->data.strings.push_back("hej");
+				for (int k = 0; k < 1000; k++) { hlp->data.strings.push_back("hej"); }
 			}
 			hlp->data.sh = -7;
 			if (hlp->data.shs.size() == 0) {
@@ -591,9 +620,9 @@ void WriteToAllSelected()
 	}
 }
 
-void printDomainInfo(ops::Participant* const part)
+void printDomainInfo(const ops::Participant& part)
 {
-	ops::Domain* const dom = part->getDomain();
+	const ops::Domain* const dom = part.getDomain();
 	std::cout << std::endl <<
 		"  DomainID: " << dom->getDomainID() << std::endl <<
 		"  DomainAddress: " << dom->getDomainAddress() << std::endl <<
@@ -604,7 +633,7 @@ void printDomainInfo(ops::Participant* const part)
 		"  LocalInterface: " << dom->getLocalInterface() << std::endl <<
 		"  TimeToLive: " <<	dom->getTimeToLive() << std::endl;
 
-	ops::Topic top = part->createParticipantInfoTopic();
+	ops::Topic top = part.createParticipantInfoTopic();
 
 	std::cout << std::endl <<
 		"  TopicName: " << top.getName() << std::endl <<
@@ -624,10 +653,9 @@ void printDomainInfo(ops::Participant* const part)
 	{
 		ops::PrintArchiverOut prt(std::cout);
 
-		prt.printObject("ops_config", part->getDomain());
+		prt.printObject("ops_config", part.getDomain());
 	}
 	std::cout << std::endl << "Dump of configuration Finished " << std::endl;
-
 }
 
 void menu()
@@ -667,7 +695,7 @@ void menu()
 
 }
 
-int main(int argc, char* argv[])
+int main(const int argc, const char* argv[])
 {
 	ops::ObjectName_T debugKey = "Pizza";
 	ops::execution_policy::Enum policy = ops::execution_policy::threading;
@@ -745,7 +773,7 @@ int main(int argc, char* argv[])
 		exit(-1);
     }
 	participant->addTypeSupport(new PizzaProject::PizzaProjectTypeFactory());
-	printDomainInfo(participant);
+	printDomainInfo(*participant);
 	
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 	ops::DebugHandler::SetKey(debugKey);
@@ -759,7 +787,7 @@ int main(int argc, char* argv[])
         exit(-1);
 	}
 	otherParticipant->addTypeSupport(new PizzaProject::PizzaProjectTypeFactory());
-	printDomainInfo(otherParticipant);
+	printDomainInfo(*otherParticipant);
 
 	// Add error writers to catch internal ops errors
 	ops::ErrorWriter* errorWriter = new ops::ErrorWriter(std::cout);
@@ -831,8 +859,8 @@ int main(int argc, char* argv[])
 					// Calc next time to send
 					nextSendTime = now + sendPeriod;
 				}
-				if (participant->GetExecutionPolicy() == ops::execution_policy::polling) participant->Poll();
-				if (otherParticipant->GetExecutionPolicy() == ops::execution_policy::polling) otherParticipant->Poll();
+				if (participant->GetExecutionPolicy() == ops::execution_policy::polling) { participant->Poll(); }
+				if (otherParticipant->GetExecutionPolicy() == ops::execution_policy::polling) { otherParticipant->Poll(); }
 				ops::TimeHelper::sleep(1);
 			}
 		}
@@ -843,21 +871,21 @@ int main(int argc, char* argv[])
 
 		char buffer[1024];
 		char* ptr = fgets(buffer, sizeof(buffer), stdin);
-		if (ptr == nullptr) continue;
+		if (ptr == nullptr) { continue; }
 
 		std::string line(buffer);
 
 		// trim start
 		std::string::size_type idx = line.find_first_not_of(" \t");
-		if (idx == std::string::npos) continue;
-		if (idx > 0) line.erase(0, idx);
-		if (line.size() == 0) continue;
+		if (idx == std::string::npos) { continue; }
+		if (idx > 0) { line.erase(0, idx); }
+		if (line.size() == 0) { continue; }
 
 		char ch = line[0];
 		line.erase(0, 1);
 
-		if ((ch == 'p') || (ch == 'P')) func = PUB;
-		if ((ch == 's') || (ch == 'S')) func = SUB;
+		if ((ch == 'p') || (ch == 'P')) { func = PUB; }
+		if ((ch == 's') || (ch == 'S')) { func = SUB; }
 
 		if (func != NONE) {
 			if (line.size() == 0) {
@@ -911,7 +939,7 @@ int main(int argc, char* argv[])
 			case 'C':
 				for (unsigned int i = 0; i < ItemInfoList.size(); i++) {
 					ItemInfo* const info = ItemInfoList[i];
-					if (!info->selected) continue;
+					if (!info->selected) { continue; }
 					if (func == PUB) {
 						info->helper->CreatePublisher(info->part, info->TopicName);
 					} else if (func == SUB) {
@@ -924,7 +952,7 @@ int main(int argc, char* argv[])
 			case 'D':
 				for (unsigned int i = 0; i < ItemInfoList.size(); i++) {
 					ItemInfo* const info = ItemInfoList[i];
-					if (!info->selected) continue;
+					if (!info->selected) { continue; }
 					if (func == PUB) {
 						info->helper->DeletePublisher();
 					} else if (func == SUB) {
@@ -937,7 +965,7 @@ int main(int argc, char* argv[])
 			case 'S':
 				for (unsigned int i = 0; i < ItemInfoList.size(); i++) {
 					ItemInfo* const info = ItemInfoList[i];
-					if (!info->selected) continue;
+					if (!info->selected) { continue; }
 					if (func == PUB) {
 						info->helper->StartPublisher();
 					} else if (func == SUB) {
@@ -950,7 +978,7 @@ int main(int argc, char* argv[])
 			case 'T':
 				for (unsigned int i = 0; i < ItemInfoList.size(); i++) {
 					ItemInfo* const info = ItemInfoList[i];
-					if (!info->selected) continue;
+					if (!info->selected) { continue; }
 					if (func == PUB) {
 						info->helper->StopPublisher();
 					} else if (func == SUB) {
@@ -967,8 +995,8 @@ int main(int argc, char* argv[])
 				{
 					num = atoi(line.c_str());
 					if (num >= 0) NumVessuvioBytes = num;
-					if (FillerStr.size() > (unsigned int)num) FillerStr.erase(num);
-					while (FillerStr.size() < (unsigned int)num) FillerStr += " ";
+					if (FillerStr.size() > (unsigned int)num) { FillerStr.erase(num); }
+					while (FillerStr.size() < (unsigned int)num) { FillerStr += " "; }
 					std::cout << "Length: " << FillerStr.size() << std::endl;
 				}
 				break;
@@ -1002,6 +1030,7 @@ int main(int argc, char* argv[])
 				break;
 
 			default:;
+				break;
 		}
 	}
 

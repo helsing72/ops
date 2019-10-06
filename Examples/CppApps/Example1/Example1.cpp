@@ -252,11 +252,23 @@ public:
 		// If you want, add a keyfilter to just be notified with data objects with the specified key
 		sub->addFilterQoSPolicy(new ops::KeyFilterQoSPolicy("InstanceOne"));
 
+#ifdef USE_TIME_BASED_FILTER
 		// There are also some other filters that can be set, and we can implement our own
-		//sub->setTimeBasedFilterQoS(1000);
+		sub->setTimeBasedFilterQoS(1000);
+#endif
 
 		// Finally start the subscriber (tell it to start listening for data)
 		sub->start();
+	}
+
+	SubscriptionHandler(SubscriptionHandler const&) = delete;
+	SubscriptionHandler(SubscriptionHandler&&) = delete;
+	SubscriptionHandler& operator =(SubscriptionHandler&&) = delete;
+	SubscriptionHandler& operator =(SubscriptionHandler const&) = delete;
+
+	~SubscriptionHandler()
+	{
+		delete sub;
 	}
 
 	// Override from ops::DataListener, called whenever new data arrives.
@@ -306,7 +318,7 @@ private:
 
 void ObjectSubscriberExample()
 {
-	SubscriptionHandler handler;
+	SubscriptionHandler const handler;
 
 	while(true) {
 		ops::TimeHelper::sleep(1000);
@@ -320,10 +332,10 @@ void usage()
 	std::cout << "" << std::endl;
 }
 
-int main(int argc, char* argv[])
+int main(const int argc, const char* argv[])
 {
 	if (argc > 1) {
-		std::string arg(argv[1]);
+		std::string const arg(argv[1]);
 		if (arg == "pub") {
 			PublisherExample();
 		} else if (arg == "sub_callback"){

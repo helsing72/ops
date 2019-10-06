@@ -19,13 +19,18 @@ class BaseTypeFactory : public ops::SerializableFactory
 public:
     virtual ops::Serializable* create(const ops::TypeId_T& type) override
     {
-		if(type == "TestAll.BaseData")
-		{
+		if (type == "TestAll.BaseData") {
 			return new TestAll::BaseData();
 		}
 		return nullptr;
     }
 
+	BaseTypeFactory() = default;
+	~BaseTypeFactory() = default;
+	BaseTypeFactory(BaseTypeFactory const&) = delete;
+	BaseTypeFactory(BaseTypeFactory&&) = delete;
+	BaseTypeFactory& operator =(BaseTypeFactory&&) = delete;
+	BaseTypeFactory& operator =(BaseTypeFactory const&) = delete;
 };
 
 //Create a class to act as a listener for OPS data and deadlines
@@ -64,7 +69,7 @@ public:
 
 	}
 	///Override from ops::DataListener, called whenever new data arrives.
-	virtual void onNewData(ops::DataNotifier* const subscriber) override
+	virtual void onNewData(ops::DataNotifier* subscriber) override
 	{
 		UNUSED(subscriber);
 		counter++;
@@ -80,7 +85,7 @@ public:
 		//std::cout << ((ops::ParticipantInfoData*)baseSub->getMessage()->getData())->ips[0] << ":" <<((ops::ParticipantInfoData*)baseSub->getMessage()->getData())->mc_udp_port << std::endl;
 	}
 	///Override from ops::DeadlineMissedListener, called if no new data has arrived within deadlineQoS.
-	virtual void onDeadlineMissed(ops::DeadlineMissedEvent* const evt) override
+	virtual void onDeadlineMissed(ops::DeadlineMissedEvent* evt) override
 	{
 		UNUSED(evt);
 		std::cout << "Deadline Missed!" << std::endl;
@@ -88,11 +93,15 @@ public:
 	~Main()
 	{
 	}
-
+	Main() = default;
+	Main(Main const&) = delete;
+	Main(Main&&) = delete;
+	Main& operator =(Main&&) = delete;
+	Main& operator =(Main const&) = delete;
 };
 
 //Application entry point
-int main(int argc, char* args[])
+int main(const int argc, const char* args[])
 {
 	UNUSED(argc);
 	UNUSED(args);
@@ -100,30 +109,25 @@ int main(int argc, char* args[])
 	//ops::OPSObjectFactory::getInstance()->add(new TestAll::TestAllTypeFactory()); 
 
 	ops::FileName_T configFile = "";
-	if (argc > 1) configFile = args[1];
+	if (argc > 1) { configFile = args[1]; }
 	
 	//Create an object that will listen to OPS events
-	Main m(configFile);
+	Main const m(configFile);
 
 	//This is a way to create inline subscriber event handlers in c++
 	/*class DataCallback : ops::DataListener 
 	{ 
 		void onNewData(ops::DataNotifier* subscriber)
 		{
-			
 			newData();
 		}
 	};*/
 	//DataCallback callBack;
 	
-
-
 	//Make sure the OPS ioService never runs out of work.
 	//Run it on main application thread only.
-	while(true)
-	{
+	while(true) {
 		ops::TimeHelper::sleep(1000);
-		
 	}
 	return 0;
 }

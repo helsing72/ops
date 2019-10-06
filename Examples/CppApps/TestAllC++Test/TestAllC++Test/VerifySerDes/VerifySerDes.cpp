@@ -1,7 +1,5 @@
-// TestAll_Publish.cpp : Defines the entry point for the console application.
+// VerifySerDes.cpp
 //
-#include "TestAll/ChildData.h"
-
 #ifdef _WIN32
   #include <Windows.h>
   #include <conio.h>
@@ -14,6 +12,7 @@
 #include <signal.h>
 #include <thread>
 
+#include "TestAll/ChildData.h"
 #include "TestAll/Definitions.h"
 TestAll::Definitions::Command cmd = TestAll::Definitions::Command::PAUSE;
 char arr[TestAll::Definitions::const_b];
@@ -33,11 +32,12 @@ char arr[TestAll::Definitions::const_b];
 	#include <crtdbg.h>
 #endif
 
-//TestAll::BaseData::MemoryPool TestAll::BaseData::_pool(10);
-//TestAll::ChildData::MemoryPool TestAll::ChildData::_pool(10);
-//TestAll::Fruit::MemoryPool TestAll::Fruit::_pool(50);
-//TestAll::TestData::MemoryPool TestAll::TestData::_pool(100);
-
+#ifdef NOT_USED_NOW
+TestAll::BaseData::MemoryPool TestAll::BaseData::_pool(10);
+TestAll::ChildData::MemoryPool TestAll::ChildData::_pool(10);
+TestAll::Fruit::MemoryPool TestAll::Fruit::_pool(50);
+TestAll::TestData::MemoryPool TestAll::TestData::_pool(100);
+#endif
 
 std::ostream& operator<<(std::ostream& os, TestAll::Definitions::Command const c)
 {
@@ -87,37 +87,31 @@ T AssertNEQ(T val, T exp, std::string mess = "")
 	return val;
 }
 
-void checkEmpty(TestAll::TestData& data)
+void checkEmpty(const TestAll::TestData& data)
 {
 	AssertEQ<std::string>(data.text, "");
 	AssertEQ<double>(data.value, 0.0);
 }
 
-void checkEmpty(TestAll::ChildData& data)
+void checkEmpty(const TestAll::ChildData& data)
 {
 	std::cout << "Checking empty object..." << std::endl;
 
 	// BaseData
-	//   std::string baseText;
 	AssertEQ<std::string>(data.baseText, "");
-	//   std::vector<std::string> stringOpenArr;
 	AssertEQ<size_t>(data.stringOpenArr.size(), 0);
-	//   std::string stringFixArr[5];
-	for (int i = 0; i < 5; i++) AssertEQ<std::string>(data.stringFixArr[i], "");
-	//   ops::strings::fixed_string<23> fixLengthString;
+	for (int i = 0; i < 5; i++) { AssertEQ<std::string>(data.stringFixArr[i], ""); }
 	AssertEQ<ops::strings::fixed_string<23>>(data.fixLengthString, "");
-	//   std::vector<ops::strings::fixed_string<16>> fixLengthStringOpenArr;
 	AssertEQ<size_t>(data.fixLengthStringOpenArr.size(), 0);
-	//   ops::strings::fixed_string<16> fixLengthStringFixArr[10];
-	for (int i = 0; i < 10; i++) AssertEQ<ops::strings::fixed_string<16>>(data.fixLengthStringFixArr[i], "");
+	for (int i = 0; i < 10; i++) { AssertEQ<ops::strings::fixed_string<16>>(data.fixLengthStringFixArr[i], ""); }
 
 	// ChildData
 	//  enums
 	AssertEQ<TestAll::ChildData::Order>(data.enu1, TestAll::ChildData::Order::ABC);
 	AssertEQ<size_t>(data.enuVec.size(), 0);
-	for (int i = 0; i < 6; i++) AssertEQ<TestAll::ChildData::Order>(data.enuFixArr[i], TestAll::ChildData::Order::ABC);
+	for (int i = 0; i < 6; i++) { AssertEQ<TestAll::ChildData::Order>(data.enuFixArr[i], TestAll::ChildData::Order::ABC); }
 	AssertEQ< TestAll::Definitions::Command>(data.cmd, TestAll::Definitions::Command::START);
-	for (int i = 0; i < 2; i++) AssertEQ<TestAll::Definitions::Command>(data.cmds[i], TestAll::Definitions::Command::START);
+	for (int i = 0; i < 2; i++) { AssertEQ<TestAll::Definitions::Command>(data.cmds[i], TestAll::Definitions::Command::START); }
 
 	//  core types
 	AssertEQ<bool>(data.bo, false, "data.bo");
@@ -136,94 +130,78 @@ void checkEmpty(TestAll::ChildData& data)
 
 	AssertEQ<int>(data.fruit.value, TestAll::Fruit::APPLE);
 
+	// vectors
 	AssertEQ<size_t>(data.bos.size(), 0);
-	//	bool fbos[11];
-	for(int i = 0; i < 11; i++) AssertEQ<bool>(data.fbos[i], false);
+	for (int i = 0; i < 11; i++) { AssertEQ<bool>(data.fbos[i], false); }
 
 	AssertEQ<size_t>(data.bs.size(), 0);
-	//	char fbs[256];
-	for(int i = 0; i < 256; i++) AssertEQ<char>(data.fbs[i], 0);
+	for (int i = 0; i < 256; i++) { AssertEQ<char>(data.fbs[i], 0); }
 
 	AssertEQ<size_t>(data.shs.size(), 0);
-	//	short fshs[4];
-	for(int i = 0; i < 4; i++) AssertEQ<short>(data.fshs[i], 0);
+	for (int i = 0; i < 4; i++) { AssertEQ<short>(data.fshs[i], 0); }
 
 	AssertEQ<size_t>(data.is_.size(), 0);
-	//	int fis_[3];
-	for(int i = 0; i < 3; i++) AssertEQ<int>(data.fis_[i], 0);
+	for (int i = 0; i < 3; i++) { AssertEQ<int>(data.fis_[i], 0); }
 
 	AssertEQ<size_t>(data.ls.size(), 0);
-	//	int64_t fls[6];
-	for(int i = 0; i < 6; i++) AssertEQ<int64_t>(data.fls[i], 0);
+	for (int i = 0; i < 6; i++) { AssertEQ<int64_t>(data.fls[i], 0); }
 
 	AssertEQ<size_t>(data.fs.size(), 0);
-	//    float ffs[77];
-	for(int i = 0; i < 77; i++) AssertEQ<float>(data.ffs[i], 0.0);
+	for (int i = 0; i < 77; i++) { AssertEQ<float>(data.ffs[i], 0.0); }
 
 	AssertEQ<size_t>(data.ds.size(), 0);
-	//    double fds[5];
-	for(int i = 0; i < 5; i++) AssertEQ<double>(data.fds[i], 0.0);
+	for (int i = 0; i < 5; i++) { AssertEQ<double>(data.fds[i], 0.0); }
 
 	AssertEQ<size_t>(data.ss.size(), 0);
-	//    std::string fss[10];
-	for(int i = 0; i < 10; i++) AssertEQ<std::string>(data.fss[i], "");
+	for (int i = 0; i < 10; i++) { AssertEQ<std::string>(data.fss[i], ""); }
 
 	AssertEQ<size_t>(data.test2s.size(), 0);
-	//    TestData* ftest2s[5];
-	for(int i = 0; i < 5; i++) checkEmpty(*data.ftest2s[i]);
+	for (int i = 0; i < 5; i++) { checkEmpty(*data.ftest2s[i]); }
 
 	AssertEQ<size_t>(data.secondVirtArray.size(), 0);
-	//    TestData* fsecondVirtArray[7];
-	for(int i = 0; i < 7; i++) checkEmpty(*data.fsecondVirtArray[i]);
+	for (int i = 0; i < 7; i++) { checkEmpty(*data.fsecondVirtArray[i]); }
 
 	AssertEQ<size_t>(data.test2s2.size(), 0);
-	//    TestData ftest2s2[4];
-	for(int i = 0; i < 4; i++) checkEmpty(data.ftest2s2[i]);
+	for (int i = 0; i < 4; i++) { checkEmpty(data.ftest2s2[i]); }
 
 	AssertEQ<size_t>(data.fruitarr.size(), 0);
 	//    Fruit ffruitarr[15];
-	for(int i = 0; i < 15; i++) AssertEQ<int>(data.ffruitarr[i].value, TestAll::Fruit::APPLE);
+	for (int i = 0; i < 15; i++) { AssertEQ<int>(data.ffruitarr[i].value, TestAll::Fruit::APPLE); }
 }
 
-void checkObjects(TestAll::TestData& data, TestAll::TestData& exp)
+void checkObjects(const TestAll::TestData& data, const TestAll::TestData& exp)
 {
 	AssertEQ<std::string>(data.text, exp.text);
 	AssertEQ<double>(data.value, exp.value);
 }
 
-void checkObjects(TestAll::ChildData& data, TestAll::ChildData& exp)
+void checkObjects(const TestAll::ChildData& data, const TestAll::ChildData& exp)
 {
 	std::cout << "Comparing objects object..." << std::endl;
 
 	// Test fields in BaseData
-	//   std::string baseText;
 	AssertEQ<std::string>(data.baseText, exp.baseText, "baseText");
 
-	//   std::vector<std::string> stringOpenArr;
 	AssertEQ<size_t>(data.stringOpenArr.size(), exp.stringOpenArr.size(), "stringOpenArr");
-	for (size_t i = 0; i < data.stringOpenArr.size(); i++) AssertEQ<std::string>(data.stringOpenArr[i], exp.stringOpenArr[i], "stringOpenArr");
+	for (size_t i = 0; i < data.stringOpenArr.size(); i++) { AssertEQ<std::string>(data.stringOpenArr[i], exp.stringOpenArr[i], "stringOpenArr"); }
 
-	//   std::string stringFixArr[5];
-	for (int i = 0; i < 5; i++) AssertEQ<std::string>(data.stringFixArr[i], exp.stringFixArr[i], "stringFixArr");
+	for (int i = 0; i < 5; i++) { AssertEQ<std::string>(data.stringFixArr[i], exp.stringFixArr[i], "stringFixArr"); }
 
-	//   ops::strings::fixed_string<23> fixLengthString;
 	AssertEQ<ops::strings::fixed_string<23>>(data.fixLengthString, exp.fixLengthString, "fixLengthString");
 
-	//   std::vector<ops::strings::fixed_string<16>> fixLengthStringOpenArr;
 	AssertEQ<size_t>(data.fixLengthStringOpenArr.size(), exp.fixLengthStringOpenArr.size(), "fixLengthStringOpenArr");
-	for (size_t i = 0; i < data.fixLengthStringOpenArr.size(); i++) AssertEQ<ops::strings::fixed_string<16>>(data.fixLengthStringOpenArr[i], exp.fixLengthStringOpenArr[i], "fixLengthStringOpenArr");
+	for (size_t i = 0; i < data.fixLengthStringOpenArr.size(); i++) { AssertEQ<ops::strings::fixed_string<16>>(data.fixLengthStringOpenArr[i], exp.fixLengthStringOpenArr[i], "fixLengthStringOpenArr"); }
 
-	//   ops::strings::fixed_string<16> fixLengthStringFixArr[10];
-	for (int i = 0; i < 10; i++) AssertEQ<ops::strings::fixed_string<16>>(data.fixLengthStringFixArr[i], exp.fixLengthStringFixArr[i], "fixLengthStringFixArr");
+	for (int i = 0; i < 10; i++) { AssertEQ<ops::strings::fixed_string<16>>(data.fixLengthStringFixArr[i], exp.fixLengthStringFixArr[i], "fixLengthStringFixArr"); }
 
 	// Test fields in ChildData
 	//  enums
 	AssertEQ<TestAll::ChildData::Order>(data.enu1, exp.enu1);
 	AssertEQ<size_t>(data.enuVec.size(), exp.enuVec.size());
-	for (unsigned int i = 0; i < data.enuVec.size(); i++) AssertEQ<TestAll::ChildData::Order>(data.enuVec[i], exp.enuVec[i]);
-	for (int i = 0; i < 6; i++) AssertEQ<TestAll::ChildData::Order>(data.enuFixArr[i], exp.enuFixArr[i]);
+	for (unsigned int i = 0; i < data.enuVec.size(); i++) { AssertEQ<TestAll::ChildData::Order>(data.enuVec[i], exp.enuVec[i]); }
+	for (int i = 0; i < 6; i++) { AssertEQ<TestAll::ChildData::Order>(data.enuFixArr[i], exp.enuFixArr[i]); }
 	AssertEQ< TestAll::Definitions::Command>(data.cmd, exp.cmd);
-	for (int i = 0; i < 2; i++) AssertEQ<TestAll::Definitions::Command>(data.cmds[i], exp.cmds[i]);
+	for (int i = 0; i < 2; i++) { AssertEQ<TestAll::Definitions::Command>(data.cmds[i], exp.cmds[i]); }
 
 	//  core types
 	AssertEQ<bool>(data.bo, exp.bo, "data.bo");
@@ -247,88 +225,71 @@ void checkObjects(TestAll::ChildData& data, TestAll::ChildData& exp)
 
 	AssertEQ<int>(data.fruit.value, exp.fruit.value);
 
+	// vectors
 	AssertEQ<size_t>(data.bos.size(), exp.bos.size());
-	for (unsigned int i = 0; i < data.bos.size(); i++) AssertEQ<bool>(data.bos[i], exp.bos[i]);
-	//	bool fbos[11];
-	for(int i = 0; i < 11; i++) AssertEQ<bool>(data.fbos[i], exp.fbos[i]);
+	for (unsigned int i = 0; i < data.bos.size(); i++) { AssertEQ<bool>(data.bos[i], exp.bos[i]); }
+	for (int i = 0; i < 11; i++) { AssertEQ<bool>(data.fbos[i], exp.fbos[i]); }
 
 	AssertEQ<size_t>(data.bs.size(), exp.bs.size());
-	for (unsigned int i = 0; i < data.bs.size(); i++) AssertEQ<char>(data.bs[i], exp.bs[i]);
-	//	char fbs[256];
-	for(int i = 0; i < 256; i++) AssertEQ<char>(data.fbs[i], exp.fbs[i]);
+	for (unsigned int i = 0; i < data.bs.size(); i++) { AssertEQ<char>(data.bs[i], exp.bs[i]); }
+	for (int i = 0; i < 256; i++) { AssertEQ<char>(data.fbs[i], exp.fbs[i]); }
 
 	AssertEQ<size_t>(data.shs.size(), exp.shs.size());
-	for (unsigned int i = 0; i < data.shs.size(); i++) AssertEQ<short>(data.shs[i], exp.shs[i]);
-	//	short fshs[4];
-	for(int i = 0; i < 4; i++) AssertEQ<short>(data.fshs[i], exp.fshs[i]);
+	for (unsigned int i = 0; i < data.shs.size(); i++) { AssertEQ<short>(data.shs[i], exp.shs[i]); }
+	for (int i = 0; i < 4; i++) { AssertEQ<short>(data.fshs[i], exp.fshs[i]); }
 
 	AssertEQ<size_t>(data.is_.size(), exp.is_.size());
-	for (unsigned int i = 0; i < data.is_.size(); i++) AssertEQ<int>(data.is_[i], exp.is_[i]);
-	//	int fis_[3];
-	for(int i = 0; i < 3; i++) AssertEQ<int>(data.fis_[i], exp.fis_[i]);
+	for (unsigned int i = 0; i < data.is_.size(); i++) { AssertEQ<int>(data.is_[i], exp.is_[i]); }
+	for (int i = 0; i < 3; i++) { AssertEQ<int>(data.fis_[i], exp.fis_[i]); }
 
 	AssertEQ<size_t>(data.ls.size(), exp.ls.size());
-	for (unsigned int i = 0; i < data.ls.size(); i++) AssertEQ<int64_t>(data.ls[i], exp.ls[i]);
-	//	int64_t fls[6];
+	for (unsigned int i = 0; i < data.ls.size(); i++) { AssertEQ<int64_t>(data.ls[i], exp.ls[i]); }
 	for(int i = 0; i < 6; i++) AssertEQ<int64_t>(data.fls[i], exp.fls[i]);
 
 	AssertEQ<size_t>(data.fs.size(), exp.fs.size());
-	for (unsigned int i = 0; i < data.fs.size(); i++) AssertEQ<float>(data.fs[i], exp.fs[i]);
-	//    float ffs[77];
+	for (unsigned int i = 0; i < data.fs.size(); i++) { AssertEQ<float>(data.fs[i], exp.fs[i]); }
 	for(int i = 0; i < 77; i++) AssertEQ<float>(data.ffs[i], exp.ffs[i]);
 
 	AssertEQ<size_t>(data.ds.size(), exp.ds.size());
-	for (unsigned int i = 0; i < data.ds.size(); i++) AssertEQ<double>(data.ds[i], exp.ds[i]);
-	//    double fds[5];
-	for(int i = 0; i < 5; i++) AssertEQ<double>(data.fds[i], exp.fds[i]);
+	for (unsigned int i = 0; i < data.ds.size(); i++) { AssertEQ<double>(data.ds[i], exp.ds[i]); }
+	for (int i = 0; i < 5; i++) { AssertEQ<double>(data.fds[i], exp.fds[i]); }
 
 	AssertEQ<size_t>(data.ss.size(), exp.ss.size());
-	for (unsigned int i = 0; i < data.ss.size(); i++) AssertEQ<std::string>(data.ss[i], exp.ss[i]);
-	//    std::string fss[10];
-	for(int i = 0; i < 10; i++) AssertEQ<std::string>(data.fss[i], exp.fss[i]);
+	for (unsigned int i = 0; i < data.ss.size(); i++) { AssertEQ<std::string>(data.ss[i], exp.ss[i]); }
+	for (int i = 0; i < 10; i++) { AssertEQ<std::string>(data.fss[i], exp.fss[i]); }
 
 	AssertEQ<size_t>(data.test2s.size(), exp.test2s.size());
-	for (unsigned int i = 0; i < data.test2s.size(); i++) checkObjects(*data.test2s[i], *exp.test2s[i]);
-	//    TestData* ftest2s[5];
-	for(int i = 0; i < 5; i++) checkObjects(*data.ftest2s[i], *exp.ftest2s[i]);
+	for (unsigned int i = 0; i < data.test2s.size(); i++) { checkObjects(*data.test2s[i], *exp.test2s[i]); }
+	for (int i = 0; i < 5; i++) { checkObjects(*data.ftest2s[i], *exp.ftest2s[i]); }
 
 	AssertEQ<size_t>(data.secondVirtArray.size(), exp.secondVirtArray.size());
-	for (unsigned int i = 0; i < data.secondVirtArray.size(); i++) checkObjects(*data.secondVirtArray[i], *exp.secondVirtArray[i]);
-	//    TestData* fsecondVirtArray[7];
-	for(int i = 0; i < 7; i++) checkObjects(*data.fsecondVirtArray[i], *exp.fsecondVirtArray[i]);
+	for (unsigned int i = 0; i < data.secondVirtArray.size(); i++) { checkObjects(*data.secondVirtArray[i], *exp.secondVirtArray[i]); }
+	for (int i = 0; i < 7; i++) { checkObjects(*data.fsecondVirtArray[i], *exp.fsecondVirtArray[i]); }
 
 	AssertEQ<size_t>(data.test2s2.size(), exp.test2s2.size());
-	for (unsigned int i = 0; i < data.test2s2.size(); i++) checkObjects(data.test2s2[i], exp.test2s2[i]);
-	//    TestData ftest2s2[4];
-	for(int i = 0; i < 4; i++) checkObjects(data.ftest2s2[i], exp.ftest2s2[i]);
+	for (unsigned int i = 0; i < data.test2s2.size(); i++) { checkObjects(data.test2s2[i], exp.test2s2[i]); }
+	for (int i = 0; i < 4; i++) { checkObjects(data.ftest2s2[i], exp.ftest2s2[i]); }
 
 	AssertEQ<size_t>(data.fruitarr.size(), exp.fruitarr.size());
-	for (unsigned int i = 0; i < data.fruitarr.size(); i++) AssertEQ<int>(data.fruitarr[i].value, exp.fruitarr[i].value);
-	//    Fruit ffruitarr[15];
-	for(int i = 0; i < 15; i++) AssertEQ<int>(data.ffruitarr[i].value, exp.ffruitarr[i].value);
+	for (unsigned int i = 0; i < data.fruitarr.size(); i++) { AssertEQ<int>(data.fruitarr[i].value, exp.fruitarr[i].value); }
+	for (int i = 0; i < 15; i++) { AssertEQ<int>(data.ffruitarr[i].value, exp.ffruitarr[i].value); }
 }
 
 // Fill ChildData with fixed values used for tests between languages
 void fillChildData(TestAll::ChildData& data)
 {
 	// Data for fields in BaseData
-	//   std::string baseText;
 	data.baseText = "dynamic string";
-	//   std::vector<std::string> stringOpenArr;
 	data.stringOpenArr.push_back("dyn str 1");
 	data.stringOpenArr.push_back("dyn str 2");
-	//   std::string stringFixArr[5];
 	data.stringFixArr[0] = "dsf 0";
 	data.stringFixArr[1] = "dsf 1";
 	data.stringFixArr[2] = "dsf 2";
 	data.stringFixArr[3] = "dsf 3";
 	data.stringFixArr[4] = "dsf 4";
-	//   ops::strings::fixed_string<23> fixLengthString;
 	data.fixLengthString = "fixed length string";
-	//   std::vector<ops::strings::fixed_string<16>> fixLengthStringOpenArr;
 	data.fixLengthStringOpenArr.push_back("fix len str 1");
 	data.fixLengthStringOpenArr.push_back("fix len str 2");
-	//   ops::strings::fixed_string<16> fixLengthStringFixArr[10];
 	data.fixLengthStringFixArr[0] = "fsf 0";
 	data.fixLengthStringFixArr[1] = "fsf 1";
 	data.fixLengthStringFixArr[2] = "fsf 2";
@@ -380,7 +341,7 @@ void fillChildData(TestAll::ChildData& data)
 	data.bos.push_back(true);
 	data.bos.push_back(false);
 
-	//	bool fbos[11];
+	// vectors
 	memset(&data.fbos, 0, sizeof(data.fbos));
 	data.fbos[5] = true;
 	data.fbos[10] = true;
@@ -389,13 +350,11 @@ void fillChildData(TestAll::ChildData& data)
 	data.bs.push_back(20);
 	data.bs.push_back(30);
 
-	//	char fbs[256];
-	for(int i = 0; i < 256; i++) data.fbs[i] = (char)i;
+	for (int i = 0; i < 256; i++) { data.fbs[i] = (char)i; }
 
 	data.shs.push_back(1111);
 	data.shs.push_back(2222);
 
-	//	short fshs[4];
 	data.fshs[0] =  21;
 	data.fshs[1] = 121;
 	data.fshs[2] = 221;
@@ -406,7 +365,6 @@ void fillChildData(TestAll::ChildData& data)
 	data.is_.push_back(110101);
 	data.is_.push_back(111111);
 
-	//	int fis_[3];
 	data.fis_[0] = -1;
 	data.fis_[1] = -2;
 	data.fis_[2] = -3;
@@ -416,7 +374,6 @@ void fillChildData(TestAll::ChildData& data)
 	data.ls.push_back(7);
 	data.ls.push_back(6);
 
-	//	int64_t fls[6];
 	data.fls[0] = 9999;
 	data.fls[1] = 9998;
 	data.fls[2] = 9997;
@@ -429,14 +386,12 @@ void fillChildData(TestAll::ChildData& data)
 	data.fs.push_back(4.56f);
 	data.fs.push_back(987.0f);
 
-	//    float ffs[77];
-	for(int i = 0; i < 77; i++) data.ffs[i] = 0.0;
+	for (int i = 0; i < 77; i++) { data.ffs[i] = 0.0; }
 	data.ffs[21] = 3.1415f;
 
 	data.ds.push_back(1.987654321);
 	data.ds.push_back(2.3456789);
 
-	//    double fds[5];
 	data.fds[0] = 1.1;
 	data.fds[1] = 2.1;
 	data.fds[2] = 3.1;
@@ -447,31 +402,24 @@ void fillChildData(TestAll::ChildData& data)
 	data.ss.push_back("Index 1");
 	data.ss.push_back("Index 2");
 
-	//    std::string fss[10];
 	data.fss[4] = "4 string";
 	data.fss[7] = "7 string";
 	data.fss[9] = "9 string";
 
-	//    std::vector<TestData*> test2s;
 	data.test2s.push_back(new TestAll::TestData());
 	data.test2s.push_back(new TestAll::TestData());
 	data.test2s.push_back(new TestAll::TestData());
 	data.test2s.push_back(new TestAll::TestData());
-	//    TestData* ftest2s[5];
 	data.ftest2s[2]->text = "Index 2";
 	data.ftest2s[2]->value = 7.7;
 
-	//    std::vector<TestData*> secondVirtArray;
 	data.secondVirtArray.push_back(new TestAll::TestData());
 	data.secondVirtArray.push_back(new TestAll::TestData());
-	//    TestData* fsecondVirtArray[7];
 	data.fsecondVirtArray[5]->text = "Index 5";
 	data.fsecondVirtArray[5]->value = -9.99;
 
-	//    std::vector<TestData> test2s2;
 	data.test2s2.reserve(11);
 	data.test2s2.resize(11);
-	//    TestData ftest2s2[4];
 	data.ftest2s2[3].text = "";
 	data.ftest2s2[1].value = 710.6;
 
@@ -480,19 +428,18 @@ void fillChildData(TestAll::ChildData& data)
 	data.fruitarr[0].value = TestAll::Fruit::PEAR;
 	data.fruitarr[1].value = TestAll::Fruit::BANANA;
 
-	//    Fruit ffruitarr[15];
 	data.ffruitarr[0].value = TestAll::Fruit::PEAR;
 	data.ffruitarr[14].value = TestAll::Fruit::PEAR;
 }
 
 volatile bool gTerminate = false;
 
-void SignalHandler(int const signal)
+void SignalHandler(const int signal)
 {
 	if (signal == SIGINT) { gTerminate = true; }
 }
 
-int main(int argc, const char* args[])
+int main(const int argc, const char* args[])
 {
 #if defined(DEBUG_OPSOBJECT_COUNTER)
 	std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
@@ -510,22 +457,12 @@ int main(int argc, const char* args[])
 #ifdef _WIN32
 		_CrtMemState s1, s2, sd;
 		_CrtMemCheckpoint(&s1);
-#endif
 
 		ops::OPSObject od0;
-//		TestAll::BaseData bd0;
-//		TestAll::ChildData cd0;
 
-#ifdef _WIN32
 		_CrtMemCheckpoint(&s2);
 		_CrtMemDifference(&sd, &s1, &s2);
 #endif
-
-//		TestAll::BaseData& pbd1 = bd0;
-//		TestAll::BaseData& pbd2 = cd0;
-
-//		pbd1 = pbd2;
-//		TestAll::BaseData bd1(pbd2);
 
 		// ===========================================
 
@@ -578,7 +515,7 @@ int main(int argc, const char* args[])
 
 		// Delete first object, recreate it and compare again
 		// This to check that cd2 is really a deep clone (no common object)
-	///TODO
+		///TODO
 
 
 		std::cout << "Finished " << std::endl;

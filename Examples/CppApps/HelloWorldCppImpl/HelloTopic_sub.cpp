@@ -64,16 +64,20 @@ public:
 	{
 		delete sub;
 	}
+	Main(Main const&) = delete;
+	Main(Main&&) = delete;
+	Main& operator =(Main&&) = delete;
+	Main& operator =(Main const&) = delete;
 
 };
 
 //Application entry point
-int main(int argc, char* args[])
+int main(const int argc, const char* args[])
 {
 	//Create an object that will listen to OPS events
 	UNUSED(argc);
 	UNUSED(args);
-	Main m;
+	Main const m;
 
 	//Just keep program alive, action will take place in Main::onNewData()
 	while(true)

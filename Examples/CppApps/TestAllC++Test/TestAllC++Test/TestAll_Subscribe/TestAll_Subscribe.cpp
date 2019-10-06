@@ -32,8 +32,9 @@ public:
 
 	ops::Receiver* rec;
 	char bytes[100];
+
 public:
-	virtual void onNewEvent(ops::Notifier<ops::BytesSizePair>* const sender, ops::BytesSizePair const byteSizePair) override
+	virtual void onNewEvent(ops::Notifier<ops::BytesSizePair>* sender, ops::BytesSizePair const byteSizePair) override
 	{
 		UNUSED(sender);
 		UNUSED(byteSizePair);
@@ -108,7 +109,7 @@ public:
 		//}
 	}
 	///Override from ops::DataListener, called whenever new data arrives.
-	virtual void onNewData(ops::DataNotifier* const subscriber) override
+	virtual void onNewData(ops::DataNotifier* subscriber) override
 	{
 		if(subscriber == sub) {
 			sub->numReservedMessages();
@@ -167,21 +168,13 @@ public:
 		} else if (subscriber == baseSub) {
 			//Sleep(100000);
 			TestAll::BaseData* const data = dynamic_cast<TestAll::BaseData*>(baseSub->getMessage()->getData());
-			if (data == nullptr) return;
+			if (data == nullptr) { return; }
 			std::cout << std::endl << data->baseText << " " << baseSub->getMessage()->getPublicationID() << " From: " << baseSub->getMessage()->getPublisherName() << std::endl;
 
 		} else if (subscriber == piSub) {
 			ops::ParticipantInfoData* const data = dynamic_cast<ops::ParticipantInfoData*>(piSub->getMessage()->getData());
-			if (data == nullptr) return;
-			//std::string name;
-			//std::string id;
-			//std::string domain;
-			//std::string ip;
+			if (data == nullptr) { return; }
 			std::cout << "name: " << data->name << ", id: " << data->id << ", domain: " << data->domain << ", ip: " << data->ip << std::endl;
-			//std::string languageImplementation;
-			//std::string opsVersion;
-			//int mc_udp_port;
-			//int mc_tcp_port;
 			std::cout << "  lang: " << data->languageImplementation << ", opsver: " << data->opsVersion << ", mcudp: " << data->mc_udp_port << ", mctcp: " << data->mc_tcp_port << std::endl;
 			//std::vector<TopicInfoData> subscribeTopics;
 			std::cout << "  subscr Topics: ";
@@ -204,25 +197,29 @@ public:
 		}
 	}
 	///Override from ops::DeadlineMissedListener, called if no new data has arrived within deadlineQoS.
-	virtual void onDeadlineMissed(ops::DeadlineMissedEvent* const evt) override
+	virtual void onDeadlineMissed(ops::DeadlineMissedEvent* evt) override
 	{
 		UNUSED(evt);
 		std::cout << "Deadline Missed!" << std::endl;
 	}
 	virtual ~Main()
 	{
-		if (baseSub != nullptr) baseSub->stop();
-		if (baseSub != nullptr) delete baseSub;
-		if (sub != nullptr) sub->stop();
-		if (sub != nullptr) delete sub;
-		if (piSub != nullptr) piSub->stop();
-		if (piSub != nullptr) delete piSub;
+		if (baseSub != nullptr) { baseSub->stop(); }
+		if (baseSub != nullptr) { delete baseSub; }
+		if (sub != nullptr) { sub->stop(); }
+		if (sub != nullptr) { delete sub; }
+		if (piSub != nullptr) { piSub->stop(); }
+		if (piSub != nullptr) { delete piSub; }
 	}
-
+	Main() = delete;
+	Main(Main const&) = delete;
+	Main(Main&&) = delete;
+	Main& operator =(Main&&) = delete;
+	Main& operator =(Main const&) = delete;
 };
 
 //Application entry point
-int main(int argc, char* argv[])
+int main(const int argc, const char* argv[])
 {
 	UNUSED(argv);
 	ops::Participant* const participant = ops::Participant::getInstance("TestAllDomain");
@@ -234,8 +231,7 @@ int main(int argc, char* argv[])
 
 	//Make sure the OPS ioService never runs out of work.
 	//Run it on main application thread only.
-	for(int i = 0; i < 100; i++)
-	{
+	for(int i = 0; i < 100; i++) {
 		ops::TimeHelper::sleep(100);
 		//break;
 		/*m.sub->aquireMessageLock();

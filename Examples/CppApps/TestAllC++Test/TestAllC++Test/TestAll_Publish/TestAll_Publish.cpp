@@ -68,7 +68,7 @@ int64_t getNow()
 }
 #endif
 
-int main(int argc, const char* args[])
+int main(const int argc, const char* args[])
 {
 	int mainSleep = 40;
 	int nrOfFloats = 500;
@@ -119,50 +119,24 @@ int main(int argc, const char* args[])
 	ErrorWriter* const errorWriter = new ErrorWriter(std::cout);
 	participant->addListener(errorWriter);
 
-	/*Sleep(2000);
-	ops::Sender* tcpServer = ops::Sender::createTCPServer("", 1342, participant->getIOService());
-
-	while(true)
-	{
-		Sleep(10);
-		tcpServer->sendTo("Hello World!", 13, "", 0);
-	}
-	return 1;*/
-
-
 	//Create topic, might throw ops::NoSuchTopicException
 	Topic const topic = participant->createTopic("ChildTopic");
 
-	/*{
-		Topic scoopedTopic;
-		scoopedTopic = participant->createTopic("ChildTopic");
-		topic = scoopedTopic;
-	}*/
-	
-	//topic.setDomainAddress("10.73.4.93");
 	//Create a publisher on that topic
 	ChildDataPublisher pub(topic);
 	pub.setName("TestAllPublisher");
 	pub.sendSleepTime = sendSleepTime;
 	pub.sleepEverySendPacket = sleepEveryNrPackets;
 
-
-
-
 	Topic const baseTopic = participant->createTopic("BaseTopic");
 
 	BaseDataPublisher basePub(baseTopic);
 	basePub.setName("BasePublisher");
 
-
-
-
-
 	//Create some data to publish
 	ChildData data;
 	BaseData baseData;
 	baseData.baseText = "Text from base";
-
 
 	//Set Base class field
 	data.baseText = "Hello";
@@ -200,49 +174,6 @@ int main(int argc, const char* args[])
 	
 	data.setKey("key1");
 
-	//return 0;
-
-	//for(int i = 0; i < nrOfFloats; i++)
-	//{
-	//	data.fs.push_back((float)i);
-	//}
-
-	
-	/*TestData testData2;
-	testData2.text = "text in aggregated array element class";
-	testData2.value = 2.0;
-
-	TestData testData3;
-	testData3.text = "text in aggregated array element class";
-	testData3.value = 3.0;
-
-	data.test2s.push_back(new TestData());
-	data.test2s.push_back(new TestData());
-
-	data.test2s2.push_back(testData3);
-	data.test2s2.push_back(testData2);
-
-	std::ofstream oStream("hatt.xml");
-
-	ops::XMLArchiverOut archiver(oStream, "config");
-
-	archiver.inout(std::string("data"), &data);
-
-	archiver.close();
-
-	oStream.close();*/
-
-	//std::ifstream iStream ("fulfile.xml");
-
-	//ops::XMLArchiverIn archiverIn(iStream, "file");
-
-	//
-	//ops::Serializable* ser = archiverIn.inout(std::string("data"), (OPSObject*)nullptr);
-
-
-
-	//return 0;
-
 	ChildData* const dataClone = dynamic_cast<ChildData*>(data.clone());
 
 	double theta = 0.0;
@@ -264,16 +195,14 @@ int main(int argc, const char* args[])
 
 		dataClone->fs.clear();
 		dataClone->ds.clear();
-		for (float v = 0; v < 600; v++)
-		{
-			dataClone->fs.push_back((float)(offset + (fact * sin(v * pi / 180.0))));
+		for (int v = 0; v < 600; v++)	{
+			dataClone->fs.push_back((float)(offset + (fact * sin((float)v * pi / 180.0))));
 			dataClone->ds.push_back(-offset + (fact * cos(v * pi / 180.0)));
 		}
 
 		pub.write(dataClone);
 
-		if(dataClone->i % 10 == 0)
-		{
+		if(dataClone->i % 10 == 0) {
 			basePub.write(&baseData);
 		//	std::cout << "Writing BaseTopic " << std::endl;
 		}

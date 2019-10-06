@@ -15,7 +15,7 @@
 #include <stdlib.h>
 #endif
 
-int main(int argc, const char* args[])
+int main(const int argc, const char* args[])
 {
 	UNUSED(argc);
 	UNUSED(args);
