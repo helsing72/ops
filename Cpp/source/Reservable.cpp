@@ -1,3 +1,25 @@
+/**
+*
+* Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2019 Lennart Andersson.
+*
+* This file is part of OPS (Open Publish Subscribe).
+*
+* OPS (Open Publish Subscribe) is free software: you can redistribute it and/or modify
+* it under the terms of the GNU Lesser General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+
+* OPS (Open Publish Subscribe) is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU Lesser General Public License for more details.
+*
+* You should have received a copy of the GNU Lesser General Public License
+* along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#include <assert.h>
 
 #include "OPSTypeDefs.h"
 #include "Reservable.h"
@@ -6,16 +28,13 @@
 namespace ops
 {
 
-	Reservable::Reservable()
+	Reservable::Reservable(const Reservable&)
 	{
+		// Should not copy our data
 	}
-	Reservable::Reservable(const Reservable& r)
+	Reservable& Reservable::operator= (const Reservable&)
 	{
-		UNUSED(r);
-	}
-	Reservable& Reservable::operator = (const Reservable& l)
-	{
-		UNUSED(l);
+		// Should not copy our data
 		return *this;
 	}
 	
@@ -23,15 +42,14 @@ namespace ops
 	{
 		referenceHandler = refHandler;
 	}
-	ReferenceHandler* Reservable::getReferenceHandler()
+	ReferenceHandler* Reservable::getReferenceHandler() const
 	{
 		return referenceHandler;
 	}
+
 	void Reservable::reserve()
 	{
-		incLock.lock();
 		nrOfReservations++;
-		incLock.unlock();
 		if(referenceHandler != nullptr)
 		{
 			referenceHandler->onNewEvent(this, ReserveInfo(this, nrOfReservations));
@@ -39,20 +57,22 @@ namespace ops
 	}
 	void Reservable::unreserve()
 	{
-		incLock.lock();
 		nrOfReservations--;
-		incLock.unlock();
 		if(referenceHandler != nullptr)
 		{
 			referenceHandler->onNewEvent(this, ReserveInfo(this, nrOfReservations));
 		}
 	}
-	int Reservable::getNrOfReservations()
+	int Reservable::getNrOfReservations() const
 	{
 		return nrOfReservations;
 	}
+
 	Reservable::~Reservable()
 	{
+#ifndef OPS_REMOVE_ASSERT
+		assert(nrOfReservations == 0);
+#endif
 	}
 
 }

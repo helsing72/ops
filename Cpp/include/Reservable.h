@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -21,31 +22,37 @@
 #ifndef ops_Reservable_h
 #define ops_Reservable_h
 
-#include "Lockable.h"
+#include <atomic>
+
 #include "OPSExport.h"
 
 namespace ops
 {
 	class ReferenceHandler;
+
 	class OPS_EXPORT Reservable
 	{
 	public:
-		Reservable();
+		Reservable() = default;
 		Reservable(const Reservable& r);
-		Reservable & operator = (const Reservable& l);
-		
-		void setReferenceHandler(ReferenceHandler* refHandler);
-		ReferenceHandler* getReferenceHandler();
-	    void reserve();
-		void unreserve();
-		int getNrOfReservations();
+		Reservable& operator= (const Reservable& l);
+		Reservable(Reservable&&) = delete;
+		Reservable& operator =(Reservable&&) = delete;
 		virtual ~Reservable();
+
+		void setReferenceHandler(ReferenceHandler* refHandler);
+		ReferenceHandler* getReferenceHandler() const;
+
+		void reserve();
+		void unreserve();
+
+		int getNrOfReservations() const;
+
+		int kalle;
 	private:
-		Lockable incLock;
-		int nrOfReservations = 0;
-		ReferenceHandler* referenceHandler = nullptr;
+		std::atomic<int> nrOfReservations{ 0 };
+		ReferenceHandler* referenceHandler{ nullptr };
 	};
 
 }
-
 #endif

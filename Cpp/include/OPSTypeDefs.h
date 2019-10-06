@@ -65,6 +65,9 @@
 #define NOEXCEPT noexcept
 
 
+//#define OPS_REMOVE_ASSERT			// Define to skip assert() calls in OPS code.
+									// (can also be done by defining NDEBUG)
+
 //#define OPSSLIM_NORESERVE			// Removes Reservable from OPSMessage
 
 //#define REPLACE_TRANSPORT_LAYER	// Removes IOService.cpp, Sender.cpp, Receiver.cpp, DeadlineTimer.cpp,
