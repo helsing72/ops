@@ -1,3 +1,6 @@
+
+//parasoft-begin-suppress ALL "suppress all rules for this XMLPARSER Library"
+
 /**
  ****************************************************************************
  * <P> XML.c - implementation file for basic XML parser written in ANSI C++
