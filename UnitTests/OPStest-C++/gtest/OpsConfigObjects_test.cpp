@@ -285,7 +285,7 @@ TEST(Test_OPSConfigObjects, TestChannel_Populate) {
 	EXPECT_EQ(obj1.inSocketBufferSize, 200000);
 
 	Topic top;
-	obj1.populateTopic(&top);
+	obj1.populateTopic(top);
 	EXPECT_STREQ(top.getTransport().c_str(), Topic::TRANSPORT_UDP.c_str());
 	EXPECT_STREQ(top.getLocalInterface().c_str(), "127.0.0.1");
 	EXPECT_STREQ(top.getDomainAddress().c_str(), "236.5.6.7");

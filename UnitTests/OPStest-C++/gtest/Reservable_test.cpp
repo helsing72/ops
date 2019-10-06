@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018 Lennart Andersson.
+* Copyright (C) 2018-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -38,6 +38,20 @@ public:
 	{
 		MyObject_Ctr++;
 	}
+	MyObject(const MyObject& r) : Reservable(r)
+	{
+		MyObject_Ctr++;
+	}
+	MyObject& operator= (const MyObject& l)
+	{
+		Reservable::operator=(l);
+		if (&l != this) {
+			// No data to copy
+		}
+		return *this;
+	}
+	MyObject(MyObject&&) = delete;
+	MyObject& operator =(MyObject&&) = delete;
 	virtual ~MyObject()
 	{
 		MyObject_Ctr--;
@@ -124,3 +138,80 @@ TEST(Test_Reservable, TestRefHandler) {
 	EXPECT_EQ(MyObject_Ctr, 0);
 }
 
+TEST(Test_Reservable, TestCopy) {
+
+	{
+		EXPECT_EQ(MyObject_Ctr, 0);
+
+		MyObject obj;
+		obj.reserve();
+		obj.reserve();
+
+		EXPECT_EQ(MyObject_Ctr, 1);
+		EXPECT_EQ(obj.getNrOfReservations(), 2);
+
+		MyObject obj2(obj);
+		EXPECT_EQ(MyObject_Ctr, 2);
+		EXPECT_EQ(obj.getNrOfReservations(), 2);
+		EXPECT_EQ(obj2.getNrOfReservations(), 0);
+		EXPECT_EQ(obj2.getReferenceHandler(), nullptr);
+
+		MyObject obj3;
+		obj3 = obj;
+		EXPECT_EQ(MyObject_Ctr, 3);
+		EXPECT_EQ(obj.getNrOfReservations(), 2);
+		EXPECT_EQ(obj3.getNrOfReservations(), 0);
+		EXPECT_EQ(obj3.getReferenceHandler(), nullptr);
+
+		obj.unreserve();
+		obj.unreserve();
+		EXPECT_EQ(obj.getNrOfReservations(), 0);
+	}
+	EXPECT_EQ(MyObject_Ctr, 0);
+	{
+		ReferenceHandler ref;
+		EXPECT_EQ(ref.size(), 0);
+
+		MyObject* obj = new MyObject();
+		ref.addReservable(obj);
+		obj->reserve();
+		EXPECT_EQ(MyObject_Ctr, 1);
+		EXPECT_EQ(obj->getNrOfReservations(), 1);
+		EXPECT_EQ(obj->getReferenceHandler(), &ref);
+
+		// Copy constructor
+		MyObject* obj2 = new MyObject(*obj);
+		EXPECT_EQ(obj2->getNrOfReservations(), 0);
+		EXPECT_EQ(obj2->getReferenceHandler(), nullptr);
+		ref.addReservable(obj2);
+		obj2->reserve();
+		EXPECT_EQ(MyObject_Ctr, 2);
+		EXPECT_EQ(obj2->getNrOfReservations(), 1);
+		EXPECT_EQ(obj2->getReferenceHandler(), &ref);
+
+		// Assignment constructor
+		MyObject mo;
+		mo = *obj2;
+		EXPECT_EQ(MyObject_Ctr, 3);
+		EXPECT_EQ(mo.getNrOfReservations(), 0);
+		EXPECT_EQ(mo.getReferenceHandler(), nullptr);
+		EXPECT_EQ(obj2->getNrOfReservations(), 1);
+		EXPECT_EQ(obj2->getReferenceHandler(), &ref);
+
+		// Two pointers to same object
+		MyObject* obj3 = obj2;
+		obj3->reserve();
+		EXPECT_EQ(obj3->getNrOfReservations(), 2);
+		EXPECT_EQ(obj2->getNrOfReservations(), 2);
+
+		obj->unreserve();
+		EXPECT_EQ(MyObject_Ctr, 2);
+
+		obj2->unreserve();
+		EXPECT_EQ(MyObject_Ctr, 2);
+
+		obj3->unreserve();
+		EXPECT_EQ(MyObject_Ctr, 1);
+	}
+	EXPECT_EQ(MyObject_Ctr, 0);
+}
