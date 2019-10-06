@@ -81,7 +81,7 @@ namespace ops
 		sendDataHandler->removePublisher(this, topic);
 	}
 
-    Topic Publisher::getTopic()
+    Topic Publisher::getTopic() const
     {
         return this->topic;
     }
@@ -96,12 +96,12 @@ namespace ops
         this->key = key;
     }
 
-    ObjectKey_T Publisher::getKey()
+    ObjectKey_T Publisher::getKey() const
     {
         return this->key;
     }
 
-	ObjectName_T Publisher::getName()
+	ObjectName_T Publisher::getName() const
     {
         return this->name;
     }

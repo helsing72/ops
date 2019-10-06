@@ -89,12 +89,12 @@ namespace ops
 		if (len > 0) { memcpy((void*)&obj->spareBytes[0], (void*)&spareBytes[0], len); }
 	}
 
-	ObjectKey_T OPSObject::getKey()
+	ObjectKey_T OPSObject::getKey() const
     {
          return key;
     }
 
-	const TypeId_T& OPSObject::getTypeString()
+	const TypeId_T& OPSObject::getTypeString() const
 	{
 		return typesString;
 	}

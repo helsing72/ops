@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -49,16 +50,16 @@ namespace ops
 			{
 				removeReference(notifier);
 			}
-
 		}
 
-		int size()
+		int size() const
 		{
 			return (int)references.size();
 		}
 
 	private:
 		std::vector<Reservable*> references;
+
 		void removeReference(Reservable* reservable)
 		{
 			SafeLock lock(this);
@@ -68,7 +69,6 @@ namespace ops
 				{
 					if(references[i])
 					{
-						//references[i]->removeListener(this);
 						delete references[i];
 						references[i] = nullptr;
 					}

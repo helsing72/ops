@@ -39,12 +39,12 @@ Domain::Domain() :
 	appendType(TypeId_T("Domain"));
 }
 
-Address_T Domain::getDomainAddress()
+Address_T Domain::getDomainAddress() const
 {
 	return domainAddress;
 }
 
-void Domain::checkTopicValues(Topic* top)
+void Domain::checkTopicValues(Topic* const top) const
 {
 	if (top->getDomainAddress() == "") { top->setDomainAddress(domainAddress); }
 	if (top->getLocalInterface() == "") { top->setLocalInterface(localInterface); }
@@ -53,7 +53,7 @@ void Domain::checkTopicValues(Topic* top)
 	if (top->getOutSocketBufferSize() < 0) { top->setOutSocketBufferSize(outSocketBufferSize); }
 }
 
-std::vector<Topic* > Domain::getTopics()
+std::vector<Topic* > Domain::getTopics() const
 {
 	for(unsigned int i = 0 ; i < topics.size(); i++) 
 	{
@@ -62,7 +62,7 @@ std::vector<Topic* > Domain::getTopics()
 	return topics;
 }
 
-Topic Domain::getTopic(ObjectName_T name)
+Topic Domain::getTopic(ObjectName_T const name) const
 {
 	for(unsigned int i = 0 ; i < topics.size(); i++)
 	{
@@ -78,7 +78,7 @@ Topic Domain::getTopic(ObjectName_T name)
 	throw NoSuchTopicException(msg);
 }
 
-bool Domain::existsTopic(ObjectName_T name)
+bool Domain::existsTopic(ObjectName_T const name) const
 {
 	for(unsigned int i = 0 ; i < topics.size(); i++)
 	{
@@ -90,7 +90,7 @@ bool Domain::existsTopic(ObjectName_T name)
 	return false;
 }
 
-ObjectName_T Domain::getDomainID()
+ObjectName_T Domain::getDomainID() const
 {
 	return domainID;
 }
@@ -117,7 +117,7 @@ void Domain::serialize(ArchiverInOut* archiver)
 	}
 }
 
-Channel* Domain::findChannel(ChannelId_T id)
+Channel* Domain::findChannel(ChannelId_T const id) const
 {
 	if (id != "") {
 		for (unsigned int i = 0; i < channels.size(); i++) {
@@ -127,7 +127,7 @@ Channel* Domain::findChannel(ChannelId_T id)
 	return nullptr;
 }
 
-Topic* Domain::findTopic(ObjectName_T id)
+Topic* Domain::findTopic(ObjectName_T const id) const
 {
 	if (id != "") {
 		for (unsigned int i = 0; i < topics.size(); i++) {
@@ -143,7 +143,7 @@ void Domain::checkTransports()
 	// Loop over all transports and for each topic, see if it needs parameters from the channel
 	for (unsigned int i = 0; i < transports.size(); i++) {
 		// Get channel
-		Channel* channel = findChannel(transports[i]->channelID);
+		Channel* const channel = findChannel(transports[i]->channelID);
 		if (channel == nullptr) {
 			ExceptionMessage_T msg("Non existing channelID: '");
 			msg += transports[i]->channelID;
@@ -151,46 +151,46 @@ void Domain::checkTransports()
 			throw ops::ConfigException(msg);
 		} else {
 			for (unsigned int j = 0; j < transports[i]->topics.size(); j++) {
-				Topic* top = findTopic(transports[i]->topics[j]);
+				Topic* const top = findTopic(transports[i]->topics[j]);
 				if (top == nullptr) {
 					ExceptionMessage_T msg("Non existing topicID: '");
 					msg += transports[i]->topics[j];
 					msg += "' used in transport specification.";
 					throw ops::ConfigException(msg);
 				} else {
-					channel->populateTopic(top);
+					channel->populateTopic(*top);
 				}
 			}
 		}
 	}
 }
 
-int Domain::getTimeToLive()
+int Domain::getTimeToLive() const
 {
 	return timeToLive;
 }
 
-Address_T Domain::getLocalInterface()
+Address_T Domain::getLocalInterface() const
 {
 	return localInterface;
 }
 
-int Domain::getInSocketBufferSize()
+int Domain::getInSocketBufferSize() const
 {
 	return inSocketBufferSize;
 }
 
-int Domain::getOutSocketBufferSize()
+int Domain::getOutSocketBufferSize() const
 {
 	return outSocketBufferSize;
 }
 
-int Domain::getMetaDataMcPort()
+int Domain::getMetaDataMcPort() const
 {
 	return metaDataMcPort;
 }
 
-int Domain::getDebugMcPort()
+int Domain::getDebugMcPort() const
 {
 	return debugMcPort;
 }

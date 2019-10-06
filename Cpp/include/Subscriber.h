@@ -72,18 +72,18 @@ namespace ops
         ///If no message is received within deadline,
         ///listeners to deadlineMissedEvent will be notified
         void setDeadlineQoS(int64_t deadlineT);
-        int64_t getDeadlineQoS();
+        int64_t getDeadlineQoS() const;
 
         void addFilterQoSPolicy(FilterQoSPolicy* fqos);
         void removeFilterQoSPolicy(FilterQoSPolicy* fqos);
 
-        int64_t getTimeBasedFilterQoS();                                    // (CB)
+        int64_t getTimeBasedFilterQoS() const;                              // (CB)
         ///Sets the minimum time separation between to consecutive messages.
         ///Received messages in between will be ignored by this Subscriber
         void setTimeBasedFilterQoS(int64_t timeBaseMinSeparationMillis);    // (CB)
 
         ///Returns a copy of this subscribers Topic.
-        Topic getTopic();                                                   // (CB)
+        Topic getTopic() const;                                             // (CB)
 
         ///Waits for new data to arrive or timeout.
         ///Returns: true if new data (i.e. unread data) exist.
@@ -91,7 +91,7 @@ namespace ops
 
         ///Checks if new data exist (same as 'waitForNewData(0)' but faster) 
         ///Returns: true if new data (i.e. unread data) exist.
-        bool newDataExist() {                                               // (CB)
+        bool newDataExist() const {                                         // (CB)
             return hasUnreadData;
         }
 
@@ -114,7 +114,7 @@ namespace ops
             return receiveDataHandler->numReservedMessages();
         }
 
-        ObjectName_T getName();                                             // (CB)
+        ObjectName_T getName() const;                                       // (CB)
         void setName(ObjectName_T name);                                    // (CB)
 
         bool isDeadlineMissed();

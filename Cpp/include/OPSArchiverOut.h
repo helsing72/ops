@@ -47,9 +47,9 @@ namespace ops
         }
 
 		// Returns true if it's an output archiver
-		virtual bool isOut() { return true; }
+		virtual bool isOut() override { return true; }
 
-		void inout(InoutName_T name, bool& value)
+		void inout(InoutName_T name, bool& value) override
         {
             UNUSED(name)
             char ch = 0;
@@ -57,49 +57,49 @@ namespace ops
             buf.WriteChar(ch);
         }
 
-        void inout(InoutName_T name, char& value)
+        void inout(InoutName_T name, char& value) override
         {
             UNUSED(name)
             buf.WriteChar(value);
         }
 
-        void inout(InoutName_T name, int& value)
+        void inout(InoutName_T name, int& value) override
         {
             UNUSED(name)
             buf.WriteInt(value);
         }
 
-        void inout(InoutName_T name, int16_t& value)
+        void inout(InoutName_T name, int16_t& value) override
         {
             UNUSED(name)
             buf.WriteShort(value);
         }
 
-        void inout(InoutName_T name, int64_t& value)
+        void inout(InoutName_T name, int64_t& value) override
         {
             UNUSED(name)
             buf.WriteLong(value);
         }
 
-        void inout(InoutName_T name, float& value)
+        void inout(InoutName_T name, float& value) override
         {
             UNUSED(name)
             buf.WriteFloat(value);
         }
 
-        void inout(InoutName_T name, double& value)
+        void inout(InoutName_T name, double& value) override
         {
             UNUSED(name)
             buf.WriteDouble(value);
         }
 
-        void inout(InoutName_T name, std::string& value)
+        void inout(InoutName_T name, std::string& value) override
         {
             UNUSED(name)
             buf.WriteString(value);
         }
 
-		virtual void inoutfixstring(InoutName_T name, char* value, int& size, int max_size, int idx)
+		virtual void inoutfixstring(InoutName_T name, char* value, int& size, int max_size, int idx) override
 		{
 			UNUSED(name)
 			UNUSED(max_size)
@@ -108,13 +108,13 @@ namespace ops
 			buf.WriteChars(value, size);
 		}
 		
-		void inout(InoutName_T name, char* buffer, int bufferSize)
+		void inout(InoutName_T name, char* buffer, int bufferSize) override
         {
             UNUSED(name)
             buf.WriteChars(buffer, bufferSize);
         }
 
-        void inout(InoutName_T name, Serializable& value)
+        void inout(InoutName_T name, Serializable& value) override
         {
             UNUSED(name)
             TypeId_T typeS = ((OPSObject&) value).getTypeString();
@@ -122,7 +122,7 @@ namespace ops
             value.serialize(this);
         }
 
-        Serializable* inout(InoutName_T name, Serializable* value, int element)
+        Serializable* inout(InoutName_T name, Serializable* value, int element) override
         {
             UNUSED(name)
             UNUSED(element)
@@ -132,7 +132,7 @@ namespace ops
             return value;
         }
 
-        Serializable* inout(InoutName_T name, Serializable* value)
+        Serializable* inout(InoutName_T name, Serializable* value) override
         {
             UNUSED(name)
             TypeId_T typeS = ((OPSObject*) value)->getTypeString();
@@ -141,105 +141,105 @@ namespace ops
             return value;
         }
 
-        void inout(InoutName_T name, std::vector<bool>& value)
+        void inout(InoutName_T name, std::vector<bool>& value) override
         {
             UNUSED(name)
             buf.WriteBooleans(value);
         }
 
-        void inout(InoutName_T name, std::vector<char>& value)
+        void inout(InoutName_T name, std::vector<char>& value) override
         {
             UNUSED(name)
             buf.WriteBytes(value);
         }
 
-        void inout(InoutName_T name, std::vector<int>& value)
+        void inout(InoutName_T name, std::vector<int>& value) override
         {
             UNUSED(name)
             buf.WriteInts(value);
         }
 
-        void inout(InoutName_T name, std::vector<int16_t>& value)
+        void inout(InoutName_T name, std::vector<int16_t>& value) override
         {
             UNUSED(name)
             buf.WriteShorts(value);
         }
 
-        void inout(InoutName_T name, std::vector<int64_t>& value)
+        void inout(InoutName_T name, std::vector<int64_t>& value) override
         {
             UNUSED(name)
             buf.WriteLongs(value);
         }
 
-        void inout(InoutName_T name, std::vector<float>& value)
+        void inout(InoutName_T name, std::vector<float>& value) override
         {
             UNUSED(name)
             buf.WriteFloats(value);
         }
 
-        void inout(InoutName_T name, std::vector<double>& value)
+        void inout(InoutName_T name, std::vector<double>& value) override
         {
             UNUSED(name)
             buf.WriteDoubles(value);
         }
 
-        void inout(InoutName_T name, std::vector<std::string>& value)
+        void inout(InoutName_T name, std::vector<std::string>& value) override
         {
             UNUSED(name)
             buf.WriteStrings(value);
         }
 
 		///TODO all inoutfixarr methods need to handle byte order on BIG ENDIAN SYSTEMS
-		void inoutfixarr(InoutName_T name, bool* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, bool* value, int numElements, int totalSize) override
 		{
 			UNUSED(name)
 			buf.WriteInt(numElements);
 			buf.WriteChars((char *)value, totalSize);
 		}
 
-		void inoutfixarr(InoutName_T name, char* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, char* value, int numElements, int totalSize) override
 		{
 			UNUSED(name)
 			buf.WriteInt(numElements);
 			buf.WriteChars((char *)value, totalSize);
 		}
 
-		void inoutfixarr(InoutName_T name, int* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, int* value, int numElements, int totalSize) override
 		{
 			UNUSED(name)
 			buf.WriteInt(numElements);
 			buf.WriteChars((char *)value, totalSize);
 		}
 
-		void inoutfixarr(InoutName_T name, int16_t* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, int16_t* value, int numElements, int totalSize) override
 		{
 			UNUSED(name)
 			buf.WriteInt(numElements);
 			buf.WriteChars((char *)value, totalSize);
 		}
 
-		void inoutfixarr(InoutName_T name, int64_t* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, int64_t* value, int numElements, int totalSize) override
 		{
 			UNUSED(name)
 			buf.WriteInt(numElements);
 			buf.WriteChars((char *)value, totalSize);
 		}
 
-		void inoutfixarr(InoutName_T name, float* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, float* value, int numElements, int totalSize) override
 		{
 			UNUSED(name)
 			buf.WriteInt(numElements);
 			buf.WriteChars((char *)value, totalSize);
 		}
 
-		void inoutfixarr(InoutName_T name, double* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, double* value, int numElements, int totalSize) override
 		{
 			UNUSED(name)
 			buf.WriteInt(numElements);
 			buf.WriteChars((char *)value, totalSize);
 		}
 
-		void inoutfixarr(InoutName_T name, std::string* value, int numElements)
+		void inoutfixarr(InoutName_T name, std::string* value, int numElements) override
         {
             UNUSED(name)
             buf.WriteInt(numElements);
@@ -248,14 +248,14 @@ namespace ops
             }
         }
 
-        int beginList(InoutName_T name, int size)
+        int beginList(InoutName_T name, int size) override
         {
             UNUSED(name)
             buf.WriteInt(size);
             return size;
         }
 
-        void endList(InoutName_T name)
+        void endList(InoutName_T name) override
         {
             //Nothing to do in this implementation
             UNUSED(name)

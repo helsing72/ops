@@ -40,41 +40,41 @@ namespace ops
 		Topic();
 
 		void setDomainID(ObjectName_T domID);
-		ObjectName_T getDomainID();
+		ObjectName_T getDomainID() const;
 
         void setParticipantID(ObjectName_T partID);
-		ObjectName_T getParticipantID();
+		ObjectName_T getParticipantID() const;
 
 		void setTransport(Transport_T transp);
-		Transport_T getTransport();
+		Transport_T getTransport() const;
 
-		ObjectName_T getName();
-		TypeId_T getTypeID();
+		ObjectName_T getName() const;
+		TypeId_T getTypeID() const;
 
 		void setDomainAddress(Address_T domainAddr);
-		Address_T getDomainAddress();
+		Address_T getDomainAddress() const;
 
 		void setLocalInterface(Address_T localIf);
-		Address_T getLocalInterface();
+		Address_T getLocalInterface() const;
 
 		void setSampleMaxSize(int size);
-		int getSampleMaxSize();
+		int getSampleMaxSize() const;
 
 		void setPort(int port);
-		int getPort();
+		int getPort() const;
 
 		void setTimeToLive(int ttl);
-		int getTimeToLive();
+		int getTimeToLive() const;
 
 		void serialize(ArchiverInOut* archiver) override;
 
-		int64_t getOutSocketBufferSize();
+		int64_t getOutSocketBufferSize() const;
 		void setOutSocketBufferSize(int64_t size);
 
-		int64_t getInSocketBufferSize();
+		int64_t getInSocketBufferSize() const;
 		void setInSocketBufferSize(int64_t size);
 
-		Participant* getParticipant()
+		Participant* getParticipant() const
 		{
 			return participant;
 		}

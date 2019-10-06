@@ -6,7 +6,7 @@
 namespace ops {
 
 #ifndef _WIN32
-    void Sleep(int ms)
+    void Sleep(int const ms)
     {
         usleep(1000 * ms);
     }

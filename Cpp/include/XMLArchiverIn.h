@@ -124,9 +124,9 @@ namespace ops
 		}
 
 		// Returns true if it's an output archiver
-		virtual bool isOut() { return false; }
+		virtual bool isOut() override { return false; }
 
-		virtual void inout(InoutName_T name, bool& value)
+		virtual void inout(InoutName_T name, bool& value) override
         {
             if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
@@ -135,7 +135,7 @@ namespace ops
             }
         }
 
-        virtual void inout(InoutName_T name, char& value)
+        virtual void inout(InoutName_T name, char& value) override
         {
             if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
@@ -148,7 +148,7 @@ namespace ops
             }
         }
 
-        virtual void inout(InoutName_T name, int& value)
+        virtual void inout(InoutName_T name, int& value) override
         {
             if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
@@ -161,7 +161,7 @@ namespace ops
             }
         }
 
-        virtual void inout(InoutName_T name, int16_t& value)
+        virtual void inout(InoutName_T name, int16_t& value) override
         {
             if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
@@ -174,7 +174,7 @@ namespace ops
             }
         }
 
-        virtual void inout(InoutName_T name, int64_t& value)
+        virtual void inout(InoutName_T name, int64_t& value) override
         {
             if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
@@ -187,7 +187,7 @@ namespace ops
             }
         }
 
-        virtual void inout(InoutName_T name, float& value)
+        virtual void inout(InoutName_T name, float& value) override
         {
             if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
@@ -200,7 +200,7 @@ namespace ops
             }
         }
 
-        virtual void inout(InoutName_T name, double& value)
+        virtual void inout(InoutName_T name, double& value) override
         {
             if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
@@ -213,7 +213,7 @@ namespace ops
             }
         }
 
-        virtual void inout(InoutName_T name, std::string& value)
+        virtual void inout(InoutName_T name, std::string& value) override
         {
             if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
@@ -229,7 +229,7 @@ namespace ops
             }
         }
 
-		virtual void inoutfixstring(InoutName_T name, char* value, int& size, int max_size, int idx)
+		virtual void inoutfixstring(InoutName_T name, char* value, int& size, int max_size, int idx) override
 		{
 			if (!currentNode.getChildNode(NAME(name), idx).isEmpty())
 			{
@@ -249,7 +249,7 @@ namespace ops
 			}
 		}
 		
-		virtual void inout(InoutName_T name, char* buffer, int bufferSize)
+		virtual void inout(InoutName_T name, char* buffer, int bufferSize) override
         {
 			if (!currentNode.getChildNode(NAME(name)).isEmpty())
 			{
@@ -270,7 +270,7 @@ namespace ops
 			}
 		}
 
-        virtual Serializable* inout(InoutName_T name, Serializable* value, int element)
+        virtual Serializable* inout(InoutName_T name, Serializable* value, int element) override
         {
 			UNUSED(name);
 
@@ -291,7 +291,7 @@ namespace ops
             return newSer;
         }
 
-        virtual void inout(InoutName_T name, Serializable& value)
+        virtual void inout(InoutName_T name, Serializable& value) override
         {
 			if (!currentNode.getChildNode(NAME(name)).isEmpty())
 			{
@@ -306,7 +306,7 @@ namespace ops
 			}
 		}
 
-        virtual Serializable* inout(InoutName_T name, Serializable* value)
+        virtual Serializable* inout(InoutName_T name, Serializable* value) override
         {
             if (value) delete value;
             value = nullptr;
@@ -328,7 +328,7 @@ namespace ops
             return value;
         }
 
-        virtual void inout(InoutName_T name, std::vector<bool>& value)
+        virtual void inout(InoutName_T name, std::vector<bool>& value) override
         {
             if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
@@ -348,7 +348,7 @@ namespace ops
 			}
         }
 
-        virtual void inout(InoutName_T name, std::vector<char>& value)
+        virtual void inout(InoutName_T name, std::vector<char>& value) override
         {
             if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
@@ -372,7 +372,7 @@ namespace ops
 			}
         }
 
-        virtual void inout(InoutName_T name, std::vector<int>& value)
+        virtual void inout(InoutName_T name, std::vector<int>& value) override
         {
             if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
@@ -396,7 +396,7 @@ namespace ops
 			}
         }
 
-        virtual void inout(InoutName_T name, std::vector<int16_t>& value)
+        virtual void inout(InoutName_T name, std::vector<int16_t>& value) override
         {
             if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
@@ -420,7 +420,7 @@ namespace ops
 			}
         }
 
-        virtual void inout(InoutName_T name, std::vector<int64_t>& value)
+        virtual void inout(InoutName_T name, std::vector<int64_t>& value) override
         {
             if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
@@ -444,7 +444,7 @@ namespace ops
 			}
         }
 
-        virtual void inout(InoutName_T name, std::vector<float>& value)
+        virtual void inout(InoutName_T name, std::vector<float>& value) override
         {
             if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
@@ -468,7 +468,7 @@ namespace ops
 			}
         }
 
-        virtual void inout(InoutName_T name, std::vector<double>& value)
+        virtual void inout(InoutName_T name, std::vector<double>& value) override
         {
             if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
@@ -492,7 +492,7 @@ namespace ops
 			}
         }
 
-        virtual void inout(InoutName_T name, std::vector<std::string>& value)
+        virtual void inout(InoutName_T name, std::vector<std::string>& value) override
         {
             if (!currentNode.getChildNode(NAME(name)).isEmpty())
             {
@@ -512,7 +512,7 @@ namespace ops
 			}
         }
 
-		void inoutfixarr(InoutName_T name, bool* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, bool* value, int numElements, int totalSize) override
 		{
 			UNUSED(totalSize);
 
@@ -534,7 +534,7 @@ namespace ops
 			}
 		}
 
-		void inoutfixarr(InoutName_T name, char* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, char* value, int numElements, int totalSize) override
 		{
 			UNUSED(totalSize);
 
@@ -560,7 +560,7 @@ namespace ops
 			}
 		}
 
-		void inoutfixarr(InoutName_T name, int* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, int* value, int numElements, int totalSize) override
 		{
 			UNUSED(totalSize);
 
@@ -586,7 +586,7 @@ namespace ops
 			}
 		}
 
-		void inoutfixarr(InoutName_T name, int16_t* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, int16_t* value, int numElements, int totalSize) override
 		{
 			UNUSED(totalSize);
 
@@ -612,7 +612,7 @@ namespace ops
 			}
 		}
 
-		void inoutfixarr(InoutName_T name, int64_t* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, int64_t* value, int numElements, int totalSize) override
 		{
 			UNUSED(totalSize);
 
@@ -638,7 +638,7 @@ namespace ops
 			}
 		}
 
-		void inoutfixarr(InoutName_T name, float* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, float* value, int numElements, int totalSize) override
 		{
 			UNUSED(totalSize);
 
@@ -664,7 +664,7 @@ namespace ops
 			}
 		}
 
-		void inoutfixarr(InoutName_T name, double* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, double* value, int numElements, int totalSize) override
 		{
 			UNUSED(totalSize);
 
@@ -690,7 +690,7 @@ namespace ops
 			}
 		}
 
-		void inoutfixarr(InoutName_T name, std::string* value, int numElements)
+		void inoutfixarr(InoutName_T name, std::string* value, int numElements) override
         {
 			if (!currentNode.getChildNode(NAME(name)).isEmpty())
 			{
@@ -710,7 +710,7 @@ namespace ops
 			}
 		}
 
-        int beginList(InoutName_T name, int size)
+        int beginList(InoutName_T name, int size) override
         {
             UNUSED(size);
 			PushNode(currentNode);
@@ -723,7 +723,7 @@ namespace ops
             return 0;
         }
 
-        void endList(InoutName_T name)
+        void endList(InoutName_T name) override
         {
             UNUSED(name);
 			PopNode(currentNode);

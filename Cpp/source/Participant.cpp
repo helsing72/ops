@@ -296,7 +296,7 @@ namespace ops
 		OPS_TRACE("Part: Destructor() Finished");
 	}
 
-	ops::Topic Participant::createParticipantInfoTopic()
+	ops::Topic Participant::createParticipantInfoTopic() const
 	{
 		ops::Topic infoTopic("ops.bit.ParticipantInfoTopic", domain->getMetaDataMcPort(), "ops.ParticipantInfoData", domain->getDomainAddress());
 		infoTopic.setLocalInterface(domain->getLocalInterface());
@@ -308,7 +308,7 @@ namespace ops
 	}
 
 #ifdef OPS_ENABLE_DEBUG_HANDLER
-	ops::Topic Participant::createDebugTopic()
+	ops::Topic Participant::createDebugTopic() const
 	{
 		ops::Topic debugTopic("ops.DebugTopic", domain->getDebugMcPort(), opsidls::DebugRequestResponseData::getTypeName(), domain->getDomainAddress());
 		debugTopic.setLocalInterface(domain->getLocalInterface());

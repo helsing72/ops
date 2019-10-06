@@ -205,7 +205,7 @@ namespace ops
         return data;
     }
 
-    Topic Subscriber::getTopic()
+    Topic Subscriber::getTopic() const
     {
         return topic;
     }
@@ -251,7 +251,7 @@ namespace ops
 		cancelDeadlineTimeouts();	// Restart with new timeout
     }
 
-    int64_t Subscriber::getDeadlineQoS()
+    int64_t Subscriber::getDeadlineQoS() const
     {
         return deadlineTimeout;
     }
@@ -266,7 +266,7 @@ namespace ops
         }
     }
 
-    int64_t Subscriber::getTimeBasedFilterQoS()
+    int64_t Subscriber::getTimeBasedFilterQoS() const
     {
         return timeBaseMinSeparationTime;
     }
@@ -290,7 +290,7 @@ namespace ops
 		return false;
     }
 
-	ObjectName_T Subscriber::getName()
+	ObjectName_T Subscriber::getName() const
     {
         return name;
     }

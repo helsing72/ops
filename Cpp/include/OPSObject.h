@@ -58,8 +58,8 @@ namespace ops
 		}
 
     public:
-		ObjectKey_T getKey();
-		const TypeId_T& getTypeString();
+		ObjectKey_T getKey() const;
+		const TypeId_T& getTypeString() const;
 		void setKey(ObjectKey_T k);
 		virtual void serialize(ArchiverInOut* archive) override;
 

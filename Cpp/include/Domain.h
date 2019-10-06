@@ -46,31 +46,30 @@ namespace ops
 		std::vector<Channel* > channels;
 		std::vector<Transport* > transports;
 
-		void checkTopicValues(Topic* top);
+		void checkTopicValues(Topic* top) const;
 		void checkTransports();
-		Channel* findChannel(ChannelId_T id);
-		Topic* findTopic(ObjectName_T id);
+		Channel* findChannel(ChannelId_T id) const;
+		Topic* findTopic(ObjectName_T id) const;
 
 	public:
 		Domain();
-		Address_T getDomainAddress();
-		virtual std::vector<Topic* > getTopics();
-		virtual Topic getTopic(ObjectName_T name);
-		bool existsTopic(ObjectName_T name);
-		ObjectName_T getDomainID();
-		int getMetaDataMcPort();
-		int getDebugMcPort();
+		Address_T getDomainAddress() const;
+		virtual std::vector<Topic* > getTopics() const;
+		virtual Topic getTopic(ObjectName_T name) const;
+		bool existsTopic(ObjectName_T name) const;
+		ObjectName_T getDomainID() const;
+		int getMetaDataMcPort() const;
+		int getDebugMcPort() const;
 
 		void serialize(ArchiverInOut* archiver) override;
-		int getTimeToLive();
+		int getTimeToLive() const;
 
-		Address_T getLocalInterface();
+		Address_T getLocalInterface() const;
 
-		int getInSocketBufferSize();
-		int getOutSocketBufferSize();
+		int getInSocketBufferSize() const;
+		int getOutSocketBufferSize() const;
 		
 		virtual ~Domain();
 	};
 }
-
 #endif

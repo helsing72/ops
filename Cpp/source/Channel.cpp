@@ -63,19 +63,19 @@ namespace ops
         }
     }
 
-    void Channel::populateTopic(Topic* top)
+    void Channel::populateTopic(Topic& top) const
     {
         // If Topic doesn't specify a transport it will default to 'multicast', therefore
         // we can't just check for an empty 'top.getTransport()' to know when to replace value.
         // Therfore, if a topic is listed in a 'Transport/Channel', we assume it shall
         // use the channel values, so replace all values.
-        top->setTransport(linktype);
-        top->setLocalInterface(localInterface);
-        top->setDomainAddress(domainAddress);
-        top->setPort(port);
-        top->setOutSocketBufferSize(outSocketBufferSize);
-        top->setInSocketBufferSize(inSocketBufferSize);
-        top->setTimeToLive(timeToLive);
+        top.setTransport(linktype);
+        top.setLocalInterface(localInterface);
+        top.setDomainAddress(domainAddress);
+        top.setPort(port);
+        top.setOutSocketBufferSize(outSocketBufferSize);
+        top.setInSocketBufferSize(inSocketBufferSize);
+        top.setTimeToLive(timeToLive);
     }
 
 	Transport_T Channel::LINKTYPE_MC = "multicast";

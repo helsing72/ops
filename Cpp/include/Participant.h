@@ -101,14 +101,14 @@ namespace ops
 
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 		//Create a Topic for subscribing or publishing on DebugRequest
-		ops::Topic createDebugTopic();
+		ops::Topic createDebugTopic() const;
 #endif
 
 		//Create a Topic for subscribing or publishing on ParticipantInfoData
-		ops::Topic createParticipantInfoTopic();
+		ops::Topic createParticipantInfoTopic() const;
 
 		//Get the name that this participant has set in its ParticipantInfoData
-		InternalString_T getPartInfoName() {
+		InternalString_T getPartInfoName() const {
 			return partInfoData.name;
 		}
 
@@ -125,23 +125,23 @@ namespace ops
 		void reportError(Error* err);
 
 		///Deadline listener callback
-		void onNewEvent(Notifier<int>* sender, int message);
+		void onNewEvent(Notifier<int>* sender, int message) override;
 		
 		///Cleans up ReceiveDataHandlers
 		//void cleanUpReceiveDataHandlers();
 
 		///Get a pointer to the underlying IOService.
 		//TODO: private?
-		IOService* getIOService()
+		IOService* getIOService() const
 		{
 			return ioService;
 		}
-		OPSConfig* getConfig()
+		OPSConfig* getConfig() const
 		{
 			return config;
 		}
 		
-		ErrorService* getErrorService()
+		ErrorService* getErrorService() const
 		{
 			return errorService;
 		}
@@ -152,14 +152,14 @@ namespace ops
 		// This static errorservice also has the advantage that errors during Participant creation can be logged.
 		static ErrorService* getStaticErrorService();
 
-		Domain* getDomain()
+		Domain* getDomain() const
 		{
 			return domain;
 		}
 
 		///Get a pointer to the data type factory used in this Participant. 
 		//TODO: Rename?
-		OPSObjectFactory* getObjectFactory()
+		OPSObjectFactory* getObjectFactory() const
 		{
 			return objectFactory;
 		}

@@ -40,7 +40,7 @@ namespace ops
 		// Should be used with care, since the above methods may return a singleton
 		virtual ~OPSConfig();
 
-		virtual Domain* getDomain(ObjectName_T domainID)
+		virtual Domain* getDomain(ObjectName_T domainID) const
 		{
 			for(unsigned int i = 0; i < domains.size(); i++)
 			{
@@ -59,12 +59,12 @@ namespace ops
 			archiver->inout<Domain>("domains", domains);
 		}
 
-		std::vector<Domain*> getDomains()
+		std::vector<Domain*> getDomains() const
 		{
 			return domains;
 		}
 
-        std::vector<Domain*>& getRefToDomains() 
+        std::vector<Domain*>& getRefToDomains()
         {
             return domains;
         }

@@ -55,7 +55,7 @@ namespace ops
         }
 
 		// Returns true if it's an output archiver
-		virtual bool isOut() { return true; }
+		virtual bool isOut() override { return true; }
 
 		void close()
         {
@@ -63,7 +63,7 @@ namespace ops
             os << tab() << "</" << topNode << ">" << std::endl;
         }
 
-        virtual void inout(InoutName_T name, bool& value)
+        virtual void inout(InoutName_T name, bool& value) override
         {
             if (value)
             {
@@ -75,43 +75,43 @@ namespace ops
             }
         }
 
-        virtual void inout(InoutName_T name, char& value)
+        virtual void inout(InoutName_T name, char& value) override
         {
             os << tab() << "<" << name << ">" << (int) value << "</" << name << ">\n";
         }
 
-        virtual void inout(InoutName_T name, int& value)
+        virtual void inout(InoutName_T name, int& value) override
         {
             os << tab() << "<" << name << ">" << value << "</" << name << ">\n";
         }
 
-        virtual void inout(InoutName_T name, int16_t& value)
+        virtual void inout(InoutName_T name, int16_t& value) override
         {
             os << tab() << "<" << name << ">" << value << "</" << name << ">\n";
         }
 
-        virtual void inout(InoutName_T name, int64_t& value)
+        virtual void inout(InoutName_T name, int64_t& value) override
         {
             os << tab() << "<" << name << ">" << value << "</" << name << ">\n";
         }
 
-        virtual void inout(InoutName_T name, float& value)
+        virtual void inout(InoutName_T name, float& value) override
         {
             os << tab() << "<" << name << ">" << std::setprecision(9) << value << "</" << name << ">\n";
         }
 
-        virtual void inout(InoutName_T name, double& value)
+        virtual void inout(InoutName_T name, double& value) override
         {
             os << tab() << "<" << name << ">" << std::setprecision(15) << value << "</" << name << ">\n";
         }
 
-        virtual void inout(InoutName_T name, std::string& value)
+        virtual void inout(InoutName_T name, std::string& value) override
         {
 			///TODO convert string to allowed xml chars
             os << tab() << "<" << name << ">" << value << "</" << name << ">\n";
         }
 
-		virtual void inoutfixstring(InoutName_T name, char* value, int& size, int max_size, int idx)
+		virtual void inoutfixstring(InoutName_T name, char* value, int& size, int max_size, int idx) override
 		{
 			UNUSED(max_size);
 			UNUSED(idx);
@@ -121,14 +121,14 @@ namespace ops
 			os << tab() << "<" << name << ">" << tmp << "</" << name << ">\n";
 		}
 
-		virtual void inout(InoutName_T name, char* buffer, int bufferSize)
+		virtual void inout(InoutName_T name, char* buffer, int bufferSize) override
         {
 			os << tab() << "<" << name << ">";
 			for (int i = 0; i < bufferSize; i++) os << ((unsigned int)buffer[i]) << " ";
 			os << "</" << name << ">\n";
 		}
 
-        virtual Serializable* inout(InoutName_T name, Serializable* value, int element)
+        virtual Serializable* inout(InoutName_T name, Serializable* value, int element) override
         {
             UNUSED(name);
             UNUSED(element);
@@ -145,7 +145,7 @@ namespace ops
             return value;
         }
 
-        virtual Serializable* inout(InoutName_T name, Serializable* value)
+        virtual Serializable* inout(InoutName_T name, Serializable* value) override
         {
             OPSObject* opsO = dynamic_cast<OPSObject*> (value);
 
@@ -160,7 +160,7 @@ namespace ops
             return value;
         }
 
-        virtual void inout(InoutName_T name, Serializable& value)
+        virtual void inout(InoutName_T name, Serializable& value) override
         {
 			OPSObject& opsO = dynamic_cast<OPSObject&> (value);
 
@@ -171,7 +171,7 @@ namespace ops
 			os << tab() << "</" << name << ">" << "\n";
 		}
 
-        virtual void inout(InoutName_T name, std::vector<bool>& value)
+        virtual void inout(InoutName_T name, std::vector<bool>& value) override
         {
             os << tab() << "<" << name << ">" << std::endl;
             for (unsigned int i = 0; i < value.size(); i++)
@@ -184,7 +184,7 @@ namespace ops
             os << tab() << "</" << name << ">" << std::endl;
         }
 
-        virtual void inout(InoutName_T name, std::vector<char>& value)
+        virtual void inout(InoutName_T name, std::vector<char>& value) override
         {
             os << tab() << "<" << name << ">" << std::endl;
             for (unsigned int i = 0; i < value.size(); i++)
@@ -196,7 +196,7 @@ namespace ops
             os << tab() << "</" << name << ">" << std::endl;
         }
 
-        virtual void inout(InoutName_T name, std::vector<int>& value)
+        virtual void inout(InoutName_T name, std::vector<int>& value) override
         {
             os << tab() << "<" << name << ">" << std::endl;
             for (unsigned int i = 0; i < value.size(); i++)
@@ -208,7 +208,7 @@ namespace ops
             os << tab() << "</" << name << ">" << std::endl;
         }
 
-        virtual void inout(InoutName_T name, std::vector<int16_t>& value)
+        virtual void inout(InoutName_T name, std::vector<int16_t>& value) override
         {
             os << tab() << "<" << name << ">" << std::endl;
             for (unsigned int i = 0; i < value.size(); i++)
@@ -220,7 +220,7 @@ namespace ops
             os << tab() << "</" << name << ">" << std::endl;
         }
 
-        virtual void inout(InoutName_T name, std::vector<int64_t>& value)
+        virtual void inout(InoutName_T name, std::vector<int64_t>& value) override
         {
             os << tab() << "<" << name << ">" << std::endl;
             for (unsigned int i = 0; i < value.size(); i++)
@@ -232,7 +232,7 @@ namespace ops
             os << tab() << "</" << name << ">" << std::endl;
         }
 
-        virtual void inout(InoutName_T name, std::vector<float>& value)
+        virtual void inout(InoutName_T name, std::vector<float>& value) override
         {
             os << tab() << "<" << name << ">" << std::endl;
             for (unsigned int i = 0; i < value.size(); i++)
@@ -244,7 +244,7 @@ namespace ops
             os << tab() << "</" << name << ">" << std::endl;
         }
 
-        virtual void inout(InoutName_T name, std::vector<double>& value)
+        virtual void inout(InoutName_T name, std::vector<double>& value) override
         {
             os << tab() << "<" << name << ">" << std::endl;
             for (unsigned int i = 0; i < value.size(); i++)
@@ -256,7 +256,7 @@ namespace ops
             os << tab() << "</" << name << ">" << std::endl;
         }
 
-        virtual void inout(InoutName_T name, std::vector<std::string>& value)
+        virtual void inout(InoutName_T name, std::vector<std::string>& value) override
         {
             os << tab() << "<" << name << ">" << std::endl;
             for (unsigned int i = 0; i < value.size(); i++)
@@ -268,7 +268,7 @@ namespace ops
             os << tab() << "</" << name << ">" << std::endl;
         }
 
-		void inoutfixarr(InoutName_T name, bool* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, bool* value, int numElements, int totalSize) override
 		{
 			UNUSED(totalSize);
 
@@ -283,7 +283,7 @@ namespace ops
 			os << tab() << "</" << name << ">" << std::endl;
 		}
 
-		void inoutfixarr(InoutName_T name, char* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, char* value, int numElements, int totalSize) override
 		{
 			UNUSED(totalSize);
 
@@ -298,7 +298,7 @@ namespace ops
 			os << tab() << "</" << name << ">" << std::endl;
 		}
 
-		void inoutfixarr(InoutName_T name, int* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, int* value, int numElements, int totalSize) override
 		{
 			UNUSED(totalSize);
 
@@ -313,7 +313,7 @@ namespace ops
 			os << tab() << "</" << name << ">" << std::endl;
 		}
 
-		void inoutfixarr(InoutName_T name, int16_t* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, int16_t* value, int numElements, int totalSize) override
 		{
 			UNUSED(totalSize);
 
@@ -328,7 +328,7 @@ namespace ops
 			os << tab() << "</" << name << ">" << std::endl;
 		}
 
-		void inoutfixarr(InoutName_T name, int64_t* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, int64_t* value, int numElements, int totalSize) override
 		{
 			UNUSED(totalSize);
 
@@ -343,7 +343,7 @@ namespace ops
 			os << tab() << "</" << name << ">" << std::endl;
 		}
 
-		void inoutfixarr(InoutName_T name, float* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, float* value, int numElements, int totalSize) override
 		{
 			UNUSED(totalSize);
 
@@ -358,7 +358,7 @@ namespace ops
 			os << tab() << "</" << name << ">" << std::endl;
 		}
 
-		void inoutfixarr(InoutName_T name, double* value, int numElements, int totalSize)
+		void inoutfixarr(InoutName_T name, double* value, int numElements, int totalSize) override
 		{
 			UNUSED(totalSize);
 
@@ -373,7 +373,7 @@ namespace ops
 			os << tab() << "</" << name << ">" << std::endl;
 		}
 
-		void inoutfixarr(InoutName_T name, std::string* value, int numElements)
+		void inoutfixarr(InoutName_T name, std::string* value, int numElements) override
         {
 			os << tab() << "<" << name << ">" << std::endl;
 			for (int i = 0; i < numElements; i++)
@@ -386,7 +386,7 @@ namespace ops
 			os << tab() << "</" << name << ">" << std::endl;
 		}
 
-        int beginList(InoutName_T name, int size)
+        int beginList(InoutName_T name, int size) override
         {
             //buf->WriteInt(size);
             os << tab() << "<" << name << ">" << std::endl;
@@ -394,7 +394,7 @@ namespace ops
             return size;
         }
 
-        void endList(InoutName_T name)
+        void endList(InoutName_T name) override
         {
             currentTabDepth--;
             os << tab() << "</" << name << ">" << std::endl;

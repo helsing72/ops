@@ -90,7 +90,7 @@ namespace ops
         
         ///Only valid for a ByteBuffer instance used to write data.
         ///Returns the number of bytes containing valid data in the buffer so far.
-        int GetSize();
+        int GetSize() const;
 
 		///Resets the whole buffer to creation state
 		void Reset();
@@ -99,10 +99,10 @@ namespace ops
 		void ResetIndex();
 
 		///Get the internal offset pointer
-		int GetIndex();
+		int GetIndex() const;
 
-		int getNrOfSegments();
-		int getSegmentSize(int i);
+		int getNrOfSegments() const;
+		int getSegmentSize(int i) const;
 		char* getSegment(int i);
 		void finish();
 

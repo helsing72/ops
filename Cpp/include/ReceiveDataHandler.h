@@ -65,12 +65,12 @@ namespace ops
 			return messageReferenceHandler.size();
 		}
 
-		int getSampleMaxSize()
+		int getSampleMaxSize() const
         {
             return sampleMaxSize;
         }
 
-		Receiver* getReceiver()
+		Receiver* getReceiver() const
 		{
 			return receiver;
 		}

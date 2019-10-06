@@ -40,7 +40,7 @@ namespace ops
 		participantID = partID;
 	}
 
-	ObjectName_T Topic::getParticipantID()
+	ObjectName_T Topic::getParticipantID() const
 	{
 		return participantID;
 	}
@@ -49,15 +49,15 @@ namespace ops
 	{
 		domainID = domID;
 	}
-	ObjectName_T Topic::getDomainID()
+	ObjectName_T Topic::getDomainID() const
 	{
 		return domainID;
 	}
-	ObjectName_T Topic::getName()
+	ObjectName_T Topic::getName() const
 	{
 		return name;
 	}
-	TypeId_T Topic::getTypeID()
+	TypeId_T Topic::getTypeID() const
 	{
 		return typeID;
 	}
@@ -69,7 +69,7 @@ namespace ops
 	{
 		transport = transp;
 	}
-	Address_T Topic::getDomainAddress()
+	Address_T Topic::getDomainAddress() const
 	{
 		return domainAddress;
 	}
@@ -77,11 +77,11 @@ namespace ops
 	{
 		localInterface = localIf;
 	}
-	Address_T Topic::getLocalInterface()
+	Address_T Topic::getLocalInterface() const
 	{
 		return localInterface;
 	}
-	int Topic::getSampleMaxSize()
+	int Topic::getSampleMaxSize() const
 	{
 		return sampleMaxSize;
 	}
@@ -96,7 +96,7 @@ namespace ops
 			sampleMaxSize = size;
 		}
 	}
-	int Topic::getPort()
+	int Topic::getPort() const
 	{
 		return port;
 	}
@@ -108,16 +108,16 @@ namespace ops
 	{
 		timeToLive = ttl;
 	}
-	int Topic::getTimeToLive()
+	int Topic::getTimeToLive() const
 	{
 		return timeToLive;
 	}
-	Transport_T Topic::getTransport()
+	Transport_T Topic::getTransport() const
 	{
 		return transport;
 	}
 
-	int64_t Topic::getOutSocketBufferSize()
+	int64_t Topic::getOutSocketBufferSize() const
 	{
 		return outSocketBufferSize;
 	}
@@ -125,7 +125,7 @@ namespace ops
 	{
 		outSocketBufferSize = size;
 	}
-	int64_t Topic::getInSocketBufferSize()
+	int64_t Topic::getInSocketBufferSize() const
 	{
 		return inSocketBufferSize;
 	}

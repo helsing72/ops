@@ -51,7 +51,7 @@ namespace ops {
 		return inst;
 	}
 
-	char* DataSegmentAllocator::Allocate(unsigned int size)
+	char* DataSegmentAllocator::Allocate(unsigned int const size)
 	{
 		return new char[size];
 	}

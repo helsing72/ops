@@ -62,7 +62,7 @@ namespace ops
             dataOwner = ownership;
         }
 
-        virtual bool isDataOwner()
+        virtual bool isDataOwner() const
         {
             return dataOwner;
         }
@@ -94,7 +94,7 @@ namespace ops
 		void fillClone(OPSMessage* obj) const { UNUSED(obj); }
 	
 	public:
-        int64_t getPublicationID()
+        int64_t getPublicationID() const
         {
             return publicationID;
         }
@@ -104,7 +104,7 @@ namespace ops
             publicationID = pubID;
         }
 
-		ObjectName_T getPublisherName()
+		ObjectName_T getPublisherName() const
         {
             return publisherName;
         }
@@ -114,7 +114,7 @@ namespace ops
             publisherName = pubName;
         }
 
-        ObjectName_T getTopicName()
+        ObjectName_T getTopicName() const
         {
             return topicName;
         }
@@ -132,7 +132,7 @@ namespace ops
             data = d;
         }
 
-        OPSObject* getData()
+        OPSObject* getData() const
         {
             return data;
         }
@@ -143,7 +143,7 @@ namespace ops
 			sourcePort = port;
 		}
 
-		void getSource(Address_T& addr, int& port)
+		void getSource(Address_T& addr, int& port) const
 		{
 			addr = sourceIP;
 			port = sourcePort;

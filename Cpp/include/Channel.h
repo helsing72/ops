@@ -44,7 +44,7 @@ namespace ops
 
         void serialize(ArchiverInOut* archiver) override;
 
-        void populateTopic(Topic* top);
+        void populateTopic(Topic& top) const;
 
         static Transport_T LINKTYPE_MC;
         static Transport_T LINKTYPE_TCP;

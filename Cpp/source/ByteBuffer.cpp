@@ -47,12 +47,12 @@ namespace ops
         nextSegmentAt = memMap.getSegmentSize();
 	}
 
-    int ByteBuffer::getNrOfSegments()
+    int ByteBuffer::getNrOfSegments() const
     {
         return currentSegment + 1;
     }
 
-    int ByteBuffer::getSegmentSize(int const i)
+    int ByteBuffer::getSegmentSize(int const i) const
     {
         if (i < currentSegment)
         {
@@ -124,12 +124,9 @@ namespace ops
     {
         index = 0;
         nextSegmentAt += memMap.getSegmentSize();
-        bool const ok = checkProtocol();
-        int i1 = ReadInt();
-        int i2 = ReadInt();
-        UNUSED(ok)
-        UNUSED(i1)
-        UNUSED(i2)
+        checkProtocol();
+        ReadInt();
+        ReadInt();
     }
 
     void ByteBuffer::ReadChars(char* chars, int length)
@@ -159,11 +156,12 @@ namespace ops
         while (i < j)
         {
             std::swap(b[i], b[j]);
-            i++, j--;
+			i++; 
+			j--;
         }
     }
 
-    int ByteBuffer::GetSize()
+    int ByteBuffer::GetSize() const
     {
         return totalSize; 
     }
@@ -217,7 +215,7 @@ namespace ops
 
     void ByteBuffer::WriteString(std::string& s)
     {
-        int siz = (int) s.size();
+        int const siz = (int) s.size();
         WriteInt(siz);
         WriteChars((char*) s.c_str(), siz);
     }
@@ -314,7 +312,7 @@ namespace ops
 
     void ByteBuffer::ReadBooleans(std::vector<bool>& out)
     {
-        int size = ReadInt();
+        int const size = ReadInt();
         out.reserve(size);
         out.resize(size, false);
         for (int i = 0; i < size; i++)
@@ -325,7 +323,7 @@ namespace ops
 
     void ByteBuffer::WriteBooleans(std::vector<bool>& out)
     {
-        int size = (int)out.size();
+        int const size = (int)out.size();
         WriteInt(size);
         for (int i = 0; i < size; i++)
         {
@@ -337,7 +335,7 @@ namespace ops
 
     void ByteBuffer::ReadBytes(std::vector<char>& out)
     {
-        int length = ReadInt();
+        int const length = ReadInt();
         out.reserve(length);
         out.resize(length, 0);
         ReadBytes(out, 0, length);
@@ -369,7 +367,7 @@ namespace ops
 
     void ByteBuffer::WriteBytes(std::vector<char>& out)
     {
-        int size = (int)out.size();
+        int const size = (int)out.size();
         WriteInt(size);
         WriteBytes(out, 0, size);
     }
@@ -401,7 +399,7 @@ namespace ops
 
     void ByteBuffer::ReadDoubles(std::vector<double>& out)
     {
-        int size = ReadInt();
+        int const size = ReadInt();
         out.reserve(size);
         out.resize(size, 0);
         if (size > 0)
@@ -418,7 +416,7 @@ namespace ops
 
     void ByteBuffer::WriteDoubles(std::vector<double>& out)
     {
-        int size = (int)out.size();
+        int const size = (int)out.size();
         WriteInt(size);
         if (size > 0)
         {
@@ -444,7 +442,7 @@ namespace ops
 
     void ByteBuffer::ReadInts(std::vector<int>& out)
     {
-        int size = ReadInt();
+        int const size = ReadInt();
         out.reserve(size);
         out.resize(size, 0);
         if (size > 0)
@@ -461,7 +459,7 @@ namespace ops
 
     void ByteBuffer::WriteInts(std::vector<int>& out)
     {
-        int size = (int)out.size();
+        int const size = (int)out.size();
         WriteInt(size);
         if (size > 0)
         {
@@ -485,7 +483,7 @@ namespace ops
 
     void ByteBuffer::ReadShorts(std::vector<int16_t>& out)
     {
-        int size = ReadInt();
+        int const size = ReadInt();
         out.reserve(size);
         out.resize(size, 0);
         if (size > 0)
@@ -502,7 +500,7 @@ namespace ops
 
     void ByteBuffer::WriteShorts(std::vector<int16_t>& out)
     {
-        int size = (int)out.size();
+        int const size = (int)out.size();
         WriteInt(size);
         if (size > 0)
         {
@@ -526,7 +524,7 @@ namespace ops
 
     void ByteBuffer::ReadFloats(std::vector<float>& out)
     {
-        int size = ReadInt();
+        int const size = ReadInt();
         out.reserve(size);
         out.resize(size, 0.0);
         if (size > 0)
@@ -543,7 +541,7 @@ namespace ops
 
     void ByteBuffer::WriteFloats(std::vector<float>& out)
     {
-        int size = (int)out.size();
+        int const size = (int)out.size();
         WriteInt(size);
         if (size > 0)
         {
@@ -567,7 +565,7 @@ namespace ops
 
     void ByteBuffer::ReadLongs(std::vector<int64_t>& out)
     {
-        int size = ReadInt();
+        int const size = ReadInt();
         out.reserve(size);
         out.resize(size, 0);
         if (size > 0)
@@ -584,7 +582,7 @@ namespace ops
 
     void ByteBuffer::WriteLongs(std::vector<int64_t>& out)
     {
-        int size = (int)out.size();
+        int const size = (int)out.size();
         WriteInt(size);
         if (size > 0)
         {
@@ -608,7 +606,7 @@ namespace ops
 
     void ByteBuffer::ReadStrings(std::vector<std::string>& out)
     {
-        int size = ReadInt();
+        int const size = ReadInt();
         out.reserve(size);
         out.resize(size, "");
         for (int i = 0; i < size; i++)
@@ -619,7 +617,7 @@ namespace ops
 
     void ByteBuffer::WriteStrings(std::vector<std::string>& out)
     {
-        int size = (int)out.size();
+        int const size = (int)out.size();
         WriteInt(size);
         for (int i = 0; i < size; i++)
         {
@@ -641,8 +639,8 @@ namespace ops
             return false;
         }
 
-        char inVersionLow = ReadChar();
-        char inVersionHigh = ReadChar();
+        char const inVersionLow = ReadChar();
+        char const inVersionHigh = ReadChar();
 
         if ((inVersionHigh != versionHigh) || (inVersionLow != versionLow))
         {
@@ -659,7 +657,7 @@ namespace ops
         WriteChar(versionHigh);
     }
 
-    int ByteBuffer::GetIndex()
+    int ByteBuffer::GetIndex() const
     {
         return index;
     }

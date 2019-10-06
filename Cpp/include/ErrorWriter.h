@@ -16,7 +16,7 @@ namespace ops
 		ErrorWriter(std::ostream& os) : oStream(os) {}
 		virtual ~ErrorWriter() {}
 
-		void onNewEvent(Notifier<Error*>* notifier, Error* error)
+		void onNewEvent(Notifier<Error*>* notifier, Error* error) override
 		{
 			UNUSED(notifier);
 			oStream << "@" << TimeHelper::getTimeToString();

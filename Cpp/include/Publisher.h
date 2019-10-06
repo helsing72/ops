@@ -47,12 +47,12 @@ public:
 	void start();
 	void stop();
 
-    Topic getTopic();
+    Topic getTopic() const;
 
     void setName(ObjectName_T name);
     void setKey(ObjectKey_T key);
-    ObjectKey_T getKey();
-	ObjectName_T getName();
+    ObjectKey_T getKey() const;
+	ObjectName_T getName() const;
 
 	void writeOPSObject(OPSObject* obj);
 
