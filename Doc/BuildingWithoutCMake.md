@@ -11,10 +11,11 @@ The opsc compiler can then be used like:
 Run the bat-file 'OPS_DIR\Common\idl\build.bat'. This will generate the needed source code using the opsc compiler built above.
 
 ## Build OPS Core for C++ with Visual Studio ##
-Open the solution/project for your version of Visual Studio (has been used with
-VS2008, VS2010, VS2012, VS2013, VS2015, VS2017 and VS2019) in directory
+Open the solution/project for your version of Visual Studio in directory
 
 > "OPS\_DIR\Cpp\Visual C++\OPSCrossPlatformCppSolution_20xx\OPSCrossPlatformCppLib_20xx.sln"
+
+Please note that since OPS version 4.2.0 (~feb 2019), support has been dropped for VS versions earlier than VS2015 (due to C++11 requirements).
 
 Check that the include and library references to boost corresponds with your installation (see Visual Studio project properties).
 

@@ -25,6 +25,7 @@
     * [OPS Listener](OPSListener.md)
     * [VerifyOPSConfig](VerifyOPSConfig.md)
     * [Syntax highlighters](SyntaxHighlighters.md)
+    * [Wireshark](Wireshark.md)
   * Advanced Concepts and Features
     * [Understanding OPSObject and OPSMessage](OpsMessage.md)
     * [Serializing](Serializing.md)
