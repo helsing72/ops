@@ -47,8 +47,6 @@ namespace ops
 		void unreserve();
 
 		int getNrOfReservations() const;
-
-		int kalle;
 	private:
 		std::atomic<int> nrOfReservations{ 0 };
 		ReferenceHandler* referenceHandler{ nullptr };

@@ -106,6 +106,12 @@ namespace ops {
 			remove();
 		}
 
+#if defined(_MSC_VER) && (_MSC_VER == 1900)
+// VS2015 gives a warning on onNewData() "... previous versions of the compiler did not override when ...", which later versions don't do.
+// We want it to override so skip warning
+#pragma warning( disable : 4373 )
+#endif
+
 		virtual void onNewData(DataNotifier* const notifier) override
 		{
 			Subscriber* sub = dynamic_cast<Subscriber*> (notifier);
