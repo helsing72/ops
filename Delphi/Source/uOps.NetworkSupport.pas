@@ -2,7 +2,7 @@ unit uOps.NetworkSupport;
 
 (**
 *
-* Copyright (C) 2016-2017 Lennart Andersson.
+* Copyright (C) 2016-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -106,13 +106,13 @@ begin
 {$R-}
         for i := 0 to dwNumEntries - 1 do begin
           with table[i] do begin
-{$R+}
             if (dwAddr and subnetMask) = (subnetIp and subnetMask) then begin
               Result := IpAddressToString(dwAddr);
               Break;
             end;
           end;
         end;
+{$R+}
       end;
     finally
       FreeMem(p);
@@ -163,13 +163,13 @@ begin
 {$R-}
         for i := 0 to dwNumEntries - 1 do begin
           with table[i] do begin
-{$R+}
             if DWORD(htonl(dwAddr)) = Ip then begin
               Result := True;
               Break;
             end;
           end;
         end;
+{$R+}
       end;
     finally
       FreeMem(p);
