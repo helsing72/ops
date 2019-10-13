@@ -53,23 +53,24 @@ namespace ops
 	OPSObject::OPSObject(OPSObject&& other)
 	{
 		// Take other's resources
-		key = other.key;
-		typesString = other.typesString;
-		spareBytes = other.spareBytes;
+		key = std::move(other.key);
+		typesString = std::move(other.typesString);
+		spareBytes = std::move(other.spareBytes);
 #if defined(DEBUG_OPSOBJECT_COUNTER)
 		_NumOpsObjects++;
 #endif
 	}
 
 	// Copy assignment operator
-    OPSObject& OPSObject::operator= (OPSObject other)
-    {
-		if (this == &other) { return *this; }
-        key = other.key;
-        typesString = other.typesString;
-        spareBytes = other.spareBytes;
-        return *this;
-    }
+	OPSObject& OPSObject::operator= (OPSObject other)
+	{
+		if (this != &other) {
+			key = other.key;
+			typesString = other.typesString;
+			spareBytes = other.spareBytes;
+		}
+		return *this;
+	}
 
 	OPSObject* OPSObject::clone()
 	{
