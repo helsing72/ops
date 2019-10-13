@@ -7,7 +7,7 @@
 
 int64_t getNow()
 {
-    struct timespec ts;
+    timespec ts;
     memset(&ts, 0, sizeof(ts));
     //clock_gettime(CLOCK_REALTIME, &ts);
     return ((1000 * ts.tv_sec) + (ts.tv_nsec / 1000000));
@@ -28,7 +28,7 @@ int _kbhit() {
         tcgetattr(STDIN, &term);
         term.c_lflag &= ~ICANON;
         tcsetattr(STDIN, TCSANOW, &term);
-        setbuf(stdin, NULL);
+        setbuf(stdin, nullptr);
         initialized = true;
     }
 
@@ -48,6 +48,7 @@ class CHelperListener
 {
 public:
 	virtual void onData(ops::Subscriber* sub, DataType* data) = 0;
+	virtual ~CHelperListener() {}
 };
 
 class IHelper
@@ -63,19 +64,12 @@ public:
 template <class DataType, class DataTypePublisher, class DataTypeSubscriber>
 class CHelper : public IHelper, ops::DataListener, ops::DeadlineMissedListener
 {
-private:
-	CHelperListener<DataType>* client;
-	ops::Publisher* pub;
-	ops::Subscriber* sub;
-	int64_t expectedPubId;
-
 public:
 	DataType data;
 
-	CHelper(CHelperListener<DataType>* client):
-		pub(NULL), sub(NULL), expectedPubId(-1)
+	CHelper(CHelperListener<DataType>* client_):
+		client(client_), pub(nullptr), sub(nullptr), expectedPubId(-1)
 	{
-		this->client = client;
 	}
 
 	virtual ~CHelper()
@@ -83,11 +77,15 @@ public:
 		DeleteSubscriber(false);
 	}
 
+	CHelper() = delete;
+	CHelper(const CHelper& r) = delete;
+	CHelper& operator= (const CHelper& l) = delete;
+	CHelper(CHelper&&) = delete;
+	CHelper& operator =(CHelper&&) = delete;
 
-
-	void CreateSubscriber(ops::Participant* part, std::string topicName)
+	virtual void CreateSubscriber(ops::Participant* part, std::string topicName) override
 	{
-		if (sub) {
+		if (sub != nullptr) {
 			std::cout << "Subscriber already exist for topic " << sub->getTopic().getName() << std::endl;
 		} else {
 			try {
@@ -107,21 +105,21 @@ public:
 		}
 	}
 
-	void DeleteSubscriber(bool doLog = true)
+	virtual void DeleteSubscriber(bool doLog = true) override
 	{
-		if (sub) {
+		if (sub != nullptr) {
 			std::cout << "Deleting subscriber for topic " << sub->getTopic().getName() << std::endl;
 			sub->stop();
 			delete sub;
-			sub = NULL;
+			sub = nullptr;
 		} else {
-			if (doLog) std::cout << "Subscriber must be created first!!" << std::endl;
+			if (doLog) { std::cout << "Subscriber must be created first!!" << std::endl; }
 		}
 	}
 
-	void StartSubscriber()
+	virtual void StartSubscriber() override
 	{
-		if (sub) {
+		if (sub != nullptr) {
 			std::cout << "Starting subscriber for topic " << sub->getTopic().getName() << std::endl;
 			sub->start();
 		} else {
@@ -130,9 +128,9 @@ public:
 
 	}
 
-	void StopSubscriber()
+	virtual void StopSubscriber() override
 	{
-		if (sub) {
+		if (sub != nullptr) {
 			std::cout << "Stoping subscriber for topic " << sub->getTopic().getName() << std::endl;
 			sub->stop();
 		} else {
@@ -141,7 +139,7 @@ public:
 	}
 	void SetDeadlineQos(int64_t timeoutMs)
 	{
-		if (sub) {
+		if (sub != nullptr) {
 			std::cout << "Setting deadlineQos to " << timeoutMs << " [ms] for topic " << sub->getTopic().getName() << std::endl;
 			sub->setDeadlineQoS(timeoutMs);
 		} else {
@@ -150,7 +148,7 @@ public:
 	}
 
 	///Override from ops::DataListener, called whenever new data arrives.
-	void onNewData(ops::DataNotifier* subscriber)
+	virtual void onNewData(ops::DataNotifier* subscriber) override
 	{
 		if(subscriber == sub)
 		{
@@ -170,11 +168,17 @@ public:
 	}
 
 	///Override from ops::DeadlineMissedListener, called if no new data has arrived within deadlineQoS.
-	void onDeadlineMissed(ops::DeadlineMissedEvent* evt)
+	virtual void onDeadlineMissed(ops::DeadlineMissedEvent* evt) override
 	{
 		UNUSED(evt)
 		std::cout << "Deadline Missed for topic " << sub->getTopic().getName() << std::endl;
 	}
+
+private:
+	CHelperListener<DataType>* client;
+	ops::Publisher* pub;
+	ops::Subscriber* sub;
+	int64_t expectedPubId;
 };
 
 
@@ -187,33 +191,39 @@ struct ItemInfo {
 	std::string TopicName;
 	std::string TypeName;
 
-	bool selected;
-	IHelper* helper;
-	ops::Participant* part;
+	bool selected = false;
+	IHelper* helper = nullptr;
+	ops::Participant* part = nullptr;
 
-	ItemInfo(std::string dom, std::string top, std::string typ)
+	ItemInfo(std::string const dom, std::string const top, std::string const typ):
+		Domain(dom), TopicName(top), TypeName(typ)
 	{
-		Domain = dom;
-		TopicName = top;
-		TypeName = typ;
-		helper = NULL;
-		part = NULL;
-		selected = false;
-	};
+	}
+
+	ItemInfo() = delete;
+	~ItemInfo() = default;
+	ItemInfo(const ItemInfo& r) = delete;
+	ItemInfo& operator= (const ItemInfo& l) = delete;
+	ItemInfo(ItemInfo&&) = delete;
+	ItemInfo& operator =(ItemInfo&&) = delete;
 };
-ItemInfo* itemInfo;
+ItemInfo* itemInfo = nullptr;
 
-class MyListener :
 
-	public CHelperListener<pizza::special::ExtraAllt>
+class MyListener : public CHelperListener<pizza::special::ExtraAllt>
 {
 public:
-
-	void onData(ops::Subscriber* sub, pizza::special::ExtraAllt* data){
+	virtual void onData(ops::Subscriber* sub, pizza::special::ExtraAllt* data) override {
 		UNUSED(sub)
 		receivedPizzaVec.push_back(*data);
 		std::cout << "GETS EXTRA_ALLT UDP DATA, size = " << receivedPizzaVec.size() << std::endl;
 	}
+	MyListener() = default;
+	~MyListener() = default;
+	MyListener(const MyListener& r) = delete;
+	MyListener& operator= (const MyListener& l) = delete;
+	MyListener(MyListener&&) = delete;
+	MyListener& operator =(MyListener&&) = delete;
 };
 
 
@@ -222,8 +232,11 @@ class Test_OPS_Publisher_And_Subscriber : public testing::Test
 {
 public:
 	Test_OPS_Publisher_And_Subscriber() {}
-
     ~Test_OPS_Publisher_And_Subscriber() {}
+	Test_OPS_Publisher_And_Subscriber(const Test_OPS_Publisher_And_Subscriber& r) = delete;
+	Test_OPS_Publisher_And_Subscriber& operator= (const Test_OPS_Publisher_And_Subscriber& l) = delete;
+	Test_OPS_Publisher_And_Subscriber(Test_OPS_Publisher_And_Subscriber&&) = delete;
+	Test_OPS_Publisher_And_Subscriber& operator =(Test_OPS_Publisher_And_Subscriber&&) = delete;
 };
 
 
@@ -235,19 +248,19 @@ int main(int argc, char**argv)
 
 	itemInfo = new ItemInfo("PizzaDomain", "UdpExtraAlltTopic", "pizza.special.ExtraAllt");
 	// Setup the OPS static error service (common for all participants, reports errors during participant creation)
-	ops::ErrorWriter* errorWriterStatic = new ops::ErrorWriter(std::cout);
+	ops::ErrorWriter* const errorWriterStatic = new ops::ErrorWriter(std::cout);
 	ops::Participant::getStaticErrorService()->addListener(errorWriterStatic);
 
 	// Create participants
 	// NOTE that the second parameter (participantID) must be different for the two participant instances
-	ops::Participant* participant = ops::Participant::getInstance("PizzaDomain", "PizzaDomain", "UnitTests/OPStest-C++/ops_config.xml");
-	if (participant == NULL) {
+	ops::Participant* const participant = ops::Participant::getInstance("PizzaDomain", "PizzaDomain", "UnitTests/OPStest-C++/ops_config.xml");
+	if (participant == nullptr) {
 	    std::cout << "Failed to create Participant. Missing ops_config.xml ??" << std::endl;
 		exit(-1);
 	}
 	participant->addTypeSupport(new PizzaProject::PizzaProjectTypeFactory());
-	ops::Participant* otherParticipant = ops::Participant::getInstance("OtherPizzaDomain", "OtherPizzaDomain", "UnitTests/OPStest-C++/ops_config.xml");
-	if (otherParticipant == NULL) {
+	ops::Participant* const otherParticipant = ops::Participant::getInstance("OtherPizzaDomain", "OtherPizzaDomain", "UnitTests/OPStest-C++/ops_config.xml");
+	if (otherParticipant == nullptr) {
 		std::cout << "Failed to create Participant. Missing ops_config.xml ??" << std::endl;
         exit(-1);
 	}
@@ -271,23 +284,23 @@ int main(int argc, char**argv)
 	//delete objects
 
 	delete itemInfo->helper;
-	itemInfo->helper = NULL;
-	itemInfo->part = NULL;
+	itemInfo->helper = nullptr;
+	itemInfo->part = nullptr;
 	delete itemInfo;
-	itemInfo = NULL;
+	itemInfo = nullptr;
 
 	participant->getErrorService()->removeListener(errorWriter);
 	otherParticipant->getErrorService()->removeListener(errorWriter2);
 
-	delete errorWriter; errorWriter = NULL;
-	delete errorWriter2; errorWriter2 = NULL;
+	delete errorWriter; errorWriter = nullptr;
+	delete errorWriter2; errorWriter2 = nullptr;
 
 	///TODO this should be done by asking Participant to delete instances??
 	delete participant;
 
     //run unit tests
     ::testing::InitGoogleTest(&argc, argv);
-    int result = RUN_ALL_TESTS();
+    int const result = RUN_ALL_TESTS();
 
     return result;
 }

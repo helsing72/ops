@@ -12,23 +12,22 @@ class Test_OPS_Serialization_And_Deserialization : public testing::Test
 {
 public:
 	Test_OPS_Serialization_And_Deserialization() {
-    	vessuvioObject 		= NULL;
-     	vessuvioMessage 	= NULL;
-     	recreatedVessuvio 	= NULL;
-    	extraAlltObject 	= NULL;
-    	extraAlltMessage 	= NULL;
-    	recreatedExtraAllt 	= NULL;
 	}
 
     ~Test_OPS_Serialization_And_Deserialization() {}
 
-    ops::OPSObject* vessuvioObject;
-    ops::OPSMessage* vessuvioMessage;
-    pizza::VessuvioData* recreatedVessuvio;
+	Test_OPS_Serialization_And_Deserialization(const Test_OPS_Serialization_And_Deserialization& r) = delete;
+	Test_OPS_Serialization_And_Deserialization& operator= (const Test_OPS_Serialization_And_Deserialization& l) = delete;
+	Test_OPS_Serialization_And_Deserialization(Test_OPS_Serialization_And_Deserialization&&) = delete;
+	Test_OPS_Serialization_And_Deserialization& operator =(Test_OPS_Serialization_And_Deserialization&&) = delete;
+	
+	ops::OPSObject* vessuvioObject = nullptr;
+    ops::OPSMessage* vessuvioMessage = nullptr;
+    pizza::VessuvioData* recreatedVessuvio = nullptr;
 
-	ops::OPSObject* extraAlltObject;
-	ops::OPSMessage* extraAlltMessage;
-	pizza::special::ExtraAllt* recreatedExtraAllt;
+	ops::OPSObject* extraAlltObject = nullptr;
+	ops::OPSMessage* extraAlltMessage = nullptr;
+	pizza::special::ExtraAllt* recreatedExtraAllt = nullptr;
 
 };
 
@@ -187,7 +186,7 @@ int main(int argc, char** argv) {
 	init::initExtraAlltNormal(extraAllt);
     // required init of gtest library
     ::testing::InitGoogleTest(&argc, argv);
-    int result = RUN_ALL_TESTS();
+    int const result = RUN_ALL_TESTS();
 
     std::cout << "RUN_ALL_TESTS returned " << result << std::endl;
     return result;

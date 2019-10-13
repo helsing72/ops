@@ -11,7 +11,7 @@
 
 int64_t getNow()
 {
-    struct timespec ts;
+    timespec ts;
     memset(&ts, 0, sizeof(ts));
     //clock_gettime(CLOCK_REALTIME, &ts);
     return ((1000 * ts.tv_sec) + (ts.tv_nsec / 1000000));
@@ -32,7 +32,7 @@ int _kbhit() {
         tcgetattr(STDIN, &term);
         term.c_lflag &= ~ICANON;
         tcsetattr(STDIN, TCSANOW, &term);
-        setbuf(stdin, NULL);
+        setbuf(stdin, nullptr);
         initialized = true;
     }
 
@@ -52,6 +52,7 @@ class CHelperListener
 {
 public:
 	virtual void onData(ops::Subscriber* sub, DataType* data) = 0;
+	virtual ~CHelperListener() {}
 };
 
 class IHelper
@@ -69,19 +70,12 @@ public:
 template <class DataType, class DataTypePublisher, class DataTypeSubscriber>
 class CHelper : public IHelper, ops::DataListener, ops::DeadlineMissedListener
 {
-private:
-	CHelperListener<DataType>* client;
-	ops::Publisher* pub;
-	ops::Subscriber* sub;
-	int64_t expectedPubId;
-
 public:
 	DataType data;
 
-	CHelper(CHelperListener<DataType>* client):
-		pub(NULL), sub(NULL), expectedPubId(-1)
+	CHelper(CHelperListener<DataType>* client_):
+		client(client_), pub(nullptr), sub(nullptr), expectedPubId(-1)
 	{
-		this->client = client;
 	}
 
 	virtual ~CHelper()
@@ -89,9 +83,15 @@ public:
 		DeletePublisher(false);
 	}
 
-	void CreatePublisher(ops::Participant* part, std::string topicName)
+	CHelper() = delete;
+	CHelper(const CHelper& r) = delete;
+	CHelper& operator= (const CHelper& l) = delete;
+	CHelper(CHelper&&) = delete;
+	CHelper& operator =(CHelper&&) = delete;
+
+	virtual void CreatePublisher(ops::Participant* part, std::string topicName) override
 	{
-		if (pub) {
+		if (pub != nullptr) {
 			std::cout << "Publisher already exist for topic " << pub->getTopic().getName() << std::endl;
 		} else {
 			try {
@@ -115,48 +115,48 @@ public:
 		}
 	}
 
-	void DeletePublisher(bool doLog = true)
+	virtual void DeletePublisher(bool doLog = true) override
 	{
-		if (pub) {
+		if (pub != nullptr) {
 			std::cout << "Deleting publisher for topic " << pub->getTopic().getName() << std::endl;
 			//pub->stop();
 			delete pub;
-			pub = NULL;
+			pub = nullptr;
 		} else {
-			if (doLog) std::cout << "Publisher must be created first!!" << std::endl;
+			if (doLog) { std::cout << "Publisher must be created first!!" << std::endl; }
 		}
 	}
 
-	void StartPublisher()
+	virtual void StartPublisher() override
 	{
-		if (pub) {
+		if (pub != nullptr) {
 			pub->start();
 		} else {
 			std::cout << "Publisher must be created first!!" << std::endl;
 		}
 	}
 
-	void StopPublisher()
+	virtual void StopPublisher() override
 	{
-		if (pub) {
+		if (pub != nullptr) {
 			pub->stop();
 		} else {
 			std::cout << "Publisher must be created first!!" << std::endl;
 		}
 	}
 
-	void Write()
+	virtual void Write() override
 	{
-		if (pub) {
+		if (pub != nullptr) {
 			pub->writeOPSObject(&data);
 		} else {
 			std::cout << "Publisher must be created first!!" << std::endl;
 		}
 	}
 
-	void SetDeadlineQos(int64_t timeoutMs)
+	virtual void SetDeadlineQos(int64_t timeoutMs) override
 	{
-		if (sub) {
+		if (sub != nullptr) {
 			std::cout << "Setting deadlineQos to " << timeoutMs << " [ms] for topic " << sub->getTopic().getName() << std::endl;
 			sub->setDeadlineQoS(timeoutMs);
 		} else {
@@ -164,7 +164,7 @@ public:
 		}
 	}
 
-	void onNewData(ops::DataNotifier* subscriber)
+	virtual void onNewData(ops::DataNotifier* subscriber) override
 	{
 		if(subscriber == sub)
 		{
@@ -183,12 +183,17 @@ public:
 		}
 	}
 
-	void onDeadlineMissed(ops::DeadlineMissedEvent* evt)
+	virtual void onDeadlineMissed(ops::DeadlineMissedEvent* evt) override
 	{
-	        UNUSED(evt)
+        UNUSED(evt)
 		std::cout << "Deadline Missed for topic " << sub->getTopic().getName() << std::endl;
 	}
 
+private:
+	CHelperListener<DataType>* client;
+	ops::Publisher* pub;
+	ops::Subscriber* sub;
+	int64_t expectedPubId;
 };
 
 typedef CHelper<pizza::PizzaData, pizza::PizzaDataPublisher, pizza::PizzaDataSubscriber> TPizzaHelper;
@@ -200,19 +205,21 @@ struct ItemInfo {
 	std::string TopicName;
 	std::string TypeName;
 
-	bool selected;
-	IHelper* helper;
-	ops::Participant* part;
+	bool selected = false;
+	IHelper* helper = nullptr;
+	ops::Participant* part = nullptr;
 
-	ItemInfo(std::string dom, std::string top, std::string typ)
+	ItemInfo(std::string const dom, std::string const top, std::string const typ) :
+		Domain(dom), TopicName(top), TypeName(typ)
 	{
-		Domain = dom;
-		TopicName = top;
-		TypeName = typ;
-		helper = NULL;
-		part = NULL;
-		selected = false;
-	};
+	}
+
+	ItemInfo() = delete;
+	~ItemInfo() = default;
+	ItemInfo(const ItemInfo& r) = delete;
+	ItemInfo& operator= (const ItemInfo& l) = delete;
+	ItemInfo(ItemInfo&&) = delete;
+	ItemInfo& operator =(ItemInfo&&) = delete;
 };
 
 std::vector<ItemInfo*> ItemInfoList;
@@ -223,19 +230,25 @@ class MyListener :
 		public CHelperListener<pizza::special::ExtraAllt>
 {
 public:
-	void onData(ops::Subscriber* sub, pizza::special::ExtraAllt* data)
+	virtual void onData(ops::Subscriber* sub, pizza::special::ExtraAllt* data) override
 	{
 	  UNUSED(sub)
 	  UNUSED(data)
 	}
-	void onData(ops::Subscriber* sub, pizza::VessuvioData* data)
+	virtual void onData(ops::Subscriber* sub, pizza::VessuvioData* data) override
 	{
 	  UNUSED(sub)
 	  UNUSED(data)
 	}
+	MyListener() = default;
+	~MyListener() = default;
+	MyListener(const MyListener& r) = delete;
+	MyListener& operator= (const MyListener& l) = delete;
+	MyListener(MyListener&&) = delete;
+	MyListener& operator =(MyListener&&) = delete;
 };
 
-int main(int argc, char**argv)
+int main(const int argc, const char**argv)
 {
 	UNUSED(argc)
 	UNUSED(argv)
@@ -247,20 +260,20 @@ int main(int argc, char**argv)
 	ItemInfoList.push_back(new ItemInfo("PizzaDomain", "UdpExtraAlltTopic", "pizza.special.ExtraAllt"));
 
 	// Setup the OPS static error service (common for all participants, reports errors during participant creation)
-	ops::ErrorWriter* errorWriterStatic = new ops::ErrorWriter(std::cout);
+	ops::ErrorWriter* const errorWriterStatic = new ops::ErrorWriter(std::cout);
 	ops::Participant::getStaticErrorService()->addListener(errorWriterStatic);
 
 	// Create participants
 	// NOTE that the second parameter (participantID) must be different for the two participant instances
-	ops::Participant* participant = ops::Participant::getInstance("PizzaDomain", "PizzaDomain", "UnitTests/OPStest-C++/ops_config.xml");
-	if (participant == NULL) {
+	ops::Participant* const participant = ops::Participant::getInstance("PizzaDomain", "PizzaDomain", "UnitTests/OPStest-C++/ops_config.xml");
+	if (participant == nullptr) {
 	    std::cout << "Failed to create Participant. Missing ops_config.xml ??" << std::endl;
 		exit(-1);
 	}
 	participant->addTypeSupport(new PizzaProject::PizzaProjectTypeFactory());
 
-	ops::Participant* otherParticipant = ops::Participant::getInstance("OtherPizzaDomain", "OtherPizzaDomain", "UnitTests/OPStest-C++/ops_config.xml");
-	if (otherParticipant == NULL) {
+	ops::Participant* const otherParticipant = ops::Participant::getInstance("OtherPizzaDomain", "OtherPizzaDomain", "UnitTests/OPStest-C++/ops_config.xml");
+	if (otherParticipant == nullptr) {
 		std::cout << "Failed to create Participant. Missing ops_config.xml ??" << std::endl;
         exit(-1);
 	}
@@ -296,34 +309,28 @@ int main(int argc, char**argv)
 	pizza::special::ExtraAllt extraAlltLargeUDP;
 	init::initExtraAlltLargeUDP(extraAlltLargeUDP);
 
-	TExtraAlltHelper* hlpExtra = NULL;
+	TExtraAlltHelper* hlpExtra = nullptr;
 
 
 	// Finish up our ItemInfo's
 	for(unsigned int i = 0; i < ItemInfoList.size(); ++i) {
-		ItemInfo* itemInfo = ItemInfoList[i];
+		ItemInfo* const itemInfo = ItemInfoList[i];
 		itemInfo->helper = new TExtraAlltHelper(&myListener);
-
 
 		itemInfo->part = participant;
 		itemInfo->selected = true;
 
-
-
 		itemInfo->helper->CreatePublisher(itemInfo->part, itemInfo->TopicName);
 		itemInfo->helper->StartPublisher();
 
-
-		if		(i == 0) std::cout << "skickar extra allt" << std::endl;
-		else if	(i == 1) std::cout << "skickar extra allt TCP" << std::endl;
-		else if	(i == 2) std::cout << "skickar extra allt UDP" << std::endl;
-
-
+		if (i == 0) { std::cout << "skickar extra allt" << std::endl; }
+		else if (i == 1) { std::cout << "skickar extra allt TCP" << std::endl; }
+		else if (i == 2) { std::cout << "skickar extra allt UDP" << std::endl; }
 
 		hlpExtra = (TExtraAlltHelper*)itemInfo->helper;
-		if		(i == 0) hlpExtra->data = extraAlltNormal;
-		else if (i == 1) hlpExtra->data = extraAlltNormalTCP;
-		else if (i == 2) hlpExtra->data = extraAlltNormalUDP;
+		if (i == 0) { hlpExtra->data = extraAlltNormal; }
+		else if (i == 1) { hlpExtra->data = extraAlltNormalTCP; }
+		else if (i == 2) { hlpExtra->data = extraAlltNormalUDP; }
 
 		ops::TimeHelper::sleep(2000);
 
@@ -331,18 +338,18 @@ int main(int argc, char**argv)
 		std::cout << "should write first data" << std::endl;
 		ops::TimeHelper::sleep(1000);
 
-		if		(i == 0) hlpExtra->data = extraAlltLarge;
-		else if (i == 1) hlpExtra->data = extraAlltLargeTCP;
-		else if (i == 2) hlpExtra->data = extraAlltLargeUDP;
+		if (i == 0) { hlpExtra->data = extraAlltLarge; }
+		else if (i == 1) { hlpExtra->data = extraAlltLargeTCP; }
+		else if (i == 2) { hlpExtra->data = extraAlltLargeUDP; }
 
 		itemInfo->helper->Write();
 
 		std::cout << "should write second data" << std::endl;
 		ops::TimeHelper::sleep(1000);
 
-		if		(i == 0) hlpExtra->data = extraAlltNormal;
-		else if (i == 1) hlpExtra->data = extraAlltNormalTCP;
-		else if (i == 2) hlpExtra->data = extraAlltNormalUDP;
+		if (i == 0) { hlpExtra->data = extraAlltNormal; }
+		else if (i == 1) { hlpExtra->data = extraAlltNormalTCP; }
+		else if (i == 2) { hlpExtra->data = extraAlltNormalUDP; }
 
 
 		std::cout << "should write 3-12 data" << std::endl;
@@ -353,9 +360,9 @@ int main(int argc, char**argv)
 
 		ops::TimeHelper::sleep(1000);
 
-		if(i == 0) 		 hlpExtra->data = extraAlltLarge;
-		else if (i == 1) hlpExtra->data = extraAlltLargeTCP;
-		else if (i == 2) hlpExtra->data = extraAlltLargeUDP;
+		if (i == 0) { hlpExtra->data = extraAlltLarge; }
+		else if (i == 1) { hlpExtra->data = extraAlltLargeTCP; }
+		else if (i == 2) { hlpExtra->data = extraAlltLargeUDP; }
 
 		std::cout << "should write 13-22 data" << std::endl;
 		for(int k = 0 ; k < 10; ++k){
@@ -365,18 +372,18 @@ int main(int argc, char**argv)
 	}
 
 	for (unsigned int idx = 0; idx < ItemInfoList.size(); ++idx) {
-		ItemInfo* ii = ItemInfoList[idx];
-		if (ii->helper) delete ii->helper;
-		ii->helper = NULL;
-		ii->part = NULL;
+		ItemInfo* const ii = ItemInfoList[idx];
+		if (ii->helper != nullptr) { delete ii->helper; }
+		ii->helper = nullptr;
+		ii->part = nullptr;
 		delete ItemInfoList[idx];
-		ItemInfoList[idx] = NULL;
+		ItemInfoList[idx] = nullptr;
 	}
 
 	participant->getErrorService()->removeListener(errorWriter);
 	otherParticipant->getErrorService()->removeListener(errorWriter2);
-	delete errorWriter; errorWriter = NULL;
-	delete errorWriter2; errorWriter2 = NULL;
+	delete errorWriter; errorWriter = nullptr;
+	delete errorWriter2; errorWriter2 = nullptr;
 	///TODO this should be done by asking Participant to delete instances??
 	delete participant;
 }
