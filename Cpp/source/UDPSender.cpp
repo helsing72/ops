@@ -108,7 +108,7 @@ namespace ops
 		}
 	}
 
-    bool UDPSender::sendTo(char* buf, int size, const Address_T& ip, int port)
+    bool UDPSender::sendTo(const char* buf, const int size, const Address_T& ip, const int port)
     {
 		if (socket == nullptr) { return false; }
         try

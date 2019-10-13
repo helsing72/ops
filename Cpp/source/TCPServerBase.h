@@ -89,7 +89,7 @@ namespace ops
 
 		///Sends buf to all Receivers connected to this Sender, ip and port are discarded and can be left blank.
 		/// buf == nullptr or size == 0, is handled by connection/protocol
-        bool sendTo(char* buf, int size, const Address_T&, int) override
+        bool sendTo(const char* buf, const int size, const Address_T&, const int) override
 		{
 			SafeLock lck(&_mtx);
 			// Send to anyone connected. Loop backwards to avoid problems when removing broken sockets

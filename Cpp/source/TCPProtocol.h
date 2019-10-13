@@ -35,7 +35,7 @@ namespace ops
 		virtual bool isConnected(TCPProtocol& prot) = 0;
 		virtual void startAsyncRead(TCPProtocol& prot, char* bytes, uint32_t size) = 0;
 		virtual void onEvent(TCPProtocol& prot, BytesSizePair arg) = 0;
-		virtual int sendBuffer(TCPProtocol& prot, char* bytes, uint32_t size) = 0;
+		virtual int sendBuffer(TCPProtocol& prot, const char* bytes, const uint32_t size) = 0;
 	};
 
 	struct TCPUserBase
@@ -94,7 +94,7 @@ namespace ops
 		virtual bool startReceive(char* bytes, uint32_t size) = 0;
 
 		// Returns number of bytes written or < 0 if an error
-		virtual int sendData(char* buf, uint32_t size) = 0;
+		virtual int sendData(const char* buf, const uint32_t size) = 0;
 
 		// Returning false if an error is detected (should disconnect)
 		virtual bool handleReceivedData(int error, uint32_t nrBytesReceived)

@@ -61,7 +61,7 @@ namespace ops
 
 		// _data[0 .. _accumulatedSize-1] contains data (_accumulatedSize == _expectedSize)
 		// returns false if error
-		bool handleData() override
+		virtual bool handleData() override
 		{
 			bool errorDetected = false;
 			_timeRcv = _timeFuncMs();
@@ -115,19 +115,19 @@ namespace ops
 			*((uint32_t*)(_probeBuffer + 8)) = protocol_version;
 		}
 
-		int detectedVersion()
+		int detectedVersion() const
 		{
 			return _detectedVersion;
 		}
 
-		void resetProtocol() override
+		virtual void resetProtocol() override
 		{
 			_detectedVersion = 1;
 			_hbSent = false;
 		}
 
 		// Returning false if unable to start
-		bool startReceive(char* bytes, uint32_t size) override
+		virtual bool startReceive(char* bytes, uint32_t size) override
 		{
 			// Always start by reading the packet size when using tcp
 			// We use the users provided buffer for receiving the size info
@@ -140,7 +140,7 @@ namespace ops
 
 		// Returns number of bytes written or < 0 if an error
 		// size == 0, trigs a periodic check
-		int sendData(char* bytes, uint32_t size) override
+		virtual int sendData(const char* bytes, const uint32_t size) override
 		{
 			if (size == 0) {
 				if (!periodicCheck()) {
@@ -203,7 +203,7 @@ namespace ops
 		}
 
 		// Returns false if an error is detected
-		bool periodicCheck() override
+		virtual bool periodicCheck() override
 		{
 			bool errorDetected = false;
 

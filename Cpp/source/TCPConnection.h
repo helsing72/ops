@@ -66,7 +66,7 @@ namespace ops
 			}
 		}
 
-		int sendData(char* buf, int size)
+		int sendData(const char* buf, const int size)
 		{
 			return _protocol->sendData(buf, size);
 		}
@@ -97,7 +97,7 @@ namespace ops
 	protected:
 		volatile bool _connected;
 
-		virtual int send(char* buf, uint32_t size) = 0;
+		virtual int send(const char* buf, const uint32_t size) = 0;
 		virtual void startAsyncRead(char* bytes, uint32_t size) = 0;
 
 		// Should be called by the derived classes
@@ -141,7 +141,7 @@ namespace ops
 		}
 
 		// Needed by protocol
-		virtual int sendBuffer(TCPProtocol&, char* bytes, uint32_t size) override
+		virtual int sendBuffer(TCPProtocol&, const char* bytes, const uint32_t size) override
 		{
 			return send(bytes, size);
 		}

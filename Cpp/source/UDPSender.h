@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -39,15 +40,15 @@ namespace ops
         UDPSender(IOService* ioServ, Address_T localInterface = "0.0.0.0", int ttl = 1, int64_t outSocketBufferSize = 16000000, bool multicastSocket = false);
         ~UDPSender();
         
-		void open();
-		void close();
+		virtual void open() override;
+		virtual void close() override;
 
         ///Override from Sender
-        bool sendTo(char* buf, int size, const Address_T& ip, int port);
+        virtual bool sendTo(const char* buf, const int size, const Address_T& ip, const int port) override;
         ///Override from Sender
-        int getLocalPort() {return socket->local_endpoint().port();};
+        virtual int getLocalPort() override {return socket->local_endpoint().port();};
         ///Override from Sender
-        Address_T getLocalAddress() {return socket->local_endpoint().address().to_string().c_str();};
+        virtual Address_T getLocalAddress() override {return socket->local_endpoint().address().to_string().c_str();};
 
     private:
         ///This UDPSender wraps boost socket functionality.

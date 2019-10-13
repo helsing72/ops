@@ -123,7 +123,7 @@ namespace ops
 			}
 		}
 
-		int send(char* buf, uint32_t size) override
+		int send(const char* buf, const uint32_t size) override
 		{
 			try {
 				// Send the data

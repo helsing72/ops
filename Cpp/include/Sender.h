@@ -41,7 +41,7 @@ namespace ops
     class Sender
     {
     public:
-        virtual bool sendTo(char* buf, int size, const Address_T& ip, int port) = 0;
+        virtual bool sendTo(const char* buf, const int size, const Address_T& ip, const int port) = 0;
 		virtual void open() = 0;
 		virtual void close() = 0;
 
