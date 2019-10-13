@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018 Lennart Andersson.
+* Copyright (C) 2018-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -528,7 +528,7 @@ TEST(Test_ByteBuffer, TestVectors) {
 	std::vector<std::string> strv(STRING_VECTOR);
 	buf.WriteStrings(strv);
 	size += 4;
-	for (unsigned int i = 0; i < strv.size(); i++) size += 4 + (int)strv[i].size();
+	for (unsigned int i = 0; i < strv.size(); i++) { size += 4 + (int)strv[i].size(); }
 	VectorCompare(strv, STRING_VECTOR, "Write String vector");
 	EXPECT_EQ(buf.GetSize(), size);
 	EXPECT_EQ(buf.GetIndex(), size);
@@ -587,7 +587,7 @@ TEST(Test_ByteBuffer, TestVectors) {
 	std::vector<std::string> strvv;
 	buf.ReadStrings(strvv);
 	size += 4;
-	for (unsigned int i = 0; i < strv.size(); i++) size += 4 + (int)strv[i].size();
+	for (unsigned int i = 0; i < strv.size(); i++) { size += 4 + (int)strv[i].size(); }
 	VectorCompare(strv, strvv, "Read String vector");
 	EXPECT_EQ(buf.GetIndex(), size);
 
@@ -720,32 +720,32 @@ TEST(Test_ByteBuffer, TestSegmentsMinimal) {
 	buf.writeNewSegment();
 
 	// Fill buffer with values from our core types
-	float f1 = TEST_FLOAT;
+	float const f1 = TEST_FLOAT;
 	buf.WriteFloat(f1);
 	size += 15 * 4;
 	EXPECT_EQ(buf.GetSize(), size);
 
-	double d1 = TEST_DOUBLE;
+	double const d1 = TEST_DOUBLE;
 	buf.WriteDouble(d1);
 	size += 15 * 8;
 	EXPECT_EQ(buf.GetSize(), size);
 
-	int16_t s1 = TEST_SHORT;
+	int16_t const s1 = TEST_SHORT;
 	buf.WriteShort(s1);
 	size += 15 * 2;
 	EXPECT_EQ(buf.GetSize(), size);
 
-	int i1 = TEST_INT;
+	int const i1 = TEST_INT;
 	buf.WriteInt(i1);
 	size += 15 * 4;
 	EXPECT_EQ(buf.GetSize(), size);
 
-	int64_t l1 = TEST_LONG;
+	int64_t const l1 = TEST_LONG;
 	buf.WriteLong(l1);
 	size += 15 * 8;
 	EXPECT_EQ(buf.GetSize(), size);
 
-	char c1 = TEST_CHAR;
+	char const c1 = TEST_CHAR;
 	buf.WriteChar(c1);
 	size += 15 * 1;
 	EXPECT_EQ(buf.GetSize(), size);

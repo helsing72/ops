@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018 Lennart Andersson.
+* Copyright (C) 2018-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -38,6 +38,12 @@ public:
 	{ 
 		appendType("MyOpsObject"); 
 	}
+	~MyOpsObject() = default;
+
+	MyOpsObject(const MyOpsObject& r) = delete;
+	MyOpsObject& operator= (const MyOpsObject& l) = delete;
+	MyOpsObject(MyOpsObject&&) = delete;
+	MyOpsObject& operator =(MyOpsObject&&) = delete;
 };
 
 // ===============================
@@ -67,7 +73,7 @@ TEST(Test_OPSObject, Test) {
 	obj2.spareBytes.push_back('d');
 	obj2.spareBytes.push_back('\0');
 
-	OPSObject* obj3 = obj2.clone();
+	OPSObject* const obj3 = obj2.clone();
 	ASSERT_NE(obj3, nullptr);
 	EXPECT_STREQ(obj3->getTypeString().c_str(), "MyOpsObject ");
 	EXPECT_STREQ(obj3->getKey().c_str(), "Pelle");

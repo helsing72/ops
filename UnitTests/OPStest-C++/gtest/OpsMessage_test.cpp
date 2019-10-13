@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018 Lennart Andersson.
+* Copyright (C) 2018-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -75,24 +75,38 @@ public:
 		appendType("OpsObject_MessageTest");
 		++OpsObject_MessageTest_Cnt;
 	}
-	~OpsObject_MessageTest()
+	virtual ~OpsObject_MessageTest()
 	{
 		--OpsObject_MessageTest_Cnt;
 	}
-	void serialize(ArchiverInOut* archive)
+	virtual void serialize(ArchiverInOut* archive) override
 	{
 		OPSObject::serialize(archive);
 		archive->inout("Message", Message);
 	}
+
+	OpsObject_MessageTest(const OpsObject_MessageTest& r) = delete;
+	OpsObject_MessageTest& operator= (const OpsObject_MessageTest& l) = delete;
+	OpsObject_MessageTest(OpsObject_MessageTest&&) = delete;
+	OpsObject_MessageTest& operator =(OpsObject_MessageTest&&) = delete;
 };
 
 class OpsObject_MessageTest_Factory : public SerializableFactory
 {
-	virtual Serializable* create(const TypeId_T& type)
+public:
+	virtual Serializable* create(const TypeId_T& type) override
 	{
-		if (type == "OpsObject_MessageTest") return new OpsObject_MessageTest();
+		if (type == "OpsObject_MessageTest") { return new OpsObject_MessageTest(); }
 		return nullptr;
 	}
+
+	OpsObject_MessageTest_Factory() = default;
+	~OpsObject_MessageTest_Factory() = default;
+
+	OpsObject_MessageTest_Factory(const OpsObject_MessageTest_Factory& r) = delete;
+	OpsObject_MessageTest_Factory& operator= (const OpsObject_MessageTest_Factory& l) = delete;
+	OpsObject_MessageTest_Factory(OpsObject_MessageTest_Factory&&) = delete;
+	OpsObject_MessageTest_Factory& operator =(OpsObject_MessageTest_Factory&&) = delete;
 };
 
 class RAII_MessageTest_FactoryHelper
@@ -110,6 +124,10 @@ public:
 		// otherwise fact tries to delete it at exit!!
 		EXPECT_TRUE(fact.remove(&fact1));
 	}
+	RAII_MessageTest_FactoryHelper(const RAII_MessageTest_FactoryHelper& r) = delete;
+	RAII_MessageTest_FactoryHelper& operator= (const RAII_MessageTest_FactoryHelper& l) = delete;
+	RAII_MessageTest_FactoryHelper(RAII_MessageTest_FactoryHelper&&) = delete;
+	RAII_MessageTest_FactoryHelper& operator =(RAII_MessageTest_FactoryHelper&&) = delete;
 };
 
 // ===============================
@@ -215,7 +233,7 @@ TEST(Test_OPSMessage, Test_Serialize) {
 	EXPECT_STREQ(obj1.getTopicName().c_str(), "TestTopic");
 	ASSERT_NE(obj1.getData(), nullptr);
 
-	OpsObject_MessageTest* data = dynamic_cast<OpsObject_MessageTest*>(obj1.getData());
+	OpsObject_MessageTest* const data = dynamic_cast<OpsObject_MessageTest*>(obj1.getData());
 	ASSERT_NE(data, nullptr);
 	EXPECT_STREQ(data->Message.c_str(), "Kalle");
 	EXPECT_EQ(OpsObject_MessageTest_Cnt, 1);

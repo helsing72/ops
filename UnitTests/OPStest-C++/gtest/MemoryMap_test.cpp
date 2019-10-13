@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018 Lennart Andersson.
+* Copyright (C) 2018-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -51,7 +51,7 @@ TEST(Test_MemoryMap, DefaultConstructor) {
 	EXPECT_EQ((size_t)ptr0, (size_t)&buf1) << "Wrong segment address";
 
 	// test copyToBytes
-	for (unsigned int i = 0; i < sizeof(buf1); i++) buf1[i] = i;
+	for (unsigned int i = 0; i < sizeof(buf1); i++) { buf1[i] = i; }
 	char buffer[400];
 	
 	EXPECT_FALSE(map1.copyToBytes(buffer, -1, 40));
@@ -154,5 +154,3 @@ TEST(Test_MemoryMap, SingleBufferConstructor) {
 
 	EXPECT_EQ((size_t)ptr0, (size_t)&buf3B) << "Wrong segment address";
 }
-
-

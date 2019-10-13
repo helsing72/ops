@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018 Lennart Andersson.
+* Copyright (C) 2018-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -349,6 +349,10 @@ public:
 		// otherwise fact tries to delete it at exit!!
 		EXPECT_TRUE(fact.remove((SerializableFactory*)&fact1));
 	}
+	RAII_FactoryHelper_Builtin(const RAII_FactoryHelper_Builtin& r) = delete;
+	RAII_FactoryHelper_Builtin& operator= (const RAII_FactoryHelper_Builtin& l) = delete;
+	RAII_FactoryHelper_Builtin(RAII_FactoryHelper_Builtin&&) = delete;
+	RAII_FactoryHelper_Builtin& operator =(RAII_FactoryHelper_Builtin&&) = delete;
 };
 
 TEST(Test_OPSConfigObjects, TestDomain) {
@@ -586,7 +590,7 @@ TEST(Test_OPSConfigObjects, TestOPSConfig_Serialize) {
 
 TEST(Test_OPSConfigObjects, TestOPSConfig_File) {
 
-	// OPSConfig::getConfig(filename); --> uses OPSConfig::getConfig(stream);
+	// OPSConfig::getConfig(filename) --> uses OPSConfig::getConfig(stream)
 
 	std::string ops_config;
 	RAII_FileRemover remover;
@@ -603,7 +607,7 @@ TEST(Test_OPSConfigObjects, TestOPSConfig_File) {
 	// Try with an existing file
 	ASSERT_TRUE(CreateTempOpsConfigFile(ops_config));
 	remover.Add(ops_config);
-	OPSConfig* cfg = OPSConfig::getConfig(ops_config);
+	OPSConfig* const cfg = OPSConfig::getConfig(ops_config);
 	ASSERT_NE(cfg, nullptr);
 
 	EXPECT_EQ(cfg->getRefToDomains().size(), (size_t)2);

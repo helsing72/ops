@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018 Lennart Andersson.
+* Copyright (C) 2018-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -28,7 +28,7 @@
 bool CreateTempOpsConfigFile(std::string& filename)
 {
 	bool result = true;
-	std::string content(
+	std::string const content(
 		" <root>"
 		" <ops_config type = \"DefaultOPSConfigImpl\">"
 		"   <domains>"
@@ -89,7 +89,7 @@ bool CreateTempOpsConfigFile(std::string& filename)
 }
 
 
-void RAII_FileRemover::Add(std::string name)
+void RAII_FileRemover::Add(const std::string name)
 {
 	list.push_back(name);
 }

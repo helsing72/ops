@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018 Lennart Andersson.
+* Copyright (C) 2018-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -40,8 +40,8 @@ public:
 	ErrorMessage_T error;
 	Error::Severity_T severity;
 	int errorCode;
-	MyErrorListener() : counter(0), severity(Error::warning) {}
-	virtual void onNewEvent(Notifier<Error*>* sender, Error* arg) 
+	MyErrorListener() : counter(0), severity(Error::warning), errorCode(0) {}
+	virtual void onNewEvent(Notifier<Error*>* sender, Error* arg)  override
 	{ 
 		(void)(sender);
 		counter++;
@@ -49,6 +49,12 @@ public:
 		severity = arg->getSeverity();
 		errorCode = arg->getErrorCode();
 	}
+
+	~MyErrorListener() = default;
+	MyErrorListener(const MyErrorListener& other) = delete;
+	MyErrorListener& operator= (const MyErrorListener& other) = delete;
+	MyErrorListener(MyErrorListener&& other) = delete;
+	MyErrorListener& operator =(MyErrorListener&& other) = delete;
 };
 
 // ===============================
@@ -117,8 +123,6 @@ TEST(Test_ErrorServiceReport, Test) {
 TEST(Test_ErrorServiceReport, TestErrorWriter) {
 
 	std::ostringstream ss;
-	//ss << Number << std::ends;
-	//return ss.str().c_str();
 
 	ErrorWriter ew(ss);
 	ErrorService notifier;

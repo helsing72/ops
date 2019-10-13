@@ -22,21 +22,29 @@
 
 #include "TCPOpsProtocol.h"
 
-using namespace ops;
-
 // ===============================
 // Helper classes
 
-class MyTcpProtClient : public TCPProtocolCallbacks
+class MyTcpProtClient : public ops::TCPProtocolCallbacks
 {
 public:
-	TCPProtocol* _prot;
+	ops::TCPProtocol* _prot;
 
-	MyTcpProtClient(TCPProtocol* prot) : _prot(prot) {}
+	MyTcpProtClient(ops::TCPProtocol* prot) : _prot(prot) 
+	{
+		memset(sbuf, 0, sizeof(sbuf));
+	}
+	~MyTcpProtClient() = default;
+
+	MyTcpProtClient() = delete;
+	MyTcpProtClient(const MyTcpProtClient& r) = delete;
+	MyTcpProtClient& operator= (const MyTcpProtClient& l) = delete;
+	MyTcpProtClient(MyTcpProtClient&&) = delete;
+	MyTcpProtClient& operator =(MyTcpProtClient&&) = delete;
 
 	bool _connected = false;
 
-	bool isConnected(TCPProtocol& prot) override
+	virtual bool isConnected(ops::TCPProtocol& prot) override
 	{
 		EXPECT_EQ(_prot, &prot);
 		return _connected;
@@ -45,16 +53,16 @@ public:
 	char* _dstPtr = nullptr;
 	int _toRead = 0;
 
-	void startAsyncRead(TCPProtocol& prot, char* bytes, uint32_t size) override
+	virtual void startAsyncRead(ops::TCPProtocol& prot, char* bytes, uint32_t size) override
 	{
 		EXPECT_EQ(_prot, &prot);
 		_dstPtr = bytes;
 		_toRead = size;
 	}
 
-	BytesSizePair _event = { nullptr, 0 };
+	ops::BytesSizePair _event = { nullptr, 0 };
 
-	void onEvent(TCPProtocol& prot, BytesSizePair arg) override
+	virtual void onEvent(ops::TCPProtocol& prot, ops::BytesSizePair arg) override
 	{
 		EXPECT_EQ(_prot, &prot);
 		_event = arg;
@@ -71,14 +79,14 @@ public:
 		send_count = 0;
 	}
 
-	int sendBuffer(TCPProtocol& prot, char* bytes, uint32_t size) override
+	virtual int sendBuffer(ops::TCPProtocol& prot, const char* bytes, const uint32_t size) override
 	{
 		send_count++;
 
 		EXPECT_EQ(_prot, &prot);
 
-		int space = (int)sizeof(sbuf) - sbuf_idx;
-		if (size > (uint32_t)space) return -1;
+		int const space = (int)sizeof(sbuf) - sbuf_idx;
+		if (size > (uint32_t)space) { return -1; }
 
 		memcpy(&sbuf[sbuf_idx], bytes, size);
 		sbuf_idx += size;
@@ -96,7 +104,7 @@ public:
 		int version = *((int*)(sbuf + 8));
 		EXPECT_EQ(version, 2);
 
-		char save = sbuf[8];
+		char const save = sbuf[8];
 		sbuf[8] = '\0';
 
 		EXPECT_STREQ(sbuf, "opsprobe");
@@ -114,7 +122,7 @@ public:
 		int version = *((int*)(sbuf + 8));
 		EXPECT_EQ(version, 2);
 
-		char save = sbuf[8];
+		char const save = sbuf[8];
 		sbuf[8] = '\0';
 
 		EXPECT_STREQ(sbuf, "opsprobe");
@@ -131,6 +139,13 @@ struct MyTime
 	{
 		return _now;
 	}
+
+	MyTime() = default;
+	MyTime(const MyTime& r) = default;
+	MyTime& operator= (const MyTime& l) = default;
+	MyTime(MyTime&&) = default;
+	MyTime& operator =(MyTime&&) = default;
+	~MyTime() = default;
 };
 int64_t MyTime::_now = 0;
 
@@ -139,7 +154,7 @@ int64_t MyTime::_now = 0;
 TEST(Test_TCPProtocol, TestTCPProtocolVer1) {
 
 	// No user data used in this test case
-	TCPOpsProtocol prot(&MyTime::clock);
+	ops::TCPOpsProtocol prot(&MyTime::clock);
 	MyTcpProtClient client(&prot);
 
 	char buffer[1024];
@@ -271,15 +286,21 @@ TEST(Test_TCPProtocol, TestTCPProtocolVer1) {
 
 static bool MyTCPUserDataCalled = false;
 
-class MyTCPUserData : public TCPUserBase
+class MyTCPUserData : public ops::TCPUserBase
 {
-	~MyTCPUserData() { MyTCPUserDataCalled = true; }
+public:
+	virtual ~MyTCPUserData() { MyTCPUserDataCalled = true; }
+	MyTCPUserData() = default;
+	MyTCPUserData(const MyTCPUserData& r) = default;
+	MyTCPUserData& operator= (const MyTCPUserData& l) = default;
+	MyTCPUserData(MyTCPUserData&&) = delete;
+	MyTCPUserData& operator =(MyTCPUserData&&) = delete;
 };
 
 TEST(Test_TCPProtocol, TestTCPProtocolVer2) {
 
 	{
-		TCPOpsProtocol prot(&MyTime::clock);
+		ops::TCPOpsProtocol prot(&MyTime::clock);
 		MyTcpProtClient client(&prot);
 
 		prot.userData = new MyTCPUserData();
@@ -361,7 +382,7 @@ TEST(Test_TCPProtocol, TestTCPProtocolPeriodic) {
 	char buffer[1024];
 
 	{
-		TCPOpsProtocol prot(&MyTime::clock);
+		ops::TCPOpsProtocol prot(&MyTime::clock);
 		MyTcpProtClient client(&prot);
 
 		prot.connect(&client);
@@ -382,7 +403,7 @@ TEST(Test_TCPProtocol, TestTCPProtocolPeriodic) {
 	}
 
 	{
-		TCPOpsProtocol prot(&MyTime::clock);
+		ops::TCPOpsProtocol prot(&MyTime::clock);
 		MyTcpProtClient client(&prot);
 		MyTime::_now = 10000;
 
@@ -435,7 +456,7 @@ TEST(Test_TCPProtocol, TestTCPProtocolPeriodic) {
 	}
 
 	{
-		TCPOpsProtocol prot(&MyTime::clock);
+		ops::TCPOpsProtocol prot(&MyTime::clock);
 		MyTcpProtClient client(&prot);
 		MyTime::_now = 10000;
 

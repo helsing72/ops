@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018 Lennart Andersson.
+* Copyright (C) 2018-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -20,7 +20,7 @@
 
 #include "gtest/gtest.h"
 
-//#define FIXED_NO_STD_STRING
+#undef FIXED_NO_STD_STRING
 
 #include "fixed_string_support.h"
 
@@ -29,14 +29,24 @@
 
 class mstring
 {
-private:
-	char internal[80];
 public:
 	size_t size() const { return strlen(internal); }
 	const char* c_str() const { return &internal[0]; }
 
 	mstring() { internal[0] = '\0'; }
-	mstring(const char* val) { int len = ((int)strlen(val) < 79) ? (int)strlen(val) : 79; for (auto i = 0; i < len; i++) internal[i] = val[i]; internal[len] = '\0'; }
+	mstring(const char* const val) 
+	{ 
+		int const len = ((int)strlen(val) < 79) ? (int)strlen(val) : 79; 
+		for (auto i = 0; i < len; i++) { internal[i] = val[i]; internal[len] = '\0'; }
+	}
+
+	~mstring() = default;
+	mstring(const mstring& other) = default;
+	mstring& operator= (const mstring& other) = default;
+	mstring(mstring&& other) = delete;
+	mstring& operator =(mstring&& other) = delete;
+private:
+	char internal[80];
 };
 
 // ===============================
@@ -138,7 +148,7 @@ TEST(Test_fixed_string, TestConstructors) {
 
 TEST(Test_fixed_string, TestModifiers) {
 	fixed_string<50> a;
-	fixed_string<20> b("hej hopp");
+	fixed_string<20> const b("hej hopp");
 	fixed_string<20> b2("Det var en gång", 3);
 	std::string kalle("kalle");
 	fixed_string<15> e(kalle);
@@ -376,7 +386,7 @@ TEST(Test_fixed_string, TestPlusOperator) {
 
 TEST(Test_fixed_string_support, TestStreamOperator) {
 
-	fixed_string<100> a("kalle hej hopp i lingonskogen");
+	fixed_string<100> const a("kalle hej hopp i lingonskogen");
 	std::stringstream ss;
 	ss << a;
 	EXPECT_STREQ(ss.str().c_str(), "kalle hej hopp i lingonskogen") << "Content error";
@@ -384,7 +394,7 @@ TEST(Test_fixed_string_support, TestStreamOperator) {
 
 TEST(Test_fixed_string_support, TestUpperLowerTrim) {
 
-	fixed_string<40> Aa("  Hej Hopp i Lingonskogen  ");
+	fixed_string<40> const Aa("  Hej Hopp i Lingonskogen  ");
 	fixed_string<40> aa, AA, Tt;
 	aa = ToLower(Aa);
 	EXPECT_STREQ(aa.c_str(), "  hej hopp i lingonskogen  ") << "ToLower Failed";

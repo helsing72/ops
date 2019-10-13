@@ -48,7 +48,7 @@ TEST(Test_ParticipantInfo, TestTopicInfoData) {
 	obj1.port = 6789;
 
 	// Copy constructor
-	TopicInfoData obj2(obj1);
+	TopicInfoData const obj2(obj1);
 	EXPECT_STREQ(obj1.getTypeString().c_str(), "TopicInfoData ");
 	EXPECT_STREQ(obj1.name.c_str(), "Kalle");
 	EXPECT_STREQ(obj1.type.c_str(), "Test");

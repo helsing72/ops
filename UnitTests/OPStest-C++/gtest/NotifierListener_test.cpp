@@ -36,13 +36,26 @@ class MyListener : public Listener<int>
 public:
 	int value;
 	MyListener() : value(0) {}
-	virtual void onNewEvent(Notifier<int>* sender, int arg) { UNUSED(sender);  value = arg; }
+	virtual void onNewEvent(Notifier<int>* sender, int arg) override { UNUSED(sender);  value = arg; }
+
+	~MyListener() = default;
+	MyListener(const MyListener& other) = delete;
+	MyListener& operator= (const MyListener& other) = delete;
+	MyListener(MyListener&& other) = delete;
+	MyListener& operator =(MyListener&& other) = delete;
 };
 
 class MyNotifier : public Notifier<int>
 {
 public:
-	void notify(int value) { notifyNewEvent(value); }
+	void notify(int const value) { notifyNewEvent(value); }
+
+	MyNotifier() = default;
+	~MyNotifier() = default;
+	MyNotifier(const MyNotifier& other) = delete;
+	MyNotifier& operator= (const MyNotifier& other) = delete;
+	MyNotifier(MyNotifier&& other) = delete;
+	MyNotifier& operator =(MyNotifier&& other) = delete;
 };
 
 // ===============================
@@ -107,19 +120,32 @@ class MyDataListener : public DataListener
 public:
 	int counter;
 	MyDataListener() : counter(0) {}
-	virtual void onNewData(DataNotifier* sender) { UNUSED(sender); counter++; }
+	virtual void onNewData(DataNotifier* sender) override { UNUSED(sender); counter++; }
+
+	~MyDataListener() = default;
+	MyDataListener(const MyDataListener& other) = delete;
+	MyDataListener& operator= (const MyDataListener& other) = delete;
+	MyDataListener(MyDataListener&& other) = delete;
+	MyDataListener& operator =(MyDataListener&& other) = delete;
 };
 
 class MyDataNotifier : public DataNotifier
 {
 public:
 	void notify() { notifyNewData(); }
+
+	MyDataNotifier() = default;
+	~MyDataNotifier() = default;
+	MyDataNotifier(const MyDataNotifier& other) = delete;
+	MyDataNotifier& operator= (const MyDataNotifier& other) = delete;
+	MyDataNotifier(MyDataNotifier&& other) = delete;
+	MyDataNotifier& operator =(MyDataNotifier&& other) = delete;
 };
 
 void MyCallback(DataNotifier* sender, void* userData)
 {
 	UNUSED(sender);
-	MyDataListener* listener = (MyDataListener*)userData;
+	MyDataListener* const listener = (MyDataListener*)userData;
 	listener->counter++;
 }
 
@@ -183,7 +209,13 @@ class MyDeadlineListener : public DeadlineMissedListener
 public:
 	int counter;
 	MyDeadlineListener() : counter(0) {}
-	virtual void onDeadlineMissed(DeadlineMissedEvent* e) { UNUSED(e); counter++; }
+	virtual void onDeadlineMissed(DeadlineMissedEvent* e) override { UNUSED(e); counter++; }
+
+	~MyDeadlineListener() = default;
+	MyDeadlineListener(const MyDeadlineListener& other) = delete;
+	MyDeadlineListener& operator= (const MyDeadlineListener& other) = delete;
+	MyDeadlineListener(MyDeadlineListener&& other) = delete;
+	MyDeadlineListener& operator =(MyDeadlineListener&& other) = delete;
 };
 
 TEST(Test_NotifierListener, TestDeadlineMissedListener) {

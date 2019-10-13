@@ -180,7 +180,7 @@ TEST(Test_Reservable, TestCopy) {
 		EXPECT_EQ(obj->getReferenceHandler(), &ref);
 
 		// Copy constructor
-		MyObject* obj2 = new MyObject(*obj);
+		MyObject* const obj2 = new MyObject(*obj);
 		EXPECT_EQ(obj2->getNrOfReservations(), 0);
 		EXPECT_EQ(obj2->getReferenceHandler(), nullptr);
 		ref.addReservable(obj2);
@@ -199,7 +199,7 @@ TEST(Test_Reservable, TestCopy) {
 		EXPECT_EQ(obj2->getReferenceHandler(), &ref);
 
 		// Two pointers to same object
-		MyObject* obj3 = obj2;
+		MyObject* const obj3 = obj2;
 		obj3->reserve();
 		EXPECT_EQ(obj3->getNrOfReservations(), 2);
 		EXPECT_EQ(obj2->getNrOfReservations(), 2);

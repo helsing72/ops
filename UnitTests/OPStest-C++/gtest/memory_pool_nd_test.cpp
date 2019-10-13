@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018 Lennart Andersson.
+* Copyright (C) 2018-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -43,6 +43,12 @@ public:
 	void operator delete(void *p) {	_pool.returnEntry(p); }
 
 	static memory_pool_type _pool;
+
+	~mem_pool_obj2() = default;
+	mem_pool_obj2(const mem_pool_obj2& other) = delete;
+	mem_pool_obj2& operator= (const mem_pool_obj2& other) = delete;
+	mem_pool_obj2(mem_pool_obj2&& other) = delete;
+	mem_pool_obj2& operator =(mem_pool_obj2&& other) = delete;
 };
 
 mem_pool_obj2::memory_pool_type mem_pool_obj2::_pool(2);
@@ -50,10 +56,17 @@ mem_pool_obj2::memory_pool_type mem_pool_obj2::_pool(2);
 class mem_pool_log : public memory_pool_logger
 {
 public:
-	void Log(const char* message, std::exception& e)
+	virtual void Log(const char* message, std::exception& e) override
 	{
 		std::cout << "[" << message << "] memory_pool Exception: " << e.what() << std::endl;
 	}
+
+	mem_pool_log() = default;
+	~mem_pool_log() = default;
+	mem_pool_log(const mem_pool_log& other) = delete;
+	mem_pool_log& operator= (const mem_pool_log& other) = delete;
+	mem_pool_log(mem_pool_log&& other) = delete;
+	mem_pool_log& operator =(mem_pool_log&& other) = delete;
 };
 mem_pool_log mpl;
 
@@ -68,7 +81,7 @@ TEST(Test_memory_pools, Test_memory_pool_nd) {
 
 	EXPECT_THROW(mem_pool_obj2::_pool.getEntry(sizeof(mem_pool_obj2)+1), mem_pool_obj2::memory_pool_type::illegal_size);
 
-//	mgr.PrintStat(std::cout);
+//	mgr.PrintStat(std::cout)
 
 	EXPECT_EQ(mem_pool_obj2::_pool.capacity(), (size_t)2);
 	EXPECT_EQ(mem_pool_obj2::_pool.size(), (size_t)2);
@@ -78,7 +91,7 @@ TEST(Test_memory_pools, Test_memory_pool_nd) {
 	EXPECT_EQ(mem_pool_obj2::_pool.size(), (size_t)1);
 
 	{
-		std::unique_ptr<mem_pool_obj2> b( new mem_pool_obj2());
+		std::unique_ptr<mem_pool_obj2> const b( new mem_pool_obj2());
 		EXPECT_EQ(mem_pool_obj2::_pool.capacity(), (size_t)2);
 		EXPECT_EQ(mem_pool_obj2::_pool.size(), (size_t)0);
 
@@ -87,8 +100,6 @@ TEST(Test_memory_pools, Test_memory_pool_nd) {
 
 	EXPECT_EQ(mem_pool_obj2::_pool.capacity(), (size_t)2);
 	EXPECT_EQ(mem_pool_obj2::_pool.size(), (size_t)1);
-
-//	mgr.PrintStat(std::cout);
 
 	EXPECT_NO_THROW(mem_pool_obj2::_pool.checkException());
 
@@ -116,7 +127,7 @@ TEST(Test_memory_pools, Test_memory_pool_nd) {
 	EXPECT_EQ(mem_pool_obj2::_pool.size(), (size_t)1);
 
 	// Try to destroy marker for check of pool corruption detection
-	void* rawptr = (void*)a;
+	void* const rawptr = (void*)a;
 	memset(rawptr, 1, sizeof(mem_pool_obj2) + 4);
 	delete a;
 	EXPECT_THROW(mem_pool_obj2::_pool.checkException(), mem_pool_obj2::memory_pool_type::pool_corruption);

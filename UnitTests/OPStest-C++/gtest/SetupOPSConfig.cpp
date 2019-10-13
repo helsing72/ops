@@ -62,7 +62,7 @@ void SetupOPSConfig::InternalSetup()
 		"</root>"
 	);
 	std::istringstream iss(content);
-	OPSConfig* config = OPSConfig::getConfig(iss);
+	OPSConfig* const config = OPSConfig::getConfig(iss);
 	ASSERT_NE(config, nullptr);
 	ASSERT_TRUE(OPSConfigRepository::Instance()->Add(config));
 	ASSERT_FALSE(OPSConfigRepository::Instance()->Add(config));	// Duplicate test

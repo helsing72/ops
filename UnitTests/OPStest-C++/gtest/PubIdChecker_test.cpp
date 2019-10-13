@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018 Lennart Andersson.
+* Copyright (C) 2018-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -33,11 +33,19 @@ public:
 	int Counter;
 	PublicationIdNotification_T value;
 	MyPubIdNotifyListener() : Counter(0) {}
-	virtual void onNewEvent(Notifier<PublicationIdNotification_T>* sender, PublicationIdNotification_T arg) { 
+	~MyPubIdNotifyListener() = default;
+
+	virtual void onNewEvent(Notifier<PublicationIdNotification_T>* sender, PublicationIdNotification_T arg) override
+	{ 
 		UNUSED(sender);
 		value = arg;
 		++Counter;
 	}
+
+	MyPubIdNotifyListener(const MyPubIdNotifyListener& r) = delete;
+	MyPubIdNotifyListener& operator= (const MyPubIdNotifyListener& l) = delete;
+	MyPubIdNotifyListener(MyPubIdNotifyListener&&) = delete;
+	MyPubIdNotifyListener& operator =(MyPubIdNotifyListener&&) = delete;
 };
 
 static void NextId(OPSMessage& m)

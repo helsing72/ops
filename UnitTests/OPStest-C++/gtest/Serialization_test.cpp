@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018 Lennart Andersson.
+* Copyright (C) 2018-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -42,6 +42,7 @@ class SerDesObject_Core : public OPSObject
 public:
 	static ops::TypeId_T getTypeName() { return ops::TypeId_T("SerDesObject_Core"); }
 	SerDesObject_Core() { appendType(getTypeName()); }
+	~SerDesObject_Core() = default;
 
 	bool bo;
 	char ch;
@@ -54,7 +55,7 @@ public:
 	strings::fixed_string<30> fstr;
 	char buffer[10];
 
-	virtual void serialize(ArchiverInOut* archive)
+	virtual void serialize(ArchiverInOut* archive) override
 	{
 		OPSObject::serialize(archive);
 		archive->inout("bo", bo);
@@ -68,6 +69,11 @@ public:
 		archive->inout("fstr", fstr);
 		archive->inout("buffer", buffer, 10);
 	}
+
+	SerDesObject_Core(const SerDesObject_Core& r) = default;
+	SerDesObject_Core& operator= (const SerDesObject_Core& l) = default;
+	SerDesObject_Core(SerDesObject_Core&&) = default;
+	SerDesObject_Core& operator =(SerDesObject_Core&&) = default;
 };
 
 int InitObject(SerDesObject_Core& obj)
@@ -82,12 +88,12 @@ int InitObject(SerDesObject_Core& obj)
 	obj.d64 = 123456789.0; size += 8;
 	obj.str = "Test std::string"; size += 4 + (int)obj.str.size();
 	obj.fstr = "Test strings:fixed_string..."; size += 4 + (int)obj.fstr.size();
-	for (int i = 0; i < (int)sizeof(obj.buffer); i++) obj.buffer[i] = i;
+	for (int i = 0; i < (int)sizeof(obj.buffer); i++) { obj.buffer[i] = i; }
 	size += sizeof(obj.buffer);
 	return size;
 }
 
-void ExpectObjects_EQ(SerDesObject_Core& obj1, SerDesObject_Core& obj2, std::string msg)
+void ExpectObjects_EQ(SerDesObject_Core& obj1, SerDesObject_Core& obj2, const std::string msg)
 {
 	EXPECT_EQ(obj1.bo, obj2.bo) << msg;
 	EXPECT_EQ(obj1.ch, obj2.ch) << msg;
@@ -159,6 +165,7 @@ class SerDesObject_Vectors : public OPSObject
 public:
 	static ops::TypeId_T getTypeName() { return ops::TypeId_T("SerDesObject_Vectors"); }
 	SerDesObject_Vectors() { appendType(getTypeName()); }
+	~SerDesObject_Vectors() = default;
 
 	std::vector<bool> bo;
 	std::vector<char> ch;
@@ -170,7 +177,7 @@ public:
 	std::vector<std::string> str;
 	std::vector<strings::fixed_string<30>> fstr;
 
-	virtual void serialize(ArchiverInOut* archive)
+	virtual void serialize(ArchiverInOut* archive) override
 	{
 		OPSObject::serialize(archive);
 		archive->inout("bo", bo);
@@ -183,6 +190,11 @@ public:
 		archive->inout("str", str);
 		archive->inout("fstr", fstr);
 	}
+
+	SerDesObject_Vectors(const SerDesObject_Vectors& r) = delete;
+	SerDesObject_Vectors& operator= (const SerDesObject_Vectors& l) = delete;
+	SerDesObject_Vectors(SerDesObject_Vectors&&) = delete;
+	SerDesObject_Vectors& operator =(SerDesObject_Vectors&&) = delete;
 };
 
 int InitObject(SerDesObject_Vectors& obj)
@@ -200,7 +212,7 @@ int InitObject(SerDesObject_Vectors& obj)
 	return size;
 }
 
-void ExpectObjects_EQ(SerDesObject_Vectors& obj1, SerDesObject_Vectors& obj2, std::string msg)
+void ExpectObjects_EQ(SerDesObject_Vectors& obj1, SerDesObject_Vectors& obj2, const std::string msg)
 {
 	EXPECT_EQ(obj1.bo, obj2.bo) << msg;
 	EXPECT_EQ(obj1.ch, obj2.ch) << msg;
@@ -272,6 +284,7 @@ class SerDesObject_Fixarrays : public OPSObject
 public:
 	static ops::TypeId_T getTypeName() { return ops::TypeId_T("SerDesObject_Fixarrays"); }
 	SerDesObject_Fixarrays() { appendType(getTypeName()); }
+	~SerDesObject_Fixarrays() = default;
 
 	bool bo[4];
 	char ch[2];
@@ -283,7 +296,7 @@ public:
 	std::string str[2];
 	strings::fixed_string<30> fstr[2];
 
-	virtual void serialize(ArchiverInOut* archive)
+	virtual void serialize(ArchiverInOut* archive) override
 	{
 		OPSObject::serialize(archive);
 		archive->inoutfixarr("bo", bo, 4, sizeof(bo));
@@ -296,6 +309,11 @@ public:
 		archive->inoutfixarr("str", str, 2);
 		archive->inoutfixarr("fstr", fstr, 2);
 	}
+
+	SerDesObject_Fixarrays(const SerDesObject_Fixarrays& r) = delete;
+	SerDesObject_Fixarrays& operator= (const SerDesObject_Fixarrays& l) = delete;
+	SerDesObject_Fixarrays(SerDesObject_Fixarrays&&) = delete;
+	SerDesObject_Fixarrays& operator =(SerDesObject_Fixarrays&&) = delete;
 };
 
 int InitObject(SerDesObject_Fixarrays& obj)
@@ -331,7 +349,7 @@ int InitObject(SerDesObject_Fixarrays& obj)
 	return size;
 }
 
-void ExpectObjects_EQ(SerDesObject_Fixarrays& obj1, SerDesObject_Fixarrays& obj2, std::string msg)
+void ExpectObjects_EQ(SerDesObject_Fixarrays& obj1, SerDesObject_Fixarrays& obj2, const std::string msg)
 {
 	for (unsigned int i = 0; i < 4; i++) { 
 		EXPECT_EQ(obj1.bo[i], obj2.bo[i]) << msg; 
@@ -416,11 +434,18 @@ TEST(Test_Serialization, TestFixedArraysXml) {
 class ObjectFactory_SerDesObjects : public SerializableFactory
 {
 public:
-	virtual Serializable* create(const TypeId_T& type)
+	virtual Serializable* create(const TypeId_T& type) override
 	{
-		if (type == SerDesObject_Core::getTypeName()) return new SerDesObject_Core();
+		if (type == SerDesObject_Core::getTypeName()) { return new SerDesObject_Core(); }
 		return nullptr;
 	}
+	ObjectFactory_SerDesObjects() = default;
+	~ObjectFactory_SerDesObjects() = default;
+
+	ObjectFactory_SerDesObjects(const ObjectFactory_SerDesObjects& r) = delete;
+	ObjectFactory_SerDesObjects& operator= (const ObjectFactory_SerDesObjects& l) = delete;
+	ObjectFactory_SerDesObjects(ObjectFactory_SerDesObjects&&) = delete;
+	ObjectFactory_SerDesObjects& operator =(ObjectFactory_SerDesObjects&&) = delete;
 };
 
 class RAII_FactoryHelper
@@ -451,17 +476,19 @@ public:
 		obj3 = new SerDesObject_Core();
 		fixarr2[0] = new SerDesObject_Core();
 		fixarr2[1] = new SerDesObject_Core();
-		testException1 = 0;
-		testException2 = 0;
 	}
-	~SerDesObject_Serializables()
+	virtual ~SerDesObject_Serializables()
 	{
-		if (obj2) delete obj2;
-		if (obj3) delete obj3;
-		for (unsigned int i = 0; i < vobj2.size(); i++) delete vobj2[i];
-		if (fixarr2[0]) delete fixarr2[0];
-		if (fixarr2[1]) delete fixarr2[1];
+		if (obj2 != nullptr) { delete obj2; }
+		if (obj3 != nullptr) { delete obj3; }
+		for (unsigned int i = 0; i < vobj2.size(); i++) { delete vobj2[i]; }
+		if (fixarr2[0] != nullptr) { delete fixarr2[0]; }
+		if (fixarr2[1] != nullptr) { delete fixarr2[1]; }
 	}
+	SerDesObject_Serializables(const SerDesObject_Serializables& r) = delete;
+	SerDesObject_Serializables& operator= (const SerDesObject_Serializables& l) = delete;
+	SerDesObject_Serializables(SerDesObject_Serializables&&) = delete;
+	SerDesObject_Serializables& operator =(SerDesObject_Serializables&&) = delete;
 
 	SerDesObject_Core obj1;
 	SerDesObject_Core* obj2;
@@ -473,10 +500,10 @@ public:
 	SerDesObject_Core fixarr1[2];
 	SerDesObject_Core* fixarr2[2];
 
-	int testException1;
-	int testException2;
+	int testException1 = 0;
+	int testException2 = 0;
 
-	virtual void serialize(ArchiverInOut* archive)
+	virtual void serialize(ArchiverInOut* archive) override
 	{
 		OPSObject::serialize(archive);
 		//virtual void inout(InoutName_T name, Serializable& value) = 0;
@@ -545,7 +572,7 @@ int InitObject(SerDesObject_Serializables& obj)
 	return size;
 }
 
-void ExpectObjects_EQ(SerDesObject_Serializables& obj1, SerDesObject_Serializables& obj2, std::string msg)
+void ExpectObjects_EQ(SerDesObject_Serializables& obj1, SerDesObject_Serializables& obj2, const std::string msg)
 {
 	ExpectObjects_EQ(obj1.obj1, obj2.obj1, msg);
 

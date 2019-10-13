@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018 Lennart Andersson.
+* Copyright (C) 2018-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -38,26 +38,26 @@ using namespace ops;
 TEST(Test_OPSConfigRepo, Test) {
 
 	// Check empty repo
-	OPSConfigRepository* repo = OPSConfigRepository::Instance();
+	OPSConfigRepository* const repo = OPSConfigRepository::Instance();
 	ASSERT_NE(repo, nullptr);
 	EXPECT_EQ(repo->numDomains(), 0);
 	EXPECT_FALSE(repo->domainExist("GTestDomain"));
 
 	// Check repo built from OPSConfig object
 	{
-		SetupOPSConfig soc;
+		SetupOPSConfig const soc;
 		EXPECT_EQ(repo->numDomains(), 1);
 		EXPECT_FALSE(repo->domainExist("Test"));
 		EXPECT_NE(repo->getConfig(""), nullptr);
 		EXPECT_EQ(repo->getConfig("Test"), nullptr);
 		EXPECT_TRUE(repo->domainExist("GTestDomain"));
-		OPSConfig* cfg = repo->getConfig("GTestDomain");
+		OPSConfig* const cfg = repo->getConfig("GTestDomain");
 		ASSERT_NE(cfg, nullptr);
 	}
 	EXPECT_EQ(repo->numDomains(), 0);
 
 	{
-		SetupOPSConfig soc;
+		SetupOPSConfig const soc;
 		EXPECT_EQ(repo->numDomains(), 1);
 		EXPECT_TRUE(repo->domainExist("GTestDomain"));
 		repo->Clear();
