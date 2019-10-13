@@ -9,7 +9,7 @@
 class ILogInterface
 {
 public:
-	virtual void Log(const char* szFormatString, ...) = 0;
+	virtual void Log(const char* const szFormatString, ...) = 0;
 };
 
 class COpsConfigHelper

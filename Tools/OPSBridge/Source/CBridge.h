@@ -101,11 +101,11 @@ namespace opsbridge {
 			uint64_t const AckCounter) override;
 		void onAckNakMessage(CTransport* const sender, TAckNakMessage& ackNak) override;
 		void onCommandMessage(CTransport* const sender, TCommandMessage& cmd) override;
-		void onStatusMessage(CTransport* const sender, TStatusMessage& status) override;
-		void onUdpMcMessage(CTransport* const sender, TUdpMcMessage& udpMc, char* data) override;
+		void onStatusMessage(CTransport* const sender, const TStatusMessage& status) override;
+		void onUdpMcMessage(CTransport* const sender, TUdpMcMessage& udpMc, const char* data) override;
 
 		// Override from RawMcUdpListener
-		void onUdpMcMessage(RawMcUdp* const sender, TUdpMcMessage& mess, char* data) override;
+		void onUdpMcMessage(RawMcUdp* const sender, TUdpMcMessage& mess, const char* data) override;
 
 		void Run();
 

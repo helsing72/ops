@@ -36,6 +36,8 @@
 
 #endif
 
+const char c_program_version[] = "OPSListener Version 2019-10-13";
+
 void showDescription()
 {
 	std::cout << std::endl;
@@ -118,10 +120,16 @@ public:
 	{
 		// Create a map with all valid format chars, used for validating -p<...> argument
 		validFormatChars = getValidFormatChars();
-		for (unsigned int i = 0; i < validFormatChars.size(); i++) validChars[validFormatChars[i]] = true;
+		for (unsigned int i = 0; i < validFormatChars.size(); i++) { validChars[validFormatChars[i]] = true; }
 	}
 
-	bool HandleArguments(const LPWSTR* szArglist, int const nStart, int const nArgs)
+	~CArguments() = default;
+	CArguments(const CArguments& other) = delete;
+	CArguments& operator= (const CArguments& other) = delete;
+	CArguments(CArguments&& other) = delete;
+	CArguments& operator =(CArguments&& other) = delete;
+
+	bool HandleArguments(const LPWSTR* const szArglist, int const nStart, int const nArgs)
 	{
 		if (verboseOutput) {
 			for (int i = nStart; i < nArgs; i++) {
@@ -465,11 +473,18 @@ public:
 		}
 		return nullptr;
 	}
+
+	AllOpsTypeFactory() = default;
+	~AllOpsTypeFactory() = default;
+	AllOpsTypeFactory(const AllOpsTypeFactory& other) = delete;
+	AllOpsTypeFactory& operator= (const AllOpsTypeFactory& other) = delete;
+	AllOpsTypeFactory(AllOpsTypeFactory&& other) = delete;
+	AllOpsTypeFactory& operator =(AllOpsTypeFactory&& other) = delete;
 };
 
 class MyLogger : public ILogInterface
 {
-	virtual void Log(const char* szFormatString, ...) override
+	virtual void Log(const char* const szFormatString, ...) override
 	{
 		char buff[1000];
 		memset(buff, 0, sizeof(buff));
@@ -482,18 +497,25 @@ class MyLogger : public ILogInterface
 #endif
 		printf("%s", buff);
 	}
+public:
+	MyLogger() = default;
+	~MyLogger() = default;
+	MyLogger(const MyLogger& other) = delete;
+	MyLogger& operator= (const MyLogger& other) = delete;
+	MyLogger(MyLogger&& other) = delete;
+	MyLogger& operator =(MyLogger&& other) = delete;
 };
 
 // ---------------------------------------------------------------------------------------
-typedef std::string (*TFormatFunc)(ops::OPSMessage* const mess, const ops::OPSObject* opsData);
+typedef std::string (*TFormatFunc)(const ops::OPSMessage* const mess, const ops::OPSObject* const opsData);
 
-std::string publisherName(ops::OPSMessage* const mess, const ops::OPSObject* opsData)
+std::string publisherName(const ops::OPSMessage* const mess, const ops::OPSObject* const opsData)
 {
 	UNUSED(opsData);
 	if (mess == nullptr) { return ""; }
 	return "Pub: " + std::string(mess->getPublisherName().c_str());
 }
-std::string publicationId(ops::OPSMessage* const mess, const ops::OPSObject* opsData)
+std::string publicationId(const ops::OPSMessage* const mess, const ops::OPSObject* const opsData)
 {
 	UNUSED(opsData);
 	if (mess == nullptr) { return ""; }
@@ -502,13 +524,13 @@ std::string publicationId(ops::OPSMessage* const mess, const ops::OPSObject* ops
 	std::string IdStr(str.str());
 	return "PubId: " + IdStr;
 }
-std::string topicName(ops::OPSMessage* const mess, const ops::OPSObject* opsData)
+std::string topicName(const ops::OPSMessage* const mess, const ops::OPSObject* const opsData)
 {
 	UNUSED(opsData);
 	if (mess == nullptr) { return ""; }
 	return "Topic: " + std::string(mess->getTopicName().c_str());
 }
-std::string source(ops::OPSMessage* const mess, const ops::OPSObject* opsData)
+std::string source(const ops::OPSMessage* const mess, const ops::OPSObject* const opsData)
 {
 	UNUSED(opsData);
 	if (mess == nullptr) { return ""; }
@@ -521,7 +543,7 @@ std::string source(ops::OPSMessage* const mess, const ops::OPSObject* opsData)
 }
 
 // ---------------------------------------------------------------------------------------
-std::string spareBytes(ops::OPSMessage* const mess, const ops::OPSObject* opsData)
+std::string spareBytes(const ops::OPSMessage* const mess, const ops::OPSObject* const opsData)
 {
 	UNUSED(mess);
 	if (opsData == nullptr) { return ""; }
@@ -530,13 +552,13 @@ std::string spareBytes(ops::OPSMessage* const mess, const ops::OPSObject* opsDat
 	std::string const SizeStr(str.str());
 	return "Spare: " + SizeStr;
 }
-std::string key(ops::OPSMessage* const mess, const ops::OPSObject* opsData)
+std::string key(const ops::OPSMessage* const mess, const ops::OPSObject* const opsData)
 {
 	UNUSED(mess);
 	if (opsData == nullptr) { return ""; }
 	return "Key: " + std::string(opsData->getKey().c_str());
 }
-std::string typeString(ops::OPSMessage* const mess, const ops::OPSObject* opsData)
+std::string typeString(const ops::OPSMessage* const mess, const ops::OPSObject* const opsData)
 {
 	UNUSED(mess);
 	if (opsData == nullptr) { return ""; }
@@ -582,7 +604,7 @@ public:
 
 	int numQueued() const {return (int)List.size();}
 
-	void LogTopic(ops::ObjectName_T const domainName, ops::Topic& top)
+	void LogTopic(ops::ObjectName_T const domainName, const ops::Topic& top)
 	{
 		// For our purpose we can use any participant
 		ops::Participant* const part = opsHelper.getDomainParticipant(opsHelper.vDomains[0]);
@@ -862,12 +884,16 @@ public:
 		}
 		vSubs.clear();
 	}
+	Main(const Main& other) = delete;
+	Main& operator= (const Main& other) = delete;
+	Main(Main&& other) = delete;
+	Main& operator =(Main&& other) = delete;
 	//
 	///Override from ops::DataListener, called whenever new data arrives.
 	virtual void onNewData(ops::DataNotifier* const subscriber) override
 	{
 		ops::Subscriber* const sub = dynamic_cast<ops::Subscriber*>(subscriber);
-		if (sub) {
+		if (sub != nullptr) {
 			ops::OPSMessage* const mess = sub->getMessage();
 			if (mess == nullptr) { return; }
 
@@ -911,7 +937,7 @@ public:
 			std::endl;
 	}
 	//
-	static void ShowDebugEntity(opsidls::DebugRequestResponseData* const data)
+	static void ShowDebugEntity(const opsidls::DebugRequestResponseData* const data)
 	{
 		switch (data->Command) {
 		case 0:
@@ -921,6 +947,7 @@ public:
 			case 2:	std::cout << "Publishers in Param3: "; break;
 			case 3: std::cout << "Suscribers in Param3: "; break;
 			case 50:std::cout << "Generic command"; break;
+			default:; break;
 			}
 			std::cout << std::endl;
 			break;
@@ -932,6 +959,7 @@ public:
 			case 1: std::cout << "  List Instance Key\n"; break;
 			case 2: std::cout << "  List Publishers\n"; break;
 			case 3: std::cout << "  List Subscribers\n"; break;
+			default:; break;
 			}
 			break;
 		case 50:
@@ -941,7 +969,7 @@ public:
 			break;
 		}
 	}
-	static void ShowPubEntity(opsidls::DebugRequestResponseData* const data)
+	static void ShowPubEntity(const opsidls::DebugRequestResponseData* const data)
 	{
 		switch (data->Command) {
 		case 0:
@@ -959,6 +987,7 @@ public:
 			switch (data->Param1) {
 			case 0: std::cout << "  Disable '" << data->Name << "' Publisher\n"; break;
 			case 1: std::cout << "  Enable '" << data->Name << "' Publisher\n"; break;
+			default:; break;
 			}
 			break;
 		case 3:
@@ -977,7 +1006,7 @@ public:
 			break;
 		}
 	}
-	static void ShowSubEntity(opsidls::DebugRequestResponseData* const data)
+	static void ShowSubEntity(const opsidls::DebugRequestResponseData* const data)
 	{
 		switch (data->Command) {
 		case 0:
@@ -995,6 +1024,7 @@ public:
 			switch (data->Param1) {
 			case 0: std::cout << "  Disable '" << data->Name << "' Subscriber\n"; break;
 			case 1: std::cout << "  Enable '" << data->Name << "' Subscriber\n"; break;
+			default:; break;
 			}
 			break;
 		case 4:
@@ -1004,7 +1034,7 @@ public:
 			break;
 		}
 	}
-	void ShowDebugMessage(TEntry& ent, ops::OPSMessage* const mess, opsidls::DebugRequestResponseData* const data)
+	void ShowDebugMessage(const TEntry& ent, const ops::OPSMessage* const mess, const opsidls::DebugRequestResponseData* const data) const
 	{
 		// Show Debug Request/Response data
 		std::string str = "";
@@ -1039,8 +1069,60 @@ public:
 
 		//Objs
 	}
+	void ShowParticipantInfo(const ops::OPSMessage* const mess, const ops::ParticipantInfoData* const piData)
+	{
+		// First check if it's from any of our own participants
+		bool fromMe = false;
+		for (unsigned int i = 0; i < ownPartInfoNames.size(); i++) {
+			if (ownPartInfoNames[i] == piData->name) { fromMe = true; }
+		}
+		if (!fromMe) {
+			if (partMap.find(piData->name) == partMap.end()) {
+				std::cout << "[" << partMap.size() + 1 << "] >>>>> Participant '" << piData->name << "' arrived" << std::endl;
+			}
+			partMap[piData->name] = sds::sdsSystemTime();
+		}
+		if (!fromMe && !onlyArrivingLeaving) {
+			std::cout <<
+				"[" << partMap.size() << "] " <<
+				"name: " << piData->name <<
+				", domain: " << piData->domain <<
+				", partId: " << piData->id <<
+				", ip: " << piData->ip <<
+				", mcudp: " << piData->mc_udp_port <<
+				", mctcp: " << piData->mc_tcp_port <<
+				std::endl;
+			ops::Address_T srcIP;
+			int srcPort;
+			mess->getSource(srcIP, srcPort);
+			std::cout <<
+				"  lang: " << piData->languageImplementation <<
+				", opsver: " << piData->opsVersion <<
+				", From: " << srcIP << ":" << srcPort <<
+				", pubId: " << mess->getPublicationID() <<
+				std::endl;
+			//std::vector<TopicInfoData> subscribeTopics;
+			std::cout << "  subscr Topics: ";
+			for (unsigned int i = 0; i < piData->subscribeTopics.size(); i++) {
+				std::cout << piData->subscribeTopics[i].name << " ";
+			}
+			std::cout << std::endl;
+			//std::vector<TopicInfoData> publishTopics;
+			std::cout << "  pub Topics: ";
+			for (unsigned int i = 0; i < piData->publishTopics.size(); i++) {
+				std::cout << piData->publishTopics[i].name << " ";
+			}
+			std::cout << std::endl;
+			//std::vector<std::string> knownTypes;
+			std::cout << "  knownTypes: ";
+			for (unsigned int i = 0; i < piData->knownTypes.size(); i++) {
+				std::cout << piData->knownTypes[i] << " ";
+			}
+			std::cout << std::endl;
+		}
+	}
 	//
-	void WorkOnList(int numMess)
+	void WorkOnList(int const numMess)
 	{
 		/// Don't loop to much, to not loose mmi responsiveness
 		for (int loopCnt=0; loopCnt < numMess; loopCnt++) {
@@ -1062,70 +1144,12 @@ public:
 
 			opsData = mess->getData();
 
-			/// OPSMessage
-			//	  int64_t getPublicationID()
-			//    std::string getPublisherName()
-			//	  std::string mess->getTopicName();
-			//    mess->getSource(srcIP, srcPort);
-			/// OPSObject
-			//    std::string getKey();
-			//    const std::string& getTypeString();
-			//    std::vector<char> spareBytes;
-
 			piData = dynamic_cast<ops::ParticipantInfoData*>(opsData);
 			debugData = dynamic_cast<opsidls::DebugRequestResponseData*>(opsData);
 
 			if (piData != nullptr) {
 				// Show Participant Info
-				// First check if it's from any of our own participants
-				bool fromMe = false;
-				for (unsigned int i = 0; i < ownPartInfoNames.size(); i++) {
-					if (ownPartInfoNames[i] == piData->name) { fromMe = true; }
-				}
-				if (!fromMe) {
-					if (partMap.find(piData->name) == partMap.end()) {
-						std::cout << "[" << partMap.size() + 1 << "] >>>>> Participant '" << piData->name << "' arrived" << std::endl;
-					}
-					partMap[piData->name] = sds::sdsSystemTime();
-				}
-				if (!fromMe && !onlyArrivingLeaving) {
-					std::cout <<
-						"[" << partMap.size() << "] " <<
-						"name: " << piData->name <<
-						", domain: " << piData->domain <<
-						", partId: " << piData->id <<
-						", ip: " << piData->ip <<
-						", mcudp: " << piData->mc_udp_port <<
-						", mctcp: " << piData->mc_tcp_port <<
-						std::endl;
-					ops::Address_T srcIP;
-					int srcPort;
-					mess->getSource(srcIP, srcPort);
-					std::cout <<
-						"  lang: " << piData->languageImplementation <<
-						", opsver: " << piData->opsVersion <<
-						", From: " << srcIP << ":" << srcPort <<
-						", pubId: " << mess->getPublicationID() <<
-						std::endl;
-					//std::vector<TopicInfoData> subscribeTopics;
-					std::cout << "  subscr Topics: ";
-					for (unsigned int i = 0; i < piData->subscribeTopics.size(); i++) {
-						std::cout << piData->subscribeTopics[i].name << " ";
-					}
-					std::cout << std::endl;
-					//std::vector<TopicInfoData> publishTopics;
-					std::cout << "  pub Topics: ";
-					for (unsigned int i = 0; i < piData->publishTopics.size(); i++) {
-						std::cout << piData->publishTopics[i].name << " ";
-					}
-					std::cout << std::endl;
-					//std::vector<std::string> knownTypes;
-					std::cout << "  knownTypes: ";
-					for (unsigned int i = 0; i < piData->knownTypes.size(); i++) {
-						std::cout << piData->knownTypes[i] << " ";
-					}
-					std::cout << std::endl;
-				}
+				ShowParticipantInfo(mess, piData);
 			
 			} else if (debugData != nullptr) {
 				ShowDebugMessage(ent, mess, debugData);
@@ -1197,7 +1221,7 @@ int _kbhit() {
 
 int main(const int argc, const char* argv[])
 {
-	std::cout << std::endl << "OPSListener Version 2019-10-05" << std::endl << std::endl;
+	std::cout << std::endl << c_program_version << std::endl << std::endl;
 
 	sds::sdsSystemTimeInit();
 
@@ -1214,7 +1238,7 @@ int main(const int argc, const char* argv[])
 		int const numMess = 100;
 
 		while (true) {
-			if (_kbhit()) {
+			if (_kbhit() != 0) {
 				char buffer[1024];
 				if (fgets(buffer, sizeof(buffer), stdin) != nullptr) {
 					std::string line(buffer);
@@ -1222,10 +1246,10 @@ int main(const int argc, const char* argv[])
 					// trim start
 					std::string::size_type const idx = line.find_first_not_of(" \t");
 					if (idx == std::string::npos) { continue; }
-					if (idx > 0) line.erase(0, idx);
+					if (idx > 0) { line.erase(0, idx); }
 					if (line.size() == 0) { continue; }
 
-					char ch = line[0];
+					char const ch = line[0];
 					line.erase(0, 1);
 
 					if (ch == 0x1b) { break; }
@@ -1240,10 +1264,8 @@ int main(const int argc, const char* argv[])
 						m->WorkOnList(1);
 					}
 
-					//if (ch == '?') {
-					//	std::cout << "Subscribing to topic: " << topicNames[0];
-					//	std::cout << std::endl;
-					//}
+					if (ch == '?') {
+					}
 				}
 			}
 			ops::TimeHelper::sleep(10);

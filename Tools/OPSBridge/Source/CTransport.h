@@ -46,9 +46,9 @@ namespace opsbridge {
 		virtual void onAckNakMessage(CTransport* sender, TAckNakMessage& ackNak) = 0;
 
 		virtual void onCommandMessage(CTransport* sender, TCommandMessage& cmd) = 0;
-		virtual void onStatusMessage(CTransport* sender, TStatusMessage& status) = 0;
+		virtual void onStatusMessage(CTransport* sender, const TStatusMessage& status) = 0;
 
-		virtual void onUdpMcMessage(CTransport* sender, TUdpMcMessage& udpMc, char* data) = 0;
+		virtual void onUdpMcMessage(CTransport* sender, TUdpMcMessage& udpMc, const char* data) = 0;
 	};
 
 	class CTransport : public CWorkItemEx
@@ -72,7 +72,7 @@ namespace opsbridge {
 		virtual bool writeStatus(TStatusMessage& status) = 0;
 
 		// The .Head field in UdpMc will be overwritten
-		virtual bool writeUdpMcMessage(TUdpMcMessage& udpMc, char* data) = 0;
+		virtual bool writeUdpMcMessage(TUdpMcMessage& udpMc, const char* data) = 0;
 
 		virtual void disconnect() = 0;
 

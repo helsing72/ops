@@ -38,7 +38,7 @@ namespace opsbridge {
 	class RawMcUdpListener
 	{
 	public:
-		virtual void onUdpMcMessage(RawMcUdp* sender, TUdpMcMessage& mess, char* data) = 0;
+		virtual void onUdpMcMessage(RawMcUdp* sender, TUdpMcMessage& mess, const char* data) = 0;
 	};
 
 	class RawMcUdp : ops::Runnable, ops::Listener<ops::BytesSizePair>
@@ -49,7 +49,7 @@ namespace opsbridge {
 		bool AddReceiver(ops::Address_T ip, uint16_t const port, ops::Address_T const ifc);
 		void AddTranslation(ops::Address_T ip, int port, ops::Address_T newIp, int newPort, ops::Address_T ifc = "", int ttl = 1);
 
-		void Write(TUdpMcMessage& mess, char* const data);
+		void Write(const TUdpMcMessage& mess, const char* const data);
 
 	private:
 		bool _keepRunning = true;

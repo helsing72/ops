@@ -193,7 +193,7 @@ public:
 		}
 	}
 
-	void VerifyNoAttributes(Configuration& config, std::string const msg)
+	void VerifyNoAttributes(Configuration& config, std::string const msg) const
 	{
 		std::vector<std::string> known = { "" };
 		CheckForUnknownAttributes(config, known, msg);
@@ -659,7 +659,7 @@ public:
 		} else {
 			// linktype
 			if (linkType == "") {
-				//LOG_WARN(">>> Missing <transport> for topic '" << topicName << "' in domain '" << domainName << "', multicast assumed." << std::endl);
+				//LOG_WARN(">>> Missing <linkType> for topic '" << topicName << "' in domain '" << domainName << "', multicast assumed." << std::endl)
 			}
 
 			// address

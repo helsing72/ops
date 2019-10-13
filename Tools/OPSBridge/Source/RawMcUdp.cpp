@@ -143,7 +143,7 @@ namespace opsbridge {
 		}
 	}
 
-	void RawMcUdp::Write(TUdpMcMessage& mess, char* const data)
+	void RawMcUdp::Write(const TUdpMcMessage& mess, const char* const data)
 	{
 		// For each srcIP,srcPort we create a unique sender (these are the original sender's IP and port).
 		// This enables the receiver of our sent MC and UDP packages, to differentiate

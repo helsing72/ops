@@ -78,7 +78,7 @@ void CSocketTransport::Close()
 	m_socketCom = INVALID_SOCKET;
 }
 
-bool CSocketTransport::write(char* const buffer, uint32_t const length)
+bool CSocketTransport::write(const char* const buffer, uint32_t const length)
 {
 	if (!m_Connected) { return false; }
 	
@@ -130,7 +130,7 @@ bool CSocketTransport::writeOpsMessage(ops::OPSObject* const mess,
 
 	// Send on transport
 	// We need to lock the writes since the complete message requires 3 writes
-	ops::SafeLock lock(&m_writeLock);
+	ops::SafeLock const lock(&m_writeLock);
 	if (!write((char *)&head, sizeof(head))) { return false; }
 	if (!write(memMap.getSegment(0), buf.GetSize())) { return false; }
 	return write(&mess->spareBytes[0], head.DataLength);
@@ -146,7 +146,7 @@ bool CSocketTransport::writeAckNak(uint64_t const ackCounter, uint32_t const err
 	
 	// Send on transport
 	// We need to lock the writes
-	ops::SafeLock lock(&m_writeLock);
+	ops::SafeLock const lock(&m_writeLock);
 	return write((char *)&AckNak, sizeof(AckNak));
 }
 
@@ -155,14 +155,6 @@ bool CSocketTransport::writeCommand(TCommandMessage& cmd)
 {
 	ops::MemoryMap memMap(1, 1000);
 	ops::ByteBuffer buf(memMap);
-
-	//typedef struct {
-	//	THeader Head;
-	//	TCommandType Command;
-	//	std::string DestTopicName;
-	//	std::string DataType;
-	//	int64_t AckCounter;
-	//} TCommandMessage;
 
 	cmd.Head.Type = mtCommand;
 	cmd.Head.Length = 0;	// replaced below with real length
@@ -178,7 +170,7 @@ bool CSocketTransport::writeCommand(TCommandMessage& cmd)
 
 	// Send on transport
 	// We need to lock the writes
-	ops::SafeLock lock(&m_writeLock);
+	ops::SafeLock const lock(&m_writeLock);
 	if (!write((char *)&cmd.Head, sizeof(cmd.Head))) { return false; }
 	return write(memMap.getSegment(0), buf.GetSize());
 }
@@ -189,20 +181,20 @@ bool CSocketTransport::writeStatus(TStatusMessage& status)
 	status.Head.Length = sizeof(status);
 	// Send on transport
 	// We need to lock the writes
-	ops::SafeLock lock(&m_writeLock);
+	ops::SafeLock const lock(&m_writeLock);
 	return write((char *)&status, sizeof(status));
 }
 
 // The .Head field in UdpMc will be overwritten
-bool CSocketTransport::writeUdpMcMessage(TUdpMcMessage& udpMc, char* const data)
+bool CSocketTransport::writeUdpMcMessage(TUdpMcMessage& udpMc, const char* data)
 {
 	udpMc.Head.Type = mtUdpMc;
 	udpMc.Head.Length = sizeof(udpMc);
 
 	// Send on transport
 	// We need to lock the writes
-	ops::SafeLock lock(&m_writeLock);
-	if (!write((char *)&udpMc, sizeof(udpMc))) { return false; }
+	ops::SafeLock const lock(&m_writeLock);
+	if (!write((const char *)&udpMc, sizeof(udpMc))) { return false; }
 	return write(data, udpMc.DataLength);
 }
 
@@ -215,7 +207,6 @@ bool CSocketTransport::ReadData(char* buffer, uint32_t const numBytes)
 		int const iResult = recv(m_socketCom, &buffer[numRead], numBytes - numRead, 0);
 		
 		if (iResult > 0) {
-			//printf("Bytes received: %d\n", iResult);
 			numRead += iResult;
 
 		} else if (iResult == 0) {
@@ -325,14 +316,6 @@ void CSocketTransport::HandleData()
 		case mtCommand:
 		{
 			ops::ByteBuffer buf(memMap);
-
-			//typedef struct {
-			//	THeader Head;
-			//	TCommandType Command;
-			//	std::string DestTopicName;
-			//	std::string DataType;
-			//	int64_t AckCounter;
-			//} TCommandMessage;
 
 			// Read rest of data for TCommandMessage
 			CmdMess.Head = Head;

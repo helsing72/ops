@@ -67,7 +67,7 @@ namespace opsbridge {
 		bool writeStatus(TStatusMessage& status);
 
 		// The .Head field in UdpMc will be overwritten
-		bool writeUdpMcMessage(TUdpMcMessage& udpMc, char* data);
+		bool writeUdpMcMessage(TUdpMcMessage& udpMc, const char* data);
 
 		void disconnect();
 
@@ -88,7 +88,7 @@ namespace opsbridge {
 		ops::Lockable m_writeLock;
 		ops::SerializableInheritingTypeFactory m_factory;
 
-		bool write(char* buffer, uint32_t length);
+		bool write(const char* const buffer, uint32_t const length);
 	};
 
 }

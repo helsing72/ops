@@ -90,7 +90,7 @@ void CBridge::setupSubscriber(ops::Topic& recTopic, BridgeConfig::TTopicConfig& 
 		sub->addFilterQoSPolicy(new ops::KeyFilterQoSPolicy(tc.sKey));
 	}
 
-	ops::SafeLock lock(&m_subscriberLock);
+	ops::SafeLock const lock(&m_subscriberLock);
 	TSubscriberEntry ent;
 	ent.tc = tc;
 	ent.sub = sub;
@@ -112,7 +112,7 @@ void CBridge::stopSubscriber(ops::ObjectName_T const topic)
 	ops::ObjectName_T domainName, topicName;
 	ops::utilities::splitTopicName(topic, domainName, topicName);
 
-	ops::SafeLock lock(&m_subscriberLock);
+	ops::SafeLock const lock(&m_subscriberLock);
 
 	for (uint32_t i = 0; i < m_subscribers.size(); i++) {
 		if ((m_subscribers[i].domainName == domainName) && (m_subscribers[i].topicName == topicName)) {
@@ -127,7 +127,7 @@ void CBridge::stopSubscriber(ops::ObjectName_T const topic)
 
 void CBridge::stopAllSubscribers()
 {
-	ops::SafeLock lock(&m_subscriberLock);
+	ops::SafeLock const lock(&m_subscriberLock);
 	for (uint32_t i = 0; i < m_subscribers.size(); i++) {
 		if (m_subscribers[i].started) {
 			m_subscribers[i].sub->stop();
@@ -142,7 +142,7 @@ void CBridge::startSubscriber(ops::ObjectName_T const topic)
 	ops::ObjectName_T domainName, topicName;
 	ops::utilities::splitTopicName(topic, domainName, topicName);
 
-	ops::SafeLock lock(&m_subscriberLock);
+	ops::SafeLock const lock(&m_subscriberLock);
 
 	for (uint32_t i = 0; i < m_subscribers.size(); i++) {
 		if ((m_subscribers[i].domainName == domainName) && (m_subscribers[i].topicName == topicName)) {
@@ -157,7 +157,7 @@ void CBridge::startSubscriber(ops::ObjectName_T const topic)
 
 void CBridge::startAllSubscribers()
 {
-	ops::SafeLock lock(&m_subscriberLock);
+	ops::SafeLock const lock(&m_subscriberLock);
 	for (uint32_t i = 0; i < m_subscribers.size(); i++) {
 		if (m_subscribers[i].stopCounter > 0) { m_subscribers[i].stopCounter--; }
 		if (!m_subscribers[i].started && (m_subscribers[i].stopCounter == 0)) {
@@ -169,7 +169,7 @@ void CBridge::startAllSubscribers()
 
 void CBridge::removeAllSubscribers()
 {
-	ops::SafeLock lock(&m_subscriberLock);
+	ops::SafeLock const lock(&m_subscriberLock);
 
 	// Debug
 	for (uint32_t i = 0; i < m_subscribers.size(); i++) {
@@ -283,7 +283,7 @@ void CBridge::queueMessage(ops::OPSMessage* const mess, TSubscriberEntry& subEnt
 	if (ht == BridgeConfig::keepLatest) {
 		// There should only be one of this type, so remove any found samples.
 		// We will add a sample at the end of the method
-		ops::SafeLock lock(&m_queueLock);
+		ops::SafeLock const lock(&m_queueLock);
 		std::deque<TMessageEntry>* const Ptr = &m_queue[subEntry.tc.iPriority];
 
 		// Algorithm: Find the last entry for topic and clear it.
@@ -322,13 +322,13 @@ void CBridge::queueMessage(ops::OPSMessage* const mess, TSubscriberEntry& subEnt
 	me.priority = subEntry.tc.iPriority;			// Priority may be needed at disconnect
 	me.AckNumber = 0;								// Initialized to NOT SET
 
-	ops::SafeLock lock(&m_queueLock);
+	ops::SafeLock const lock(&m_queueLock);
 	m_queue[subEntry.tc.iPriority].push_back(me);
 }
 
 bool CBridge::getHighestPrioMessage(TMessageEntry& me)
 {
-	ops::SafeLock lock(&m_queueLock);
+	ops::SafeLock const lock(&m_queueLock);
 
 	for (int prio = HIGHEST_PRIO; prio >= 0; prio--) {
 		while (m_queue[prio].size() > 0) {
@@ -347,7 +347,7 @@ bool CBridge::getHighestPrioMessage(TMessageEntry& me)
 
 void CBridge::clearQueuedMessages()
 {
-	ops::SafeLock lock(&m_queueLock);
+	ops::SafeLock const lock(&m_queueLock);
 
 	for (int prio = HIGHEST_PRIO; prio >= 0; prio--) {
 		while (m_queue[prio].size() > 0) {
@@ -380,7 +380,7 @@ void CBridge::Continue()
 // NOTE Called from transport thread
 void CBridge::UpdateReceiveTime()
 {
-	ops::SafeLock lock(&m_timeLock);
+	ops::SafeLock const lock(&m_timeLock);
 	m_recvTime = ops::TimeHelper::currentTimeMillis();
 }
 
@@ -388,7 +388,7 @@ void CBridge::UpdateReceiveTime()
 void CBridge::SendPreparePublishers()
 {
 	// Subscriberlist contains all destination topics and datatypes
-	ops::SafeLock lock(&m_subscriberLock);
+	ops::SafeLock const lock(&m_subscriberLock);
 	TCommandMessage cmd;
 	cmd.Command = ctPreparePub;
 	cmd.AckCounter = m_AckCounter;
@@ -434,10 +434,10 @@ void CBridge::onDisconnect(CTransport* const sender)
 	m_isConnected = false;
 
 	// First lock the sends 
-	ops::SafeLock lock1(&m_sendLock);
+	ops::SafeLock const lock1(&m_sendLock);
 
 	// Then lock the queue
-	ops::SafeLock lock2(&m_queueLock);
+	ops::SafeLock const lock2(&m_queueLock);
 
 	// Handle ev. message in process of sending but not acknowledged
 	if (m_savedMess.mess != nullptr) {
@@ -499,8 +499,7 @@ void CBridge::onOpsMessage(CTransport* const sender, ops::OPSObject* const mess,
 	// Find publisher to use from the topicName, i.e. destination
 	ops::Publisher* pub = nullptr;
 
-	// not needed since only transport thread is using 
-	//ops::SafeLock lock(&m_publishersLock);
+	// no need to take publisher lock since only transport thread is using 
 
 	// Find publisher for this destination topic
 	// (topicName is the destination name including domain to use for publishing)
@@ -555,7 +554,7 @@ void CBridge::onAckNakMessage(CTransport* const sender, TAckNakMessage& ackNak)
 	}
 
 	// Take lock
-	ops::SafeLock lock(&m_sendLock);
+	ops::SafeLock const lock(&m_sendLock);
 
 	if (m_savedMess.AckNumber == ackNak.AckCounter) {
 		// Calculate approx. buffered size
@@ -589,8 +588,7 @@ ops::Publisher* CBridge::setupPublisher(ops::Topic& destTopic)
 	TPublisherData pd;
 	pd.topicName = ops::utilities::fullTopicName(destTopic.getDomainID(), destTopic.getName());
 
-	// not needed since only transport thread is using 
-	//ops::SafeLock lock(&m_publishersLock);
+	// no need to take publisher lock since only transport thread is using 
 
 	// Check if publisher already exist
 	for (std::vector<TPublisherData>::iterator iter = m_publishers.begin(); iter != m_publishers.end(); iter++) {
@@ -711,7 +709,7 @@ void CBridge::onCommandMessage(CTransport* const sender, TCommandMessage& cmd)
 }
 
 // NOTE Called from transport thread
-void CBridge::onStatusMessage(CTransport* const sender, TStatusMessage& status)
+void CBridge::onStatusMessage(CTransport* const sender, const TStatusMessage& status)
 {
 	UpdateReceiveTime();
 
@@ -732,14 +730,14 @@ void CBridge::onStatusMessage(CTransport* const sender, TStatusMessage& status)
 
 // =================================================================================
 // NOTE Called from transport thread
-void CBridge::onUdpMcMessage(CTransport* const sender, TUdpMcMessage& udpMc, char* data)
+void CBridge::onUdpMcMessage(CTransport* const sender, TUdpMcMessage& udpMc, const char* data)
 {
 	// We don't buffer Raw UDP/MC messages
 	m_raw.Write(udpMc, data);
 }
 
 // NOTE Called from RawMcUdp thread
-void CBridge::onUdpMcMessage(RawMcUdp* const sender, TUdpMcMessage& mess, char* data)
+void CBridge::onUdpMcMessage(RawMcUdp* const sender, TUdpMcMessage& mess, const char* data)
 {
 	// We don't buffer Raw UDP/MC messages
 	m_transport->writeUdpMcMessage(mess, data);
@@ -763,7 +761,7 @@ void CBridge::getStatus(opsbridge::OpsBridgeStatusData& status)
 void CBridge::TriggSendOPSMessage()
 {
 	// Take lock
-	ops::SafeLock lock(&m_sendLock);
+	ops::SafeLock const lock(&m_sendLock);
 
 	// We must be connected 
 	if (!m_isConnected) { return; }
@@ -838,7 +836,7 @@ void CBridge::Run()
 			if (m_isConnected) {
 				// If we or other side want to pause, don't send any OPS messages
 				if (! (m_isPaused || m_isEpPaused) ) {
-					ops::SafeLock lock(&m_sendLock);
+					ops::SafeLock const lock(&m_sendLock);
 					SendOPSMessage();
 				}
 			}
@@ -871,7 +869,7 @@ void CBridge::Run()
 			// Calculate number of queued messages
 			uint32_t NumQueuedMessages = 0;
 			{
-				ops::SafeLock lock(&m_queueLock);
+				ops::SafeLock const lock(&m_queueLock);
 				for (int prio = HIGHEST_PRIO; prio >= 0; prio--) {
 					NumQueuedMessages += (uint32_t)m_queue[prio].size();
 				}
@@ -880,16 +878,12 @@ void CBridge::Run()
 
 			// if no data from other side (endpoint) in 5000 [ms], force a disconnect
 			if (m_isConnected) {
-				ops::SafeLock lock(&m_timeLock);
+				ops::SafeLock const lock(&m_timeLock);
 				if ((ops::TimeHelper::currentTimeMillis() - m_recvTime) > 5000) {
 					BL_TRACE("# [ CBridge (%s) ] NO DATA. Forcing DISCONNECT\n", m_myName.c_str());
 					m_transport->disconnect();
 				}
 			}
-
-			// Do some logging
-///TODO			BL_TRACE("# [ CBridge (%s) ] Recv:%u, Send:%u, Buff:%d, Queued, My:%u, Other:%u\n",
-///				m_myName.c_str(), m_numRecvMess, m_numSentMess, m_bytesBuffered.load(), m_myQueued, m_otherQueued);
 
 			PeriodicalTime = ops::TimeHelper::currentTimeMillis();
 		}
