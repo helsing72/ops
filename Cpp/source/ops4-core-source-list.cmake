@@ -48,6 +48,7 @@ set(LIB_OPS_PUBLIC_HEADERS
   ${OPS_HEADER_PATH}/OPSMessage.h
   ${OPS_HEADER_PATH}/OPSObjectFactory.h
   ${OPS_HEADER_PATH}/OPSObject.h
+  ${OPS_HEADER_PATH}/OPSStringLengths.h
   ${OPS_HEADER_PATH}/OPSTypeDefs.h
   ${OPS_HEADER_PATH}/OPSUtilities.h
   ${OPS_HEADER_PATH}/Participant.h

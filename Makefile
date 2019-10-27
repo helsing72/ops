@@ -1,4 +1,4 @@
-## COMMON defines
+## Configurable defines
 BUILD_ROOT?=build
 BUILD_SUFFIX?=
 DEPLOY_SUFFIX?=
@@ -14,8 +14,14 @@ INSTALL_PREFIX?=$(CURDIR)/deploy$(DEPLOY_SUFFIX)
 OPS_BUILD_UNITTESTS?=ON
 OPS_BUILD_EXAMPLES?=ON
 
+# Common defines
 CCV=$(shell $(CC) -dumpversion)
 CXXV=$(shell $(CXX) -dumpversion)
+
+COMMON_DEFINES_FOR_CMAKE= \
+			-DCMAKE_INSTALL_PREFIX=$(INSTALL_PREFIX) \
+			-DOPS_BUILD_UNITTESTS=$(OPS_BUILD_UNITTESTS) \
+			-DOPS_BUILD_EXAMPLES=$(OPS_BUILD_EXAMPLES)
 
 ## Rules
 
@@ -31,6 +37,7 @@ clean_bootstrap:
 	@echo "Cleaning bootstrap"
 	rm -rf $(BUILD_BOOTSTRAP)
 	rm -rf Common/idl/Generated
+	rm -rf Cpp/include/OPSStringLengths.h
 
 .PHONY : clean_debug
 clean_debug:
@@ -52,16 +59,18 @@ clean_tools:
 	@echo "Cleaning tools"
 	rm -rf Tools/OPSBridge/idl/Generated
 
+# rebuild_cache is used so we can change the configurable sizes and get them
+# generated without cleaning all
 .PHONY : bootstrap
 bootstrap: $(BUILD_BOOTSTRAP)/Makefile
-	$(MAKE) -C $(BUILD_BOOTSTRAP) --no-print-directory all install
+	$(MAKE) -C $(BUILD_BOOTSTRAP) --no-print-directory rebuild_cache all install
 
 $(BUILD_BOOTSTRAP)/Makefile : %/Makefile :
 	export CC=$(CC) && \
 	export CXX=$(CXX) && \
 	mkdir -p $* && \
 	cd $* && \
-	cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_PREFIX) -DCMAKE_BUILD_TYPE=Bootstrap -DOPS_BUILD_UNITTESTS=$(OPS_BUILD_UNITTESTS) -DOPS_BUILD_EXAMPLES=$(OPS_BUILD_EXAMPLES) $(CURDIR)
+	cmake -DCMAKE_BUILD_TYPE=Bootstrap $(COMMON_DEFINES_FOR_CMAKE) $(CURDIR)
 
 .PHONY : opt
 opt: $(BUILD_OPT)/Makefile
@@ -72,7 +81,7 @@ $(BUILD_OPT)/Makefile : %/Makefile : bootstrap
 	export CXX=$(CXX) && \
 	mkdir -p $* && \
 	cd $* && \
-	cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_PREFIX) -DCMAKE_BUILD_TYPE=Release -DOPS_BUILD_UNITTESTS=$(OPS_BUILD_UNITTESTS) -DOPS_BUILD_EXAMPLES=$(OPS_BUILD_EXAMPLES) $(CURDIR)
+	cmake -DCMAKE_BUILD_TYPE=Release $(COMMON_DEFINES_FOR_CMAKE) $(CURDIR)
 
 .PHONY : debug
 debug: $(BUILD_DEBUG)/Makefile
@@ -83,7 +92,7 @@ $(BUILD_DEBUG)/Makefile : %/Makefile : bootstrap
 	export CXX=$(CXX) && \
 	mkdir -p $* && \
 	cd $* && \
-	cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_PREFIX) -DCMAKE_BUILD_TYPE=Debug -DOPS_BUILD_UNITTESTS=$(OPS_BUILD_UNITTESTS) -DOPS_BUILD_EXAMPLES=$(OPS_BUILD_EXAMPLES) $(CURDIR)
+	cmake -DCMAKE_BUILD_TYPE=Debug $(COMMON_DEFINES_FOR_CMAKE) $(CURDIR)
 
 .PHONY : unittest-c++
 unittest-c++ : debug
@@ -121,12 +130,14 @@ $(INSTALL_PREFIX)/lib/README :
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
 	@echo "... all (the default if no target is provided)"
+	@echo "... bootstrap"
 	@echo "... opt (optimized/release)"
 	@echo "... debug"
 	@echo "... unittest-c++"
 	@echo "... unittest-python"
 	@echo "... install"
-	@echo "... clean"
+	@echo "... clean (cleans all)"
+	@echo "... clean_bootstrap"
 	@echo "... clean_debug"
 	@echo "... clean_opt"
 .PHONY : help

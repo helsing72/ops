@@ -49,7 +49,7 @@ namespace ops
 	// Compile signature
 	InternalString_T Participant::LibraryCompileSignature()
 	{
-		return OPS_COMPILESIGNATURE;
+		return InternalString_T(OPS_COMPILESIGNATURE) + NumberToString(fixed_string_length_check_value);
 	}
 
 	// --------------------------------------------------------------------------------

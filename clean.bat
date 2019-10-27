@@ -12,3 +12,5 @@ rmdir /S /Q %INSTALL_PREFIX%
 
 rmdir /S /Q %~dp0\Common\idl\Generated
 rmdir /S /Q %~dp0\Tools\OPSBridge\idl\Generated
+
+del %~dp0\Cpp\include\OPSStringLengths.h

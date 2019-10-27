@@ -73,7 +73,8 @@ namespace ops
 			const char* what() const NOEXCEPT { return "Mismatched headers and compiled library"; }
 		};
 		static InternalString_T LibraryCompileSignature();
-		static bool CheckCompileSignature() { return LibraryCompileSignature() == OPS_COMPILESIGNATURE; }
+		static InternalString_T HeaderCompileSignature() { return InternalString_T(OPS_COMPILESIGNATURE) + NumberToString(fixed_string_length_check_value); }
+		static bool CheckCompileSignature() { return LibraryCompileSignature() == HeaderCompileSignature(); }
 
 		// -------------------------------------------------------------------
 		///By Singelton, one Participant per 'domainID::participantID'

@@ -87,10 +87,10 @@ install(TARGETS ${LIB_NAME} ${LIB_STATIC}
   )
 
 else()
-# install headers separately to keep the include file hierarchy
+  # install headers separately to keep the include file hierarchy
   # Only done in Bootstrap phase
   set(INSTALL_INCDIR include)
-install(DIRECTORY ${OPS_HEADER_PATH}/ DESTINATION ${INSTALL_INCDIR}/${LIB_NAME})
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/Common/idl/Generated/Cpp/ DESTINATION ${INSTALL_INCDIR}/${LIB_NAME})
+  install(DIRECTORY ${OPS_HEADER_PATH}/ DESTINATION ${INSTALL_INCDIR}/${LIB_NAME})
+  install(DIRECTORY ${CMAKE_SOURCE_DIR}/Common/idl/Generated/Cpp/ DESTINATION ${INSTALL_INCDIR}/${LIB_NAME})
 
 endif()

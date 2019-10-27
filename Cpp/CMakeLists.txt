@@ -1,4 +1,46 @@
 
+if(CMAKE_BUILD_TYPE MATCHES "Bootstrap")
+  ## Define constants when using fixed length strings internally and in OPS interface
+  ## Max name length for: DomainId, ParticipantId, TopicName, PublisherName, SubscriberName, ...
+  ## If you use ops::utilities::nnn() the length need to be able to handle Domain::TopicName
+  if ($ENV{OPS_FIXED_OBJECT_NAME_SIZE})
+    set(FIXED_OBJECT_NAME_SIZE $ENV{OPS_FIXED_OBJECT_NAME_SIZE})
+  else()
+    set(FIXED_OBJECT_NAME_SIZE 50)
+  endif()
+
+  ## Max length of key set by user on publisher/message and subscriber filter
+  if ($ENV{OPS_FIXED_MESSAGE_KEY_SIZE})
+    set(FIXED_MESSAGE_KEY_SIZE $ENV{OPS_FIXED_MESSAGE_KEY_SIZE})
+  else()
+    set(FIXED_MESSAGE_KEY_SIZE 60)
+  endif()
+
+  ## Max TypeString length and depends on type names and inheritance depth
+  if ($ENV{OPS_FIXED_TYPE_ID_SIZE})
+    set(FIXED_TYPE_ID_SIZE $ENV{OPS_FIXED_TYPE_ID_SIZE})
+  else()
+    set(FIXED_TYPE_ID_SIZE 256)
+  endif()
+
+  ## Max name length for: ChannelId
+  if ($ENV{OPS_FIXED_CHANNEL_ID_SIZE})
+    set(FIXED_CHANNEL_ID_SIZE $ENV{OPS_FIXED_CHANNEL_ID_SIZE})
+  else()
+    set(FIXED_CHANNEL_ID_SIZE 20)
+  endif()
+
+  ## Max length for filename including path when giving ops configuration files
+  if ($ENV{OPS_FIXED_FILENAME_SIZE})
+    set(FIXED_FILENAME_SIZE $ENV{OPS_FIXED_FILENAME_SIZE})
+  else()
+    set(FIXED_FILENAME_SIZE 1024)
+  endif()
+
+  ## Configure C++ include file with the constant values
+  configure_file(OPSStringLengths.h.in ${CMAKE_CURRENT_SOURCE_DIR}/include/OPSStringLengths.h)
+endif()
+
 # Make the headers visible to everything (below this location)
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/include

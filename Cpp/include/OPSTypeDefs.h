@@ -1,5 +1,4 @@
 /**
- *
  * Copyright (C) 2006-2010 Anton Gravestam.
  * Copyright (C) 2018-2019 Lennart Andersson.
 *
@@ -88,48 +87,28 @@
 #include "fixed_string.h"
 #include "fixed_string_support.h"
 
-namespace ops {
-
 // -----------------------------------------------------------------------------
 // Defines for String handling in OPS
 
 //#define USE_FIXED_LENGTH_STRINGS
 
 #ifdef USE_FIXED_LENGTH_STRINGS
-	// Define lengths if not already done via build system
 
-	#ifndef FIXED_OBJECT_NAME_SIZE
-		// Max name length for: DomainId, ParticipantId, TopicName, PublisherName, SubscriberName, ...
-		// If you use ops::utilities::nnn() the length need to be able to handle Domain::TopicName
-		#define FIXED_OBJECT_NAME_SIZE 50
-	#endif
-	#ifndef FIXED_MESSAGE_KEY_SIZE
-		// Max length of key set by user on publisher/message and subscriber filter
-		#define FIXED_MESSAGE_KEY_SIZE 60
-	#endif
-	#ifndef FIXED_TYPE_ID_SIZE
-		// Max TypeString length and depends on type names and inheritance depth
-		#define FIXED_TYPE_ID_SIZE 256
-	#endif
-	#ifndef FIXED_CHANNEL_ID_SIZE
-		#define FIXED_CHANNEL_ID_SIZE 20
-	#endif
-	#ifndef FIXED_FILENAME_SIZE
-		#define FIXED_FILENAME_SIZE 1024
-	#endif
+#include "OPSStringLengths.h"
 
+namespace ops {
 
 	// Rest of lengths are internal or defined in relation to the above lengths
 	// Need to be able to handle Domain::ParticipantId
-	#define FIXED_PART_KEY_SIZE (FIXED_OBJECT_NAME_SIZE + 2 + FIXED_OBJECT_NAME_SIZE)
+	const static int FIXED_PART_KEY_SIZE = (FIXED_OBJECT_NAME_SIZE + 2 + FIXED_OBJECT_NAME_SIZE);
 	// xxx.xxx.xxx.xxx/xxx.xxx.xxx.xxx
-	#define FIXED_ADDRESS_SIZE 32
-	#define FIXED_TRANSPORT_SIZE 10
-	#define FIXED_INTERNAL_STRING_SIZE 64
-	#define FIXED_EXCEPTION_MSG_SIZE 256
-	#define FIXED_ERROR_MSG_SIZE 256
+	const static int FIXED_ADDRESS_SIZE         = 32;
+	const static int FIXED_TRANSPORT_SIZE       = 10;
+	const static int FIXED_INTERNAL_STRING_SIZE = 64;
+	const static int FIXED_EXCEPTION_MSG_SIZE   = 256;
+	const static int FIXED_ERROR_MSG_SIZE       = 256;
 	// transport::xxx.xxx.xxx.xxx::port
-	#define FIXED_INTERNAL_KEY_SIZE (FIXED_TRANSPORT_SIZE + 2 + FIXED_ADDRESS_SIZE + 2 + 5)
+	const static int FIXED_INTERNAL_KEY_SIZE = (FIXED_TRANSPORT_SIZE + 2 + FIXED_ADDRESS_SIZE + 2 + 5);
 
 	typedef strings::fixed_string<FIXED_OBJECT_NAME_SIZE>     ObjectName_T;
 	typedef strings::fixed_string<FIXED_FILENAME_SIZE>        FileName_T;
@@ -141,12 +120,22 @@ namespace ops {
 	typedef strings::fixed_string<FIXED_ADDRESS_SIZE>         Address_T;
 	typedef strings::fixed_string<FIXED_TRANSPORT_SIZE>       Transport_T;
 	typedef strings::fixed_string<FIXED_INTERNAL_STRING_SIZE> InternalString_T;
-	typedef strings::fixed_string<FIXED_EXCEPTION_MSG_SIZE>   ExceptionMessage_T;
+	typedef strings::fixed_string<FIXED_EXCEPTION_MSG_SIZE, strings::truncate_string> ExceptionMessage_T;
 	typedef strings::fixed_string<FIXED_INTERNAL_KEY_SIZE>    InternalKey_T;
-	typedef strings::fixed_string<FIXED_ERROR_MSG_SIZE>       ErrorMessage_T;
+	typedef strings::fixed_string<FIXED_ERROR_MSG_SIZE, strings::truncate_string>     ErrorMessage_T;
 	typedef const char*                                       InoutName_T;
 
+	// Simple constant to be able to check that include file and compiled library has the same configurable constants
+	constexpr uint64_t fixed_string_length_check_value =
+		(uint64_t(FIXED_OBJECT_NAME_SIZE) << 0) +
+		(uint64_t(FIXED_MESSAGE_KEY_SIZE) << 8) +
+		(uint64_t(FIXED_TYPE_ID_SIZE)     << 16) +
+		(uint64_t(FIXED_CHANNEL_ID_SIZE)  << 24) +
+		(uint64_t(FIXED_FILENAME_SIZE)    << 32);
+
 #else
+namespace ops {
+
 	typedef std::string ObjectName_T;
 	typedef std::string FileName_T;
 	typedef std::string ObjectKey_T;
@@ -161,6 +150,8 @@ namespace ops {
 	typedef std::string InternalKey_T;
 	typedef std::string ErrorMessage_T;
 	typedef const std::string& InoutName_T;
+
+	constexpr uint64_t fixed_string_length_check_value = 0;
 #endif
 
 // -----------------------------------------------------------------------------
@@ -227,6 +218,12 @@ typedef int16_t __int16;	// - " -
 	#define COMPILESIGNATURE_SLIM ""
 #endif
 
+#ifdef OPS_REMOVE_ASSERT
+	#define COMPILESIGNATURE_ASSERT ""
+#else
+	#define COMPILESIGNATURE_ASSERT "ASSERT"
+#endif
+
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 	#define COMPILESIGNATURE_DBGHND "DBGHND"
 #else
@@ -234,14 +231,7 @@ typedef int16_t __int16;	// - " -
 #endif
 
 #ifdef USE_FIXED_LENGTH_STRINGS
-	#define stringer(x) stringerx(x)
-	#define stringerx(a) #a
-	#define COMPILESIGNATURE_STRINGS \
-		stringer(FIXED_OBJECT_NAME_SIZE) " " \
-		stringer(FIXED_MESSAGE_KEY_SIZE) " " \
-		stringer(FIXED_TYPE_ID_SIZE) " " \
-		stringer(FIXED_CHANNEL_ID_SIZE) " " \
-		stringer(FIXED_FILENAME_SIZE) 
+	#define COMPILESIGNATURE_STRINGS "FIX"
 #else
 	#define COMPILESIGNATURE_STRINGS "STD"
 #endif
@@ -252,5 +242,6 @@ typedef int16_t __int16;	// - " -
 	#define COMPILESIGNATURE_CTR ""
 #endif
 
-#define OPS_COMPILESIGNATURE (COMPILESIGNATURE_FIXED COMPILESIGNATURE_CXX COMPILESIGNATURE_SLIM COMPILESIGNATURE_DBGHND COMPILESIGNATURE_STRINGS COMPILESIGNATURE_CTR)
+#define OPS_COMPILESIGNATURE (COMPILESIGNATURE_FIXED COMPILESIGNATURE_CXX COMPILESIGNATURE_SLIM COMPILESIGNATURE_ASSERT\
+                              COMPILESIGNATURE_DBGHND COMPILESIGNATURE_STRINGS COMPILESIGNATURE_CTR)
 

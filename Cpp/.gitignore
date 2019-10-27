@@ -2,3 +2,4 @@ build/debug
 build/opt
 lib*
 *~
+include/OPSStringLengths.h

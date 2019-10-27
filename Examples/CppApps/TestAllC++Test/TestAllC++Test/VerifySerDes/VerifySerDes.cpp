@@ -448,10 +448,11 @@ int main(const int argc, const char* args[])
 		signal(SIGINT, SignalHandler);
 
 		std::cout << "OPS Library Compile Signature: " << ops::Participant::LibraryCompileSignature() << std::endl;
-		std::cout << "OPS Header Compile Signature : " << OPS_COMPILESIGNATURE << std::endl;
+		std::cout << "OPS Header Compile Signature : " << ops::Participant::HeaderCompileSignature() << std::endl;
 
 		if (!ops::Participant::CheckCompileSignature()) {
 			std::cout << "ERROR: Headers and compiled library are not consistent !!" << std::endl;
+			gTestFailed = true;
 		}
 
 #ifdef _WIN32
