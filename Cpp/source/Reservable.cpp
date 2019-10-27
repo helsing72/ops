@@ -40,6 +40,10 @@ namespace ops
 	
 	void Reservable::setReferenceHandler(ReferenceHandler* refHandler)
 	{
+#ifndef OPS_REMOVE_ASSERT
+		// Referencehandler should not be changed if already reserved
+		assert(nrOfReservations == 0);
+#endif
 		referenceHandler = refHandler;
 	}
 	ReferenceHandler* Reservable::getReferenceHandler() const
@@ -49,6 +53,10 @@ namespace ops
 
 	void Reservable::reserve()
 	{
+#ifndef OPS_REMOVE_ASSERT
+		// Should not be used if no referenceHandler is assigned
+		assert(referenceHandler != nullptr);
+#endif
 		nrOfReservations++;
 		if(referenceHandler != nullptr)
 		{
@@ -57,6 +65,10 @@ namespace ops
 	}
 	void Reservable::unreserve()
 	{
+#ifndef OPS_REMOVE_ASSERT
+		// Should not be used if no referenceHandler is assigned
+		assert(referenceHandler != nullptr);
+#endif
 		nrOfReservations--;
 		if(referenceHandler != nullptr)
 		{
