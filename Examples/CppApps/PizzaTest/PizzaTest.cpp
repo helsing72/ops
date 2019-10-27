@@ -487,13 +487,14 @@ public:
 #endif
 		}
 
-#ifndef NOT_USED_FOR_NOW
+#ifdef NOT_USED_FOR_NOW
 		pizza::PizzaData* ttt = (pizza::PizzaData*)data->clone();
 		std::cout <<
 			"Clone PizzaData:: Cheese: " << ttt->cheese <<
 			", Tomato sauce: " << ttt->tomatoSauce << 
 			", spareBytes: " << ttt->spareBytes.size() << 
 			std::endl;
+		delete ttt;
 #endif
 	}
 
