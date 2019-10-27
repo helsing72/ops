@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2017-2018 Lennart Andersson.
+* Copyright (C) 2017-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -114,7 +114,7 @@ namespace ops { namespace strings {
 
 		// Construction from any type that have c_str() and size() methods
 		template<typename T>
-		fixed_string(T str) : _size(0) { append(str.c_str(), str.size()); }
+		fixed_string(const T& str) : _size(0) { append(str.c_str(), str.size()); }
 
 		// all the special members can be defaulted
 #ifdef FIXED_C11_DETECTED
