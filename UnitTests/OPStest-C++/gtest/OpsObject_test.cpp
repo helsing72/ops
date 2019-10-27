@@ -18,9 +18,6 @@
 * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 */
 
-// TODO:
-// *  NumOpsObjects when DEBUG_OPSOBJECT_COUNTER is defined
-
 #include "gtest/gtest.h"
 
 #include "OPSObject.h"
@@ -66,7 +63,7 @@ TEST(Test_OPSObject, Test) {
 	obj2.setKey("Pelle");
 	EXPECT_STREQ(obj2.getKey().c_str(), "Pelle");
 
-	// Test Clone
+	// Test Clone, and indirectly fillClone()
 	obj2.spareBytes.push_back('a');
 	obj2.spareBytes.push_back('b');
 	obj2.spareBytes.push_back('c');
@@ -97,4 +94,89 @@ TEST(Test_OPSObject, Test) {
 
 	buf.ResetIndex();
 	EXPECT_STREQ(buf.ReadString().c_str(), "Pelle");
+}
+
+static OPSObject f(OPSObject o)
+{
+	return o;
+}
+
+TEST(Test_OPSObject, TestCopyMove) {
+
+#if defined(DEBUG_OPSOBJECT_COUNTER)
+	uint32_t start_value = ops::OPSObject::NumOpsObjects();
+#endif
+
+	{
+		// Default constructed 
+		MyOpsObject obj1;
+		obj1.setKey("Kalle");
+		obj1.spareBytes.push_back('a');
+		obj1.spareBytes.push_back('b');
+		obj1.spareBytes.push_back('c');
+		obj1.spareBytes.push_back('d');
+		obj1.spareBytes.push_back('\0');
+
+		EXPECT_STREQ(obj1.getKey().c_str(), "Kalle");
+		EXPECT_STREQ(obj1.getTypeString().c_str(), "MyOpsObject ");
+		EXPECT_EQ(obj1.spareBytes.size(), (size_t)5);
+		EXPECT_STREQ((char*)&obj1.spareBytes[0], "abcd");
+#if defined(DEBUG_OPSOBJECT_COUNTER)
+		EXPECT_EQ(ops::OPSObject::NumOpsObjects(), start_value + 1);
+#endif
+
+		// Copy constructed
+		OPSObject obj2(obj1);
+		EXPECT_STREQ(obj2.getKey().c_str(), "Kalle");
+		EXPECT_STREQ(obj2.getTypeString().c_str(), "MyOpsObject ");
+		EXPECT_EQ(obj2.spareBytes.size(), (size_t)5);
+		EXPECT_STREQ((char*)&obj2.spareBytes[0], "abcd");
+#if defined(DEBUG_OPSOBJECT_COUNTER)
+		EXPECT_EQ(ops::OPSObject::NumOpsObjects(), start_value + 2);
+#endif
+
+		// Copy assignment
+		OPSObject obj3;
+		obj3 = obj2;
+		EXPECT_STREQ(obj3.getKey().c_str(), "Kalle");
+		EXPECT_STREQ(obj3.getTypeString().c_str(), "MyOpsObject ");
+		EXPECT_EQ(obj3.spareBytes.size(), (size_t)5);
+		EXPECT_STREQ((char*)&obj3.spareBytes[0], "abcd");
+#if defined(DEBUG_OPSOBJECT_COUNTER)
+		EXPECT_EQ(ops::OPSObject::NumOpsObjects(), start_value + 3);
+#endif
+
+		// Move constructor
+		OPSObject obj4 = f(obj3);	// Makes a copy of obj3 which is given to f(), which is moved from
+		EXPECT_STREQ(obj4.getKey().c_str(), "Kalle");
+		EXPECT_STREQ(obj4.getTypeString().c_str(), "MyOpsObject ");
+		EXPECT_EQ(obj4.spareBytes.size(), (size_t)5);
+		EXPECT_STREQ((char*)&obj4.spareBytes[0], "abcd");
+
+		EXPECT_STREQ(obj3.getKey().c_str(), "Kalle");
+		EXPECT_STREQ(obj3.getTypeString().c_str(), "MyOpsObject ");
+		EXPECT_EQ(obj3.spareBytes.size(), (size_t)5);
+#if defined(DEBUG_OPSOBJECT_COUNTER)
+		EXPECT_EQ(ops::OPSObject::NumOpsObjects(), start_value + 4);
+#endif
+
+		// Move assignment
+		OPSObject obj5;
+		obj5 = std::move(obj3);
+		EXPECT_STREQ(obj5.getKey().c_str(), "Kalle");
+		EXPECT_STREQ(obj5.getTypeString().c_str(), "MyOpsObject ");
+		EXPECT_EQ(obj5.spareBytes.size(), (size_t)5);
+		EXPECT_STREQ((char*)&obj5.spareBytes[0], "abcd");
+
+		EXPECT_STREQ(obj3.getKey().c_str(), "Kalle");
+		EXPECT_STREQ(obj3.getTypeString().c_str(), "MyOpsObject ");
+		EXPECT_EQ(obj3.spareBytes.size(), (size_t)0);
+#if defined(DEBUG_OPSOBJECT_COUNTER)
+		EXPECT_EQ(ops::OPSObject::NumOpsObjects(), start_value + 5);
+#endif
+	}
+
+#if defined(DEBUG_OPSOBJECT_COUNTER)
+	EXPECT_EQ(ops::OPSObject::NumOpsObjects(), start_value);
+#endif
 }

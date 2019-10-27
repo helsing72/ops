@@ -23,6 +23,7 @@
 #include "Reservable.h"
 #include "ReserveInfo.h"
 #include "ReferenceHandler.h"
+#include "Participant.h"
 
 using namespace ops;
 
@@ -50,8 +51,8 @@ public:
 		}
 		return *this;
 	}
-	MyObject(MyObject&&) = delete;
-	MyObject& operator =(MyObject&&) = delete;
+	//	MyObject(MyObject&&) = delete;
+	//	MyObject& operator =(MyObject&&) = delete;
 	virtual ~MyObject()
 	{
 		MyObject_Ctr--;
@@ -66,6 +67,10 @@ TEST(Test_Reservable, TestRefCounter) {
 
 	MyObject obj;
 
+	EXPECT_TRUE(ops::Participant::CheckCompileSignature());
+
+	// We can't test ref counter without a ref handler if assert() is enabled
+#ifdef OPS_REMOVE_ASSERT
 	EXPECT_EQ(MyObject_Ctr, 1);
 	EXPECT_EQ(obj.getNrOfReservations(), 0);
 	obj.reserve();
@@ -80,9 +85,12 @@ TEST(Test_Reservable, TestRefCounter) {
 	// Note object will not be deleted when we reach 0, since we haven't provided a refHandler
 	obj.unreserve();
 	EXPECT_EQ(obj.getNrOfReservations(), 0);
+#endif
 }
 
 TEST(Test_Reservable, TestRefHandler) {
+
+	EXPECT_TRUE(ops::Participant::CheckCompileSignature());
 
 	EXPECT_EQ(MyObject_Ctr, 0);
 
@@ -140,32 +148,46 @@ TEST(Test_Reservable, TestRefHandler) {
 
 TEST(Test_Reservable, TestCopy) {
 
+	EXPECT_TRUE(ops::Participant::CheckCompileSignature());
+
 	{
 		EXPECT_EQ(MyObject_Ctr, 0);
 
 		MyObject obj;
+		// We can't test ref counter without a ref handler if assert() is enabled
+#ifdef OPS_REMOVE_ASSERT
 		obj.reserve();
 		obj.reserve();
+#endif
 
 		EXPECT_EQ(MyObject_Ctr, 1);
+#ifdef OPS_REMOVE_ASSERT
 		EXPECT_EQ(obj.getNrOfReservations(), 2);
+#endif
 
 		MyObject obj2(obj);
 		EXPECT_EQ(MyObject_Ctr, 2);
+#ifdef OPS_REMOVE_ASSERT
 		EXPECT_EQ(obj.getNrOfReservations(), 2);
 		EXPECT_EQ(obj2.getNrOfReservations(), 0);
+#endif
 		EXPECT_EQ(obj2.getReferenceHandler(), nullptr);
 
 		MyObject obj3;
 		obj3 = obj;
 		EXPECT_EQ(MyObject_Ctr, 3);
+#ifdef OPS_REMOVE_ASSERT
 		EXPECT_EQ(obj.getNrOfReservations(), 2);
 		EXPECT_EQ(obj3.getNrOfReservations(), 0);
+#endif
 		EXPECT_EQ(obj3.getReferenceHandler(), nullptr);
 
+#ifdef OPS_REMOVE_ASSERT
 		obj.unreserve();
 		obj.unreserve();
+		// Note object will not be deleted when we reach 0, since we haven't provided a refHandler
 		EXPECT_EQ(obj.getNrOfReservations(), 0);
+#endif
 	}
 	EXPECT_EQ(MyObject_Ctr, 0);
 	{
