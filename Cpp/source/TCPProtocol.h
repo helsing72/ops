@@ -24,8 +24,6 @@
 #include "OPSTypeDefs.h"
 #include "BytesSizePair.h"
 
-#define OPS_TCP_TRACE(msg) { OPS_TRACE("TCP: " << msg); }
-
 namespace ops
 {
 	class TCPProtocol;

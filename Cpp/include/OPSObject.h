@@ -77,11 +77,11 @@ namespace ops
         OPSObject();
         virtual ~OPSObject();
 
-        OPSObject(const OPSObject& other);                      // Copy constructor
-		OPSObject(OPSObject&& other);                           // Move constructor
+        OPSObject(const OPSObject& other);                       // Copy constructor
+        OPSObject(OPSObject&& other);                            // Move constructor
 
-        OPSObject& operator= (OPSObject other);                 // Copy assignment operator
-        //OPSObject& operator= (OPSObject&& other) = delete;    // Move assignment operator
+        OPSObject& operator= (const OPSObject& other) = default; // Copy assignment operator
+        OPSObject& operator= (OPSObject&& other) = default;      // Move assignment operator
 
 #if defined(DEBUG_OPSOBJECT_COUNTER)
         static uint32_t NumOpsObjects() { return _NumOpsObjects; }

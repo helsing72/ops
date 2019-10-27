@@ -30,6 +30,19 @@
 #include <string>
 #include <sstream>
 
+
+// -----------------------------------------------------------------------------
+// Macros used for trace of some functionality used during development 
+//#define OPS_TRACE(msg) { std::cout << msg << std::flush; }
+#define OPS_TRACE(msg) 
+#define OPS_NOTRACE(msg) 
+
+#define OPS_OBJ_TRACE(msg) { OPS_NOTRACE("OBJ: " << msg); }
+#define OPS_TCP_TRACE(msg) { OPS_NOTRACE("TCP: " << msg); }
+
+//#include <iostream>		// needed when using OPS_TRACE
+
+
 // -----------------------------------------------------------------------------
 // Some OPS configurations
 
@@ -167,10 +180,6 @@ namespace ops {
 // Also adds a debug function for reading the current number of living OPSObjects
 //#define DEBUG_OPSOBJECT_COUNTER
 
-// -----------------------------------------------------------------------------
-// Macros used for trace of some functionality used during development 
-//#define OPS_TRACE(msg) { std::cout << msg << std::flush; }
-#define OPS_TRACE(msg) 
 
 // -----------------------------------------------------------------------------
 // Macro used to remove compiler warnings about non used variables/parameters

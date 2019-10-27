@@ -26,13 +26,13 @@ namespace ops
 {
 
 #if defined(DEBUG_OPSOBJECT_COUNTER)
-    std::atomic<uint32_t> OPSObject::_NumOpsObjects = 0;
+	std::atomic<uint32_t> OPSObject::_NumOpsObjects{ 0 };
 #endif
 
-    OPSObject::OPSObject()
+    OPSObject::OPSObject() :
+		key("k")
     {
-        key = "k";
-        typesString = "";
+		OPS_OBJ_TRACE("OPSObject()\n");
 #if defined(DEBUG_OPSOBJECT_COUNTER)
         _NumOpsObjects++;
 #endif
@@ -41,7 +41,8 @@ namespace ops
 	// Copy constructor
     OPSObject::OPSObject(const OPSObject& other)
     {
-        key = other.key;
+		OPS_OBJ_TRACE("OPSObject(const OPSObject& other)\n");
+		key = other.key;
         typesString = other.typesString;
         spareBytes = other.spareBytes;
 #if defined(DEBUG_OPSOBJECT_COUNTER)
@@ -52,6 +53,7 @@ namespace ops
 	// Move constructor
 	OPSObject::OPSObject(OPSObject&& other)
 	{
+		OPS_OBJ_TRACE("OPSObject(OPSObject&& other)\n");
 		// Take other's resources
 		key = std::move(other.key);
 		typesString = std::move(other.typesString);
@@ -61,15 +63,12 @@ namespace ops
 #endif
 	}
 
-	// Copy assignment operator
-	OPSObject& OPSObject::operator= (OPSObject other)
+	OPSObject::~OPSObject()
 	{
-		if (this != &other) {
-			key = other.key;
-			typesString = other.typesString;
-			spareBytes = other.spareBytes;
-		}
-		return *this;
+#if defined(DEBUG_OPSOBJECT_COUNTER)
+		_NumOpsObjects--;
+#endif
+		OPS_OBJ_TRACE("~OPSObject()\n");
 	}
 
 	OPSObject* OPSObject::clone()
@@ -109,11 +108,4 @@ namespace ops
 	{
 		archive->inout("key", key);
 	}
-	
-    OPSObject::~OPSObject()
-    {
-#if defined(DEBUG_OPSOBJECT_COUNTER)
-        _NumOpsObjects--;
-#endif
-    }
 }
