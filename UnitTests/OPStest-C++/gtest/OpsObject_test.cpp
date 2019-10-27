@@ -168,8 +168,13 @@ TEST(Test_OPSObject, TestCopyMove) {
 		EXPECT_EQ(obj5.spareBytes.size(), (size_t)5);
 		EXPECT_STREQ((char*)&obj5.spareBytes[0], "abcd");
 
+#ifdef USE_FIXED_LENGTH_STRINGS
 		EXPECT_STREQ(obj3.getKey().c_str(), "Kalle");
 		EXPECT_STREQ(obj3.getTypeString().c_str(), "MyOpsObject ");
+#else
+		EXPECT_STREQ(obj3.getKey().c_str(), "");
+		EXPECT_STREQ(obj3.getTypeString().c_str(), "");
+#endif
 		EXPECT_EQ(obj3.spareBytes.size(), (size_t)0);
 #if defined(DEBUG_OPSOBJECT_COUNTER)
 		EXPECT_EQ(ops::OPSObject::NumOpsObjects(), start_value + 5);
