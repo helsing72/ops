@@ -39,55 +39,78 @@ namespace ops
     {
     public:
         OPSMessage() : 
+            OPSObject()
 #ifndef OPSSLIM_NORESERVE
-        Reservable(),
+            , Reservable()
 #endif
-        messageType(0),
-        endianness(0),
-        publisherPriority(),
-        dataOwner(true),
-        sourcePort(0),
-        qosMask(0),
-        publicationID(0),
-        data(nullptr)
         {
-			UNUSED(endianness)
-			UNUSED(qosMask)
-			TypeId_T typeName("ops.protocol.OPSMessage");
+			TypeId_T const typeName("ops.protocol.OPSMessage");
             OPSObject::appendType(typeName);
         }
 
-        virtual void setDataOwner(bool ownership)
-        {
-            dataOwner = ownership;
-        }
+		// Copy constructor
+		// Note: A copied OPSMessage will NOT copy the Reservable data, ie. the copy will not belong to a reference
+		// handler and the reserve/unreserv methods will not work until the copy is added to such a handler
+		OPSMessage(const OPSMessage& other) : 
+			OPSObject(other)
+#ifndef OPSSLIM_NORESERVE
+			, Reservable()
+#endif
+		{
+			messageType = other.messageType;
+			publisherPriority = other.publisherPriority;
+			dataOwner = other.dataOwner;
+			sourcePort = other.sourcePort;
+			sourceIP = other.sourceIP;
+			publicationID = other.publicationID;
+			publisherName = other.publisherName;
+			topicName = other.topicName;
+			topLevelKey = other.topLevelKey;
+			address = other.address;
+			
+			// Clone data
+			if (other.data != nullptr) {
+				data = other.data->clone();
+			} else {
+				data = nullptr;
+			}
+		}
+		
+		// Move constructor
+		OPSMessage(OPSMessage&& other) = delete;
 
-        virtual bool isDataOwner() const
-        {
-            return dataOwner;
-        }
-
-        virtual ~OPSMessage()
+		OPSMessage& operator= (const OPSMessage& other) = delete; // Copy assignment operator
+		OPSMessage& operator= (OPSMessage&& other) = delete;      // Move assignment operator
+		
+		virtual ~OPSMessage()
         {
             if (dataOwner) {
-                if (data) delete data;
+				if (data != nullptr) { delete data; }
             }
         }
 
-    private:
-        char messageType;			// Serialized (not used, always 0)
-        char endianness;			//            (not used)
-        char publisherPriority;		// Serialized (not used, always 0)
-        bool dataOwner;
-        int sourcePort;
+		virtual void setDataOwner(bool ownership)
+		{
+			dataOwner = ownership;
+		}
+
+		virtual bool isDataOwner() const
+		{
+			return dataOwner;
+		}
+
+	private:
+		char messageType{ 0 };			// Serialized (not used, always 0)
+		char publisherPriority{ 0 };	// Serialized (not used, always 0)
+		bool dataOwner{ true };
+		int sourcePort{ 0 };
 		Address_T sourceIP;
-        int64_t qosMask;
-        int64_t publicationID;		// Serialized
-		ObjectName_T publisherName;	// Serialized
-        ObjectName_T topicName;		// Serialized
-        ObjectKey_T topLevelKey;	// Serialized (not used, empty string)
-		Address_T address;			// Serialized (not used, empty string)
-        OPSObject* data;			// Serialized
+		int64_t publicationID{ 0 };		// Serialized
+		ObjectName_T publisherName;		// Serialized
+        ObjectName_T topicName;			// Serialized
+        ObjectKey_T topLevelKey;		// Serialized (not used, empty string)
+		Address_T address;				// Serialized (not used, empty string)
+		OPSObject* data{ nullptr };		// Serialized
 
 		// Hide these since we don't support Clone of an OPSMessage()
 		virtual OPSObject* clone() { return nullptr; }
@@ -127,7 +150,7 @@ namespace ops
         void setData(OPSObject* d)
         {
 			if (dataOwner) {
-				if (data && (data != d)) delete data;
+				if ((data != nullptr) && (data != d)) { delete data; }
 			}
             data = d;
         }
@@ -149,7 +172,7 @@ namespace ops
 			port = sourcePort;
 		}
 
-        void serialize(ArchiverInOut* archive) override
+        virtual void serialize(ArchiverInOut* archive) override
         {
             OPSObject::serialize(archive);
 			
@@ -162,7 +185,6 @@ namespace ops
             archive->inout("topLevelKey", topLevelKey);
             archive->inout("address", address);
             data = (OPSObject*) archive->inout("data", data);
-
         }
     };
 

@@ -85,6 +85,18 @@ public:
 		archive->inout("Message", Message);
 	}
 
+	virtual OPSObject* clone() override
+	{ 
+		OpsObject_MessageTest* obj = new OpsObject_MessageTest();
+		fillClone(obj);
+		return obj; 
+	}
+	void fillClone(OpsObject_MessageTest* obj) const
+	{ 
+		ops::OPSObject::fillClone(obj);
+		obj->Message = Message;
+	}
+
 	OpsObject_MessageTest(const OpsObject_MessageTest& r) = delete;
 	OpsObject_MessageTest& operator= (const OpsObject_MessageTest& l) = delete;
 	OpsObject_MessageTest(OpsObject_MessageTest&&) = delete;
@@ -239,3 +251,49 @@ TEST(Test_OPSMessage, Test_Serialize) {
 	EXPECT_EQ(OpsObject_MessageTest_Cnt, 1);
 }
 
+TEST(Test_OPSMessage, Test_CopyMove) {
+
+	{
+		// Default constructed 
+		OPSMessage obj1;
+		obj1.setKey("Kalle");
+		obj1.spareBytes.push_back('a');
+		obj1.spareBytes.push_back('b');
+		obj1.spareBytes.push_back('c');
+		obj1.spareBytes.push_back('d');
+		obj1.spareBytes.push_back('\0');
+
+		EXPECT_STREQ(obj1.getKey().c_str(), "Kalle");
+		EXPECT_STREQ(obj1.getTypeString().c_str(), "ops.protocol.OPSMessage ");
+		EXPECT_EQ(obj1.spareBytes.size(), (size_t)5);
+		EXPECT_STREQ((char*)&obj1.spareBytes[0], "abcd");
+		EXPECT_EQ(obj1.getData(), nullptr);
+
+		// Copy constructed with no data
+		OPSMessage obj2(obj1);
+		EXPECT_STREQ(obj2.getKey().c_str(), "Kalle");
+		EXPECT_STREQ(obj2.getTypeString().c_str(), "ops.protocol.OPSMessage ");
+		EXPECT_EQ(obj2.spareBytes.size(), (size_t)5);
+		EXPECT_STREQ((char*)&obj2.spareBytes[0], "abcd");
+		EXPECT_EQ(obj2.getData(), nullptr);
+
+		// Create some data
+		OpsObject_MessageTest* data = new OpsObject_MessageTest();
+		EXPECT_EQ(OpsObject_MessageTest_Cnt, 1);
+
+		obj1.setData(data);
+		EXPECT_EQ(OpsObject_MessageTest_Cnt, 1);
+		EXPECT_EQ(obj1.getData(), data);
+
+		// Copy constructed with data
+		OPSMessage obj3(obj1);
+		EXPECT_STREQ(obj3.getKey().c_str(), "Kalle");
+		EXPECT_STREQ(obj3.getTypeString().c_str(), "ops.protocol.OPSMessage ");
+		EXPECT_EQ(obj3.spareBytes.size(), (size_t)5);
+		EXPECT_STREQ((char*)&obj3.spareBytes[0], "abcd");
+		EXPECT_NE(obj3.getData(), nullptr);
+
+		EXPECT_EQ(OpsObject_MessageTest_Cnt, 2);
+	}
+	EXPECT_EQ(OpsObject_MessageTest_Cnt, 0);
+}
