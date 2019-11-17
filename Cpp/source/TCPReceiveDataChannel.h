@@ -21,23 +21,30 @@
 
 #pragma once
 
-#include <map>
-
 #include "OPSExport.h"
-#include "ReceiveDataHandler.h"
+#include "Notifier.h"
+#include "BytesSizePair.h"
+#include "ReceiveDataChannel.h"
+#include "TCPClientBase.h"
+#include "TCPOpsProtocol.h"
 
 namespace ops
 {
-	class OPS_EXPORT TCPReceiveDataHandler : public ReceiveDataHandler
+	class OPS_EXPORT TCPReceiveDataChannel : public ReceiveDataChannel, TCPClientCallbacks
 	{
 	public:
-		TCPReceiveDataHandler(Topic top, Participant& part);
-
-		void AddReceiveChannel(ObjectName_T& topicName, Address_T& ip, int port);
+		TCPReceiveDataChannel(Topic top, Participant& part);
+		virtual ~TCPReceiveDataChannel();
 
 	protected:
-		std::map<ObjectName_T, int32_t> topics;
-		bool usingPartInfo = true;
+		void onNewEvent(Notifier<BytesSizePair>* sender, BytesSizePair byteSizePair) override;
+
+		// Called from client when a connection is made
+		void onConnect(TCPConnection& conn, ConnectStatus status) override;
+
+		// Called from client when a connection is closed
+		// Ev. buffer used in asynchRead() is no longer in use
+		void onDisconnect(TCPConnection& conn, ConnectStatus status) override;
 
 		// Tell derived classes which topics that are active
 		void topicUsage(Topic& top, bool used) override;

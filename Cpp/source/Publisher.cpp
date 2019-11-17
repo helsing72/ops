@@ -50,6 +50,10 @@ namespace ops
 		
 		start();
 
+		// If we let the OS define the port, the transport info isn't available until after start()
+		sendDataHandler->updateTransportInfo(topic);
+		participant->updateSendPartInfo(topic);
+
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 		participant->debugHandler.RegisterPub(this, topic.getName());
 #endif

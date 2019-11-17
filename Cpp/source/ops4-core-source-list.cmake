@@ -57,6 +57,7 @@ set(LIB_OPS_PUBLIC_HEADERS
   ${OPS_HEADER_PATH}/PrintArchiverOut.h
   ${OPS_HEADER_PATH}/PubIdChecker.h
   ${OPS_HEADER_PATH}/Publisher.h
+  ${OPS_HEADER_PATH}/ReceiveDataChannel.h
   ${OPS_HEADER_PATH}/ReceiveDataHandler.h
   ${OPS_HEADER_PATH}/Receiver.h
   ${OPS_HEADER_PATH}/ReferenceHandler.h
@@ -101,6 +102,8 @@ set(LIB_OPS_CORE_SRCS
   ${OPS_SRC_PATH}/ErrorService.cpp
   ${OPS_SRC_PATH}/KeyFilterQoSPolicy.cpp
   ${OPS_SRC_PATH}/Lockable.cpp
+  ${OPS_SRC_PATH}/MCReceiveDataHandler.h
+  ${OPS_SRC_PATH}/MCReceiveDataHandler.cpp
   ${OPS_SRC_PATH}/McSendDataHandler.h
   ${OPS_SRC_PATH}/McUdpSendDataHandler.h
   ${OPS_SRC_PATH}/memory_pool.cpp
@@ -115,6 +118,7 @@ set(LIB_OPS_CORE_SRCS
   ${OPS_SRC_PATH}/Participant.cpp
   ${OPS_SRC_PATH}/ParticipantInfoDataListener.cpp
   ${OPS_SRC_PATH}/Publisher.cpp
+  ${OPS_SRC_PATH}/ReceiveDataChannel.cpp
   ${OPS_SRC_PATH}/ReceiveDataHandler.cpp
   ${OPS_SRC_PATH}/ReceiveDataHandlerFactory.cpp
   ${OPS_SRC_PATH}/ReceiveDataHandlerFactory.h
@@ -131,13 +135,18 @@ set(LIB_OPS_CORE_SRCS
   ${OPS_SRC_PATH}/TCPConnection.h
   ${OPS_SRC_PATH}/TCPOpsProtocol.h
   ${OPS_SRC_PATH}/TCPProtocol.h
+  ${OPS_SRC_PATH}/TCPReceiveDataChannel.cpp
+  ${OPS_SRC_PATH}/TCPReceiveDataChannel.h
   ${OPS_SRC_PATH}/TCPReceiveDataHandler.cpp
+  ${OPS_SRC_PATH}/TCPReceiveDataHandler.h
   ${OPS_SRC_PATH}/TCPSendDataHandler.h
   ${OPS_SRC_PATH}/TCPServerBase.h
   ${OPS_SRC_PATH}/Thread.cpp
   ${OPS_SRC_PATH}/ThreadSupport.h
   ${OPS_SRC_PATH}/Topic.cpp
   ${OPS_SRC_PATH}/Transport.cpp
+  ${OPS_SRC_PATH}/UDPReceiveDataHandler.cpp
+  ${OPS_SRC_PATH}/UDPReceiveDataHandler.h
   ${OPS_SRC_PATH}/xml/xmlParser.cpp
   ${OPS_SRC_PATH}/XMLArchiverIn.cpp
   ${OPS_SRC_PATH}/XMLArchiverOut.cpp

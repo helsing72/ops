@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -36,7 +37,7 @@ namespace ops
 	public:
 		virtual ~Receiver() {}
 
-		static Receiver* create(Address_T ip, int bindPort, IOService* ioService, Address_T localInterface = "0.0.0.0", int64_t inSocketBufferSize = 16000000);
+		static Receiver* createMCReceiver(Address_T ip, int bindPort, IOService* ioService, Address_T localInterface = "0.0.0.0", int64_t inSocketBufferSize = 16000000);
 		static Receiver* createTCPClient(TCPClientCallbacks* client, Address_T ip, int port, IOService* ioService, int64_t inSocketBufferSize = 16000000);
 		static Receiver* createUDPReceiver(int port, IOService* ioService, Address_T localInterface = "0.0.0.0", int64_t inSocketBufferSize = 16000000);
 		

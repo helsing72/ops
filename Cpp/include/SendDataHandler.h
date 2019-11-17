@@ -64,6 +64,21 @@ namespace ops
 			if (publishers.size() == 0) sender->close();
 		}
 
+		int getLocalPort()
+		{
+			return sender->getLocalPort();
+		}
+
+		Address_T getLocalAddress()
+		{
+			return sender->getLocalAddress();
+		}
+
+		// At least one publisher must be added to us for this call to work correct
+		virtual void updateTransportInfo(Topic&)
+		{
+		}
+
 	protected:
         Sender* sender = nullptr;
         Lockable mutex;

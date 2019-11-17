@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -21,22 +22,16 @@
 #ifndef SerializableH
 #define SerializableH
 
-
-
 namespace ops
 {
 	class ArchiverInOut;
-
 
 	class Serializable
 	{
 	public:
 		virtual void serialize(ArchiverInOut* archiver) = 0;
-		virtual ~Serializable(){};
-
+		virtual ~Serializable() {};
 	};
 }
-
-
 
 #endif

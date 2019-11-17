@@ -32,29 +32,23 @@
 
 namespace ops
 {
-    ///Constructor.
-    ReceiveDataHandler::ReceiveDataHandler(Topic top, Participant& part, Receiver* recv) :
-		receiver(recv),
-		memMap(top.getSampleMaxSize() / OPSConstants::PACKET_MAX_SIZE + 1, OPSConstants::PACKET_MAX_SIZE, &DataSegmentAllocator::Instance()),
+    ReceiveDataHandler::ReceiveDataHandler(Topic top, Participant& part, ReceiveDataChannel* rdc_) :
+		topic(top),
+		participant(part),
 		sampleMaxSize(top.getSampleMaxSize()),
-		participant(part), message(nullptr),
-		currentMessageSize(0),
-		expectedSegment(0),
-		firstReceived(false)
+		message(nullptr)
     {
-		if (receiver == nullptr) { receiver = ReceiverFactory::getReceiver(top, participant); }
-
-        if (receiver == nullptr) {
-            throw exceptions::CommException("Could not create receiver");
-        }
-
-        receiver->addListener(this);
+		if (rdc_ != nullptr) {
+			rdc.push_back(rdc_);
+			rdc_->connect(this);
+		}
     }
 
-	///Destructor
     ReceiveDataHandler::~ReceiveDataHandler()
     {
-        delete receiver;
+		for (auto x : rdc) {
+			delete x;
+		}
     }
 
 	// Overridden from Notifier<OPSMessage*>
@@ -63,10 +57,9 @@ namespace ops
         SafeLock lock(&messageLock);
 		Notifier<OPSMessage*>::addListener(listener);
 		if (Notifier<OPSMessage*>::getNrOfListeners() == 1) {
-			receiver->start();
-			expectedSegment = 0;
-			currentMessageSize = 0;
-	        receiver->asynchWait(memMap.getSegment(expectedSegment), memMap.getSegmentSize());
+			for (auto x : rdc) {
+				x->start();
+			}
 		}
 		topicUsage(top, true);
 	}
@@ -77,215 +70,56 @@ namespace ops
         SafeLock lock(&messageLock);
 		topicUsage(top, false);
 		Notifier<OPSMessage*>::removeListener(listener);
-		if (Notifier<OPSMessage*>::getNrOfListeners() == 0) { receiver->stop(); }
+		if (Notifier<OPSMessage*>::getNrOfListeners() == 0) {
+			for (auto x : rdc) {
+				x->stop();
+			}
+		}
 	}
 
-	void ReportError(Participant& participant, ErrorMessage_T message, Address_T addr, int port)
+	///Called whenever the receiver has new data.
+	void ReceiveDataHandler::onMessage(ReceiveDataChannel&, OPSMessage* mess)
 	{
-		message += " [";
-		message += addr;
-		message += "::";
-		message += NumberToString(port);
-		message += ']';
-		BasicError err("ReceiveDataHandler", "onNewEvent", message);
-		participant.reportError(&err);
+		SafeLock lock(&messageLock);
+
+		OPSMessage* oldMessage = message;
+		message = mess;
+
+		//Add message to a reference handler that will keep the message until it is no longer needed.
+		messageReferenceHandler.addReservable(message);
+		message->reserve();
+
+		//Send it to Subscribers
+		Notifier<OPSMessage*>::notifyNewEvent(message);
+
+		//This will delete this message if no one reserved it in the application layer.
+		if (oldMessage != nullptr) {
+			oldMessage->unreserve();
+		}
 	}
 
-    ///Override from Listener
-    ///Called whenever the receiver has new data.
-    void ReceiveDataHandler::onNewEvent(Notifier<BytesSizePair>* sender, BytesSizePair byteSizePair)
-    {
-        UNUSED(sender);
-        if (byteSizePair.size <= 0)
-        {
-            //Inform participant that we had an error waiting for data,
-            //this means the underlying socket is down but hopefully it will reconnect, so no need to do anything.
-            //Only happens with tcp connections so far.
+	bool ReceiveDataHandler::aquireMessageLock()
+	{
+		return messageLock.lock();
+	}
 
-            if (byteSizePair.size == -5)
-            {
-                BasicError err("ReceiveDataHandler", "onNewEvent", "Connection was lost but is now reconnected.");
-                participant.reportError(&err);
-            }
-            else
-            {
-                BasicError err("ReceiveDataHandler", "onNewEvent", "Empty message or error.");
-                participant.reportError(&err);
-            }
-
-            receiver->asynchWait(memMap.getSegment(expectedSegment), memMap.getSegmentSize());
-            return;
-        }
-
-		///TODO Check that all segments come from the same source (IP and port)
-		Address_T addr;
-		int port;
-		receiver->getSource(addr, port);
-
-        //Create a temporay map and buf to peek data before putting it in to memMap
-        MemoryMap tMap(memMap.getSegment(expectedSegment), memMap.getSegmentSize());
-        ByteBuffer tBuf(tMap);
-
-        //Check protocol
-        if (tBuf.checkProtocol())
-        {
-            int nrOfFragments = tBuf.ReadInt();
-            int currentFragment = tBuf.ReadInt();
-
-            if (currentFragment != (nrOfFragments - 1) && byteSizePair.size != OPSConstants::PACKET_MAX_SIZE)
-            {
-				ReportError(participant, "Debug: Received broken package.", addr, port);
-            }
-
-            currentMessageSize += byteSizePair.size; // - tBuf.GetSize();
-
-            if (currentFragment != expectedSegment)
-            {//For testing only...
-                if (firstReceived)
-                {
-					ReportError(participant, "Segment Error, sample will be lost.", addr, port);
-                    firstReceived = false;
-                }
-                expectedSegment = 0;
-                currentMessageSize = 0;
-                receiver->asynchWait(memMap.getSegment(expectedSegment), memMap.getSegmentSize());
-                return;
-            }
-
-            if (currentFragment == (nrOfFragments - 1))
-            {
-                firstReceived = true;
-                expectedSegment = 0;
-                ByteBuffer buf(memMap);
-
-                buf.checkProtocol();
-                int i1 = buf.ReadInt();
-                int i2 = buf.ReadInt();
-                UNUSED(i1)
-                UNUSED(i2)
-                int segmentPaddingSize = buf.GetSize();
-
-                //Read of the actual OPSMessage
-                OPSArchiverIn archiver(buf, participant.getObjectFactory());
-
-                SafeLock lock(&messageLock);
-
-                OPSMessage* oldMessage = message;
-
-                message = nullptr;
-				try {
-					message = dynamic_cast<OPSMessage*> (archiver.inout("message", message));
-				} catch (ops::ArchiverException& e) {
-					ErrorMessage_T msg("Invalid data on network. Exception: ");
-					msg += e.what();
-					ReportError(participant, msg, addr, port);
-				} catch (std::exception& e) {
-					ErrorMessage_T msg("Invalid data on network. Exception: ");
-					msg += e.what();
-					ReportError(participant, msg, addr, port);
-				}
-				if (message != nullptr)
-                {
-					//Check that we succeded in creating the actual data message
-					if (message->getData() != nullptr) 
-					{
-						//Put spare bytes in data of message
-						if (!calculateAndSetSpareBytes(buf, segmentPaddingSize)) {
-							//Message has consumed more bytes than received
-							ReportError(participant, "Invalid data on network. Wrong message length.", addr, port);
-						}
-
-						// Add IP and port for source as meta data into OPSMessage
-						message->setSource(addr, port);
-
-						//Add message to a reference handler that will keep the message until it is no longer needed.
-						messageReferenceHandler.addReservable(message);
-						message->reserve();
-						//Send it to Subscribers
-						Notifier<OPSMessage*>::notifyNewEvent(message);
-						//This will delete this message if no one reserved it in the application layer.
-						if (oldMessage != nullptr) { oldMessage->unreserve(); }
-						currentMessageSize = 0;
-					}
-					else
-					{
-						ReportError(participant, "Failed to deserialize message. Check added Factories.", addr, port);
-						delete message;
-	                    message = oldMessage;
-					}
-                }
-                else
-                {
-                    //Inform participant that invalid data is on the network.
-					ReportError(participant, "Unexpected type received. Type creation failed.", addr, port);
-                    message = oldMessage;
-                }
-            }
-            else
-            {
-                expectedSegment++;
-
-				if (expectedSegment >= memMap.getNrOfSegments()) {
-					ReportError(participant, "Buffer too small for received message.", addr, port);
-					expectedSegment = 0;
-					currentMessageSize = 0;
-				}
-            }
-            receiver->asynchWait(memMap.getSegment(expectedSegment), memMap.getSegmentSize());
-        }
-        else
-        {
-            //Inform participant that invalid data is on the network.
-			ReportError(participant, "Protocol ERROR.", addr, port);
-            receiver->asynchWait(memMap.getSegment(expectedSegment), memMap.getSegmentSize());
-        }
-
-    }
+	void ReceiveDataHandler::releaseMessageLock()
+	{
+		messageLock.unlock();
+	}
 
 	// Called when there are no more listeners and we are about to be put on the garbage-list for later removal
-    void ReceiveDataHandler::stop()
+    void ReceiveDataHandler::clear()
     {
-        receiver->removeListener(this);
+		for (auto x : rdc) {
+			x->clear();
+		}
 
 		// Need to release the last message we received, if any.
 		// (We always keep a reference to the last message received)
 		// If we don't, the garbage-cleaner won't delete us.
 		if (message != nullptr) { message->unreserve(); }
 		message = nullptr;
-
-///LA ///TTTTT        receiver->stop();
-    }
-
-    bool ReceiveDataHandler::aquireMessageLock()
-    {
-        return messageLock.lock();
-    }
-
-    void ReceiveDataHandler::releaseMessageLock()
-    {
-        messageLock.unlock();
-    }
-
-    bool ReceiveDataHandler::calculateAndSetSpareBytes(ByteBuffer &buf, int segmentPaddingSize)
-    {
-        //We must calculate how many unserialized segment headers we have and substract that total header size from the size of spareBytes.
-        int nrOfSerializedBytes = buf.GetSize();
-        int totalNrOfSegments = (int) (currentMessageSize / memMap.getSegmentSize());
-        int nrOfSerializedSegements = (int) (nrOfSerializedBytes / memMap.getSegmentSize());
-        int nrOfUnserializedSegments = totalNrOfSegments - nrOfSerializedSegements;
-
-        int nrOfSpareBytes = currentMessageSize - buf.GetSize() - (nrOfUnserializedSegments * segmentPaddingSize);
-
-        if (nrOfSpareBytes > 0) {
-            message->getData()->spareBytes.reserve(nrOfSpareBytes);
-            message->getData()->spareBytes.resize(nrOfSpareBytes, 0);
-
-            //This will read the rest of the bytes as raw bytes and put them into sparBytes field of data.
-            buf.ReadChars(&(message->getData()->spareBytes[0]), nrOfSpareBytes);
-		}
-
-		//Return false if message has consumed more bytes than received (but still within our buffer size)
-		return (nrOfSpareBytes >= 0);
     }
 
 }

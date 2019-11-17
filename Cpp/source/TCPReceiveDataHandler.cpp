@@ -21,84 +21,81 @@
 
 #include "OPSTypeDefs.h"
 #include "TCPReceiveDataHandler.h"
-#include "OPSArchiverIn.h"
-#include "BasicError.h" 
-#include "Domain.h"
+#include "TCPReceiveDataChannel.h"
 #include "Participant.h"
-#include "ReceiverFactory.h"
-#include "CommException.h"
-#include "TimeHelper.h"
 
 namespace ops
 {
-	///TODO
-	/// We want to send:
-	///   "Info about which subscribers"
-	///      @ connect
-	///      sub added/removed
-	/// We receive:
-	///   "OPS Messages"
-	///      Normal handling
-	///   "Info about which publishers"
-	///      Store info in map so that subscribers can ask if any publisher
-	///      @ disconnect, clear publishers
-
     TCPReceiveDataHandler::TCPReceiveDataHandler(Topic top, Participant& part) :
-		ReceiveDataHandler(top, part, 
-			Receiver::createTCPClient(
-				this, top.getDomainAddress(), top.getPort(), 
-				part.getIOService(), top.getInSocketBufferSize())),
-		_protocol(nullptr), _connected(false)
+		ReceiveDataHandler(top, part, nullptr)
     {
+		// Handle TCP channels specified with an address and port
+		if ((top.getTransport() == Topic::TRANSPORT_TCP) && (top.getPort() != 0)) {
+			ReceiveDataChannel* rdc_ = new TCPReceiveDataChannel(top, part);
+			rdc_->connect(this);
+			rdc.push_back(rdc_);
+			usingPartInfo = false;
+		}
 	}
 
-    TCPReceiveDataHandler::~TCPReceiveDataHandler()
-    {
-    }
+	void TCPReceiveDataHandler::AddReceiveChannel(ObjectName_T& topicName, Address_T& ip, int port)
+	{
+		OPS_PIFO_TRACE("Partinfo: name: " << topicName << ", ip: " << ip << ", port: " << port << "\n");
 
-	// Tell derived classes which topics that are active
+		// We need to check if a new publisher has emerged that we need to connect to
+		InternalKey_T key(ip);
+		key += "::";
+		key += NumberToString(port);
+
+		// Look for it in rdc, if not there, create one
+		bool found = false;
+		for (auto x : rdc) {
+			if (x->key == key) {
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			OPS_PIFO_TRACE("Partinfo: CREATED name: " << topicName << ", ip: " << ip << ", port: " << port << "\n");
+			topic.setDomainAddress(ip);
+			topic.setPort(port);
+			ReceiveDataChannel* rdc_ = new TCPReceiveDataChannel(topic, participant);
+			rdc_->key = key;
+			rdc_->connect(this);
+
+			SafeLock lock(&messageLock);
+			rdc.push_back(rdc_);
+
+			if (Notifier<OPSMessage*>::getNrOfListeners() > 0) {
+				rdc_->start();
+			}
+		}
+	}
+
 	void TCPReceiveDataHandler::topicUsage(Topic& top, bool used)
 	{
-		///TODO Keep a list of all used topics, with count
-		/// If a new topic is added or an old one deleted, send updates if connected
-	}
-
-    ///Override from Listener
-    ///Called whenever the receiver has new data.
-    void TCPReceiveDataHandler::onNewEvent(Notifier<BytesSizePair>* sender, BytesSizePair byteSizePair)
-    {
-		/// Here we got some data in our buffer
-		///TODO Check if it is an internal TCP Transport info and if so handle it and start a new asynch read
-
-		/// Otherwise let parent handle it (normal OPS trafic)
-		ReceiveDataHandler::onNewEvent(sender, byteSizePair);
-	}
-
-	// Called from client when a connection is made
-	void TCPReceiveDataHandler::onConnect(TCPConnection& conn, ConnectStatus status)
-	{
-		OPS_TCP_TRACE("RDH: onConnect()\n");
-		// If first time, set the protocol to use
-		if (!_protocol) {
-			_protocol = new TCPOpsProtocol(TimeHelper::currentTimeMillis);
-			conn.setProtocol(_protocol);
+		// Called with messageLock held
+		if (usingPartInfo) {
+			// We should only register unique topics
+			auto it = topics.find(top.getName());
+			int32_t count = 0;
+			if (it != topics.end()) {
+				count = topics[top.getName()];
+			}
+			// Register topic with participant info data handler/listener to get callbacks to handler above
+			if (used) {
+				++count;
+				if (count == 1) {
+					participant.registerTcpTopic(top.getName(), this);
+				}
+			} else {
+				--count;
+				if (count == 0) {
+					participant.unregisterTcpTopic(top.getName(), this);
+				}
+			}
+			topics[top.getName()] = count;
 		}
-		
-		// Trig sending of "ops protocol probe" to see if server know new features.
-		_protocol->sendProbe();
-
-		_connected = true;
-		ReceiveDataHandler::onNewEvent(nullptr, status);
 	}
 
-	// Called from client when a connection is closed
-	// Ev. buffer used in asynchRead() is no longer in use
-	void TCPReceiveDataHandler::onDisconnect(TCPConnection&, ConnectStatus status)
-	{
-		OPS_TCP_TRACE("RDH: onDisconnect()\n");
-		_connected = false;
-		// Need to reset protocol state in case the next connection is to a server with another version
-		_protocol->resetProtocol();
-		ReceiveDataHandler::onNewEvent(nullptr, status);
-	}
 }

@@ -39,6 +39,7 @@
 
 #define OPS_OBJ_TRACE(msg) { OPS_NOTRACE("OBJ: " << msg); }
 #define OPS_TCP_TRACE(msg) { OPS_NOTRACE("TCP: " << msg); }
+#define OPS_PIFO_TRACE(msg) { OPS_NOTRACE("PIFO: " << msg); }
 
 //#include <iostream>		// needed when using OPS_TRACE
 

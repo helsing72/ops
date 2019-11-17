@@ -248,6 +248,10 @@ namespace ops
 			// Note that this uses our sendDataHandlerFactory.
 			if (partInfoPub != nullptr) { delete partInfoPub; }
 			partInfoPub = nullptr;
+
+#ifdef OPS_ENABLE_DEBUG_HANDLER
+			debugHandler.Stop();
+#endif
 		}
 
 		// Stop the subscriber for partInfoData. This requires ioService to be running.
@@ -413,6 +417,20 @@ namespace ops
 		partInfoData.mc_udp_port = port;
 	}
 
+	void Participant::registerTcpTopic(ObjectName_T topicName, ReceiveDataHandler* handler)
+	{
+		if (partInfoListener != nullptr) {
+			partInfoListener->connectTcp(topicName, handler);
+		}
+	}
+
+	void Participant::unregisterTcpTopic(ObjectName_T topicName, ReceiveDataHandler* handler)
+	{
+		if (partInfoListener != nullptr) {
+			partInfoListener->disconnectTcp(topicName, handler);
+		}
+	}
+
 	void Participant::addTypeSupport(ops::SerializableFactory* typeSupport)
 	{
 		objectFactory->add(typeSupport);
@@ -451,6 +469,17 @@ namespace ops
 		return false;
 	}
 
+	bool Participant::hasSubscriberOn(ObjectName_T topicName)
+	{
+		SafeLock lock(&partInfoDataMutex);
+		// Check if topic exist in partInfoData.subscribeTopics
+		std::vector<TopicInfoData>::iterator it;
+		for (it = partInfoData.subscribeTopics.begin(); it != partInfoData.subscribeTopics.end(); ++it) {
+			if (it->name == topicName) return true;
+		}
+		return false;
+	}
+
 	ReceiveDataHandler* Participant::getReceiveDataHandler(Topic top)
 	{
 		ReceiveDataHandler* result = receiveDataHandlerFactory->getReceiveDataHandler(top, *this);
@@ -480,12 +509,15 @@ namespace ops
 	SendDataHandler* Participant::getSendDataHandler(Topic top)
 	{
 		SendDataHandler* result = sendDataHandlerFactory->getSendDataHandler(top, *this);
-		if (result != nullptr) {
-			SafeLock lock(&partInfoDataMutex);
-			//Need to add topic to partInfoData.subscribeTopics (TODO ref count if same topic??)
-            partInfoData.publishTopics.push_back(TopicInfoData(top));
-		}
+		// We can't update Participant Info here, delayed until updateSendPartInfo()
 		return result;
+	}
+
+	void Participant::updateSendPartInfo(Topic top)
+	{
+		SafeLock lock(&partInfoDataMutex);
+		//Need to add topic to partInfoData.subscribeTopics (TODO ref count if same topic??)
+		partInfoData.publishTopics.push_back(TopicInfoData(top));
 	}
 
 	void Participant::releaseSendDataHandler(Topic top)

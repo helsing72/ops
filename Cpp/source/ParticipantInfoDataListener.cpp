@@ -21,6 +21,7 @@
 #include "OPSTypeDefs.h"
 #include "ParticipantInfoDataListener.h"
 #include "McUdpSendDataHandler.h"
+#include "TCPReceiveDataHandler.h"
 #include "Participant.h"
 #include "BasicError.h"
 #include "NetworkSupport.h"
@@ -48,20 +49,21 @@ namespace ops
 					SafeLock lock(&mutex);
 					if (sendDataHandler != nullptr) {
 						if (partInfo->mc_udp_port != 0) {
-							for (unsigned int i = 0; i < partInfo->subscribeTopics.size(); i++)	{
-								if ((partInfo->subscribeTopics[i].transport == Topic::TRANSPORT_UDP) &&
-									participant.hasPublisherOn(partInfo->subscribeTopics[i].name))
-								{
+							for (auto x : partInfo->subscribeTopics) {
+								if ((x.transport == Topic::TRANSPORT_UDP) && participant.hasPublisherOn(x.name)) {
 									//Do an add sink here
-									dynamic_cast<McUdpSendDataHandler*>(sendDataHandler)->addSink(partInfo->subscribeTopics[i].name, partInfo->ip, partInfo->mc_udp_port);
+									dynamic_cast<McUdpSendDataHandler*>(sendDataHandler)->addSink(x.name, partInfo->ip, partInfo->mc_udp_port);
 								}
 							}
 						}
 					}
-	                for (unsigned int i = 0; i < partInfo->publishTopics.size(); i++)
-		            {
-						if (partInfo->publishTopics[i].transport == Topic::TRANSPORT_TCP) {
-							///TODO lookup topic in map. If found call handler
+					for (auto& x : partInfo->publishTopics) {
+						if ((x.transport == Topic::TRANSPORT_TCP) && participant.hasSubscriberOn(x.name)) {
+							// Lookup topic in map. If found call handler
+							auto result = rcvDataHandlers.find(x.name);
+							if (result != rcvDataHandlers.end()) {
+								dynamic_cast<TCPReceiveDataHandler*>(result->second)->AddReceiveChannel(x.name, x.address, x.port);
+							}
 						}
 					}
 				}
@@ -148,37 +150,68 @@ namespace ops
 		if (numUdpTopics == 0) {
 			sendDataHandler = nullptr;
 
-///TODO			if (num tcp topics == 0) {
+			if (rcvDataHandlers.size() == 0) {
 				removeSubscriber();
-///			}
+			}
 		}
 	}
 
-	void ParticipantInfoDataListener::connectTcp(Topic& top, void* const handler)
+	void ParticipantInfoDataListener::connectTcp(ObjectName_T& top, ReceiveDataHandler* const handler)
 	{
-		UNUSED(handler);
 		SafeLock lock(&mutex);
 		if (partInfoSub == nullptr) {
 			if (!setupSubscriber()) {
 				// Generate an error message if we come here with domain->getMetaDataMcPort() == 0,
 				// it means that we have TCP topics that require meta data but user has disabled it.
 				ErrorMessage_T msg("TCP topic '");
-				msg += top.getName();
+				msg += top;
 				msg += "' won't work since Meta Data disabled in config-file";
 				BasicError err("ParticipantInfoDataListener", "connectTcp", msg);
 				participant.reportError(&err);
 				return;
 			}
 		}
-		///TODO add to map
+		
+		// Add to map if not already there
+		if (rcvDataHandlers.find(top) != rcvDataHandlers.end()) {
+			ReceiveDataHandler* rdh = rcvDataHandlers[top];
+			if (rdh != handler) {
+				ErrorMessage_T msg("TCP topic '");
+				msg += top;
+				msg += "' already registered for another RDH";
+				BasicError err("ParticipantInfoDataListener", "connectTcp", msg);
+				participant.reportError(&err);
+				return;
+			}
+		} else {
+			rcvDataHandlers[top] = handler;
+		}
 	}
 
-	void ParticipantInfoDataListener::disconnectTcp(Topic& top, void* const handler)
+	void ParticipantInfoDataListener::disconnectTcp(ObjectName_T& top, ReceiveDataHandler* const handler)
 	{
-		UNUSED(top);
-		UNUSED(handler);
 		SafeLock lock(&mutex);
-		///TODO remove from map
+
+		// Remove from map
+		auto result = rcvDataHandlers.find(top);
+		if (result != rcvDataHandlers.end()) {
+			ReceiveDataHandler* rdh = rcvDataHandlers[top];
+			if (rdh != handler) {
+				ErrorMessage_T msg("TCP topic '");
+				msg += top;
+				msg += "' atempt to remove topic for another RDH";
+				BasicError err("ParticipantInfoDataListener", "connectTcp", msg);
+				participant.reportError(&err);
+				return;
+			}
+			rcvDataHandlers.erase(result);
+
+			if (rcvDataHandlers.size() == 0) {
+				if (numUdpTopics == 0) {
+					removeSubscriber();
+				}
+			}
+		}
 	}
 
 }

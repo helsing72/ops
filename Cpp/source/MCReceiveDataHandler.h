@@ -21,26 +21,15 @@
 
 #pragma once
 
-#include <map>
-
 #include "OPSExport.h"
 #include "ReceiveDataHandler.h"
 
 namespace ops
 {
-	class OPS_EXPORT TCPReceiveDataHandler : public ReceiveDataHandler
+	class OPS_EXPORT MCReceiveDataHandler : public ReceiveDataHandler
 	{
 	public:
-		TCPReceiveDataHandler(Topic top, Participant& part);
-
-		void AddReceiveChannel(ObjectName_T& topicName, Address_T& ip, int port);
-
-	protected:
-		std::map<ObjectName_T, int32_t> topics;
-		bool usingPartInfo = true;
-
-		// Tell derived classes which topics that are active
-		void topicUsage(Topic& top, bool used) override;
+		MCReceiveDataHandler(Topic top, Participant& part);
 	};
 	
 }

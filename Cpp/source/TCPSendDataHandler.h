@@ -31,6 +31,7 @@
 #include "IOService.h"
 #include "TCPServerBase.h"
 #include "TCPOpsProtocol.h"
+#include "NetworkSupport.h"
 
 namespace ops
 {
@@ -46,6 +47,7 @@ namespace ops
 
     class TCPSendDataHandler : public SendDataHandler, TCPServerCallbacks
     {
+		IOService* _ioService;
 		std::map<ObjectName_T, int> _topics;
 
 		struct Connection_t : TCPUserBase
@@ -59,7 +61,8 @@ namespace ops
 		};
 
 	public:
-        TCPSendDataHandler(IOService* ioService, Topic& topic)
+        TCPSendDataHandler(IOService* ioService, Topic& topic) :
+			_ioService(ioService)
         {
 			sender = Sender::createTCPServer(this, ioService, topic.getDomainAddress(), topic.getPort(), topic.getOutSocketBufferSize());
         }
@@ -72,6 +75,17 @@ namespace ops
             bool result = sender->sendTo(buf, bufSize, "", 0);
             return result;
         }
+
+		// At least one publisher must be added to us for this call to work correct
+		// ie. sender must be opened for this to be correct
+		virtual void updateTransportInfo(Topic& top) override
+		{
+			// Set port to the one actually used (for tcp server where OS defines port)
+			top.setPort(getLocalPort());
+			if (!isValidNodeAddress(top.getDomainAddress())) {
+				top.setDomainAddress(doSubnetTranslation(top.getLocalInterface(), _ioService));
+			}
+		}
 
 		// Tell derived classes which topics that are active
 		void topicUsage(Topic& top, bool used) override

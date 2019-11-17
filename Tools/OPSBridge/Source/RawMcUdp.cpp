@@ -82,7 +82,7 @@ namespace opsbridge {
 		uint32_t const addr = ops::IPString2Addr(ip);
 		if (addr >= 0xE0000000) {
 			// Multicast and above
-			_receivers[key].receiver = ops::Receiver::create(ip, port, _ioService, ifc);
+			_receivers[key].receiver = ops::Receiver::createMCReceiver(ip, port, _ioService, ifc);
 		} else {
 			// Use UDP
 			_receivers[key].receiver = ops::Receiver::createUDPReceiver(port, _ioService, ip);

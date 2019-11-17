@@ -33,6 +33,7 @@
 #include "Listener.h"
 #include "BytesSizePair.h"
 #include "ReferenceHandler.h"
+#include "ReceiveDataChannel.h"
 #include "OPSExport.h"
 #include "ConnectStatus.h"
 
@@ -42,27 +43,37 @@ namespace ops
 	class Participant;
 	
 	class OPS_EXPORT ReceiveDataHandler : 
-		protected Notifier<OPSMessage*>, Listener<BytesSizePair>, 
-		public Notifier<ConnectStatus>, Listener<ConnectStatus>
+		protected Notifier<OPSMessage*>, 
+		public Notifier<ConnectStatus>, public ReceiveDataChannelCallbacks
 	{
 		friend class ReceiveDataHandlerFactory;
 	public:
-		ReceiveDataHandler(Topic top, Participant& part, Receiver* recv = nullptr);
+		ReceiveDataHandler(Topic top, Participant& part, ReceiveDataChannel* rdc_ = nullptr);
 		virtual ~ReceiveDataHandler();
 
 		bool aquireMessageLock();
 		void releaseMessageLock();
 
-		void stop();
+		void clear();
 
 		// We need to act on these localy
 		// overridden from Notifier<OPSMessage*>
 		void addListener(Listener<OPSMessage*>* listener, Topic& top);
 		void removeListener(Listener<OPSMessage*>* listener, Topic& top);
 
-		int numReservedMessages()
+		int numReservedMessages() const
 		{
 			return messageReferenceHandler.size();
+		}
+
+		bool asyncFinished()
+		{
+			bool finished = true;
+			SafeLock lock(&messageLock);
+			for (auto x : rdc) {
+				finished &= x->getReceiver()->asyncFinished();
+			}
+			return finished;
 		}
 
 		int getSampleMaxSize() const
@@ -70,22 +81,17 @@ namespace ops
             return sampleMaxSize;
         }
 
-		Receiver* getReceiver() const
-		{
-			return receiver;
-		}
-
 	protected:
-		///Override from Listener
-		///Called whenever the receiver has new data.
-		void onNewEvent(Notifier<BytesSizePair>* sender, BytesSizePair byteSizePair) override;
-		bool calculateAndSetSpareBytes(ByteBuffer &buf, int segmentPaddingSize);
+		Topic topic;
 
-		void onNewEvent(Notifier<ConnectStatus>* sender, ConnectStatus arg) override
-		{
-			UNUSED(sender);
-			Notifier<ConnectStatus>::notifyNewEvent(arg);
-		}
+		Lockable messageLock;
+
+		//The receiver channel(s) used for this transport channel. 
+		//Currently only TCP transport may have more than one rdc
+		std::vector<ReceiveDataChannel*> rdc;
+
+		//The Participant to which this ReceiveDataHandler belongs.
+		Participant& participant;
 
 		// Tell derived classes which topics that are active
 		virtual void topicUsage(Topic& top, bool used) 
@@ -93,30 +99,21 @@ namespace ops
 			UNUSED(top); UNUSED(used);
 		}
 
+		virtual void onMessage(ReceiveDataChannel& rdc_, OPSMessage* mess) override;
+		virtual void onStatusChange(ReceiveDataChannel& rdc_, ConnectStatus& status) override
+		{
+			UNUSED(rdc_);
+			Notifier<ConnectStatus>::notifyNewEvent(status);
+		}
+
 	private:
-		///The receiver used for this topic. 
-		Receiver* receiver;
-
-		///Preallocated MemoryMap for receiving data
-		MemoryMap memMap;
 		int sampleMaxSize;
-
-		//The Participant to which this ReceiveDataHandler belongs.
-		Participant& participant;
 
 		///Current OPSMessage, valid until next sample arrives.
 		OPSMessage* message;
 
-		///The accumulated size in bytes of the current message
-		int currentMessageSize;
-
-		Lockable messageLock;
-
 		///ReferenceHandler that keeps track of object created on reception and deletes them when no one is interested anymore.
 		ReferenceHandler messageReferenceHandler;
-		
-		int expectedSegment;
-		bool firstReceived;
 	};
 	
 }

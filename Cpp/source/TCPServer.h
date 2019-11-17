@@ -120,6 +120,15 @@ namespace ops
 					start_accept();
 				}
 			}
+
+			void getLocal(Address_T& address, int& port)
+			{
+				boost::system::error_code error;
+				boost::asio::ip::tcp::endpoint localEndPoint;
+				localEndPoint = _acceptor->local_endpoint(error);
+				address = localEndPoint.address().to_string().c_str();
+				port = localEndPoint.port();
+			}
 		};
 
     public:
@@ -145,6 +154,11 @@ namespace ops
 			if (_server) close();
 			_server = std::make_shared<impl>(this, _ioService);
 			_server->start_accept();
+
+			Address_T addr;
+			int port;
+			_server->getLocal(addr, port);
+			OPS_PIFO_TRACE("TCP Server IP: " << addr << ", Port: " << port << "\n");
 		}
 
 		void close() override
@@ -158,6 +172,12 @@ namespace ops
 
 		int getLocalPort() override
 		{
+			if ((_serverPort == 0) && (_server)) {
+				Address_T addr;
+				int port;
+				_server->getLocal(addr, port);
+				return port;
+			}
 			return _serverPort;
 		}
         

@@ -21,10 +21,13 @@
 #ifndef ops_ParticipantInfoDataListener_h
 #define	ops_ParticipantInfoDataListener_h
 
+#include <map>
+
 #include "DataNotifier.h"
 #include "ParticipantInfoData.h"
 #include "Subscriber.h"
 #include "SendDataHandler.h"
+#include "ReceiveDataHandler.h"
 #include "Lockable.h"
 #include "OPSExport.h"
 
@@ -45,8 +48,8 @@ namespace ops
 		void connectUdp(Topic& top, SendDataHandler* handler);
 		void disconnectUdp(Topic& top, SendDataHandler* handler);
 
-		void connectTcp(Topic& top, void* handler);
-		void disconnectTcp(Topic& top, void* handler);
+		void connectTcp(ObjectName_T& top, ReceiveDataHandler* handler);
+		void disconnectTcp(ObjectName_T& top, ReceiveDataHandler* handler);
 
 	private:
 		Participant& participant;
@@ -54,6 +57,8 @@ namespace ops
 		Lockable mutex;
 		Subscriber* partInfoSub;
 		SendDataHandler* sendDataHandler;
+
+		std::map<ObjectName_T, ReceiveDataHandler*> rcvDataHandlers;
 
 		int numUdpTopics;
 

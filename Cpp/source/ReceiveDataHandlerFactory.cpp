@@ -22,6 +22,8 @@
 #include "OPSTypeDefs.h"
 #include "ReceiveDataHandlerFactory.h"
 #include "ReceiveDataHandler.h"
+#include "MCReceiveDataHandler.h"
+#include "UDPReceiveDataHandler.h"
 #include "TCPReceiveDataHandler.h"
 #include "Participant.h"
 #include "BasicError.h"
@@ -84,7 +86,7 @@ namespace ops
         }
         else if (top.getTransport() == Topic::TRANSPORT_MC)
         {
-            ReceiveDataHandler* newReceiveDataHandler = new ReceiveDataHandler(top, participant);
+            ReceiveDataHandler* newReceiveDataHandler = new MCReceiveDataHandler(top, participant);
             receiveDataHandlerInstances[key] = newReceiveDataHandler;
             return newReceiveDataHandler;
         }
@@ -93,15 +95,10 @@ namespace ops
 			ReceiveDataHandler* newReceiveDataHandler = new TCPReceiveDataHandler(top, participant);
 			receiveDataHandlerInstances[key] = newReceiveDataHandler;
 			return newReceiveDataHandler;
-		} else if (top.getTransport() == Topic::TRANSPORT_UDP)
+		} 
+		else if (top.getTransport() == Topic::TRANSPORT_UDP)
         {
-	        ReceiveDataHandler* udpReceiveDataHandler = new ReceiveDataHandler(top, participant);
-
-			if (key == top.getTransport()) {
-				Receiver* recv = udpReceiveDataHandler->getReceiver();
-				participant.setUdpTransportInfo(recv->getLocalAddress(), recv->getLocalPort());
-			}
-            
+	        ReceiveDataHandler* udpReceiveDataHandler = new UDPReceiveDataHandler(top, participant);
 			receiveDataHandlerInstances[key] = udpReceiveDataHandler;
             return udpReceiveDataHandler;
         }
@@ -130,7 +127,7 @@ namespace ops
                 //Time to mark this receiveDataHandler as garbage.
                 receiveDataHandlerInstances.erase(receiveDataHandlerInstances.find(key));
 
-                rdh->stop();
+                rdh->clear();
 
 				if (key == Topic::TRANSPORT_UDP) {
 					participant.setUdpTransportInfo("", 0);
@@ -148,7 +145,7 @@ namespace ops
         for (int i = (int)garbageReceiveDataHandlers.size() - 1; i >= 0; i--)
         {
             if ((garbageReceiveDataHandlers[i]->numReservedMessages() == 0) &&
-                (garbageReceiveDataHandlers[i]->getReceiver()->asyncFinished()))
+                (garbageReceiveDataHandlers[i]->asyncFinished()))
             {
                 delete garbageReceiveDataHandlers[i];
                 std::vector<ReceiveDataHandler*>::iterator iter = garbageReceiveDataHandlers.begin() + i;

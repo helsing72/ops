@@ -45,6 +45,7 @@ namespace ops
 {
 	//Forward declaration..
 	class ReceiveDataHandler;
+	class UDPReceiveDataHandler;
 	class ReceiveDataHandlerFactory;
 	class SendDataHandlerFactory;
 	class Domain;
@@ -63,6 +64,8 @@ namespace ops
 	{
 		friend class Subscriber;
 		friend class Publisher;
+		friend class UDPReceiveDataHandler;
+		friend class TCPReceiveDataHandler;
 		friend class ReceiveDataHandlerFactory;
 		friend class SendDataHandlerFactory;
 		friend class ParticipantInfoDataListener;
@@ -215,7 +218,10 @@ namespace ops
 
 		//Visible to friends only
 		void setUdpTransportInfo(Address_T ip, int port);
+		void registerTcpTopic(ObjectName_T topicName, ReceiveDataHandler* handler);
+		void unregisterTcpTopic(ObjectName_T topicName, ReceiveDataHandler* handler);
 		bool hasPublisherOn(ObjectName_T topicName);
+		bool hasSubscriberOn(ObjectName_T topicName);
 
 		Domain* domain;		
 
@@ -237,7 +243,8 @@ namespace ops
 		//TODO: Deprecate and delegate to sendDataHandlerFactory???
 		SendDataHandler* getSendDataHandler(Topic top);
 		void releaseSendDataHandler(Topic top);		
-		
+		void updateSendPartInfo(Topic top);
+
 		///Mutex for ioService, used to shutdown safely
 		Lockable serviceMutex;
 
@@ -247,7 +254,7 @@ namespace ops
 		ObjectName_T participantID;
 
 		///As long this is true, we keep on running this participant
-		bool keepRunning;
+		volatile bool keepRunning;
 
 		///The interval with which this Participant publishes ParticipantInfoData
 		int64_t aliveTimeout;
