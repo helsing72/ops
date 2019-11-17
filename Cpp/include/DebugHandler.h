@@ -58,6 +58,7 @@ namespace ops {
 
 	protected:
 		void Start();
+		void Stop();
 
 		// Register/Unregister with the debug handler
 		void RegisterPub(DebugNotifyInterface* client, ObjectName_T topicName);

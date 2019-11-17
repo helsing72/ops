@@ -254,6 +254,11 @@ namespace ops {
 		_pimpl->Start();
 	}
 
+	void DebugHandler::Stop()
+	{
+		_pimpl->Stop();
+	}
+
 	// Used by application to set a handler for "Generic Command" (50)
 	void DebugHandler::SetAppCallback(DebugNotifyInterface* client)
 	{
