@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018 Lennart Andersson.
+ * Copyright (C) 2018-2019 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -144,6 +144,11 @@ namespace ops
 		// - A new publisher is detected (Ip & Port of publisher is used)
 		// - A Sequence Error is detected for an existing publisher
 		PublicationIdChecker* pubIdChecker;
+
+		//User data field that the owner of the subscriber can use for any purpose. Not used by OPS.
+		uint64_t userData = 0;
+		//User data field that the owner of the subscriber can use for any purpose. Not used by OPS.
+		void* userPtr = nullptr;
 
 	protected:
         void checkAndNotifyDeadlineMissed();
