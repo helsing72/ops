@@ -1,6 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
+ * Copyright (C) 2019 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -22,75 +23,46 @@
 
 #ifndef REPLACE_TRANSPORT_LAYER
 
-#ifdef __GNUC__
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#endif
-
-#include <sstream>
-#include <boost/date_time/local_time/local_time.hpp>
-#include <boost/thread/thread.hpp>
-#include <boost/thread/xtime.hpp>
-#include <boost/algorithm/string/replace.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/version.hpp>
-
-#if BOOST_VERSION < 105000
-#define TIME_UTC_ TIME_UTC
-#endif
+#include <chrono>
+#include <thread>
+#include <ctime>
 
 namespace ops
 {
     ///Returns the current time as a number of milliseconds since Epoch 1970-01-01.
     int64_t TimeHelper::currentTimeMillis()
     {
-        return getEpochTime();
+        return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     }
 
-	///Sleeps the given number of milliseconds (millis).
+    ///Sleeps the given number of milliseconds (millis).
     void TimeHelper::sleep(int64_t millis)
     {
-        boost::xtime xt;
-        boost::xtime_get(&xt, boost::TIME_UTC_);
-
-
-        int seconds = (int) (millis / 1000.0);
-        xt.sec += seconds;
-        int nanos = (int) (((millis / 1000.0) - seconds) * 1000000000.0);
-        xt.nsec += nanos;
-
-        boost::thread::sleep(xt);
+        std::this_thread::sleep_for(std::chrono::milliseconds(millis));
     }
 
 	///Returns current system time as a string to be used as user output, file names etc...
     std::string TimeHelper::getTimeToString()
     {
-        //Get time with seconds resolution
-        boost::posix_time::ptime p = boost::date_time::second_clock<boost::posix_time::ptime>::local_time();
-
-        //Print the time to a string.
-        std::stringstream ss;
-        ss << p;
-        std::string ret = ss.str();
-
-        //Replace characters that are illegal in file names.
-        boost::algorithm::replace_all(ret, ":", "-");
-
-        return ret;
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable: 4996)
+#endif
+        std::time_t t = std::time(nullptr);
+        char mbstr[100];
+        if (std::strftime(mbstr, sizeof(mbstr), "%Y-%m-%d %H-%M-%S", std::localtime(&t))) {
+            return mbstr;
+        }
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
+        return "";
     }
 
 	///Returns the current time as a number of milliseconds since Epoch 1970-01-01.
     int64_t TimeHelper::getEpochTime()
     {
-        using namespace boost::gregorian;
-        using namespace boost::local_time;
-        using namespace boost::posix_time;
-
-        boost::posix_time::ptime time_t_epoch(date(1970, 1, 1));
-        boost::posix_time::ptime p = boost::date_time::microsec_clock<boost::posix_time::ptime>::local_time();
-
-        time_duration diff = p - time_t_epoch;
-
-        return diff.total_milliseconds();
+        return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     }
 
 }
