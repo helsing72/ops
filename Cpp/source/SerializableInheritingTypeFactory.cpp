@@ -1,6 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
+ * Copyright (C) 2019 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -23,35 +24,23 @@
 
 namespace ops
 {
-
-	void split(const TypeId_T& s, char c, std::vector<TypeId_T>& v)
-	{
-		TypeId_T::size_type i = 0;
-		TypeId_T::size_type j = s.find(c);
-
-		while (j != TypeId_T::npos) {
-			v.push_back(s.substr(i, j - i));
-			i = ++j;
-			j = s.find(c, j);
-		}
-		v.push_back(s.substr(i, s.length()));
-	}
-
 	/**
-     * Tries to construct the most specialized object in the given typeString list
- 	 */
+	 * Tries to construct the most specialized object in the given typeString list
+	 */
 	Serializable* SerializableInheritingTypeFactory::create(const TypeId_T& typeString)
 	{
-		std::vector<TypeId_T> types;
-		split(typeString, ' ', types);
+		TypeId_T::size_type i = 0;
+		TypeId_T::size_type j = typeString.find(' ');
 
-		for (unsigned int i = 0; i < types.size(); i++) {
-			Serializable* serializable = SerializableCompositeFactory::create(types[i]);
+		while (j != TypeId_T::npos) {
+			Serializable* serializable = SerializableCompositeFactory::create(typeString.substr(i, j - i));
 			if (serializable != nullptr) {
 				return serializable;
 			}
+			i = ++j;
+			j = typeString.find(' ', j);
 		}
-		return nullptr;
+		return SerializableCompositeFactory::create(typeString.substr(i, typeString.length()));
 	}
 
 }
