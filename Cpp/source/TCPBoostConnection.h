@@ -37,6 +37,8 @@ namespace ops
 	{
 	protected:
 		boost::asio::ip::tcp::socket* _sock;
+		Address_T _remoteAddress;
+		int _remotePort = -1;
 
 		// Used for a connection created by TCPClient
 		TCPBoostConnection(TCPConnectionCallbacks* client) :
@@ -60,17 +62,17 @@ namespace ops
 		virtual ~TCPBoostConnection()
 		{
 			close();
-			if (_sock) delete _sock;
+			if (_sock != nullptr) delete _sock;
 		}
 
 		void close() override
 		{
-			if (_sock) _sock->close();
+			if (_sock != nullptr) _sock->close();
 		}
 
 		void setOutSize(int64_t size)
 		{
-			if (_sock && (size > 0)) {
+			if ((_sock != nullptr) && (size > 0)) {
 				boost::asio::socket_base::send_buffer_size option((int)size);
 				boost::system::error_code ec;
 				ec = _sock->set_option(option, ec);
@@ -84,7 +86,7 @@ namespace ops
 
 		void setInSize(int64_t size)
 		{
-			if (_sock && (size > 0)) {
+			if ((_sock != nullptr) && (size > 0)) {
 				boost::asio::socket_base::receive_buffer_size option((int)size);
 				boost::system::error_code ec;
 				ec = _sock->set_option(option, ec);
@@ -98,13 +100,26 @@ namespace ops
 
 		void disableNagleAlg()
 		{
-			if (_sock) {
+			if (_sock != nullptr) {
 				boost::asio::ip::tcp::no_delay option(true);
 				boost::system::error_code error;
 				_sock->set_option(option, error);
 				if (error) {
 					ops::BasicWarning warn("TCPBoostConnection", "disableNagleAlg", "Failed to disable Nagle algorithm.");
 					Participant::reportStaticError(&warn);
+				}
+			}
+		}
+
+		void getRemoteEndPoint()
+		{
+			if (_connected && (_sock != nullptr)) {
+				boost::system::error_code error;
+				boost::asio::ip::tcp::endpoint sendingEndPoint;
+				sendingEndPoint = _sock->remote_endpoint(error);
+				if (!error) {
+					_remoteAddress = sendingEndPoint.address().to_string().c_str();
+					_remotePort = sendingEndPoint.port();
 				}
 			}
 		}
@@ -139,11 +154,12 @@ namespace ops
 
 		void getRemote(Address_T& address, int& port) override
 		{
-			boost::system::error_code error;
-			boost::asio::ip::tcp::endpoint sendingEndPoint;
-			sendingEndPoint = _sock->remote_endpoint(error);
-			address = sendingEndPoint.address().to_string().c_str();
-			port = sendingEndPoint.port();
+			// We cache the address and port for TCP, since it is the same until disconnected
+			if (_remotePort < 0) {
+				getRemoteEndPoint();
+			}
+			address = _remoteAddress;
+			port = _remotePort;
 		}
 
 		void getLocal(Address_T& address, int& port) override

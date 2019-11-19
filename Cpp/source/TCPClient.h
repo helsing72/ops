@@ -76,6 +76,7 @@ namespace ops
 			{
 				OPS_TCP_TRACE("Client: start_async_connect()\n");
 				_connected = false;
+				_remotePort = -1;
 
 				std::shared_ptr<TCPConnection> self = shared_from_this();
 				_sock->async_connect(
@@ -91,6 +92,7 @@ namespace ops
 				if (_tryToConnect) {
 					_tryToConnect = false;
 					_connected = false;
+					_remotePort = -1;
 					_timer.cancel();
 					if (_sock) _sock->close();
 					_owner->connected(false);
@@ -122,6 +124,7 @@ namespace ops
 
 							setInSize(_inBufferSize);
 							disableNagleAlg();
+							getRemoteEndPoint();
 
 							_owner->connected(true);
 						}
