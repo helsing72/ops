@@ -5,7 +5,11 @@ The TCP Transport of OPS is based on TCP/IP as opposed to Multicast Transport wh
 
 The TCP transport can be useful in network environments with high IP package losses and/or for communicating over the Internet or other complex networks where routers may block multicast traffic.
 
-When using TCP Transport, a topic can only have one publisher but any number of subscribers to a topic.
+The TCP transport can be configured in two different ways:
+
+Without specified **address** and **port** tags, OPS uses the metadata sent by participants to connect publishers and subscribers using dynamic ports. This requires metadata to be enabled to work and it is a _many-to-many_ transport mechanism.
+
+With specified **address** and **port** tags, the metadata is not used and they specify the publishers address and port. It is a _one-to-many_ transport mechanism.
 
 To use the TCP transport for a topic, this is how to setup your [Topic Config](OpsConfig.md) file:
 
@@ -24,7 +28,7 @@ To use the TCP transport for a topic, this is how to setup your [Topic Config](O
                 <localInterface>127.0.0.1</localInterface>
                 <topics>
                     <element type = "Topic">
-                        <!-- Required for TCP Transport-->
+                        <!-- Required for TCP Transport with a specified sender -->
                         <name>FooTopic</name>
                         <port>6686</port>
                         <dataType>foopackage.FooData</dataType>
@@ -36,6 +40,12 @@ To use the TCP transport for a topic, this is how to setup your [Topic Config](O
                         <inSocketBufferSize>1000000</inSocketBufferSize>
                         <outSocketBufferSize>1000000</outSocketBufferSize>
                     </element>
+                    <element type = "Topic">
+                        <!-- Required for TCP Transport using many-to-many -->
+                        <name>BarTopic</name>
+                        <dataType>foopackage.FooData</dataType>
+                        <transport>tcp</transport>
+                    </element>
                     <!-- TODO: Add more topics here... -->
                 </topics>
             </element>
@@ -45,7 +55,7 @@ To use the TCP transport for a topic, this is how to setup your [Topic Config](O
 
 ```
 
-As you can see, the fields address and transport must be specified. The field transport must be set to "tcp" and address is the ip address of the machine running the publisher for the topic (once again note that the TCP Transport only support one-to-many communication).
+As you can see, the field transport must be set to "tcp". If address and port is specified it is the ip address of the machine running the publisher for the topic (a one-to-many communication).
 Other fields has the same impact as for the [Multicast Transport](MulticastTransport.md).
 
 See also, [Topic Config](OpsConfig.md).
