@@ -66,8 +66,11 @@ namespace ops
 				socket->get_option(option);
 				if(ec || option.value() != _outSocketBufferSize)
 				{
-					//std::cout << "Socket buffer size could not be set" << std::endl;
-					ops::BasicWarning err("UDPSender", "UDPSender", "Socket buffer size could not be set");
+					ErrorMessage_T msg("Socket buffer size ");
+					msg += NumberToString(_outSocketBufferSize);
+					msg += " could not be set. Used value: ";
+					msg += NumberToString(option.value());
+					ops::BasicWarning err("UDPSender", "UDPSender", msg);
 					Participant::reportStaticError(&err);
 				}
 			}

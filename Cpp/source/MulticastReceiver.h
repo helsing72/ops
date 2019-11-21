@@ -79,8 +79,11 @@ namespace ops
 				sock->get_option(option);
 				if(ec || option.value() != _inSocketBufferSizent)
 				{
-					//std::cout << "Socket buffer size could not be set" << std::endl;
-					ops::BasicWarning err("MulticastReceiver", "Start", "Socket buffer size could not be set");
+					ErrorMessage_T msg("Socket buffer size ");
+					msg += NumberToString(_inSocketBufferSizent);
+					msg += " could not be set. Used value: ";
+					msg += NumberToString(option.value());
+					ops::BasicWarning err("MulticastReceiver", "Start", msg);
 					Participant::reportStaticError(&err);
 				}
 			}

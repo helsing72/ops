@@ -83,8 +83,11 @@ namespace ops
                 sock->get_option(option);
                 if (ec || option.value() != inSocketBufferSizent)
                 {
-                    //std::cout << "Socket buffer size could not be set" << std::endl;
-					ops::BasicWarning err("UDPReceiver", "UDPReceiver", "Socket buffer size could not be set");
+					ErrorMessage_T msg("Socket buffer size ");
+					msg += NumberToString(inSocketBufferSizent);
+					msg += " could not be set. Used value: ";
+					msg += NumberToString(option.value());
+					ops::BasicWarning err("UDPReceiver", "UDPReceiver", msg);
                     Participant::reportStaticError(&err);
                 }
             }

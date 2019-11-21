@@ -78,7 +78,11 @@ namespace ops
 				ec = _sock->set_option(option, ec);
 				_sock->get_option(option);
 				if (ec || option.value() != size) {
-					BasicWarning err("TCPBoostConnection", "setOutSize", "Socket buffer size could not be set");
+					ErrorMessage_T msg("Socket buffer size ");
+					msg += NumberToString(size);
+					msg += " could not be set. Used value: ";
+					msg += NumberToString(option.value());
+					BasicWarning err("TCPBoostConnection", "setOutSize", msg);
 					Participant::reportStaticError(&err);
 				}
 			}
@@ -92,7 +96,11 @@ namespace ops
 				ec = _sock->set_option(option, ec);
 				_sock->get_option(option);
 				if (ec || option.value() != size) {
-					ops::BasicWarning err("TCPBoostConnection", "setInSize", "Socket buffer size could not be set");
+					ErrorMessage_T msg("Socket buffer size ");
+					msg += NumberToString(size);
+					msg += " could not be set. Used value: ";
+					msg += NumberToString(option.value());
+					ops::BasicWarning err("TCPBoostConnection", "setInSize", msg);
 					Participant::reportStaticError(&err);
 				}
 			}
