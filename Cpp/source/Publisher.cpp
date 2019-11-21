@@ -44,6 +44,7 @@ namespace ops
         participant = Participant::getInstance(topic.getDomainID(), topic.getParticipantID());
         sendDataHandler = participant->getSendDataHandler(topic);
 
+		message.setKey("");
         message.setPublisherName(name);
         message.setTopicName(topic.getName());
         message.setDataOwner(false);
@@ -93,7 +94,8 @@ namespace ops
     void Publisher::setName(ObjectName_T name)
     {
         this->name = name;
-    }
+		message.setPublisherName(name);
+	}
 
     void Publisher::setKey(ObjectKey_T key)
     {
@@ -135,17 +137,14 @@ namespace ops
 	void Publisher::internalWrite(OPSObject* data)
 	{
 #endif
-		if (key != "")
-        {
+		if (key != "") {
             data->setKey(key);
         }
 
         ByteBuffer buf(memMap);
 
         message.setData(data);
-
         message.setPublicationID(currentPublicationID);
-        message.setPublisherName(name);
 
         buf.writeNewSegment();
 
@@ -154,24 +153,20 @@ namespace ops
         archive.inout("message", &message);
 
         //If data has spare bytes, write them to the end of the buf
-        if (message.getData()->spareBytes.size() > 0)
-        {
+        if (message.getData()->spareBytes.size() > 0) {
             buf.WriteChars(&(message.getData()->spareBytes[0]), (int)message.getData()->spareBytes.size());
         }
 
         buf.finish();
 
-        for (int i = 0; i < buf.getNrOfSegments(); i++)
-        {
+        for (int i = 0; i < buf.getNrOfSegments(); i++) {
             int segSize = buf.getSegmentSize(i);
             bool sendOK = sendDataHandler->sendData(buf.getSegment(i), segSize, topic);
-            if (!sendOK)
-            {
+            if (!sendOK) {
                 TimeHelper::sleep(sendSleepTime);
                 sendDataHandler->sendData(buf.getSegment(i), segSize, topic);
             }
-			else if ((i > 0) && (i % sleepEverySendPacket == 0))
-            {
+			else if ((i > 0) && (i % sleepEverySendPacket == 0)) {
                 TimeHelper::sleep(sendSleepTime);
             }
         }
