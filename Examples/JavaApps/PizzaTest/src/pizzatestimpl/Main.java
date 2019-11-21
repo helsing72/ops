@@ -54,7 +54,7 @@ public class Main
             {
                 ExtraAllt ea = new ExtraAllt();
 
-                ea.description = "Skeppets bästa!";
+                ea.description = "Skeppets baesta!";
                 ea.bearnaise = "Svettigast i stan!";
                 ea.ham = "Italiensk kvalitet...";
                 ea.meetQuality = 10;

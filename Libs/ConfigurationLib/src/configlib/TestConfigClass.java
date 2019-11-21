@@ -26,7 +26,7 @@ public class TestConfigClass
     public TestConfigClass()
     {
         strings.add(new String("Ett"));
-        strings.add("Två");
+        strings.add("Tvaa");
         strings.add("osv...");
 
         node.add(class2);
