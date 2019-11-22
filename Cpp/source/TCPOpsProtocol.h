@@ -71,16 +71,23 @@ namespace ops
 				if (sizeInfo > _maxLength) {
 					// This is an error, we are not able to receive more than _maxLength bytes (the buffer size)
 					errorDetected = true;
+					OPS_TCP_ERROR("OpsProt: handleData(), Error: sizeInfo too large: " << sizeInfo << ", [" << _debugId << "]\n");
+					OPS_DUMP_MEMORY(_data, 23);
 				} else if (sizeInfo < 2) {
 					// Check that it is a probe/heartbeat message using 8 first bytes
 					if (memcmp(_probeBuffer, _data, 8) != 0) {
 						errorDetected = true;
+						OPS_TCP_ERROR("OpsProt: handleData(), Error: Not a probe/heartbeat, [" << _debugId << "]\n");
+						OPS_DUMP_MEMORY(_data, 23);
 					} else {
 						_detectedVersion = 2;
 						if (sizeInfo == 0) {
 							OPS_TCP_TRACE("Heartbeat received\n");
 							// Heartbeats, if used, are sent with size 0. Restart read of header
 							errorDetected = !startAsyncRead(headersize);
+							if (errorDetected) {
+								OPS_TCP_ERROR("OpsProt: handleData(), Error: Failed to start async read, [" << _debugId << "]\n");
+							}
 						} else {
 							// size 1 is used for the leading Probe message from a client
 							if (_expectedSize == headersize) {
@@ -91,12 +98,18 @@ namespace ops
 								OPS_TCP_TRACE("Probe received\n");
 								// Restart read of header
 								errorDetected = !startAsyncRead(headersize);
+								if (errorDetected) {
+									OPS_TCP_ERROR("OpsProt: handleData(), Error: Failed to start async read, [" << _debugId << "]\n");
+								}
 							}
 						}
 					}
 				} else {
 					_readingHeader = false;
 					errorDetected = !startAsyncRead(sizeInfo);
+					if (errorDetected) {
+						OPS_TCP_ERROR("OpsProt: handleData(), Error: Failed to start async read, [" << _debugId << "]\n");
+					}
 				}
 			} else {
 				// Got a complete data packet
@@ -156,10 +169,19 @@ namespace ops
 
 				// Send header
 				int res = _client->sendBuffer(*this, _sizeInfoBuffer, headersize);
+				if (res != (int)headersize) {
+					OPS_TCP_ERROR("OpsProt: sendData(), Error: Failed to write header (" << headersize << "), res: " << res << ", [" << _debugId << "]\n");
+					res = -1;
+				}
 				if (res < 0) return res;
 
 				// Send data
-				return _client->sendBuffer(*this, bytes, size);
+				res = _client->sendBuffer(*this, bytes, size);
+				if (res != (int)size) {
+					OPS_TCP_ERROR("OpsProt: sendData(), Error: Failed to write data (" << size << "), res: " << res << ", [" << _debugId << "]\n");
+					res = -1;
+				}
+				return res;
 			}
 		}
 

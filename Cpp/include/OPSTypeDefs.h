@@ -30,18 +30,31 @@
 #include <string>
 #include <sstream>
 
-
 // -----------------------------------------------------------------------------
 // Macros used for trace of some functionality used during development 
-//#define OPS_TRACE(msg) { std::cout << msg << std::flush; }
-#define OPS_TRACE(msg) 
+//#define OPS_ENABLE_TRACE
+#ifdef OPS_ENABLE_TRACE
+	#include <iomanip>
+	#include <iostream>
+	#define OPS_TRACE(msg) { std::cout << msg << std::flush; }
+	#define OPS_DUMP_MEMORY(addr, len) { \
+	  uint8_t* Ptr__ = (uint8_t*)addr; \
+	  std::cout << std::setw(2) << std::hex; \
+	  for(int i=0; i<len; ++i) { std::cout << (int)*Ptr__++ << " "; } \
+	  std::cout << std::dec << "\n";\
+	}
+#else
+	#define OPS_TRACE(msg) 
+	#define OPS_DUMP_MEMORY(addr, len)
+#endif
 #define OPS_NOTRACE(msg) 
 
+#define OPS_DES_TRACE(msg)  { OPS_NOTRACE("DES: " << msg); }
 #define OPS_OBJ_TRACE(msg) { OPS_NOTRACE("OBJ: " << msg); }
 #define OPS_TCP_TRACE(msg) { OPS_NOTRACE("TCP: " << msg); }
 #define OPS_PIFO_TRACE(msg) { OPS_NOTRACE("PIFO: " << msg); }
-
-//#include <iostream>		// needed when using OPS_TRACE
+#define OPS_TCP_ERROR(msg)  { OPS_TRACE("TCP: " << msg); }
+#define OPS_UDP_ERROR(msg)  { OPS_TRACE("UDP: " << msg); }
 
 
 // -----------------------------------------------------------------------------

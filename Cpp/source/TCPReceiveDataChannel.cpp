@@ -82,6 +82,12 @@ namespace ops
 			conn.setProtocol(new TCPOpsProtocol(TimeHelper::currentTimeMillis));
 		}
 		TCPOpsProtocol* prot = dynamic_cast<TCPOpsProtocol*>(conn.getProtocol());
+		if (prot != nullptr) {
+			InternalString_T dbgId(status.addr);
+			dbgId += "::";
+			dbgId += NumberToString(status.port);
+			prot->setDebugId(dbgId);
+		}
 
 		// Trig sending of "ops protocol probe" to see if server know new features.
 		if (prot != nullptr) {

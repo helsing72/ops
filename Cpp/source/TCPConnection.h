@@ -68,6 +68,7 @@ namespace ops
 
 		int sendData(const char* buf, const int size)
 		{
+			OPS_TCP_TRACE("Conn: sendData(), #bytes: " << size << ", [" << _protocol->getDebugId() << "]\n");
 			return _protocol->sendData(buf, size);
 		}
 
@@ -103,7 +104,11 @@ namespace ops
 		// Should be called by the derived classes
 		virtual void handleReceivedData(int error, uint32_t nrBytesReceived)
 		{
-			OPS_TCP_TRACE("Conn: handleReceivedData(), error: " << error << ", #bytes: " << nrBytesReceived << '\n');
+			if (error) {
+				OPS_TCP_ERROR("Conn: handleReceivedData(), error: " << error << ", #bytes: " << nrBytesReceived << ", [" << _protocol->getDebugId() << "]\n");
+			} else {
+				OPS_TCP_TRACE("Conn: handleReceivedData(), error: " << error << ", #bytes: " << nrBytesReceived << ", [" << _protocol->getDebugId() << "]\n");
+			}
 			if (!_protocol->handleReceivedData(error, nrBytesReceived)) {
 				// If we come here the protocol can't receive any longer and we need to disconnect
 				// By holding the mutex while in the callback, we are synchronized with clearCallbacks()

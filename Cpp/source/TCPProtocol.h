@@ -49,6 +49,7 @@ namespace ops
 		uint32_t _maxLength;
 		uint32_t _accumulatedSize;
 		uint32_t _expectedSize;
+		InternalString_T _debugId;
 
 		// Returns false on error
 		bool startAsyncRead(uint32_t size)
@@ -83,6 +84,9 @@ namespace ops
 
 		// Connect a client
 		void connect(TCPProtocolCallbacks* client) { _client = client; }
+
+		void setDebugId(const InternalString_T& dbgId) { _debugId = dbgId; }
+		const InternalString_T& getDebugId() { return _debugId; }
 
 		// Called to reset protocol internal state
 		// Normaly used at connect

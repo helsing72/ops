@@ -125,6 +125,10 @@ namespace ops
 
 			TCPOpsProtocol* prot = new TCPOpsProtocol(TimeHelper::currentTimeMillis);
 			prot->userData = ct;
+			InternalString_T dbgId(status.addr);
+			dbgId += "::";
+			dbgId += NumberToString(status.port);
+			prot->setDebugId(dbgId);
 
 			conn.setProtocol(prot);
 			conn.asynchWait(ct->buffer, sizeof(ct->buffer));
@@ -164,7 +168,7 @@ namespace ops
 
         virtual ~TCPSendDataHandler()
         {
-			OPS_TRACE("SDH: Destructor()\n");
+			OPS_DES_TRACE("SDH: Destructor()\n");
             SafeLock lock(&mutex);
 			delete sender;
         }

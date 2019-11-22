@@ -229,7 +229,7 @@ namespace ops
 
 	Participant::~Participant()
 	{
-		OPS_TRACE("Part: Destructor()...");
+		OPS_DES_TRACE("Part: Destructor()...");
 
 		// We assume that the user has deleted all publishers and subscribers connected to this Participant.
 		// We also assume that the user has cancelled eventual deadlinetimers etc. connected to the ioService.
@@ -297,7 +297,7 @@ namespace ops
 		// All objects connected to this ioservice should now be deleted, so it should be safe to delete it
 		if (ioService != nullptr) { delete ioService; }
 
-		OPS_TRACE("Part: Destructor() Finished");
+		OPS_DES_TRACE("Part: Destructor() Finished");
 	}
 
 	ops::Topic Participant::createParticipantInfoTopic() const
