@@ -150,7 +150,7 @@ namespace ops
 		{
 			try {
 				// Send the data
-				return (int)_sock->send(boost::asio::buffer(buf, size));
+				return (int)boost::asio::write(*_sock, boost::asio::buffer(buf, size));
 			} catch (std::exception& e) {
 				ErrorMessage_T msg("Exception: ");
 				msg += e.what();
