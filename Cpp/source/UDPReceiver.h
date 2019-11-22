@@ -222,8 +222,12 @@ namespace ops
         {
             try
             {
-                sock->send_to(boost::asio::buffer(buf, size), lastEndpoint);
-                return true;
+                std::size_t res = sock->send_to(boost::asio::buffer(buf, size), lastEndpoint);
+				if (res != (std::size_t)size) {
+					OPS_UDP_ERROR("UDPReceiver: sendReply(), Error: Failed to write message (" << size << "), res: " << res << "]\n");
+					return false;
+				}
+				return true;
             }
             catch (...)
             {
