@@ -30,7 +30,7 @@ namespace ops
 #endif
 
     OPSObject::OPSObject() :
-		key("k")
+		key("")
     {
 		OPS_OBJ_TRACE("OPSObject()\n");
 #if defined(DEBUG_OPSOBJECT_COUNTER)

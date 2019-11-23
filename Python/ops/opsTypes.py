@@ -13,7 +13,7 @@ class OPS_Object(object):
 	"""docstring for OPS_Object"""
 	def __init__(self):
 		super(OPS_Object, self).__init__()
-		self.key = "k"
+		self.key = ""
 		self.typesString = ""
 		self.spareBytes = None
 

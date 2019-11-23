@@ -11,7 +11,7 @@ namespace Ops
 {
     public class OPSObject : ISerializable 
     {
-		protected string key = "k";
+		protected string key = "";
 
         /// Bytes that hold unserialized data for this object.
         /// This happens if a type can not be fully understood by a participants type support.

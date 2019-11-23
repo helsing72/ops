@@ -66,7 +66,7 @@ implementation
 
 constructor TOPSObject.Create;
 begin
-  Fkey         := 'k';
+  Fkey         := '';
   FTypesString := '';
 end;
 

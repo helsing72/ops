@@ -32,10 +32,10 @@ import java.util.Vector;
  */
 public class OPSObject implements Serializable
 {
-    protected String key = "k";
+    protected String key = "";
     protected String typesString = "";
     public byte[] spareBytes = new byte[0];
-    
+
 
     public OPSObject()
     {
@@ -46,12 +46,12 @@ public class OPSObject implements Serializable
     {
         typesString = type + " " + typesString;
     }
-  
+
     public void setKey(String key)
     {
         this.key = key;
     }
-   
+
     public String getKey()
     {
         return key;
@@ -88,12 +88,12 @@ public class OPSObject implements Serializable
         return getClass().getName();
     }
 
-   
 
-   
-    
 
-    
- 
-    
+
+
+
+
+
+
 }

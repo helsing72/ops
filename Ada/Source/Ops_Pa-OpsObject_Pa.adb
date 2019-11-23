@@ -125,7 +125,7 @@ package body Ops_Pa.OpsObject_pa is
   --------------------------------------------------------------------------
   procedure InitInstance( Self : in out OpsObject_Class ) is
   begin
-    Self.Key         := Copy("k");
+    Self.Key         := Copy("");
     Self.TypesString := Copy("");
   end InitInstance;
 
