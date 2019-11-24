@@ -117,7 +117,7 @@ TEST(Test_Serialization, TestCoreTypes) {
 
 	MemoryMap map(1, 1000);
 	ByteBuffer buf(map);
-	OPSArchiverOut arcOut(buf);
+	OPSArchiverOut arcOut(buf, false);
 	EXPECT_TRUE(arcOut.isOut());
 	EXPECT_EQ(buf.GetSize(), 0);
 	EXPECT_EQ(buf.GetIndex(), 0);
@@ -236,7 +236,7 @@ TEST(Test_Serialization, TestVectorTypes) {
 
 	MemoryMap map(1, 1000);
 	ByteBuffer buf(map);
-	OPSArchiverOut arcOut(buf);
+	OPSArchiverOut arcOut(buf, false);
 	EXPECT_TRUE(arcOut.isOut());
 	EXPECT_EQ(buf.GetSize(), 0);
 	EXPECT_EQ(buf.GetIndex(), 0);
@@ -388,7 +388,7 @@ TEST(Test_Serialization, TestFixedArrays) {
 
 	MemoryMap map(1, 1000);
 	ByteBuffer buf(map);
-	OPSArchiverOut arcOut(buf);
+	OPSArchiverOut arcOut(buf, false);
 	EXPECT_TRUE(arcOut.isOut());
 	EXPECT_EQ(buf.GetSize(), 0);
 	EXPECT_EQ(buf.GetIndex(), 0);
@@ -613,7 +613,7 @@ TEST(Test_Serialization, TestObjects) {
 
 	MemoryMap map(1, 4000);
 	ByteBuffer buf(map);
-	OPSArchiverOut arcOut(buf);
+	OPSArchiverOut arcOut(buf, false);
 	EXPECT_TRUE(arcOut.isOut());
 	EXPECT_EQ(buf.GetSize(), 0);
 	EXPECT_EQ(buf.GetIndex(), 0);

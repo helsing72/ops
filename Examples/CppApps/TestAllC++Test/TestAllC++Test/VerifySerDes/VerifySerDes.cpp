@@ -534,15 +534,37 @@ int main(const int argc, const char* args[])
 
 		// ==============================================================
 		std::cout << "Serialize filled object" << std::endl;
-		ops::MemoryMap map(1, 65536);
-		ops::ByteBuffer buf(map);
-		ops::OPSArchiverOut ao(buf);
+		{
+			ops::MemoryMap map(1, 65536);
+			ops::ByteBuffer buf(map);
+			ops::OPSArchiverOut ao(buf, false);
 
-		std::cout << "  GetSize()= " << buf.GetSize() << std::endl;
-		ao.inout("data", cd1);
-		std::cout << "  GetSize()= " << buf.GetSize() << std::endl;
-		AssertEQ(buf.GetSize(), 3204, "Serialized size error");
+			std::cout << "  GetSize()= " << buf.GetSize() << std::endl;
+			ao.inout("data", cd1);
+			std::cout << "  optNonVirt = false, GetSize()= " << buf.GetSize() << std::endl;
+			AssertEQ(buf.GetSize(), 3150, "Serialized size error");
+		}
+		{
+			ops::MemoryMap map(1, 65536);
+			ops::ByteBuffer buf(map);
+			ops::OPSArchiverOut ao(buf, true);
+
+			std::cout << "  GetSize()= " << buf.GetSize() << std::endl;
+			ao.inout("data", cd1);
+			std::cout << "  optNonVirt = true,  GetSize()= " << buf.GetSize() << std::endl;
+			AssertEQ(buf.GetSize(), 2591, "Serialized size error");
+		}
 		std::cout << "Serialize finished" << std::endl;
+
+#ifdef kjshfdjkdshfkhsdkfj
+		std::ofstream myfile("dump-opt.bin", std::ios::out | std::ios::app | std::ios::binary);
+		if (myfile.is_open()) {
+			myfile.write(buf.getSegment(0), buf.getSegmentSize(0));
+			myfile.close();
+		} else {
+			std::cout << "Unable to open file\n";
+		}
+#endif
 
 #if defined(DEBUG_OPSOBJECT_COUNTER)
 		std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
@@ -618,7 +640,9 @@ int main(const int argc, const char* args[])
 			std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
 #endif
 
-			std::cout << "Waiting for more data... (Press Ctrl-C to terminate)" << std::endl;
+			std::cout << "Waiting for more data during 60 seconds... (Press Ctrl-C to terminate)" << std::endl;
+			int64_t PubTime = ops::TimeHelper::currentTimeMillis() + 5000;
+			int64_t Limit = ops::TimeHelper::currentTimeMillis() + 60000;
 			while (!gTerminate) {
 				if (sub.waitForNewData(100)) {
 					sub.aquireMessageLock();
@@ -631,6 +655,11 @@ int main(const int argc, const char* args[])
 					checkObjects(cd3, cd1);
 					std::cout << "Data check done" << std::endl;
 				}
+				if (PubTime < ops::TimeHelper::currentTimeMillis()) {
+					PubTime = ops::TimeHelper::currentTimeMillis() + 5000;
+					pub.write(cd1);
+				}
+				if (Limit < ops::TimeHelper::currentTimeMillis()) break;
 			}
 		}
 

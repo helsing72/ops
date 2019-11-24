@@ -32,7 +32,7 @@ TEST(Test_OPSMessage, Test) {
 	// Default constructed 
 	OPSMessage obj1;
 	EXPECT_STREQ(obj1.getTypeString().c_str(), "ops.protocol.OPSMessage ");
-	EXPECT_STREQ(obj1.getKey().c_str(), "k");
+	EXPECT_STREQ(obj1.getKey().c_str(), "");
 	EXPECT_TRUE(obj1.isDataOwner());
 
 	Address_T addr;
@@ -239,7 +239,7 @@ TEST(Test_OPSMessage, Test_Serialize) {
 	XMLArchiverIn arcIn(is, "root", &factory.fact);
 	obj1.serialize(&arcIn);
 	EXPECT_STREQ(obj1.getTypeString().c_str(), "ops.protocol.OPSMessage ");
-	EXPECT_STREQ(obj1.getKey().c_str(), "k");
+	EXPECT_STREQ(obj1.getKey().c_str(), "");
 	EXPECT_EQ(obj1.getPublicationID(), 123456789);
 	EXPECT_STREQ(obj1.getPublisherName().c_str(), "GTestPub");
 	EXPECT_STREQ(obj1.getTopicName().c_str(), "TestTopic");

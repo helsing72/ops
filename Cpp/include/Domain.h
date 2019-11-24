@@ -42,6 +42,7 @@ namespace ops
 		ObjectName_T domainID;
 		int metaDataMcPort;
 		int debugMcPort;
+		bool optNonVirt;
 
 		std::vector<Channel* > channels;
 		std::vector<Transport* > transports;
@@ -60,6 +61,7 @@ namespace ops
 		ObjectName_T getDomainID() const;
 		int getMetaDataMcPort() const;
 		int getDebugMcPort() const;
+		bool getOptNonVirt() const;
 
 		void serialize(ArchiverInOut* archiver) override;
 		int getTimeToLive() const;

@@ -134,6 +134,11 @@ namespace ops
 		inSocketBufferSize = size;
 	}
 
+	bool Topic::getOptNonVirt() const
+	{
+		return optNonVirt;
+	}
+
 	void Topic::serialize(ArchiverInOut* archiver)
 	{
 		OPSObject::serialize(archiver);

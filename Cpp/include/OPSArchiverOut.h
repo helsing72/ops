@@ -37,8 +37,8 @@ namespace ops
     {
     public:
 
-        OPSArchiverOut(ByteBuffer& _buf):
-			buf(_buf)
+        OPSArchiverOut(ByteBuffer& _buf, bool _optNonVirt):
+			buf(_buf), optNonVirt(_optNonVirt)
         {
         }
 
@@ -116,8 +116,12 @@ namespace ops
 
         void inout(InoutName_T name, Serializable& value) override
         {
-            UNUSED(name)
-            TypeId_T typeS = ((OPSObject&) value).getTypeString();
+			UNUSED(name);
+			// For non-virtual objects type can be sent as a null string
+			TypeId_T typeS;
+			if (!optNonVirt) {
+				typeS = ((OPSObject&)value).getTypeString();
+			}
             buf.WriteString(typeS);
             value.serialize(this);
         }
@@ -263,6 +267,7 @@ namespace ops
 
     private:
         ByteBuffer& buf;
+		bool optNonVirt;
     };
 }
 #endif

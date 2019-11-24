@@ -118,7 +118,7 @@ namespace ops
 		void inout(InoutName_T name, Serializable& value) override
         {
             UNUSED(name)
-            /*std::string types =*/ buf.ReadString();		///TODO Check that types is the expected Serializable Object?
+            buf.ReadString();  // For non-virtual objects we can always skip the string, may be sent as a null string
             value.serialize(this);
         }
 

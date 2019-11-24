@@ -50,7 +50,7 @@ TEST(Test_OPSObject, Test) {
 	// Default constructed 
 	OPSObject obj1;
 	EXPECT_STREQ(obj1.getTypeString().c_str(), "");
-	EXPECT_STREQ(obj1.getKey().c_str(), "k");
+	EXPECT_STREQ(obj1.getKey().c_str(), "");
 
 	obj1.setKey("Kalle");
 	EXPECT_STREQ(obj1.getKey().c_str(), "Kalle");
@@ -58,7 +58,7 @@ TEST(Test_OPSObject, Test) {
 	// Test appendType
 	MyOpsObject obj2;
 	EXPECT_STREQ(obj2.getTypeString().c_str(), "MyOpsObject ");
-	EXPECT_STREQ(obj2.getKey().c_str(), "k");
+	EXPECT_STREQ(obj2.getKey().c_str(), "");
 
 	obj2.setKey("Pelle");
 	EXPECT_STREQ(obj2.getKey().c_str(), "Pelle");
@@ -84,7 +84,7 @@ TEST(Test_OPSObject, Test) {
 	// Note, Only key of OPSObject is serialized and MyOpsObject don't have any fields that is serialized
 	MemoryMap map(1, 60);
 	ByteBuffer buf(map);
-	OPSArchiverOut arc(buf);
+	OPSArchiverOut arc(buf, false);
 	EXPECT_EQ(buf.GetSize(), 0);
 	EXPECT_EQ(buf.GetIndex(), 0);
 

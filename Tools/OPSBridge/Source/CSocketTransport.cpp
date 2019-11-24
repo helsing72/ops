@@ -103,7 +103,7 @@ bool CSocketTransport::writeOpsMessage(ops::OPSObject* const mess,
 {
 	ops::MemoryMap memMap(1, 65536);
 	ops::ByteBuffer buf(memMap);
-	ops::OPSArchiverOut archive(buf);
+	ops::OPSArchiverOut archive(buf, false);
 
 	// Build header
 	//   First a TOpsMessage structure

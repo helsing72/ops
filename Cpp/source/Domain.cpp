@@ -34,7 +34,8 @@ Domain::Domain() :
 	inSocketBufferSize(-1),		// Use OS default, Topics may override
 	outSocketBufferSize(-1),	// Use OS default, Topics may override
 	metaDataMcPort(9494),		// Default port 
-	debugMcPort(0)
+	debugMcPort(0),
+	optNonVirt(false)
 {
 	appendType(TypeId_T("Domain"));
 }
@@ -51,6 +52,7 @@ void Domain::checkTopicValues(Topic* const top) const
 	if (top->getTimeToLive() < 0) { top->setTimeToLive(timeToLive); }
 	if (top->getInSocketBufferSize() < 0) { top->setInSocketBufferSize(inSocketBufferSize); }
 	if (top->getOutSocketBufferSize() < 0) { top->setOutSocketBufferSize(outSocketBufferSize); }
+	top->optNonVirt = optNonVirt;
 }
 
 std::vector<Topic* > Domain::getTopics() const
@@ -113,6 +115,7 @@ void Domain::serialize(ArchiverInOut* archiver)
 		archiver->inout<Channel>("channels", channels);
 		archiver->inout<Transport>("transports", transports);
 		archiver->inout("debugMcPort", debugMcPort);
+		archiver->inout("optNonVirt", optNonVirt);
 		checkTransports();
 	}
 }
@@ -193,6 +196,11 @@ int Domain::getMetaDataMcPort() const
 int Domain::getDebugMcPort() const
 {
 	return debugMcPort;
+}
+
+bool Domain::getOptNonVirt() const
+{
+	return optNonVirt;
 }
 
 Domain::~Domain()

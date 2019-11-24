@@ -148,7 +148,7 @@ namespace ops
 
         buf.writeNewSegment();
 
-        OPSArchiverOut archive(buf);
+        OPSArchiverOut archive(buf, topic.getOptNonVirt());
 
         archive.inout("message", &message);
 

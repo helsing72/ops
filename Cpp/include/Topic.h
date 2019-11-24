@@ -74,6 +74,8 @@ namespace ops
 		int64_t getInSocketBufferSize() const;
 		void setInSocketBufferSize(int64_t size);
 
+		bool getOptNonVirt() const;
+
 		Participant* getParticipant() const
 		{
 			return participant;
@@ -99,6 +101,8 @@ namespace ops
 		int64_t inSocketBufferSize;			// Serialized
 
 		Participant* participant;
-    };
+	
+		bool optNonVirt;
+	};
 }
 #endif

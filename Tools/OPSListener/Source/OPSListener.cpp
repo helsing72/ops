@@ -26,6 +26,7 @@
 #include "PubIdChecker.h"
 #include "opsidls/DebugRequestResponseData.h"
 #include "NetworkSupport.h"
+#include "Publisher.h"
 
 #include "COpsConfigHelper.h"
 #include "SdsSystemTime.h"
@@ -36,7 +37,7 @@
 
 #endif
 
-const char c_program_version[] = "OPSListener Version 2019-10-13";
+const char c_program_version[] = "OPSListener Version 2019-11-19";
 
 void showDescription()
 {
@@ -567,7 +568,7 @@ std::string typeString(const ops::OPSMessage* const mess, const ops::OPSObject* 
 
 // ---------------------------------------------------------------------------------------
 //Create a class to act as a listener for OPS data and deadlines
-class Main : ops::DataListener, ops::Listener<ops::PublicationIdNotification_T>
+class Main : ops::DataListener, ops::Listener<ops::PublicationIdNotification_T>, ops::Listener<ops::ConnectStatus>
 {
 private:
 	bool logTime;
@@ -793,6 +794,7 @@ public:
 
 			ops::Subscriber* const sub = new ops::Subscriber(topic);
 			sub->addDataListener(this);
+			sub->addListener(this);
 			sub->start();
 
 			vSubs.push_back(sub);
@@ -935,6 +937,20 @@ public:
 			", Expected: " << arg.expectedPubID <<
 			", Got: " << arg.mess->getPublicationID() <<
 			std::endl;
+	}
+	virtual void onNewEvent(ops::Notifier<ops::ConnectStatus>* sender, ops::ConnectStatus arg) override
+	{
+		ops::Subscriber* sb = dynamic_cast<ops::Subscriber*>(sender);
+		if (sb) {
+			std::cout << "[Publisher on " << sb->getTopic().getName() << "] ";
+		}
+		std::cout << "IP: " << arg.addr << "::" << arg.port;
+		if (arg.connected) {
+			std::cout << " Connected.";
+		} else {
+			std::cout << " Disconnected.";
+		}
+		std::cout << " Total: " << arg.totalNo << "\n";
 	}
 	//
 	static void ShowDebugEntity(const opsidls::DebugRequestResponseData* const data)

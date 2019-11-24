@@ -20,7 +20,7 @@ public:
 	Test_OPS_Serialization_And_Deserialization& operator= (const Test_OPS_Serialization_And_Deserialization& l) = delete;
 	Test_OPS_Serialization_And_Deserialization(Test_OPS_Serialization_And_Deserialization&&) = delete;
 	Test_OPS_Serialization_And_Deserialization& operator =(Test_OPS_Serialization_And_Deserialization&&) = delete;
-	
+
 	ops::OPSObject* vessuvioObject = nullptr;
     ops::OPSMessage* vessuvioMessage = nullptr;
     pizza::VessuvioData* recreatedVessuvio = nullptr;
@@ -38,7 +38,7 @@ TEST_F(Test_OPS_Serialization_And_Deserialization, test_Vesuvio_OPSObject) {
 	ops::SerializableInheritingTypeFactory fact;
 	fact.add(new PizzaProject::PizzaProjectTypeFactory());
 
-	ops::OPSArchiverOut out(buf);
+	ops::OPSArchiverOut out(buf, false);
 	ops::OPSArchiverIn  in(buf, &fact);
 
 	out.inout("data", &vessuvio);
@@ -67,7 +67,7 @@ TEST_F(Test_OPS_Serialization_And_Deserialization, test_Vesuvio_OPSMessage) {
 	fact.add(new PizzaProject::PizzaProjectTypeFactory());
 
 
-	ops::OPSArchiverOut out(buf);
+	ops::OPSArchiverOut out(buf, false);
 	ops::OPSArchiverIn  in(buf, &fact);
 
 
@@ -109,7 +109,7 @@ TEST_F(Test_OPS_Serialization_And_Deserialization, test_ExtraAllt_OPSObject) {
 	fact.add(new PizzaProject::PizzaProjectTypeFactory());
 
 	// Setup archivers
-	ops::OPSArchiverOut out(buf);
+	ops::OPSArchiverOut out(buf, false);
 	ops::OPSArchiverIn  in(buf, &fact);
 
 
@@ -142,7 +142,7 @@ TEST_F(Test_OPS_Serialization_And_Deserialization, test_ExtraAllt_OPSMessage) {
 	fact.add(new PizzaProject::PizzaProjectTypeFactory());
 
 
-	ops::OPSArchiverOut out(buf);
+	ops::OPSArchiverOut out(buf, false);
 	ops::OPSArchiverIn  in(buf, &fact);
 
 	pizza::special::ExtraAllt extraAllt;
