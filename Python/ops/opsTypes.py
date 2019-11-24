@@ -110,6 +110,7 @@ class Topic(OPS_Object):
 		self.participant=None
 		self.timeToLive=-1
 		self.localInterface=""
+		self.optNonVirt=False
 
 	def __str__(self):
 		temp ="\nTopic:"
@@ -284,6 +285,7 @@ class Domain(OPS_Object):
 		self.domainID=""
 		self.channels=[]
 		self.transports=[]
+		self.optNonVirt=False
 
 	def __str__(self):
 		temp ="\nDomain:"
@@ -320,6 +322,7 @@ class Domain(OPS_Object):
 			archiver.OpsVector("channels",self.channels,Channel)
 			archiver.OpsVector("transports",self.transports,Transport)
 			self.debugMcPort = archiver.Int32("debugMcPort",self.debugMcPort)
+			self.optNonVirt = archiver.Bool("optNonVirt",self.optNonVirt)
 			self.checkTransports()
 
 	def validate(self):
@@ -365,6 +368,7 @@ class Domain(OPS_Object):
 				t.inSocketBufferSize = self.inSocketBufferSize
 			if t.outSocketBufferSize < 0:
 				t.outSocketBufferSize = self.outSocketBufferSize
+			t.optNonVirt = self.optNonVirt
 			if t.name == name:
 				return copy.deepcopy(t)
 		return None

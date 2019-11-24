@@ -143,10 +143,11 @@ class OPS_Archiver_In(Archiver_In):
 
 
 class OPS_Archiver_Out(Archiver_Out):
-	def __init__(self,size):
+	def __init__(self,size,optNonVirt):
 		super(OPS_Archiver_Out, self).__init__()
 		self.index = 0
 		self.buffer = bytearray(size)
+		self.optNonVirt=optNonVirt
 	def Bool(self,name,value):
 		fmt = '<?'
 		struct.pack_into(fmt,self.buffer,self.index,value)
@@ -188,7 +189,10 @@ class OPS_Archiver_Out(Archiver_Out):
 		self.index += struct.calcsize(fmt)
 		return value
 	def Ops(self,name,value,prototype=None):
-		typesString = value.typesString
+		if self.optNonVirt==True and prototype!=None:
+			typesString=""
+		else:
+			typesString = value.typesString
 		fmt = '<i%ss' % len(typesString)
 		struct.pack_into(fmt,self.buffer,self.index,len(typesString),b(typesString))
 		self.index += struct.calcsize(fmt)
@@ -234,7 +238,10 @@ class OPS_Archiver_Out(Archiver_Out):
 		struct.pack_into('<i',self.buffer,self.index,len(value))
 		self.index += struct.calcsize('<i')
 		for itr in value:
-			typesString = itr.typesString
+			if self.optNonVirt==True and prototype!=None:
+				typesString=""
+			else:
+				typesString = itr.typesString
 			fmt = '<i%ss' % len(typesString)
 			struct.pack_into(fmt,self.buffer,self.index,len(typesString),b(typesString))
 			self.index += struct.calcsize(fmt)

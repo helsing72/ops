@@ -11,7 +11,7 @@ class XML_Archiver_In(Archiver_In):
 	def Bool(self,name,value):
 		newNode = self.stack[-1].find(name)
 		if newNode is not None:
-			value = bool(newNode.text)
+			value = bool(newNode.text.upper()=="TRUE")
 		return value
 
 	def Int8(self,name,value):

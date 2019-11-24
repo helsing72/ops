@@ -441,11 +441,22 @@ prt.printObject("cd1", cd1)
 print("Print Archiver Test Finished")
 print("Serialize filled object...")
 
-archiver = OPS_Archiver.OPS_Archiver_Out(65536)
+archiver = OPS_Archiver.OPS_Archiver_Out(65536,False)
 print("  GetSize()= " + str(archiver.index))
-archiver.Ops("data",cd1)
+archiver.Ops("data",cd1,TestAll.ChildData)
+print("  optNonVirt = false, GetSize()= " + str(archiver.index))
+AssertEQ(archiver.index, 3150)
+
+archiver = OPS_Archiver.OPS_Archiver_Out(65536,True)
 print("  GetSize()= " + str(archiver.index))
-AssertEQ(archiver.index, 3204)
+archiver.Ops("data",cd1,TestAll.ChildData)
+
+#filedesciptor = open('python-dump-opt.bin','wb')
+#filedesciptor.write(archiver.buffer)
+#filedesciptor.close()
+
+print("  optNonVirt = true,  GetSize()= " + str(archiver.index))
+AssertEQ(archiver.index, 2591)
 
 print("Serialize finished")
 print("Test publish/subscribe...")
@@ -471,7 +482,13 @@ pub.write(cd1)
 
 print("Waiting for data (60 seconds) ...")
 
-time.sleep(60)
+for x in range(10):
+	time.sleep(6)
+	pub.write(cd1)
 
 sub.stop()
 pub.stop()
+
+print("Sleeping for 5 seconds ...")
+
+time.sleep(5)

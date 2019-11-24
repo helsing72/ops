@@ -38,7 +38,7 @@ class Publisher(object):
 		self.message.publisherName = self.name
 		self.message.publicationID = self.currentPublicationID;
 
-		archiver = OPS_Archiver_Out(self.topic.sampleMaxSize)
+		archiver = OPS_Archiver_Out(self.topic.sampleMaxSize,self.topic.optNonVirt)
 		archiver.Ops("message",self.message)
 		archiver.Spare(data.spareBytes)
 
