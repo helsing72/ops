@@ -72,6 +72,11 @@ namespace Ops
         /// 
         /// <param name="name"></param>
         /// <param name="v"></param>
+        public abstract ISerializable Inout<T>(string name, ISerializable v) where T : new();
+
+        /// 
+        /// <param name="name"></param>
+        /// <param name="v"></param>
         public abstract ISerializable Inout(string name, ISerializable v);
 
         /// 

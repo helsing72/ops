@@ -209,8 +209,11 @@ namespace Ops
             if (v != null)
             {
                 Write(v.Length);
-                byte[] bytes = encoding.GetBytes(v);
-                Write(bytes, 0, v.Length);
+                if (v.Length > 0)
+                {
+                    byte[] bytes = encoding.GetBytes(v);
+                    Write(bytes, 0, v.Length);
+                }
             }
             else
             {

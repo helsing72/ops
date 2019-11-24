@@ -20,6 +20,7 @@ namespace Ops
 		private int replyPort = 0;
         private int sampleMaxSize = Globals.MAX_SEGMENT_SIZE;
         private int timeToLive = -1;
+        private bool optNonVirt = false;
         private string transport;
 		public static readonly string TRANSPORT_MC = "multicast";
 		public static readonly string TRANSPORT_TCP = "tcp";
@@ -204,6 +205,16 @@ namespace Ops
         public void SetTimeToLive(int timeToLive)
         {
             this.timeToLive = timeToLive;
+        }
+
+        public bool GetOptNonVirt()
+        {
+            return optNonVirt;
+        }
+
+        public void SetOptNonVirt(bool optNonVirt)
+        {
+            this.optNonVirt = optNonVirt;
         }
 
     }

@@ -114,6 +114,17 @@ namespace Ops
         /// 
         /// <param name="name"></param>
         /// <param name="v"></param>
+        public override ISerializable Inout<T>(string name, ISerializable v)
+        {
+            string types = readBuf.ReadString();  // Skip string for non virtual objects, type is known by T
+            ISerializable newSer = (ISerializable) new T();
+            newSer.Serialize(this);
+            return newSer;
+        }
+
+        /// 
+        /// <param name="name"></param>
+        /// <param name="v"></param>
         public override ISerializable Inout(string name, ISerializable v)
         {
             string types = readBuf.ReadString();

@@ -495,9 +495,17 @@ public class CSharpCompiler extends opsc.Compiler
             String fieldName = getFieldName(field);
             if (field.isIdlType()) {
                 if (!field.isArray()) {
+                  if (field.isAbstract()) {
                     ret += tab(3) + "_" + fieldName + " = (" + field.getType() + ") archive.Inout(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
+                  } else {
+                    ret += tab(3) + "_" + fieldName + " = (" + field.getType() + ") archive.Inout<" + field.getType() + ">(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
+                  }
                 } else {
+                  if (field.isAbstract()) {
                     ret += tab(3) + "_" + fieldName + " = (" + languageType(field.getType()) + ") archive.InoutSerializableList(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
+                  } else {
+                    ret += tab(3) + "_" + fieldName + " = (" + languageType(field.getType()) + ") archive.InoutSerializableList<" + languageType(elementType(field.getType())) + ">(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
+                  }
                 }
             } else if (field.isEnumType()) {
                 if (!field.isArray()) {

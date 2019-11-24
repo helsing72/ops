@@ -19,6 +19,7 @@ namespace Ops
         private int inSocketBufferSize = -1;    // Use OS default
         private int outSocketBufferSize = -1;   // Use OS default
 		private int metaDataMcPort = 9494;
+        private bool optNonVirt = false;
 
         private List<Channel> channels = new List<Channel>();
         private List<Transport> transports = new List<Transport>();
@@ -50,6 +51,7 @@ namespace Ops
             {
                 top.SetOutSocketBufferSize(outSocketBufferSize);
             }
+            top.SetOptNonVirt(optNonVirt);
         }
 
         public Topic GetTopic(string name)
@@ -97,6 +99,7 @@ namespace Ops
 		        //archiver->inout<Transport>(std::string("transports"), transports);
         		channels = (List<Channel>)archive.InoutSerializableList("channels", channels);
                 transports = (List<Transport>)archive.InoutSerializableList("transports", transports);
+                optNonVirt = archive.Inout("optNonVirt", optNonVirt);
         		checkTransports();
         	}
         }
@@ -216,6 +219,11 @@ namespace Ops
         public void SetLocalInterface(string localInterface) 
         {
             this.localInterface = localInterface;
+        }
+
+        public bool getOptNonVirt()
+        {
+            return optNonVirt;
         }
 
         // If argument contains a "/" we assume it is on the form:  subnet-address/subnet-mask

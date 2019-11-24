@@ -133,7 +133,7 @@ namespace Ops
             WriteByteBuffer buf = new WriteByteBuffer(this.bytes, Globals.MAX_SEGMENT_SIZE);
             try
             {
-                OPSArchiverOut archiverOut = new OPSArchiverOut(buf);
+                OPSArchiverOut archiverOut = new OPSArchiverOut(buf, topic.GetOptNonVirt());
 
                 archiverOut.Inout("message", message);
 

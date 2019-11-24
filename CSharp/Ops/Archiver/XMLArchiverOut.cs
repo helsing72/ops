@@ -328,6 +328,26 @@ namespace Ops
             return v;
         }
 
+        public override ISerializable Inout<T>(string name, ISerializable v)
+        {
+            string typeName = compositeFactory.Create(v);
+
+            if (typeName == null)
+            {
+                typeName = v.GetType().Name;
+            }
+
+            string typeAdd = TYPE_ADD_CLASS + "\"" + typeName + "\"";
+            string nodeString = Tab(currentTabDepth) + "<" + name + typeAdd + ">" + LINE_CHANGE;
+            bw.Write(encoding.GetBytes(nodeString));
+            currentTabDepth++;
+            v.Serialize(this);
+            currentTabDepth--;
+            nodeString = Tab(currentTabDepth) + "</" + name + ">" + LINE_CHANGE;
+            bw.Write(encoding.GetBytes(nodeString));
+            return v;
+        }
+
         public override ISerializable Inout(string name, ISerializable v) 
         {
             string typeName = compositeFactory.Create(v);

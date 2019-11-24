@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -21,7 +22,7 @@ namespace TestAll
         ChildDataPublisher pub = null;
         ChildData cd1 = null;
 
-        Definitions.Command EnumTest = Definitions.Command.PAUSE;
+        //Definitions.Command EnumTest = Definitions.Command.PAUSE;
 
         private ConcurrentQueue<string> LogList = new ConcurrentQueue<string>();
 
@@ -695,12 +696,25 @@ namespace TestAll
             LogNL("Serialize filled object");
             byte[] bytes = new byte[Globals.MAX_SEGMENT_SIZE];
             WriteByteBuffer buf = new WriteByteBuffer(bytes, Globals.MAX_SEGMENT_SIZE, true);
-            OPSArchiverOut ao = new OPSArchiverOut(buf);
+            OPSArchiverOut ao = new OPSArchiverOut(buf, false);
             LogNL("  Position()= " + buf.Position());
-            ao.Inout("data", cd1);
+            ao.Inout<ChildData>("data", cd1);
+            LogNL("  optNonVirt = false, Position()= " + buf.Position());
+            AssertEQ(buf.Position(), 3150, "Serialized size error");
+
+            buf = new WriteByteBuffer(bytes, Globals.MAX_SEGMENT_SIZE, true);
+            ao = new OPSArchiverOut(buf, true);
             LogNL("  Position()= " + buf.Position());
-            AssertEQ(buf.Position(), 3204, "Serialized size error");
+            ao.Inout<ChildData>("data", cd1);
+            LogNL("  optNonVirt = true,  Position()= " + buf.Position());
+            AssertEQ(buf.Position(), 2591, "Serialized size error");
             LogNL("Serialize finished");
+
+            // Create a new stream to write to the file
+            //BinaryWriter Writer = new BinaryWriter(File.OpenWrite(@"csharp-dump-opt.bin"));
+            //Writer.Write(bytes, 0, buf.Position());
+            //Writer.Flush();
+            //Writer.Close();
 
             // ==============================================================
             LogNL("Test publish/subscribe");

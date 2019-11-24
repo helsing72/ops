@@ -265,6 +265,17 @@ namespace Ops
         }
 
         // Read a "ISerializable" item with name "name". 
+        public override ISerializable Inout<T>(string name, ISerializable v)
+        {
+            nodeStack.Push(currentNode);
+            currentNode = GetNode(name);
+            ISerializable newElem = (ISerializable)new T();
+            newElem.Serialize(this);
+            currentNode = nodeStack.Pop();
+            return newElem;
+        }
+
+        // Read a "ISerializable" item with name "name". 
         public override ISerializable Inout(string name, ISerializable v) 
         {
             nodeStack.Push(currentNode);

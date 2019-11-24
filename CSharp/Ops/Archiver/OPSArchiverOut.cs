@@ -13,10 +13,12 @@ namespace Ops
 	public class OPSArchiverOut : IArchiverInOut 
     {
 		internal WriteByteBuffer writeBuf;
+        private readonly bool optNonVirt;
 
-		public OPSArchiverOut(WriteByteBuffer buf)
+		public OPSArchiverOut(WriteByteBuffer buf, bool optNonVirt)
         {
             this.writeBuf = buf;
+            this.optNonVirt = optNonVirt;
         }
 
         public override bool IsOut()
@@ -96,10 +98,27 @@ namespace Ops
             return v;
         }
 
-		/// 
-		/// <param name="name"></param>
-		/// <param name="v"></param>
-		public override ISerializable Inout(string name, ISerializable v)
+        /// 
+        /// <param name="name"></param>
+        /// <param name="v"></param>
+        public override ISerializable Inout<T>(string name, ISerializable v)
+        {
+            if (optNonVirt)
+            {
+                writeBuf.Write("");
+            }
+            else
+            {
+                writeBuf.Write(((OPSObject)v).GetTypesString());
+            }
+            v.Serialize(this);
+            return v;
+        }
+
+        /// 
+        /// <param name="name"></param>
+        /// <param name="v"></param>
+        public override ISerializable Inout(string name, ISerializable v)
         {
             writeBuf.Write(((OPSObject)v).GetTypesString());
             v.Serialize(this);
@@ -175,7 +194,20 @@ namespace Ops
         // NB! we assume that the object is a List<T> where T implements ISerializable.
         public override IList InoutSerializableList<T>(string name, IList v)
         {
-            return InoutSerializableList(name, v);
+            writeBuf.Write(((IList)v).Count);
+            foreach (ISerializable obj in (IList)v)
+            {
+                if (optNonVirt)
+                {
+                    writeBuf.Write("");
+                }
+                else
+                {
+                    writeBuf.Write(((OPSObject)obj).GetTypesString());
+                }
+                obj.Serialize(this);
+            }
+            return v;
         }
 
         /// 

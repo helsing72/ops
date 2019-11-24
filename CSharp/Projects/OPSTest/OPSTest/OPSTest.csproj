@@ -101,6 +101,9 @@
     <Compile Include="..\..\..\..\Examples\OPSIdls\TestAll\Generated\CSharp\TestAll\ChildData.cs">
       <Link>GenIDLs\ChildData.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\..\Examples\OPSIdls\TestAll\Generated\CSharp\TestAll\Definitions.cs">
+      <Link>GenIDLs\Definitions.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\..\Examples\OPSIdls\TestAll\Generated\CSharp\TestAll\Fruit.cs">
       <Link>GenIDLs\Fruit.cs</Link>
     </Compile>
