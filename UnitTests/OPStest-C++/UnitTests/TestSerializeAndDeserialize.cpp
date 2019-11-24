@@ -43,7 +43,7 @@ TEST_F(Test_OPS_Serialization_And_Deserialization, test_Vesuvio_OPSObject) {
 
 	out.inout("data", &vessuvio);
 
-	EXPECT_EQ(buf.GetSize(), 89);
+	EXPECT_EQ(buf.GetSize(), 88);
 
 	buf.Reset();
 
@@ -55,7 +55,7 @@ TEST_F(Test_OPS_Serialization_And_Deserialization, test_Vesuvio_OPSObject) {
 
 	test::testVessuvio(*recreatedVessuvio);
 
-	EXPECT_EQ((int) buf.GetSize(), 89);
+	EXPECT_EQ((int) buf.GetSize(), 88);
 }
 
 TEST_F(Test_OPS_Serialization_And_Deserialization, test_Vesuvio_OPSMessage) {
@@ -79,7 +79,7 @@ TEST_F(Test_OPS_Serialization_And_Deserialization, test_Vesuvio_OPSMessage) {
 
 	out.inout("data", &mess);
 
-	EXPECT_EQ((int) buf.GetSize(), 148);
+	EXPECT_EQ((int) buf.GetSize(), 146);
 
 	// Create object from buffer (using type info in buffer)
 	buf.Reset();
@@ -96,7 +96,7 @@ TEST_F(Test_OPS_Serialization_And_Deserialization, test_Vesuvio_OPSMessage) {
 
 	test::testVessuvio(*recreatedVessuvio);
 
-	EXPECT_EQ((int) buf.GetSize(), 148);
+	EXPECT_EQ((int) buf.GetSize(), 146);
 
 }
 
@@ -117,7 +117,7 @@ TEST_F(Test_OPS_Serialization_And_Deserialization, test_ExtraAllt_OPSObject) {
 
 	out.inout("data", &extraAllt);
 
-	EXPECT_EQ(buf.GetSize(), 815);
+	EXPECT_EQ(buf.GetSize(), 807);
 
 	// Create object from buffer (using type info in buffer)
 	buf.Reset();
@@ -130,7 +130,7 @@ TEST_F(Test_OPS_Serialization_And_Deserialization, test_ExtraAllt_OPSObject) {
 
 	test::testExtraAlltNormal(*recreatedExtraAllt);
 
-	EXPECT_EQ((int) buf.GetSize(), 815);
+	EXPECT_EQ((int) buf.GetSize(), 807);
 }
 
 TEST_F(Test_OPS_Serialization_And_Deserialization, test_ExtraAllt_OPSMessage) {
@@ -157,7 +157,7 @@ TEST_F(Test_OPS_Serialization_And_Deserialization, test_ExtraAllt_OPSMessage) {
 
 	out.inout("data", &mess);
 
-	EXPECT_EQ(buf.GetSize(), 874);
+	EXPECT_EQ(buf.GetSize(), 865);
 
 	// Create object from buffer (using type info in buffer)
 	buf.Reset();
@@ -175,7 +175,7 @@ TEST_F(Test_OPS_Serialization_And_Deserialization, test_ExtraAllt_OPSMessage) {
 	//testing values of extra allt
 	test::testExtraAlltNormal(*recreatedExtraAllt);
 
-	EXPECT_EQ(buf.GetSize(), 874);
+	EXPECT_EQ(buf.GetSize(), 865);
 
 }
 
