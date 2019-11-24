@@ -61,6 +61,7 @@ Optional elements of _Domain_:
   * **metaDataMcPort**, defines the multicast port used for metadata communication between participants. If this tag is omitted, the default port is 9494. If set to 0, metadata will be disabled. See the *Transport Mechanisms* section below how this effects the communication.
   * **channels**, a list of *Channel* elements, see Channel Configuration below.
   * **transports**, a list of *Transport* elements, see Channel Configuration below.
+  * **optNonVirt**, false/true, default false. If set to true, non-virtual fields in idl's will be sent without type information (since it is redundant) to minimize transfer size. Setting it to true may break backward compatibility and will in this case require all programs to be recompiled with the same OPS version.
 
 Optional elements of _Topic_:
   * **sampleMaxSize**, defines the maximum size of the data type when used in this topic. The value is used for reserving memory to be able to buffer data during reception. If this tag is omitted or is specified with a value < 60000, a value of 60000 is used. If a value > 60000 is specified, this topic MUST use its own port, see also [Sending Large Messages](LargeMessages.md).

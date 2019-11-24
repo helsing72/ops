@@ -10,7 +10,7 @@ An OPSMessage is serialized into the following:
 ```
 Field                 Type          Bytes
 -----                 ----          -----
-key                   string        4 + 1    (always = "k")
+key                   string        4        (always = "")
 message type          byte          1
 pub prio              byte          1
 pub identification    int64         8
@@ -31,7 +31,7 @@ The data type field is a concatenation of all datatypes in the inheritance hiera
 
 ** Note: 'key'**
 
-The key field sent is the Publisher key if it has been set. If it hasn't been set, the key will be the sent message key, which defaults to "k" if not set by the user.
+The key field sent is the Publisher key if it has been set. If it hasn't been set, the key will be the sent message key, which defaults to "" if not set by the user.
 
 ## Segments ##
 The serialized data from OPSMessage is split into one or more segments as described above.

@@ -51,11 +51,11 @@ The following table shows a listing of all available OPS IDL types and their cor
 | double  | double | double | double | Double | 8 bytes           |
 | string  | std::string | String | string | AnsiString | 4 bytes (size) + 1 byte per character (8-bit) |
 | string`<size>` | fixed_string`<size>` | String | string | AnsiString | 4 bytes (size) + 1 byte per character (8-bit) |
-| T       | T  | T  | T | T | sizeof( T ) |
-| T`[]` | std::vector< T > | java.util.Vector< T > | List< T > | array of T | 4 bytes (size) + sizeof( T ) per element |
-| T`[size]` | T`[size]` | java.util.Vector< T > | List< T > | array`[0..size-1]` of T | 4 bytes (size) + sizeof( T ) per element |
+| T       | T  | T  | T | T | size_of( T ) |
+| T`[]` | std::vector< T > | java.util.Vector< T > | List< T > | array of T | 4 bytes (size) + size_of( T ) per element |
+| T`[size]` | T`[size]` | java.util.Vector< T > | List< T > | array`[0..size-1]` of T | 4 bytes (size) + size_of( T ) per element |
 
-where sizeof( T ) is the serialized size of a string for the datatype plus the serialized size of all fields in T.
+where **size_of( T )** is the serialized size of a string for the datatype plus the serialized size of all fields in T. If element _optNonVirt_ is set to true in the _Domain_ section of the [OPS configuration file](OpsConfig.md), the string for the datatype is sent as an empty string for non-virtual fields, see description of inheritance below.
 
 Defined constants are never sent on the network. They are just generated to the target language source files to be used by the users code.
 
