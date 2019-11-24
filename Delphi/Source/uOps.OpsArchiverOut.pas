@@ -31,9 +31,10 @@ type
   TOPSArchiverOut = class(TArchiverInOut)
   private
     FBuf : TByteBuffer;
+    FOptNonVirt : Boolean;
 
   public
-    constructor Create(buf : TByteBuffer);
+    constructor Create(buf : TByteBuffer; OptNonVirt : Boolean);
     destructor Destroy; override;
 
     function isOut : Boolean; override;
@@ -47,12 +48,13 @@ type
     procedure inout(const name : String; var value : Double); overload; override;
     procedure inout(const name : String; var value : AnsiString); overload; override;
     procedure inout(const name : String; var value : TSerializable); overload; override;
+    procedure inout(const name : String; var value : TSerializable; element : Integer); overload; override;
 
 		procedure inout(const name : String; buffer : PByte; bufferSize : Integer); overload; override;
 
 		function inout2(const name : String; var value : TSerializable) : TSerializable; overload; override;
 
-    function inout(const name : String; var value : TSerializable; element : Integer) : TSerializable; overload; override;
+    function inout2(const name : String; var value : TSerializable; element : Integer) : TSerializable; overload; override;
 
     procedure inout(const name : String; var value : TDynBooleanArray); overload; override;
     procedure inout(const name : String; var value : TDynByteArray); overload; override;
@@ -76,9 +78,10 @@ implementation
 
 uses uOps.Exceptions;
 
-constructor TOPSArchiverOut.Create(buf : TByteBuffer);
+constructor TOPSArchiverOut.Create(buf : TByteBuffer; OptNonVirt : Boolean);
 begin
   Fbuf := buf;
+  FOptNonVirt := OptNonVirt;
 end;
 
 destructor TOPSArchiverOut.Destroy;
@@ -135,8 +138,25 @@ procedure TOPSArchiverOut.inout(const name : String; var value : TSerializable);
 var
   typeS : AnsiString;
 begin
-  typeS := (value as TOPSObject).TypesString;
-  Fbuf.WriteString(AnsiString(typeS));
+  if FOptNonVirt then begin
+    typeS := '';
+  end else begin
+    typeS := (value as TOPSObject).TypesString;
+  end;
+  Fbuf.WriteString(typeS);
+  value.serialize(Self);
+end;
+
+procedure TOPSArchiverOut.inout(const name : String; var value : TSerializable; element : Integer);
+var
+  typeS : AnsiString;
+begin
+  if FOptNonVirt then begin
+    typeS := '';
+  end else begin
+    typeS := (value as TOPSObject).TypesString;
+  end;
+  Fbuf.WriteString(typeS);
   value.serialize(Self);
 end;
 
@@ -155,7 +175,7 @@ begin
   Result := value;
 end;
 
-function TOPSArchiverOut.inout(const name : String; var value : TSerializable; element : Integer) : TSerializable;
+function TOPSArchiverOut.inout2(const name : String; var value : TSerializable; element : Integer) : TSerializable;
 var
   typeS : AnsiString;
 begin
@@ -240,7 +260,7 @@ begin
 
   // Now loop over all objects in the array
   for i := 0 to size-1 do begin
-    inout(name, value[i]);
+    inout(name, value[i], i);
   end;
 
   endList(name);

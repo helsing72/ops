@@ -85,6 +85,8 @@
         <DCCReference Include="..\..\OPSIdls\TestAll\Generated\Delphi\TestAll\TestAll.TestAllTypeFactory.pas"/>
         <DCCReference Include="..\..\OPSIdls\TestAll\Generated\Delphi\TestAll\TestAll.TestData.pas"/>
         <DCCReference Include="uExampleSubscriber.pas"/>
+        <DCCReference Include="..\..\OPSIdls\TestAll\Generated\Delphi\TestAll\TestAll.NoData.pas"/>
+        <DCCReference Include="..\..\OPSIdls\TestAll\Generated\Delphi\TestAll\TestAll.Definitions.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

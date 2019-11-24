@@ -45,6 +45,7 @@ type
     FTopics : TDynTopicArray;
 		FDomainID : AnsiString;
 		FMetaDataMcPort : Integer;
+		FOptNonVirt : Boolean;
 
 		FChannels : TDynChannelArray;
 		FTransports : TDynTransportArray;
@@ -83,6 +84,7 @@ type
     property LocalInterface : AnsiString read FLocalInterface;
 		property InSocketBufferSize : Integer read FInSocketBufferSize;
 		property OutSocketBufferSize : Integer read FOutSocketBufferSize;
+    property OptNonVirt : Boolean read FOptNonVirt;
   end;
 
 implementation
@@ -102,7 +104,9 @@ begin
 	FLocalInterface := '0.0.0.0';
 	FInSocketBufferSize := -1;    // Use OS default, Topics may override
 	FOutSocketBufferSize := -1;   // Use OS default, Topics may override
-	FMetaDataMcPort := 9494;      // Default port
+  FMetaDataMcPort := 9494;      // Default port
+  FOptNonVirt := False;
+
 	AppendType('Domain');
 end;
 
@@ -124,6 +128,7 @@ begin
 	if top.TimeToLive < 0 then top.TimeToLive := timeToLive;
 	if top.InSocketBufferSize < 0 then top.InSocketBufferSize := FInSocketBufferSize;
 	if top.OutSocketBufferSize < 0 then	top.OutSocketBufferSize := FOutSocketBufferSize;
+  top.OptNonVirt := FOptNonVirt;
 end;
 
 // Returns references to the internal topics
@@ -180,6 +185,7 @@ begin
   if archiver is TXMLArchiverIn then begin
 		archiver.inout('channels', TDynSerializableArray(FChannels));
 		archiver.inout('transports', TDynSerializableArray(FTransports));
+    archiver.inout('optNonVirt', FOptNonVirt);
 		CheckTransports();
   end;
  end;

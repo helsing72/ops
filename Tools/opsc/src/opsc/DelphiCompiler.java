@@ -641,15 +641,28 @@ public class DelphiCompiler extends opsc.Compiler
             ret += tab(1);
             if (field.isIdlType()) {
                 if (!field.isArray()) {
+                  if (field.isAbstract()) {
                     ret += fieldName + " := " + getFullyQualifiedClassName(field.getType()) +
                           "(archiver.Inout2('" + field.getName() + "', TSerializable(" + fieldName + ")));" + endl();
+                  } else {
+                    ret += "archiver.Inout('" + field.getName() + "', TSerializable(" + fieldName + "));" + endl();
+                  }
                 } else {
+                    String isAbsType = "false";
+                    if (field.isAbstract()) {
+                      isAbsType = "true";
+                    }
                     if (field.getArraySize() > 0) {
                         // idl = type[size] name;
                         // TestDataArchiveHelper.inoutfixarr(archiver, 'ftest2s', ftest2s, 5);
-                        ret += getFullyQualifiedClassName(elementType(field.getType())) + "ArchiveHelper.Inoutfixarr(archiver, '" + fieldName + "', " + fieldName + ", " + field.getArraySize() + ");" + endl();
+                        ret += getFullyQualifiedClassName(elementType(field.getType())) +
+                              "ArchiveHelper.Inoutfixarr(archiver, '" + fieldName + "', " + fieldName + ", " +
+                              field.getArraySize() + ", " + isAbsType + ");" + endl();
                     } else {
-                        ret += "archiver.Inout('" + field.getName() + "', TDynSerializableArray(" + fieldName + "));" + endl();
+                        ret += getFullyQualifiedClassName(elementType(field.getType())) +
+                              "ArchiveHelper.Inoutdynarr(archiver, '" + fieldName + "', TDynSerializableArray(" + fieldName +
+                              "), " + isAbsType + ");" + endl();
+///                        ret += "archiver.Inout('" + field.getName() + "', TDynSerializableArray(" + fieldName + "));" + endl();
                     }
                 }
             } else if (field.isEnumType()) {

@@ -40,6 +40,7 @@ type
     FFactory : TSerializableInheritingTypeFactory;
     FDoc : IXMLDocument;
     FCurrentNode: IXMLNode;
+    FStack : System.Generics.Collections.TStack<IXMLNode>;
 
     function numElements : Integer;
 
@@ -58,12 +59,13 @@ type
     procedure inout(const name : String; var value : Double); overload; override;
     procedure inout(const name : String; var value : AnsiString); overload; override;
     procedure inout(const name : String; var value : TSerializable); overload; override;
+    procedure inout(const name : String; var value : TSerializable; element : Integer); overload; override;
 
 		procedure inout(const name : String; buffer : PByte; bufferSize : Integer); overload; override;
 
 		function inout2(const name : String; var value : TSerializable) : TSerializable; overload; override;
 
-    function inout(const name : String; var value : TSerializable; element : Integer) : TSerializable; overload; override;
+    function inout2(const name : String; var value : TSerializable; element : Integer) : TSerializable; overload; override;
 
     procedure inout(const name : String; var value : TDynBooleanArray); overload; override;
     procedure inout(const name : String; var value : TDynByteArray); overload; override;
@@ -101,6 +103,8 @@ begin
   FFactory := factory;
   FFmt := TFormatSettings.Create;
   FFmt.DecimalSeparator := '.';
+  FStack := System.Generics.Collections.TStack<IXMLNode>.Create;
+
   FDoc := TXMLDocument.Create(nil);
   FDoc.LoadFromXML(xmlString);
 
@@ -109,6 +113,7 @@ end;
 
 destructor TXMLArchiverIn.Destroy;
 begin
+  FreeAndNil(FStack);
   inherited;
 end;
 
@@ -217,6 +222,11 @@ begin
   //TODO
 end;
 
+procedure TXMLArchiverIn.inout(const name : String; var value : TSerializable; element : Integer);
+begin
+  //TODO
+end;
+
 procedure TXMLArchiverIn.inout(const name : String; buffer : PByte; bufferSize : Integer);
 begin
   //TODO
@@ -253,7 +263,7 @@ begin
   FCurrentNode := tempNode;
 end;
 
-function TXMLArchiverIn.inout(const name : String; var value : TSerializable; element : Integer) : TSerializable;
+function TXMLArchiverIn.inout2(const name : String; var value : TSerializable; element : Integer) : TSerializable;
 var
   i : Integer;
   tempNode : IXMLNode;
@@ -528,7 +538,7 @@ begin
 
     // Now loop over all objects in the array
     for i := 0 to size-1 do begin
-      value[i] := inout(name, value[i], i);
+      value[i] := inout2(name, value[i], i);
     end;
   end;
 
@@ -547,13 +557,19 @@ end;
 
 function TXMLArchiverIn.beginList(const name : String; size : Integer) : Integer;
 begin
-  //Nothing to do in this implementation
-  Result := 0;
+  FStack.Push(FCurrentNode);
+
+  FCurrentNode := FCurrentNode.ChildNodes.FindNode(name);
+  if Assigned(FCurrentNode) then begin
+    Result := numElements;
+  end else begin
+    Result := 0;
+  end;
 end;
 
 procedure TXMLArchiverIn.endList(const name : String);
 begin
-  //Nothing to do in this implementation
+  FCurrentNode := FStack.Pop;
 end;
 
 end.

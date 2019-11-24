@@ -63,7 +63,7 @@ type
 
 		function inout2(const name : String; var value : TSerializable) : TSerializable; overload; override;
 
-    function inout(const name : String; var value : TSerializable; element : Integer) : TSerializable; overload; override;
+    function inout2(const name : String; var value : TSerializable; element : Integer) : TSerializable; overload; override;
 
     procedure inout(const name : String; var value : TDynBooleanArray); overload; override;
     procedure inout(const name : String; var value : TDynByteArray); overload; override;
@@ -211,7 +211,7 @@ begin
   Result := value;
 end;
 
-function TPrintArchiverOut.inout(const name : String; var value : TSerializable; element : Integer) : TSerializable;
+function TPrintArchiverOut.inout2(const name : String; var value : TSerializable; element : Integer) : TSerializable;
 var
   Obj : TOPSObject;
 begin

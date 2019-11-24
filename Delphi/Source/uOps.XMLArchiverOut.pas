@@ -60,12 +60,13 @@ type
     procedure inout(const name : String; var value : Double); overload; override;
     procedure inout(const name : String; var value : AnsiString); overload; override;
     procedure inout(const name : String; var value : TSerializable); overload; override;
+    procedure inout(const name : String; var value : TSerializable; element : Integer); overload; override;
 
 		procedure inout(const name : String; buffer : PByte; bufferSize : Integer); overload; override;
 
 		function inout2(const name : String; var value : TSerializable) : TSerializable; overload; override;
 
-    function inout(const name : String; var value : TSerializable; element : Integer) : TSerializable; overload; override;
+    function inout2(const name : String; var value : TSerializable; element : Integer) : TSerializable; overload; override;
 
     procedure inout(const name : String; var value : TDynBooleanArray); overload; override;
     procedure inout(const name : String; var value : TDynByteArray); overload; override;
@@ -209,6 +210,20 @@ begin
   end;
 end;
 
+procedure TXMLArchiverOut.inout(const name : String; var value : TSerializable; element : Integer);
+var
+  Obj : TOPSObject;
+begin
+  if value is TOPSObject then begin
+    Obj := value as TOPSObject;
+    Add(StartTag(name, 'type = "' + string(Obj.TypesString) + '"'));
+    Inc(FCurrentTabDepth);
+    value.Serialize(Self);
+    Dec(FCurrentTabDepth);
+    Add(EndTag(name));
+  end;
+end;
+
 procedure TXMLArchiverOut.inout(const name : String; buffer : PByte; bufferSize : Integer);
 begin
   ///TODO
@@ -229,7 +244,7 @@ begin
   Result := value;
 end;
 
-function TXMLArchiverOut.inout(const name : String; var value : TSerializable; element : Integer) : TSerializable;
+function TXMLArchiverOut.inout2(const name : String; var value : TSerializable; element : Integer) : TSerializable;
 var
   Obj : TOPSObject;
 begin

@@ -2,7 +2,7 @@ unit uOps.Publisher;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -75,7 +75,7 @@ begin
 
   FMemMap := TMemoryMap.Create(UInt32(t.SampleMaxSize div PACKET_MAX_SIZE) + 1, PACKET_MAX_SIZE);
   FBuf := TByteBuffer.Create(FMemMap);
-  FArchive := TOPSArchiverOut.Create(FBuf);
+  FArchive := TOPSArchiverOut.Create(FBuf, FTopic.OptNonVirt);
 
   FSendSleepTime := 1;
   FSleepEverySendPacket := 100000;
@@ -145,7 +145,7 @@ begin
   FMessage.PublicationID := FCurrentPublicationID;
   FMessage.PublisherName := FName;
 
-  FArchive.inout('message', TSerializable(FMessage));
+  FArchive.inout2('message', TSerializable(FMessage));
 
   // If data has spare bytes, write them to the end of the buffer
   if Length(FMessage.Data.spareBytes) > 0 then begin

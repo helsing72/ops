@@ -49,12 +49,13 @@ type
     procedure inout(const name : String; var value : Double); overload; virtual; abstract;
     procedure inout(const name : String; var value : AnsiString); overload; virtual; abstract;
     procedure inout(const name : String; var value : TSerializable); overload; virtual; abstract;
+    procedure inout(const name : String; var value : TSerializable; element : Integer); overload; virtual; abstract;
 
 		procedure inout(const name : String; buffer : PByte; bufferSize : Integer); overload; virtual; abstract;
 
 		function inout2(const name : String; var value : TSerializable) : TSerializable; overload; virtual; abstract;
 
-    function inout(const name : String; var value : TSerializable; element : Integer) : TSerializable; overload; virtual; abstract;
+    function inout2(const name : String; var value : TSerializable; element : Integer) : TSerializable; overload; virtual; abstract;
 
     procedure inout(const name : String; var value : TDynBooleanArray); overload; virtual; abstract;
     procedure inout(const name : String; var value : TDynByteArray); overload; virtual; abstract;
@@ -71,8 +72,9 @@ type
     procedure inout(const name : string; var Value : TDynSerializableArray); overload; virtual; abstract;
 
     type
-      TSerializableHelper<T: TSerializable> = class(TObject)
-        class procedure inoutfixarr(archiver : TArchiverInOut; const name : string; var value : array of T; numElements : Integer);
+      TSerializableHelper<T: TSerializable, constructor> = class(TObject)
+        class procedure inoutfixarr(archiver : TArchiverInOut; const name : string; var value : array of T; numElements : Integer; isAbstract : Boolean);
+        class procedure inoutdynarr(archiver : TArchiverInOut; const name : string; var Value : TDynSerializableArray; isAbstract : Boolean);
       end;
 
     function beginList(const name : String; size : Integer) : Integer; virtual; abstract;
@@ -96,7 +98,9 @@ begin
   obj.SetTypesString(types);
 end;
 
-class procedure TArchiverInOut.TSerializableHelper<T>.inoutfixarr(archiver : TArchiverInOut; const name : string; var value : array of T; numElements : Integer);
+// isAbstract = true --> declared virtual in idl and can therefore be any derived object
+class procedure TArchiverInOut.TSerializableHelper<T>.inoutfixarr(
+  archiver : TArchiverInOut; const name : string; var value : array of T; numElements : Integer; isAbstract : Boolean);
 var
   num, i : Integer;
 begin
@@ -104,8 +108,56 @@ begin
   if num <> numElements then raise EArchiverException.Create('Illegal size of fix array received. name: ' + name);
 
   for i := 0 to numElements-1 do begin
-    if not archiver.isOut then FreeAndNil(value[i]);
-    value[i] := T(archiver.inout(name, TSerializable(value[i]), i));
+    if isAbstract then begin
+      // Elements can be of any derived type
+      if not archiver.isOut then FreeAndNil(value[i]);
+      value[i] := T(archiver.inout2(name, TSerializable(value[i]), i));
+    end else begin
+      // In this case we know that elements always are of type T
+      archiver.inout(name, TSerializable(value[i]), i);
+    end;
+  end;
+
+  archiver.endList(name);
+end;
+
+class procedure TArchiverInOut.TSerializableHelper<T>.inoutdynarr(
+  archiver : TArchiverInOut; const name : string; var Value : TDynSerializableArray; isAbstract : Boolean);
+var
+  size, i : Integer;
+begin
+  size := archiver.beginList(name, Length(value));
+
+  if archiver.isOut then begin
+    // Now loop over all objects in the array
+    for i := 0 to size-1 do begin
+      if isAbstract then begin
+        // Elements can be of any derived type
+        archiver.inout2(name, value[i], i);
+      end else begin
+        // In this case we know that elements always are of type T
+        archiver.inout(name, TSerializable(value[i]), i);
+      end;
+    end;
+
+  end else begin
+    // First free ev existing objects in the array
+    for i := 0 to Length(value)-1 do begin
+      FreeAndNil(value[i]);
+    end;
+
+    // Set new length (elements will be nil)
+    SetLength(value, size);
+
+    // Now loop over all objects in the array
+    for i := 0 to size-1 do begin
+      if isAbstract then begin
+        value[i] := archiver.inout2(name, value[i]);
+      end else begin
+        value[i] := T.Create;
+        archiver.inout(name, TSerializable(value[i]), i);
+      end;
+    end;
   end;
 
   archiver.endList(name);

@@ -2,7 +2,7 @@ unit uOps.Topic;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -50,6 +50,7 @@ type
 		FTransport : AnsiString;
 		FOutSocketBufferSize : Int64;
 		FInSocketBufferSize : Int64;
+		FOptNonVirt : Boolean;
 
 		procedure SetSampleMaxSize(Value : Integer);
 
@@ -77,6 +78,7 @@ type
     property TimeToLive : Integer read FTimeToLive write FTimeToLive;
     property OutSocketBufferSize : Int64 read FOutSocketBufferSize write FOutSocketBufferSize;
     property InSocketBufferSize : Int64 read FInSocketBufferSize write FInSocketBufferSize;
+    property OptNonVirt : Boolean read FOptNonVirt write FOptNonVirt;
   end;
 
 implementation

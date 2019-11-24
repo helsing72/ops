@@ -49,12 +49,13 @@ type
     procedure inout(const name : String; var value : Double); overload; override;
     procedure inout(const name : String; var value : AnsiString); overload; override;
     procedure inout(const name : String; var value : TSerializable); overload; override;
+    procedure inout(const name : String; var value : TSerializable; element : Integer); overload; override;
 
 		procedure inout(const name : String; buffer : PByte; bufferSize : Integer); overload; override;
 
 		function inout2(const name : String; var value : TSerializable) : TSerializable; overload; override;
 
-    function inout(const name : String; var value : TSerializable; element : Integer) : TSerializable; overload; override;
+    function inout2(const name : String; var value : TSerializable; element : Integer) : TSerializable; overload; override;
 
     procedure inout(const name : String; var value : TDynBooleanArray); overload; override;
     procedure inout(const name : String; var value : TDynByteArray); overload; override;
@@ -148,7 +149,15 @@ begin
   value.Serialize(Self);
 end;
 
-function TOPSArchiverIn.inout(const name : String; var value : TSerializable; element : Integer) : TSerializable;
+procedure TOPSArchiverIn.inout(const name : String; var value : TSerializable; element : Integer);
+var
+  types : string;
+begin
+  types := string(Fbuf.ReadString);
+  value.Serialize(Self);
+end;
+
+function TOPSArchiverIn.inout2(const name : String; var value : TSerializable; element : Integer) : TSerializable;
 var
   types : string;
 begin

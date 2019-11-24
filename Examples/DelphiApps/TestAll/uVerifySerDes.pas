@@ -532,6 +532,7 @@ var
   pub : ChildDataPublisher;
   Flag : Boolean;
   Limit : UInt64;
+  PubTime : UInt64;
   map : TMemoryMap;
   buf : TByteBuffer;
   ao : TOPSArchiverOut;
@@ -573,12 +574,25 @@ begin
 	Log('Serialize filled object');
 	map := TMemoryMap.Create(1, 65536);
 	buf := TByteBuffer.Create(map);
-	ao := TOPSArchiverOut.Create(buf);
+	ao := TOPSArchiverOut.Create(buf, False);
 
 	Log('  GetSize()= ' + IntToStr(buf.GetSize()));
   ao.inout('data', TSerializable(cd1));
+	Log('  optNonVirt = false, GetSize()= ' + IntToStr(buf.GetSize()));
+  AssertEQ(buf.GetSize(), 3150, 'Serialized size error');
+
+	FreeAndNil(map);
+	FreeAndNil(buf);
+	FreeAndNil(ao);
+
+	map := TMemoryMap.Create(1, 65536);
+	buf := TByteBuffer.Create(map);
+	ao := TOPSArchiverOut.Create(buf, True);
+
 	Log('  GetSize()= ' + IntToStr(buf.GetSize()));
-  AssertEQ(buf.GetSize(), 3204, 'Serialized size error');
+  ao.inout('data', TSerializable(cd1));
+	Log('  optNonVirt = true,  GetSize()= ' + IntToStr(buf.GetSize()));
+  AssertEQ(buf.GetSize(), 2591, 'Serialized size error');
 	Log('Serialize finished');
 
   Log('Test publish/subscribe');
@@ -626,6 +640,7 @@ begin
 
   Log('Waiting for more data... (Press Ctrl-C to terminate or wait 60 seconds)');
   Limit := GetTickCount + 60000;
+  PubTime := GetTickCount + 5000;
   while True do begin
     if (sub.waitForNewData(100)) then begin
       sub.aquireMessageLock;
@@ -637,6 +652,10 @@ begin
       sub.releaseMessageLock;
       checkObjects(cd3, cd1);
       Log('Data check done');
+    end;
+    if PubTime < GetTickCount then begin
+      PubTime := GetTickCount + 5000;
+      pub.write(cd1);
     end;
     if Limit < GetTickCount then Break;
   end;

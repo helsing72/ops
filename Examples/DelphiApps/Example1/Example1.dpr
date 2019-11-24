@@ -18,7 +18,8 @@ uses
   TestAll.TestAllTypeFactory in '..\..\OPSIdls\TestAll\Generated\Delphi\TestAll\TestAll.TestAllTypeFactory.pas',
   TestAll.TestData in '..\..\OPSIdls\TestAll\Generated\Delphi\TestAll\TestAll.TestData.pas',
   uExampleSubscriber in 'uExampleSubscriber.pas',
-  TestAll.NoData in '..\..\OPSIdls\TestAll\Generated\Delphi\TestAll\TestAll.NoData.pas';
+  TestAll.NoData in '..\..\OPSIdls\TestAll\Generated\Delphi\TestAll\TestAll.NoData.pas',
+  TestAll.Definitions in '..\..\OPSIdls\TestAll\Generated\Delphi\TestAll\TestAll.Definitions.pas';
 
 procedure Usage;
 begin
