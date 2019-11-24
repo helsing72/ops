@@ -163,6 +163,16 @@ package body Ops_Pa.OpsObject_Pa.Topic_Pa is
     Self.InSocketBufferSize := Value;
   end;
 
+  function OptNonVirt( Self : Topic_Class ) return Boolean is
+  begin
+    return Self.OptNonVirt;
+  end;
+
+  procedure SetOptNonVirt( Self : in out Topic_Class; Value : Boolean) is
+  begin
+    Self.OptNonVirt := Value;
+  end;
+
   overriding procedure Serialize( Self : in out Topic_Class; archiver : ArchiverInOut_Class_At) is
     tSampleMaxSize : Int32;
   begin

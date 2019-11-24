@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2018 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -32,7 +32,7 @@ package body Ops_Pa.OpsObject_Pa.ParticipantInfoData_Pa is
   end Create;
 
   -- Helpers for handling [de]serializing of fixed arrays
-  procedure TopicInfoData_Class_InoutDynArr is new inoutdynarr2(TopicInfoData_Class, TopicInfoData_Class_At, TopicInfoData_Class_At_Arr, TopicInfoData_Class_At_Arr_At);
+  procedure TopicInfoData_Class_InoutDynArr is new inoutdynarr2(TopicInfoData_Class, TopicInfoData_Class_At, TopicInfoData_Class_At_Arr, TopicInfoData_Class_At_Arr_At, Create);
 
   overriding procedure Serialize( Self : in out ParticipantInfoData_Class; archiver : ArchiverInOut_Class_At) is
   begin
@@ -45,8 +45,8 @@ package body Ops_Pa.OpsObject_Pa.ParticipantInfoData_Pa is
     archiver.Inout("opsVersion", Self.opsVersion);
     archiver.Inout("mc_udp_port", Self.mc_udp_port);
     archiver.Inout("mc_tcp_port", Self.mc_tcp_port);
-    TopicInfoData_Class_InoutDynArr(archiver, "subscribeTopics", Self.subscribeTopics);
-    TopicInfoData_Class_InoutDynArr(archiver, "publishTopics", Self.publishTopics);
+    TopicInfoData_Class_InoutDynArr(archiver, "subscribeTopics", Self.subscribeTopics, False);
+    TopicInfoData_Class_InoutDynArr(archiver, "publishTopics", Self.publishTopics, False);
     archiver.Inout("knownTypes", Self.knownTypes);
   end;
 

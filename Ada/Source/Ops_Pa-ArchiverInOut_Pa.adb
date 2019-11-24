@@ -142,11 +142,12 @@ package body Ops_Pa.ArchiverInOut_Pa is
     archiver.endList(name);
   end;
 
-  procedure inoutdynarr2(archiver : ArchiverInOut_Class_At; name : string; value : in out Item_At_Arr_At) is
+  procedure inoutdynarr2(archiver : ArchiverInOut_Class_At; name : string; value : in out Item_At_Arr_At; isAbstract : Boolean) is
 
     procedure Dispose is new Ada.Unchecked_Deallocation( Item_At_Arr, Item_At_Arr_At );
 
     num : Integer := 0;
+    tmp : Serializable_Class_At := null;
   begin
     if value /= null then
       num := Integer(value.all'Length);
@@ -169,17 +170,26 @@ package body Ops_Pa.ArchiverInOut_Pa is
         value := new Item_At_Arr(0..Integer(num-1));
 
         for i in value.all'Range loop
-          value.all(i) := Item_At(archiver.Inout(name, Serializable_Class_At(value.all(i)), i));
+          if isAbstract then
+            value.all(i) := Item_At(archiver.Inout(name, Serializable_Class_At(value.all(i)), i));
+          else
+            value.all(i) := Create;
+            archiver.Inout(name, Serializable_Class_At(value.all(i)), i);
+          end if;
         end loop;
       end if;
-    else
 
+    else
       if num > 0 then
         for i in value.all'Range loop
           if value(i) = null then
             raise Null_Object_In_Array;
           end if;
-          archiver.Inout(name, Serializable_Class_At(value.all(i)));
+          if isAbstract then
+            tmp := archiver.Inout2(name, Serializable_Class_At(value.all(i)));
+          else
+            archiver.Inout(name, Serializable_Class_At(value.all(i)));
+          end if;
         end loop;
       end if;
     end if;

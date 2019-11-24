@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -71,6 +71,7 @@ package Ops_Pa.OpsObject_Pa.Domain_Pa is
   function LocalInterface( Self : Domain_Class ) return String;
   function InSocketBufferSize( Self : Domain_Class ) return Int32;
   function OutSocketBufferSize( Self : Domain_Class ) return Int32;
+  function OptNonVirt( Self : Domain_Class ) return Boolean;
 
 private
 -- ==========================================================================
@@ -88,6 +89,7 @@ private
       MetaDataMcPort : Int32 := 9494;
       Channels : Channel_Class_At_Arr_At := null;
       Transports : Transport_Class_At_Arr_At := null;
+      OptNonVirt : Boolean := False;
     end record;
 
   procedure checkTopicValues( Self : Domain_Class; top : Topic_Class_At);

@@ -18,6 +18,8 @@
 
 with Ada.Text_IO;
 with Ada.Strings.Fixed; use Ada.Strings.Fixed;
+with Ada.Strings.Maps;
+with Ada.Strings.Maps.Constants;
 with Input_Sources.Strings;
 with Unicode.CES;
 with Unicode.CES.Utf8;
@@ -134,16 +136,18 @@ package body Ops_Pa.ArchiverInOut_Pa.XMLArchiverIn_Pa is
   end;
 
   overriding procedure inout( Self : in out XMLArchiverIn_Class; name : String; value : in out Boolean) is
---      tempNode : IXMLNode;
---      s : string;
+    tempNode : DOM.Core.Node := FindNode( DOM.Core.Nodes.Child_Nodes( Self.CurrentNode ), name );
   begin
-    raise Not_Yet_Implemented;
---      tempNode := FCurrentNode.ChildNodes.FindNode(name);
---      if Assigned(tempNode) then
---        s := Trim(tempNode.Text);
---        if UpperCase(s) = "TRUE" then value := True; end if;
---        if UpperCase(s) = "FALSE" then value := False; end if;
---      end if;
+    if tempNode /= null and then DOM.Core.Nodes.Has_Child_Nodes( tempNode ) then
+      tempNode := DOM.Core.Nodes.First_Child( tempNode );
+      declare
+        s : String := Trim(DOM.Core.Nodes.Node_Value( tempNode ), Ada.Strings.Both);
+      begin
+        Ada.Strings.Fixed.Translate(s, Ada.Strings.Maps.Constants.Upper_Case_Map);
+        if s = "TRUE" then value := True; end if;
+        if s = "FALSE" then value := False; end if;
+      end;
+    end if;
   end;
 
   overriding procedure inout( Self : in out XMLArchiverIn_Class; name : String; value : in out Byte) is
@@ -248,8 +252,51 @@ package body Ops_Pa.ArchiverInOut_Pa.XMLArchiverIn_Pa is
   end;
 
   overriding procedure inout( Self : in out XMLArchiverIn_Class; name : String; value : in out Serializable_Class_At) is
+    tempNode : DOM.Core.Node := Self.CurrentNode;
   begin
-    raise Not_Yet_Implemented;
+    if value = null then
+      raise Null_Object_Not_Allowed;
+    end if;
+
+    Self.CurrentNode := FindNode( DOM.Core.Nodes.Child_Nodes( Self.CurrentNode ), name);
+    if Self.CurrentNode /= null then
+      value.serialize( ArchiverInOut_Class_At(Self.SelfAt) );
+    end if;
+    Self.CurrentNode := tempNode;
+  end;
+
+  overriding procedure inout( Self : in out XMLArchiverIn_Class; name : String; value : in out Serializable_Class_At; element : Integer) is
+    node : DOM.Core.Node := FindNode( DOM.Core.Nodes.Child_Nodes( Self.CurrentNode ), name );
+    nlist : DOM.Core.Node_List := DOM.Core.Nodes.Child_Nodes( node );
+    Result : Serializable_Class_At := null;
+    Count : Integer := element;
+  begin
+    if value = null then
+      raise Null_Object_Not_Allowed;
+    end if;
+
+    -- Find n:th element
+    for idx in 0 .. DOM.Core.Nodes.Length( nlist )-1 loop
+      node := DOM.Core.Nodes.Item( nlist, idx );
+      if DOM.Core.Nodes.Node_Name( node ) = "element" then
+        if Count > 0 then
+          Count := Count - 1;
+        else
+          declare
+            tempNode : DOM.Core.Node := Self.CurrentNode;
+          begin
+            Self.CurrentNode := node;
+
+            if Self.CurrentNode /= null then
+              value.serialize( ArchiverInOut_Class_At(Self.SelfAt) );
+            end if;
+
+            Self.CurrentNode := tempNode;
+            exit;
+          end;
+        end if;
+      end if;
+    end loop;
   end;
 
   overriding function inout2( Self : in out XMLArchiverIn_Class; name : String; value : in out Serializable_Class_At) return Serializable_Class_At is

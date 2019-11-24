@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -28,7 +28,7 @@ package Ops_Pa.ArchiverInOut_Pa.ArchiverOut_Pa is
   type ArchiverOut_Class_At is access all ArchiverOut_Class'Class;
 
   -- Constructors
-  function Create( buf : ByteBuffer_Class_At ) return ArchiverOut_Class_At;
+  function Create( buf : ByteBuffer_Class_At; OptNonVirt : Boolean ) return ArchiverOut_Class_At;
 
   --
   overriding function IsOut( Self : in ArchiverOut_Class) return Boolean;
@@ -42,6 +42,7 @@ package Ops_Pa.ArchiverInOut_Pa.ArchiverOut_Pa is
   overriding procedure inout( Self : in out ArchiverOut_Class; name : String; value : in out Float64);
   overriding procedure inout( Self : in out ArchiverOut_Class; name : String; value : in out String_At);
   overriding procedure inout( Self : in out ArchiverOut_Class; name : String; value : in out Serializable_Class_At);
+  overriding procedure inout( Self : in out ArchiverOut_Class; name : String; value : in out Serializable_Class_At; element : Integer);
 
   overriding function inout2( Self : in out ArchiverOut_Class; name : String; value : in out Serializable_Class_At) return Serializable_Class_At;
 
@@ -76,13 +77,15 @@ private
 -- ==========================================================================
   type ArchiverOut_Class is new ArchiverInOut_Class with
     record
-      SelfAt : ArchiverOut_Class_At := null;
-      FBuf : ByteBuffer_Class_At := null;
+       SelfAt : ArchiverOut_Class_At := null;
+       FBuf : ByteBuffer_Class_At := null;
+       OptNonVirt : Boolean := False;
     end record;
 
   procedure InitInstance( Self : in out ArchiverOut_Class;
                           SelfAt : ArchiverOut_Class_At;
-                          buf : ByteBuffer_Class_At );
+                          buf : ByteBuffer_Class_At;
+                          OptNonVirt : Boolean );
 
   --------------------------------------------------------------------------
   --  Finalize the object

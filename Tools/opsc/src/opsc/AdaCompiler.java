@@ -892,13 +892,22 @@ public class AdaCompiler extends opsc.Compiler
                         // TestData_Class_InoutFixArr(archiver, "ftest2s2", Self.ftest2s2);
                         ret += elementType(getLastPart(field.getType())) + "_Class_InoutFixArr(archiver, \"" + field.getName() + "\", Self." + fieldName + ");" + endl();
                     } else {
-                        ret += elementType(getLastPart(field.getType())) + "_Class_InoutDynArr(archiver, \"" + field.getName() + "\", Self." + fieldName + ");" + endl();
+                        String isAbsStr = "False";
+                        if (field.isAbstract()) {
+                            isAbsStr = "True";
+                        }
+                        ret += elementType(getLastPart(field.getType())) + "_Class_InoutDynArr(archiver, \"" + field.getName() + "\", Self." +
+                                fieldName + ", " + isAbsStr + ");" + endl();
                     }
                 } else {
                     if (alwaysDynObject || field.isAbstract()) {
                         ret += tab(2);
-                        ret += "Self." + fieldName + " := " + getFullyQualifiedClassName(field.getType()) + "_At" +
+                        if (field.isAbstract()) {
+                          ret += "Self." + fieldName + " := " + getFullyQualifiedClassName(field.getType()) + "_At" +
                                "(archiver.Inout2(\"" + field.getName() + "\", Serializable_Class_At(Self." + fieldName + ")));" + endl();
+                        } else {
+                          ret += "archiver.Inout(\"" + field.getName() + "\", Serializable_Class_At(Self." + fieldName + "));" + endl();
+                        }
                     } else {
                         ret += tab(2) + "declare" + endl();
                         ret += tab(3) +   "tmp : " + getFullyQualifiedClassName(field.getType()) + "_At := Self." + fieldName + "'Unchecked_Access;" + endl();

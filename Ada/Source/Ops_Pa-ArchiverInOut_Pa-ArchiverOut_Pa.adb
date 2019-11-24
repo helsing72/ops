@@ -19,11 +19,11 @@
 package body Ops_Pa.ArchiverInOut_Pa.ArchiverOut_Pa is
 
   -- Constructors
-  function Create( buf : ByteBuffer_Class_At ) return ArchiverOut_Class_At is
+  function Create( buf : ByteBuffer_Class_At; OptNonVirt : Boolean ) return ArchiverOut_Class_At is
     Self : ArchiverOut_Class_At := null;
   begin
     Self := new ArchiverOut_Class;
-    InitInstance( Self.all, Self, buf );
+    InitInstance( Self.all, Self, buf, OptNonVirt );
     return Self;
   exception
     when others =>
@@ -81,7 +81,24 @@ package body Ops_Pa.ArchiverInOut_Pa.ArchiverOut_Pa is
     if value = null then
       raise Null_Object_Not_Allowed;
     end if;
-    Self.FBuf.WriteString( value.TypesString );
+    if Self.OptNonVirt then
+      Self.FBuf.WriteString( "" );
+    else
+      Self.FBuf.WriteString( value.TypesString );
+    end if;
+    value.all.Serialize( ArchiverInOut_Class_At(Self.SelfAt) );
+  end;
+
+  procedure inout( Self : in out ArchiverOut_Class; name : String; value : in out Serializable_Class_At; element : Integer) is
+  begin
+    if value = null then
+      raise Null_Object_Not_Allowed;
+    end if;
+    if Self.OptNonVirt then
+      Self.FBuf.WriteString( "" );
+    else
+      Self.FBuf.WriteString( value.TypesString );
+    end if;
     value.all.Serialize( ArchiverInOut_Class_At(Self.SelfAt) );
   end;
 
@@ -242,10 +259,12 @@ package body Ops_Pa.ArchiverInOut_Pa.ArchiverOut_Pa is
 --    Self.endList(name);
 --  end;
 
-  procedure InitInstance( Self : in out ArchiverOut_Class; SelfAt : ArchiverOut_Class_At; buf : ByteBuffer_Class_At ) is
+  procedure InitInstance( Self : in out ArchiverOut_Class; SelfAt : ArchiverOut_Class_At;
+                          buf : ByteBuffer_Class_At; OptNonVirt : Boolean ) is
   begin
     Self.SelfAt := SelfAt;
     Self.FBuf := buf;
+    Self.OptNonVirt := OptNonVirt;
   end;
 
   overriding procedure Finalize( Self : in out ArchiverOut_Class ) is

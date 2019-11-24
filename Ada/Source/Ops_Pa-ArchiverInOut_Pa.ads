@@ -47,6 +47,7 @@ package Ops_Pa.ArchiverInOut_Pa is
   procedure inout( Self : in out ArchiverInOut_Class; name : String; value : in out Float64) is abstract;
   procedure inout( Self : in out ArchiverInOut_Class; name : String; value : in out String_At) is abstract;
   procedure inout( Self : in out ArchiverInOut_Class; name : String; value : in out Serializable_Class_At) is abstract;
+  procedure inout( Self : in out ArchiverInOut_Class; name : String; value : in out Serializable_Class_At; element : Integer) is abstract;
 
   function inout2( Self : in out ArchiverInOut_Class; name : String; value : in out Serializable_Class_At) return Serializable_Class_At is abstract;
 
@@ -115,7 +116,8 @@ package Ops_Pa.ArchiverInOut_Pa is
     type Item_At is access all Item'Class;
     type Item_At_Arr is array(Integer range <>) of Item_At;
     type Item_At_Arr_At is access all Item_At_Arr;
-  procedure inoutdynarr2(archiver : ArchiverInOut_Class_At; name : string; value : in out Item_At_Arr_At);
+    with function Create return Item_At;
+  procedure inoutdynarr2(archiver : ArchiverInOut_Class_At; name : string; value : in out Item_At_Arr_At; isAbstract : Boolean);
 
 private
 -- ==========================================================================

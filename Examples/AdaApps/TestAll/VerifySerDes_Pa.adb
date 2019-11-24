@@ -1019,7 +1019,7 @@ package body VerifySerDes_Pa is
     Log("Serialize empty object");
     FMap := Create(1, 65536);
     FBuf := Create(FMap);
-    ao := Create(FBuf);
+    ao := Create(FBuf, False);
 
     Put_line("  GetSize()= " & UInt32'Image(FBuf.GetSize));
     ao.inout("data", Serializable_Class_At(cd1));
@@ -1057,12 +1057,25 @@ package body VerifySerDes_Pa is
     Log("Serialize filled object");
     FMap := Create(1, 65536);
     FBuf := Create(FMap);
-    ao := Create(FBuf);
+    ao := Create(FBuf, False);
 
     Put_line("  GetSize()= " & UInt32'Image(FBuf.GetSize));
     ao.inout("data", Serializable_Class_At(cd1));
-    Put_Line("  GetSize()= " & UInt32'Image(FBuf.GetSize));
-    AssertEQ(Int32(FBuf.GetSize), Int32(3204), "Serialized size error");
+    Put_Line("  NonVirtOpt = False, GetSize()= " & UInt32'Image(FBuf.GetSize));
+    AssertEQ(Int32(FBuf.GetSize), Int32(3150), "Serialized size error");
+
+    Free(ao);
+    Free(FBuf);
+    Free(FMap);
+
+    FMap := Create(1, 65536);
+    FBuf := Create(FMap);
+    ao := Create(FBuf, True);
+
+    Put_line("  GetSize()= " & UInt32'Image(FBuf.GetSize));
+    ao.inout("data", Serializable_Class_At(cd1));
+    Put_Line("  NonVirtOpt = True,  GetSize()= " & UInt32'Image(FBuf.GetSize));
+    AssertEQ(Int32(FBuf.GetSize), Int32(2591), "Serialized size error");
     Log("Serialize finished");
 
 --      declare
@@ -1141,6 +1154,7 @@ package body VerifySerDes_Pa is
         Log("  Waiting for more data for 60 seconds ... (Press Ctrl-C to terminate)");
         declare
           stopTime : Ops_Pa.TimeMs_T := Ops_Pa.GetTimeInMs + 60000;
+          pubTime : Ops_Pa.TimeMs_T := Ops_Pa.GetTimeInMs + 5000;
         begin
           while not gTerminate and Ops_Pa.GetTimeInMs < stopTime loop
             if (sub.waitForNewData(100)) then
@@ -1160,6 +1174,10 @@ package body VerifySerDes_Pa is
               end;
               checkObjects(cd3, cd1);
               Log("Data check done");
+            end if;
+            if Ops_Pa.GetTimeInMs >= pubTime then
+              pubTime := Ops_Pa.GetTimeInMs + 5000;
+              pub.Write( cd1 );
             end if;
           end loop;
         end;

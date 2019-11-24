@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -83,6 +83,9 @@ package Ops_Pa.OpsObject_Pa.Topic_Pa is
   function InSocketBufferSize( Self : Topic_Class ) return Int64;
   procedure SetInSocketBufferSize( Self : in out Topic_Class; Value : Int64);
 
+  function OptNonVirt( Self : Topic_Class ) return Boolean;
+  procedure SetOptNonVirt( Self : in out Topic_Class; Value : Boolean);
+
 private
 -- ==========================================================================
 --
@@ -103,6 +106,7 @@ private
       Transport : String_At := null;
       OutSocketBufferSize : Int64 := -1;
       InSocketBufferSize : Int64 := -1;
+      OptNonVirt : Boolean := False;
     end record;
 
   procedure InitInstance( Self : in out Topic_Class; namee : String; portt : Int32; typeIDd : String; domainAddresss : String);

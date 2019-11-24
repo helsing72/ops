@@ -53,6 +53,6 @@ package __unitName is
   procedure __className_Class_InoutFixArr is new inoutfixarr2(__className_Class, __className_Class_At, __className_Class_At_Arr);
 
   procedure __className_Class_InoutDynArr is new inoutdynarr(__className_Class, __className_Class_At, __className_Class_Arr, __className_Class_Arr_At);
-  procedure __className_Class_InoutDynArr is new inoutdynarr2(__className_Class, __className_Class_At, __className_Class_At_Arr, __className_Class_At_Arr_At);
+  procedure __className_Class_InoutDynArr is new inoutdynarr2(__className_Class, __className_Class_At, __className_Class_At_Arr, __className_Class_At_Arr_At, Create);
 
 end __unitName;

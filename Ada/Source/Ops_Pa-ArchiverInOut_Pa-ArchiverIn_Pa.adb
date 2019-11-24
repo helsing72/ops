@@ -93,6 +93,19 @@ package body Ops_Pa.ArchiverInOut_Pa.ArchiverIn_Pa is
     end if;
   end;
 
+  procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Serializable_Class_At; element : Integer) is
+    types : String_At := null;
+  begin
+    if value = null then
+      raise Null_Object_Not_Allowed;
+    end if;
+    Self.FBuf.ReadString( types );
+    value.all.Serialize( ArchiverInOut_Class_At(Self.SelfAt) );
+    if types /= null then
+      Dispose(types);
+    end if;
+  end;
+
   function inout2( Self : in out ArchiverIn_Class; name : String; value : in out Serializable_Class_At) return Serializable_Class_At is
     types : String_At := null;
     result : Serializable_Class_At := null;

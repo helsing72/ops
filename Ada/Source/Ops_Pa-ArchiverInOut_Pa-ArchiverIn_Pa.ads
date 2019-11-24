@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -43,6 +43,7 @@ package Ops_Pa.ArchiverInOut_Pa.ArchiverIn_Pa is
   overriding procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Float64);
   overriding procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out String_At);
   overriding procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Serializable_Class_At);
+  overriding procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Serializable_Class_At; element : Integer);
 
   overriding function inout2( Self : in out ArchiverIn_Class; name : String; value : in out Serializable_Class_At) return Serializable_Class_At;
 

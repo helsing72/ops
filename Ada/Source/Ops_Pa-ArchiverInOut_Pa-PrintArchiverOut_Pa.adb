@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2017 Lennart Andersson.
+-- Copyright (C) 2017-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -145,6 +145,21 @@ package body Ops_Pa.ArchiverInOut_Pa.PrintArchiverOut_Pa is
     if value.all in OpsObject_Class'Class then
       Obj := OpsObject_Class_At(value);
       Self.Add(name & " type = '" & Obj.TypesString & "'");
+      Self.CurrentTabDepth := Self.CurrentTabDepth + 1;
+      value.Serialize(ArchiverInOut_Class_At(Self.SelfAt));
+      Self.CurrentTabDepth := Self.CurrentTabDepth - 1;
+    end if;
+  end;
+
+  overriding procedure inout( Self : in out PrintArchiverOut_Class; name : String; value : in out Serializable_Class_At; element : Integer) is
+    Obj : OpsObject_Class_At;
+  begin
+    if value = null then
+      raise Null_Object_Not_Allowed;
+    end if;
+    if value.all in OpsObject_Class'Class then
+      Obj := OpsObject_Class_At(value);
+      Self.Add(name & " type = '" & string(Obj.TypesString) & "'");
       Self.CurrentTabDepth := Self.CurrentTabDepth + 1;
       value.Serialize(ArchiverInOut_Class_At(Self.SelfAt));
       Self.CurrentTabDepth := Self.CurrentTabDepth - 1;

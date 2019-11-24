@@ -48,12 +48,12 @@ package body Ops_Pa.OpsObject_Pa.OPSConfig_Pa is
   end Create;
 
   -- Helpers for handling [de]serializing of fixed arrays
-  procedure Domain_Class_InoutDynArr is new inoutdynarr2(Domain_Class, Domain_Class_At, Domain_Class_At_Arr, Domain_Class_At_Arr_At);
+  procedure Domain_Class_InoutDynArr is new inoutdynarr2(Domain_Class, Domain_Class_At, Domain_Class_At_Arr, Domain_Class_At_Arr_At, Create);
 
   overriding procedure Serialize( Self : in out OPSConfig_Class; archiver : ArchiverInOut_Class_At) is
   begin
     Serialize( OpsObject_Class(Self), archiver );
-    Domain_Class_InoutDynArr(archiver, "domains", Self.domains);
+    Domain_Class_InoutDynArr(archiver, "domains", Self.domains, False);
   end;
 
   -- Returns a newely allocated deep copy/clone of Self.

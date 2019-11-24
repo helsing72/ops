@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2019 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -72,16 +72,21 @@ package body Ops_Pa.OpsObject_Pa.Domain_Pa is
     return Self.OutSocketBufferSize;
   end;
 
+  function OptNonVirt( Self : Domain_Class ) return Boolean is
+  begin
+    return Self.OptNonVirt;
+  end;
+
   -- Helpers for handling [de]serializing of fixed arrays
-  procedure Topic_Class_InoutDynArr is new inoutdynarr2(Topic_Class, Topic_Class_At, Topic_Class_At_Arr, Topic_Class_At_Arr_At);
-  procedure Channel_Class_InoutDynArr is new inoutdynarr2(Channel_Class, Channel_Class_At, Channel_Class_At_Arr, Channel_Class_At_Arr_At);
-  procedure Transport_Class_InoutDynArr is new inoutdynarr2(Transport_Class, Transport_Class_At, Transport_Class_At_Arr, Transport_Class_At_Arr_At);
+  procedure Topic_Class_InoutDynArr is new inoutdynarr2(Topic_Class, Topic_Class_At, Topic_Class_At_Arr, Topic_Class_At_Arr_At, Create);
+  procedure Channel_Class_InoutDynArr is new inoutdynarr2(Channel_Class, Channel_Class_At, Channel_Class_At_Arr, Channel_Class_At_Arr_At, Create);
+  procedure Transport_Class_InoutDynArr is new inoutdynarr2(Transport_Class, Transport_Class_At, Transport_Class_At_Arr, Transport_Class_At_Arr_At, Create);
 
   overriding procedure Serialize( Self : in out Domain_Class; archiver : ArchiverInOut_Class_At) is
   begin
     Serialize( OpsObject_Class(Self), archiver );
     archiver.Inout("domainID", Self.domainID);
-    Topic_Class_InoutDynArr(archiver, "topics", Self.topics);
+    Topic_Class_InoutDynArr(archiver, "topics", Self.topics, False);
     archiver.Inout("domainAddress", Self.domainAddress);
     archiver.Inout("localInterface", Self.localInterface);
     archiver.Inout("timeToLive", Self.timeToLive);
@@ -92,8 +97,9 @@ package body Ops_Pa.OpsObject_Pa.Domain_Pa is
     -- To not break binary compatibility we only do this when we know we are
     -- reading from an XML-file
     if archiver.all in Ops_Pa.ArchiverInOut_Pa.XMLArchiverIn_Pa.XMLArchiverIn_Class'Class then
-      Channel_Class_InoutDynArr(archiver, "channels", Self.channels);
-      Transport_Class_InoutDynArr(archiver, "transports", Self.transports);
+      Channel_Class_InoutDynArr(archiver, "channels", Self.channels, False);
+      Transport_Class_InoutDynArr(archiver, "transports", Self.transports, False);
+      archiver.InOut("optNonVirt", Self.OptNonVirt);
       Self.CheckTransports;
     end if;
   end;
@@ -214,6 +220,7 @@ package body Ops_Pa.OpsObject_Pa.Domain_Pa is
     if top.OutSocketBufferSize < 0 then
       top.SetOutSocketBufferSize( Int64(Self.OutSocketBufferSize) );
     end if;
+    top.SetOptNonVirt( Self.OptNonVirt );
   end;
 
   -- Returns references to the internal topics

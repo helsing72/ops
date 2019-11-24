@@ -98,7 +98,11 @@ package body Ops_Pa.PublisherAbs_Pa.Publisher_Pa is
       Self.Message.SetPublisherName( Self.Name.all );
     end if;
 
-    Self.Archive.inout("message", Serializable_Class_At(Self.Message));
+    declare
+      dummy : Serializable_Class_At;
+    begin
+      dummy := Self.Archive.inout2("message", Serializable_Class_At(Self.Message));
+    end;
 
     -- If data has spare bytes, write them to the end of the buffer
     if Self.Message.Data.SpareBytes /= null then
@@ -129,7 +133,7 @@ package body Ops_Pa.PublisherAbs_Pa.Publisher_Pa is
 
     Self.MemMap := Create(UInt32(t.SampleMaxSize / PACKET_MAX_SIZE) + 1, PACKET_MAX_SIZE);
     Self.Buf := Create(Self.MemMap);
-    Self.Archive := Create(Self.Buf);
+    Self.Archive := Create(Self.Buf, Self.Topic.OptNonVirt);
 
     Self.Participant := getInstance(t.DomainID, t.ParticipantID);
     Self.SendDataHandler := Self.Participant.getSendDataHandler(Self.Topic);
