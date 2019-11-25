@@ -18,13 +18,13 @@ delta = 0.00001
 
 def test_extraAllt():
 	print("testing extra allt")
-	
+
 	m_factory = PizzaProjectTypeFactory.PizzaProjectTypeFactory()
-	
+
 	#initialize data to pack / unpack
 	extraAllt = InitData.initExtraAlltNormal()
 
-	m_OPS_archiver_out = OPS_Archiver.OPS_Archiver_Out(10000) #buffer size
+	m_OPS_archiver_out = OPS_Archiver.OPS_Archiver_Out(10000, False) #buffer size
 
 	#serializing
 	m_OPS_archiver_out.Bool("extraCheese", extraAllt.extraCheese)
@@ -43,10 +43,10 @@ def test_extraAllt():
 	m_OPS_archiver_out.Float64Vector("doubles", extraAllt.doubles)
 	m_OPS_archiver_out.StringVector("strings", extraAllt.strings)
 	m_OPS_archiver_out.OpsVector("cheeses", extraAllt.cheeses)
-	
+
 	#unpacking data
 	m_OPS_archiver_in = OPS_Archiver.OPS_Archiver_In(m_factory,m_OPS_archiver_out.buffer)
-	
+
 	unpacked_extraAllt 					= pizza_special.ExtraAllt()
 	unpacked_extraAllt.extraCheese 		= m_OPS_archiver_in.Bool("extraCheese", m_OPS_archiver_out.buffer)
 	unpacked_extraAllt.nrOfMushRooms 	= m_OPS_archiver_in.Int8("nrOfMushRooms", m_OPS_archiver_out.buffer)
@@ -56,8 +56,8 @@ def test_extraAllt():
 	unpacked_extraAllt.timeBakedSeconds = m_OPS_archiver_in.Float64("timeBakedSeconds", m_OPS_archiver_out.buffer)
 	unpacked_extraAllt.description 		= m_OPS_archiver_in.String("description", m_OPS_archiver_out.buffer)
 	unpacked_extraAllt.cheese_ 			= m_OPS_archiver_in.Ops("cheese_", m_OPS_archiver_out.buffer)
-	
-	
+
+
 	#unpacling vectors
 	unpacked_bools = []
 	unpacked_bytes = []
@@ -67,8 +67,8 @@ def test_extraAllt():
 	unpacked_doubles = []
 	unpacked_strings = []
 	unpacked_cheeses = []
-	
-	
+
+
 	m_OPS_archiver_in.BoolVector("bools", unpacked_bools)
 	m_OPS_archiver_in.Int8Vector("bytes", unpacked_bytes)
 	m_OPS_archiver_in.Int32Vector("ints", unpacked_ints)
@@ -77,7 +77,7 @@ def test_extraAllt():
 	m_OPS_archiver_in.Float64Vector("doubles", unpacked_doubles)
 	m_OPS_archiver_in.StringVector("strings", unpacked_strings)
 	m_OPS_archiver_in.OpsVector("cheeses", unpacked_cheeses)
-	
+
 	unpacked_extraAllt.bools 	= unpacked_bools
 	unpacked_extraAllt.bytes 	= unpacked_bytes
 	unpacked_extraAllt.ints 	= unpacked_ints
@@ -86,8 +86,8 @@ def test_extraAllt():
 	unpacked_extraAllt.doubles 	= unpacked_doubles
 	unpacked_extraAllt.strings 	= unpacked_strings
 	unpacked_extraAllt.cheeses 	= unpacked_cheeses
-	
-	
+
+
 	#test data
 	assert(unpacked_extraAllt.extraCheese 		== True )
 	assert(unpacked_extraAllt.nrOfMushRooms		== 14 )
@@ -120,28 +120,28 @@ def test_extraAllt():
 	assert(unpacked_extraAllt.cheeses[2].name 	== "ost3" )
 	assert(unpacked_extraAllt.cheeses[3].age 	== 4 )
 	assert(unpacked_extraAllt.cheeses[3].name 	== "ost4" )
-	
 
-	
+
+
 def test_vessuvio():
 	m_factory = PizzaProjectTypeFactory.PizzaProjectTypeFactory()
 	print("testing vessuvio")
 	vessuvioData = InitData.initVessuvioData()
 
 	#serialize
-	m_OPS_archiver_out = OPS_Archiver.OPS_Archiver_Out(200) #buffer size
+	m_OPS_archiver_out = OPS_Archiver.OPS_Archiver_Out(200, False) #buffer size
 	m_OPS_archiver_out.String("ham" , vessuvioData.ham)
 	m_OPS_archiver_out.String("cheese" , vessuvioData.cheese)
 	m_OPS_archiver_out.String("tomatoSauce" , vessuvioData.tomatoSauce)
-	
+
 	#unpack
 	m_OPS_archiver_in = OPS_Archiver.OPS_Archiver_In(m_factory,m_OPS_archiver_out.buffer)
-	
+
 	unpacked_vessuvioData = pizza.VessuvioData()
 	unpacked_vessuvioData.ham = m_OPS_archiver_in.String("ham" , m_OPS_archiver_out.buffer)
 	unpacked_vessuvioData.cheese = m_OPS_archiver_in.String("cheese" , m_OPS_archiver_out.buffer)
 	unpacked_vessuvioData.tomatoSauce = m_OPS_archiver_in.String("tomatoSauce" , m_OPS_archiver_out.buffer)
-	
+
 	#test data
 	assert(unpacked_vessuvioData.ham == "my ham")
 	assert(unpacked_vessuvioData.cheese == "my cheese")
