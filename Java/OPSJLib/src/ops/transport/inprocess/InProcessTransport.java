@@ -40,7 +40,7 @@ public class InProcessTransport extends Thread
     private List<Subscriber> subscribers = new ArrayList<Subscriber>();
 
     /**
-     * 
+     *
      */
     public InProcessTransport()
     {
@@ -93,8 +93,10 @@ public class InProcessTransport extends Thread
         while(keepRunning)
         {
             OPSMessage newMessage = takeMessage();
-            newMessage.setQosMask(1);
-            notifySubscribers(newMessage);
+            if (keepRunning) {
+                newMessage.setQosMask(1);
+                notifySubscribers(newMessage);
+            }
         }
     }
 
@@ -110,6 +112,8 @@ public class InProcessTransport extends Thread
     public void stopTransport()
     {
         keepRunning = false;
+        OPSMessage dummy = new OPSMessage();
+        putMessage(dummy);
     }
 
     private synchronized void notifySubscribers(OPSMessage newMessage)

@@ -309,6 +309,21 @@ public class XMLArchiverIn extends ArchiverInOut
         }
     }
 
+    public <T extends Serializable> Serializable inout(String name, Serializable v, Class<T> cls) throws IOException
+    {
+        nodeStack.push(currentNode);
+        currentNode = getNode(name);
+        Serializable newElem = null;
+        try {
+            newElem = (Serializable) cls.newInstance();
+            newElem.serialize(this);
+        } catch (InstantiationException | IllegalAccessException e)
+        {
+        }
+        currentNode = nodeStack.pop();
+        return newElem;
+    }
+
     public Serializable inout(String name, Serializable v) throws IOException
     {
         nodeStack.push(currentNode);
@@ -437,4 +452,15 @@ public class XMLArchiverIn extends ArchiverInOut
         }
         return v;
     }
+
+    public <T extends Serializable> List inoutSerializableList(String name, List v, Class<T> cls) throws IOException
+    {
+        int size = getNrElements(name);
+        for (int i = 0; i < size; i++)
+        {
+            v.add(getElement(name, i));
+        }
+        return v;
+    }
+
 }

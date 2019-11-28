@@ -27,6 +27,7 @@ public abstract class ArchiverInOut
     public abstract boolean inout(String name, boolean v) throws IOException;
     public abstract String inout(String name, String v) throws IOException;
     public abstract double inout(String name, double v) throws IOException;
+    public abstract <T extends Serializable> Serializable inout(String name, Serializable v, Class<T> cls) throws IOException;
 
     public <T extends java.lang.Enum<T>> T inoutEnum(String name, T v, T[] values) throws IOException
     {
@@ -46,6 +47,7 @@ public abstract class ArchiverInOut
     public abstract List<String> inoutStringList(String name, List<String> v) throws IOException;
     public abstract List<Double> inoutDoubleList(String name, List<Double> v) throws IOException;
     public abstract List inoutSerializableList(String name, List v) throws IOException;
+    public abstract <T extends Serializable> List inoutSerializableList(String name, List v, Class<T> cls) throws IOException;
 
     public <T extends java.lang.Enum<T>> List inoutEnumList(String name, List<T> v, T[] values) throws IOException
     {

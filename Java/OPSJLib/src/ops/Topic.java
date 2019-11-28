@@ -1,6 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
+ * Copyright (C) 2019 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -46,6 +47,7 @@ public class Topic<T> extends OPSObject
     private String transport;
     private String localInterface = "";
     private int timeToLive = -1;
+    private boolean optNonVirt = false;
 
     /** Creates a new instance of Topic */
     public Topic(String name, int port, String typeID, String domainAddress)
@@ -155,6 +157,16 @@ public class Topic<T> extends OPSObject
         }
     }
 
+    public boolean getOptNonVirt()
+    {
+        return optNonVirt;
+    }
+
+    public void setOptNonVirt(boolean value)
+    {
+        optNonVirt = value;
+    }
+
     @Override
     public void serialize(ArchiverInOut archive) throws IOException
     {
@@ -228,5 +240,5 @@ public class Topic<T> extends OPSObject
     {
         this.timeToLive = timeToLive;
     }
-    
+
 }

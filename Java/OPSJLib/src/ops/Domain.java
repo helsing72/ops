@@ -1,6 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -43,6 +44,7 @@ public class Domain extends OPSObject
     private int inSocketBufferSize = -1;    // Use OS default
     private int outSocketBufferSize = -1;   // Use OS default
     private int metaDataMcPort = 9494;
+    private boolean optNonVirt = false;
 
     private Vector<Channel> channels = new Vector<Channel>();
     private Vector<Transport> transports = new Vector<Transport>();
@@ -74,6 +76,7 @@ public class Domain extends OPSObject
       {
         top.setOutSocketBufferSize(outSocketBufferSize);
       }
+      top.setOptNonVirt(optNonVirt);
     }
 
     public Topic getTopic(String name)
@@ -120,6 +123,7 @@ public class Domain extends OPSObject
       	if (archive instanceof XMLArchiverIn) {
       		  channels = (Vector<Channel>) archive.inoutSerializableList("channels", channels);
       		  transports = (Vector<Transport>) archive.inoutSerializableList("transports", transports);
+      		  optNonVirt = archive.inout("optNonVirt", optNonVirt);
       		  checkTransports();
       	}
     }
@@ -228,6 +232,11 @@ public class Domain extends OPSObject
 
     public void setLocalInterface(String localInterface) {
         this.localInterface = localInterface;
+    }
+
+    public boolean getOptNonVirt()
+    {
+        return optNonVirt;
     }
 
     // If argument contains a "/" we assume it is on the form:  subnet-address/subnet-mask

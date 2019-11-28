@@ -22,6 +22,7 @@ import ops.archiver.OPSArchiverOut;
 import ops.protocol.OPSMessage;
 import ops.WriteByteBuffer;
 import ops.StaticManager;
+import ops.DeadlineNotifier;
 
 import TestAll.Definitions;
 import TestAll.BaseData;
@@ -681,16 +682,29 @@ public class testallmain implements ops.Listener<ops.Error> {
       OnLog("Serialize filled object");
       ByteBuffer buffer = ByteBuffer.allocateDirect(StaticManager.MAX_SIZE);
       WriteByteBuffer buf = new WriteByteBuffer(buffer, StaticManager.MAX_SIZE, true);
-      OPSArchiverOut ao = new OPSArchiverOut(buf);
+      OPSArchiverOut ao = new OPSArchiverOut(buf, false);
       OnLog("  Position()= " + buf.position());
       try {
-          ao.inout("data", cd1);
+          ao.inout("data", cd1, ChildData.class);
       } catch (IOException ex) {
           OnLog("ao.inout() exception: ");
           ex.printStackTrace();
       }
+      OnLog("  optNonVirt = false, Position()= " + buf.position());
+      AssertEQ(buf.position(), 3150, "Serialization size error");
+
+      buffer = ByteBuffer.allocateDirect(StaticManager.MAX_SIZE);
+      buf = new WriteByteBuffer(buffer, StaticManager.MAX_SIZE, true);
+      ao = new OPSArchiverOut(buf, true);
       OnLog("  Position()= " + buf.position());
-      AssertEQ(buf.position(), 3204, "Serialization size error");
+      try {
+          ao.inout("data", cd1, ChildData.class);
+      } catch (IOException ex) {
+          OnLog("ao.inout() exception: ");
+          ex.printStackTrace();
+      }
+      OnLog("  optNonVirt = true,  Position()= " + buf.position());
+      AssertEQ(buf.position(), 2591, "Serialization size error");
       OnLog("Serialize finished");
 
 
@@ -759,20 +773,34 @@ public class testallmain implements ops.Listener<ops.Error> {
           }
       });
 
-      try {
-          Thread.sleep(60000);
-      } catch (InterruptedException e) {
-          OnLog("Exception: " + e.getMessage());
+      for (int i = 0; i < 10; i++) {
+          try {
+              Thread.sleep(6000);
+              pub.write(cd1);
+          } catch (InterruptedException e) {
+              OnLog("Exception: " + e.getMessage());
+          }
       }
 
       pub.stop();
       sub.stop();
       participant.stopThread();
+      DeadlineNotifier.getInstance().stopRunning();
 
-      if (gTestFailed) {
-          OnLog("####  SOME TESTS FAILED  ####");
-      } else {
-          OnLog(" T E S T   O K ");
+      try {
+          if (gTestFailed) {
+              OnLog("");
+              OnLog("####  SOME TESTS FAILED  #### Sleeping for 20 seconds");
+              OnLog("");
+              Thread.sleep(20000);
+          } else {
+              OnLog("");
+              OnLog(" T E S T   O K        Sleeping for 5 seconds");
+              OnLog("");
+              Thread.sleep(5000);
+          }
+      } catch (InterruptedException e) {
+          OnLog("Exception: " + e.getMessage());
       }
     }
     catch (ConfigurationException e)

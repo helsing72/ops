@@ -1,6 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -97,6 +98,19 @@ public class OPSArchiverIn extends ArchiverInOut
         return readBuf.readdouble();
     }
 
+    public <T extends Serializable> Serializable inout(String name, Serializable v, Class<T> cls) throws IOException
+    {
+        String type = readBuf.readstring();     // Skip string for non virtual objects, type is known by T
+        Serializable newSer = null;
+        try {
+          newSer = (Serializable) cls.newInstance();
+          newSer.serialize(this);
+        } catch (InstantiationException | IllegalAccessException e)
+        {
+        }
+        return newSer;
+    }
+
     public Serializable inout(String name, Serializable v) throws IOException
     {
         String type = readBuf.readstring();
@@ -155,6 +169,17 @@ public class OPSArchiverIn extends ArchiverInOut
         for (int i = 0; i < size; i++)
         {
             list.add(inout("", (Serializable)null));
+        }
+        return list;
+    }
+
+    public <T extends Serializable> List inoutSerializableList(String name, List v, Class<T> cls) throws IOException
+    {
+        Vector list = new Vector();
+        int size = readBuf.readint();
+        for (int i = 0; i < size; i++)
+        {
+            list.add(inout("", (Serializable)null, cls));
         }
         return list;
     }

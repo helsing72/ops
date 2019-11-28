@@ -14,8 +14,8 @@ public class TestReadByteBuffer
 {
     public static void main(String[] args)
     {
-        String s = "abc123def456abc123def456";
-        String res = new String(ReadByteBuffer.trimSegments(s.getBytes(), 6,s.length(), 3, new byte[100]));
-        System.out.println(res); //Expected 123456123456
+//        String s = "abc123def456abc123def456";
+//        String res = new String(ReadByteBuffer.trimSegments(s.getBytes(), 6,s.length(), 3, new byte[100]));
+//        System.out.println(res); //Expected 123456123456
     }
 }

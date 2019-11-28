@@ -1,6 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
+ * Copyright (C) 2019 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -144,7 +145,7 @@ public class Publisher
             //buf.write(0);
 
             buffer.position(0);
-            OPSArchiverOut archiverOut = new OPSArchiverOut(buf);
+            OPSArchiverOut archiverOut = new OPSArchiverOut(buf, topic.getOptNonVirt());
 
             archiverOut.inout("message", message);
 

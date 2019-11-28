@@ -457,9 +457,18 @@ public class JavaCompiler extends opsc.Compiler
             String fieldName = getFieldName(field);
             if (field.isIdlType()) {
                 if (!field.isArray()) {
+                  if (field.isAbstract()) {
                     ret += tab(2) + fieldName + " = (" + field.getType() + ") archive.inout(\"" + field.getName() + "\", " + fieldName + ");" + endl();
+                  } else {
+                    ret += tab(2) + fieldName + " = (" + field.getType() + ") archive.inout(\"" + field.getName() + "\", " + fieldName + ", " + field.getType() + ".class);" + endl();
+                  }
                 } else {
+                  if (field.isAbstract()) {
                     ret += tab(2) + fieldName + " = (" + languageType(field.getType()) + ") archive.inoutSerializableList(\"" + field.getName() + "\", " + fieldName + ");" + endl();
+                  } else {
+                    ret += tab(2) + fieldName + " = (" + languageType(field.getType()) + ") archive.inoutSerializableList(\"" + field.getName() + "\", " + fieldName + ", " +
+                            elementType(field.getType()) + ".class);" + endl();
+                  }
                 }
             } else if (field.isEnumType()) {
                 if (!field.isArray()) {

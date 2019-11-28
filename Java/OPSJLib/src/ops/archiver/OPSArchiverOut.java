@@ -1,6 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -34,15 +35,12 @@ import ops.WriteByteBuffer;
 public class OPSArchiverOut extends ArchiverInOut
 {
     WriteByteBuffer writeBuf;
-//
-//    public OPSArchiverOut()
-//    {
-//        writeBuf = new WriteByteBuffer();
-//    }
+    private boolean optNonVirt = false;
 
-    public OPSArchiverOut(WriteByteBuffer buf)
+    public OPSArchiverOut(WriteByteBuffer buf, boolean optNonVirt_)
     {
         this.writeBuf = buf;
+        this.optNonVirt = optNonVirt_;
     }
     public byte[] getBytes()
     {
@@ -106,6 +104,17 @@ public class OPSArchiverOut extends ArchiverInOut
         return v;
     }
 
+    public <T extends Serializable> Serializable inout(String name, Serializable v, Class<T> cls) throws IOException
+    {
+        if (optNonVirt) {
+            writeBuf.write("");
+        } else {
+            writeBuf.write(((OPSObject)v).getTypesString());
+        }
+        v.serialize(this);
+        return v;
+    }
+
     public List<Integer> inoutIntegerList(String name, List<Integer> v) throws IOException
     {
         writeBuf.writeintArr(v);
@@ -160,6 +169,21 @@ public class OPSArchiverOut extends ArchiverInOut
         for (int i = 0; i < v.size(); i++)
         {
             writeBuf.write(((OPSObject)v.get(i)).getTypesString());
+            ((Serializable)v.get(i)).serialize(this);
+        }
+        return v;
+    }
+
+    public <T extends Serializable> List inoutSerializableList(String name, List v, Class<T> cls) throws IOException
+    {
+        writeBuf.write(v.size());
+        for (int i = 0; i < v.size(); i++)
+        {
+            if (optNonVirt) {
+                writeBuf.write("");
+            } else {
+                writeBuf.write(((OPSObject)v.get(i)).getTypesString());
+            }
             ((Serializable)v.get(i)).serialize(this);
         }
         return v;

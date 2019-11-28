@@ -311,6 +311,19 @@ public class XMLArchiverOut extends ArchiverInOut
         return v;
     }
 
+    public <T extends Serializable> Serializable inout(String name, Serializable v, Class<T> cls) throws IOException
+    {
+        String typeAdd = TYPE_ADD_CLASS + "\"" + v.getClass().getName() + "\"";
+        String nodeString = tab(currentTabDepth) + "<" + name + typeAdd +">" + LINE_CHANGE;
+        os.write(nodeString.getBytes());
+        currentTabDepth ++;
+        v.serialize(this);
+        currentTabDepth --;
+        nodeString = tab(currentTabDepth) + "</" + name + ">" + LINE_CHANGE;
+        os.write(nodeString.getBytes());
+        return v;
+    }
+
     public Serializable inout(String name, Serializable v) throws IOException
     {
         String typeAdd = TYPE_ADD_CLASS + "\"" + v.getClass().getName() + "\"";
@@ -339,6 +352,11 @@ public class XMLArchiverOut extends ArchiverInOut
         nodeString = tab(currentTabDepth) + "</" + name + ">" + LINE_CHANGE;
         os.write(nodeString.getBytes());
         return v;
+    }
+
+    public <T extends Serializable> List inoutSerializableList(String name, List v, Class<T> cls) throws IOException
+    {
+        return inout(name, v);
     }
 
     public List<Integer> inoutIntegerList(String name, List<Integer> v) throws IOException
