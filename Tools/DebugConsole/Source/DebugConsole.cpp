@@ -1,6 +1,8 @@
 // DebugConsole.cpp : Defines the entry point for the console application.
 //
 
+#include <iomanip>
+
 #include "DataListener.h"
 #include "Participant.h"
 #include "ErrorWriter.h"
@@ -18,6 +20,7 @@ pizza::PizzaData testData;
 #endif
 
 opsidls::DebugRequestResponseData request;
+bool gverbose = false;
 
 class DebugListener : public ops::DataListener
 {
@@ -30,6 +33,8 @@ public:
 	DebugListener(DebugListener&&) = delete;
 	DebugListener& operator =(DebugListener&&) = delete;
 	DebugListener& operator =(DebugListener const&) = delete;
+
+	std::vector<std::string> _topics;
 
 	void Start()
 	{
@@ -59,10 +64,11 @@ public:
 					if ((data->Result1 >= 1) && (data->Result1 <= 3)) {
 						switch (data->Result1) {
 						case 1: std::cout << "Instance key:" << std::endl; break;
-						case 2:	std::cout << "Publisher Topics (" << data->getKey() << "):" << std::endl; break;
-						case 3:	std::cout << "Subscriber Topics (" << data->getKey() << "):" << std::endl; break;
+						case 2:	std::cout << "Publisher Topics (key: " << data->getKey() << "):" << std::endl; break;
+						case 3:	std::cout << "Subscriber Topics (key: " << data->getKey() << "):" << std::endl; break;
 						default:; break;
 						}
+						_topics = data->Param3;
 						for (unsigned int i = 0; i < data->Param3.size(); i++) {
 							std::cout << "    " << data->Param3[i] << std::endl;
 						}
@@ -78,11 +84,21 @@ public:
 					break;
 
 				case 2: // Publisher
-					data->serialize(&prt);
+					std::cout << "\n(key: " << data->getKey() <<
+						") Publisher for Topic: " << data->Name <<
+						", Enabled: " << data->Enabled <<
+						", PubId: " << data->Result1 <<
+						"\n";
+					if (gverbose) { data->serialize(&prt); }
 					break;
 
 				case 3: // Subscriber
-					data->serialize(&prt);
+					std::cout << "\n(key: " << data->getKey() <<
+						") Subscriber for Topic: " << data->Name <<
+						", Enabled: " << data->Enabled <<
+						", Num rcv: " << data->Result1 <<
+						"\n";
+					if (gverbose) { data->serialize(&prt); }
 					break;
 
 				default:
@@ -115,8 +131,43 @@ private:
 	ops::Participant* _part = nullptr;
 	ops::Subscriber* _sub = nullptr;
 
-	opsidls::DebugRequestResponseData _request;
+//	opsidls::DebugRequestResponseData _request;
 };
+
+void ListDomains()
+{
+	ops::OPSConfig* cfg = ops::OPSConfigRepository::Instance()->getConfig();
+	if (cfg == nullptr) { return; }
+
+	std::vector<ops::Domain*>& domains = cfg->getRefToDomains();
+
+	std::cout << "\n        Domains with Debug enabled\n\n";
+	std::cout << "   " << std::setw(20) << "Domain ID" << "   " << std::setw(20) << "Local Interface" << 
+		"   " << std::setw(20) << "Domain Address" << "   " << std::setw(8) << "Dbg Port" << 
+		"\n";
+	std::cout << "   " << std::setw(20) << "---------" << "   " << std::setw(20) << "---------------" << 
+		"   " << std::setw(20) << "--------------" << "   " << std::setw(8) << "--------" <<
+		"\n";
+	for (auto& d : domains) {
+		if (d->getDebugMcPort() != 0) {
+			std::cout << 
+				"   " << std::setw(20) << d->getDomainID() << 
+				"   " << std::setw(20) << d->getLocalInterface() << 
+				"   " << std::setw(20) << d->getDomainAddress() <<
+				"   " << std::setw(8)  << d->getDebugMcPort() <<
+				"\n";
+		}
+	}
+}
+
+void ForAllTopics(DebugListener& listener, opsidls::DebugRequestResponseDataPublisher& pub)
+{
+	for (auto n : listener._topics) {
+		request.Name = n;
+		pub.write(request);
+		ops::TimeHelper::sleep(20);
+	}
+}
 
 void CommandLoop(const ops::Participant* part)
 {
@@ -137,28 +188,38 @@ void CommandLoop(const ops::Participant* part)
 void Usage()
 {
 	std::cout << std::endl;
-	std::cout << "Version 2019-09-22" << std::endl;
+	std::cout << "Version 2019-11-29" << std::endl;
 	std::cout << std::endl;
 	std::cout << "  Usage:" << std::endl;
-	std::cout << "    DebugConsole [-?] -cfg file -d domain <high-level-command> [-k key]" << std::endl;
-	std::cout << "    DebugConsole [-?] -cfg file -d domain -k key -e n -n name -c cmd -p1 num" << std::endl;
+	std::cout << "    DebugConsole [-?][-v] [-cfg file] -list" << std::endl;
 	std::cout << std::endl;
-	std::cout << "    -? | -h         Help" << std::endl;
-	std::cout << "    -cfg file       ops_config.xml file to use (default ops_config.xml in CWD)" << std::endl;
-	std::cout << "    -d domain       OPS Domain to use" << std::endl;
+	std::cout << "      -? | -h         Help" << std::endl;
+	std::cout << "      -v              Verbose" << std::endl;
+	std::cout << "      -cfg file       ops_config.xml file to use (default ops_config.xml in CWD)" << std::endl;
+	std::cout << "      -list           lists all OPS Domains in given config file with debugging enabled" << std::endl;
 	std::cout << std::endl;
-	std::cout << "  High-level commands:" << std::endl;
-	std::cout << "    -lk             List all instance keys" << std::endl;
-	std::cout << "    -lp             List all publishers (*)" << std::endl;
-	std::cout << "    -ls             List all subscribers (*)" << std::endl;
-	std::cout << "                      * can be limited by giving a key (-k)" << std::endl;
+	std::cout << "    DebugConsole -cfg file -d domain <command> [-k key]" << std::endl;
 	std::cout << std::endl;
-	std::cout << "  Low-level commands:" << std::endl;
-	std::cout << "    -k key          Key to set in sent debug message" << std::endl;
-	std::cout << "    -e type         Entity type (2 = Publisher, 3 = Subscriber)" << std::endl;
-	std::cout << "    -n name         Entity name (for pub/sub the topic name)" << std::endl;
-	std::cout << "    -c cmd          Command to send to entity" << std::endl;
-	std::cout << "    -p1 num         Value for parameter 1" << std::endl;
+	std::cout << "      -d domain       OPS Domain to use" << std::endl;
+	std::cout << "      -lk             List all instance keys" << std::endl;
+	std::cout << "      -lp             List all publishers (*)" << std::endl;
+	std::cout << "      -ls             List all subscribers (*)" << std::endl;
+	std::cout << "                        * can be limited by giving a key (-k)" << std::endl;
+	std::cout << std::endl;
+	std::cout << "    DebugConsole -cfg file -d domain -k key <command>" << std::endl;
+	std::cout << std::endl;
+	std::cout << "      -k key          Key to set in sent debug message" << std::endl;
+	std::cout << "      -lpa            List info from all publisher topics" << std::endl;
+	std::cout << "      -lpi name       List info from publisher topic 'name'" << std::endl;
+	std::cout << "      -lsa            List info from all subscriber topics" << std::endl;
+	std::cout << "      -lsi name       List info from subscriber topic 'name'" << std::endl;
+	std::cout << std::endl;
+	std::cout << "    DebugConsole -cfg file -d domain -k key -e n -n name -c cmd -p1 num" << std::endl;
+	std::cout << std::endl;
+	std::cout << "      -e type         Entity type (2 = Publisher, 3 = Subscriber)" << std::endl;
+	std::cout << "      -n name         Entity name (for pub/sub the topic name)" << std::endl;
+	std::cout << "      -c cmd          Command to send to entity" << std::endl;
+	std::cout << "      -p1 num         Value for parameter 1" << std::endl;
 	std::cout << std::endl;
 }
 
@@ -167,6 +228,9 @@ int main(const int argc, const char* argv[])
 {
 	// Default values
 	bool printUsage = false;
+	bool listDomains = false;
+	bool allpubtopics = false;
+	bool allsubtopics = false;
 	std::string cfgFile("ops_config.xml");
 	std::string domain = "";
 	std::string key = "*";
@@ -175,6 +239,8 @@ int main(const int argc, const char* argv[])
 	std::string* strp = nullptr;
 	int* intp = nullptr;
 	int64_t* int64p = nullptr;
+
+	if (argc <= 1) { printUsage = true; }
 
 	for (int i = 1; i < argc; i++) {
 		std::string const arg = argv[i];
@@ -199,22 +265,45 @@ int main(const int argc, const char* argv[])
 		} else if (arg == "-k") {
 			strp = &key;
 
+		} else if (arg == "-list") {
+			listDomains = true;
+
 		} else if (arg == "-lk") {
 			request.Entity = 0;
 			request.Command = 2;
 			request.Param1 = 1;
 
-		}
-		else if (arg == "-lp") {
+		} else if (arg == "-lp") {
 			request.Entity = 0;
 			request.Command = 2;
 			request.Param1 = 2;
 
-		}
-		else if (arg == "-ls") {
+		} else if (arg == "-lpa") {
+			allpubtopics = true;
+			request.Entity = 0;
+			request.Command = 2;
+			request.Param1 = 2;
+
+		} else if (arg == "-lpi") {
+			request.Entity = 2;
+			request.Command = 1;
+			strp = &request.Name;
+
+		} else if (arg == "-ls") {
 			request.Entity = 0;
 			request.Command = 2;
 			request.Param1 = 3;
+
+		} else if (arg == "-lsa") {
+			allsubtopics = true;
+			request.Entity = 0;
+			request.Command = 2;
+			request.Param1 = 3;
+
+		} else if (arg == "-lsi") {
+			request.Entity = 3;
+			request.Command = 1;
+			strp = &request.Name;
 
 		} else if (arg == "-n") {
 			strp = &request.Name;
@@ -227,6 +316,9 @@ int main(const int argc, const char* argv[])
 			testData.cheese = "Hello from DebugConsole";
 			request.Objs.push_back(&testData);
 #endif
+		} else if (arg == "-v") {
+			gverbose = true;
+
 		}
 
 		if ((strp != nullptr) && ((i+1) < argc)) {
@@ -262,6 +354,11 @@ int main(const int argc, const char* argv[])
 		// Add all Domain's from given file(s)
 		ops::OPSConfigRepository::Instance()->Add(cfgFile);
 
+		if (listDomains) {
+			ListDomains();
+			return 0;
+		}
+
 		// Create participant
 		ops::Participant* const participant = ops::Participant::getInstance(domain);
 		if (participant == nullptr) {
@@ -281,6 +378,21 @@ int main(const int argc, const char* argv[])
 		request.Objs.clear();
 
 		ops::TimeHelper::sleep(1000);
+
+		if (allpubtopics || allsubtopics) {
+			if (allpubtopics) {
+				request.Entity = 2;
+				request.Command = 1;
+				ForAllTopics(listener, pub);
+			}
+			if (allsubtopics) {
+				request.Entity = 3;
+				request.Command = 1;
+				ForAllTopics(listener, pub);
+			}
+			ops::TimeHelper::sleep(1000);
+		}
+
 	}
     return 0;
 }
