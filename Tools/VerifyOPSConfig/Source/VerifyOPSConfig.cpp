@@ -12,7 +12,7 @@
 
 #include "Configuration.h"
 
-const std::string sVersion = "Version 2019-10-05";
+const std::string sVersion = "Version 2019-12-01";
 
 
 bool gErrorGiven = false;
@@ -37,7 +37,8 @@ public:
 	CVerifyOPSConfig(std::string filename, bool const debug):
 	    bDebug(debug),
 		iNumDomains(0),
-		bUdpRequireMetadata(false)
+		bUdpRequireMetadata(false),
+		bTcpRequireMetadata(false)
 	{
 		try {
 			std::string s;
@@ -267,6 +268,7 @@ public:
 		vChannels.clear();
 		vTransportTopics.clear();
 		bUdpRequireMetadata = false;
+		bTcpRequireMetadata = false;
 
 		//<element type = "MulticastDomain"> or <element type = "Domain">
         //    <domainID>SDSDomain</domainID>
@@ -311,7 +313,7 @@ public:
 				"localInterface", "timeToLive",
 				"channels", "transports",
 				"outSocketBufferSize", "inSocketBufferSize",
-				"topics" 
+				"topics", "optNonVirt", "heartbeatPeriod", "heartbeatTimeout"
 			};
 			CheckForUnknown(config, known, " in <domains> for domainID '" + domainName + "'");
 		}
@@ -424,6 +426,9 @@ public:
 		if (bUdpRequireMetadata && (config.parseInt(metaDataMcPort, 9494) == 0)) {
 			LOG_WARN( ">>> UDP used as transport and '<metaDataMcPort>' set to 0. UDP requires metaDataMcPort != 0." << std::endl );
 		}
+		if (bTcpRequireMetadata && (config.parseInt(metaDataMcPort, 9494) == 0)) {
+			LOG_WARN(">>> TCP used as transport and '<metaDataMcPort>' set to 0. TCP requires metaDataMcPort != 0." << std::endl);
+		}
 
 		// Check that all transport topics have been found
 		if (vTransportTopics.size() > 0) {
@@ -479,19 +484,27 @@ public:
 			LOG_WARN( ">>> Missing <linktype> for channel '" << channelName << "' in domain '" << domainName << "', multicast assumed." << std::endl );
 		}
 
-		// address
-		if ((address == "") && (linkType != "udp")) {
-			LOG_WARN( ">>> Missing <address> for channel '" << channelName << "' in domain '" << domainName << "'" << std::endl );
-		}
-
-		// port
+		// address & port
 		if (port == "") {
-			if (linkType != "udp") {
+			if ((linkType != "udp") && (linkType != "tcp")) {
 				LOG_WARN(">>> Missing <port> for channel '" << channelName << "' in domain '" << domainName << "'" << std::endl);
 			}
 		} else {
 			if (config.parseInt(port, -1) > 65535) {
 				LOG_WARN(">>> port > 65535 for channel '" << channelName << "' in domain '" << domainName << "'" << std::endl);
+			}
+		}
+
+		if (linkType == "tcp") {
+			if (address == "") {
+				bTcpRequireMetadata = true;
+				if (port != "") {
+					LOG_WARN(">>> Superfluous <port> given for channel '" << channelName << "' in domain '" << domainName << "'" << std::endl);
+				}
+			} else {
+				if (port == "") {
+					LOG_WARN(">>> Missing <port> for channel '" << channelName << "' in domain '" << domainName << "'. <port> is required if <address> specified" << std::endl);
+				}
 			}
 		}
 
@@ -662,19 +675,27 @@ public:
 				//LOG_WARN(">>> Missing <linkType> for topic '" << topicName << "' in domain '" << domainName << "', multicast assumed." << std::endl)
 			}
 
-			// address
-			if ((address == "") && (linkType == "tcp")) {
-				LOG_WARN(">>> Missing <address> for topic '" << topicName << "' in domain '" << domainName << "'" << std::endl);
-			}
-
-			// port
+			// address & port
 			if (port == "") {
-				if (linkType != "udp") {
+				if ((linkType != "udp") && (linkType != "tcp")) {
 					LOG_WARN(">>> Missing <port> for topic '" << topicName << "' in domain '" << domainName << "'" << std::endl);
 				}
 			} else {
 				if (config.parseInt(port, -1) > 65535) {
 					LOG_WARN(">>> port > 65535 for topic '" << topicName << "' in domain '" << domainName << "'" << std::endl);
+				}
+			}
+
+			if (linkType == "tcp") {
+				if (address == "") {
+					bTcpRequireMetadata = true;
+					if (port != "") {
+						LOG_WARN(">>> Superfluous <port> for topic '" << topicName << "' in domain '" << domainName << "'" << std::endl);
+					}
+				} else {
+					if (port == "") {
+						LOG_WARN(">>> Missing <port> for topic '" << topicName << "' in domain '" << domainName << "'. <port> is required if <address> specified" << std::endl);
+					}
 				}
 			}
 
@@ -711,6 +732,7 @@ private:
 	std::vector<std::string> vChannels;
 	std::vector<std::string> vTransportTopics;
 	bool bUdpRequireMetadata;
+	bool bTcpRequireMetadata;
 
 };
 
