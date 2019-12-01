@@ -83,11 +83,12 @@ class CHelper(IHelper):
 		self.sub = None
 		self.expectedPubId = -1
 		self.data = None
+
 	def HasPublisher(self):
 		return self.pub is not None
+
 	def HasSubscriber(self):
 		return self.sub is not None
-
 
 	def CreatePublisher(self,part,topicName):
 		if self.pub is not None:
@@ -101,6 +102,7 @@ class CHelper(IHelper):
 	def DeletePublisher(self,doLog = True):
 		if self.pub is not None:
 			print("Deleting publisher for topic " + self.pub.topic.name)
+			self.pub.stop()
 			del self.pub
 			self.pub = None
 		else:
@@ -177,7 +179,7 @@ class ItemInfo(object):
 		self.part = None
 		self.selected = False
 	def __str__(self):
-		return ("P" if self.helper.HasPublisher() else " ") + ("S" if self.helper.HasPublisher() else " ") + ("*" if self.selected else " ") + self.Domain + "::" + self.TopicName
+		return ("P" if self.helper.HasPublisher() else " ") + ("S" if self.helper.HasSubscriber() else " ") + ("*" if self.selected else " ") + self.Domain + "::" + self.TopicName
 
 
 ItemInfoList = []

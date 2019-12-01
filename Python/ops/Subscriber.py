@@ -29,6 +29,7 @@ class Subscriber(object):
 		if not self.started:
 			return
 		self.receiveDataHandler.removeSubscriber(self);
+		self.participant.releaseReceiveDataHandler(self.topic)
 		self.receiveDataHandler = None
 		self.started = False
 

@@ -26,7 +26,8 @@ class Publisher(object):
 
 		self.currentPublicationID=0
 		self.participant = Participant.getInstance(topic.domainID, topic.participantID)
-		self.sendDataHandler = self.participant.getSendDataHandler(topic)
+		self.sendDataHandler = None
+		self.start()
 
 	def write(self,data,doValidation = True):
 		if doValidation:
@@ -52,10 +53,15 @@ class Publisher(object):
 		self.currentPublicationID+=1
 
 	def start(self):
-		self.sendDataHandler.addPublisher(self)
+		if self.sendDataHandler is None:
+			self.sendDataHandler = self.participant.getSendDataHandler(self.topic)
+			self.sendDataHandler.addPublisher(self)
 
 	def stop(self):
-		self.sendDataHandler.removePublisher(self)
+		if self.sendDataHandler is not None:
+			self.sendDataHandler.removePublisher(self)
+			self.participant.releaseSendDataHandler(self.topic)
+			self.sendDataHandler = None
 
 	def getTopic(self):
 		return self.topic

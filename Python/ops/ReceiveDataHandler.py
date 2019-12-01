@@ -1,6 +1,8 @@
-#ReceiveDataHandler
+# ReceiveDataHandler
 
+import struct
 import socket
+
 try:
 	import thread
 except ImportError:
@@ -16,7 +18,7 @@ class AbstractReceiveDataHandler(object):
 		self.topic = topic
 		self.localInterface = localInterface
 		self.assembler = None
-		self.subscrubers = set()
+		self.subscribers = set()
 
 	def segmentReceived(self,data,addr):
 		segment = ops.DataAssembly.Segment(data)
@@ -36,13 +38,13 @@ class AbstractReceiveDataHandler(object):
 			print("Not a valid segment")
 
 	def addSubscriber(self,subs):
-		self.subscrubers.add(subs)
+		self.subscribers.add(subs)
 	def removeSubscriber(self,subs):
-		self.subscrubers.remove(subs)
+		self.subscribers.remove(subs)
 
 	def distributeMessage(self,obj):
 		if obj is not None:
-			for subs in self.subscrubers:
+			for subs in self.subscribers:
 				subs.newMessage(obj)
 
 	def run(self):
@@ -52,12 +54,6 @@ class AbstractReceiveDataHandler(object):
 		thread.start_new_thread( self.run, () )
 	def end(self):
 		self.shouldRun = False
-		pass
-
-class TcpReceiveDataHandler(AbstractReceiveDataHandler):
-	def __init__(self):
-		super(TcpReceiveDataHandler,self).__init__()
-		raise NotImplementedError
 
 class UdpReceiveDataHandler(AbstractReceiveDataHandler):
 	def __init__(self,localInterface,topic):
@@ -79,6 +75,77 @@ class UdpReceiveDataHandler(AbstractReceiveDataHandler):
 				pass
 
 		sock.close()
+
+def recvall(sock, n):
+	# Helper function to recv n bytes or return None if EOF is hit
+	data = b''
+	try:
+		while len(data) < n:
+			fragment = sock.recv(n - len(data))
+			if not fragment:
+				break
+			data += fragment
+	except socket.error:
+		pass
+	return data
+
+class TcpReceiveDataHandler(AbstractReceiveDataHandler):
+	def __init__(self,localInterface,topic):
+		super(TcpReceiveDataHandler,self).__init__(localInterface,topic)
+		self.addr = (topic.domainAddress, topic.port)
+		self.connected = False
+
+	def run(self):
+		while self.shouldRun:
+			self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			self.sock.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
+			if self.topic.inSocketBufferSize > 0:
+				self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, self.topic.inSocketBufferSize)
+
+			while not self.connected and self.shouldRun:
+				try:
+					self.sock.connect(self.addr)
+				except socket.error:
+					pass
+				else:
+					self.connected = True
+
+			while self.connected and self.shouldRun:
+				data = ''
+				size = 0
+				try:
+					data = recvall(self.sock, 18)
+				except socket.timeout:
+					pass
+
+				if data == b'opsp_tcp_size_info':
+					try:
+						data = recvall(self.sock, 4)
+					except socket.timeout:
+						pass
+
+					if len(data) == 4:
+						size = struct.unpack("<I", data)[0]
+						if size > 0 and size <= PACKET_MAX_SIZE:
+							try:
+								data = recvall(self.sock, size)
+							except socket.timeout:
+								pass
+						else:
+							self.connected = False
+
+						if len(data) == size and size > 0:
+							self.segmentReceived(data, self.addr)
+							data = ''
+						else:
+							self.connected = False
+					else:
+						self.connected = False
+				else:
+					self.connected = False
+
+			self.sock.shutdown(socket.SHUT_RDWR)
+			self.sock.close()
 
 class McReceiveDataHandler(AbstractReceiveDataHandler):
 	def __init__(self,localInterface,topic):
@@ -108,19 +175,20 @@ class McReceiveDataHandler(AbstractReceiveDataHandler):
 def __makeKey(topic):
 	return topic.transport + "::" + topic.domainAddress + "::" + str(topic.port)
 
-__ReceiveDataHandler = {}
-
+__ReceiveDataHandlerList = {}
 
 def getReceiveDataHandler(participant,topic):
 	key = __makeKey(topic)
 
 	rdh = None
-	if key in __ReceiveDataHandler:
-		rdh = __ReceiveDataHandler[key]
+	if key in __ReceiveDataHandlerList:
+		rdh = __ReceiveDataHandlerList[key]
 		if max(rdh.topic.sampleMaxSize,topic.sampleMaxSize) > PACKET_MAX_SIZE:
 			message = "Warning: "
 			if topic.transport == TRANSPORT_UDP:
 				message += "UDP Transport"
+			elif topic.transport == TRANSPORT_TCP:
+				message += "TCP Transport"
 			else:
 				message += "Same port (%s)" % topic.port
 			message += " is used with Topics with 'sampleMaxSize' > %s" % PACKET_MAX_SIZE
@@ -129,8 +197,21 @@ def getReceiveDataHandler(participant,topic):
 		localInterface = ops.Support.doSubnetTranslation(topic.localInterface)
 		if topic.transport == TRANSPORT_MC:
 			rdh = McReceiveDataHandler(localInterface,topic)
-		if topic.transport == TRANSPORT_UDP:
+		elif topic.transport == TRANSPORT_UDP:
 			rdh = UdpReceiveDataHandler(localInterface,topic)
+		elif topic.transport == TRANSPORT_TCP:
+			rdh = TcpReceiveDataHandler(localInterface,topic)
 		rdh.start()
-		__ReceiveDataHandler[key] = rdh
+		__ReceiveDataHandlerList[key] = rdh
 	return rdh
+
+def releaseReceiveDataHandler(participant,topic):
+	key = __makeKey(topic)
+
+	rdh = None
+	if key in __ReceiveDataHandlerList:
+		rdh = __ReceiveDataHandlerList[key]
+
+		if len(rdh.subscribers) == 0:
+			rdh.end()
+			__ReceiveDataHandlerList.pop(key)

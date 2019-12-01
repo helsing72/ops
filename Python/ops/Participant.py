@@ -57,8 +57,12 @@ class Participant(object):
 		self.objectFactory.addFactory(typeSupport)
 	def getSendDataHandler(self,topic):
 		return ops.SendDataHandler.getSendDataHandler(self,topic)
+	def releaseSendDataHandler(self,topic):
+		return ops.SendDataHandler.releaseSendDataHandler(self,topic)
 	def getReceiveDataHandler(self,topic):
 		return ops.ReceiveDataHandler.getReceiveDataHandler(self,topic)
+	def releaseReceiveDataHandler(self,topic):
+		return ops.ReceiveDataHandler.releaseReceiveDataHandler(self,topic)
 
 	def createParticipantInfoTopic(self):
 		topic = Topic()
