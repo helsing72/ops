@@ -26,7 +26,7 @@ Build the solution for all configurations (both x86 and x64):
   * "Release" - for compiler setting Multi-threaded Release
   * "Release DLL" - for compiler setting Multi-threaded Release DLL
 
-Verify they all compile alright (you will have some warnings).
+Verify they all compile alright (you will have a few warnings).
 
 ## Building OPS Core for C# with Visual Studio ##
 Open the solution/project with Visual Studio (VS2017 version 15.7 or later) in directory

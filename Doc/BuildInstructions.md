@@ -33,6 +33,7 @@ The install result will be in the subdirectory 'deploy' with the following struc
 >  - include
 >  - lib
 >  - share
+>  - test 
 
 ## Building without CMake ##
 See [Building without CMake](BuildingWithoutCMake.md).

@@ -38,10 +38,13 @@ To run a Python application that uses OPS and the generated IDL files, the Pytho
 See the 'run' script-file in the example directory for how to use the PYTHONPATH method.
 
 ## Ada Examples ##
-TBD
+Under OPS_DIR/Examples, you find Ada examples in the directory **AdaApps**.
 
 ## Delphi Examples ##
-TBD
+Under OPS_DIR/Examples, you find Delphi examples in the directory **DelphiApps**.
 
 ## Java Examples ##
-TBD
+Under OPS_DIR/Examples, you find Java examples in the directory **JavaApps**.
+
+## C# Examples ##
+Under OPS_DIR/Examples, you find C# examples in the directory **CSharpApps**.

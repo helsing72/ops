@@ -9,9 +9,9 @@ The C++ implementation of OPS uses boost.asio as the core for its communication 
 More than doing work in the core of OPS, this thread also occasionally finds its way into your application code. This happens when your are notified of new data or deadlineTimeouts via listeners. It is important to understand that if you hold up the executing thread in such a listener callback, this will affect the whole participant. Listener callbacks should always do as little work as possible, if you need to do more heavy work, consider polling the subscriber instead or transfer your work to another worker thread.
 
 
-## Threading Model C#, Java, Delphi and Ada ##
+## Threading Model C#, Java, Delphi, Ada and Python ##
 
-In C#, Java, Delphi and Ada, each unique port in the configuration yields one thread that waits on the socket for new data to arrive. Deadline timeouts are checked by another thread common for the whole participant.
+In C#, Java, Delphi, Ada and Python, each unique port in the configuration yields one thread that waits on the socket for new data to arrive. Deadline timeouts are checked by another thread common for the whole participant.
 
 Both these threads also occasionally finds its ways into your application code. This happens when your are notified of new data or deadlineTimeouts via listeners. It is important to understand that if you hold up the executing thread in such a listener callback, this will affect all subscribers to topics using that port within the participant (on new data events) or the whole participant (deadline events). Listener callbacks should always do as little work as possible, if you need to do more heavy work, consider polling the subscriber instead or transfer your work to another worker thread.
 

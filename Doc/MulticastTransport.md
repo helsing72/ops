@@ -71,7 +71,7 @@ Further more, the domain is made up of three different topics: FooTopic1, FooTop
 
 **FooTopic1** has the minimal set of configuration needed for a multicast topic: **name**, **port** and **dataType**. FooTopic1 have no address explicitly set and will thus be communicated over the multicast address specified by the **domainAddress**. The port number will be 7000.
 
-**FooTopic2** has a **address** field specified to another multicast address then the domain address and this will override the domain address for FooTopic2 which will be communicated on 234.5.6.9/7001 in this case.
+**FooTopic2** has an **address** field specified to another multicast address then the domain address and this will override the domain address for FooTopic2 which will be communicated on 234.5.6.9/7001 in this case.
 
 **FooTopic3** has the same address/port combination as FooTopic2 which is perfectly valid but will yield a receiver side filtering in applications if there exist a subscriber for one but not the other of the two topics. It is often a good idea to only use the same address/port combination for topics that go close together, i.e. if an application subscribes to one of the topics, it is likley that it also subscribes to the other. Moreover, to save ports (which is a limited resource of the operating system) it can be a good idea to have the same address/port combination for topics with low rates and sample sizes.
 
