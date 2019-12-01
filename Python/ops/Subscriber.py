@@ -1,5 +1,5 @@
 from ops.opsTypes import Message
-from ops.Participant import Participant
+import ops.Participant
 from ops.OPS_Archiver import OPS_Archiver_In
 from ops.Constants import *
 
@@ -7,7 +7,7 @@ class Subscriber(object):
 	def __init__(self,topic):
 		super(Subscriber,self).__init__()
 		self.topic = topic
-		self.participant = Participant.getInstance(topic.domainID,topic.participantID)
+		self.participant = ops.Participant.Participant.getInstance(topic.domainID,topic.participantID)
 		self.receiveDataHandler=None
 
 		self.filters = []

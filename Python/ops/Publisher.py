@@ -1,4 +1,4 @@
-from ops.Participant import Participant
+import ops.Participant
 from ops.opsTypes import Message
 
 from ops.OPS_Archiver import OPS_Archiver_Out
@@ -12,7 +12,7 @@ class Publisher(object):
 
 	@staticmethod
 	def create(domainID,topicname):
-		return Publisher(Participant.Participant.getInstance(domainID).createTopic(topicname))
+		return Publisher(ops.Participant.Participant.getInstance(domainID).createTopic(topicname))
 
 	def __init__(self,topic):
 		super(Publisher, self).__init__()
@@ -25,7 +25,7 @@ class Publisher(object):
 		self.message.topicName = topic.name
 
 		self.currentPublicationID=0
-		self.participant = Participant.getInstance(topic.domainID, topic.participantID)
+		self.participant = ops.Participant.Participant.getInstance(topic.domainID, topic.participantID)
 		self.sendDataHandler = None
 		self.start()
 
