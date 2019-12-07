@@ -58,4 +58,6 @@ To use the TCP transport for a topic, this is how to setup your [Topic Config](O
 As you can see, the field transport must be set to "tcp". If address and port is specified it is the ip address of the machine running the publisher for the topic (a one-to-many communication).
 Other fields has the same impact as for the [Multicast Transport](MulticastTransport.md).
 
+The TCP transport protocol exists in two versions, where v2 added heartbeats to enable faster detection of a broken link, see [protocol description](Protocol.md)). Currently the v2 protocol only exist in C++ and Ada implementations.
+
 See also, [Topic Config](OpsConfig.md).

@@ -67,8 +67,8 @@ Version 2 adds heartbeats in both directions to enable faster detection of a bro
 
 The version detection is initiated by the TCPClient sending a *Probe message*. A v1 TCPServer don't read anything, so the message will be ignored. A v2 or greater TCPServer reacts by sending a *Heartbeat message*. When the TCPClient gets the *Heartbeat message*, both sides know the version on the other side.
 
-Both sides shall send a *Heartbeat message* if no other data is sent since 1 second.
-The link shall be determined as broken and closed if no bytes are received during 3 seconds.
+Both sides shall send a *Heartbeat message* if no other data is sent since 1 second (default value, can be configured in the OPS [configuration file](OpsConfig.md)).
+The link shall be determined as broken and closed if no bytes are received during 3 seconds (default value, can be configured in the OPS [configuration file](OpsConfig.md))
 
 **Probe Message** (23 bytes)
 ```

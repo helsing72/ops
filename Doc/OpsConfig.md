@@ -59,9 +59,12 @@ Optional elements of _Domain_:
   * **inSocketBufferSize**, sets a default underlying socket buffer size used for topics that doesn't specify its own, see *Topic* below. If this tag is omitted, the OS default is used.
   * **outSocketBufferSize**, sets a default underlying socket buffer size used for topics that doesn't specify its own, see *Topic* below. If this tag is omitted, the OS default is used.
   * **metaDataMcPort**, defines the multicast port used for metadata communication between participants. If this tag is omitted, the default port is 9494. If set to 0, metadata will be disabled. See the *Transport Mechanisms* section below how this effects the communication.
+  * **debugMcPort**, defines the multicast port used for the debug control and monitoring of publishers and subscribers in a domain. If the tag is omitted or set to 0, the debug facilities are disabled. For more information see [debug facilities](DebugFunc.md).
   * **channels**, a list of *Channel* elements, see Channel Configuration below.
   * **transports**, a list of *Transport* elements, see Channel Configuration below.
   * **optNonVirt**, false/true, default false. If set to true, non-virtual fields in idl's will be sent without type information (since it is redundant) to minimize transfer size. Setting it to true may break backward compatibility and will in this case require all programs to be recompiled with the same OPS version.
+  * **heartbeatPeriod**, sets the TCP heartbeat Period in [ms], which defines the longest silent period on TCP before a heartbeat message is sent (heartbeats are suppressed if other data is sent on the socket). Default value is 1000 [ms], setting a value of 0 disables heartbeat sending and monitoring. See also [TCP transport](TcpTransport.md).
+  * **heartbeatTimeout**, sets the TCP monitoring timeout in [ms], which defines the longest silent period on TCP before the socket is disconnected. Default value is 3000 [ms].
 
 Optional elements of _Topic_:
   * **sampleMaxSize**, defines the maximum size of the data type when used in this topic. The value is used for reserving memory to be able to buffer data during reception. If this tag is omitted or is specified with a value < 60000, a value of 60000 is used. If a value > 60000 is specified, this topic MUST use its own port, see also [Sending Large Messages](LargeMessages.md).
