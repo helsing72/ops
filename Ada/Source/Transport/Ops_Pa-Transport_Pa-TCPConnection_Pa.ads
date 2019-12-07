@@ -29,7 +29,9 @@ package Ops_Pa.Transport_Pa.TCPConnection_Pa is
 
   -- Takes ownership of socket handle
   function Create( Socket : Ops_Pa.Socket_Pa.TCPClientSocket_Class_At;
-                   Port : Integer ) return TCPConnection_Class_At;
+                   Port : Integer;
+                   HeartbeatPeriod : Int32;
+                   HeartbeatTimeout : Int32 ) return TCPConnection_Class_At;
 
   package ReceiveNotifier_Pa is new Notifier_Pa(1, BytesSizePair_T);
 
@@ -80,7 +82,9 @@ package Ops_Pa.Transport_Pa.TCPConnection_Pa is
 
   -- Takes ownership of socket handle
   function Create( Socket : Ops_Pa.Socket_Pa.TCPClientSocket_Class_At;
-                   Port : Integer ) return TCPServerConnection_Class_At;
+                   Port : Integer;
+                   HeartbeatPeriod : Int32;
+                   HeartbeatTimeout : Int32 ) return TCPServerConnection_Class_At;
 
   -- Set this flag to enable trace from the TCP Connection
   TraceEnabled : Boolean := False;
@@ -121,6 +125,8 @@ private
       -- Send time
       TimeSnd : TimeMs_T := 0;
       HbSent : Boolean := False;
+      HeartbeatPeriod : TimeMs_T := 1000;
+      HeartbeatTimeout : TimeMs_T := 3000;
 
       UserData : Integer := 0;
     end record;
@@ -128,7 +134,9 @@ private
   procedure InitInstance( Self : in out TCPConnection_Class;
                           SelfAt : TCPConnection_Class_At;
                           Socket : Ops_Pa.Socket_Pa.TCPClientSocket_Class_At;
-                          Port : Integer
+                          Port : Integer;
+                          HeartbeatPeriod : Int32;
+                          HeartbeatTimeout : Int32
                          );
 
   procedure SetupForReadingSize( Self : in out TCPConnection_Class );
@@ -150,7 +158,9 @@ private
   procedure InitInstance( Self : in out TCPServerConnection_Class;
                           SelfAt : TCPServerConnection_Class_At;
                           Socket : Ops_Pa.Socket_Pa.TCPClientSocket_Class_At;
-                          Port : Integer
+                          Port : Integer;
+                          HeartbeatPeriod : Int32;
+                          HeartbeatTimeout : Int32
                          );
 
   --------------------------------------------------------------------------

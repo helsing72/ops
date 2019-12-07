@@ -97,7 +97,11 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa is
 
     elsif top.Transport = TRANSPORT_TCP then
       Result := Receiver_Class_At(Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa.
-        Create( top.DomainAddress, Integer(top.Port), top.InSocketBufferSize));
+                                    Create( ServerIP => top.DomainAddress,
+                                            ServerPort => Integer(top.Port),
+                                            HeartbeatPeriod => top.HeartbeatPeriod,
+                                            HeartbeatTimeout => top.HeartbeatTimeout,
+                                            InSocketBufferSize => top.InSocketBufferSize) );
 
     elsif top.Transport = TRANSPORT_UDP then
       Result := Receiver_Class_At(Ops_Pa.Transport_Pa.Receiver_Pa.UDPReceiver_Pa.

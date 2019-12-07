@@ -33,6 +33,8 @@ package Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
 
   function Create(serverIP : String;
                   serverPort : Integer;
+                  HeartbeatPeriod : Int32;
+                  HeartbeatTimeout : Int32;
                   outSocketBufferSize : Int64 := 16000000) return TCPServerSender_Class_At;
 
   -- Interface used to send data
@@ -77,6 +79,8 @@ private
       Port : Integer := 0;
       IpAddress : String_At := null;
       OutSocketBufferSize : Int64 := -1;
+      HeartbeatPeriod : Int32 := 0;
+      HeartbeatTimeout : Int32 := 0;
 
       TcpServer : Ops_Pa.Socket_Pa.TCPServerSocket_Class_At := null;
       SocketWaits : Ops_Pa.Socket_Pa.Selector_Class_At := null;
@@ -102,6 +106,8 @@ private
   procedure InitInstance( Self : in out TCPServerSender_Class;
                           serverIP : String;
                           serverPort : Integer;
+                          HeartbeatPeriod : Int32;
+                          HeartbeatTimeout : Int32;
                           outSocketBufferSize : Int64 );
 
   --------------------------------------------------------------------------

@@ -53,11 +53,13 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
 
   function Create(serverIP : String;
                   serverPort : Integer;
+                  HeartbeatPeriod : Int32;
+                  HeartbeatTimeout : Int32;
                   outSocketBufferSize : Int64 := 16000000) return TCPServerSender_Class_At is
     Self : TCPServerSender_Class_At := null;
   begin
     Self := new TCPServerSender_Class;
-    InitInstance( Self.all, serverIP, serverPort, outSocketBufferSize );
+    InitInstance( Self.all, serverIP, serverPort, HeartbeatPeriod, HeartbeatTimeout, outSocketBufferSize );
     return Self;
   exception
     when others =>
@@ -68,11 +70,15 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
   procedure InitInstance( Self : in out TCPServerSender_Class;
                           serverIP : String;
                           serverPort : Integer;
+                          HeartbeatPeriod : Int32;
+                          HeartbeatTimeout : Int32;
                           outSocketBufferSize : Int64) is
   begin
     Self.Port := serverPort;
     Self.IpAddress := Copy(serverIP);
     Self.OutSocketBufferSize := outSocketBufferSize;
+    Self.HeartbeatPeriod := HeartbeatPeriod;
+    Self.HeartbeatTimeout := HeartbeatTimeout;
 
     Self.TcpServer := Ops_Pa.Socket_Pa.Create;
     Self.SocketWaits := Ops_Pa.Socket_Pa.Create;
@@ -266,7 +272,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
       begin
         Self.SocketWaits.Add( Socket_Pa.Socket_Class_At(tcpClient) );
         Port := tcpClient.GetBoundPort;
-        Conn := TCPConnection_Pa.Create( tcpClient, Port );
+        Conn := TCPConnection_Pa.Create( tcpClient, Port, Self.HeartbeatPeriod, Self.HeartbeatTimeout );
         Self.ConnectedSockets.Append( Conn );
         if Self.CsClient /= null then
           Ada.Strings.Fixed.Move( tcpClient.GetPeerIP, Status.Address, Drop => Ada.Strings.Right );

@@ -35,6 +35,8 @@ package Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
 
   function Create( serverIP : string;
                    serverPort : Integer;
+                   HeartbeatPeriod : Int32;
+                   HeartbeatTimeout : Int32;
                    inSocketBufferSize : Int64 := 16000000) return TCPClientReceiver_Class_At;
 
   -- Start():
@@ -99,6 +101,8 @@ private
                           SelfAt : TCPClientReceiver_Class_At;
                           serverIP : string;
                           serverPort : Integer;
+                          HeartbeatPeriod : Int32;
+                          HeartbeatTimeout : Int32;
                           inSocketBufferSize : Int64 );
 
   --------------------------------------------------------------------------

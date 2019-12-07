@@ -36,7 +36,7 @@ package Ops_Pa.Transport_Pa.Sender_Pa is
   -- Sender Factory (creates a sender)
   function createMCSender(localInterface : string := "0.0.0.0"; ttl : Integer := 1; outSocketBufferSize : Int64 := 16000000) return Sender_Class_At;
   function createUDPSender(localInterface : string := "0.0.0.0"; ttl : Integer := 1; outSocketBufferSize : Int64 := 16000000) return Sender_Class_At;
-  function createTCPServer(ip : string; port : Integer; outSocketBufferSize : Int64 := 16000000) return Sender_Class_At;
+  function createTCPServer(ip : string; port : Integer; HeartbeatPeriod : Int32; HeartbeatTimeout : Int32; outSocketBufferSize : Int64 := 16000000) return Sender_Class_At;
 
 private
 -- ==========================================================================

@@ -86,6 +86,12 @@ package Ops_Pa.OpsObject_Pa.Topic_Pa is
   function OptNonVirt( Self : Topic_Class ) return Boolean;
   procedure SetOptNonVirt( Self : in out Topic_Class; Value : Boolean);
 
+  function HeartbeatPeriod( Self : Topic_Class ) return Int32;
+  procedure SetHeartbeatPeriod( Self : in out Topic_Class; Value : Int32);
+
+  function HeartbeatTimeout( Self : Topic_Class ) return Int32;
+  procedure SetHeartbeatTimeout( Self : in out Topic_Class; Value : Int32);
+
 private
 -- ==========================================================================
 --
@@ -107,6 +113,8 @@ private
       OutSocketBufferSize : Int64 := -1;
       InSocketBufferSize : Int64 := -1;
       OptNonVirt : Boolean := False;
+      HeartbeatPeriod : Int32 := 0;
+      HeartbeatTimeout : Int32 := 0;
     end record;
 
   procedure InitInstance( Self : in out Topic_Class; namee : String; portt : Int32; typeIDd : String; domainAddresss : String);

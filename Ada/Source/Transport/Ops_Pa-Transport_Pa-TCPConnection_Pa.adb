@@ -17,6 +17,7 @@
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
 with Ada.Unchecked_Conversion;
+with Ada.Real_Time;
 
 package body Ops_Pa.Transport_Pa.TCPConnection_Pa is
 
@@ -112,12 +113,14 @@ package body Ops_Pa.Transport_Pa.TCPConnection_Pa is
   -- =========================================================================
 
   function Create( Socket : Ops_Pa.Socket_Pa.TCPClientSocket_Class_At;
-                   Port : Integer
+                   Port : Integer;
+                   HeartbeatPeriod : Int32;
+                   HeartbeatTimeout : Int32
                   ) return TCPConnection_Class_At is
      Self : TCPConnection_Class_At := null;
   begin
     Self := new TCPConnection_Class;
-    InitInstance( Self.all, Self, Socket, Port );
+    InitInstance( Self.all, Self, Socket, Port, HeartbeatPeriod, HeartbeatTimeout );
     return Self;
   exception
     when others =>
@@ -128,10 +131,14 @@ package body Ops_Pa.Transport_Pa.TCPConnection_Pa is
   procedure InitInstance( Self : in out TCPConnection_Class;
                           SelfAt : TCPConnection_Class_At;
                           Socket : Ops_Pa.Socket_Pa.TCPClientSocket_Class_At;
-                          Port : Integer ) is
+                          Port : Integer;
+                          HeartbeatPeriod : Int32;
+                          HeartbeatTimeout : Int32 ) is
   begin
     Self.Socket := Socket;
     Self.Port := Port;
+    Self.HeartbeatPeriod := TimeMs_T(HeartbeatPeriod);
+    Self.HeartbeatTimeout := TimeMs_T(HeartbeatTimeout);
     Self.DataNotifier := ReceiveNotifier_Pa.Create( Ops_Class_At(SelfAt) );
 
     Self.SizeBuffer := new Byte_Arr(0..SizeInfoSize_C-1);
@@ -271,12 +278,12 @@ package body Ops_Pa.Transport_Pa.TCPConnection_Pa is
   begin
     if Self.DetectedVersion > 1 then
       -- Check if we need to send a heartbeat (at least one during a connection)
-      if not Self.HbSent or ((GetTimeInMs - Self.TimeSnd) >= 1000) then
+      if not Self.HbSent or ((GetTimeInMs - Self.TimeSnd) >= Self.HeartbeatPeriod) then
         Self.SendHeartbeat( errorFlag );
       end if;
 
       -- Check receive timeout
-      if GetTimeInMs - Self.TimeRcv >= 3000 then
+      if GetTimeInMs - Self.TimeRcv >= Self.HeartbeatTimeout then
         if TraceEnabled then Self.Trace("No Data. Connection timed out"); end if;
         errorFlag := True;
       end if;
@@ -405,6 +412,8 @@ package body Ops_Pa.Transport_Pa.TCPConnection_Pa is
     Res : Integer := 0;
     ErrorDetected : Boolean := False;
     Timedout : Boolean := False;
+    TimeSpan  : Ada.Real_Time.Time_Span;
+    Dur       : Duration;
   begin
     Self.StopFlag := False;
     Self.LastErrorCode := 0;
@@ -414,6 +423,9 @@ package body Ops_Pa.Transport_Pa.TCPConnection_Pa is
     -- Set up for reading a new size info
     Self.SetupForReadingSize;
 
+    TimeSpan := Ada.Real_Time.Milliseconds( Integer(Self.HeartbeatTimeout) );
+    Dur := Ada.Real_Time.To_Duration(TimeSpan);
+
     -- Read data loop
     while (not Self.StopFlag) and (Self.Socket.IsConnected) loop
       if TraceEnabled then Self.Trace("Wait for Data..."); end if;
@@ -421,7 +433,7 @@ package body Ops_Pa.Transport_Pa.TCPConnection_Pa is
       if Self.DetectedVersion > 1 then
         --Wait for data with timeout. If no data, exit which closes the connection
         --This will be the heartbeat check (ie. we don't need to save time for received messages?)
-        Res := Self.Socket.ReceiveBuf( Self.Buffer(Self.BufferIdx..Self.BufferIdxLast), 3.0, Timedout );
+        Res := Self.Socket.ReceiveBuf( Self.Buffer(Self.BufferIdx..Self.BufferIdxLast), Dur, Timedout );
       else
         Res := Self.Socket.ReceiveBuf( Self.Buffer(Self.BufferIdx..Self.BufferIdxLast) );
       end if;
@@ -457,12 +469,14 @@ package body Ops_Pa.Transport_Pa.TCPConnection_Pa is
   -- =========================================================================
 
   function Create( Socket : Ops_Pa.Socket_Pa.TCPClientSocket_Class_At;
-                   Port : Integer
+                   Port : Integer;
+                   HeartbeatPeriod : Int32;
+                   HeartbeatTimeout : Int32
                   ) return TCPServerConnection_Class_At is
      Self : TCPServerConnection_Class_At := null;
   begin
     Self := new TCPServerConnection_Class;
-    InitInstance( Self.all, Self, Socket, Port );
+    InitInstance( Self.all, Self, Socket, Port, HeartbeatPeriod, HeartbeatTimeout );
     return Self;
   exception
     when others =>
@@ -473,9 +487,11 @@ package body Ops_Pa.Transport_Pa.TCPConnection_Pa is
   procedure InitInstance( Self : in out TCPServerConnection_Class;
                           SelfAt : TCPServerConnection_Class_At;
                           Socket : Ops_Pa.Socket_Pa.TCPClientSocket_Class_At;
-                          Port : Integer ) is
+                          Port : Integer;
+                          HeartbeatPeriod : Int32;
+                          HeartbeatTimeout : Int32 ) is
   begin
-    InitInstance( TCPConnection_Class(Self), TCPConnection_Class_At(SelfAt), Socket, Port );
+    InitInstance( TCPConnection_Class(Self), TCPConnection_Class_At(SelfAt), Socket, Port, HeartbeatPeriod, HeartbeatTimeout );
     Self.ServerBuffer := new Byte_Arr'(0..Byte_Arr_Index_T(1023) => 0);
     Self.SetReceiveBuffer( Self.ServerBuffer, 1024 );
     Self.SetupForReadingSize;

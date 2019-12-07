@@ -33,11 +33,13 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
 
   function Create( serverIP : string;
                    serverPort : Integer;
+                   HeartbeatPeriod : Int32;
+                   HeartbeatTimeout : Int32;
                    inSocketBufferSize : Int64 := 16000000) return TCPClientReceiver_Class_At is
      Self : TCPClientReceiver_Class_At := null;
   begin
     Self := new TCPClientReceiver_Class;
-    InitInstance( Self.all, Self, serverIP, serverPort, inSocketBufferSize );
+    InitInstance( Self.all, Self, serverIP, serverPort, HeartbeatPeriod, HeartbeatTimeout, inSocketBufferSize );
     return Self;
   exception
     when others =>
@@ -49,6 +51,8 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
                           SelfAt : TCPClientReceiver_Class_At;
                           serverIP : String;
                           serverPort : Integer;
+                          HeartbeatPeriod : Int32;
+                          HeartbeatTimeout : Int32;
                           inSocketBufferSize : Int64 ) is
   begin
     Self.SelfAt := SelfAt;
@@ -60,7 +64,7 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
 
     -- Create socket
     Self.TcpClient := Ops_Pa.Socket_Pa.Create;
-    Self.Connection := TCPConnection_Pa.Create( Self.TcpClient, Self.Port );
+    Self.Connection := TCPConnection_Pa.Create( Self.TcpClient, Self.Port, HeartbeatPeriod, HeartbeatTimeout );
     Self.Connection.addListener( TCPConnection_Pa.ReceiveNotifier_Pa.Listener_Interface_At(SelfAt) );
 
     Self.Timer := Timer_Pa.Create( Ops_Class_At(SelfAt), Periodic => True );

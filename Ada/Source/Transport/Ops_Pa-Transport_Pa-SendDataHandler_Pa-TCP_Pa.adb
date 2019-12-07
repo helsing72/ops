@@ -36,7 +36,11 @@ package body Ops_Pa.Transport_Pa.SendDataHandler_Pa.TCP_Pa is
                           Reporter : ErrorService_Class_At ) is
   begin
     InitInstance( SendDataHandler_Class(Self), SendDataHandler_Class_At(SelfAt) );
-    Self.Sender := createTCPServer( topic.DomainAddress, Integer(topic.Port), topic.OutSocketBufferSize );
+    Self.Sender := createTCPServer( ip                  => topic.DomainAddress,
+                                    port                => Integer(topic.Port),
+                                    HeartbeatPeriod     => topic.HeartbeatPeriod,
+                                    HeartbeatTimeout    => topic.HeartbeatTimeout,
+                                    outSocketBufferSize => topic.OutSocketBufferSize );
     Self.Sender.SetErrorService( Reporter );
     Self.Sender.SetConnectStatusClient( ConnectStatus_Interface_At(SelfAt) );
   end;

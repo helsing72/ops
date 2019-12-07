@@ -173,6 +173,26 @@ package body Ops_Pa.OpsObject_Pa.Topic_Pa is
     Self.OptNonVirt := Value;
   end;
 
+  function HeartbeatPeriod( Self : Topic_Class ) return Int32 is
+  begin
+    return Self.HeartbeatPeriod;
+  end;
+
+  procedure SetHeartbeatPeriod( Self : in out Topic_Class; Value : Int32) is
+  begin
+    Self.HeartbeatPeriod := Value;
+  end;
+
+  function HeartbeatTimeout( Self : Topic_Class ) return Int32 is
+  begin
+    return Self.HeartbeatTimeout;
+  end;
+
+  procedure SetHeartbeatTimeout( Self : in out Topic_Class; Value : Int32) is
+  begin
+    Self.HeartbeatTimeout := Value;
+  end;
+
   overriding procedure Serialize( Self : in out Topic_Class; archiver : ArchiverInOut_Class_At) is
     tSampleMaxSize : Int32;
   begin

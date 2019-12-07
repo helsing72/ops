@@ -33,9 +33,9 @@ package body Ops_Pa.Transport_Pa.Sender_Pa is
     return Sender_Class_At(Ops_Pa.Transport_Pa.Sender_Pa.Udp_Pa.Create(localInterface, ttl, outSocketBufferSize, False));
   end;
 
-  function createTCPServer(ip : string; port : Integer; outSocketBufferSize : Int64 := 16000000) return Sender_Class_At is
+  function createTCPServer(ip : string; port : Integer; HeartbeatPeriod : Int32; HeartbeatTimeout : Int32; outSocketBufferSize : Int64 := 16000000) return Sender_Class_At is
   begin
-   return Sender_Class_At(Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa.Create(ip, port, outSocketBufferSize));
+   return Sender_Class_At(Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa.Create(ip, port, HeartbeatPeriod, HeartbeatTimeout, outSocketBufferSize));
   end;
 
 end Ops_Pa.Transport_Pa.Sender_Pa;

@@ -77,6 +77,16 @@ package body Ops_Pa.OpsObject_Pa.Domain_Pa is
     return Self.OptNonVirt;
   end;
 
+  function HeartbeatPeriod( Self : Domain_Class ) return Int32 is
+  begin
+    return Self.HeartbeatPeriod;
+  end;
+
+  function HeartbeatTimeout( Self : Domain_Class ) return Int32 is
+  begin
+    return Self.HeartbeatTimeout;
+  end;
+
   -- Helpers for handling [de]serializing of fixed arrays
   procedure Topic_Class_InoutDynArr is new inoutdynarr2(Topic_Class, Topic_Class_At, Topic_Class_At_Arr, Topic_Class_At_Arr_At, Create);
   procedure Channel_Class_InoutDynArr is new inoutdynarr2(Channel_Class, Channel_Class_At, Channel_Class_At_Arr, Channel_Class_At_Arr_At, Create);
@@ -100,6 +110,8 @@ package body Ops_Pa.OpsObject_Pa.Domain_Pa is
       Channel_Class_InoutDynArr(archiver, "channels", Self.channels, False);
       Transport_Class_InoutDynArr(archiver, "transports", Self.transports, False);
       archiver.InOut("optNonVirt", Self.OptNonVirt);
+      archiver.InOut("heartbeatPeriod", Self.heartbeatPeriod);
+      archiver.InOut("heartbeatTimeout", Self.heartbeatTimeout);
       Self.CheckTransports;
     end if;
   end;
@@ -221,6 +233,8 @@ package body Ops_Pa.OpsObject_Pa.Domain_Pa is
       top.SetOutSocketBufferSize( Int64(Self.OutSocketBufferSize) );
     end if;
     top.SetOptNonVirt( Self.OptNonVirt );
+    top.SetHeartbeatPeriod( Self.HeartbeatPeriod );
+    top.SetHeartbeatTimeout( Self.HeartbeatTimeout );
   end;
 
   -- Returns references to the internal topics

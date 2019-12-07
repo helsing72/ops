@@ -72,6 +72,8 @@ package Ops_Pa.OpsObject_Pa.Domain_Pa is
   function InSocketBufferSize( Self : Domain_Class ) return Int32;
   function OutSocketBufferSize( Self : Domain_Class ) return Int32;
   function OptNonVirt( Self : Domain_Class ) return Boolean;
+  function HeartbeatPeriod( Self : Domain_Class ) return Int32;
+  function HeartbeatTimeout( Self : Domain_Class ) return Int32;
 
 private
 -- ==========================================================================
@@ -90,6 +92,8 @@ private
       Channels : Channel_Class_At_Arr_At := null;
       Transports : Transport_Class_At_Arr_At := null;
       OptNonVirt : Boolean := False;
+      HeartbeatPeriod : Int32 := 1000;
+      HeartbeatTimeout : Int32 := 3000;
     end record;
 
   procedure checkTopicValues( Self : Domain_Class; top : Topic_Class_At);
