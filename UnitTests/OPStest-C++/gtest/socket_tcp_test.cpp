@@ -93,7 +93,7 @@ public:
 		Log("Server", status);
 		cst = status;
 		
-		conn.setProtocol(new ops::TCPOpsProtocol(TimeHelper::currentTimeMillis));
+		conn.setProtocol(new ops::TCPOpsProtocol(TimeHelper::currentTimeMillis, 1000, 3000));
 		
 		// Start a read
 		conn.asynchWait(buffer, 1024);
@@ -128,7 +128,7 @@ public:
 	// Called from client when a connection is made
 	void onConnect(TCPConnection& conn, ConnectStatus status) override
 	{
-		if (!protSet) conn.setProtocol(new ops::TCPOpsProtocol(TimeHelper::currentTimeMillis));
+		if (!protSet) conn.setProtocol(new ops::TCPOpsProtocol(TimeHelper::currentTimeMillis, 1000, 3000));
 		protSet = true;
 		Log("Client", status);
 		cst = status;

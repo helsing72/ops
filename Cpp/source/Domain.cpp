@@ -35,7 +35,9 @@ Domain::Domain() :
 	outSocketBufferSize(-1),	// Use OS default, Topics may override
 	metaDataMcPort(9494),		// Default port 
 	debugMcPort(0),
-	optNonVirt(false)
+	optNonVirt(false), 
+	heartbeatPeriod(1000),
+	heartbeatTimeout(3000)
 {
 	appendType(TypeId_T("Domain"));
 }
@@ -53,6 +55,8 @@ void Domain::checkTopicValues(Topic* const top) const
 	if (top->getInSocketBufferSize() < 0) { top->setInSocketBufferSize(inSocketBufferSize); }
 	if (top->getOutSocketBufferSize() < 0) { top->setOutSocketBufferSize(outSocketBufferSize); }
 	top->optNonVirt = optNonVirt;
+	top->heartbeatPeriod = heartbeatPeriod;
+	top->heartbeatTimeout = heartbeatTimeout;
 }
 
 std::vector<Topic* > Domain::getTopics() const
@@ -116,6 +120,8 @@ void Domain::serialize(ArchiverInOut* archiver)
 		archiver->inout<Transport>("transports", transports);
 		archiver->inout("debugMcPort", debugMcPort);
 		archiver->inout("optNonVirt", optNonVirt);
+		archiver->inout("heartbeatPeriod", heartbeatPeriod);
+		archiver->inout("heartbeatTimeout", heartbeatTimeout);
 		checkTransports();
 	}
 }
@@ -201,6 +207,14 @@ int Domain::getDebugMcPort() const
 bool Domain::getOptNonVirt() const
 {
 	return optNonVirt;
+}
+int Domain::getHeartbeatPeriod() const
+{
+	return heartbeatPeriod;
+}
+int Domain::getHeartbeatTimeout() const
+{
+	return heartbeatTimeout;
 }
 
 Domain::~Domain()

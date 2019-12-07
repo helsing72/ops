@@ -154,7 +154,7 @@ int64_t MyTime::_now = 0;
 TEST(Test_TCPProtocol, TestTCPProtocolVer1) {
 
 	// No user data used in this test case
-	ops::TCPOpsProtocol prot(&MyTime::clock);
+	ops::TCPOpsProtocol prot(&MyTime::clock, 1000, 3000);
 	MyTcpProtClient client(&prot);
 
 	char buffer[1024];
@@ -300,7 +300,7 @@ public:
 TEST(Test_TCPProtocol, TestTCPProtocolVer2) {
 
 	{
-		ops::TCPOpsProtocol prot(&MyTime::clock);
+		ops::TCPOpsProtocol prot(&MyTime::clock, 1000, 3000);
 		MyTcpProtClient client(&prot);
 
 		prot.userData = new MyTCPUserData();
@@ -382,7 +382,7 @@ TEST(Test_TCPProtocol, TestTCPProtocolPeriodic) {
 	char buffer[1024];
 
 	{
-		ops::TCPOpsProtocol prot(&MyTime::clock);
+		ops::TCPOpsProtocol prot(&MyTime::clock, 1000, 3000);
 		MyTcpProtClient client(&prot);
 
 		prot.connect(&client);
@@ -403,7 +403,7 @@ TEST(Test_TCPProtocol, TestTCPProtocolPeriodic) {
 	}
 
 	{
-		ops::TCPOpsProtocol prot(&MyTime::clock);
+		ops::TCPOpsProtocol prot(&MyTime::clock, 1000, 3000);
 		MyTcpProtClient client(&prot);
 		MyTime::_now = 10000;
 
@@ -456,7 +456,7 @@ TEST(Test_TCPProtocol, TestTCPProtocolPeriodic) {
 	}
 
 	{
-		ops::TCPOpsProtocol prot(&MyTime::clock);
+		ops::TCPOpsProtocol prot(&MyTime::clock, 1000, 3000);
 		MyTcpProtClient client(&prot);
 		MyTime::_now = 10000;
 

@@ -43,6 +43,8 @@ namespace ops
 		int metaDataMcPort;
 		int debugMcPort;
 		bool optNonVirt;
+		int heartbeatPeriod;
+		int heartbeatTimeout;
 
 		std::vector<Channel* > channels;
 		std::vector<Transport* > transports;
@@ -62,6 +64,8 @@ namespace ops
 		int getMetaDataMcPort() const;
 		int getDebugMcPort() const;
 		bool getOptNonVirt() const;
+		int getHeartbeatPeriod() const;
+		int getHeartbeatTimeout() const;
 
 		void serialize(ArchiverInOut* archiver) override;
 		int getTimeToLive() const;

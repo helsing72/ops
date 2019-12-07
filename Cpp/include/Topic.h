@@ -75,6 +75,8 @@ namespace ops
 		void setInSocketBufferSize(int64_t size);
 
 		bool getOptNonVirt() const;
+		int getHeartbeatPeriod() const;
+		int getHeartbeatTimeout() const;
 
 		Participant* getParticipant() const
 		{
@@ -102,7 +104,9 @@ namespace ops
 
 		Participant* participant;
 	
-		bool optNonVirt;
+		bool optNonVirt = false;
+		int heartbeatPeriod = 0;
+		int heartbeatTimeout = 0;
 	};
 }
 #endif

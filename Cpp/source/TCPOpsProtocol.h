@@ -58,6 +58,8 @@ namespace ops
 		int64_t _timeSnd = 0;
 		int _detectedVersion = 1;
 		bool _hbSent = false;
+		int _heartbeatPeriod = 1000;
+		int _heartbeatTimeout = 3000;
 
 		// _data[0 .. _accumulatedSize-1] contains data (_accumulatedSize == _expectedSize)
 		// returns false if error
@@ -119,10 +121,12 @@ namespace ops
 		}
 
 	public:
-		TCPOpsProtocol(timeFunc func) :
+		TCPOpsProtocol(timeFunc func, int heartbeatPeriod, int heartbeatTimeout) :
 			_timeFuncMs(func),
 			_sizeInfoBuffer("opsp_tcp_size_info"),
-			_probeBuffer   ("opsprobeNNNN______")
+			_probeBuffer   ("opsprobeNNNN______"),
+			_heartbeatPeriod(heartbeatPeriod),
+			_heartbeatTimeout(heartbeatTimeout)
 		{
 			// In _probeBuffer the NNNN is the current TCP protocol version
 			*((uint32_t*)(_probeBuffer + 8)) = protocol_version;
@@ -229,14 +233,14 @@ namespace ops
 		{
 			bool errorDetected = false;
 
-			if (_detectedVersion > 1) {
+			if ((_detectedVersion > 1) && (_heartbeatPeriod > 0)) {
 				// Check if we need to send a heartbeat (at least one during a connection)
-				if ((!_hbSent) || ((_timeFuncMs() - _timeSnd) >= 1000)) {
+				if ((!_hbSent) || ((_timeFuncMs() - _timeSnd) >= _heartbeatPeriod)) {
 					if (sendHeartbeat() < 0) errorDetected = true;
 				}
 
 				// Check that we got data from other side
-				if ((_timeFuncMs() - _timeRcv) >= 3000) {
+				if ((_timeFuncMs() - _timeRcv) >= _heartbeatTimeout) {
 					OPS_TCP_TRACE("Receive timeout\n");
 					// A long time since any data
 					errorDetected = true;

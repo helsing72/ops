@@ -49,6 +49,7 @@ namespace ops
     {
 		IOService* _ioService;
 		std::map<ObjectName_T, int> _topics;
+		int _heartbeatPeriod, _heartbeatTimeout;
 
 		struct Connection_t : TCPUserBase
 		{
@@ -62,7 +63,7 @@ namespace ops
 
 	public:
         TCPSendDataHandler(IOService* ioService, Topic& topic) :
-			_ioService(ioService)
+			_ioService(ioService), _heartbeatPeriod(topic.getHeartbeatPeriod()), _heartbeatTimeout(topic.getHeartbeatTimeout())
         {
 			sender = Sender::createTCPServer(this, ioService, topic.getDomainAddress(), topic.getPort(), topic.getOutSocketBufferSize());
         }
@@ -123,7 +124,7 @@ namespace ops
 			Connection_t* ct = new Connection_t();
 			ct->sentAtConnect = false;
 
-			TCPOpsProtocol* prot = new TCPOpsProtocol(TimeHelper::currentTimeMillis);
+			TCPOpsProtocol* prot = new TCPOpsProtocol(TimeHelper::currentTimeMillis, _heartbeatPeriod, _heartbeatTimeout);
 			prot->userData = ct;
 			InternalString_T dbgId(status.addr);
 			dbgId += "::";

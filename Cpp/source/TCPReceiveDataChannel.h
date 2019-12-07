@@ -48,6 +48,10 @@ namespace ops
 
 		// Tell derived classes which topics that are active
 		void topicUsage(Topic& top, bool used) override;
+
+	private:
+		int _heartbeatPeriod;
+		int _heartbeatTimeout;
 	};
 	
 }

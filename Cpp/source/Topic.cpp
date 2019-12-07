@@ -139,6 +139,15 @@ namespace ops
 		return optNonVirt;
 	}
 
+	int Topic::getHeartbeatPeriod() const
+	{
+		return heartbeatPeriod;
+	}
+	int Topic::getHeartbeatTimeout() const
+	{
+		return heartbeatTimeout;
+	}
+
 	void Topic::serialize(ArchiverInOut* archiver)
 	{
 		OPSObject::serialize(archiver);

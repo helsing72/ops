@@ -47,7 +47,9 @@ namespace ops
 		ReceiveDataChannel(top, part, 
 			Receiver::createTCPClient(
 				this, top.getDomainAddress(), top.getPort(), 
-				part.getIOService(), top.getInSocketBufferSize()))
+				part.getIOService(), top.getInSocketBufferSize())),
+		_heartbeatPeriod(top.getHeartbeatPeriod()),
+		_heartbeatTimeout(top.getHeartbeatTimeout())
     {
 	}
 
@@ -79,7 +81,7 @@ namespace ops
 		OPS_TCP_TRACE("RDC: onConnect()\n");
 		// If first time, set the protocol to use
 		if (conn.getProtocol() == nullptr) {
-			conn.setProtocol(new TCPOpsProtocol(TimeHelper::currentTimeMillis));
+			conn.setProtocol(new TCPOpsProtocol(TimeHelper::currentTimeMillis, _heartbeatPeriod, _heartbeatTimeout));
 		}
 		TCPOpsProtocol* prot = dynamic_cast<TCPOpsProtocol*>(conn.getProtocol());
 		if (prot != nullptr) {
