@@ -35,6 +35,9 @@ class AbstractSendDataHandler(object):
 	def sendData(self,block,topic):
 		raise NotImplementedError
 
+	def localAddress(self):
+		return (0,0)
+
 
 class UdpSendDataHandler(AbstractSendDataHandler):
 	def __init__(self,topic):
@@ -43,6 +46,9 @@ class UdpSendDataHandler(AbstractSendDataHandler):
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
 		if topic.outSocketBufferSize > 0:
 			self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, topic.outSocketBufferSize)
+
+	def localAddress(self):
+		return self.socket.getsockname()
 
 	def sendData(self,block,topic):
 		if self.socket is None:
@@ -59,6 +65,9 @@ class TcpSendDataHandler(AbstractSendDataHandler):
 		self.sock.listen(1)
 		self.conns = set()
 		self.shouldRun = False
+
+	def localAddress(self):
+		return self.sock.getsockname()
 
 	def sendData(self,block,topic):
 		data = b'opsp_tcp_size_info' + struct.pack("<I", len(block)) + block
@@ -105,6 +114,9 @@ class McSendDataHandler(AbstractSendDataHandler):
 		self.socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_IF, socket.inet_aton(localInterface))
 		if topic.outSocketBufferSize > 0:
 			self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, topic.outSocketBufferSize)
+
+	def localAddress(self):
+		return self.socket.getsockname()
 
 	def sendData(self,block,topic):
 		if self.socket is None:

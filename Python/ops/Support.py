@@ -19,3 +19,14 @@ def doSubnetTranslation(localInterface):
 		temp = struct.unpack(">I",socket.inet_aton(iface))[0]
 		if ((temp ^ networkAddress) & netMask) == 0:
 			return iface
+
+
+def isValidNodeAddress(addr):
+	if addr == "":
+		return False
+	ip = struct.unpack(">I",socket.inet_aton(addr))[0]
+	if ip == 0:
+		return False
+	if ip >= 0xE0000000:
+	   return False
+	return True

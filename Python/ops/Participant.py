@@ -2,6 +2,7 @@
 
 from socket import gethostname
 from os import getpid
+from threading import Lock
 
 try:
 	import thread
@@ -47,15 +48,15 @@ class Participant(object):
 		self.objectFactory = OpsDefaultFactory()
 
 		self.shouldRun = False
+		self.tcprdhs = {}
 
-		self.partInfoSub = None
-		self.partInfoPub = None
 		self.partInfoData = ops.ParticipantInfoData.ParticipantInfoData()
 
 		self.partInfoData.name = gethostname() + "(" + str(getpid()) + ")"
 		self.partInfoData.languageImplementation = "Python"
 		self.partInfoData.id = participantID
 		self.partInfoData.domain = domainID
+		self.partInfoLock = Lock()
 
 	def __str__(self):
 		return "Participant\nConfig:\n" + self.config.__str__() + "\nDomain:\n" + self.domain.__str__()
@@ -72,24 +73,41 @@ class Participant(object):
 
 	def getSendDataHandler(self,topic):
 		self.start()
-		self.partInfoData.publishTopics.append(ops.ParticipantInfoData.TopicInfoData(topic))
-		return ops.SendDataHandler.getSendDataHandler(self,topic)
+		sdh = ops.SendDataHandler.getSendDataHandler(self,topic)
+		if topic.transport == ops.Constants.TRANSPORT_TCP and topic.port == 0:
+			addr = sdh.localAddress()
+			topic.port = addr[1]
+			if not ops.Support.isValidNodeAddress(topic.domainAddress):
+				topic.domainAddress = ops.Support.doSubnetTranslation(topic.localInterface)
+		with self.partInfoLock:
+			self.partInfoData.publishTopics.append(ops.ParticipantInfoData.TopicInfoData(topic))
+		return sdh
+
 	def releaseSendDataHandler(self,topic):
-		for i, ti in enumerate(self.partInfoData.publishTopics):
-			if ti.name == topic.name:
-				del self.partInfoData.publishTopics[i]
-				break
+		with self.partInfoLock:
+			for i, ti in enumerate(self.partInfoData.publishTopics):
+				if ti.name == topic.name:
+					del self.partInfoData.publishTopics[i]
+					break
 		ops.SendDataHandler.releaseSendDataHandler(self,topic)
 
 	def getReceiveDataHandler(self,topic):
 		self.start()
-		self.partInfoData.subscribeTopics.append(ops.ParticipantInfoData.TopicInfoData(topic))
-		return ops.ReceiveDataHandler.getReceiveDataHandler(self,topic)
+		rdh = ops.ReceiveDataHandler.getReceiveDataHandler(self,topic)
+		with self.partInfoLock:
+			self.partInfoData.subscribeTopics.append(ops.ParticipantInfoData.TopicInfoData(topic))
+		if topic.transport == ops.Constants.TRANSPORT_TCP:
+			self.tcprdhs[topic.name] = rdh 
+		return rdh
+
 	def releaseReceiveDataHandler(self,topic):
-		for i, ti in enumerate(self.partInfoData.subscribeTopics):
-			if ti.name == topic.name:
-				del self.partInfoData.subscribeTopics[i]
-				break
+		with self.partInfoLock:
+			for i, ti in enumerate(self.partInfoData.subscribeTopics):
+				if ti.name == topic.name:
+					del self.partInfoData.subscribeTopics[i]
+					break
+		if topic.transport == ops.Constants.TRANSPORT_TCP:
+			self.tcprdhs.pop(topic.name)
 		ops.ReceiveDataHandler.releaseReceiveDataHandler(self,topic)
 
 	def createParticipantInfoTopic(self):
@@ -119,27 +137,30 @@ class Participant(object):
 		return topic
 
 	def run(self):
+		partInfoSub = None
+		partInfoPub = None
 		while self.shouldRun:
 			sleep(1)
 			# Create subscriber
-			if self.partInfoSub is None and self.domain.metaDataMcPort > 0:
-				self.partInfoSub = ops.Subscriber.Subscriber(self.createParticipantInfoTopic())
-				self.partInfoSub.addCallback(self.onParticipantInfoData)
-				self.partInfoSub.start()
+			if partInfoSub is None and self.domain.metaDataMcPort > 0:
+				partInfoSub = ops.Subscriber.Subscriber(self.createParticipantInfoTopic())
+				partInfoSub.addCallback(self.onParticipantInfoData)
+				partInfoSub.start()
 			# create publisher
-			if self.partInfoPub is None and self.domain.metaDataMcPort > 0:
-				self.partInfoPub = ops.Publisher.Publisher(self.createParticipantInfoTopic())
+			if partInfoPub is None and self.domain.metaDataMcPort > 0:
+				partInfoPub = ops.Publisher.Publisher(self.createParticipantInfoTopic())
 
 			# periodic publish of our ParticipantInfoData
-			if self.partInfoPub is not None:
-				self.partInfoPub.write(self.partInfoData)
+			if partInfoPub is not None:
+				with self.partInfoLock:
+					partInfoPub.write(self.partInfoData)
 
-		if self.partInfoSub is not None:
-			self.partInfoSub.stop()
-			self.partInfoSub = None
-		if self.partInfoPub is not None:
-			self.partInfoPub.stop()
-			self.partInfoPub = None
+		if partInfoSub is not None:
+			partInfoSub.stop()
+			partInfoSub = None
+		if partInfoPub is not None:
+			partInfoPub.stop()
+			partInfoPub = None
 
 	def start(self):
 		if not self.shouldRun and self.domain.metaDataMcPort > 0:
@@ -150,10 +171,24 @@ class Participant(object):
 		if self.shouldRun:
 			self.shouldRun = False
 
+	def hasSubscriberOn(self,topicname):
+		with self.partInfoLock:
+			for subtop in self.partInfoData.subscribeTopics:
+				if subtop.name == topicname:
+					return True
+		return False
+
 	def onParticipantInfoData(self,sub,message):
-		addr,port = map(str,message.getSource())
 		data=message.data
-		tempStr = "(From " + addr + ":" + port
-		tempStr +=") PartInfoData: Name: " + data.name
-		tempStr +=",  languageImplementation: " + data.languageImplementation
-#		print(tempStr)
+
+		#addr,port = map(str,message.getSource())
+		#tempStr = "(From " + addr + ":" + port
+		#tempStr +=") PartInfoData: Name: " + data.name
+		#tempStr +=",  languageImplementation: " + data.languageImplementation
+		#print(tempStr)
+
+		for pubtop in data.publishTopics:
+			if pubtop.transport == ops.Constants.TRANSPORT_TCP:
+				if self.hasSubscriberOn( pubtop.name ):
+					if pubtop.name in self.tcprdhs:
+						self.tcprdhs[pubtop.name].addChannel( pubtop.address, pubtop.port )
