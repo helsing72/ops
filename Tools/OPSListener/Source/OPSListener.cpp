@@ -37,14 +37,14 @@
 
 #endif
 
-const char c_program_version[] = "OPSListener Version 2019-11-19";
+const char c_program_version[] = "OPSListener Version 2019-12-08";
 
 void showDescription()
 {
-	std::cout << std::endl;
-	std::cout << "  This program can subscribe to any OPS topic and it is possible to choose what " << std::endl;
-	std::cout << "  information to present and in which order." << std::endl;
+	std::cout << "  This program can subscribe to any OPS topic and it is possible to choose what ";
+	std::cout << "information to present and in which order." << std::endl;
 	std::cout << "  This can be used to test if / verify that topics are published." << std::endl;
+	std::cout << "  Topic names can use wildcards (eg. \".*zz.*\" means any topic with 'zz' any where in the name)." << std::endl;
 	std::cout << std::endl;
 }
 
@@ -621,6 +621,16 @@ public:
 			std::endl;
 	}
 
+	void updateVector(std::vector<ops::ObjectName_T>& v, const ops::ObjectName_T& topName)
+	{
+		for (unsigned int j = 0; j < v.size(); j++) {
+			if (v[j] == topName) {
+				return;
+			}
+		}
+		v.push_back(topName);
+	}
+
 	//
 	Main(CArguments& args) :
 		logTime(args.logTime),
@@ -649,8 +659,32 @@ public:
 
 		std::cout << std::endl;
 
+		// Check for regex in topicNames 
+		std::vector<ops::ObjectName_T> vec;
+		for (unsigned int i = 0; i < args.topicNames.size(); i++) {
+			if (opsHelper.checkExpansion(vec, args.topicNames[i])) {
+				args.topicNames[i] = "";
+			}
+		}
+		for (auto& x : vec) {
+			updateVector(args.topicNames, x);
+		}
+		vec.clear();
+
+		// Check for regex in skipTopicNames 
+		for (unsigned int i = 0; i < args.skipTopicNames.size(); i++) {
+			if (opsHelper.checkExpansion(vec, args.skipTopicNames[i])) {
+				args.skipTopicNames[i] = "";
+			}
+		}
+		for (auto& x : vec) {
+			updateVector(args.skipTopicNames, x);
+		}
+		vec.clear();
+
 		// Now, Check given topics and find all unique domains for these
 		for (unsigned int i = 0; i < args.topicNames.size(); i++) {
+			if (args.topicNames[i] == "") continue;
 			if (!opsHelper.existsTopic(args.topicNames[i])) {
 				std::cout << "##### Topic '" << args.topicNames[i] << "' not found in configuration file(s)" << std::endl;
 				args.topicNames[i] = "";
@@ -745,14 +779,7 @@ public:
 
 			for (unsigned int t = 0; t < topics.size(); t++) {
 				ops::ObjectName_T const topName = ops::utilities::fullTopicName(domainName, topics[t]->getName());
-				bool found = false;
-				for (unsigned int j = 0; j < args.topicNames.size(); j++) {
-					if (args.topicNames[j] == topName) {
-						found = true;
-						break;
-					}
-				}
-				if (!found) { args.topicNames.push_back(topName); }
+				updateVector(args.topicNames, topName);
 			}
 		}
 

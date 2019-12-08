@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <map>
+#include <regex>
 
 #include "ops.h"
 
@@ -99,6 +100,38 @@ public:
 			if (s == vDomains[i]) return;
 		}
 		vDomains.push_back(s);
+	}
+
+	// -----------------------------------------------------------------------------------------
+	// 
+	bool checkExpansion(std::vector<ops::ObjectName_T>& vec, ops::ObjectName_T name)
+	{
+		bool expanded = false;
+		try {
+			ops::ObjectName_T domID = ops::utilities::domainName(name);
+			ops::Participant* part = getDomainParticipant(domID);
+			if (part == nullptr) { return false; }
+
+			ops::Domain* domain = part->getDomain();
+			if (domain == nullptr) { return false; }
+
+			ops::ObjectName_T topName = ops::utilities::topicName(name);
+			bool exist = domain->existsTopic(topName);
+			if (!exist) {
+				// Check if it's a valid regex
+				std::regex rex(topName.c_str());
+				for (auto& topic : domain->getTopics()) {
+					if (std::regex_match(topic->getName().c_str(), rex)) {
+						vec.push_back(ops::utilities::fullTopicName(domID, topic->getName()));
+						expanded = true;
+					}
+				}
+			}
+		}
+		catch (...) {
+			expanded = false;
+		}
+		return expanded;
 	}
 
 	// -----------------------------------------------------------------------------------------
