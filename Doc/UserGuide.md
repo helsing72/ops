@@ -23,6 +23,7 @@
     * [OPS Bridge](OPSBridge.md)
     * [OPS Debugger](OPSDebugger.md)
     * [OPS Listener](OPSListener.md)
+    * [DebugConsole](DebugConsole.md)
     * [VerifyOPSConfig](VerifyOPSConfig.md)
     * [Syntax highlighters](SyntaxHighlighters.md)
     * [Wireshark](Wireshark.md)

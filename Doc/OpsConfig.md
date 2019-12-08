@@ -102,7 +102,7 @@ Note that if a topic specify _sampleMaxSize_ > 60000, it MUST have its own _Chan
   With specified **address** and **port** tags, the metadata is not used and address and port specify the subscribers address and port. In this case it is a _many-to-one_ transport mechanism.
   For an example see [udp example](UdpTransport.md).
 
-  * *tcp*: Without specified **address** and **port** tags, OPS uses the metadata sent by participants to connect publishers and subscribers using dynamic ports. This requires metadata to be enabled to work and it is a _many-to-many_ transport mechanism (Please note: Currently only supported in C++).
+  * *tcp*: Without specified **address** and **port** tags, OPS uses the metadata sent by participants to connect publishers and subscribers using dynamic ports. This requires metadata to be enabled to work and it is a _many-to-many_ transport mechanism (Please note: Currently only supported in C++ and Python).
   With specified **address** and **port** tags, the metadata is not used and address and port specify the publishers tcp server address and port to which subscribers connect. In this case it is a _one-to-many_ transport mechanism.
   For an example see [tcp example](TcpTransport.md).
 

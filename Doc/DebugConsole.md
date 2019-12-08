@@ -1,5 +1,5 @@
 # Debug Console #
-***DebugConsole*** is a tool for accessing the built-in debug facilities in OPS.
+***DebugConsole*** is a tool for accessing the built-in [debug functionality](DebugFunc.md) in OPS.
 
 TBD
 
