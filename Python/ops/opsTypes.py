@@ -111,6 +111,7 @@ class Topic(OPS_Object):
 		self.timeToLive=-1
 		self.localInterface=""
 		self.optNonVirt=False
+		self.channelID=""
 
 	def __str__(self):
 		temp ="\nTopic:"
@@ -236,6 +237,7 @@ class Channel(OPS_Object):
 		top.outSocketBufferSize = self.outSocketBufferSize
 		top.inSocketBufferSize = self.inSocketBufferSize
 		top.timeToLive = self.timeToLive
+		top.channelID = self.channelID
 
 class Transport(OPS_Object):
 	"""docstring for Transport"""

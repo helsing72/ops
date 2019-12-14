@@ -74,13 +74,18 @@ class Participant(object):
 	def getSendDataHandler(self,topic):
 		self.start()
 		sdh = ops.SendDataHandler.getSendDataHandler(self,topic)
+		# For tcp we may need to give the specific address bound to the TCP server
+		addr = None
 		if topic.transport == ops.Constants.TRANSPORT_TCP and topic.port == 0:
 			addr = sdh.localAddress()
-			topic.port = addr[1]
-			if not ops.Support.isValidNodeAddress(topic.domainAddress):
-				topic.domainAddress = ops.Support.doSubnetTranslation(topic.localInterface)
+			##addr[0] is address, will be 0.0.0.0
+			##addr[1] is port
+			adr = topic.domainAddress
+			if not ops.Support.isValidNodeAddress(adr):
+				adr = ops.Support.doSubnetTranslation(topic.localInterface)
+			addr = (adr, addr[1])
 		with self.partInfoLock:
-			self.partInfoData.publishTopics.append(ops.ParticipantInfoData.TopicInfoData(topic))
+			self.partInfoData.publishTopics.append(ops.ParticipantInfoData.TopicInfoData(topic,addr))
 		return sdh
 
 	def releaseSendDataHandler(self,topic):
@@ -97,7 +102,11 @@ class Participant(object):
 		with self.partInfoLock:
 			self.partInfoData.subscribeTopics.append(ops.ParticipantInfoData.TopicInfoData(topic))
 		if topic.transport == ops.Constants.TRANSPORT_TCP:
-			self.tcprdhs[topic.name] = rdh 
+			# Need to count topic instances
+			if topic.name in self.tcprdhs:
+				self.tcprdhs[topic.name] = (rdh, self.tcprdhs[topic.name][1]+1)
+			else:
+				self.tcprdhs[topic.name] = (rdh, 1)
 		return rdh
 
 	def releaseReceiveDataHandler(self,topic):
@@ -107,7 +116,11 @@ class Participant(object):
 					del self.partInfoData.subscribeTopics[i]
 					break
 		if topic.transport == ops.Constants.TRANSPORT_TCP:
-			self.tcprdhs.pop(topic.name)
+			# Need to count topic instances
+			if topic.name in self.tcprdhs:
+				self.tcprdhs[topic.name] = (self.tcprdhs[topic.name][0], self.tcprdhs[topic.name][1]-1)
+				if self.tcprdhs[topic.name][1] == 0:
+					self.tcprdhs.pop(topic.name)
 		ops.ReceiveDataHandler.releaseReceiveDataHandler(self,topic)
 
 	def createParticipantInfoTopic(self):
@@ -191,4 +204,4 @@ class Participant(object):
 			if pubtop.transport == ops.Constants.TRANSPORT_TCP:
 				if self.hasSubscriberOn( pubtop.name ):
 					if pubtop.name in self.tcprdhs:
-						self.tcprdhs[pubtop.name].addChannel( pubtop.address, pubtop.port )
+						self.tcprdhs[pubtop.name][0].addChannel( pubtop.address, pubtop.port )

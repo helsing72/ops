@@ -1,15 +1,19 @@
 from ops.opsTypes import OPS_Object
 
 class TopicInfoData(OPS_Object):
-	def __init__(self,topic=None):
+	def __init__(self,topic=None,addr=None):
 		super(TopicInfoData, self).__init__()
 		self.appendType("TopicInfoData")
 		if topic is not None:
 			self.name = topic.name
 			self.type = topic.typeID
 			self.transport = topic.transport
-			self.address = topic.domainAddress
-			self.port = topic.port
+			if addr is not None:
+				self.address = addr[0]
+				self.port = addr[1]
+			else:
+				self.address = topic.domainAddress
+				self.port = topic.port
 		else:
 			self.name = ""
 			self.type = ""
