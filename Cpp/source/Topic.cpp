@@ -148,6 +148,11 @@ namespace ops
 		return heartbeatTimeout;
 	}
 
+	ChannelId_T Topic::getChannelId() const
+	{
+		return channelID;
+	}
+
 	void Topic::serialize(ArchiverInOut* archiver)
 	{
 		OPSObject::serialize(archiver);

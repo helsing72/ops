@@ -134,8 +134,8 @@ namespace ops {
 	const static int FIXED_INTERNAL_STRING_SIZE = 64;
 	const static int FIXED_EXCEPTION_MSG_SIZE   = 256;
 	const static int FIXED_ERROR_MSG_SIZE       = 256;
-	// transport::xxx.xxx.xxx.xxx::port
-	const static int FIXED_INTERNAL_KEY_SIZE = (FIXED_TRANSPORT_SIZE + 2 + FIXED_ADDRESS_SIZE + 2 + 5);
+	// channelid::transport::xxx.xxx.xxx.xxx::port
+	const static int FIXED_INTERNAL_KEY_SIZE = (FIXED_CHANNEL_ID_SIZE + 2 + FIXED_TRANSPORT_SIZE + 2 + FIXED_ADDRESS_SIZE + 2 + 5);
 
 	typedef strings::fixed_string<FIXED_OBJECT_NAME_SIZE>     ObjectName_T;
 	typedef strings::fixed_string<FIXED_FILENAME_SIZE>        FileName_T;

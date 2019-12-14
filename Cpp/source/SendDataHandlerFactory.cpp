@@ -40,6 +40,11 @@ namespace ops
 		// Make a key with the transport info that uniquely defines the receiver.
 		InternalKey_T key = top.getTransport();
 		key += "::";
+		if ((top.getTransport() == Topic::TRANSPORT_TCP) && (top.getPort() == 0)) {
+			// We add the channel name so different channels get different TCP Servers
+			key += top.getChannelId();
+			key += "::";
+		}
 		key += top.getDomainAddress();
 		key += "::";
 		key += NumberToString(top.getPort());

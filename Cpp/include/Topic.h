@@ -32,6 +32,7 @@ namespace ops
 
 	class OPS_EXPORT Topic : public OPSObject
     {
+		friend class Channel;
 		friend class Domain;
 		friend class Participant;
     
@@ -77,6 +78,7 @@ namespace ops
 		bool getOptNonVirt() const;
 		int getHeartbeatPeriod() const;
 		int getHeartbeatTimeout() const;
+		ChannelId_T getChannelId() const;
 
 		Participant* getParticipant() const
 		{
@@ -107,6 +109,7 @@ namespace ops
 		bool optNonVirt = false;
 		int heartbeatPeriod = 0;
 		int heartbeatTimeout = 0;
+		ChannelId_T channelID;
 	};
 }
 #endif

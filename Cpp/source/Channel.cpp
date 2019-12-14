@@ -76,6 +76,7 @@ namespace ops
         top.setOutSocketBufferSize(outSocketBufferSize);
         top.setInSocketBufferSize(inSocketBufferSize);
         top.setTimeToLive(timeToLive);
+        top.channelID = channelID;
     }
 
 	Transport_T Channel::LINKTYPE_MC = "multicast";
