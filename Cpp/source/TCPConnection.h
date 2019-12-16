@@ -22,8 +22,8 @@
 #pragma once
 
 #include <memory>
-#include <mutex>
 
+#include "Lockable.h"
 #include "OPSTypeDefs.h"
 #include "TCPProtocol.h"
 
@@ -55,7 +55,7 @@ namespace ops
 			// By holding the mutex while clearing _client, we ensure that we can't 
 			// be in a callback while clearing it. This also means that when this method returns
 			// the connection can't call the _client anymore and it's OK for the client to vanish.
-			std::lock_guard<std::mutex> lck(_clientMtx);
+			SafeLock lck(&_clientMtx);
 			_client = nullptr;
 		}
 
@@ -112,7 +112,7 @@ namespace ops
 			if (!_protocol->handleReceivedData(error, nrBytesReceived)) {
 				// If we come here the protocol can't receive any longer and we need to disconnect
 				// By holding the mutex while in the callback, we are synchronized with clearCallbacks()
-				std::lock_guard<std::mutex> lck(_clientMtx);
+				SafeLock lck(&_clientMtx);
 				if (_client) _client->onReceiveError(*this);
 			}
 		}
@@ -121,7 +121,7 @@ namespace ops
 		friend class TCPServerBase;
 		friend class TCPClientBase;
 
-		std::mutex _clientMtx;
+		Lockable _clientMtx;
 		TCPConnectionCallbacks* _client;
 		TCPProtocol* _protocol;
 
@@ -141,7 +141,7 @@ namespace ops
 		void onEvent(TCPProtocol&, BytesSizePair arg) override
 		{
 			// By holding the mutex while in the callback, we are synchronized with clearCallbacks()
-			std::lock_guard<std::mutex> lck(_clientMtx);
+			SafeLock lck(&_clientMtx);
 			if (_client) _client->onEvent(*this, arg);
 		}
 

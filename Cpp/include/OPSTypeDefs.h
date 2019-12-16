@@ -106,6 +106,9 @@
 //#define REPLACE_NETWORK_ALLOC		// Removes the ops::DataSegmentPool::Allocate/Deallocate from library so you
 									// can use our own implementation.
 
+//#define REPLACE_OPS_LOCKABLE      // Removes Lockable() implementation from library so you can use your own
+
+
 #define OPS_ENABLE_DEBUG_HANDLER	// Adds some debug functionality
 
 // -----------------------------------------------------------------------------

@@ -19,8 +19,8 @@
 */
 
 #include <map>
-#include <mutex>
 
+#include "Lockable.h"
 #include "DataNotifier.h"
 #include "Participant.h"
 #include "Subscriber.h"
@@ -51,23 +51,23 @@ namespace ops {
 		// Used by application to set a handler for "Generic Command" (50)
 		void SetAppCallback(DebugNotifyInterface* client)
 		{
-			std::lock_guard<std::mutex> lck(_mapLock);
+			SafeLock lck(&_mapLock);
 			_appCallback = client;
 		}
 
 		// Register/Unregister with the debug handler
 		void RegisterPub(DebugNotifyInterface* const client, ObjectName_T topicName)
 		{
-			std::lock_guard<std::mutex> lck(_mapLock);
-			if (_pubMap.find(topicName) == _pubMap.end()) {
+            SafeLock lck(&_mapLock);
+            if (_pubMap.find(topicName) == _pubMap.end()) {
 				_pubMap[topicName] = client;
 			}
 		}
 
 		void UnregisterPub(DebugNotifyInterface* const client, ObjectName_T topicName)
 		{
-			std::lock_guard<std::mutex> lck(_mapLock);
-			std::map<ObjectName_T, DebugNotifyInterface*>::iterator it = _pubMap.find(topicName);
+            SafeLock lck(&_mapLock);
+            std::map<ObjectName_T, DebugNotifyInterface*>::iterator it = _pubMap.find(topicName);
 			if (it == _pubMap.end()) return;
 			if (it->second != client) return;
 			_pubMap.erase(it);
@@ -75,16 +75,16 @@ namespace ops {
 
 		void RegisterSub(DebugNotifyInterface* const client, ObjectName_T topicName)
 		{
-			std::lock_guard<std::mutex> lck(_mapLock);
-			if (_subMap.find(topicName) == _subMap.end()) {
+            SafeLock lck(&_mapLock);
+            if (_subMap.find(topicName) == _subMap.end()) {
 				_subMap[topicName] = client;
 			}
 		}
 
 		void UnregisterSub(DebugNotifyInterface* const client, ObjectName_T topicName)
 		{
-			std::lock_guard<std::mutex> lck(_mapLock);
-			std::map<ObjectName_T, DebugNotifyInterface*>::iterator it = _subMap.find(topicName);
+            SafeLock lck(&_mapLock);
+            std::map<ObjectName_T, DebugNotifyInterface*>::iterator it = _subMap.find(topicName);
 			if (it == _subMap.end()) return;
 			if (it->second != client) return;
 			_subMap.erase(it);
@@ -121,7 +121,7 @@ namespace ops {
 					if (req->Command == 0) return;  // We don't care about responses
 
 					{
-						std::lock_guard<std::mutex> lck(_mapLock);
+                        SafeLock lck(&_mapLock);
 
 						switch (req->Entity) {
 						case 0: // Debug
@@ -234,7 +234,7 @@ namespace ops {
 
 		opsidls::DebugRequestResponseData _response;
 
-		std::mutex _mapLock;
+		Lockable _mapLock;
 		std::map<ObjectName_T, DebugNotifyInterface*> _pubMap;
 		std::map<ObjectName_T, DebugNotifyInterface*> _subMap;
 		DebugNotifyInterface* _appCallback;

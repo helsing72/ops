@@ -22,7 +22,6 @@
 #pragma once
 
 #include <map>
-#include <mutex>
 
 #include "OPSConstants.h"
 #include "SendDataHandler.h"

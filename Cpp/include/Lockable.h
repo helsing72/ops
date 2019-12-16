@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -24,17 +25,13 @@
 #include "OPSExport.h"
 #include "OPSTypeDefs.h"
 
-#include <mutex>
-
 namespace ops
 {
-	class SafeLock;
-
 	class OPS_EXPORT Lockable
 	{
-		friend class SafeLock;
 	private:
-		std::recursive_mutex* mutex;
+        class InternalLock;
+        InternalLock* _lock;
 
 	public:
 		Lockable();
@@ -49,16 +46,15 @@ namespace ops
 	class SafeLock
 	{
 	private:
-		Lockable* lockable;
+		Lockable* _lockable;
 	public:
-		SafeLock(Lockable* lockable)
+		SafeLock(Lockable* lockable) : _lockable(lockable)
 		{
-			this->lockable = lockable;
-			this->lockable->lock();
+			_lockable->lock();
 		}
 		~SafeLock()
 		{
-			this->lockable->unlock();
+			_lockable->unlock();
 		}
 	};
 

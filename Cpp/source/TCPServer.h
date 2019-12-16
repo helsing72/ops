@@ -29,13 +29,13 @@
 #pragma once
 
 #include <iostream>
-#include <mutex>
 #include <memory>
 
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 #include <boost/bind.hpp>
 
+#include "Lockable.h"
 #include "TCPServerBase.h"
 #include "IOService.h" 
 #include "BytesSizePair.h"
@@ -55,7 +55,7 @@ namespace ops
 		// Internal helper class that handles the server socket
 		class impl : public std::enable_shared_from_this<impl>
 		{
-			std::mutex _ownerMtx;
+			Lockable _ownerMtx;
 			TCPServer* _owner = nullptr;
 			boost::asio::io_service* _ioService = nullptr;
 			boost::asio::ip::tcp::socket* _sock = nullptr;				// The socket that handles next accept.
@@ -83,7 +83,7 @@ namespace ops
 				// By holding the mutex while clearing _owner, we ensure that we can't 
 				// be in a callback while clearing it. This also means that when this method returns
 				// we can't call the _owner anymore and it's OK for the owner to vanish.
-				std::lock_guard<std::mutex> lck(_ownerMtx);
+				SafeLock lck(&_ownerMtx);
 				_owner = nullptr;
 				OPS_TCP_TRACE("Server: Callbacks Cleared\n");
 			}
@@ -113,7 +113,7 @@ namespace ops
 				if (!_canceled) {
 					if (!error) {
 						// By holding the mutex while in the callback, we are synchronized with clearCallbacks()
-						std::lock_guard<std::mutex> lck(_ownerMtx);
+						SafeLock lck(&_ownerMtx);
 						if (_owner) _owner->AddSocket(std::make_shared<TCPBoostConnection>(_owner, _sock, _outSocketBufferSize));
 						_sock = new boost::asio::ip::tcp::socket(*_ioService);
 					}
