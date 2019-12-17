@@ -364,6 +364,7 @@
     <ClInclude Include="..\..\..\include\memory_pool_lock_free.h" />
     <ClInclude Include="..\..\..\include\NetworkSupport.h" />
     <ClInclude Include="..\..\..\include\OPSConfigRepository.h" />
+    <ClInclude Include="..\..\..\include\OPSEvent.h" />
     <ClInclude Include="..\..\..\include\OPSStringLengths.h" />
     <ClInclude Include="..\..\..\include\OPSUtilities.h" />
     <ClInclude Include="..\..\..\include\PrintArchiverOut.h" />
@@ -480,6 +481,7 @@
     <ClCompile Include="..\..\..\source\OPSArchiverOut.cpp" />
     <ClCompile Include="..\..\..\source\OPSConfig.cpp" />
     <ClCompile Include="..\..\..\source\OPSConfigRepository.cpp" />
+    <ClCompile Include="..\..\..\source\OPSEvent.cpp" />
     <ClCompile Include="..\..\..\source\OPSObject.cpp" />
     <ClCompile Include="..\..\..\source\OPSObjectFactory.cpp" />
     <ClCompile Include="..\..\..\source\Participant.cpp" />

@@ -160,10 +160,8 @@ namespace ops
                 notifyNewData();
 
                 // Signal any waiting thread(s)
-				std::unique_lock<std::mutex> lock(newDataMutex);
-				hasUnreadData = true;
-				newDataEvent.notify_all();
-				lock.unlock();
+                hasUnreadData = true;
+                newDataEvent.signal();
 
 				// Update deadline variables
                 timeLastDataForTimeBase = TimeHelper::currentTimeMillis();
@@ -281,13 +279,7 @@ namespace ops
         if (hasUnreadData) {
             return true;
         }
-
-		std::unique_lock<std::mutex> lock(newDataMutex);
-
-		if (newDataEvent.wait_for(lock, std::chrono::milliseconds(timeoutMs), [this] { return this->newDataExist(); })) {
-			return true;
-		}
-		return false;
+        return newDataEvent.waitFor(std::chrono::milliseconds(timeoutMs));
     }
 
 	ObjectName_T Subscriber::getName() const

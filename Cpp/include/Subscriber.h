@@ -38,9 +38,7 @@
 #include "OPSExport.h"
 #include "PubIdChecker.h"
 #include "DebugHandler.h"
-
-#include <mutex>
-#include <condition_variable>
+#include "OPSEvent.h"
 
 namespace ops
 {
@@ -189,8 +187,7 @@ namespace ops
         void addToBuffer(OPSMessage* mess);
 
         Lockable filterQoSPolicyMutex;
-		std::mutex newDataMutex;
-		std::condition_variable newDataEvent;
+        Event newDataEvent;
 
         int64_t timeLastData;
         int64_t timeLastDataForTimeBase;
