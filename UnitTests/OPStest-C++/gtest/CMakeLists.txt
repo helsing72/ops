@@ -12,6 +12,7 @@ set(APP_SRCS
   fixed_string_test.cpp
   gtest_main.cpp
   listener_helpers.h
+  Lockable_test.cpp
   MemoryMap_test.cpp
   NotifierListener_test.cpp
   ObjectFactory_test.cpp
@@ -29,6 +30,7 @@ set(APP_SRCS
   SetupOPSConfig.h
 ##  socket_tcp_test.cpp
   TCPOpsProtocol_test.cpp
+  ThreadPool_test.cpp
 )
 
 set(APP2_SRCS
