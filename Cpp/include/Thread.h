@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -21,10 +22,10 @@
 #ifndef ops_ThreadH
 #define ops_ThreadH
 
+#include <thread>
+
 #include "OPSTypeDefs.h"
 #include "OPSExport.h"
-
-#include <thread>
 
 namespace ops
 {
@@ -33,7 +34,7 @@ namespace ops
     {
     public:
         Thread();
-        ~Thread();
+        virtual ~Thread();
         int start();
         void stop();
         bool join();
@@ -41,8 +42,7 @@ namespace ops
         static void EntryPoint(void* pthis);
     
     protected:
-        bool threadRunning;
-		std::thread* thread;
+        std::thread* thread{ nullptr };
 	};
 }
 #endif
