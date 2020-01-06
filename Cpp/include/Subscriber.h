@@ -94,7 +94,8 @@ namespace ops
         }
 
         ///Acquires/Releases the MessageLock.
-        ///NOTE: The MessageLock is held by the subscriber while in the "New Message" callback
+        ///You should preferably use the MessageLock() class when using the lock.
+        ///NOTE: The MessageLock is held by the subscriber while in the "New Message" callback.
         bool aquireMessageLock();
         void releaseMessageLock();
 
@@ -215,4 +216,12 @@ namespace ops
 #endif
 	};
 
+	// RAII helper for aquire/release of the MessageLock
+	class MessageLock
+	{
+		Subscriber& _sub;
+	public:
+		MessageLock(Subscriber& sub) : _sub(sub) { _sub.aquireMessageLock(); }
+		~MessageLock() { _sub.releaseMessageLock(); }
+	};
 }
