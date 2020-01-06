@@ -40,8 +40,10 @@ namespace ops
 
     Lockable& Lockable::operator=(const Lockable& rhs)
     {
-		if (this != &rhs) {
-            _lock = new InternalLock();
+        if (this != &rhs) {
+            InternalLock* tmp = new InternalLock();
+            std::swap(_lock, tmp);
+            delete tmp;
         }
         return *this;
     }
