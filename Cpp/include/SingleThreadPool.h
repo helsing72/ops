@@ -1,6 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
+ * Copyright (C) 2019-2020 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -22,6 +23,9 @@
 #define ops_SingleThreadPool
 
 #include <vector>
+#include <atomic>
+#include <chrono>
+
 #include "Thread.h"
 #include "ThreadPool.h"
 #include "Lockable.h"
@@ -33,39 +37,79 @@ namespace ops
     class SingleThreadPool : public Thread, public ThreadPool
     {
     public:
+        // While we are running, ie. executing run(), we don't allow add/remove to/from the runnables container.
+        // And we don't want to hold a mutex while executing runnables (due to the fact that atleast one of the
+        // OS:es we run on only allow a thread to hold one (1) lock at a time).
+
+        // That is the reason that we have a separate running flag, do a loop in add and remove, and
+        // only hold the lock a short period
+
+        // Add a runnable to the list of things to run. If threadpool has been started, this will hang until
+        // the run() method exits, to be backward compatible.
         virtual void addRunnable(Runnable* runnable)
         {
-            SafeLock lock(&mutex);
-            runnables.push_back(runnable);
-        }
-
-        virtual void removeRunnable(Runnable* runnable)
-        {
-			SafeLock lock(&mutex);
-			std::vector<Runnable*>::iterator it = runnables.begin();
-			for (unsigned int i = 0; i < runnables.size(); i++) {
-				if (runnables[i] == runnable) {
-					it += i;
-					runnables.erase(it);
-					break;
-				}
+            for (;;) {
+                {
+                    SafeLock lock(&mutex);
+                    if (!running.load()) {
+                        runnables.push_back(runnable);
+                        return;
+                    }
+                }
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
             }
         }
 
+        // Remove a runnable from the list of things to run. If threadpool has been started, this will hang until
+        // the run() method exits, to be backward compatible.
+        virtual void removeRunnable(Runnable* runnable)
+        {
+            for (;;) {
+                {
+                    SafeLock lock(&mutex);
+                    if (!running.load()) {
+                        std::vector<Runnable*>::iterator it = runnables.begin();
+                        for (unsigned int i = 0; i < runnables.size(); i++) {
+                            if (runnables[i] == runnable) {
+                                it += i;
+                                runnables.erase(it);
+                                break;
+                            }
+                        }
+                        return;
+                    }
+                }
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            }
+        }
+
+        // Starts the thread that calls our run() method
         void start()
         {
             Thread::start();
         }
 
+        // Called by Thread. While we are running we don't allow changes to the runnables container.
         void run()
         {
-			SafeLock lock(&mutex);
-			for (unsigned int i = 0; i < runnables.size(); i++) {
-                runnables[i]->run();
+            // Take mutex to make sure add/remove isn't in process of updating the runnables container
+            {
+                SafeLock lock(&mutex);
+                running.store(true);
             }
+            // We don't want to hold the mutex while executing runnables, so the runnables
+            // are instead protected by the running flag, set above and cleared below
+            for (auto &r : runnables) {
+                try {
+                    r->run();
+                }
+                catch (...) {
+                }
+            }
+            running.store(false);
         }
 
-		~SingleThreadPool()
+        virtual ~SingleThreadPool()
         {
             // We need to stop the thread explicitly so that the run() method exits
             // before our mutex destructor is called.
@@ -76,8 +120,8 @@ namespace ops
     private:
         std::vector<Runnable*> runnables;
         Lockable mutex;
+        std::atomic<bool> running{ false };
     };
 
 }
-
 #endif
