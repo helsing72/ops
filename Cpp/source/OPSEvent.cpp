@@ -31,17 +31,17 @@ namespace ops {
     {
         std::mutex mtx;
         std::condition_variable cv;
-        bool signalled = false;
+        bool signaled = false;
     public:
         bool waitFor(const std::chrono::milliseconds& timeout)
         {
             std::unique_lock<std::mutex> lock(mtx);
-            if (signalled) {
-                signalled = false;
+            if (signaled) {
+                signaled = false;
                 return true;
             }
-            if (cv.wait_for(lock, timeout, [this] { return this->signalled; })) {
-                signalled = false;
+            if (cv.wait_for(lock, timeout, [this] { return this->signaled; })) {
+                signaled = false;
                 return true;
             }
             return false;
@@ -51,7 +51,7 @@ namespace ops {
         void signal()
         {
             std::unique_lock<std::mutex> lock(mtx);
-            signalled = true;
+            signaled = true;
             cv.notify_all();
         }
     };
