@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018 Lennart Andersson.
+* Copyright (C) 2018-2019 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -24,6 +24,7 @@
 #include "Topic.h"
 #include "Sender.h"
 #include "Notifier.h"
+#include "Lockable.h"
 #include "ConnectStatus.h"
 
 namespace ops

@@ -25,7 +25,6 @@
 
 #include "OPSConstants.h"
 #include "SendDataHandler.h"
-#include "Lockable.h"
 #include "Sender.h"
 #include "IOService.h"
 #include "TCPServerBase.h"

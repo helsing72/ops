@@ -28,7 +28,6 @@
 #include "SendDataHandler.h"
 #include "Sender.h"
 #include "OPSObject.h"
-#include "Lockable.h"
 #include "TimeHelper.h"
 
 namespace ops
