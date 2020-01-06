@@ -22,9 +22,10 @@
 
 #include <ostream>
 #include <vector>
-#include <mutex>
 #include <exception>
 #include <typeinfo>
+
+#include "Lockable.h"
 
 #define OPS_MEMORY_POOL_INTEGRITY_CHECK
 
@@ -94,7 +95,7 @@ namespace ops {
 			memory_pool_manager& operator=(memory_pool_manager const&) = default;
 			memory_pool_manager& operator=(memory_pool_manager&&) = default;
 
-			std::mutex _mtx;
+			Lockable _mtx;
 			node<memory_pool_abs> _root;
 			int _numPools;
 			memory_pool_logger* _client;
@@ -122,7 +123,7 @@ namespace ops {
 			entry_t* _freePtr;			// Pointer to first free entry, if any
 			size_t _capacity;
 			size_t _size;
-			std::mutex _mtx;
+			Lockable _mtx;
 			static constexpr uint32_t marker_c = 0x5BD0DEAD;
 			static constexpr uint32_t inUse_c  = 0x5BD0AAAA;
 			static constexpr uint32_t free_c   = 0x5BD0DEAD;
@@ -155,7 +156,7 @@ namespace ops {
 			{
 				entry_t* ret = nullptr;
 				{
-					std::lock_guard<std::mutex> lck(_mtx);
+					SafeLock lck(&_mtx);
 					ret = _freePtr;
 					if (ret == nullptr) throw out_of_space();
 #ifdef OPS_MEMORY_POOL_INTEGRITY_CHECK
@@ -178,7 +179,7 @@ namespace ops {
 				check_integrity(ret);
 #endif
 				if (ret->inUse != inUse_c) throw pool_corruption();
-				std::lock_guard<std::mutex> lck(_mtx);
+				SafeLock lck(&_mtx);
 				ret->next = _freePtr;
 				_freePtr = ret;
 				++_size;
@@ -344,7 +345,7 @@ namespace ops {
 		class memory_pool_exp : public memory_pool_abs
 		{
 			std::vector<char *> _blocks;
-			std::mutex _mtx;
+			Lockable _mtx;
 
 			void PrintStat(std::ostream& os)
 			{
@@ -371,7 +372,7 @@ namespace ops {
 
 			~memory_pool_exp()
 			{
-				for (unsigned int i = 0; i < _blocks.size(); ++i) {
+				for (std::size_t i = 0; i < _blocks.size(); ++i) {
 					delete[] _blocks[i];
 				}
 			}
@@ -379,7 +380,7 @@ namespace ops {
 			inline char* getEntry()
 			{
 				char* ptr;
-				std::lock_guard<std::mutex> lck(_mtx);
+				SafeLock lck(&_mtx);
 				if (_blocks.size() > 0) {
 					ptr = _blocks.back();
 					_blocks.pop_back();
@@ -393,7 +394,7 @@ namespace ops {
 			{
 				if (ptr == nullptr) throw illegal_ref();
 
-				std::lock_guard<std::mutex> lck(_mtx);
+				SafeLock lck(&_mtx);
 				_blocks.push_back(ptr);
 				ptr = nullptr;
 			}
