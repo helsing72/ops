@@ -729,7 +729,7 @@ public class DelphiCompiler extends opsc.Compiler
       "nil", "not",
       "object", "of", "or", "out",
       "packed", "procedure", "program", "property",
-      "raise", "record", "repeat", "resourcestring",
+      "raise", "record", "repeat", "resourcestring", "result",
       "set", "shl", "shr", "string",
       "then", "threadvar", "to", "try", "type",
       "unit", "until", "uses",
