@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -128,9 +128,9 @@ namespace opsbridge {
 			mess.Head.Type = mtUdpMc;
 			mess.Head.Length = sizeof(mess);
 			mess.DstMcIP = ops::IPString2Addr(localAddr);
-			mess.DstMcPort = localPort;
+			mess.DstMcPort = (uint16_t)localPort;
 			mess.SrcIP = ops::IPString2Addr(srcAddr);
-			mess.SrcPort = srcPort;
+			mess.SrcPort = (uint16_t)srcPort;
 			mess.DataLength = byteSizePair.size;
 
 			// notify client

@@ -1,6 +1,11 @@
 
 //parasoft-begin-suppress ALL "suppress all rules for this XMLPARSER Library"
 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wcast-qual"
+#endif
+
 /**
  ****************************************************************************
  * <P> XML.c - implementation file for basic XML parser written in ANSI C++

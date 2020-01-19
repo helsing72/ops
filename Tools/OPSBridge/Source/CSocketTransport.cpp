@@ -3,7 +3,7 @@
 * Copyright (C) 2010-2012 Saab Dynamics AB
 *   author Lennart Andersson <nnnn@saabgroup.com>
 *
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -82,7 +82,7 @@ bool CSocketTransport::write(const char* const buffer, uint32_t const length)
 {
 	if (!m_Connected) { return false; }
 	
-	int const iResult = send(m_socketCom, buffer, length, 0);
+	int const iResult = (int const)send(m_socketCom, buffer, length, 0);
 
 	if (iResult == 0) {
 		BL_TRACE("# [ SocketTransport ] send() returned 0\n");
@@ -126,7 +126,7 @@ bool CSocketTransport::writeOpsMessage(ops::OPSObject* const mess,
 	//   Direcly in write call below.
 
 	// Update header length with real size of header
-	head.Head.Length = sizeof(head) + buf.GetSize();
+	head.Head.Length = (uint32_t)sizeof(head) + buf.GetSize();
 
 	// Send on transport
 	// We need to lock the writes since the complete message requires 3 writes
@@ -166,7 +166,7 @@ bool CSocketTransport::writeCommand(TCommandMessage& cmd)
 	buf.WriteLong(cmd.AckCounter);
 
 	// Update header length with real size of header
-	cmd.Head.Length = sizeof(cmd.Head) + buf.GetSize();
+	cmd.Head.Length = (uint32_t)sizeof(cmd.Head) + buf.GetSize();
 
 	// Send on transport
 	// We need to lock the writes
@@ -204,7 +204,7 @@ bool CSocketTransport::ReadData(char* buffer, uint32_t const numBytes)
 
     // Loop until the requested number of bytes have been read
 	while (numRead < numBytes) {
-		int const iResult = recv(m_socketCom, &buffer[numRead], numBytes - numRead, 0);
+		int const iResult = (int const)recv(m_socketCom, &buffer[numRead], numBytes - numRead, 0);
 		
 		if (iResult > 0) {
 			numRead += iResult;
@@ -268,7 +268,7 @@ void CSocketTransport::HandleData()
 			}
 
 			// Read rest of header into buffer for deserializing
-			if (!ReadData(memMap.getSegment(0), Head.Length - sizeof(OpsMess))) { return; }
+			if (!ReadData(memMap.getSegment(0), Head.Length - (uint32_t)sizeof(OpsMess))) { return; }
 			if (terminated()) { return; }
 
 			topicName = buf.ReadString();
@@ -306,7 +306,7 @@ void CSocketTransport::HandleData()
 				return;
 			}
 
-			if (!ReadData(Ptr, Head.Length - sizeof(Head))) { return; }
+			if (!ReadData(Ptr, Head.Length - (uint32_t)sizeof(Head))) { return; }
 			if (terminated()) { return; }
 
 			if (m_user != nullptr) { m_user->onAckNakMessage(this, AckNakMess); }
@@ -321,7 +321,7 @@ void CSocketTransport::HandleData()
 			CmdMess.Head = Head;
 
 			// Read rest of header into buffer for deserializing
-			if (!ReadData(memMap.getSegment(0), Head.Length - sizeof(CmdMess.Head))) { return; }
+			if (!ReadData(memMap.getSegment(0), Head.Length - (uint32_t)sizeof(CmdMess.Head))) { return; }
 			if (terminated()) { return; }
 
 			CmdMess.Command = (TCommandType)buf.ReadInt();
@@ -345,7 +345,7 @@ void CSocketTransport::HandleData()
 				return;
 			}
 
-			if (!ReadData(Ptr, Head.Length - sizeof(Head))) { return; }
+			if (!ReadData(Ptr, Head.Length - (uint32_t)sizeof(Head))) { return; }
 			if (terminated()) { return; }
 
 			if (m_user != nullptr) { m_user->onStatusMessage(this, StatusMess); }
@@ -364,7 +364,7 @@ void CSocketTransport::HandleData()
 				return;
 			}
 
-			if (!ReadData(Ptr, Head.Length - sizeof(Head))) { return; }
+			if (!ReadData(Ptr, Head.Length - (uint32_t)sizeof(Head))) { return; }
 			if (terminated()) { return; }
 
 			if (UdpMcMess.DataLength > (uint32_t)memMap.getSegmentSize()) {

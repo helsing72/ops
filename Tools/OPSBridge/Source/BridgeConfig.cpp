@@ -110,6 +110,8 @@ void BridgeConfig::checkTopicDomain(ops::ObjectName_T topicName)
 
 void BridgeConfig::ParseBridgeConfiguration(std::string const tracestr, Configuration& config, TBridgeConfig& bc)
 {
+    UNUSED(tracestr);
+
 	std::string s;
 
 	// Set default values

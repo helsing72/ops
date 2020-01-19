@@ -86,7 +86,7 @@ namespace ops
 		size_t len = spareBytes.size();
 		obj->spareBytes.reserve(len);
 		obj->spareBytes.resize(len, 0);
-		if (len > 0) { memcpy((void*)&obj->spareBytes[0], (void*)&spareBytes[0], len); }
+		if (len > 0) { memcpy((void*)&obj->spareBytes[0], &spareBytes[0], len); }
 	}
 
 	ObjectKey_T OPSObject::getKey() const

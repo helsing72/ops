@@ -24,10 +24,16 @@
 #include "OPSTypeDefs.h"
 
 #ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #endif
 
 #include "boost/asio/basic_datagram_socket.hpp"
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 #include "UDPSender.h"
 #include "Participant.h"
@@ -117,7 +123,7 @@ namespace ops
         try
         {
             boost::asio::ip::address ipaddress = boost::asio::ip::address::from_string(ip.c_str());
-            boost::asio::ip::udp::endpoint endpoint(ipaddress, port);
+            boost::asio::ip::udp::endpoint endpoint(ipaddress, (unsigned short)port);
             std::size_t res = socket->send_to(boost::asio::buffer(buf, size), endpoint);
 			if (res != (std::size_t)size) {
 				OPS_UDP_ERROR("UDPSender: sendTo(), Error: Failed to write message (" << size << "), res: " << res << "]\n");

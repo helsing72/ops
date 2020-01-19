@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -128,10 +128,10 @@ int main(const int argc, const char* argv[])
 		exit(4);
 		break;
 	case opsbridge::BridgeConfig::tcpClient: 
-		transport = new opsbridge::CTcpTransportClient(bc.endpoint.remoteHost, bc.endpoint.remotePort);
+		transport = new opsbridge::CTcpTransportClient(bc.endpoint.remoteHost, (uint16_t)bc.endpoint.remotePort);
 		break;
 	case opsbridge::BridgeConfig::tcpServer: 
-		transport = new opsbridge::CTcpTransportServer(bc.endpoint.localPort);
+		transport = new opsbridge::CTcpTransportServer((uint16_t)bc.endpoint.localPort);
 		BL_INFO("Running as server on port: %d\n", bc.endpoint.localPort);
 		break;
 	}
@@ -139,7 +139,7 @@ int main(const int argc, const char* argv[])
 	opsbridge::CBridge br(bc.sBridgeName, bc.iBufferSize, bc.iMinPubTime_ms, transport);
 
 	for (size_t i = 0; i < bc.vRawReceives.size(); i++) {
-		br.getRef().AddReceiver(bc.vRawReceives[i].sIp, bc.vRawReceives[i].port, bc.vRawReceives[i].sIfc);
+		br.getRef().AddReceiver(bc.vRawReceives[i].sIp, (uint16_t)bc.vRawReceives[i].port, bc.vRawReceives[i].sIfc);
 	}
 	
 	for (size_t i = 0; i < bc.vRawSends.size(); i++) {

@@ -21,9 +21,18 @@
 
 #pragma once
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+#endif
+
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 #include <boost/bind.hpp>
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 #include "TCPClientBase.h"
 #include "IOService.h"
@@ -57,7 +66,7 @@ namespace ops
 			{
 				boost::asio::io_service* ioService = dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService;
 				boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(serverIP.c_str()));
-				_endpoint = new boost::asio::ip::tcp::endpoint(ipAddr, serverPort);
+				_endpoint = new boost::asio::ip::tcp::endpoint(ipAddr, (unsigned short)serverPort);
 				_sock = new boost::asio::ip::tcp::socket(*ioService);
 			}
 

@@ -3,7 +3,7 @@
 * Copyright (C) 2010-2012 Saab Dynamics AB
 *   author Lennart Andersson <nnnn@saabgroup.com>
 *
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -98,7 +98,7 @@ void CTcpTransportClient::Run()
 				
 			int const optVal = 1;
 			int const optLen = sizeof(optVal);
-			setsockopt(m_socketCom, IPPROTO_TCP, TCP_NODELAY, (char*)&optVal, optLen);
+			setsockopt(m_socketCom, IPPROTO_TCP, TCP_NODELAY, (const char*)&optVal, optLen);
 
 			m_Connected = true;
 			if (m_user != nullptr) { m_user->onConnect(this); }

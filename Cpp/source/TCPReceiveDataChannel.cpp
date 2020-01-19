@@ -58,7 +58,7 @@ namespace ops
     }
 
 	// Tell derived classes which topics that are active
-	void TCPReceiveDataChannel::topicUsage(Topic& top, bool used)
+	void TCPReceiveDataChannel::topicUsage(Topic& , bool )
 	{
 		///TODO Keep a list of all used topics, with count
 		/// If a new topic is added or an old one deleted, send updates if connected

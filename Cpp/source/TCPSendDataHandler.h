@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2019 Lennart Andersson.
+ * Copyright (C) 2018-2020 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -138,7 +138,7 @@ namespace ops
 
 		// Called from server when data has been filled into given buffer
 		// A new call to conn.asynchWait(buffer, size) need to be done to continue to read
-		void onEvent(TCPConnection& conn, BytesSizePair arg) override
+		void onEvent(TCPConnection& conn, BytesSizePair) override
 		{
 			Connection_t* ct = dynamic_cast<Connection_t*>(conn.getProtocol()->userData);
 			if (!ct->sentAtConnect) {
@@ -156,7 +156,7 @@ namespace ops
 
 		// Called from server when a connection is going to be deleted
 		// Ev. buffer used in asynchRead() is no longer in use
-		void onDisconnect(TCPConnection& conn, ConnectStatus status) override
+		void onDisconnect(TCPConnection&, ConnectStatus status) override
 		{
 			// All subscribers from this connection disapeared, update list
 			///TODO

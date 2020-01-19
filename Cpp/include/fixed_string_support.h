@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2017-2018 Lennart Andersson.
+* Copyright (C) 2017-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -37,7 +37,7 @@ namespace ops { namespace strings {
 	fixed_string<N, POLICY> ToLower(fixed_string<N, POLICY> str)
 	{
 		for (typename fixed_string<N, POLICY>::size_type i = 0; i < str.size(); ++i) {
-			str[i] = ::tolower(str[i]);
+			str[i] = (char)::tolower(str[i]);
 		}
 		return str;
 	}
@@ -46,7 +46,7 @@ namespace ops { namespace strings {
 	fixed_string<N, POLICY> ToUpper(fixed_string<N, POLICY> str)
 	{
 		for (typename fixed_string<N, POLICY>::size_type i = 0; i < str.size(); ++i) {
-			str[i] = ::toupper(str[i]);
+			str[i] = (char)::toupper(str[i]);
 		}
 		return str;
 	}

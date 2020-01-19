@@ -40,6 +40,7 @@ namespace ops
 
 	void TCPReceiveDataHandler::AddReceiveChannel(ObjectName_T& topicName, Address_T& ip, int port)
 	{
+        UNUSED(topicName);
 		OPS_PIFO_TRACE("Partinfo: name: " << topicName << ", ip: " << ip << ", port: " << port << "\n");
 
 		// We need to check if a new publisher has emerged that we need to connect to

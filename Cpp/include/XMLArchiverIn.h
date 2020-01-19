@@ -1,6 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
+ * Copyright (C) 2020 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -144,7 +145,7 @@ namespace ops
 
                 int inVal;
                 ss >> inVal;
-                value = inVal;
+                value = (char)inVal;
             }
         }
 
@@ -170,7 +171,7 @@ namespace ops
 
                 int inVal;
                 ss >> inVal;
-                value = inVal;
+                value = (int16_t)inVal;
             }
         }
 
@@ -365,7 +366,7 @@ namespace ops
 
                     int inVal;
                     ss >> inVal;
-                    value[i] = inVal;
+                    value[i] = (char)inVal;
                 }
 
 				PopNode(currentNode);
@@ -413,7 +414,7 @@ namespace ops
 
                     int inVal;
                     ss >> inVal;
-                    value[i] = inVal;
+                    value[i] = (int16_t)inVal;
                 }
 
 				PopNode(currentNode);
@@ -553,7 +554,7 @@ namespace ops
 
 					int inVal;
 					ss >> inVal;
-					value[i] = inVal;
+					value[i] = (char)inVal;
 				}
 
 				PopNode(currentNode);
@@ -605,7 +606,7 @@ namespace ops
 
 					int inVal;
 					ss >> inVal;
-					value[i] = inVal;
+					value[i] = (int16_t)inVal;
 				}
 
 				PopNode(currentNode);

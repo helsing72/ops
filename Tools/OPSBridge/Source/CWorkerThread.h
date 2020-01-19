@@ -37,6 +37,8 @@
 // Forward declaration
 class CWorkerThread;
 
+#define UNUSED(expr) (void)(expr);
+
 // ------------------------------------------------------------------------
 // Base class for work to be done by a CWorkerThread
 //
@@ -150,7 +152,7 @@ class CWorkerErrorLogger
 {
 public:
 	virtual void onError(std::string errorString, unsigned int errorId) = 0;
-	virtual void onInformation(std::string infoString, unsigned int infoNumber) {};
+    virtual void onInformation(std::string infoString, unsigned int infoNumber) { UNUSED(infoString); UNUSED(infoNumber); };
 };
 
 // ------------------------------------------------------------------------

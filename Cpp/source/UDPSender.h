@@ -23,8 +23,19 @@
 #define	ops_UDPSenderH
 
 #include "Sender.h"
+
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+#endif
+
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+
 #include "Notifier.h"
 
 namespace ops

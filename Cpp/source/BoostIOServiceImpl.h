@@ -21,7 +21,16 @@
 #ifndef ops_BoostIOServiceImpl_h
 #define ops_BoostIOServiceImpl_h
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+#endif
+
 #include <boost/asio.hpp>
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 namespace ops
 {

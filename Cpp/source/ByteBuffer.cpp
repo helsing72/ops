@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2019 Lennart Andersson.
+ * Copyright (C) 2019-2020 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -90,7 +90,7 @@ namespace ops
     {
     }
 
-    void ByteBuffer::WriteChars(char* const chars, int const length)
+    void ByteBuffer::WriteChars(const char* const chars, int const length)
     {
         int bytesLeftInSegment = memMap.getSegmentSize() - index;
         if (bytesLeftInSegment >= length)
@@ -173,7 +173,7 @@ namespace ops
 #ifdef ON_BIG_ENDIAN_MACHINE
         ByteSwap((unsigned char*)&f, 4);
 #endif
-        WriteChars(((char*)&f), 4);
+        WriteChars(((const char*)&f), 4);
     }
 
     void ByteBuffer::WriteInt(int i)
@@ -181,7 +181,7 @@ namespace ops
 #ifdef ON_BIG_ENDIAN_MACHINE
         ByteSwap((unsigned char*)&i, 4);
 #endif
-        WriteChars(((char*)&i), 4);
+        WriteChars((const char*)&i, 4);
     }
 
     void ByteBuffer::WriteShort(int16_t i)
@@ -189,7 +189,7 @@ namespace ops
 #ifdef ON_BIG_ENDIAN_MACHINE
         ByteSwap((unsigned char*)&i, 2);
 #endif
-        WriteChars(((char*)&i), 2);
+        WriteChars((const char*)&i, 2);
     }
 
     void ByteBuffer::WriteLong(int64_t l)
@@ -197,7 +197,7 @@ namespace ops
 #ifdef ON_BIG_ENDIAN_MACHINE
         ByteSwap((unsigned char*)&l, 8);
 #endif
-        WriteChars(((char*)&l), 8);
+        WriteChars((const char*)&l, 8);
     }
 
     void ByteBuffer::WriteDouble(double d)
@@ -205,19 +205,19 @@ namespace ops
 #ifdef ON_BIG_ENDIAN_MACHINE
         ByteSwap((unsigned char*)&d, 8);
 #endif
-		WriteChars(((char*)&d), 8);
+		WriteChars((const char*)&d, 8);
     }
 
     void ByteBuffer::WriteChar(char c)
     {
-        WriteChars(&c, 1);
+        WriteChars((const char*)&c, 1);
     }
 
     void ByteBuffer::WriteString(std::string& s)
     {
         int const siz = (int) s.size();
         WriteInt(siz);
-        WriteChars((char*) s.c_str(), siz);
+        WriteChars(s.c_str(), siz);
     }
 
 	// -----------------------------------------------------------------
@@ -426,7 +426,7 @@ namespace ops
                 ByteSwap((unsigned char*) &out[i], 8);
             }
 #endif
-            WriteChars((char*) & out[0], size * 8);
+            WriteChars((const char*) & out[0], size * 8);
 #ifdef ON_BIG_ENDIAN_MACHINE
             if (preserveWrittenData) {
                 for(unsigned int i = 0; i < out.size() ; i++)
@@ -469,7 +469,7 @@ namespace ops
                 ByteSwap((unsigned char*) &out[i], 4);
             }
 #endif
-            WriteChars((char*) & out[0], size * 4);
+            WriteChars((const char*) & out[0], size * 4);
 #ifdef ON_BIG_ENDIAN_MACHINE
             if (preserveWrittenData) {
                 for(unsigned int i = 0; i < out.size() ; i++)
@@ -510,7 +510,7 @@ namespace ops
                 ByteSwap((unsigned char*) &out[i], 2);
             }
 #endif
-            WriteChars((char*) & out[0], size * 2);
+            WriteChars((const char*) & out[0], size * 2);
 #ifdef ON_BIG_ENDIAN_MACHINE
             if (preserveWrittenData) {
                 for(unsigned int i = 0; i < out.size() ; i++)
@@ -551,7 +551,7 @@ namespace ops
                 ByteSwap((unsigned char*) &out[i], 4);
             }
 #endif
-            WriteChars((char*) & out[0], size * 4);
+            WriteChars((const char*) & out[0], size * 4);
 #ifdef ON_BIG_ENDIAN_MACHINE
             if (preserveWrittenData) {
                 for(unsigned int i = 0; i < out.size() ; i++)
@@ -592,7 +592,7 @@ namespace ops
                 ByteSwap((unsigned char*) &out[i], 8);
             }
 #endif
-            WriteChars((char*) & out[0], size * 8);
+            WriteChars((const char*) & out[0], size * 8);
 #ifdef ON_BIG_ENDIAN_MACHINE
             if (preserveWrittenData) {
                 for(unsigned int i = 0; i < out.size() ; i++)
@@ -652,7 +652,7 @@ namespace ops
 
     void ByteBuffer::writeProtocol()
     {
-        WriteChars((char*)protocolID, 4);
+        WriteChars(protocolID, 4);
         WriteChar(versionLow);
         WriteChar(versionHigh);
     }

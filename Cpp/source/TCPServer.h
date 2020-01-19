@@ -138,7 +138,7 @@ namespace ops
 		{
 			_ioService = dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService;
 			//boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(serverIP));
-			_endpoint = new boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), serverPort);
+			_endpoint = new boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), (unsigned short)serverPort);
 		}
 		
 		virtual ~TCPServer()

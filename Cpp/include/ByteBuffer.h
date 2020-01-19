@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2019-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -61,8 +61,8 @@ namespace ops
 		char shortStringBuffer[shortStringBufferLength+1];
 	public:
         ///Writes the length first chars from chars to the buffer and increments index by length.
-        void WriteChars(char* chars, int length);
-        ///Reads length number of chars to the buffer and icrements index by length.
+        void WriteChars(const char* chars, int length);
+        ///Reads length number of chars to the buffer and increments index by length.
         void ReadChars(char* chars, int length);
 
 		void writeNewSegment();
@@ -131,7 +131,7 @@ namespace ops
 		{
 			int siz = (int)s.size();
 			WriteInt(siz);
-			WriteChars((char*)s.c_str(), siz);
+			WriteChars(s.c_str(), siz);
 		}
 
 		///Reads 4 bytes from the buffer and returns them as a float. Index is increased by 4.

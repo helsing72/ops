@@ -404,6 +404,7 @@ void CBridge::SendPreparePublishers()
 // NOTE Called from transport thread
 void CBridge::onConnect(CTransport* const sender)
 {
+    UNUSED(sender);
 	BL_INFO("# [ CBridge (%s) ] CONNECTED...\n", m_myName.c_str());
 
 	// Update time so we don't disconnect before data has started to arrive
@@ -428,7 +429,8 @@ void CBridge::onConnect(CTransport* const sender)
 // NOTE Called from transport thread
 void CBridge::onDisconnect(CTransport* const sender)
 {
-	BL_INFO("# [ CBridge (%s) ] DISCONNECTED...\n", m_myName.c_str());
+    UNUSED(sender);
+    BL_INFO("# [ CBridge (%s) ] DISCONNECTED...\n", m_myName.c_str());
 
 	// Save state
 	m_isConnected = false;
@@ -491,7 +493,8 @@ void CBridge::onOpsMessage(CTransport* const sender, ops::OPSObject* const mess,
 						   ops::ObjectName_T const publisherName,
 						   ops::ObjectName_T const topicName, uint64_t const AckCounter)
 {
-	UpdateReceiveTime();
+    UNUSED(sender);
+    UpdateReceiveTime();
 	m_numRecvMess++;
 
 	uint32_t errorCode = EC_NO_ERROR;
@@ -546,7 +549,8 @@ void CBridge::onOpsMessage(CTransport* const sender, ops::OPSObject* const mess,
 // NOTE Called from transport thread
 void CBridge::onAckNakMessage(CTransport* const sender, TAckNakMessage& ackNak)
 {
-	UpdateReceiveTime();
+    UNUSED(sender);
+    UpdateReceiveTime();
 
 	// if NAK logg error
 	if (ackNak.ErrorCode != EC_NO_ERROR) {
@@ -611,7 +615,8 @@ ops::Publisher* CBridge::setupPublisher(ops::Topic& destTopic)
 // NOTE Called from transport thread
 void CBridge::onCommandMessage(CTransport* const sender, TCommandMessage& cmd)
 {
-	UpdateReceiveTime();
+    UNUSED(sender);
+    UpdateReceiveTime();
 
 	// Commands
 	switch (cmd.Command) {
@@ -711,7 +716,8 @@ void CBridge::onCommandMessage(CTransport* const sender, TCommandMessage& cmd)
 // NOTE Called from transport thread
 void CBridge::onStatusMessage(CTransport* const sender, const TStatusMessage& status)
 {
-	UpdateReceiveTime();
+    UNUSED(sender);
+    UpdateReceiveTime();
 
 	//  - Buffer status (cyclic, heartbeat)
 	m_otherQueued = status.NumQueuedMessages;
@@ -732,14 +738,16 @@ void CBridge::onStatusMessage(CTransport* const sender, const TStatusMessage& st
 // NOTE Called from transport thread
 void CBridge::onUdpMcMessage(CTransport* const sender, TUdpMcMessage& udpMc, const char* data)
 {
-	// We don't buffer Raw UDP/MC messages
+    UNUSED(sender);
+    // We don't buffer Raw UDP/MC messages
 	m_raw.Write(udpMc, data);
 }
 
 // NOTE Called from RawMcUdp thread
 void CBridge::onUdpMcMessage(RawMcUdp* const sender, TUdpMcMessage& mess, const char* data)
 {
-	// We don't buffer Raw UDP/MC messages
+    UNUSED(sender);
+    // We don't buffer Raw UDP/MC messages
 	m_transport->writeUdpMcMessage(mess, data);
 }
 

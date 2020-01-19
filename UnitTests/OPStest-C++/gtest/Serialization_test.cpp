@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -88,8 +88,8 @@ int InitObject(SerDesObject_Core& obj)
 	obj.d64 = 123456789.0; size += 8;
 	obj.str = "Test std::string"; size += 4 + (int)obj.str.size();
 	obj.fstr = "Test strings:fixed_string..."; size += 4 + (int)obj.fstr.size();
-	for (int i = 0; i < (int)sizeof(obj.buffer); i++) { obj.buffer[i] = i; }
-	size += sizeof(obj.buffer);
+	for (int i = 0; i < (int)sizeof(obj.buffer); i++) { obj.buffer[i] = (char)i; }
+	size += (int)sizeof(obj.buffer);
 	return size;
 }
 

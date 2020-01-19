@@ -21,13 +21,25 @@
 #ifndef ops_UDPReceiverH
 #define ops_UDPReceiverH
 
+#include <iostream>
+
 #include "Participant.h"
 #include "Receiver.h"
+
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+#endif
+
 #include <boost/asio.hpp>
 #include "boost/bind.hpp"
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+
 #include "ByteBuffer.h"
 #include "BoostIOServiceImpl.h"
-#include <iostream>
 #include "BasicError.h"
 #include "BasicWarning.h"
 #include "Compatibility.h"
@@ -58,7 +70,7 @@ namespace ops
                     if (addr.is_v4())
                     {
                         ipaddress = addr.to_string().c_str();
-                        localEndpoint = new udp::endpoint(addr, bindPort);
+                        localEndpoint = new udp::endpoint(addr, (unsigned short)bindPort);
                         break;
                     }
                     ++it;
@@ -67,7 +79,7 @@ namespace ops
             else
             {
                 boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(localInterface.c_str()));
-                localEndpoint = new boost::asio::ip::udp::endpoint(ipAddr, bindPort);
+                localEndpoint = new boost::asio::ip::udp::endpoint(ipAddr, (unsigned short)bindPort);
 				ipaddress = localInterface;
             }
 

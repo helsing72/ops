@@ -213,7 +213,7 @@ int main(const int argc, const char* args[])
 #ifdef _WIN32
 			char const ch = _getch();
 #else
-			char const ch = getchar();
+			char const ch = (char const)getchar();
 #endif
 			if (ch == '+') {
 				if (fact >= (15.0 * dist)) { dist = 10.0 * dist; }

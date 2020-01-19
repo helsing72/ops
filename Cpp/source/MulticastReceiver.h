@@ -1,6 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -23,8 +24,17 @@
 
 #include <iostream>
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+#endif
+
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 #include "Participant.h"
 #include "Receiver.h"
@@ -61,7 +71,7 @@ namespace ops
 			boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string("0.0.0.0"));
 //			boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(localInterface));
 
-			localEndpoint = new boost::asio::ip::udp::endpoint(ipAddr, bindPort);
+			localEndpoint = new boost::asio::ip::udp::endpoint(ipAddr, (unsigned short)bindPort);
 
 			sock = new boost::asio::ip::udp::socket(*ioService);
 		}

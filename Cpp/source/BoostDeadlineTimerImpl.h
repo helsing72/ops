@@ -20,11 +20,20 @@
 #ifndef ops_BoostDeadlineTimerImpl_h
 #define ops_BoostDeadlineTimerImpl_h
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+#endif
+
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/shared_ptr.hpp>
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 #include "Participant.h"
 #include "BoostIOServiceImpl.h"
