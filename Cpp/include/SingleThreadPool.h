@@ -34,7 +34,7 @@
 namespace ops
 {
 
-    class SingleThreadPool : public Thread, public ThreadPool
+    class SingleThreadPool : private Thread, public ThreadPool
     {
     public:
         // While we are running, ie. executing run(), we don't allow add/remove to/from the runnables container.
