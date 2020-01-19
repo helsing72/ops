@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2019 Lennart Andersson.
+ * Copyright (C) 2019-2020 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -56,28 +56,19 @@ namespace ops {
         }
     };
 
-    Event::Event()
-    {
-        _impl = new InternalImpl();
-    }
+    Event::Event() : _impl(new InternalImpl) {}
 
-    Event::Event(const Event& rhs)
-    {
-        _impl = new InternalImpl();
-    }
+    Event::Event(const Event& ) : _impl(new InternalImpl) {}
 
     Event& Event::operator= (const Event& rhs)
     {
         if (this != &rhs) {
-            _impl = new InternalImpl();
+            _impl.reset(new InternalImpl);
         }
         return *this;
     }
 
-    Event::~Event()
-    {
-        delete _impl;
-    }
+    Event::~Event() {}
 
     bool Event::waitFor(const std::chrono::milliseconds& timeout)
     {
