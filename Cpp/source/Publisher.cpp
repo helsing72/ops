@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2019 Lennart Andersson.
+ * Copyright (C) 2018-2020 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -31,15 +31,7 @@ namespace ops
 {
     Publisher::Publisher(Topic t) :
     topic(t),
-    memMap(t.getSampleMaxSize() / OPSConstants::PACKET_MAX_SIZE + 1, OPSConstants::PACKET_MAX_SIZE, &DataSegmentAllocator::Instance()),
-    currentPublicationID(0),
-    name(""),
-    key(""),
-#ifdef OPS_ENABLE_DEBUG_HANDLER
-	_dbgSkip(0),
-#endif
-    sendSleepTime(1),
-    sleepEverySendPacket(100000)
+    memMap(t.getSampleMaxSize() / OPSConstants::PACKET_MAX_SIZE + 1, OPSConstants::PACKET_MAX_SIZE, &DataSegmentAllocator::Instance())
     {
         participant = Participant::getInstance(topic.getDomainID(), topic.getParticipantID());
         sendDataHandler = participant->getSendDataHandler(topic);
@@ -112,32 +104,35 @@ namespace ops
         return this->name;
     }
 
-    void Publisher::writeOPSObject(OPSObject* obj)
+    bool Publisher::writeOPSObject(OPSObject* obj)
     {
-        write(obj);
+        return write(obj);
     }
 
-	void Publisher::write(OPSObject* data)
+	bool Publisher::write(OPSObject* data)
 	{
+        bool sendOK = true;
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 		SafeLock lck(&_dbgLock);
 		if (_dbgSkip > 0) {
 			_dbgSkip--;
 		} else {
 			if (_replace.size() > 0) {
-				internalWrite(_replace[_replace.size()-1]);
+				sendOK = internalWrite(_replace[_replace.size()-1]);
 				delete _replace[_replace.size() - 1];
 				_replace.pop_back();
 			} else {
-				internalWrite(data);
+				sendOK = internalWrite(data);
 			}
 		}
+        return sendOK;
 	}
 
-	void Publisher::internalWrite(OPSObject* data)
+	bool Publisher::internalWrite(OPSObject* data)
 	{
+        bool sendOK = true;
 #endif
-		if (key != "") {
+        if (key != "") {
             data->setKey(key);
         }
 
@@ -161,17 +156,16 @@ namespace ops
 
         for (int i = 0; i < buf.getNrOfSegments(); i++) {
             int segSize = buf.getSegmentSize(i);
-            bool sendOK = sendDataHandler->sendData(buf.getSegment(i), segSize, topic);
-            if (!sendOK) {
-                TimeHelper::sleep(sendSleepTime);
-                sendDataHandler->sendData(buf.getSegment(i), segSize, topic);
-            }
-			else if ((i > 0) && (i % sleepEverySendPacket == 0)) {
+            // We need to continue even if a send fails, since it may work to some destinations
+            sendOK &= sendDataHandler->sendData(buf.getSegment(i), segSize, topic);
+            // Check if we should back off for a while to distribute large messages over time
+            if ((i > 0) && (i % sleepEverySendPacket == 0)) {
                 TimeHelper::sleep(sendSleepTime);
             }
         }
 
-		currentPublicationID++;
+        currentPublicationID++;
+        return sendOK;
     }
 
 #ifdef OPS_ENABLE_DEBUG_HANDLER

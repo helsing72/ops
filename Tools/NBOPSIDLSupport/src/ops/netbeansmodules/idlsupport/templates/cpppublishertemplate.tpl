@@ -21,14 +21,14 @@ public:
     {
     }
 
-    void write(__className* data)
+    bool write(__className* data)
     {
-        ops::Publisher::write(data);
+        return ops::Publisher::write(data);
     }
 
-    void write(__className& data)
+    bool write(__className& data)
     {
-        ops::Publisher::write(&data);
+        return ops::Publisher::write(&data);
     }
 
 };

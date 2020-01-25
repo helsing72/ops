@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -54,10 +54,10 @@ public:
     ObjectKey_T getKey() const;
 	ObjectName_T getName() const;
 
-	void writeOPSObject(OPSObject* obj);
+	bool writeOPSObject(OPSObject* obj);
 
 protected:
-	void write(OPSObject* data);
+	bool write(OPSObject* data);
 
 	// Called from SendDataHandler (TCPServer)
 	virtual void onNewEvent(Notifier<ConnectStatus>* sender, ConnectStatus arg) override
@@ -72,28 +72,28 @@ private:
 
 	MemoryMap memMap;
 
-	SendDataHandler* sendDataHandler;
+    SendDataHandler* sendDataHandler{ nullptr };
 
 	OPSMessage message;
  
-	Participant* participant;
+    Participant* participant{ nullptr };
 
-    int64_t currentPublicationID;
+    int64_t currentPublicationID{ 0 };
 	ObjectName_T name;
     ObjectKey_T key;
 	
 #ifdef OPS_ENABLE_DEBUG_HANDLER
-	volatile int64_t _dbgSkip;
+    volatile int64_t _dbgSkip{ 0 };
 	Lockable _dbgLock;
 	std::vector<OPSObject*> _replace;
 	virtual void onRequest(opsidls::DebugRequestResponseData& req, opsidls::DebugRequestResponseData& resp) override;
-	void internalWrite(OPSObject* data);
+	bool internalWrite(OPSObject* data);
 #endif
 
 public:
 	//Send behavior parameters
-	int64_t sendSleepTime;
-	int sleepEverySendPacket;
+    int64_t sendSleepTime{ 1 };
+    int sleepEverySendPacket{ 100000 };
 };
 
 }
