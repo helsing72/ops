@@ -47,12 +47,11 @@ namespace ops {
             return false;
         }
 
-        // Signal any waiting thread(s)
         void signal()
         {
             std::unique_lock<std::mutex> lock(mtx);
             signaled = true;
-            cv.notify_all();
+            cv.notify_one();
         }
     };
 

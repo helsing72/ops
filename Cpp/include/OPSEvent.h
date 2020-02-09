@@ -35,7 +35,7 @@ namespace ops {
         ~Event();
         
         bool waitFor(const std::chrono::milliseconds& timeout);
-        // Signal any waiting thread(s)
+        // Signal a waiting thread (only one is released)
         void signal();
 
     private:
