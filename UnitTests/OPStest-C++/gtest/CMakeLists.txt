@@ -18,6 +18,7 @@ set(APP_SRCS
   ObjectFactory_test.cpp
   OpsConfigObjects_test.cpp
   OpsConfigRepo_test.cpp
+  OpsEvent_test.cpp
   OpsMessage_test.cpp
   OpsObject_test.cpp
   OPSUtilities_test.cpp
