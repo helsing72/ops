@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2019 Lennart Andersson.
+ * Copyright (C) 2018-2020 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -121,7 +121,7 @@ namespace ops
         void setHistoryMaxSize(int s);
         std::deque<OPSMessage*> getHistory();
 
-        ///Returns a reference the latest received data object.
+        ///Returns a reference to the latest received data object.
         ///Clears the "new data" flag.
         ///NOTE: MessageLock should be held while working with the data object, to prevent a
         ///new incomming message to delete the current one while in use. 
@@ -142,7 +142,7 @@ namespace ops
 		//Add listerner(s) to the checker and you will be notified when:
 		// - A new publisher is detected (Ip & Port of publisher is used)
 		// - A Sequence Error is detected for an existing publisher
-		PublicationIdChecker* pubIdChecker;
+		PublicationIdChecker* pubIdChecker = nullptr;
 
 		//User data field that the owner of the subscriber can use for any purpose. Not used by OPS.
 		uint64_t userData = 0;
@@ -152,12 +152,12 @@ namespace ops
 	protected:
         void checkAndNotifyDeadlineMissed();
 
-        OPSMessage* message;
+        OPSMessage* message = nullptr;
 
-        OPSObject* data;
+        OPSObject* data = nullptr;
         OPSObject* getData();
-        bool firstDataReceived;
-        bool hasUnreadData;
+        bool firstDataReceived = false;
+        bool hasUnreadData = false;
 
 		// Called from ReceiveDataHandler (TCPClient)
 		virtual void onNewEvent(Notifier<ConnectStatus>* sender, ConnectStatus arg)
@@ -169,10 +169,10 @@ namespace ops
 
 	private:
         ///The Participant to which this Subscriber belongs.
-        Participant* participant;
+        Participant* participant = nullptr;
 
         ///ReceiveDataHandler delivering new data samples to this Subscriber
-        ReceiveDataHandler* receiveDataHandler;
+        ReceiveDataHandler* receiveDataHandler = nullptr;
 
         ///The Topic this Subscriber subscribes to.
         Topic topic;
@@ -184,33 +184,31 @@ namespace ops
         std::list<FilterQoSPolicy*> filterQoSPolicies;
 
         std::deque<OPSMessage*> messageBuffer;
-        unsigned int messageBufferMaxSize;
+        unsigned int messageBufferMaxSize = 1;
         void addToBuffer(OPSMessage* mess);
 
         Lockable filterQoSPolicyMutex;
         Event newDataEvent;
 
-        int64_t timeLastData;
-        int64_t timeLastDataForTimeBase;
-        int64_t timeBaseMinSeparationTime;
-        int64_t deadlineTimeout;
+        int64_t timeLastData = 0;
+        int64_t timeLastDataForTimeBase = 0;
+        int64_t timeBaseMinSeparationTime = 0;
+        int64_t deadlineTimeout = 0;
 
         bool applyFilterQoSPolicies(OPSObject* o);
-        //bool applyKeyFilter(OPSObject* o);
 
         void registerForDeadlineTimeouts();
         void cancelDeadlineTimeouts();
 
-        bool deadlineMissed;
-        void setDeadlineMissed(bool deadlineMissed);
+        bool deadlineMissed = false;
 
-        bool started;
+        bool started = false;
 
-        DeadlineTimer* deadlineTimer;
+        DeadlineTimer* deadlineTimer = nullptr;
 
 #ifdef OPS_ENABLE_DEBUG_HANDLER
-		volatile int64_t _dbgSkip;
-		volatile int64_t _numReceived;
+		volatile int64_t _dbgSkip = 0;
+		volatile int64_t _numReceived = 0;
 		Lockable _dbgLock;
 		virtual void onRequest(opsidls::DebugRequestResponseData& req, opsidls::DebugRequestResponseData& resp);
 #endif

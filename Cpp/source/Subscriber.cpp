@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2019 Lennart Andersson.
+ * Copyright (C) 2018-2020 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -31,23 +31,8 @@ namespace ops
 {
 
     Subscriber::Subscriber(Topic t) :
-		pubIdChecker(nullptr),
-		message(nullptr),
-		data(nullptr),
-		firstDataReceived(false),
-		hasUnreadData(false),
-		receiveDataHandler(nullptr),
 		topic(t),
-		messageBufferMaxSize(1),
-		timeLastDataForTimeBase(0),
-		timeBaseMinSeparationTime(0),
-		deadlineTimeout(TimeHelper::infinite),
-		deadlineMissed(false),
-		started(false)
-#ifdef OPS_ENABLE_DEBUG_HANDLER
-		, _dbgSkip(0)
-		, _numReceived(0)
-#endif
+		deadlineTimeout(TimeHelper::infinite)
 	{
         participant = Participant::getInstance(topic.getDomainID(), topic.getParticipantID());
         deadlineTimer = DeadlineTimer::create(participant->getIOService());
@@ -148,7 +133,7 @@ namespace ops
         OPSObject* o = message->getData();
         if (applyFilterQoSPolicies(o))
         {
-            if (TimeHelper::currentTimeMillis() - timeLastDataForTimeBase > timeBaseMinSeparationTime || timeBaseMinSeparationTime == 0)
+            if (timeBaseMinSeparationTime == 0 || TimeHelper::currentTimeMillis() - timeLastDataForTimeBase > timeBaseMinSeparationTime)
             {
                 firstDataReceived = true;
                 
@@ -159,19 +144,15 @@ namespace ops
                 // Notify all registered listeners
                 notifyNewData();
 
-                // Signal any waiting thread(s)
+                // Signal any waiting thread
                 hasUnreadData = true;
                 newDataEvent.signal();
 
 				// Update deadline variables
-                timeLastDataForTimeBase = TimeHelper::currentTimeMillis();
-                timeLastData = TimeHelper::currentTimeMillis();
-                setDeadlineMissed(false);
+                timeLastData = timeLastDataForTimeBase = TimeHelper::currentTimeMillis();
+                deadlineMissed = false;
 
                 deadlineTimer->start(deadlineTimeout);
-
-                //cancelDeadlineTimeouts();
-                //registerForDeadlineTimeouts();
             }
         }
     }
@@ -301,11 +282,6 @@ namespace ops
             return deadlineMissed;
         }
         return false;
-    }
-
-    void Subscriber::setDeadlineMissed(bool deadlineMissed)
-    {
-        this->deadlineMissed = deadlineMissed;
     }
 
     void Subscriber::registerForDeadlineTimeouts()
