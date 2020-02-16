@@ -1,6 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
+ * Copyright (C) 2020 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -36,17 +37,17 @@ namespace ops
 
     Sender* Sender::create(IOService* ioService, Address_T localInterface, int ttl, int64_t outSocketBufferSize)
     {
-        return new UDPSender(ioService, localInterface, ttl, outSocketBufferSize, true);
+        return new UDPSender(ioService, localInterface, ttl, (int)outSocketBufferSize, true);
     }
 
     Sender* Sender::createUDPSender(IOService* ioService, Address_T localInterface, int ttl, int64_t outSocketBufferSize)
     {
-        return new UDPSender(ioService, localInterface, ttl, outSocketBufferSize, false);
+        return new UDPSender(ioService, localInterface, ttl, (int)outSocketBufferSize, false);
     }
 
     Sender* Sender::createTCPServer(TCPServerCallbacks* client, IOService* ioService, Address_T ip, int port, int64_t outSocketBufferSize)
     {
-		return new TCPServer(client, ioService, ip, port, outSocketBufferSize);
+		return new TCPServer(client, ioService, ip, (uint16_t)port, (int)outSocketBufferSize);
     }
 
 }

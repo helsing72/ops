@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2019-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -48,17 +48,14 @@ namespace ops
         ///and a dynamically allocated local port.
 		///This class accepts synchronous write operations through sendTo().
 
-        UDPSender(IOService* ioServ, Address_T localInterface = "0.0.0.0", int ttl = 1, int64_t outSocketBufferSize = 16000000, bool multicastSocket = false);
+        UDPSender(IOService* ioServ, Address_T localInterface = "0.0.0.0", int ttl = 1, int outSocketBufferSize = 16000000, bool multicastSocket = false);
         ~UDPSender();
         
-		virtual void open() override;
+		virtual bool open() override;
 		virtual void close() override;
 
-        ///Override from Sender
-        virtual bool sendTo(const char* buf, const int size, const Address_T& ip, const int port) override;
-        ///Override from Sender
-        virtual int getLocalPort() override {return socket->local_endpoint().port();};
-        ///Override from Sender
+        virtual bool sendTo(const char* buf, const int size, const Address_T& ip, const uint16_t port) override;
+        virtual uint16_t getLocalPort() override {return socket->local_endpoint().port();};
         virtual Address_T getLocalAddress() override {return socket->local_endpoint().address().to_string().c_str();};
 
     private:
@@ -71,7 +68,7 @@ namespace ops
 
 		Address_T _localInterface;
 		int _ttl;
-		int64_t _outSocketBufferSize;
+		int _outSocketBufferSize;
 		bool _multicastSocket;
     };
 }

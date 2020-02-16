@@ -50,7 +50,7 @@ namespace ops
 	public:
 		// Used for connections created by TCPServer
 		// In this case the socket is already connected
-		explicit TCPBoostConnection(TCPConnectionCallbacks* client, boost::asio::ip::tcp::socket* sock, int64_t outSocketBufferSize) :
+		explicit TCPBoostConnection(TCPConnectionCallbacks* client, boost::asio::ip::tcp::socket* sock, int outSocketBufferSize) :
 			TCPConnection(client),
 			_sock(sock)
 		{
@@ -70,10 +70,10 @@ namespace ops
 			if (_sock != nullptr) _sock->close();
 		}
 
-		void setOutSize(int64_t size)
+		void setOutSize(int size)
 		{
 			if ((_sock != nullptr) && (size > 0)) {
-				boost::asio::socket_base::send_buffer_size option((int)size);
+				boost::asio::socket_base::send_buffer_size option(size);
 				boost::system::error_code ec;
 				ec = _sock->set_option(option, ec);
 				_sock->get_option(option);

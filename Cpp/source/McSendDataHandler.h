@@ -40,7 +40,7 @@ namespace ops
 
         bool sendData(char* buf, int bufSize, Topic& topic)
         {
-            bool result = sender->sendTo(buf, bufSize, topic.getDomainAddress(), topic.getPort());
+            bool result = sender->sendTo(buf, bufSize, topic.getDomainAddress(), (uint16_t)topic.getPort());
             return result;
         }
 

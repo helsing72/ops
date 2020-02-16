@@ -198,7 +198,7 @@ namespace opsbridge {
 		}
 		if (_senders[key].sender != nullptr) {
 			BL_TRACE("RawMcUdp::write() to %s::%d\n", _senders[key].t.dstIp.c_str(), _senders[key].t.dstPort);
-			_senders[key].sender->sendTo(data, mess.DataLength, _senders[key].t.dstIp.c_str(), _senders[key].t.dstPort);
+			_senders[key].sender->sendTo(data, mess.DataLength, _senders[key].t.dstIp.c_str(), (uint16_t)_senders[key].t.dstPort);
 		}
 	}
 

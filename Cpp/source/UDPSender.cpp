@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2019-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -44,7 +44,7 @@
 namespace ops
 {
     using boost::asio::ip::udp;
-	UDPSender::UDPSender(IOService* ioServ, Address_T localInterface, int ttl, int64_t outSocketBufferSize, bool multicastSocket):
+	UDPSender::UDPSender(IOService* ioServ, Address_T localInterface, int ttl, int outSocketBufferSize, bool multicastSocket):
 		ipAddr(boost::asio::ip::address_v4::from_string(localInterface.c_str())),
 		localEndpoint(ipAddr, 0),
 		socket(nullptr), io_service(dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService),
@@ -58,54 +58,88 @@ namespace ops
 		close();
     }
 
-	void UDPSender::open()
+	bool UDPSender::open()
 	{
-		if (socket != nullptr) return;
+        if (socket != nullptr) { return true; }
 
-        socket = new boost::asio::ip::udp::socket(*io_service, localEndpoint.protocol());
-		try {
-			if(_outSocketBufferSize > 0)
-			{
-				boost::asio::socket_base::send_buffer_size option((int)_outSocketBufferSize);
-				boost::system::error_code ec;
-				ec = socket->set_option(option, ec);
-				socket->get_option(option);
-				if(ec || option.value() != _outSocketBufferSize)
-				{
-					ErrorMessage_T msg("Socket buffer size ");
-					msg += NumberToString(_outSocketBufferSize);
-					msg += " could not be set. Used value: ";
-					msg += NumberToString(option.value());
-					ops::BasicWarning err("UDPSender", "UDPSender", msg);
-					Participant::reportStaticError(&err);
-				}
-			}
+        boost::system::error_code ec;
+        socket = new boost::asio::ip::udp::socket(*io_service);
+        socket->open(localEndpoint.protocol(), ec);
+        if (ec) {
+            ErrorMessage_T msg("Open failed with error: ");
+            msg += ec.message();
+            msg += ", port: ";
+            msg += NumberToString(localEndpoint.port());
+            ops::BasicError err("UDPSender", "Open", msg);
+            Participant::reportStaticError(&err);
+            delete socket;
+            socket = nullptr;
+            return false;
+        }
 
-			if(_multicastSocket)
-			{
-				boost::asio::ip::multicast::hops ttlOption(_ttl);
-				socket->set_option(ttlOption);
+        if (_outSocketBufferSize > 0) {
+            boost::asio::socket_base::send_buffer_size option(_outSocketBufferSize);
+            boost::system::error_code ec, ec2;
+            ec = socket->set_option(option, ec);
+            socket->get_option(option, ec2);
+            if (ec || ec2 || option.value() != _outSocketBufferSize)
+            {
+                ErrorMessage_T msg("Socket buffer size ");
+                msg += NumberToString(_outSocketBufferSize);
+                msg += " could not be set. Used value: ";
+                msg += NumberToString(option.value());
+                ops::BasicWarning err("UDPSender", "Open", msg);
+                Participant::reportStaticError(&err);
+            }
+        }
 
-				boost::asio::ip::address_v4 local_interface = boost::asio::ip::address_v4::from_string(_localInterface.c_str());
-				boost::asio::ip::multicast::outbound_interface ifOption(local_interface);
-				socket->set_option(ifOption);
-			}
+        if (_multicastSocket) {
+            boost::asio::ip::multicast::hops ttlOption(_ttl);
+            socket->set_option(ttlOption, ec);
+            if (ec) {
+                ErrorMessage_T msg("Set TTL failed with error: ");
+                msg += ec.message();
+                ops::BasicWarning err("UDPSender", "Open", msg);
+                Participant::reportStaticError(&err);
+                ec.clear();
+            }
+
+            boost::asio::ip::address_v4 local_interface = boost::asio::ip::address_v4::from_string(_localInterface.c_str());
+            boost::asio::ip::multicast::outbound_interface ifOption(local_interface);
+            socket->set_option(ifOption, ec);
+            if (ec) {
+                ErrorMessage_T msg("Set MC Interface failed with error: ");
+                msg += ec.message();
+                ops::BasicWarning err("UDPSender", "Open", msg);
+                Participant::reportStaticError(&err);
+                ec.clear();
+            }
+        }
 
 #if BOOST_VERSION > 106500
-			socket->non_blocking(true);
+        socket->non_blocking(true, ec);
 #else
-			boost::asio::socket_base::non_blocking_io command(true);
-			socket->io_control(command);
+        boost::asio::socket_base::non_blocking_io command(true);
+        socket->io_control(command, ec);
 #endif
+        if (ec) {
+            ErrorMessage_T msg("Set non-blocking failed with error: ");
+            msg += ec.message();
+            ops::BasicWarning err("UDPSender", "Open", msg);
+            Participant::reportStaticError(&err);
+            ec.clear();
+        }
 
-			socket->bind(localEndpoint);
-		}
-		catch (...) {
-			socket->close();
-			delete socket;
-			socket = nullptr;
-			throw;
-		}
+        socket->bind(localEndpoint, ec);
+        if (ec) {
+            ErrorMessage_T msg("Bind failed with error: ");
+            msg += ec.message();
+            ops::BasicError err("UDPSender", "Open", msg);
+            Participant::reportStaticError(&err);
+            close();
+            return false;
+        }
+        return true;
 	}
 
 	void UDPSender::close()
@@ -117,13 +151,13 @@ namespace ops
 		}
 	}
 
-    bool UDPSender::sendTo(const char* buf, const int size, const Address_T& ip, const int port)
+    bool UDPSender::sendTo(const char* buf, const int size, const Address_T& ip, const uint16_t port)
     {
 		if (socket == nullptr) { return false; }
         try
         {
             boost::asio::ip::address ipaddress = boost::asio::ip::address::from_string(ip.c_str());
-            boost::asio::ip::udp::endpoint endpoint(ipaddress, (unsigned short)port);
+            boost::asio::ip::udp::endpoint endpoint(ipaddress, port);
             std::size_t res = socket->send_to(boost::asio::buffer(buf, size), endpoint);
 			if (res != (std::size_t)size) {
 				OPS_UDP_ERROR("UDPSender: sendTo(), Error: Failed to write message (" << size << "), res: " << res << "]\n");

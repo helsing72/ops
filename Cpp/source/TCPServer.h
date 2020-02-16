@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -61,7 +61,7 @@ namespace ops
 			boost::asio::ip::tcp::socket* _sock = nullptr;				// The socket that handles next accept.
 			boost::asio::ip::tcp::acceptor* _acceptor = nullptr;
 			volatile bool _canceled = false;
-			int64_t _outSocketBufferSize = 0;
+			int _outSocketBufferSize = 0;
 
 		public:
 			impl(TCPServer* owner, boost::asio::io_service* ioService) : _owner(owner), _ioService(ioService)
@@ -121,7 +121,7 @@ namespace ops
 				}
 			}
 
-			void getLocal(Address_T& address, int& port)
+			void getLocal(Address_T& address, uint16_t& port)
 			{
 				boost::system::error_code error;
 				boost::asio::ip::tcp::endpoint localEndPoint;
@@ -132,13 +132,13 @@ namespace ops
 		};
 
     public:
-		TCPServer(TCPServerCallbacks* client, IOService* ioServ, Address_T serverIP, int serverPort, int64_t outSocketBufferSize = 16000000) :
+		TCPServer(TCPServerCallbacks* client, IOService* ioServ, Address_T serverIP, uint16_t serverPort, int outSocketBufferSize = 16000000) :
 			TCPServerBase(client, ioServ),
 			_serverPort(serverPort), _serverIP(serverIP), _outSocketBufferSize(outSocketBufferSize)
 		{
 			_ioService = dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService;
 			//boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(serverIP));
-			_endpoint = new boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), (unsigned short)serverPort);
+			_endpoint = new boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), serverPort);
 		}
 		
 		virtual ~TCPServer()
@@ -149,16 +149,17 @@ namespace ops
 			OPS_TCP_TRACE("Server: Destructor finished\n");
 		}
 
-		void open() override
+		bool open() override
 		{
 			if (_server) close();
 			_server = std::make_shared<impl>(this, _ioService);
 			_server->start_accept();
 
 			Address_T addr;
-			int port;
+			uint16_t port;
 			_server->getLocal(addr, port);
 			OPS_PIFO_TRACE("TCP Server IP: " << addr << ", Port: " << port << "\n");
+            return true;
 		}
 
 		void close() override
@@ -170,11 +171,11 @@ namespace ops
 			TCPServerBase::close();
 		}
 
-		int getLocalPort() override
+		uint16_t getLocalPort() override
 		{
 			if ((_serverPort == 0) && (_server)) {
 				Address_T addr;
-				int port;
+				uint16_t port;
 				_server->getLocal(addr, port);
 				return port;
 			}
@@ -187,9 +188,9 @@ namespace ops
 		}
 
     private:
-		int _serverPort;
+		uint16_t _serverPort;
 		Address_T _serverIP;
-		int64_t _outSocketBufferSize;
+		int _outSocketBufferSize;
 		boost::asio::ip::tcp::endpoint* _endpoint;		// The local port to bind to.
 		boost::asio::io_service* _ioService;			// Boost io_service handles the asynchronous operations on the sockets
 

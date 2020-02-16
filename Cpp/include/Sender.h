@@ -1,6 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
+ * Copyright (C) 2020 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -41,11 +42,11 @@ namespace ops
     class Sender
     {
     public:
-        virtual bool sendTo(const char* buf, const int size, const Address_T& ip, const int port) = 0;
-		virtual void open() = 0;
+        virtual bool sendTo(const char* buf, const int size, const Address_T& ip, const uint16_t port) = 0;
+		virtual bool open() = 0;
 		virtual void close() = 0;
 
-		virtual int getLocalPort() = 0;
+		virtual uint16_t getLocalPort() = 0;
 		virtual Address_T getLocalAddress() = 0;
 
         static OPS_EXPORT Sender* create(IOService* ioService, Address_T localInterface = "0.0.0.0", int ttl = 1, int64_t outSocketBufferSize = 16000000);

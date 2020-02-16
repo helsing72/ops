@@ -58,7 +58,7 @@ namespace ops
                 //Check if this sink is alive
                 if (it->second.isAlive()) {
                     //std::cout << topic.getName() << ", sending to sink: " << it->second.getKey() << std::endl;
-                    result &= sender->sendTo(buf, bufSize, it->second._ip, it->second._port);
+                    result &= sender->sendTo(buf, bufSize, it->second._ip, (uint16_t)it->second._port);
                 }
                 else //Remove it.
                 {

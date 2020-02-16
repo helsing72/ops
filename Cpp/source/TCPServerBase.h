@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -89,7 +89,7 @@ namespace ops
 
 		///Sends buf to all Receivers connected to this Sender, ip and port are discarded and can be left blank.
 		/// buf == nullptr or size == 0, is handled by connection/protocol
-        bool sendTo(const char* buf, const int size, const Address_T&, const int) override
+        bool sendTo(const char* buf, const int size, const Address_T&, const uint16_t) override
 		{
 			SafeLock lck(&_mtx);
 			// Send to anyone connected. Loop backwards to avoid problems when removing broken sockets
