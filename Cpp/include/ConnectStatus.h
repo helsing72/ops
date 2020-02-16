@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2018 Lennart Andersson.
+* Copyright (C) 2018-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -34,7 +34,7 @@ namespace ops
 	struct ConnectStatus
 	{
 		Address_T addr;
-		int port;
+		uint16_t port;
 		bool connected;
 		int totalNo;
 		ConnectStatus(bool c, int no) : port(0), connected(c), totalNo(no) { }

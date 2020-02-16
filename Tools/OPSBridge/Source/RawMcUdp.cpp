@@ -108,9 +108,9 @@ namespace opsbridge {
 		ops::Receiver* const receiver = dynamic_cast<ops::Receiver*>(sender);
 
 		ops::Address_T localAddr = receiver->getLocalAddress();
-		int localPort = receiver->getLocalPort();
+		uint16_t localPort = receiver->getLocalPort();
 		ops::Address_T srcAddr;
-		int srcPort;
+		uint16_t srcPort;
 		receiver->getSource(srcAddr, srcPort);
 
 		// if srcPort is one of our own sender sockets, then skip data to avoid unwanted feedback
@@ -128,9 +128,9 @@ namespace opsbridge {
 			mess.Head.Type = mtUdpMc;
 			mess.Head.Length = sizeof(mess);
 			mess.DstMcIP = ops::IPString2Addr(localAddr);
-			mess.DstMcPort = (uint16_t)localPort;
+			mess.DstMcPort = localPort;
 			mess.SrcIP = ops::IPString2Addr(srcAddr);
-			mess.SrcPort = (uint16_t)srcPort;
+			mess.SrcPort = srcPort;
 			mess.DataLength = byteSizePair.size;
 
 			// notify client

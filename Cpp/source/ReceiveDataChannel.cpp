@@ -69,7 +69,7 @@ namespace ops
 		receiver->stop();
 	}
 
-	static void ReportError(Participant& participant, ErrorMessage_T message, Address_T addr, int port)
+	static void ReportError(Participant& participant, ErrorMessage_T message, Address_T addr, uint16_t port)
 	{
 		message += " [";
 		message += addr;
@@ -108,7 +108,7 @@ namespace ops
 
 		///TODO Check that all segments come from the same source (IP and port)
 		Address_T addr;
-		int port;
+		uint16_t port;
 		receiver->getSource(addr, port);
 
         //Create a temporay map and buf to peek data before putting it in to memMap

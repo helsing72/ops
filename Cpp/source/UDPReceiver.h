@@ -1,7 +1,8 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- *
+ * Copyright (C) 2020 Lennart Andersson.
+*
  * This file is part of OPS (Open Publish Subscribe).
  *
  * OPS (Open Publish Subscribe) is free software: you can redistribute it and/or modify
@@ -51,35 +52,27 @@ namespace ops
     class UDPReceiver : public Receiver
     {
     public:
-
-        UDPReceiver(int bindPort, IOService* ioServ, Address_T localInterface = "0.0.0.0", int64_t inSocketBufferSizent = 16000000) :
-	        sock(nullptr), localEndpoint(nullptr), max_length(65535), data(nullptr),
-			cancelled(false), m_asyncCallActive(false), m_working(false)
+        UDPReceiver(uint16_t bindPort, IOService* ioServ, Address_T localInterface = "0.0.0.0", int inSocketBufferSizent = 16000000)
         {
             boost::asio::io_service* ioService = dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService;
 
-            if (localInterface == "0.0.0.0")
-            {
+            if (localInterface == "0.0.0.0") {
                 udp::resolver resolver(*ioService);
                 udp::resolver::query query(boost::asio::ip::host_name(), "");
                 udp::resolver::iterator it = resolver.resolve(query);
                 udp::resolver::iterator end;
-                while (it != end)
-                {
+                while (it != end) {
                     boost::asio::ip::address addr = it->endpoint().address();
-                    if (addr.is_v4())
-                    {
+                    if (addr.is_v4()) {
                         ipaddress = addr.to_string().c_str();
-                        localEndpoint = new udp::endpoint(addr, (unsigned short)bindPort);
+                        localEndpoint = new udp::endpoint(addr, bindPort);
                         break;
                     }
                     ++it;
                 }
-            }
-            else
-            {
+            } else {
                 boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(localInterface.c_str()));
-                localEndpoint = new boost::asio::ip::udp::endpoint(ipAddr, (unsigned short)bindPort);
+                localEndpoint = new boost::asio::ip::udp::endpoint(ipAddr, bindPort);
 				ipaddress = localInterface;
             }
 
@@ -87,14 +80,12 @@ namespace ops
 
             sock->open(localEndpoint->protocol());
 
-            if (inSocketBufferSizent > 0)
-            {
-                boost::asio::socket_base::receive_buffer_size option((int) inSocketBufferSizent);
+            if (inSocketBufferSizent > 0) {
+                boost::asio::socket_base::receive_buffer_size option(inSocketBufferSizent);
                 boost::system::error_code ec;
                 ec = sock->set_option(option, ec);
                 sock->get_option(option);
-                if (ec || option.value() != inSocketBufferSizent)
-                {
+                if (ec || option.value() != inSocketBufferSizent) {
 					ErrorMessage_T msg("Socket buffer size ");
 					msg += NumberToString(inSocketBufferSizent);
 					msg += " could not be set. Used value: ";
@@ -118,7 +109,7 @@ namespace ops
 			}
         }
 
-        void asynchWait(char* bytes, int size)
+        virtual void asynchWait(char* bytes, int size) override
         {
             data = bytes;
             max_length = size;
@@ -133,7 +124,7 @@ namespace ops
 
 		// Used to get the sender IP and port for a received message
 		// Only safe to call in callback, before a new asynchWait() is called.
-		void getSource(Address_T& address, int& port)
+		virtual void getSource(Address_T& address, uint16_t& port) override
 		{
 			address = sendingEndPoint.address().to_string().c_str();
 			port = sendingEndPoint.port();
@@ -142,14 +133,11 @@ namespace ops
         void handle_receive_from(const boost::system::error_code& error, size_t nrBytesReceived)
         {
 			m_asyncCallActive = false;	// No longer a call active, thou we may start a new one below
-			if (!cancelled)
-            {
-	            if (!error && nrBytesReceived > 0)
-		        {
-			        handleReadOK(data, (int)nrBytesReceived);
-				}
-	            else
-		        {
+            if (!cancelled) {
+                if (!error && nrBytesReceived > 0) {
+                    notifyNewEvent(BytesSizePair(data, (int)nrBytesReceived));
+
+                } else {
 			        handleReadError(error);
 				}
 			}
@@ -159,20 +147,8 @@ namespace ops
 			m_working = m_asyncCallActive;
         }
 
-        void handleReadOK(char* bytes_, int size)
-        {
-            UNUSED(bytes_);
-            notifyNewEvent(BytesSizePair(data, size));
-        }
-
         void handleReadError(const boost::system::error_code& error)
         {
-            if (error.value() == BREAK_COMM_ERROR_CODE)
-            {
-                //Communcation has been canceled from stop, do not scedule new receive
-                return;
-            }
-
 			ops::BasicError err("UDPReceiver", "handleReadError", "Error");
             Participant::reportStaticError(&err);
 
@@ -180,8 +156,9 @@ namespace ops
 			// it probably wont go away by calling the same again, so just report error and then exit without 
 			// starting a new async_receive().
 #ifdef _WIN32
-			if (error.value() == WSAEFAULT) return;
+            if (error.value() == WSAEFAULT) { return; }
 #else
+            UNUSED(error);
 ///TODO LINUX			if (error.value() == WSAEFAULT) return;
 #endif
 
@@ -191,13 +168,8 @@ namespace ops
         ~UDPReceiver()
         {
 			// Make sure socket is closed
-//#if BOOST_VERSION == 103800
-//			boost::system::error_code error(BREAK_COMM_ERROR_CODE, boost::system::generic_category);
-//#else
-//			boost::system::error_code error(BREAK_COMM_ERROR_CODE, boost::system::generic_category());
-//#endif
             cancelled = true;
-			if (sock) sock->close();
+            if (sock != nullptr) { sock->close(); }
 
 			/// We must handle asynchronous callbacks that haven't finished yet.
 			/// This approach works, but the recommended boost way is to use a shared pointer to the instance object
@@ -206,71 +178,66 @@ namespace ops
 				Sleep(1);
 			}
 
-            if (sock) delete sock;
-            if (localEndpoint) delete localEndpoint;
+            if (sock != nullptr) { delete sock; }
+            if (localEndpoint != nullptr) { delete localEndpoint; }
         }
 
         int receive(char* buf, int size)
         {
-            try
-            {
+            try {
                 size_t nReceived = sock->receive_from(boost::asio::buffer(buf, size), lastEndpoint);
                 return (int)nReceived;
-            }
-            catch (...)
-            {
+            } catch (...) {
 				ops::BasicError err("UDPReceiver", "receive", "Exception");
                 Participant::reportStaticError(&err);
                 return -1;
             }
         }
 
-        int available()
+        size_t available() const
         {
-            return (int)sock->available();
+            return sock->available();
         }
 
         bool sendReply(char* buf, int size)
         {
-            try
-            {
+            try {
                 std::size_t res = sock->send_to(boost::asio::buffer(buf, size), lastEndpoint);
 				if (res != (std::size_t)size) {
 					OPS_UDP_ERROR("UDPReceiver: sendReply(), Error: Failed to write message (" << size << "), res: " << res << "]\n");
 					return false;
 				}
 				return true;
-            }
-            catch (...)
-            {
+            } catch (...) {
                 return false;
             }
         }
 
-        int getLocalPort()
+        virtual uint16_t getLocalPort() override
         {
             return port;
         }
 
-		Address_T getLocalAddress()
+		virtual Address_T getLocalAddress() override
         {
             return ipaddress;
         }
 
         ///Override from Receiver
-		void start()
+		virtual bool start() override
 		{
 			/// The UDP Receiver is open the whole life time
             cancelled = false;
+            return true;
 		}
 
-        void stop()
+        virtual void stop() override
         {
 			/// The UDP Receiver is open the whole life time
 			// Cancel the asynch_receive()
             cancelled = true;
 			//sock->cancel(); ///FAILS ON WIN XP
-			if (sock) sock->close();
+            if (sock) { sock->close(); }
 
 			/// We must handle asynchronous callbacks that haven't finished yet.
 			/// This approach works, but the recommended boost way is to use a shared pointer to the instance object
@@ -281,30 +248,27 @@ namespace ops
         }
 
 		// Returns true if all asynchronous work has finished
-		virtual bool asyncFinished()
+		virtual bool asyncFinished() override
 		{
 			return !m_working;
 		}
 
     private:
-        int port;
+        uint16_t port = 0;
 		Address_T ipaddress;
-        boost::asio::ip::udp::socket* sock;
-        boost::asio::ip::udp::endpoint* localEndpoint;
+        boost::asio::ip::udp::socket* sock = nullptr;
+        boost::asio::ip::udp::endpoint* localEndpoint = nullptr;
         boost::asio::ip::udp::endpoint lastEndpoint;
-        //boost::asio::io_service* ioService;
-
 		boost::asio::ip::udp::endpoint sendingEndPoint;
 
-        int max_length; //enum { max_length = 65535 };
-        char* data; //[max_length];
+        int max_length = 65535; 
+        char* data = nullptr;
 
-        static const int BREAK_COMM_ERROR_CODE = 345676;
-        bool cancelled;
+        bool cancelled = false;
 
 		// Variables to keep track of our outstanding requests, that will result in callbacks to us
-		volatile bool m_asyncCallActive;
-		volatile bool m_working;
+		volatile bool m_asyncCallActive = false;
+		volatile bool m_working = false;
     };
 }
 #endif

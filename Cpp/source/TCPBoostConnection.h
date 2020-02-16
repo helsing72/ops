@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -38,7 +38,7 @@ namespace ops
 	protected:
 		boost::asio::ip::tcp::socket* _sock;
 		Address_T _remoteAddress;
-		int _remotePort = -1;
+		uint16_t _remotePort = 0;
 
 		// Used for a connection created by TCPClient
 		TCPBoostConnection(TCPConnectionCallbacks* client) :
@@ -88,10 +88,10 @@ namespace ops
 			}
 		}
 
-		void setInSize(int64_t size)
+		void setInSize(int size)
 		{
 			if ((_sock != nullptr) && (size > 0)) {
-				boost::asio::socket_base::receive_buffer_size option((int)size);
+				boost::asio::socket_base::receive_buffer_size option(size);
 				boost::system::error_code ec;
 				ec = _sock->set_option(option, ec);
 				_sock->get_option(option);
@@ -160,17 +160,17 @@ namespace ops
 			return -1;
 		}
 
-		void getRemote(Address_T& address, int& port) override
+		void getRemote(Address_T& address, uint16_t& port) override
 		{
 			// We cache the address and port for TCP, since it is the same until disconnected
-			if (_remotePort < 0) {
+			if (_remotePort == 0) {
 				getRemoteEndPoint();
 			}
 			address = _remoteAddress;
 			port = _remotePort;
 		}
 
-		void getLocal(Address_T& address, int& port) override
+		void getLocal(Address_T& address, uint16_t& port) override
 		{
 			boost::system::error_code error;
 			boost::asio::ip::tcp::endpoint localEndPoint;

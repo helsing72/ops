@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2019 Lennart Andersson.
+ * Copyright (C) 2018-2020 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -55,18 +55,18 @@ namespace ops
 			TCPClient* _owner;
 			volatile bool _tryToConnect;
 			boost::asio::ip::tcp::endpoint* _endpoint;
-			int64_t _inBufferSize;
+			int _inBufferSize;
 			boost::asio::deadline_timer _timer;
 
 		public:
-			TCPBoostConnectionWConnect(TCPClient* owner, Address_T serverIP, int serverPort, IOService* ioServ, int64_t inBufferSize) :
+			TCPBoostConnectionWConnect(TCPClient* owner, Address_T serverIP, uint16_t serverPort, IOService* ioServ, int inBufferSize) :
 				TCPBoostConnection(owner),
 				_owner(owner), _tryToConnect(false), _endpoint(nullptr), _inBufferSize(inBufferSize),
 				_timer(*dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService)
 			{
 				boost::asio::io_service* ioService = dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService;
 				boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(serverIP.c_str()));
-				_endpoint = new boost::asio::ip::tcp::endpoint(ipAddr, (unsigned short)serverPort);
+				_endpoint = new boost::asio::ip::tcp::endpoint(ipAddr, serverPort);
 				_sock = new boost::asio::ip::tcp::socket(*ioService);
 			}
 
@@ -85,7 +85,7 @@ namespace ops
 			{
 				OPS_TCP_TRACE("Client: start_async_connect()\n");
 				_connected = false;
-				_remotePort = -1;
+				_remotePort = 0;
 
 				std::shared_ptr<TCPConnection> self = shared_from_this();
 				_sock->async_connect(
@@ -101,7 +101,7 @@ namespace ops
 				if (_tryToConnect) {
 					_tryToConnect = false;
 					_connected = false;
-					_remotePort = -1;
+					_remotePort = 0;
 					_timer.cancel();
 					if (_sock) _sock->close();
 					_owner->connected(false);
@@ -148,15 +148,16 @@ namespace ops
 		};
 
 	public:
-        TCPClient(TCPClientCallbacks* client, Address_T serverIP, int serverPort, IOService* ioServ, int64_t inSocketBufferSizent = 16000000) :
+        TCPClient(TCPClientCallbacks* client, Address_T serverIP, uint16_t serverPort, IOService* ioServ, int inSocketBufferSizent = 16000000) :
 			TCPClientBase(client, ioServ, std::make_shared<TCPBoostConnectionWConnect>(this, serverIP, serverPort, ioServ, inSocketBufferSizent))
         {}
 
-		void start() override
+		bool start() override
 		{
-			TCPClientBase::start();
+			bool res = TCPClientBase::start();
 			std::shared_ptr<TCPBoostConnectionWConnect> sp = std::dynamic_pointer_cast<TCPBoostConnectionWConnect>(_connection);
 			sp->start();
+            return res;
 		}
 
         void stop() override
@@ -168,7 +169,7 @@ namespace ops
 
 		// Used to get the sender IP and port for a received message
 		// Only safe to call in callback, before a new asynchWait() is called.
-		void getSource(Address_T& address, int& port) override
+		void getSource(Address_T& address, uint16_t& port) override
 		{
 			_connection->getRemote(address, port);
 		}
@@ -189,10 +190,10 @@ namespace ops
 			return _connection->isConnected();
 		}
 
-		int getLocalPort() override
+		uint16_t getLocalPort() override
 		{
 			Address_T address;
-			int port;
+			uint16_t port;
 			_connection->getLocal(address, port);
 			return port;
 		}
@@ -200,7 +201,7 @@ namespace ops
 		Address_T getLocalAddress() override
 		{
 			Address_T address;
-			int port;
+			uint16_t port;
 			_connection->getLocal(address, port);
 			return address;
 		}

@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2019 Lennart Andersson.
+ * Copyright (C) 2018-2020 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -140,9 +140,10 @@ namespace ops
 			_timer->start(period);
 		}
 
-		void start() override
+		bool start() override
 		{
 			_started = true;
+            return true;
 		}
 
 		void stop() override

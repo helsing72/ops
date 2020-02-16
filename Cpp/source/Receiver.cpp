@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -35,15 +35,15 @@ namespace ops
 {
 	Receiver* Receiver::createMCReceiver(Address_T ip, int bindPort, IOService* ioService, Address_T localInterface, int64_t inSocketBufferSize)
 	{
-		return new MulticastReceiver(ip, bindPort, ioService, localInterface, inSocketBufferSize);
+		return new MulticastReceiver(ip, (uint16_t)bindPort, ioService, localInterface, (int)inSocketBufferSize);
 	}
 	Receiver* Receiver::createTCPClient(TCPClientCallbacks* client, Address_T ip, int port, IOService* ioService, int64_t inSocketBufferSize)
 	{
-		return new TCPClient(client, ip, port, ioService, inSocketBufferSize);
+		return new TCPClient(client, ip, (uint16_t)port, ioService, (int)inSocketBufferSize);
 	}
 	Receiver* Receiver::createUDPReceiver(int port, IOService* ioService, Address_T localInterface, int64_t inSocketBufferSize)
 	{
-		return new UDPReceiver(port, ioService, localInterface, inSocketBufferSize);
+		return new UDPReceiver((uint16_t)port, ioService, localInterface, (int)inSocketBufferSize);
 	}
 
 }
