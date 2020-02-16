@@ -3,4 +3,7 @@ from distutils.core import setup
 setup(name='ops-python',
       version='${PROJECT_VERSION}',
       packages=['ops'],
+      maintainer='Lennart Andersson',
+      maintainer_email='lelle@localhost',
+      url='https://github.com/LelleAnd/ops'
       )
