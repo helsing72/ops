@@ -1,8 +1,6 @@
 # Debug Console #
 ***DebugConsole*** is a tool for accessing the built-in [debug functionality](DebugFunc.md) in OPS.
 
-TBD
-
 The following shows the available command line arguments:
 
 ```
@@ -39,5 +37,7 @@ Version 2019-11-29
       -c cmd          Command to send to entity
       -p1 num         Value for parameter 1
 ```
+
+The source for the tool is located in the directory *Tools/DebugConsole/Source*.
 
 See also [debug functionality](DebugFunc.md).
