@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2019 Lennart Andersson.
+ * Copyright (C) 2018-2020 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -33,14 +33,10 @@ namespace ops
 {
 
 	ReceiveDataChannel::ReceiveDataChannel(Topic top, Participant& part, Receiver* recv) :
-		_client(nullptr),
-		receiver(recv),
 		memMap(top.getSampleMaxSize() / OPSConstants::PACKET_MAX_SIZE + 1, OPSConstants::PACKET_MAX_SIZE, &DataSegmentAllocator::Instance()),
-		sampleMaxSize(top.getSampleMaxSize()),
-		participant(part),
-		currentMessageSize(0),
-		expectedSegment(0),
-		firstReceived(false)
+        participant(part),
+        receiver(recv),
+        sampleMaxSize(top.getSampleMaxSize())
     {
 		if (receiver == nullptr) { receiver = ReceiverFactory::getReceiver(top, participant); }
 
@@ -80,27 +76,21 @@ namespace ops
 		participant.reportError(&err);
 	}
 
+    void ReceiveDataChannel::onNewEvent(Notifier<ConnectStatus>*, ConnectStatus arg)
+    {
+        if (_client != nullptr) {
+            _client->onStatusChange(*this, arg);
+        }
+    }
+
     ///Override from Listener
     ///Called whenever the receiver has new data.
     void ReceiveDataChannel::onNewEvent(Notifier<BytesSizePair>* sender, BytesSizePair byteSizePair)
     {
 		UNUSED(sender);
-        if (byteSizePair.size <= 0)
-        {
-            //Inform participant that we had an error waiting for data,
-            //this means the underlying socket is down but hopefully it will reconnect, so no need to do anything.
-            //Only happens with tcp connections so far.
-
-            if (byteSizePair.size == -5)
-            {
-                BasicError err("ReceiveDataChannel", "onNewEvent", "Connection was lost but is now reconnected.");
-                participant.reportError(&err);
-            }
-            else
-            {
-                BasicError err("ReceiveDataChannel", "onNewEvent", "Empty message or error.");
-                participant.reportError(&err);
-            }
+        if (byteSizePair.size <= 0) {
+            BasicError err("ReceiveDataChannel", "onNewEvent", "Empty message or error.");
+            participant.reportError(&err);
 
             receiver->asynchWait(memMap.getSegment(expectedSegment), memMap.getSegmentSize());
             return;

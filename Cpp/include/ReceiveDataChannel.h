@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -88,31 +88,27 @@ namespace ops
 		void onNewEvent(Notifier<BytesSizePair>* sender, BytesSizePair byteSizePair) override;
 		bool calculateAndSetSpareBytes(ByteBuffer &buf, OPSObject* obj, int segmentPaddingSize);
 
-		void onNewEvent(Notifier<ConnectStatus>*, ConnectStatus arg) override
-		{
-			if (_client != nullptr) {
-				_client->onStatusChange(*this, arg);
-			}
-		}
+        void onNewEvent(Notifier<ConnectStatus>*, ConnectStatus arg) override;
 
-	private:
-		ReceiveDataChannelCallbacks* _client;
+        ///Preallocated MemoryMap for receiving data
+        MemoryMap memMap;
+        int expectedSegment = 0;
+
+        //The Participant to which this ReceiveDataChannel belongs.
+        Participant& participant;
+
+    private:
+		ReceiveDataChannelCallbacks* _client = nullptr;
 
 		///The receiver used for this topic. 
-		Receiver* receiver;
+		Receiver* receiver = nullptr;
 
-		///Preallocated MemoryMap for receiving data
-		MemoryMap memMap;
-		int sampleMaxSize;
-
-		//The Participant to which this ReceiveDataChannel belongs.
-		Participant& participant;
+		int sampleMaxSize = 0;
 
 		///The accumulated size in bytes of the current message
-		int currentMessageSize;
+		int currentMessageSize = 0;
 
-		int expectedSegment;
-		bool firstReceived;
+		bool firstReceived = false;
 	};
 	
 }

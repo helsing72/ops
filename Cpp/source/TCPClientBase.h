@@ -84,18 +84,12 @@ namespace ops
 			_cs.connected = value;
 			_cs.totalNo = value ? 1 : 0;
 			if (value) getSource(_cs.addr, _cs.port);
-			// Need to call onConnect() before the notification, since onConnect()
-			// is used to provide the protocol to use.
 			if (doNotify) {
 				if (_cs.connected) {
 					_client->onConnect(*_connection, _cs);
 				} else {
 					_client->onDisconnect(*_connection, _cs);
 				}
-			}
-			// Backward compatibility. To be removed later
-			if (value) {
-				Notifier<BytesSizePair>::notifyNewEvent(BytesSizePair(nullptr, -5)); //Connection was down but has been reastablished.
 			}
 		}
 

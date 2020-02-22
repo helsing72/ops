@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2019 Lennart Andersson.
+ * Copyright (C) 2018-2020 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -96,15 +96,28 @@ namespace ops
 			prot->sendProbe();
 		}
 
-		ReceiveDataChannel::onNewEvent(nullptr, status);
-	}
+        if (_hasBeenConnected && !_isConnected) {
+            // Note that this will only happen for TCP Channels with configured fixed ports
+            // Dynamic ports will have a new RDC for each connection
+            BasicError err("ReceiveDataChannel", "onConnect", "Connection was lost but is now reconnected.");
+            participant.reportError(&err);
+        }
+        _hasBeenConnected = true;
+        _isConnected = true;
+
+        ReceiveDataChannel::onNewEvent(nullptr, status);
+
+        // We also need to start the asynch receiving
+        conn.asynchWait(memMap.getSegment(expectedSegment), memMap.getSegmentSize());
+    }
 
 	// Called from client when a connection is closed
 	// Ev. buffer used in asynchRead() is no longer in use
 	void TCPReceiveDataChannel::onDisconnect(TCPConnection& conn, ConnectStatus status)
 	{
 		OPS_TCP_TRACE("RDC: onDisconnect()\n");
-		// Need to reset protocol state in case the next connection is to a server with another version
+        _isConnected = false;
+        // Need to reset protocol state in case the next connection is to a server with another version
 		TCPOpsProtocol* prot = dynamic_cast<TCPOpsProtocol*>(conn.getProtocol());
 		if (prot != nullptr) {
 			prot->resetProtocol();

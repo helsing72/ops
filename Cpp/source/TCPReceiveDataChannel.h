@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -49,9 +49,11 @@ namespace ops
 		// Tell derived classes which topics that are active
 		void topicUsage(Topic& top, bool used) override;
 
-	private:
-		int _heartbeatPeriod;
-		int _heartbeatTimeout;
-	};
+    private:
+        int _heartbeatPeriod = 0;
+        int _heartbeatTimeout = 0;
+        bool _hasBeenConnected = false;
+        bool _isConnected = false;
+    };
 	
 }
