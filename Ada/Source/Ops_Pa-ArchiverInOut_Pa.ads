@@ -34,6 +34,8 @@ package Ops_Pa.ArchiverInOut_Pa is
 
   procedure Serialize( Self : in out Serializable_Class; archiver : ArchiverInOut_Class_At ) is abstract;
   function TypesString( Self : Serializable_Class ) return String is abstract;
+  -- SetTypesString() should not be used directly. It's for internal use only.
+  procedure SetTypesString( Self : in out Serializable_Class; types : String );
 
   --
   function IsOut( Self : in ArchiverInOut_Class) return Boolean is abstract;
@@ -123,7 +125,6 @@ private
 -- ==========================================================================
 --
 -- ==========================================================================
-  procedure SetTypesString( Self : in out Serializable_Class; types : String );
 
   procedure SetTypesString( Self : in out ArchiverInOut_Class; obj : Serializable_Class_At; types : String);
 

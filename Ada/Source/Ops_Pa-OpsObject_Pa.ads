@@ -63,7 +63,7 @@ private
   procedure AppendType( Self : in out OpsObject_Class; typ : String );
 
   -- Used from archivers
-  procedure SetTypesString( Self : in out OpsObject_Class; types : String ); 
+  overriding procedure SetTypesString( Self : in out OpsObject_Class; types : String );
 
   procedure InitInstance( Self : in out OpsObject_Class );
 
