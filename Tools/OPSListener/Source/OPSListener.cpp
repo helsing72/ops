@@ -37,7 +37,7 @@
 
 #endif
 
-const char c_program_version[] = "OPSListener Version 2019-12-08";
+const char c_program_version[] = "OPSListener Version 2020-03-15";
 
 void showDescription()
 {
@@ -52,7 +52,7 @@ void ShowUsage()
 {
 	std::cout << std::endl << "Usage:" << std::endl;
 	std::cout << "  OPSListener [-v] [-?] [-c ops_cfg_file [-c ops_cfg_file [...]]]" << std::endl;
-	std::cout << "              [-t] [-pA | -p<option_chars>]" << std::endl;
+	std::cout << "              [-t] [-pA | -p<option_chars>][-d [num]]" << std::endl;
 	std::cout << "              [-a arg_file [-a arg_file [...]]]" << std::endl;
 	std::cout << "              [-GA | -G domain [-G domain [...]]]" << std::endl;
 	std::cout << "              [-IA | -I domain [-I domain [...]] [-O]]" << std::endl;
@@ -64,6 +64,7 @@ void ShowUsage()
 	std::cout << "    -c ops_config_file Specifies an OPS configuration file to use" << std::endl;
 	std::cout << "                       If none given, the default 'ops_config.xml' is used" << std::endl;
 	std::cout << "    -C                 Do a publication ID check" << std::endl;
+    std::cout << "    -d [num]           Dump message content in hex (part derived from OPSObject)" << std::endl;
 	std::cout << "    -D default_domain  Default domain name to use for topics given without domain name" << std::endl;
 	std::cout << "                       If none given, the default 'SDSDomain' is used" << std::endl;
 	std::cout << "                       A new default can be given between topics" << std::endl;
@@ -116,6 +117,7 @@ public:
 	bool doMinimizeOutput = false;
 	bool skipTopics = false;
 	bool dontSkipUdpStaticRoute = false;
+    int maxDumpBytes = 0;
 
 	CArguments() : defaultDomain(getDefaultDomain())
 	{
@@ -181,6 +183,24 @@ public:
 				doPubIdCheck = true;
 				continue;
 			}
+
+            // DumpMessage
+            if (argument == "-d") {
+                maxDumpBytes = 0x7FFFFFFF;
+                if (argIdx >= nArgs) {
+                    // No more args so max should be used
+                    continue;
+                }
+                // Check next arg if it belongs to -d
+                std::string val = toAnsi(szArglist[argIdx]);
+                if (val.size() > 0) {
+                    if (isdigit(val[0])) {
+                        maxDumpBytes = atoi(val.c_str());
+                        argIdx++;
+                    }
+                }
+                continue;
+            }
 
 			// Default domain
 			if (argument == "-D") {
@@ -578,6 +598,7 @@ private:
 	bool onlyArrivingLeaving;
 	bool doPubIdCheck;
 	bool doMinimizeOutput;
+    size_t maxDumpBytes;
 
 	std::vector<ops::Subscriber*> vSubs;
 	std::map<ops::Subscriber*, ops::PublicationIdChecker*> pubIdMap;
@@ -639,6 +660,7 @@ public:
 		onlyArrivingLeaving(args.onlyArrivingLeaving),
 		doPubIdCheck(args.doPubIdCheck),
 		doMinimizeOutput(args.doMinimizeOutput),
+        maxDumpBytes(args.maxDumpBytes),
 		messDataCounter(0)
 	{
 		using namespace ops;
@@ -1165,6 +1187,33 @@ public:
 		}
 	}
 	//
+    char toAscii(uint8_t val)
+    {
+        if (isalnum(val)) return (char)val;
+        return '.';
+    }
+    void dumpHex(const char* ptr, size_t numbytes)
+    {
+        int offset = 0;
+        if (numbytes > maxDumpBytes) numbytes = maxDumpBytes;
+        while (numbytes > 0) {
+            const uint8_t* Ptr__ = (const uint8_t*)&ptr[offset];
+            int len = (int)numbytes;
+            if (len > 16) len = 16;
+
+            std::cout << std::hex << "    " << std::setw(8) << offset << ": ";
+            for (int i = 0; i < len; ++i) { std::cout << std::setw(2) << (int)*Ptr__++ << " "; }
+            for (int i = len; i < 16; ++i) { std::cout << "   "; }
+            std::cout << "    ";
+            Ptr__ = (const uint8_t*)&ptr[offset];
+            for (int i = 0; i < len; ++i) { std::cout << toAscii(*Ptr__++); }
+            std::cout << std::dec << "\n";
+
+            numbytes -= len;
+            offset += len;
+        }
+    }
+    //
 	void WorkOnList(int const numMess)
 	{
 		/// Don't loop to much, to not loose mmi responsiveness
@@ -1209,6 +1258,10 @@ public:
 				if ((str != "") && (!doMinimizeOutput)) {
 					std::cout << str << std::endl;
 				}
+                if (true) {
+                    // Dump OPSData->spareBytes content in hex
+                    dumpHex(&opsData->spareBytes[0], opsData->spareBytes.size());
+                }
 				if (doPubIdCheck) {
 					// This may call our "onNewEvent(ops::Notifier<ops::PublicationIdNotification_T>* ...") method
 					// We may need the time in that method so save it in a member variable
