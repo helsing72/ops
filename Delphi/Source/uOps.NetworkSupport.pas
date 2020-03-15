@@ -2,7 +2,7 @@ unit uOps.NetworkSupport;
 
 (**
 *
-* Copyright (C) 2016-2019 Lennart Andersson.
+* Copyright (C) 2016-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -63,8 +63,10 @@ function IpAddressToString(Addr: DWORD): AnsiString;
 var
   InAddr: TInAddr;
 begin
+{$R-}
   InAddr.S_addr := Addr;
   Result := AnsiString(inet_ntoa(InAddr));
+{$R+}
 end;
 
 // If argument contains a "/" we assume it is on the form:  subnet-address/subnet-mask
