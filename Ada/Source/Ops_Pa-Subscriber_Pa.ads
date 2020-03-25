@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2019 Lennart Andersson.
+-- Copyright (C) 2016-2020 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -59,6 +59,9 @@ package Ops_Pa.Subscriber_Pa is
 
   -- Stops communication, unsubscribe this subscriber from data.
   procedure Stop( Self : in out Subscriber_Class );
+
+  -- Return connect status (currently only valid for TCP)
+  function isConnected( Self : Subscriber_Class ) return Boolean;
 
   package MessageNotifier_Pa is new Ops_Pa.Notifier_Pa(10, OPSMessage_Class_At);
 
@@ -176,6 +179,9 @@ private
       -- Used for notifications to users of the subscriber
       DataNotifier : MessageNotifier_Pa.Notifier_Class_At := null;
       CsNotifier : Transport_Pa.ConnectStatusNotifier_Pa.Notifier_Class_At := null;
+
+      -- Keep status for current ConnectStatus
+      Connected : Boolean := False;
 
       -- Used for notifications to users of the subscriber
       DeadlineNotifier : Deadline_Pa.DeadlineNotifier_Class_At := null;

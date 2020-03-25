@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2018 Lennart Andersson.
+-- Copyright (C) 2016-2020 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -23,6 +23,7 @@ with Ops_Pa.Mutex_Pa;
 generic
   MinCapacity : Positive;
   type Item_T is private;
+  LateArrivals : Boolean := False;
 package Ops_Pa.Notifier_Pa is
 
 -- ==========================================================================
@@ -83,6 +84,8 @@ private
       Owner        : Ops_Class_At := null;
       Mutex        : aliased Ops_Pa.Mutex_Pa.Mutex;
       Listeners    : MyVector_Pa.Vector;
+      Value        : Item_T;
+      ValueValid   : Boolean := False;
     end record;
 
   procedure InitInstance( Self : in out Notifier_Class; Owner : Ops_Class_At );

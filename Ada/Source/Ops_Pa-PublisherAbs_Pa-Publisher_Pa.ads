@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2019 Lennart Andersson.
+-- Copyright (C) 2016-2020 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -50,6 +50,9 @@ package Ops_Pa.PublisherAbs_Pa.Publisher_Pa is
   overriding procedure Start( Self : in out Publisher_Class );
   overriding procedure Stop( Self : in out Publisher_Class );
 
+  -- Return connect status (currently only valid for TCP)
+  function isConnected( Self : Publisher_Class ) return Boolean;
+
   procedure addListener( Self : in out Publisher_Class; Client : Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface_At );
   procedure removeListener( Self : in out Publisher_Class; Client : Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface_At );
 
@@ -71,6 +74,9 @@ private
       Message : OPSMessage_Class_At := null;
 
       CsNotifier : Transport_Pa.ConnectStatusNotifier_Pa.Notifier_Class_At := null;
+
+      -- Keep status for current ConnectStatus
+      Connected : Boolean := False;
 
       -- The Participant to which this Publisher belongs (NOTE: we don't own the object)
       Participant : Participant_Class_At := null;

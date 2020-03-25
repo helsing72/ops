@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2018 Lennart Andersson.
+-- Copyright (C) 2016-2020 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -51,6 +51,8 @@ package body Ops_Pa.Notifier_Pa is
   procedure doNotify( Self : in out Notifier_Class; Item : in Item_T ) is
     S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
+    Self.Value := Item;
+    Self.ValueValid := True;
     for i in Self.Listeners.First_Index .. Self.Listeners.Last_Index loop
       -- We don't allow a client to stop us from notify all clients
       begin
@@ -76,6 +78,9 @@ package body Ops_Pa.Notifier_Pa is
   begin
     if Proc /= null then
       Self.Listeners.Append(Listener_T'(Proc => Proc, Arg => Arg, ClassAt => null));
+      if LateArrivals and then Self.ValueValid then
+        Proc.all( Self.Owner, Self.Value, Arg );
+      end if;
     end if;
   end;
 
@@ -105,6 +110,9 @@ package body Ops_Pa.Notifier_Pa is
   begin
     if Listener /= null then
       Self.Listeners.Append(Listener_T'(Proc => null, Arg => null, ClassAt => Listener));
+      if LateArrivals and then Self.ValueValid then
+        OnNotify( Listener.all, Self.Owner, Self.Value );
+      end if;
     end if;
   end;
 

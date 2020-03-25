@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2019 Lennart Andersson.
+-- Copyright (C) 2016-2020 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -49,6 +49,13 @@ package body Ops_Pa.PublisherAbs_Pa.Publisher_Pa is
   begin
     Self.SendDataHandler.removeListener( Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface_At(Self.SelfAt) );
     Self.SendDataHandler.removeUser( Ops_Class_At(Self.SelfAt) );
+    Self.Connected := False;
+  end;
+
+  -- Return connect status (currently only valid for TCP)
+  function isConnected( Self : Publisher_Class ) return Boolean is
+  begin
+    return Self.Connected;
   end;
 
   procedure addListener( Self : in out Publisher_Class; Client : Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface_At ) is
@@ -63,6 +70,7 @@ package body Ops_Pa.PublisherAbs_Pa.Publisher_Pa is
 
   procedure OnNotify( Self : in out Publisher_Class; Sender : in Ops_Class_At; Item : in Transport_Pa.ConnectStatus_T ) is
   begin
+    Self.Connected := Item.Connected;
     Self.CsNotifier.doNotify( Item );
   end;
 

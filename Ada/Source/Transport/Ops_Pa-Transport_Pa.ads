@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2019 Lennart Andersson.
+-- Copyright (C) 2016-2020 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -35,7 +35,7 @@ package Ops_Pa.Transport_Pa is
     TotalNo : Integer := 0;
   end record;
 
-  package ConnectStatusNotifier_Pa is new Ops_Pa.Notifier_Pa(10, ConnectStatus_T);
+  package ConnectStatusNotifier_Pa is new Ops_Pa.Notifier_Pa(10, ConnectStatus_T, LateArrivals => True);
 
 -- ==========================================================================
 --      C l a s s    D e c l a r a t i o n.

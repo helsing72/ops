@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2019 Lennart Andersson.
+-- Copyright (C) 2016-2020 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -124,8 +124,15 @@ package body Ops_Pa.Subscriber_Pa is
       Self.ReceiveDataHandler := null;
       Self.Participant.ReleaseReceiveDataHandler(Self.Topic);
 
+      Self.Connected := False;
       Self.Started := False;
     end if;
+  end;
+
+  -- Return connect status (currently only valid for TCP)
+  function isConnected( Self : Subscriber_Class ) return Boolean is
+  begin
+    return Self.Connected;
   end;
 
   -- ---------------------------------------------------------------------------
@@ -263,6 +270,7 @@ package body Ops_Pa.Subscriber_Pa is
 
   procedure OnNotify( Self : in out Subscriber_Class; Sender : in Ops_Class_At; Item : in Transport_Pa.ConnectStatus_T ) is
   begin
+    Self.Connected := Item.Connected;
     Self.CsNotifier.doNotify( Item );
   end;
 
