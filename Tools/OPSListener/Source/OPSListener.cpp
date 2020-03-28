@@ -31,6 +31,7 @@
 
 #include "COpsConfigHelper.h"
 #include "SdsSystemTime.h"
+#include "MessageDump.h"
 
 #ifndef _WIN32
 
@@ -38,7 +39,7 @@
 
 #endif
 
-const char c_program_version[] = "OPSListener Version 2020-03-15";
+const char c_program_version[] = "OPSListener Version 2020-03-26";
 
 void showDescription()
 {
@@ -53,7 +54,8 @@ void ShowUsage()
 {
 	std::cout << std::endl << "Usage:" << std::endl;
 	std::cout << "  OPSListener [-v] [-?] [-c ops_cfg_file [-c ops_cfg_file [...]]]" << std::endl;
-	std::cout << "              [-t] [-pA | -p<option_chars>][-d [num]]" << std::endl;
+    std::cout << "              [-j json_file [-j json_file [...]]]" << std::endl;
+	std::cout << "              [-t] [-pA | -p<option_chars>] [-d [num]]" << std::endl;
 	std::cout << "              [-a arg_file [-a arg_file [...]]]" << std::endl;
 	std::cout << "              [-GA | -G domain [-G domain [...]]]" << std::endl;
 	std::cout << "              [-IA | -I domain [-I domain [...]] [-O]]" << std::endl;
@@ -65,7 +67,7 @@ void ShowUsage()
 	std::cout << "    -c ops_config_file Specifies an OPS configuration file to use" << std::endl;
 	std::cout << "                       If none given, the default 'ops_config.xml' is used" << std::endl;
 	std::cout << "    -C                 Do a publication ID check" << std::endl;
-    std::cout << "    -d [num]           Dump message content in hex (part derived from OPSObject)" << std::endl;
+    std::cout << "    -d [num]           Dump message content in hex (the part derived from OPSObject)" << std::endl;
 	std::cout << "    -D default_domain  Default domain name to use for topics given without domain name" << std::endl;
 	std::cout << "                       If none given, the default 'SDSDomain' is used" << std::endl;
 	std::cout << "                       A new default can be given between topics" << std::endl;
@@ -74,6 +76,7 @@ void ShowUsage()
 	std::cout << "    -GA                Subscribe to Debug Request/Response from all domains in given configuration files" << std::endl;
 	std::cout << "    -I domain          Subscribe to Participant Info Data from given domain" << std::endl;
 	std::cout << "    -IA                Subscribe to Participant Info Data from all domains in given configuration files" << std::endl;
+    std::cout << "    -j json_file       Specifies a JSON-file with OPS Message descriptions (generated from opsc)" << std::endl;
 	std::cout << "    -n                 Don't subscribe to topics following" << std::endl;
 	std::cout << "    -O                 if -I or -IA given, only show arriving and timed out participants" << std::endl;
 	std::cout << "    -p<option_chars>   Defines for received messages, which fields to print and in which order" << std::endl;
@@ -101,7 +104,8 @@ public:
 	static ops::ObjectName_T getDefaultDomain() { return "SDSDomain"; }
 
 	std::vector<ops::FileName_T> cfgFiles;
-	std::vector<ops::ObjectName_T> topicNames;
+    std::vector<std::string> jsonFiles;
+    std::vector<ops::ObjectName_T> topicNames;
 	std::vector<ops::ObjectName_T> subscribeDomains;
 	std::vector<ops::ObjectName_T> infoDomains;
 	std::vector<ops::ObjectName_T> debugDomains;
@@ -249,7 +253,17 @@ public:
 				continue;
 			}
 
-			if (argument == "-O") {
+            // JSON files
+            if (argument == "-j") {
+                if (argIdx >= nArgs) {
+                    std::cout << "Argument '-j' is missing value" << std::endl;
+                    return false;
+                }
+                jsonFiles.push_back(toAnsi(szArglist[argIdx++]).c_str());
+                continue;
+            }
+
+            if (argument == "-O") {
 				onlyArrivingLeaving = true;
 				continue;
 			}
@@ -390,8 +404,7 @@ public:
 			if (nullptr == szArglist) {
 				std::cout << "CommandLineToArgvW() failed" << std::endl;
 				returnValue = false;
-			}
-			else {
+			} else {
 				returnValue = HandleArguments(szArglist, 0, nArgs);
 			}
 
@@ -414,8 +427,7 @@ public:
 		if (nullptr == szArglist) {
 			std::cout << "CommandLineToArgvW failed" << std::endl;
 			return false;
-		}
-		else {
+		} else {
 			returnValue = HandleArguments(szArglist, 1, nArgs);
 		}
 		// Free memory allocated for CommandLineToArgvW arguments.
@@ -622,6 +634,8 @@ private:
 	// local storage of current worked on entry time
 	int64_t _messageTime = 0;
 
+    message_dump::MessageDump MsgDump;
+
 public:
 	int messDataCounter;
 
@@ -676,6 +690,8 @@ public:
 		formatMap['S'] = source;
 
 		ErrorWriter* const errorWriter = new ErrorWriter(std::cout);
+
+        for (unsigned int i = 0; i < args.jsonFiles.size(); i++) { MsgDump.AddDefinitions(args.jsonFiles[i]); }
 
 		// First, Add all domains in given configuration files to the helper
 		for (unsigned int i = 0; i < args.cfgFiles.size(); i++) { opsHelper.DomainMapAdd(args.cfgFiles[i]); }
@@ -1190,8 +1206,9 @@ public:
 	//
     char toAscii(uint8_t val)
     {
-        if (isalnum(val)) return (char)val;
-        return '.';
+        if (val < 0x20) return '.';
+        if (val > 0x7F) return '.';
+        return (char)val;
     }
     void dumpHex(const char* ptr, size_t numbytes)
     {
@@ -1259,11 +1276,18 @@ public:
 				if ((str != "") && (!doMinimizeOutput)) {
 					std::cout << str << std::endl;
 				}
-                if (true) {
-                    // Dump OPSData->spareBytes content in hex
-                    dumpHex(&opsData->spareBytes[0], opsData->spareBytes.size());
+                // Dump OPSData->spareBytes content in hex
+                dumpHex(&opsData->spareBytes[0], opsData->spareBytes.size());
+                if (MsgDump.Any()) {
+                    std::string tname = opsData->getTypeString().c_str();
+                    auto pos = tname.find(' ');
+                    if (pos != tname.npos) {
+                        tname = tname.substr(0, pos);
+                    }
+                    MsgDump.Dump(tname, &opsData->spareBytes[0]);
                 }
-				if (doPubIdCheck) {
+                
+                if (doPubIdCheck) {
 					// This may call our "onNewEvent(ops::Notifier<ops::PublicationIdNotification_T>* ...") method
 					// We may need the time in that method so save it in a member variable
 					_messageTime = ent.time;

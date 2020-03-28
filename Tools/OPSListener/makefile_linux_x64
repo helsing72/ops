@@ -14,8 +14,10 @@ BOOSTLIBS=-lboost_system-mt -lboost_thread-mt
 
 # ----------------------
 
-all: OPSListener 
+all: OPSListener
 
+MessageDump.o: Source/MessageDump.cpp
+	g++ -std=c++11 -O2 $(OPSINCDIR) -c $< -o $@
 
 SdsSystemTime.o: Source/SdsSystemTime.cpp
 	g++ -std=c++11 -O2 $(OPSINCDIR) -c $< -o $@
@@ -23,12 +25,9 @@ SdsSystemTime.o: Source/SdsSystemTime.cpp
 OPSListener.o: Source/OPSListener.cpp
 	g++ -std=c++11 -O2 $(OPSINCDIR) -c $< -o $@
 
-OPSListener: OPSListener.o SdsSystemTime.o $(OPSLIBS)
-	g++ -std=c++11 -O2 $^ $(OPSLIBS) $(BOOSTLIBS) -o $@ 
-
+OPSListener: OPSListener.o SdsSystemTime.o MessageDump.o $(OPSLIBS)
+	g++ -std=c++11 -O2 $^ $(OPSLIBS) $(BOOSTLIBS) -o $@
 
 clean:
 	rm -f *.o
 	rm -f OPSListener
-
-

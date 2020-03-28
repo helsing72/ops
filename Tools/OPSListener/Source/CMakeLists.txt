@@ -2,9 +2,10 @@
 # the Exe name
 set(EXE_NAME OPSListener)
 
-
 set(EXE_SRCS
 COpsConfigHelper.h
+MessageDump.cpp
+MessageDump.h
 OPSListener.cpp
 SdsSystemTime.cpp
 SdsSystemTime.h
@@ -31,4 +32,4 @@ set(INSTALL_BINDIR bin)
 
 install(TARGETS ${EXE_NAME}
   RUNTIME DESTINATION ${INSTALL_BINDIR}
-  )
+)
