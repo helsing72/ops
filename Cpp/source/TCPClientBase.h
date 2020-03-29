@@ -67,7 +67,12 @@ namespace ops
 			_connection->asynchWait(bytes, size);
         }
 
-		int sendTo(char* buf, int size)
+        size_t bytesAvailable() override
+        {
+            return _connection->bytesAvailable();
+        }
+
+        int sendTo(char* buf, int size)
 		{
 			return _connection->sendData(buf, size);
 		}

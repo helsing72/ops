@@ -130,6 +130,13 @@ namespace ops
 			port = sendingEndPoint.port();
 		}
 
+        size_t bytesAvailable() override
+        {
+            boost::asio::socket_base::bytes_readable command(true);
+            sock->io_control(command);
+            return command.get();
+        }
+
         void handle_receive_from(const boost::system::error_code& error, size_t nrBytesReceived)
         {
 			m_asyncCallActive = false;	// No longer a call active, thou we may start a new one below

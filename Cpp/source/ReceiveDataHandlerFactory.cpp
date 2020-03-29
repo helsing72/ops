@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -159,6 +159,15 @@ namespace ops
         SafeLock lock(&garbageLock);
 		return garbageReceiveDataHandlers.size() == 0;
 	}
+
+    bool ReceiveDataHandlerFactory::dataAvailable()
+    {
+        SafeLock lock(&garbageLock);
+        for (auto& rdh : receiveDataHandlerInstances) {
+            if (rdh.second->dataAvailable()) return true;
+        }
+        return false;
+    }
 
     ReceiveDataHandlerFactory::~ReceiveDataHandlerFactory()
     {

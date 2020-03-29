@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -179,6 +180,9 @@ namespace ops
 		bool Poll();
 
 		execution_policy::Enum GetExecutionPolicy() { return _policy; }
+
+        // Check under laying transports if there is any data not processed
+        bool dataAvailable();
 
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 		DebugHandler debugHandler;

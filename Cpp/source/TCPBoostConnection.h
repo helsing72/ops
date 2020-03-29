@@ -146,7 +146,14 @@ namespace ops
 			}
 		}
 
-		int send(const char* buf, const uint32_t size) override
+        size_t bytesAvailable() override
+        {
+            boost::asio::socket_base::bytes_readable command(true);
+            _sock->io_control(command);
+            return command.get();
+        }
+
+        int send(const char* buf, const uint32_t size) override
 		{
 			try {
 				// Send the data

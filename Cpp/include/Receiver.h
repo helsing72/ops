@@ -46,6 +46,7 @@ namespace ops
 		virtual bool start() = 0;           // Starts asynchrounous work
 		virtual void stop() = 0;            // Request the asynchronous work to stop
 		virtual bool asyncFinished() = 0;   // Returns true if all asynchronous work has finished
+        virtual size_t bytesAvailable() = 0;
 
 		virtual uint16_t getLocalPort() = 0;
 		virtual Address_T getLocalAddress() = 0;

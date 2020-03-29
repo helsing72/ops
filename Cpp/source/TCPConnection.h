@@ -66,7 +66,9 @@ namespace ops
 			}
 		}
 
-		int sendData(const char* buf, const int size)
+        virtual size_t bytesAvailable() = 0;
+
+        int sendData(const char* buf, const int size)
 		{
 			OPS_TCP_TRACE("Conn: sendData(), #bytes: " << size << ", [" << _protocol->getDebugId() << "]\n");
 			return _protocol->sendData(buf, size);

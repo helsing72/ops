@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -55,6 +55,7 @@ namespace ops
         void cleanUpReceiveDataHandlers();
         void releaseReceiveDataHandler(Topic& top, Participant& participant);
 		bool cleanUpDone();
+        bool dataAvailable();
         ~ReceiveDataHandlerFactory();
     };
 
