@@ -30,6 +30,7 @@
 
 #include <vector>
 #include <memory>
+#include <atomic>
 
 #include "OPSTypeDefs.h"
 
@@ -92,23 +93,14 @@ namespace ops
         bool sendTo(const char* buf, const int size, const Address_T&, const uint16_t) override
 		{
 			SafeLock lck(&_mtx);
-			// Send to anyone connected. Loop backwards to avoid problems when removing broken sockets
-			for (int i = (int)_connectedSockets.size() - 1; i >= 0 ; i--) {
-				// Send the data
-				if (_connectedSockets[i]->sendData(buf, size) < 0) {
-					// Failed to send to this socket
-					deleteConnection(i);
-					// Remove it from our lists
-					auto it = _connectedSockets.begin();
-					it += i;
-					_connectedSockets.erase(it);
-					auto it2 = _connectedStatus.begin();
-					it2 += i;
-					_connectedStatus.erase(it2);
-					OPS_TCP_TRACE("Server: Connection deleted. Total: " << _connectedSockets.size() << '\n');
-				}
-			}
-			return true;
+            sendToInternal(buf, size);
+            if (_doPeriodic) {
+                _doPeriodic = false;
+                // We use a size 0 to force a periodic check (heartbeat handling in protocol)
+                sendToInternal(nullptr, 0);
+                OPS_TCP_ERROR("Server: Deferred Periodic check excuted\n");
+            }
+            return true;
 		}
 
 		int numConnected()
@@ -165,11 +157,41 @@ namespace ops
 		// Called from periodic timer
 		void onNewEvent(Notifier<int>*, int)
 		{
-			// We use a size 0 to force a periodic check (heartbeat handling in protocol)
-			///TODO call PeriodicCheck directly instead??
-			sendTo(nullptr, 0, "", 0);
+            _doPeriodic = true;
+            SafeTryLock lck(&_mtx);
+            if (lck.isLocked()) {
+                _doPeriodic = false;
+                // We use a size 0 to force a periodic check (heartbeat handling in protocol)
+                sendToInternal(nullptr, 0);
+            } else {
+                OPS_TCP_ERROR("Server: Periodic check deferred (due to LOCK taken)\n");
+            }
 			_timer->start(period);
 		}
+
+        ///Sends buf to all Receivers connected to this Sender
+        /// buf == nullptr or size == 0, is handled by connection/protocol
+        /// _mtx must be held when calling this method !!!
+        bool sendToInternal(const char* buf, const int size)
+        {
+            // Send to anyone connected. Loop backwards to avoid problems when removing broken sockets
+            for (int i = (int)_connectedSockets.size() - 1; i >= 0; i--) {
+                // Send the data
+                if (_connectedSockets[i]->sendData(buf, size) < 0) {
+                    // Failed to send to this socket
+                    deleteConnection(i);
+                    // Remove it from our lists
+                    auto it = _connectedSockets.begin();
+                    it += i;
+                    _connectedSockets.erase(it);
+                    auto it2 = _connectedStatus.begin();
+                    it2 += i;
+                    _connectedStatus.erase(it2);
+                    OPS_TCP_TRACE("Server: Connection deleted. Total: " << _connectedSockets.size() << '\n');
+                }
+            }
+            return true;
+        }
 
 		// All connected sockets
 		std::vector<std::shared_ptr<TCPConnection>> _connectedSockets;
@@ -180,5 +202,6 @@ namespace ops
 
 	private:
 		TCPServerCallbacks* _client;
+        std::atomic_bool _doPeriodic{ false };
 	};
 }
