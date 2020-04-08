@@ -54,6 +54,11 @@ namespace ops
         return true;
     }
 
+    bool Lockable::trylock()
+    {
+        return _lock->try_lock();
+    }
+
     void Lockable::unlock()
     {
         _lock->unlock();

@@ -39,7 +39,8 @@ namespace ops
 		Lockable& operator= (const Lockable& l);
 
 		bool lock();
-		void unlock();
+        bool trylock();
+        void unlock();
 		virtual ~Lockable();
 	};
 
@@ -57,6 +58,23 @@ namespace ops
 			_lockable->unlock();
 		}
 	};
+
+    class SafeTryLock
+    {
+    private:
+        Lockable* _lockable;
+        bool locked = false;
+    public:
+        SafeTryLock(Lockable* lockable) : _lockable(lockable)
+        {
+            locked = _lockable->trylock();
+        }
+        bool isLocked() { return locked; }
+        ~SafeTryLock()
+        {
+            if (locked) _lockable->unlock();
+        }
+    };
 
 }
 #endif
