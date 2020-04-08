@@ -30,7 +30,7 @@ public:
 	bool isUdp;
 	int counter;
 	ops::Address_T srcIp;
-	int srcPort;
+	uint16_t srcPort;
 	ops::BytesSizePair bsp;
 
 	MyBSPListener(bool udp) : isUdp(udp), counter(0), srcPort(0), bsp(nullptr, 0) {}
