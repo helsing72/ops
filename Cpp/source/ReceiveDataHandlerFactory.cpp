@@ -21,6 +21,7 @@
 
 #include "OPSTypeDefs.h"
 #include "ReceiveDataHandlerFactory.h"
+#include "OPSConstants.h"
 #include "ReceiveDataHandler.h"
 #include "MCReceiveDataHandler.h"
 #include "UDPReceiveDataHandler.h"

@@ -26,7 +26,6 @@
 
 #include "Topic.h"
 #include "ByteBuffer.h"
-#include "OPSConstants.h"
 #include "Receiver.h"
 #include "OPSMessage.h"
 #include "Notifier.h"

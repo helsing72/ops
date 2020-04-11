@@ -42,7 +42,6 @@ set(LIB_OPS_PUBLIC_HEADERS
   ${OPS_HEADER_PATH}/OPSArchiverOut.h
   ${OPS_HEADER_PATH}/OPSConfig.h
   ${OPS_HEADER_PATH}/OPSConfigRepository.h
-  ${OPS_HEADER_PATH}/OPSConstants.h
   ${OPS_HEADER_PATH}/ops.h
   ${OPS_HEADER_PATH}/OPSEvent.h
   ${OPS_HEADER_PATH}/OPSExport.h
@@ -113,6 +112,7 @@ set(LIB_OPS_CORE_SRCS
   ${OPS_SRC_PATH}/OPSArchiverOut.cpp
   ${OPS_SRC_PATH}/OPSConfig.cpp
   ${OPS_SRC_PATH}/OPSConfigRepository.cpp
+  ${OPS_SRC_PATH}/OPSConstants.h
   ${OPS_SRC_PATH}/OPSEvent.cpp
   ${OPS_SRC_PATH}/OPSObject.cpp
   ${OPS_SRC_PATH}/OPSObjectFactory.cpp

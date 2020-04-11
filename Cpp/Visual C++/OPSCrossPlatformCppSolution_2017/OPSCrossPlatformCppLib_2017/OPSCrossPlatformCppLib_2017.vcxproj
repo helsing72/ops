@@ -391,6 +391,7 @@
     <ClInclude Include="..\..\..\source\McUdpSendDataHandler.h" />
     <ClInclude Include="..\..\..\source\MulticastReceiver.h" />
     <ClInclude Include="..\..\..\source\MultiThreadPool.h" />
+    <ClInclude Include="..\..\..\source\OPSConstants.h" />
     <ClInclude Include="..\..\..\source\OPSObjectFactoryImpl.h" />
     <ClInclude Include="..\..\..\source\ReceiveDataHandlerFactory.h" />
     <ClInclude Include="..\..\..\source\ReceiverFactory.h" />
@@ -433,7 +434,6 @@
     <ClInclude Include="..\..\..\include\OPSArchiverIn.h" />
     <ClInclude Include="..\..\..\include\OPSArchiverOut.h" />
     <ClInclude Include="..\..\..\include\OPSConfig.h" />
-    <ClInclude Include="..\..\..\include\OPSConstants.h" />
     <ClInclude Include="..\..\..\include\OPSMessage.h" />
     <ClInclude Include="..\..\..\include\OPSObject.h" />
     <ClInclude Include="..\..\..\include\OPSObjectFactory.h" />

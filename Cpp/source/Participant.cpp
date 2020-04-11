@@ -28,6 +28,7 @@
 #endif
 #include "OPSTypeDefs.h"
 #include "Participant.h"
+#include "OPSConstants.h"
 #include "ReceiveDataHandler.h"
 #include "ReceiveDataHandlerFactory.h"
 #include "SendDataHandlerFactory.h"
@@ -81,6 +82,7 @@ namespace ops
 
 	Participant* Participant::getInstanceInternal(ObjectName_T domainID_, ObjectName_T participantID, FileName_T configFile, execution_policy::Enum policy)
 	{
+        if (participantID == "") { participantID = OPSConstants::DEFAULT_PARTICIPANT_ID; }
 		ParticipantKey_T key = getKey(domainID_, participantID);
 		SafeLock lock(&creationMutex);
 		if (instances.find(key) == instances.end()) {

@@ -21,6 +21,7 @@
 
 #include "OPSTypeDefs.h"
 #include "ReceiveDataChannel.h"
+#include "OPSConstants.h"
 #include "OPSArchiverIn.h"
 #include "BasicError.h" 
 #include "Domain.h"

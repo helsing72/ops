@@ -19,6 +19,8 @@
  * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <climits>
+
 #include "OPSTypeDefs.h"
 #include "Subscriber.h"
 #include "TimeHelper.h"
