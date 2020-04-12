@@ -23,7 +23,7 @@
 
 #include <map>
 
-#include "OPSConstants.h"
+#include "opsidls/OPSConstants.h"
 #include "SendDataHandler.h"
 #include "Sender.h"
 #include "IOService.h"
@@ -33,6 +33,8 @@
 
 namespace ops
 {
+    using namespace opsidls;
+
 	///TODO
 	/// We want to send:
 	///   "Info about which publishers"

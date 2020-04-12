@@ -23,6 +23,7 @@
 
 #include <list>
 #include <deque>
+#include <climits>
 
 #include "OPSTypeDefs.h"
 #include "Topic.h"
@@ -69,6 +70,7 @@ namespace ops
         ///Sets the deadline timout for this subscriber.
         ///If no message is received within deadline,
         ///listeners to deadlineMissedEvent will be notified
+        const static int64_t MAX_DEADLINE_TIMEOUT = LLONG_MAX;
         void setDeadlineQoS(int64_t deadlineT);
         int64_t getDeadlineQoS() const;
 

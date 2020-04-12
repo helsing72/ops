@@ -21,7 +21,7 @@
 
 #include "OPSTypeDefs.h"
 #include "ReceiveDataHandlerFactory.h"
-#include "OPSConstants.h"
+#include "opsidls/OPSConstants.h"
 #include "ReceiveDataHandler.h"
 #include "MCReceiveDataHandler.h"
 #include "UDPReceiveDataHandler.h"
@@ -32,6 +32,8 @@
 
 namespace ops
 {
+    using namespace opsidls;
+
     ReceiveDataHandlerFactory::ReceiveDataHandlerFactory()
     {
     }

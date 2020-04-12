@@ -112,7 +112,6 @@ set(LIB_OPS_CORE_SRCS
   ${OPS_SRC_PATH}/OPSArchiverOut.cpp
   ${OPS_SRC_PATH}/OPSConfig.cpp
   ${OPS_SRC_PATH}/OPSConfigRepository.cpp
-  ${OPS_SRC_PATH}/OPSConstants.h
   ${OPS_SRC_PATH}/OPSEvent.cpp
   ${OPS_SRC_PATH}/OPSObject.cpp
   ${OPS_SRC_PATH}/OPSObjectFactory.cpp

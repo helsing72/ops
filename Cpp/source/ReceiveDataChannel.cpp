@@ -21,7 +21,7 @@
 
 #include "OPSTypeDefs.h"
 #include "ReceiveDataChannel.h"
-#include "OPSConstants.h"
+#include "opsidls/OPSConstants.h"
 #include "OPSArchiverIn.h"
 #include "BasicError.h" 
 #include "Domain.h"
@@ -32,6 +32,7 @@
 
 namespace ops
 {
+    using namespace opsidls;
 
 	ReceiveDataChannel::ReceiveDataChannel(Topic top, Participant& part, Receiver* recv) :
 		memMap(top.getSampleMaxSize() / OPSConstants::PACKET_MAX_SIZE + 1, OPSConstants::PACKET_MAX_SIZE, &DataSegmentAllocator::Instance()),

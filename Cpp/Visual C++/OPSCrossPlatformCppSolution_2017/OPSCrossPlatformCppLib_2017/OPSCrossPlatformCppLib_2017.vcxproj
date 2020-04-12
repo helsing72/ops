@@ -391,7 +391,6 @@
     <ClInclude Include="..\..\..\source\McUdpSendDataHandler.h" />
     <ClInclude Include="..\..\..\source\MulticastReceiver.h" />
     <ClInclude Include="..\..\..\source\MultiThreadPool.h" />
-    <ClInclude Include="..\..\..\source\OPSConstants.h" />
     <ClInclude Include="..\..\..\source\OPSObjectFactoryImpl.h" />
     <ClInclude Include="..\..\..\source\ReceiveDataHandlerFactory.h" />
     <ClInclude Include="..\..\..\source\ReceiverFactory.h" />

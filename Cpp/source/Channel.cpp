@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016-2017 Lennart Andersson.
+* Copyright (C) 2016-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -20,7 +20,6 @@
 
 #include "OPSTypeDefs.h"
 #include "Channel.h"
-#include "OPSConstants.h"
 #include "ConfigException.h"
 
 namespace ops

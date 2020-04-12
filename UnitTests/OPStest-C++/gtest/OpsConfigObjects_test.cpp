@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -23,7 +23,7 @@
 
 #include "gtest/gtest.h"
 
-#include "OPSConstants.h"
+#include "opsidls/OPSConstants.h"
 #include "Channel.h"
 #include "Topic.h"
 #include "Transport.h"
@@ -39,10 +39,13 @@
 #include "CreateTempOpsConfigFile.h"
 
 using namespace ops;
+using namespace opsidls;
 
 // ===============================
 
 TEST(Test_OPSConfigObjects, TestTopic) {
+
+    const int PACKET_MAX_SIZE = OPSConstants::PACKET_MAX_SIZE;
 
 	// Default constructed
 	Topic obj1;
@@ -53,9 +56,9 @@ TEST(Test_OPSConfigObjects, TestTopic) {
 	EXPECT_STREQ(obj1.getTypeID().c_str(), "");
 	EXPECT_STREQ(obj1.getDomainAddress().c_str(), "");
 	EXPECT_STREQ(obj1.getLocalInterface().c_str(), "");
-	EXPECT_STREQ(obj1.getParticipantID().c_str(), OPSConstants::DEFAULT_PARTICIPANT_ID.c_str());
+	EXPECT_STREQ(obj1.getParticipantID().c_str(), OPSConstants::DEFAULT_PARTICIPANT_ID());
 	EXPECT_STREQ(obj1.getDomainID().c_str(), "");
-	EXPECT_EQ(obj1.getSampleMaxSize(), OPSConstants::PACKET_MAX_SIZE);
+	EXPECT_EQ(obj1.getSampleMaxSize(), PACKET_MAX_SIZE);
 	EXPECT_STREQ(obj1.getTransport().c_str(), "");
 	//outsocketbuffersize
 	//insocketbuffersize
@@ -65,7 +68,7 @@ TEST(Test_OPSConfigObjects, TestTopic) {
 	obj1.setSampleMaxSize(789789);
 	EXPECT_EQ(obj1.getSampleMaxSize(), 789789);
 	obj1.setSampleMaxSize(3333);
-	EXPECT_EQ(obj1.getSampleMaxSize(), OPSConstants::PACKET_MAX_SIZE);
+	EXPECT_EQ(obj1.getSampleMaxSize(), PACKET_MAX_SIZE);
 
 	// Other constructor
 	Topic obj2("Kalle", 9999, "MinType", "localhost");
@@ -76,9 +79,9 @@ TEST(Test_OPSConfigObjects, TestTopic) {
 	EXPECT_STREQ(obj2.getTypeID().c_str(), "MinType");
 	EXPECT_STREQ(obj2.getDomainAddress().c_str(), "localhost");
 	EXPECT_STREQ(obj2.getLocalInterface().c_str(), "");
-	EXPECT_STREQ(obj2.getParticipantID().c_str(), OPSConstants::DEFAULT_PARTICIPANT_ID.c_str());
+	EXPECT_STREQ(obj2.getParticipantID().c_str(), OPSConstants::DEFAULT_PARTICIPANT_ID());
 	EXPECT_STREQ(obj2.getDomainID().c_str(), "");
-	EXPECT_EQ(obj2.getSampleMaxSize(), OPSConstants::PACKET_MAX_SIZE);
+	EXPECT_EQ(obj2.getSampleMaxSize(), PACKET_MAX_SIZE);
 	EXPECT_STREQ(obj2.getTransport().c_str(), "");
 	//outsocketbuffersize
 	//insocketbuffersize

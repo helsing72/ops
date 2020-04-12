@@ -3,6 +3,7 @@ set(BUILD_NAME opsidls)
 
 # list of source files that, when changed, require regeneration of target
 set(IDL_SRCS
+    ${CMAKE_CURRENT_SOURCE_DIR}/OPSConstants.idl
     ${CMAKE_CURRENT_SOURCE_DIR}/DebugRequestResponseData.idl
     )
 

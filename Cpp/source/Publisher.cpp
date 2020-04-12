@@ -23,12 +23,14 @@
 #include "Participant.h"
 #include "Domain.h"
 #include "OPSArchiverOut.h"
-#include "OPSConstants.h"
+#include "opsidls/OPSConstants.h"
 #include "TimeHelper.h"
 #include "DataSegmentPool.h"
 
 namespace ops
 {
+    using namespace opsidls;
+
     Publisher::Publisher(Topic t) :
     topic(t),
     memMap(t.getSampleMaxSize() / OPSConstants::PACKET_MAX_SIZE + 1, OPSConstants::PACKET_MAX_SIZE, &DataSegmentAllocator::Instance())

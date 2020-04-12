@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -19,11 +19,13 @@
 */
 
 #include "OPSTypeDefs.h"
-#include "OPSConstants.h"
+#include "opsidls/OPSConstants.h"
 #include "memory_pool.h"
 #include "DataSegmentPool.h"
 
 namespace ops {
+
+    using namespace opsidls;
 
 	///TODO add an allocator as parameter 
 	static memory_pools::memory_pool_exp<OPSConstants::PACKET_MAX_SIZE> rcvPool(20);

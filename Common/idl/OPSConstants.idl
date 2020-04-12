@@ -1,0 +1,13 @@
+package opsidls;
+
+/* Common definitions of OPS constants needed for all languages */
+
+//@onlydefinition
+class OPSConstants
+{
+    /* Max size of a message segment */
+    const int PACKET_MAX_SIZE = 60000;
+
+    /* Participant ID used when none or an empty string is given */
+    const string DEFAULT_PARTICIPANT_ID = "DEFAULT_PARTICIPANT";
+}
