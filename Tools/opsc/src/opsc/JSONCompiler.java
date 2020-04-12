@@ -187,7 +187,9 @@ public class JSONCompiler extends CompilerSupport
         if (idlClass.getBaseClassName() != null) {
           baseClass = idlClass.getBaseClassName();
         }
-        res += tab(t+1) + "\"extends\": \"" + getFullyQualifiedClassName(baseClass) + "\"," + endl();
+        if (!isOnlyDefinition(idlClass)) {
+          res += tab(t+1) + "\"extends\": \"" + getFullyQualifiedClassName(baseClass) + "\"," + endl();
+        }
 
         if (idlClass.getType() == IDLClass.ENUM_TYPE) {
           res += tab(t+1) + "\"enum\": [";
