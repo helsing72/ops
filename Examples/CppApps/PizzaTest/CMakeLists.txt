@@ -31,5 +31,3 @@ else()
 endif()
 
 install(TARGETS ${APP_NAME} DESTINATION examples/pizzatest)
-
-file(INSTALL ops_config.xml DESTINATION ${CMAKE_INSTALL_PREFIX}/examples/pizzatest)

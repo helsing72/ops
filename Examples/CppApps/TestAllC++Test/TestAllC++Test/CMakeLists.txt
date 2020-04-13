@@ -46,5 +46,3 @@ else()
 endif()
 
 install(TARGETS ${APP1_NAME} ${APP2_NAME} ${APP3_NAME} ${APP4_NAME} DESTINATION examples/testall)
-
-file(INSTALL ops_config.xml DESTINATION ${CMAKE_INSTALL_PREFIX}/examples/testall)

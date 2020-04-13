@@ -23,3 +23,5 @@ add_custom_command(OUTPUT ${JAR_OUTPUT}
   )
 
 add_custom_target(PizzaProject DEPENDS ${JAR_OUTPUT})
+
+file(INSTALL ops_config.xml DESTINATION ${CMAKE_INSTALL_PREFIX}/examples/pizzatest)

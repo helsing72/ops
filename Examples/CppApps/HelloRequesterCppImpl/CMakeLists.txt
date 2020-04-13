@@ -29,5 +29,3 @@ else()
 endif()
 
 install(TARGETS ${PUB_NAME} ${SUB_NAME} DESTINATION examples/requesthello)
-
-file(INSTALL ${OPSIDL_SOURCE_DIR}/HelloRequestReply/src/ops_config.xml DESTINATION ${CMAKE_INSTALL_PREFIX}/examples/requesthello)

@@ -21,6 +21,5 @@ install(FILES
   ${OPSJAR_PATH}/OPSJLib-${PROJECT_VERSION}.jar
   ${OPSJAR_PATH}/ConfigurationLib-${PROJECT_VERSION}.jar
   ${PROJECT_BINARY_DIR}/bin/ChatExample.jar
-  ${OPSIDL_SOURCE_DIR}/ChatExample/src/ops_config.xml
   DESTINATION examples/chatexample
 )

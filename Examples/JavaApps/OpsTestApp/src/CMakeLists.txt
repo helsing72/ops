@@ -26,6 +26,5 @@ install(FILES
   ${OPSJAR_PATH}/OPSJLib-${PROJECT_VERSION}.jar
   ${OPSJAR_PATH}/ConfigurationLib-${PROJECT_VERSION}.jar
   ${PROJECT_BINARY_DIR}/bin/PizzaProject.jar
-  ../ops_config.xml
   DESTINATION examples/pizzatest
 )

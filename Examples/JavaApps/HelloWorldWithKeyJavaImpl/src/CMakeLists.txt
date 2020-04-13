@@ -34,6 +34,5 @@ install(FILES
   ${OPSJAR_PATH}/OPSJLib-${PROJECT_VERSION}.jar
   ${OPSJAR_PATH}/ConfigurationLib-${PROJECT_VERSION}.jar
   ${PROJECT_BINARY_DIR}/bin/HelloWorld.jar
-  ${OPSIDL_SOURCE_DIR}/HelloWorld/src/ops_config.xml
   DESTINATION examples/helloworld
 )

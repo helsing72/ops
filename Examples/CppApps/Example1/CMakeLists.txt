@@ -28,5 +28,3 @@ else()
 endif()
 
 install(TARGETS ${APP_NAME} DESTINATION examples/testall)
-
-file(INSTALL ${OPSIDL_SOURCE_DIR}/TestAll/src/ops_config.xml DESTINATION ${CMAKE_INSTALL_PREFIX}/examples/testall)
