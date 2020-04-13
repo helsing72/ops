@@ -1,7 +1,7 @@
 object Form1: TForm1
   Left = 0
   Top = 0
-  Caption = 'PizzaTest (Version 2016-08-28)'
+  Caption = 'PizzaTest (Version 2020-04-13)'
   ClientHeight = 428
   ClientWidth = 746
   Color = clBtnFace

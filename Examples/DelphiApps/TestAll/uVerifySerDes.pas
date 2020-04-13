@@ -18,6 +18,7 @@ uses SysUtils, Windows,
      uOps.OpsArchiverOut,
      uOps.Topic,
      uOps.Error,
+     uOps.OPSConfigRepository,
      TestAll.Definitions,
      TestAll.TestAllTypeFactory,
      TestAll.ChildData,
@@ -536,6 +537,8 @@ var
   map : TMemoryMap;
   buf : TByteBuffer;
   ao : TOPSArchiverOut;
+  cwd : string;
+  idx : Integer;
 begin
   DetectedError := False;
 
@@ -600,6 +603,18 @@ begin
   // Setup the OPS static error service (common for all participants, reports
   // errors during participant creation)
   uOps.Error.gStaticErrorService.addListener(OpsLogger.OnErrorReport);
+
+  if FileExists('ops_config.xml') then begin
+    Log('Using config file in CWD');
+  end else begin
+    cwd := GetCurrentDir;
+    idx := Pos('Example', cwd);
+    if Idx > 0 then begin
+      cwd := Copy(cwd, 0, idx-1) + 'Examples/OPSIdls/TestAll/ops_config.xml';
+      uOps.OPSConfigRepository.TOPSConfigRepository.Instance.Add(cwd);
+      Log('Using config file: ' + cwd);
+    end;
+  end;
 
   participant := TParticipant.getInstance('TestAllDomain');
   if not Assigned(participant) then begin

@@ -768,6 +768,8 @@ end;
 procedure TForm1.FormCreate(Sender: TObject);
 var
   info : TItemInfo;
+  cwd : string;
+  idx : Integer;
 begin
   FMsgLog := TStringList.Create;
 
@@ -799,12 +801,17 @@ begin
   FItemInfoList.Add(TItemInfo.Create('PizzaDomain', 'ExtraAlltTopic', 'pizza.special.ExtraAllt'));
 
   // Add all Domain's from file(s)
-  TOPSConfigRepository.Instance.Add('ops_config.xml');
-//  TOPSConfigRepository.Instance.Add('ops_config2.xml');
-
-  // Add a specific domain from a file
-//  TOPSConfigRepository.Instance.Add('ops_config.xml', 'PizzaDomain');
-//  TOPSConfigRepository.Instance.Add('ops_config2.xml', 'OtherPizzaDomain');
+  if FileExists('ops_config.xml') then begin
+    LogProc('Using config file in CWD');
+  end else begin
+    cwd := GetCurrentDir;
+    idx := Pos('Example', cwd);
+    if Idx > 0 then begin
+      cwd := Copy(cwd, 0, idx-1) + 'Examples/OPSIdls/PizzaProject/ops_config.xml';
+      uOps.OPSConfigRepository.TOPSConfigRepository.Instance.Add(cwd);
+      LogProc('Using config file: ' + cwd);
+    end;
+  end;
 
   info := FItemInfoList[0];
   info.Selected := True;

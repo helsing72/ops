@@ -11,6 +11,7 @@ program Example1;
 uses
   System.Win.ComObj,
   System.SysUtils,
+  uOps.OPSConfigRepository,
   uExamplePublisher in 'uExamplePublisher.pas',
   TestAll.BaseData in '..\..\OPSIdls\TestAll\Generated\Delphi\TestAll\TestAll.BaseData.pas',
   TestAll.ChildData in '..\..\OPSIdls\TestAll\Generated\Delphi\TestAll\TestAll.ChildData.pas',
@@ -30,12 +31,26 @@ end;
 
 var
   arg : string;
+  cwd : string;
+  idx : Integer;
 begin
 {$IFDEF WIN32}
   ReportMemoryLeaksOnShutdown := True; //DebugHook <> 0;
 {$ENDIF}
   CoInitializeEx(nil, 0);    // Needed for the TXMLDocument
   try
+    if FileExists('ops_config.xml') then begin
+      Writeln('Using config file in CWD');
+    end else begin
+      cwd := GetCurrentDir;
+      idx := Pos('Example', cwd);
+      if Idx > 0 then begin
+        cwd := Copy(cwd, 0, idx-1) + 'Examples/OPSIdls/TestAll/ops_config.xml';
+        uOps.OPSConfigRepository.TOPSConfigRepository.Instance.Add(cwd);
+        Writeln('Using config file: ' + cwd);
+      end;
+    end;
+
     if ParamCount >= 1 then begin
 	  	arg := ParamStr(1);
   		if arg = 'pub' then begin
