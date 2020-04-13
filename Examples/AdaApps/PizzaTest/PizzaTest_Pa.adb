@@ -1,12 +1,14 @@
 
 with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Characters.Latin_1; use Ada.Characters.Latin_1;
-with Ada.Strings.Fixed;
+with Ada.Directories; use Ada.Directories;
+with Ada.Strings.Fixed; use Ada.Strings.Fixed;
 with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
+
 with Ops_Pa.OpsObject_Pa.OPSConfig_Pa;
 with Ops_Pa.SerializableFactory_Pa.CompFactory_Pa;
 with Ops_Pa.SerializableFactory_Pa.CompFactory_Pa.OpsObjectFactory_Pa;
-
+with Ops_Pa.OpsObject_Pa.OPSConfig_Pa; use Ops_Pa.OpsObject_Pa.OPSConfig_Pa;
 with Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa;
 with Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa;
 with Ops_Pa.Transport_Pa.TCPConnection_Pa;
@@ -736,6 +738,25 @@ package body PizzaTest_Pa is
     Ada.Text_IO.Put_Line( ">>>>>> [ " & NameStr & " ]  " & ValueStr);
   end;
 
+  procedure setup_alt_config(cfg_rel_ops4 : String) is
+  begin
+    -- Check if we have an ops_config.xml in CWD
+    if Exists("ops_config.xml") then
+      Put_Line("Using config file in CWD");
+
+    else
+      declare
+        cwd : String := Current_Directory;
+        pos : Natural := Index(cwd, "Examples", 1);
+      begin
+        if pos > 1 then
+          if RepositoryInstance.add(Head(cwd, pos - 1) & cfg_rel_ops4) then
+            Put_Line("Using config file: " & Head(cwd, pos - 1) & cfg_rel_ops4);
+          end if;
+        end if;
+      end;
+    end if;
+  end;
 
   procedure PizzaTest is
     participant : Participant_Class_At := null;
@@ -752,10 +773,7 @@ package body PizzaTest_Pa is
     StaticErrorService.addListener(ErrorLog'Access, null);
 
     -- Add all Domain's from given file(s)
-    if not Ops_Pa.OpsObject_Pa.OPSConfig_Pa.RepositoryInstance.Add("ops_config.xml") then
-      Put_Line("No domain's added. Missing ops_config.xml ??");
-      return;
-    end if;
+    setup_alt_config("Examples/OPSIdls/PizzaProject/ops_config.xml");
 
     -- Setup Topic list
     -- Setup the InfoItem list (TODO take from ops_config.xml)

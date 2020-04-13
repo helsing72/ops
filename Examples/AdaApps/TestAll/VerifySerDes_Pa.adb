@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2017-2019 Lennart Andersson.
+-- Copyright (C) 2017-2020 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -18,6 +18,8 @@
 
 with System.Atomic_Counters;
 with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Directories; use Ada.Directories;
+with Ada.Strings.Fixed; use Ada.Strings.Fixed;
 with Ops_Pa;
 
 with Interfaces;
@@ -42,6 +44,7 @@ with Ops_Pa.OpsObject_Pa.TestAll_Fruit;
 with Ops_Pa.SerializableFactory_Pa.TestAll_TestAllTypeFactory;
 
 use Ops_Pa.OpsObject_Pa;
+use Ops_Pa.OpsObject_Pa.OPSConfig_Pa;
 use Ops_Pa.OpsObject_Pa.TestAll_Definitions;
 use Ops_Pa.OpsObject_Pa.TestAll_BaseData;
 use Ops_Pa.OpsObject_Pa.TestAll_TestData;
@@ -989,6 +992,25 @@ package body VerifySerDes_Pa is
     gTerminate := True;
   end;
 
+  procedure setup_alt_config(cfg_rel_ops4 : String) is
+  begin
+    -- Check if we have an ops_config.xml in CWD
+    if Exists("ops_config.xml") then
+      Put_Line("Using config file in CWD");
+
+    else
+      declare
+        cwd : String := Current_Directory;
+        pos : Natural := Index(cwd, "Examples", 1);
+        dummy : Boolean;
+      begin
+        if pos > 1 then
+          dummy := RepositoryInstance.add(Head(cwd, pos - 1) & cfg_rel_ops4);
+          Put_Line("Using config file: " & Head(cwd, pos - 1) & cfg_rel_ops4);
+        end if;
+      end;
+    end if;
+  end;
 
   procedure VerifySerDes_Internal is
     cd1, cd2, cd3 : Ops_Pa.OpsObject_Pa.TestAll_ChildData.ChildData_Class_At;
@@ -1090,6 +1112,8 @@ package body VerifySerDes_Pa is
     Log("Test publish/subscribe ...");
 
     Ops_Pa.Error_Pa.StaticErrorService.addListener(Proc => ErrorLog'Access, Arg => null);
+
+    setup_alt_config("Examples/OPSIdls/TestAll/ops_config.xml");
 
     declare
       part : Ops_Pa.Participant_Pa.Participant_Class_At := null;
