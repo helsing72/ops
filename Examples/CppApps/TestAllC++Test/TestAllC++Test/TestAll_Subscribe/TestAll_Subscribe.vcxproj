@@ -167,10 +167,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\ConfigFileHelper.cpp" />
     <ClCompile Include="TestAll_Subscribe.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="ops_config.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\ConfigFileHelper.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

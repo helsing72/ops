@@ -11,6 +11,8 @@
 #include <stdlib.h>
 #endif
 
+#include "../ConfigFileHelper.h"
+
 //Create a class to act as a listener for OPS data
 class Main : ops::DataListener
 {
@@ -77,7 +79,10 @@ int main(const int argc, const char* args[])
 	//Create an object that will listen to OPS events
 	UNUSED(argc);
 	UNUSED(args);
-	Main const m;
+    
+    setup_alt_config("Examples/OPSIdls/HelloWorld/ops_config.xml");
+    
+    Main const m;
 
 	//Just keep program alive, action will take place in Main::onNewData()
 	while(true)

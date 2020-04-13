@@ -35,6 +35,8 @@
 #include "SdsSystemTime.h"
 #endif
 
+#include "../ConfigFileHelper.h"
+
 #define USE_LAMDAS
 #undef USE_MEMORY_POOLS
 
@@ -93,6 +95,8 @@ int64_t getNow()
 }
 #endif
 
+static bool gDoRcvDelay = false;
+
 template <class DataType>
 class CHelperListener
 {
@@ -115,7 +119,7 @@ public:
 	virtual void DeletePublisher(bool doLog = true) = 0;
 	virtual void StartPublisher() = 0;
 	virtual void StopPublisher() = 0;
-	virtual void Write() = 0;
+	virtual bool Write() = 0;
 	virtual void CreateSubscriber(ops::Participant* part, ops::ObjectName_T topicName) = 0;
 	virtual void DeleteSubscriber(bool doLog = true) = 0;
 	virtual void StartSubscriber() = 0;
@@ -231,19 +235,25 @@ public:
 		}
 	}
 
-	virtual void Write() override
-	{
-		if (pub) {
-			try {
-				//pub->writeOPSObject(&data);		// Write using pointer
-				pub->write(data);					// Write using ref
-			} catch (std::exception& e) {
-				std::cout << "Write(): Got exception: " << e.what() << std::endl;
-			}
-		} else {
-			std::cout << "Publisher must be created first!!" << std::endl;
-		}
-	}
+    virtual bool Write() override
+    {
+        bool res = false;
+        if (pub) {
+            try {
+                //res = pub->writeOPSObject(&data);     // Write using pointer
+                res = pub->write(data);                 // Write using ref
+                if (!res) {
+                    std::cout << "Write(): failed" << std::endl;
+                }
+            }
+            catch (std::exception& e) {
+                std::cout << "Write(): Got exception: " << e.what() << std::endl;
+            }
+        } else {
+            std::cout << "Publisher must be created first!!" << std::endl;
+        }
+        return res;
+    }
 
 	virtual void CreateSubscriber(ops::Participant* part, ops::ObjectName_T topicName) override 
 	{
@@ -277,7 +287,7 @@ public:
 						//std::cout << "Lambda[] for topic '" << sub->getTopic().getName() << "'" << std::endl;
 						ops::OPSMessage* newMess = sub->getMessage();
 						client->onData(sub, dynamic_cast<DataType*>(newMess->getData()));
-					}
+                    }
 				);
 				sub->deadlineMissedEvent.addDeadlineMissedListener(
 					[&](ops::DeadlineMissedEvent* /*sender*/) {
@@ -363,7 +373,7 @@ public:
 			std::endl;
 	}
 
-	virtual void onNewEvent(ops::Notifier<ops::ConnectStatus>* sender, ops::ConnectStatus arg) override
+    virtual void onNewEvent(ops::Notifier<ops::ConnectStatus>* sender, ops::ConnectStatus arg) override
 	{
 		ops::Publisher* pb = dynamic_cast<ops::Publisher*>(sender);
 		if (pb) {
@@ -518,7 +528,10 @@ public:
 				", Tomato sauce: " << data->tomatoSauce <<
 				", Ham length: " << data->ham.size() << std::endl;
 		}
-	}
+        if (gDoRcvDelay) {
+            ops::TimeHelper::sleep(1000);
+        }
+    }
 
 	virtual void onData(ops::Subscriber* sub, pizza::special::ExtraAllt* data) override
 	{
@@ -607,6 +620,7 @@ void WriteToAllSelected()
 			if (hlp->data.strings.size() == 0) {
 				for (int k = 0; k < 1000; k++) { hlp->data.strings.push_back("hej"); }
 			}
+            hlp->data.description = "TLA";
 			hlp->data.sh = -7;
 			if (hlp->data.shs.size() == 0) {
 				hlp->data.shs.push_back(17);
@@ -730,15 +744,8 @@ int main(const int argc, const char* argv[])
 	ops::ErrorWriter* const errorWriterStatic = new ops::ErrorWriter(std::cout);
 	ops::Participant::getStaticErrorService()->addListener(errorWriterStatic);
 
-	// Add all Domain's from given file(s)
-	ops::OPSConfigRepository::Instance()->Add("ops_config.xml");
-//	ops::OPSConfigRepository::Instance()->Add("ops_config2.xml");
-
-	// Add a specific domain from a file
-//	ops::OPSConfigRepository::Instance()->Add("ops_config.xml", "PizzaDomain");
-//	ops::OPSConfigRepository::Instance()->Add("ops_config2.xml", "OtherPizzaDomain");
-
-	
+    // Add all Domain's from given file(s)
+    setup_alt_config("Examples/OPSIdls/PizzaProject/ops_config.xml");
 
 	// --------------------------------------------------------------------
 	MyListener myListener;
@@ -862,7 +869,10 @@ int main(const int argc, const char* argv[])
 				}
 				if (participant->GetExecutionPolicy() == ops::execution_policy::polling) { participant->Poll(); }
 				if (otherParticipant->GetExecutionPolicy() == ops::execution_policy::polling) { otherParticipant->Poll(); }
-				ops::TimeHelper::sleep(1);
+                if (participant->dataAvailable()) {
+                    std::cout << "##### data is available\n";
+                }
+                ops::TimeHelper::sleep(1);
 			}
 		}
 
@@ -935,6 +945,16 @@ int main(const int argc, const char* argv[])
 			case 'A':
 				doPeriodicSend = !doPeriodicSend;
 				break;
+
+            case 'b':
+            //	for (int ff = 0; ff < 10; ++ff) {
+            //		int64_t start = ops::TimeHelper::currentTimeMillis();
+            //		Sleep(1000);
+            //		int64_t stop = ops::TimeHelper::currentTimeMillis();
+            //		std::cout << "### Diff: " << stop - start << " ms (nom: 1000ms)" << "\n";
+            //	}
+                gDoRcvDelay = true;
+                break;
 
 			case 'c':
 			case 'C':

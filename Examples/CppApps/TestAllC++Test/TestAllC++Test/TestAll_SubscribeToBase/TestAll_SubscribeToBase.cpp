@@ -14,6 +14,8 @@
 #include <iostream>
 #include <vector>
 
+#include "../../../ConfigFileHelper.h"
+
 class BaseTypeFactory : public ops::SerializableFactory
 {
 public:
@@ -105,7 +107,10 @@ int main(const int argc, const char* args[])
 {
 	UNUSED(argc);
 	UNUSED(args);
-	//Add support for our types from TestAll IDL project.
+    
+    setup_alt_config("Examples/OPSIdls/TestAll/ops_config.xml");
+
+    //Add support for our types from TestAll IDL project.
 	//ops::OPSObjectFactory::getInstance()->add(new TestAll::TestAllTypeFactory()); 
 
 	ops::FileName_T configFile = "";

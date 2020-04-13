@@ -32,6 +32,8 @@ char arr[TestAll::Definitions::const_b];
 	#include <crtdbg.h>
 #endif
 
+#include "../../../ConfigFileHelper.h"
+
 #ifdef NOT_USED_NOW
 TestAll::BaseData::MemoryPool TestAll::BaseData::_pool(10);
 TestAll::ChildData::MemoryPool TestAll::ChildData::_pool(10);
@@ -573,7 +575,9 @@ int main(const int argc, const char* args[])
 		// ==============================================================
 		std::cout << "Test publish/subscribe" << std::endl;
 
-		ops::Participant::getStaticErrorService()->addListener(new ops::ErrorWriter(std::cout));
+        setup_alt_config("Examples/OPSIdls/TestAll/ops_config.xml");
+        
+        ops::Participant::getStaticErrorService()->addListener(new ops::ErrorWriter(std::cout));
 
 		ops::Participant* const participant = ops::Participant::getInstance("TestAllDomain");
 		if (!participant) {

@@ -18,6 +18,8 @@
 #include <XMLArchiverOut.h>
 #include <XMLArchiverIn.h>
 
+#include "../../../ConfigFileHelper.h"
+
 //Include iostream to get std::cout
 #include <iostream>
 #include <fstream>
@@ -106,7 +108,9 @@ int main(const int argc, const char* args[])
 	bP.push_back(new TestData());
 	bP.clear();
 
-	ops::Participant* const participant = Participant::getInstance("TestAllDomain");
+    setup_alt_config("Examples/OPSIdls/TestAll/ops_config.xml");
+
+    ops::Participant* const participant = Participant::getInstance("TestAllDomain");
 	if(!participant)
 	{
 		std::cout << "Create participant failed. do you have ops_config.xml on your rundirectory?" << std::endl;

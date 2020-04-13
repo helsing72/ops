@@ -2,11 +2,16 @@
 set(PUB_NAME HelloWorldWithKeyPub)
 set(SUB_NAME HelloWorldWithKeySub)
 
+set(COMMON_SRC
+  ../ConfigFileHelper.cpp
+  ../ConfigFileHelper.h
+)
+
 include_directories(${OPSIDL_SOURCE_DIR}/HelloWorld/Generated/Cpp)
 
 #
-add_executable(${PUB_NAME} HelloTopic_pub.cpp)
-add_executable(${SUB_NAME} HelloTopic_sub.cpp)
+add_executable(${PUB_NAME} HelloTopic_pub.cpp ${COMMON_SRC})
+add_executable(${SUB_NAME} HelloTopic_sub.cpp ${COMMON_SRC})
 
 # generate HelloWorld ops idl project if necessary
 add_dependencies(${PUB_NAME} HelloWorld)

@@ -17,6 +17,8 @@
 //  - Factory that is able to create our data objects
 #include "TestAll/TestAllTypeFactory.h"
 
+#include "../ConfigFileHelper.h"
+
 using namespace TestAll;
 
 /// =======================================================================
@@ -102,7 +104,6 @@ void PollingSubscriberExample()
 		"::" << topic.getPort() <<
 		"] " << std::endl;
 
-
 	// Create a subscriber for ChildData
 	ChildDataSubscriber sub(topic);
 
@@ -112,14 +113,16 @@ void PollingSubscriberExample()
 	sub.start();
 
 	while (true) {
-#ifdef zzz
-		if (sub.waitForNewData(100)) {
+#ifndef zzz
+        if (sub.waitForNewData(100)) {
 			// Need to lock message while using it's data via the reference
 			sub.aquireMessageLock();
 			ChildData* data = sub.getTypedDataReference();
 			std::cout << "New data found: Received ChildTopic with " << data->l << std::endl;
 			sub.releaseMessageLock();
-		}
+        } else {
+            std::cout << "." << std::flush;
+        }
 #else
 		if (sub.newDataExist()) {
 			ChildData data;
@@ -334,7 +337,10 @@ void usage()
 
 int main(const int argc, const char* argv[])
 {
-	if (argc > 1) {
+    // Add all Domain's from given file(s)
+    setup_alt_config("Examples/OPSIdls/TestAll/ops_config.xml");
+
+    if (argc > 1) {
 		std::string const arg(argv[1]);
 		if (arg == "pub") {
 			PublisherExample();

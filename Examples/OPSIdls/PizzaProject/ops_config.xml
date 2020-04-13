@@ -10,15 +10,17 @@
         <domainID>PizzaDomain</domainID>
         <domainAddress>234.5.6.8</domainAddress>
         <localInterface>127.0.0.1</localInterface>
-        <!--<localInterface>127.0.0.1</localInterface>-->
-        <!--<localInterface>192.168.184.0/255.255.255.0</localInterface>-->
-        <!--<localInterface>192.168.0.0/255.255.255.0</localInterface>-->
+        <localInterface>192.168.0.0/24</localInterface>
         <!--optional <timeToLive>1</timeToLive>-->
         <!--optional <inSocketBufferSize>16000000</inSocketBufferSize>-->
         <!--optional <outSocketBufferSize>16000000</outSocketBufferSize>-->
+        <!--optional <optNonVirt>false</optNonVirt>-->
+        <heartbeatPeriod>0</heartbeatPeriod>
+        <heartbeatTimeout>3000</heartbeatTimeout>
         <!-- metaDataMcPort is necessary for UDP transport to work -->
         <metaDataMcPort>9494</metaDataMcPort>
-        
+        <debugMcPort>9999</debugMcPort>
+
         <channels>
           <element type = "Channel">
             <name>Channel-A</name>
@@ -26,6 +28,7 @@
             <!-- We may override domainAddress/localInterface given above for specific multicast Topics -->
             <address>236.12.13.14</address>
             <localInterface>127.0.0.1</localInterface>
+            <localInterface>192.168.0.0/24</localInterface>
             <port>6680</port>
             <inSocketBufferSize>16000000</inSocketBufferSize>
             <outSocketBufferSize>16000000</outSocketBufferSize>
@@ -34,21 +37,29 @@
           <element type = "Channel">
             <name>Channel-B</name>
             <linktype>tcp</linktype>
-            <address>127.0.0.1</address>
-            <port>6680</port>
+            <zaddress>127.0.0.1</zaddress>
+            <zport>6680</zport>
             <inSocketBufferSize>16000000</inSocketBufferSize>
             <outSocketBufferSize>16000000</outSocketBufferSize>
           </element>
-          
+
+          <element type = "Channel">
+            <name>Channel-B2</name>
+            <linktype>tcp</linktype>
+            <inSocketBufferSize>16000000</inSocketBufferSize>
+            <outSocketBufferSize>16000000</outSocketBufferSize>
+          </element>
+
           <element type = "Channel">
             <name>Channel-C</name>
             <linktype>udp</linktype>
-            <port>7700</port>
+            <zaddress>127.0.0.1</zaddress>
+            <zport>6680</zport>
             <inSocketBufferSize>16000000</inSocketBufferSize>
             <outSocketBufferSize>16000000</outSocketBufferSize>
           </element>
         </channels>
-        
+
         <transports>
           <element type = "Transport">
             <channelID>Channel-A</channelID>
@@ -65,6 +76,19 @@
               <element>TcpVessuvioTopic2</element>
             </topics>
           </element>
+
+          <element type = "Transport">
+            <channelID>Channel-B2</channelID>
+            <topics>
+            </topics>
+          </element>
+
+          <element type = "Transport">
+            <channelID>Channel-C</channelID>
+            <topics>
+              <element>UdpPizzaTopic</element>
+            </topics>
+          </element>
         </transports>
 
         <topics>
@@ -78,9 +102,9 @@
             <name>VessuvioTopic</name>
             <port>6690</port>
             <dataType>pizza.VessuvioData</dataType>
-            <sampleMaxSize>2100000</sampleMaxSize>
-            <inSocketBufferSize>16000000</inSocketBufferSize>
-            <outSocketBufferSize>16000000</outSocketBufferSize>
+            <zsampleMaxSize>2100000</zsampleMaxSize>
+            <zinSocketBufferSize>16000000</zinSocketBufferSize>
+            <zoutSocketBufferSize>16000000</zoutSocketBufferSize>
           </element>
           <element type = "Topic">
             <name>ExtraAlltTopic</name>
@@ -105,20 +129,22 @@
           <!-- TCP topics, different ports -->
           <element type = "Topic">
             <name>TcpPizzaTopic</name>
-            <port>6689</port>
             <dataType>pizza.PizzaData</dataType>
             <transport>tcp</transport>
-            <address>127.0.0.1</address>
+            <zport>6689</zport>
+            <zaddress>127.0.0.1</zaddress>
+            <zaddress>192.168.0.26</zaddress>
           </element>
           <element type = "Topic">
             <name>TcpVessuvioTopic</name>
-            <port>6690</port>
             <dataType>pizza.VessuvioData</dataType>
-            <sampleMaxSize>2100000</sampleMaxSize>
-            <inSocketBufferSize>16000000</inSocketBufferSize>
-            <outSocketBufferSize>16000000</outSocketBufferSize>
             <transport>tcp</transport>
-            <address>127.0.0.1</address>
+            <zport>6690</zport>
+            <zsampleMaxSize>2100000</zsampleMaxSize>
+            <zinSocketBufferSize>16000000</zinSocketBufferSize>
+            <zoutSocketBufferSize>16000000</zoutSocketBufferSize>
+            <zaddress>127.0.0.1</zaddress>
+            <zaddress>192.168.0.26</zaddress>
           </element>
 
           <!-- TCP topics, same port -->
@@ -135,18 +161,17 @@
           <!-- UDP topics, different ports -->
           <element type = "Topic">
             <name>UdpPizzaTopic</name>
-            <port>6789</port>
             <dataType>pizza.PizzaData</dataType>
-            <transport>udp</transport>
           </element>
           <element type = "Topic">
             <name>UdpVessuvioTopic</name>
-            <port>6790</port>
             <dataType>pizza.VessuvioData</dataType>
             <transport>udp</transport>
-            <sampleMaxSize>2100000</sampleMaxSize>
-            <inSocketBufferSize>16000000</inSocketBufferSize>
-            <outSocketBufferSize>16000000</outSocketBufferSize>
+            <address>127.0.0.1</address>
+            <port>6680</port>
+            <zsampleMaxSize>2100000</zsampleMaxSize>
+            <zinSocketBufferSize>16000000</zinSocketBufferSize>
+            <zoutSocketBufferSize>16000000</zoutSocketBufferSize>
           </element>
 
         </topics>
@@ -161,6 +186,7 @@
         <!--optional <timeToLive>1</timeToLive>-->
         <!--optional <inSocketBufferSize>16000000</inSocketBufferSize>-->
         <!--optional <outSocketBufferSize>16000000</outSocketBufferSize>-->
+        <metaDataMcPort>0</metaDataMcPort>
         <topics>
           <!-- Multicast topics, different ports, but same as in other domain -->
           <element type = "Topic">

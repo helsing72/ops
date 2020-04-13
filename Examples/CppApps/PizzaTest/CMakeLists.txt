@@ -7,6 +7,8 @@ set(APP_SRCS
   PizzaTest.cpp
   SdsSystemTime.cpp
   SdsSystemTime.h
+  ../ConfigFileHelper.cpp
+  ../ConfigFileHelper.h
   targetver.h
 )
 

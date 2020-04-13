@@ -5,6 +5,8 @@ include_directories(${OPSIDL_SOURCE_DIR}/TestAll/Generated/Cpp)
 
 set(APP_SRCS
   Example1.cpp
+  ../ConfigFileHelper.cpp
+  ../ConfigFileHelper.h
 )
 
 add_executable(${APP_NAME} ${APP_SRCS})

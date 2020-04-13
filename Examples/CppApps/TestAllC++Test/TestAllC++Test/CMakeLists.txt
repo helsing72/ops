@@ -4,12 +4,17 @@ set(APP2_NAME TestAllSub)
 set(APP3_NAME TestAllSubBase)
 set(APP4_NAME VerifySerDes)
 
+set(COMMON_SRC
+  ../../ConfigFileHelper.cpp
+  ../../ConfigFileHelper.h
+)
+
 include_directories(${OPSIDL_SOURCE_DIR}/TestAll/Generated/Cpp)
 
-add_executable(${APP1_NAME} TestAll_Publish/TestAll_Publish.cpp)
-add_executable(${APP2_NAME} TestAll_Subscribe/TestAll_Subscribe.cpp)
-add_executable(${APP3_NAME} TestAll_SubscribeToBase/TestAll_SubscribeToBase.cpp)
-add_executable(${APP4_NAME} VerifySerDes/VerifySerDes.cpp)
+add_executable(${APP1_NAME} TestAll_Publish/TestAll_Publish.cpp ${COMMON_SRC})
+add_executable(${APP2_NAME} TestAll_Subscribe/TestAll_Subscribe.cpp ${COMMON_SRC})
+add_executable(${APP3_NAME} TestAll_SubscribeToBase/TestAll_SubscribeToBase.cpp ${COMMON_SRC})
+add_executable(${APP4_NAME} VerifySerDes/VerifySerDes.cpp ${COMMON_SRC})
 
 # generate TestAll ops idl project if necessary
 add_dependencies(${APP1_NAME} TestAll)

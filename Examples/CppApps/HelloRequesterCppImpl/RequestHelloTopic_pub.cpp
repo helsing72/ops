@@ -13,12 +13,15 @@
 #include <stdlib.h>
 #endif
 
+#include "../ConfigFileHelper.h"
 
 int main(const int argc, const char* args[])
 {
   UNUSED(argc);
   UNUSED(args);
   using namespace ops;
+
+  setup_alt_config("Examples/OPSIdls/HelloRequestReply/ops_config.xml");
 
   //Create a Participant (i.e. an entry point for using ops.), compare with your ops_config.xml
   ops::Participant* const participant = Participant::getInstance("HelloDomain");

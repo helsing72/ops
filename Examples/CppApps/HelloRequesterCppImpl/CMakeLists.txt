@@ -2,11 +2,16 @@
 set(PUB_NAME RequestHelloPub)
 set(SUB_NAME RequestHelloSub)
 
+set(COMMON_SRC
+  ../ConfigFileHelper.cpp
+  ../ConfigFileHelper.h
+)
+
 include_directories(${OPSIDL_SOURCE_DIR}/HelloRequestReply/Generated/Cpp)
 
 #
-add_executable(${PUB_NAME} RequestHelloTopic_pub.cpp)
-add_executable(${SUB_NAME} RequestHelloTopic_sub.cpp)
+add_executable(${PUB_NAME} RequestHelloTopic_pub.cpp ${COMMON_SRC})
+add_executable(${SUB_NAME} RequestHelloTopic_sub.cpp ${COMMON_SRC})
 
 # generate HelloRequestReply ops idl project if necessary
 add_dependencies(${PUB_NAME} HelloRequestReply)

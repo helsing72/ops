@@ -2,28 +2,41 @@
 <!--
  Description:
 -->
-<root xmlns="ops">
+<root>
     <ops_config type = "DefaultOPSConfigImpl">
         <domains>
+
             <!-- First multicast domain -->
             <element type = "Domain">
                 <domainID>TestAllDomain</domainID>
                 <domainAddress>234.5.6.8</domainAddress>
+                <!--optional <timeToLive>1</timeToLive>-->
                 <localInterface>127.0.0.1</localInterface>
+                <localInterface>192.168.0.0/24</localInterface>
+                <!--optional <inSocketBufferSize>16000000</inSocketBufferSize>-->
+                <outSocketBufferSize>16000000</outSocketBufferSize>
+                <optNonVirt>true</optNonVirt>
+                <metaDataMcPort>0</metaDataMcPort>
                 <topics>
                     <element type = "Topic">
                         <name>ChildTopic</name>
                         <port>6689</port>
                         <dataType>TestAll.ChildData</dataType>
-                        <sampleMaxSize>2100000</sampleMaxSize>
+                        <!--<sampleMaxSize>2100000</sampleMaxSize>-->
+                        <transport>multicast</transport>
+                        <outSocketBufferSize>260000000</outSocketBufferSize>
+                        <inSocketBufferSize>160000000</inSocketBufferSize>
                     </element>
                     <element type = "Topic">
-                      <name>BaseTopic</name>
-                      <port>6687</port>
-                      <dataType>TestAll.BaseData</dataType>
-                    </element>
+                        <name>BaseTopic</name>
+                        <port>6689</port>
+                        <dataType>TestAll.BaseData</dataType>
+                        <outSocketBufferSize>260000000</outSocketBufferSize>
+                        <inSocketBufferSize>160000000</inSocketBufferSize>
+                      </element>
                 </topics>
             </element>
+
         </domains>
     </ops_config>
 </root>

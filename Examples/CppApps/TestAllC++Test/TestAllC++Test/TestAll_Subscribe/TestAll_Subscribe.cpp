@@ -14,6 +14,8 @@
 #include <vector>
 #include "Receiver.h"
 
+#include "../../../ConfigFileHelper.h"
+
 //Create a class to act as a listener for OPS data and deadlines
 class Main : ops::DataListener, ops::DeadlineMissedListener, ops::Listener<ops::BytesSizePair>
 {
@@ -222,7 +224,10 @@ public:
 int main(const int argc, const char* argv[])
 {
 	UNUSED(argv);
-	ops::Participant* const participant = ops::Participant::getInstance("TestAllDomain");
+    
+    setup_alt_config("Examples/OPSIdls/TestAll/ops_config.xml");
+
+    ops::Participant* const participant = ops::Participant::getInstance("TestAllDomain");
 	
 	bool asPiSub = (argc > 1); 
 	
