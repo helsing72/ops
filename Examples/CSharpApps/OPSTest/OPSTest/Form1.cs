@@ -161,13 +161,24 @@ namespace OPSTest
             {
                 try
                 {
-                    myParticipant = Participant.GetInstance("PizzaDomain", "partId", "ops_config.xml");
-                    OtherParticipant = Participant.GetInstance("OtherPizzaDomain", "partId", "ops_config.xml");
-                    if (myParticipant == null)
+                    if (File.Exists("ops_config.xml"))
                     {
-                        myParticipant = Participant.GetInstance("PizzaDomain", "partId", "..\\..\\ops_config.xml");
-                        OtherParticipant = Participant.GetInstance("OtherPizzaDomain", "partId", "..\\..\\ops_config.xml");
+                        Log("Using config file in CWD");
                     }
+                    else
+                    {
+                        string cwd = Environment.CurrentDirectory;
+                        int pos = cwd.IndexOf("Example");
+                        if (pos > 0)
+                        {
+                            cwd = cwd.Substring(0, pos) + "Examples/OPSIdls/PizzaProject/ops_config.xml";
+                            Log("Using config file: " + cwd);
+                            OPSConfigRepository.Add(cwd);
+                        }
+                    }
+
+                    myParticipant = Participant.GetInstance("PizzaDomain", "partId");
+                    OtherParticipant = Participant.GetInstance("OtherPizzaDomain", "partId");
                     if (myParticipant == null)
                     {
                         Log("Failed to create Participant!");
