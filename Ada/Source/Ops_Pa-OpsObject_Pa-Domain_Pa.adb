@@ -303,7 +303,7 @@ package body Ops_Pa.OpsObject_Pa.Domain_Pa is
   end;
 
   procedure checkTransports( Self : in out Domain_Class ) is
-    trp : TRansport_Class_At := null;
+    trp : Transport_Class_At := null;
     channel : Channel_Class_At := null;
     top : Topic_Class_At := null;
   begin
@@ -321,18 +321,20 @@ package body Ops_Pa.OpsObject_Pa.Domain_Pa is
                       "' used in transport spcification." );
           raise EConfigException;
         else
-          for j in trp.topics.all'Range loop
-            top := findTopic( Self, trp.Topics(j).all );
-            if top = null then
-              StaticErrorService.
-                Report( "Domain", "CheckTransport",
-                        "Non existing topicID: '" & trp.Topics(j).all &
-                          "' used in transport specification." );
-              raise EConfigException;
-            else
-              channel.PopulateTopic(top);
-            end if;
-          end loop;
+          if trp.topics /= null then
+            for j in trp.topics.all'Range loop
+              top := findTopic( Self, trp.Topics(j).all );
+              if top = null then
+                StaticErrorService.
+                  Report( "Domain", "CheckTransport",
+                          "Non existing topicID: '" & trp.Topics(j).all &
+                            "' used in transport specification." );
+                raise EConfigException;
+              else
+                channel.PopulateTopic(top);
+              end if;
+            end loop;
+          end if;
         end if;
       end loop;
     end if;
