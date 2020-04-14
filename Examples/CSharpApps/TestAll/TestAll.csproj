@@ -155,6 +155,9 @@
     <Compile Include="..\..\..\CSharp\Ops\OPSConfig.cs">
       <Link>Ops\OPSConfig.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\CSharp\Ops\OPSConfigRepository.cs">
+      <Link>Ops\OPSConfigRepository.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\CSharp\Ops\OPSMessage.cs">
       <Link>Ops\OPSMessage.cs</Link>
     </Compile>

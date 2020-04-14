@@ -28,6 +28,7 @@ namespace TestAll
 
         public Form1()
         {
+            logger = new MyLogger(this);
             InitializeComponent();
         }
 
@@ -65,6 +66,23 @@ namespace TestAll
             gTestFailed = true;
             LogNL("###### " + str);
         }
+
+        class MyLogger : LoggerImplementation
+        {
+            Form1 owner = null;
+            public MyLogger(Form1 own)
+            {
+                owner = own;
+            }
+            override public void LogError(string error)
+            {
+                if (owner != null) {
+                    owner.LogError(error);
+                }
+            }
+        }
+
+        MyLogger logger = null;
 
         // ===========================================================
 
@@ -719,7 +737,19 @@ namespace TestAll
             // ==============================================================
             LogNL("Test publish/subscribe");
 
-            //ops::Participant::getStaticErrorService()->addListener(new ops::ErrorWriter(std::cout));
+            Logger.ExceptionLogger.AddLogger(logger);
+
+            if (File.Exists("ops_config.xml")) {
+                LogNL("Using config file in CWD");
+            } else {
+                string cwd = Environment.CurrentDirectory;
+                int pos = cwd.IndexOf("Example");
+                if (pos > 0) {
+                    cwd = cwd.Substring(0, pos) + "Examples/OPSIdls/TestAll/ops_config.xml";
+                    LogNL("Using config file: " + cwd);
+                    OPSConfigRepository.Add(cwd);
+                }
+            }
 
             participant = Participant.GetInstance("TestAllDomain");
             if (participant == null) {
