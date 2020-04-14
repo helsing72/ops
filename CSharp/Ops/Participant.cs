@@ -347,7 +347,8 @@ namespace Ops
                 }
             }
 
-            partInfoPub.Stop();
+            if (partInfoPub != null) { partInfoPub.Stop(); }
+
             partInfoPub = null;
         }
 
