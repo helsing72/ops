@@ -13,22 +13,30 @@ namespace Ops
 {
 	public class OPSConfig : OPSObject 
     {
-        private List<Domain> domains = new List<Domain>();
+        private protected List<Domain> domains = new List<Domain>();
 
         public static OPSConfig GetConfig() 
         {
-            return GetConfig("ops_config.xml");
+            return OPSConfigRepository.GetConfig(); //GetConfig("ops_config.xml");
         }
 
         public static OPSConfig GetConfig(string configFile)
         {
-            FileStream fis = File.OpenRead(configFile);
-            XMLArchiverIn archiverIn = new XMLArchiverIn(fis, "root");
-            archiverIn.Add(OPSObjectFactory.GetInstance());
-            OPSConfig newConfig = null;
-            newConfig = (OPSConfig)archiverIn.Inout("ops_config", newConfig);
-            fis.Close();
-            return newConfig;
+            try
+            {
+                FileStream fis = File.OpenRead(configFile);
+                XMLArchiverIn archiverIn = new XMLArchiverIn(fis, "root");
+                archiverIn.Add(OPSObjectFactory.GetInstance());
+                OPSConfig newConfig = null;
+                newConfig = (OPSConfig)archiverIn.Inout("ops_config", newConfig);
+                fis.Close();
+                return newConfig;
+            }
+            catch (FileNotFoundException)
+            {
+                Logger.ExceptionLogger.LogMessage("OPSConfig::GetConfig(), File NOT found: " + configFile);
+                return null;
+            }
         }
 
         public static void SaveConfig(OPSConfig conf, string configFile) 
