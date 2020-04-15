@@ -11,5 +11,6 @@ add_subdirectory(PizzaTest/src)
 
 add_subdirectory(SimpleChatSenderJavaImpl/src)
 
+add_subdirectory(TestAll/src)
 add_subdirectory(TestAllJavaTest/TestAllJavaTestPublisher/src)
 add_subdirectory(TestAllJavaTest/TestAllJavaTestSubscriber/src)
