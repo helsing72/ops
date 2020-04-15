@@ -98,6 +98,7 @@ class CHelper(IHelper):
 			print("Created topic " + topic.name + " [" + topic.transport + "." + topic.domainAddress +"." + str(topic.port) + "]")
 			self.pub = Publisher.Publisher(topic)
 			self.pub.name = "PythonTest " + platform.system() + ("(%s)" % os.getpid())
+			#self.pub2 = Publisher.Publisher(topic)
 
 	def DeletePublisher(self,doLog = True):
 		if self.pub is not None:
@@ -261,20 +262,31 @@ ItemInfoList.append(ItemInfo("PizzaDomain", "ExtraAlltTopic", "pizza.special.Ext
 
 ItemInfoList[0].selected = True
 
-participant = Participant.Participant.getInstance("PizzaDomain", "PizzaDomain")
+cfg_file = None
+import os.path
+from os import path
+if not path.exists("ops_config.xml"):
+	cwd = os.getcwd()
+	idx = cwd.index("Examples")
+	if idx > 0:
+		cfg_file = cwd[0:idx] + "Examples/OPSIdls/PizzaProject/ops_config.xml"
+
+if cfg_file == None:
+	print("Using config file in CWD")
+else:
+	print("Using config file: " + cfg_file)
+
+participant = Participant.Participant.getInstance("PizzaDomain", "PizzaDomain", cfg_file)
 if participant == None:
 	print("Failed to create Participant. Missing ops_config.xml ??")
 	sys.exit(-1)
 participant.addTypeSupport(PizzaProjectTypeFactory.PizzaProjectTypeFactory())
 
-otherParticipant = Participant.Participant.getInstance("OtherPizzaDomain", "OtherPizzaDomain")
+otherParticipant = Participant.Participant.getInstance("OtherPizzaDomain", "OtherPizzaDomain", cfg_file)
 if otherParticipant == None:
 	print("Failed to create Participant. Missing ops_config.xml ??")
 	sys.exit(-1)
 otherParticipant.addTypeSupport(PizzaProjectTypeFactory.PizzaProjectTypeFactory())
-
-
-
 
 for info in ItemInfoList:
 	if info.TypeName == pizza.PizzaData.TypeName:

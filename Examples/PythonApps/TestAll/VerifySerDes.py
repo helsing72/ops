@@ -461,7 +461,21 @@ AssertEQ(archiver.index, 2591)
 print("Serialize finished")
 print("Test publish/subscribe...")
 
-participant = Participant.Participant.getInstance("TestAllDomain", "TestAllDomain")
+cfg_file = None
+import os.path
+from os import path
+if not path.exists("ops_config.xml"):
+	cwd = os.getcwd()
+	idx = cwd.index("Examples")
+	if idx > 0:
+		cfg_file = cwd[0:idx] + "Examples/OPSIdls/TestAll/ops_config.xml"
+
+if cfg_file == None:
+	print("Using config file in CWD")
+else:
+	print("Using config file: " + cfg_file)
+
+participant = Participant.Participant.getInstance("TestAllDomain", "TestAllDomain", cfg_file)
 if participant == None:
 	print("Failed to create Participant. Missing ops_config.xml ??")
 	sys.exit(-1)
