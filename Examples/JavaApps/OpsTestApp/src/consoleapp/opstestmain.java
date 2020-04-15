@@ -5,12 +5,16 @@
 package opstestmain;
 
 import java.util.Vector;
+import java.nio.file.Paths;
+import java.io.File;
+import java.io.IOException;
 
 import opstestapp.IOpsHelperListener;
 import opstestapp.COpsHelper;
 
 import ops.Participant;
 import ops.OPSConfig;
+import ops.OPSConfigRepository;
 import ops.Domain;
 import ops.Topic;
 import ops.KeyFilterQoSPolicy;
@@ -29,6 +33,7 @@ import PizzaProject.PizzaProjectTypeFactory;
 import ops.ConfigurationException;
 import ops.Listener;
 import ops.OPSObject;
+import ops.DeadlineNotifier;
 
 public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> {
 
@@ -86,13 +91,34 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
         info.helper = new COpsHelper(this);
     }
 
+    File tmp = new File("ops_config.xml");
+    if (tmp.exists()) {
+      OnLog("Using config file in CWD\n");
+    } else {
+      String cwd = Paths.get(".").toAbsolutePath().normalize().toString();
+      int idx = cwd.indexOf("Examples");
+      if (idx > 0) {
+        String cfg = cwd.substring(0, idx) + "Examples/OPSIdls/PizzaProject/ops_config.xml";
+        OPSConfigRepository.add(cfg);
+        OnLog("Using config file in: " + cfg);
+      }
+    }
+
     try
     {
       //Create Participant
       participant = Participant.getInstance(defaultDomain, defaultDomain);
+      if (participant == null) {
+        OnLog("Failed to create Participant. Check ops_config.xml files\n");
+        System.exit(1);
+      }
       participant.addTypeSupport(new PizzaProjectTypeFactory());
       participant.addListener(this);
       otherParticipant = Participant.getInstance(OtherDomain, OtherDomain);
+      if (otherParticipant == null) {
+        OnLog("Failed to create Participant. Check ops_config.xml files\n");
+        System.exit(1);
+      }
       otherParticipant.addTypeSupport(new PizzaProjectTypeFactory());
       otherParticipant.addListener(this);
 
@@ -125,6 +151,7 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
     catch (ConfigurationException e)
     {
       OnLog("Exception: " + e.getMessage());
+      System.exit(1);
     }
   }
 
@@ -411,8 +438,11 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
       info.helper = null;
 		}
 
+    participant.stopThread();
+    otherParticipant.stopThread();
     participant = null;
     otherParticipant = null;
+    DeadlineNotifier.getInstance().stopRunning();
   }
 
 }

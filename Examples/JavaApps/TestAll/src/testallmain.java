@@ -4,14 +4,17 @@
 
 package testallmain;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Observer;
 import java.util.Observable;
 import java.util.Vector;
 import java.nio.ByteBuffer;
+import java.nio.file.Paths;
 
 import ops.Participant;
 import ops.OPSConfig;
+import ops.OPSConfigRepository;
 import ops.Domain;
 import ops.Topic;
 import ops.KeyFilterQoSPolicy;
@@ -710,6 +713,19 @@ public class testallmain implements ops.Listener<ops.Error> {
 
       // ==============================================================
       OnLog("Test publish/subscribe");
+
+      File tmp = new File("ops_config.xml");
+      if (tmp.exists()) {
+        OnLog("Using config file in CWD\n");
+      } else {
+        String cwd = Paths.get(".").toAbsolutePath().normalize().toString();
+        int idx = cwd.indexOf("Examples");
+        if (idx > 0) {
+          String cfg = cwd.substring(0, idx) + "Examples/OPSIdls/TestAll/ops_config.xml";
+          OPSConfigRepository.add(cfg);
+          OnLog("Using config file in: " + cfg);
+        }
+      }
 
       //Create Participant
       participant = Participant.getInstance(defaultDomain, defaultDomain);
