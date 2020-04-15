@@ -1,6 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -30,6 +31,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Vector;
 import ops.archiver.OPSObjectFactory;
+import ops.OPSConfigRepository;
 
 /**
  *
@@ -42,20 +44,11 @@ public class OPSConfig extends OPSObject
     //static OPSConfig theConfig = null;
     public static OPSConfig getConfig() throws IOException, FormatException
     {
-
-        FileInputStream fis = new FileInputStream("ops_config.xml");
-        XMLArchiverIn archiverIn = new XMLArchiverIn(fis, "root");
-        archiverIn.add(OPSObjectFactory.getInstance());
-
-        OPSConfig newConfig = null;
-        newConfig = (OPSConfig) archiverIn.inout("ops_config", newConfig);
-
-        return newConfig;
+        return OPSConfigRepository.getConfig(); // getConfig(new File("ops_config.xml"));
     }
 
     public static OPSConfig getConfig(File configFile) throws IOException, FormatException
     {
-
         FileInputStream fis = new FileInputStream(configFile);
         XMLArchiverIn archiverIn = new XMLArchiverIn(fis, "root");
         archiverIn.add(OPSObjectFactory.getInstance());
@@ -64,6 +57,7 @@ public class OPSConfig extends OPSObject
 
         return newConfig;
     }
+
     public static void saveConfig(OPSConfig conf, File configFile) throws FileNotFoundException, IOException
     {
         FileOutputStream fos = new FileOutputStream(configFile);
@@ -71,11 +65,10 @@ public class OPSConfig extends OPSObject
         fos.write("<root xmlns=ops>\n".getBytes());
             archiverOut.inout("ops_config", conf);
         fos.write("\n</root>".getBytes());
-
-
     }
+
     //------------------------------
-    private Vector<Domain> domains = new Vector<Domain>();
+    protected Vector<Domain> domains = new Vector<Domain>();
 
     public OPSConfig()
     {
@@ -105,6 +98,5 @@ public class OPSConfig extends OPSObject
     {
         return domains;
     }
-
 
 }

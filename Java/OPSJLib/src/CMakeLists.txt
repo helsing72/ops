@@ -32,6 +32,7 @@ set(OPSJLIB_SRC
   ops/MulticastSocketCreator.java
   ops/Notifier.java
   ops/OPSConfig.java
+  ops/OPSConfigRepository.java
   ops/OPSEnum.java
   ops/OPSObject.java
   ops/OPSReceiveException.java

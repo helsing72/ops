@@ -48,6 +48,7 @@ src\ops\MulticastSender.java
 src\ops\MulticastSocketCreator.java
 src\ops\Notifier.java
 src\ops\OPSConfig.java
+src\ops\OPSConfigRepository.java
 src\ops\OPSEnum.java
 src\ops\OPSObject.java
 src\ops\OPSReceiveException.java
