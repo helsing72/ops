@@ -105,12 +105,12 @@ public class Participant
             if (configFile == null)
             {
                 config = OPSConfig.getConfig();
-                domain = config.getDomain(domainID);
+                if (config != null) domain = config.getDomain(domainID);
             }
             else
             {
                 config = OPSConfig.getConfig(configFile);
-                domain = config.getDomain(domainID);
+                if (config != null) domain = config.getDomain(domainID);
             }
             if (domain != null)
             {
