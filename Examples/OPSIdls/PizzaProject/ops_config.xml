@@ -10,59 +10,59 @@
         <domainID>PizzaDomain</domainID>
         <domainAddress>234.5.6.8</domainAddress>
         <localInterface>127.0.0.1</localInterface>
-        <localInterface>192.168.0.0/24</localInterface>
+        <!-- <localInterface>192.168.0.0/24</localInterface>-->
         <!--optional <timeToLive>1</timeToLive>-->
-        <!--optional <inSocketBufferSize>16000000</inSocketBufferSize>-->
-        <!--optional <outSocketBufferSize>16000000</outSocketBufferSize>-->
-        <!--optional <optNonVirt>false</optNonVirt>-->
+        <inSocketBufferSize>16000000</inSocketBufferSize>
+        <outSocketBufferSize>16000000</outSocketBufferSize>
+        <!--optional <optNonVirt>true</optNonVirt>-->
         <heartbeatPeriod>0</heartbeatPeriod>
         <heartbeatTimeout>3000</heartbeatTimeout>
-        <!-- metaDataMcPort is necessary for UDP transport to work -->
+        <!-- metaDataMcPort is necessary for TCP/UDP many-to-many transports to work -->
         <metaDataMcPort>9494</metaDataMcPort>
         <debugMcPort>9999</debugMcPort>
 
         <channels>
           <element type = "Channel">
-            <name>Channel-A</name>
+            <!-- MC transport, with other domainAddress/localInterface than default and a port definition -->
+            <name>Channel-MC</name>
             <linktype>multicast</linktype>
-            <!-- We may override domainAddress/localInterface given above for specific multicast Topics -->
             <address>236.12.13.14</address>
             <localInterface>127.0.0.1</localInterface>
-            <localInterface>192.168.0.0/24</localInterface>
-            <port>6680</port>
-            <inSocketBufferSize>16000000</inSocketBufferSize>
-            <outSocketBufferSize>16000000</outSocketBufferSize>
+            <port>7780</port>
           </element>
 
           <element type = "Channel">
-            <name>Channel-B</name>
+            <!-- TCP one-to-many transport. This specifies the publisher (server) address and port -->
+            <name>Channel-TCP-1-to-M</name>
             <linktype>tcp</linktype>
-            <zaddress>127.0.0.1</zaddress>
-            <zport>6680</zport>
-            <inSocketBufferSize>16000000</inSocketBufferSize>
-            <outSocketBufferSize>16000000</outSocketBufferSize>
+            <address>127.0.0.1</address>
+            <port>7781</port>
           </element>
 
           <element type = "Channel">
-            <name>Channel-B2</name>
+            <!-- TCP many-to-many transport (only for C++ and Python so far) -->
+            <name>Channel-TCP-M-to-M</name>
             <linktype>tcp</linktype>
-            <inSocketBufferSize>16000000</inSocketBufferSize>
-            <outSocketBufferSize>16000000</outSocketBufferSize>
           </element>
 
           <element type = "Channel">
-            <name>Channel-C</name>
+            <!-- UDP many-to-one transport. This specifies the subscriber address and port -->
+            <name>Channel-UDP-M-to-1</name>
             <linktype>udp</linktype>
-            <zaddress>127.0.0.1</zaddress>
-            <zport>6680</zport>
-            <inSocketBufferSize>16000000</inSocketBufferSize>
-            <outSocketBufferSize>16000000</outSocketBufferSize>
+            <address>127.0.0.1</address>
+            <port>7782</port>
+          </element>
+
+          <element type = "Channel">
+            <!-- UDP many-to-many transport -->
+            <name>Channel-UDP-M-to-M</name>
+            <linktype>udp</linktype>
           </element>
         </channels>
 
         <transports>
           <element type = "Transport">
-            <channelID>Channel-A</channelID>
+            <channelID>Channel-MC</channelID>
             <topics>
               <element>PizzaTopic2</element>
               <element>VessuvioTopic2</element>
@@ -70,7 +70,7 @@
           </element>
 
           <element type = "Transport">
-            <channelID>Channel-B</channelID>
+            <channelID>Channel-TCP-1-to-M</channelID>
             <topics>
               <element>TcpPizzaTopic2</element>
               <element>TcpVessuvioTopic2</element>
@@ -78,13 +78,19 @@
           </element>
 
           <element type = "Transport">
-            <channelID>Channel-B2</channelID>
+            <channelID>Channel-TCP-M-to-M</channelID>
             <topics>
             </topics>
           </element>
 
           <element type = "Transport">
-            <channelID>Channel-C</channelID>
+            <channelID>Channel-UDP-M-to-1</channelID>
+            <topics>
+            </topics>
+          </element>
+
+          <element type = "Transport">
+            <channelID>Channel-UDP-M-to-M</channelID>
             <topics>
               <element>UdpPizzaTopic</element>
             </topics>
@@ -102,27 +108,12 @@
             <name>VessuvioTopic</name>
             <port>6690</port>
             <dataType>pizza.VessuvioData</dataType>
-            <zsampleMaxSize>2100000</zsampleMaxSize>
-            <zinSocketBufferSize>16000000</zinSocketBufferSize>
-            <zoutSocketBufferSize>16000000</zoutSocketBufferSize>
+            <sampleMaxSize>2100000</sampleMaxSize>
           </element>
           <element type = "Topic">
             <name>ExtraAlltTopic</name>
             <port>6691</port>
             <dataType>pizza.special.ExtraAllt</dataType>
-            <sampleMaxSize>2100000</sampleMaxSize>
-            <inSocketBufferSize>16000000</inSocketBufferSize>
-            <outSocketBufferSize>16000000</outSocketBufferSize>
-          </element>
-
-          <!-- Multicast topics, same port -->
-          <element type = "Topic">
-            <name>PizzaTopic2</name>
-            <dataType>pizza.PizzaData</dataType>
-          </element>
-          <element type = "Topic">
-            <name>VessuvioTopic2</name>
-            <dataType>pizza.VessuvioData</dataType>
             <sampleMaxSize>2100000</sampleMaxSize>
           </element>
 
@@ -131,26 +122,45 @@
             <name>TcpPizzaTopic</name>
             <dataType>pizza.PizzaData</dataType>
             <transport>tcp</transport>
-            <zport>6689</zport>
-            <zaddress>127.0.0.1</zaddress>
-            <zaddress>192.168.0.26</zaddress>
+            <port>6689</port>
+            <address>127.0.0.1</address>
           </element>
           <element type = "Topic">
             <name>TcpVessuvioTopic</name>
             <dataType>pizza.VessuvioData</dataType>
             <transport>tcp</transport>
-            <zport>6690</zport>
-            <zsampleMaxSize>2100000</zsampleMaxSize>
-            <zinSocketBufferSize>16000000</zinSocketBufferSize>
-            <zoutSocketBufferSize>16000000</zoutSocketBufferSize>
-            <zaddress>127.0.0.1</zaddress>
-            <zaddress>192.168.0.26</zaddress>
+            <port>6690</port>
+            <sampleMaxSize>2100000</sampleMaxSize>
+            <address>127.0.0.1</address>
           </element>
 
-          <!-- TCP topics, same port -->
+          <!-- UDP topics, different ports -->
+          <element type = "Topic">
+            <name>UdpVessuvioTopic</name>
+            <dataType>pizza.VessuvioData</dataType>
+            <transport>udp</transport>
+            <address>127.0.0.1</address>
+            <port>6680</port>
+            <sampleMaxSize>2100000</sampleMaxSize>
+          </element>
+
+          <!-- Topics used in Channel definitions -->
+          <element type = "Topic">
+            <name>PizzaTopic2</name>
+            <dataType>pizza.PizzaData</dataType>
+          </element>
           <element type = "Topic">
             <name>TcpPizzaTopic2</name>
             <dataType>pizza.PizzaData</dataType>
+          </element>
+          <element type = "Topic">
+            <name>UdpPizzaTopic</name>
+            <dataType>pizza.PizzaData</dataType>
+          </element>
+          <element type = "Topic">
+            <name>VessuvioTopic2</name>
+            <dataType>pizza.VessuvioData</dataType>
+            <sampleMaxSize>2100000</sampleMaxSize>
           </element>
           <element type = "Topic">
             <name>TcpVessuvioTopic2</name>
@@ -158,34 +168,14 @@
             <sampleMaxSize>2100000</sampleMaxSize>
           </element>
 
-          <!-- UDP topics, different ports -->
-          <element type = "Topic">
-            <name>UdpPizzaTopic</name>
-            <dataType>pizza.PizzaData</dataType>
-          </element>
-          <element type = "Topic">
-            <name>UdpVessuvioTopic</name>
-            <dataType>pizza.VessuvioData</dataType>
-            <transport>udp</transport>
-            <address>127.0.0.1</address>
-            <port>6680</port>
-            <zsampleMaxSize>2100000</zsampleMaxSize>
-            <zinSocketBufferSize>16000000</zinSocketBufferSize>
-            <zoutSocketBufferSize>16000000</zoutSocketBufferSize>
-          </element>
-
         </topics>
       </element>
-
 
       <!-- Second domain -->
       <element type = "Domain">
         <domainID>OtherPizzaDomain</domainID>
         <domainAddress>234.1.6.8</domainAddress>
         <localInterface>127.0.0.1</localInterface>
-        <!--optional <timeToLive>1</timeToLive>-->
-        <!--optional <inSocketBufferSize>16000000</inSocketBufferSize>-->
-        <!--optional <outSocketBufferSize>16000000</outSocketBufferSize>-->
         <metaDataMcPort>0</metaDataMcPort>
         <topics>
           <!-- Multicast topics, different ports, but same as in other domain -->
