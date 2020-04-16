@@ -276,17 +276,21 @@ package body Ops_Pa.Transport_Pa.TCPConnection_Pa is
 
   procedure PeriodicCheck( Self : in out TCPConnection_Class; errorFlag : in out boolean ) is
   begin
-    if Self.DetectedVersion > 1 then
-      -- Check if we need to send a heartbeat (at least one during a connection)
-      if not Self.HbSent or ((GetTimeInMs - Self.TimeSnd) >= Self.HeartbeatPeriod) then
-        Self.SendHeartbeat( errorFlag );
-      end if;
+    if Self.DetectedVersion > 1 and Self.HeartbeatPeriod > 0 then
+      declare
+        Now : TimeMs_T := GetTimeInMs;
+      begin
+        -- Check if we need to send a heartbeat (at least one during a connection)
+        if not Self.HbSent or ((Now - Self.TimeSnd) >= Self.HeartbeatPeriod) then
+          Self.SendHeartbeat( errorFlag );
+        end if;
 
-      -- Check receive timeout
-      if GetTimeInMs - Self.TimeRcv >= Self.HeartbeatTimeout then
-        if TraceEnabled then Self.Trace("No Data. Connection timed out"); end if;
-        errorFlag := True;
-      end if;
+        -- Check receive timeout
+        if Now - Self.TimeRcv >= Self.HeartbeatTimeout then
+          if TraceEnabled then Self.Trace("No Data. Connection timed out"); end if;
+          errorFlag := True;
+        end if;
+      end;
     end if;
   end;
 
