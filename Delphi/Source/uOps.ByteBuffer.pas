@@ -98,7 +98,7 @@ type
     function ReadFloat : Single;
     ///Reads 2 bytes from the buffer and returns them as an short. Index is increased by 2.
     ///Byte order is swaped before return.
-    function ReadShort : Integer;
+    function ReadShort : Int16;
     ///Reads 4 bytes from the buffer and returns them as an int. Index is increased by 4.
     ///Byte order is swaped before return.
     function ReadInt : Integer;
@@ -316,7 +316,7 @@ begin
   WriteChars(PByte(@i), 2);
 end;
 
-function TByteBuffer.ReadShort: Integer;
+function TByteBuffer.ReadShort: Int16;
 begin
   ReadChars(PByte(@Result), 2);
 end;
@@ -344,7 +344,7 @@ end;
 procedure TByteBuffer.WriteString(s: AnsiString);
 begin
   WriteInt(Length(s));
-  WriteChars(PByte(s), Length(s));
+  if Length(s) > 0 then WriteChars(PByte(s), Length(s));
 end;
 
 function TByteBuffer.ReadString: AnsiString;
@@ -353,7 +353,7 @@ var
 begin
   Len := ReadInt;
   SetLength(Result, Len);
-  ReadChars(PByte(Result), Len);
+  if Len > 0 then ReadChars(PByte(Result), Len);
 end;
 
 // ------------------
@@ -454,7 +454,7 @@ var
 begin
   size := Length(value);
   WriteInt(size);
-  WriteBytes(value, 0, size);
+  if size > 0 then WriteBytes(value, 0, size);
 end;
 
 function TByteBuffer.ReadBytes : TDynByteArray;
@@ -463,7 +463,7 @@ var
 begin
   size := ReadInt;
   SetLength(Result, size);
-  ReadBytes(Result, 0, size);
+  if size > 0 then ReadBytes(Result, 0, size);
 end;
 
 procedure TByteBuffer.WriteBytes(var buf : array of Byte; offset : Integer; length : Integer);
