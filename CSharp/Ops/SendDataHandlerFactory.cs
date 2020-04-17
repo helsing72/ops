@@ -41,7 +41,7 @@ namespace Ops
             try
             {
                 // Get the local interface, doing a translation from subnet if necessary
-                string localIF = Domain.DoSubnetTranslation(t.GetLocalInterface());
+                string localIF = InetAddress.DoSubnetTranslation(t.GetLocalInterface());
 
                 ISendDataHandler sender = null;
                 if (t.GetTransport().Equals(Topic.TRANSPORT_MC))
