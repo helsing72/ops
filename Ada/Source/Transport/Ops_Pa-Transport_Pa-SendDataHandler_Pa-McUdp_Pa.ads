@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2017-2019 Lennart Andersson.
+-- Copyright (C) 2017-2020 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -32,7 +32,7 @@ package Ops_Pa.Transport_Pa.SendDataHandler_Pa.McUdp_Pa is
 
   overriding function sendData( Self : in out McUdpSendDataHandler_Class; buf : Byte_Arr_At; bufSize : Integer; topic : Topic_Class_At) return Boolean;
 
-  procedure addSink( Self : in out McUdpSendDataHandler_Class; topic : String; Ip : String; Port : Int32);
+  procedure addSink( Self : in out McUdpSendDataHandler_Class; topic : String; Ip : String; Port : Int32; staticRoute : Boolean);
 
 private
 -- ==========================================================================
@@ -42,23 +42,27 @@ private
      record
        ip : String_At := null;
        port : Int32 := 0;
+       alwaysAlive : Boolean := False;
        lastTimeAlive : TimeMs_T := 0;
      end record;
   type IpPortPair_Class_At is access all IpPortPair_Class'Class;
 
-  function Create(ip : string; port : Int32) return IpPortPair_Class_At;
+  function Create(ip : string; port : Int32; alwaysAlive : Boolean) return IpPortPair_Class_At;
 
   function isAlive( Self : IpPortPair_Class ) return Boolean;
-  procedure feedWatchdog( Self : in out IpPortPair_Class );
+  procedure feedWatchdog( Self : in out IpPortPair_Class; alwaysAlive : Boolean );
   function getKey( Self : IpPortPair_Class ) return String;
 
   function getKey( ip : String; Port : Int32 ) return String;
 
   procedure InitInstance( Self : in out IpPortPair_Class;
                           ip : String;
-                          port : Int32 );
+                          port : Int32;
+                          alwaysAlive : Boolean );
 
   overriding procedure Finalize( Self : in out IpPortPair_Class );
+
+  -- ==============================
 
   -- Define a map that can hold IpPortPairs, key is made up of ip and port using method getKey above
   function Less (Left, Right : String) return Boolean;
@@ -68,10 +72,13 @@ private
 
   type TopicMap is
      record
+       staticRoute : Boolean := False;
        Map : IpPortPairMap.Map;
      end record;
 
   type TopicMap_At is access all TopicMap;
+
+  -- ==============================
 
   -- Define a map that can hold IpPortPairMaps, key is a topic name
   function Equal (Left, Right : TopicMap_At) return Boolean;

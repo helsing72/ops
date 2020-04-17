@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2018 Lennart Andersson.
+-- Copyright (C) 2016-2020 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -104,13 +104,25 @@ package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
                                    Self.ErrorService));
       end if;
 
-      -- Setup a listener on the participant info data published by participants on our domain.
-      -- We use the information for topics with UDP as transport, to know the destination for UDP sends
-      -- ie. we extract ip and port from the information and add it to our McUdpSendDataHandler
-      if Self.OnUdpConnectDisconnectClient /= null then
-        Self.OnUdpConnectDisconnectClient.OnUdpTransport(top, Self.UdpSendDataHandler, True);
-      end if;
+      -- If topic specifies a valid node address, add that as a static destination address for topic
+      if Ops_Pa.Socket_Pa.isValidNodeAddress(top.DomainAddress) then
+        declare
+          topName : String := top.Name;
+          destAddress : String := top.DomainAddress;
+          destPort : Int32 := top.Port;
+        begin
+          Ops_Pa.Transport_Pa.SendDataHandler_Pa.McUdp_Pa.McUdpSendDataHandler_Class_At(Self.UdpSendDataHandler).
+            addSink(topName, destAddress, destPort, True);
+        end;
 
+      else
+        -- Setup a listener on the participant info data published by participants on our domain.
+        -- We use the information for topics with UDP as transport, to know the destination for UDP sends
+        -- ie. we extract ip and port from the information and add it to our McUdpSendDataHandler
+        if Self.OnUdpConnectDisconnectClient /= null then
+          Self.OnUdpConnectDisconnectClient.OnUdpTransport(top, Self.UdpSendDataHandler, True);
+        end if;
+      end if;
       Self.UdpUsers := Self.UdpUsers + 1;
 
       Result := Self.UdpSendDataHandler;

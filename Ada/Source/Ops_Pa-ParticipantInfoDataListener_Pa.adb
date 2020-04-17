@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2017-2018 Lennart Andersson.
+-- Copyright (C) 2017-2020 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -170,7 +170,7 @@ package body Ops_Pa.ParticipantInfoDataListener_Pa is
                 then
                   -- Do an add sink here
                   McUdpSendDataHandler_Class_At(Self.SendDataHandler).addSink(
-                     partInfo.subscribeTopics(i).name.all, partInfo.ip.all, partInfo.mc_udp_port);
+                     partInfo.subscribeTopics(i).name.all, partInfo.ip.all, partInfo.mc_udp_port, False);
                 end if;
               end loop;
             end if;

@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2018 Lennart Andersson.
+-- Copyright (C) 2016-2020 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -17,6 +17,7 @@
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
 with Ops_Pa.OpsObject_Pa.Topic_Pa,
+     Ops_Pa.Socket_Pa,
      Ops_Pa.Error_Pa;
 
 use Ops_Pa.OpsObject_Pa.Topic_Pa,
@@ -78,10 +79,10 @@ package body Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa is
   function makeKey( top : Ops_Pa.OpsObject_Pa.Topic_Pa.Topic_Class_At ) return String is
   begin
     -- Since topics can use the same port for transports multicast & tcp, or
-    -- use transport udp which always use a single ReceiveDataHandler,
+    -- use transport udp which in most cases use a single ReceiveDataHandler,
     -- we need to return the same ReceiveDataHandler in these cases.
     -- Make a key with the transport info that uniquely defines the receiver.
-    if top.Transport = TRANSPORT_UDP then
+    if (top.Transport = TRANSPORT_UDP) or (not Ops_Pa.Socket_Pa.isMyNodeAddress(top.DomainAddress)) then
       return top.Transport;
     else
       return top.Transport & "::" & top.DomainAddress & "::" & Int32'Image(top.Port);
@@ -137,9 +138,11 @@ package body Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa is
     elsif top.Transport = TRANSPORT_UDP then
       Result := Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa.Create(top, dom, opsObjectFactory, Self.ErrorService);
 
-      if Self.OnUdpTransportInfoClient /= null then
-        Self.OnUdpTransportInfoClient.
-          OnUdpTransport( Result.getReceiver.Address, Int32(Result.getReceiver.Port) );
+      if key = top.Transport then
+        if Self.OnUdpTransportInfoClient /= null then
+          Self.OnUdpTransportInfoClient.
+            OnUdpTransport( Result.getReceiver.Address, Int32(Result.getReceiver.Port) );
+        end if;
       end if;
 
       info.handler := Result;
@@ -179,8 +182,10 @@ package body Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa is
         Free(rdh);
 
         if top.Transport = TRANSPORT_UDP then
-          if Self.OnUdpTransportInfoClient /= null then
-            Self.OnUdpTransportInfoClient.OnUdpTransport("", 0);
+          if key = top.Transport then
+            if Self.OnUdpTransportInfoClient /= null then
+              Self.OnUdpTransportInfoClient.OnUdpTransport("", 0);
+            end if;
           end if;
         end if;
       end if;

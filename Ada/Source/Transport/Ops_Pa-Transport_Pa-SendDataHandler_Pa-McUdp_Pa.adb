@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2017-2019 Lennart Andersson.
+-- Copyright (C) 2017-2020 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -41,11 +41,11 @@ package body Ops_Pa.Transport_Pa.SendDataHandler_Pa.McUdp_Pa is
     return Left = Right;
   end;
 
-  function Create(ip : string; port : Int32) return IpPortPair_Class_At is
+  function Create(ip : string; port : Int32; alwaysAlive : Boolean) return IpPortPair_Class_At is
     Self : IpPortPair_Class_At := null;
   begin
     Self := new IpPortPair_Class;
-    InitInstance( Self.all, ip, port );
+    InitInstance( Self.all, ip, port, alwaysAlive );
     return Self;
   exception
     when others =>
@@ -55,11 +55,12 @@ package body Ops_Pa.Transport_Pa.SendDataHandler_Pa.McUdp_Pa is
 
   function isAlive( Self : IpPortPair_Class ) return Boolean is
   begin
-    return (GetTimeInMs - Self.lastTimeAlive) < ALIVE_TIMEOUT;
+    return Self.alwaysAlive or else (GetTimeInMs - Self.lastTimeAlive) < ALIVE_TIMEOUT;
   end;
 
-  procedure feedWatchdog( Self : in out IpPortPair_Class ) is
+  procedure feedWatchdog( Self : in out IpPortPair_Class; alwaysAlive : Boolean ) is
   begin
+    Self.alwaysAlive := Self.alwaysAlive or alwaysAlive;
     Self.lastTimeAlive := GetTimeInMs;
   end;
 
@@ -75,10 +76,12 @@ package body Ops_Pa.Transport_Pa.SendDataHandler_Pa.McUdp_Pa is
 
   procedure InitInstance( Self : in out IpPortPair_Class;
                           ip : String;
-                          port : Int32 ) is
+                          port : Int32;
+                          alwaysAlive : Boolean ) is
   begin
     Self.ip := Copy(ip);
     Self.port := port;
+    Self.alwaysAlive := alwaysAlive;
     Self.lastTimeAlive := GetTimeInMs;
   end;
 
@@ -157,7 +160,7 @@ package body Ops_Pa.Transport_Pa.SendDataHandler_Pa.McUdp_Pa is
     return Result;
   end;
 
-  procedure addSink( Self : in out McUdpSendDataHandler_Class; topic : String; Ip : String; Port : Int32) is
+  procedure addSink( Self : in out McUdpSendDataHandler_Class; topic : String; Ip : String; Port : Int32; staticRoute : Boolean) is
     ipPort : IpPortPair_Class_At := null;
     ipPortMap : TopicMap_At := null;
     posMap : IpPortPairMap.Cursor;
@@ -169,22 +172,26 @@ package body Ops_Pa.Transport_Pa.SendDataHandler_Pa.McUdp_Pa is
     if posDict = IpPortPairDict.No_Element then
       -- We have no sink map for this topic, so add it
       ipPortMap := new TopicMap;
+      ipPortMap.staticRoute := staticRoute;
       Self.TopSinkMap.Insert( topic, ipPortMap );
     else
       ipPortMap := IpPortPairDict.Element( posDict );
     end if;
 
-    posMap := ipPortMap.Map.Find( getKey( Ip, Port ) );
-    if posMap = IpPortPairMap.No_Element then
-      -- We have no matching sink, add it
-      ipPort := Create(Ip, Port);
-      ipPortMap.Map.Insert( ipPort.getKey, ipPort );
-      --Put_Line( topic & " added as new sink " & ipPort.getKey);
-    else
-      ipPort := IpPortPairMap.Element( posMap );
-    end if;
+    -- If created as static route, we only add sinks that are static
+    if (not ipPortMap.staticRoute) or (ipPortMap.staticRoute and staticRoute) then
+      posMap := ipPortMap.Map.Find( getKey( Ip, Port ) );
+      if posMap = IpPortPairMap.No_Element then
+        -- We have no matching sink, add it
+        ipPort := Create(Ip, Port, staticRoute);
+        ipPortMap.Map.Insert( ipPort.getKey, ipPort );
+        --Put_Line( topic & " added as new sink " & ipPort.getKey);
+      else
+        ipPort := IpPortPairMap.Element( posMap );
+      end if;
 
-    ipPort.feedWatchdog;
+      ipPort.feedWatchdog( staticRoute );
+    end if;
   end;
 
   procedure InitInstance( Self : in out McUdpSendDataHandler_Class;

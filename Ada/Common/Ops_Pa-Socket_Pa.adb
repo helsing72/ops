@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2017-2019 Lennart Andersson.
+-- Copyright (C) 2017-2020 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -728,11 +728,12 @@ package body Ops_Pa.Socket_Pa is
           tmp := part(str, Last+1, Last);
           if tmp >= 0 and tmp <= 255 then
             res := res + Shift_Left(Unsigned_32(tmp), 0);
+            return res;
           end if;
         end if;
       end if;
     end if;
-    return res;
+    return 0;
   end;
 
 
@@ -784,7 +785,7 @@ package body Ops_Pa.Socket_Pa is
           --Ada.Text_IO.Put_Line("  Address: " & GNAT.Sockets.Image(addr));
           --Ada.Text_IO.Put("Translate(), addrnum: "); x.Put(addrnum, 12, 16); Ada.Text_IO.New_Line;
 
-          if (addrnum and subnetMask) = (subnetip and subnetmask) then
+          if (addrNum and subnetMask) = (subnetIp and subnetMask) then
             --Ada.Text_IO.Put_Line("Translate()  ----> " & GNAT.Sockets.Image(addr));
             return GNAT.Sockets.Image(addr);
           end if;
@@ -792,6 +793,46 @@ package body Ops_Pa.Socket_Pa is
       end;
       return subnet;
     end;
+  end;
+
+  function isValidNodeAddress(addr : String) return Boolean is
+    Ip : Unsigned_32;
+  begin
+    Ip := To_Unsigned_32(addr);
+
+    -- Skip Any and multicast and above
+    if Ip = 0 or Ip >= 16#E0000000# then
+      return False;
+    end if;
+    return True;
+  end;
+
+  function isMyNodeAddress(addr : String) return Boolean is
+    Ip : Unsigned_32;
+  begin
+    Ip := To_Unsigned_32(addr);
+
+    if Ip = 16#7F000001# then
+      return True;
+    end if;
+
+    declare
+      he : GNAT.Sockets.Host_Entry_Type := GNAT.Sockets.Get_Host_By_Name(GNAT.Sockets.Host_Name);
+      addr : GNAT.Sockets.Inet_Addr_Type;
+      addrNum : Unsigned_32;
+    begin
+      for i in 1 .. GNAT.Sockets.Addresses_Length( he ) loop
+        addr := GNAT.Sockets.Addresses( he, i );
+        addrNum := To_Unsigned_32(GNAT.Sockets.Image(addr));
+        --Ada.Text_IO.Put_Line("  Address: " & GNAT.Sockets.Image(addr));
+        --Ada.Text_IO.Put("Translate(), addrnum: "); x.Put(addrnum, 12, 16); Ada.Text_IO.New_Line;
+
+        if addrNum = Ip then
+          return True;
+        end if;
+      end loop;
+    end;
+    return False;
   end;
 
 begin

@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2019 Lennart Andersson.
+-- Copyright (C) 2016-2020 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -104,8 +104,20 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa is
                                             InSocketBufferSize => top.InSocketBufferSize) );
 
     elsif top.Transport = TRANSPORT_UDP then
-      Result := Receiver_Class_At(Ops_Pa.Transport_Pa.Receiver_Pa.UDPReceiver_Pa.
-        Create(0, localIf, top.InSocketBufferSize));
+      -- If UDP topic is configured with my node address, we use the configured port, otherwise
+      -- we use port 0 which will force the OS to create a unique port that we listen to.
+      if Ops_Pa.Socket_Pa.isMyNodeAddress(top.DomainAddress) then
+        Result := Receiver_Class_At(Ops_Pa.Transport_Pa.Receiver_Pa.UDPReceiver_Pa.
+                                      Create( bindPort => Integer(top.Port),
+                                              localInterface => top.DomainAddress,
+                                              inSocketBufferSize => top.InSocketBufferSize));
+
+      else
+        Result := Receiver_Class_At(Ops_Pa.Transport_Pa.Receiver_Pa.UDPReceiver_Pa.
+                                      Create( bindPort => 0,
+                                              localInterface => localIf,
+                                              inSocketBufferSize => top.InSocketBufferSize));
+      end if;
 
     end if;
 
