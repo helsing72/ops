@@ -86,13 +86,14 @@
           <element type = "Transport">
             <channelID>Channel-UDP-M-to-1</channelID>
             <topics>
+              <element>UdpVessuvioTopic2</element>
             </topics>
           </element>
 
           <element type = "Transport">
             <channelID>Channel-UDP-M-to-M</channelID>
             <topics>
-              <element>UdpPizzaTopic</element>
+              <element>UdpPizzaTopic2</element>
             </topics>
           </element>
         </transports>
@@ -136,11 +137,17 @@
 
           <!-- UDP topics, different ports -->
           <element type = "Topic">
+            <name>UdpPizzaTopic</name>
+            <dataType>pizza.PizzaData</dataType>
+            <address>127.0.0.1</address>
+            <port>6680</port>
+          </element>
+          <element type = "Topic">
             <name>UdpVessuvioTopic</name>
             <dataType>pizza.VessuvioData</dataType>
             <transport>udp</transport>
             <address>127.0.0.1</address>
-            <port>6680</port>
+            <port>6681</port>
             <sampleMaxSize>2100000</sampleMaxSize>
           </element>
 
@@ -154,7 +161,7 @@
             <dataType>pizza.PizzaData</dataType>
           </element>
           <element type = "Topic">
-            <name>UdpPizzaTopic</name>
+            <name>UdpPizzaTopic2</name>
             <dataType>pizza.PizzaData</dataType>
           </element>
           <element type = "Topic">
@@ -164,6 +171,11 @@
           </element>
           <element type = "Topic">
             <name>TcpVessuvioTopic2</name>
+            <dataType>pizza.VessuvioData</dataType>
+            <sampleMaxSize>2100000</sampleMaxSize>
+          </element>
+          <element type = "Topic">
+            <name>UdpVessuvioTopic2</name>
             <dataType>pizza.VessuvioData</dataType>
             <sampleMaxSize>2100000</sampleMaxSize>
           </element>

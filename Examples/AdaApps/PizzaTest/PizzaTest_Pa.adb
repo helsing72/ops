@@ -464,7 +464,7 @@ package body PizzaTest_Pa is
        Part : Participant_Class_At := null;
      end record;
 
-  type ItemInfoList_T is array(Integer range 0..15) of ItemInfo_T;
+  type ItemInfoList_T is array(Integer range 0..17) of ItemInfo_T;
 
   ItemInfoList : ItemInfoList_T;
   ItemInfoNum : Integer := 0;
@@ -787,6 +787,8 @@ package body PizzaTest_Pa is
     Setup("PizzaDomain", "TcpVessuvioTopic2", "pizza.VessuvioData");
     Setup("PizzaDomain", "UdpPizzaTopic", "pizza.PizzaData");
     Setup("PizzaDomain", "UdpVessuvioTopic", "pizza.VessuvioData");
+    Setup("PizzaDomain", "UdpPizzaTopic2", "pizza.PizzaData");
+    Setup("PizzaDomain", "UdpVessuvioTopic2", "pizza.VessuvioData");
     Setup("OtherPizzaDomain", "OtherPizzaTopic", "pizza.PizzaData");
     Setup("OtherPizzaDomain", "OtherVessuvioTopic", "pizza.VessuvioData");
     Setup("PizzaDomain", "ExtraAlltTopic", "pizza.special.ExtraAllt");

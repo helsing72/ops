@@ -82,6 +82,8 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
     MyTopicInfoList.add(new MyTopicInfo("PizzaDomain",      "TcpVessuvioTopic2",  "pizza.VessuvioData"));
     MyTopicInfoList.add(new MyTopicInfo("PizzaDomain",      "UdpPizzaTopic",      "pizza.PizzaData"));
     MyTopicInfoList.add(new MyTopicInfo("PizzaDomain",      "UdpVessuvioTopic",   "pizza.VessuvioData"));
+    MyTopicInfoList.add(new MyTopicInfo("PizzaDomain",      "UdpPizzaTopic2",     "pizza.PizzaData"));
+    MyTopicInfoList.add(new MyTopicInfo("PizzaDomain",      "UdpVessuvioTopic2",  "pizza.VessuvioData"));
     MyTopicInfoList.add(new MyTopicInfo("OtherPizzaDomain", "OtherPizzaTopic",    "pizza.PizzaData"));
     MyTopicInfoList.add(new MyTopicInfo("OtherPizzaDomain", "OtherVessuvioTopic", "pizza.VessuvioData"));
     MyTopicInfoList.add(new MyTopicInfo("PizzaDomain",      "ExtraAlltTopic",     "pizza.special.ExtraAllt"));

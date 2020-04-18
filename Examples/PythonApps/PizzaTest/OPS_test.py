@@ -255,6 +255,9 @@ ItemInfoList.append(ItemInfo("PizzaDomain", "TcpVessuvioTopic2", "pizza.Vessuvio
 ItemInfoList.append(ItemInfo("PizzaDomain", "UdpPizzaTopic", "pizza.PizzaData"))
 ItemInfoList.append(ItemInfo("PizzaDomain", "UdpVessuvioTopic", "pizza.VessuvioData"))
 
+ItemInfoList.append(ItemInfo("PizzaDomain", "UdpPizzaTopic2", "pizza.PizzaData"))
+ItemInfoList.append(ItemInfo("PizzaDomain", "UdpVessuvioTopic2", "pizza.VessuvioData"))
+
 ItemInfoList.append(ItemInfo("OtherPizzaDomain", "OtherPizzaTopic", "pizza.PizzaData"))
 ItemInfoList.append(ItemInfo("OtherPizzaDomain", "OtherVessuvioTopic", "pizza.VessuvioData"))
 

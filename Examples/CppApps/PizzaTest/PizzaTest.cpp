@@ -766,7 +766,10 @@ int main(const int argc, const char* argv[])
 	ItemInfoList.push_back(new ItemInfo("PizzaDomain", "UdpPizzaTopic", "pizza.PizzaData"));
 	ItemInfoList.push_back(new ItemInfo("PizzaDomain", "UdpVessuvioTopic", "pizza.VessuvioData"));
 
-	ItemInfoList.push_back(new ItemInfo("OtherPizzaDomain", "OtherPizzaTopic", "pizza.PizzaData"));
+    ItemInfoList.push_back(new ItemInfo("PizzaDomain", "UdpPizzaTopic2", "pizza.PizzaData"));
+    ItemInfoList.push_back(new ItemInfo("PizzaDomain", "UdpVessuvioTopic2", "pizza.VessuvioData"));
+
+    ItemInfoList.push_back(new ItemInfo("OtherPizzaDomain", "OtherPizzaTopic", "pizza.PizzaData"));
 	ItemInfoList.push_back(new ItemInfo("OtherPizzaDomain", "OtherVessuvioTopic", "pizza.VessuvioData"));
 
 	ItemInfoList.push_back(new ItemInfo("PizzaDomain", "ExtraAlltTopic", "pizza.special.ExtraAllt"));

@@ -795,6 +795,9 @@ begin
   FItemInfoList.Add(TItemInfo.Create('PizzaDomain', 'UdpPizzaTopic', 'pizza.PizzaData'));
   FItemInfoList.Add(TItemInfo.Create('PizzaDomain', 'UdpVessuvioTopic', 'pizza.VessuvioData'));
 
+  FItemInfoList.Add(TItemInfo.Create('PizzaDomain', 'UdpPizzaTopic2', 'pizza.PizzaData'));
+  FItemInfoList.Add(TItemInfo.Create('PizzaDomain', 'UdpVessuvioTopic2', 'pizza.VessuvioData'));
+
   FItemInfoList.Add(TItemInfo.Create('OtherPizzaDomain', 'OtherPizzaTopic', 'pizza.PizzaData'));
   FItemInfoList.Add(TItemInfo.Create('OtherPizzaDomain', 'OtherVessuvioTopic', 'pizza.VessuvioData'));
 

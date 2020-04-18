@@ -101,6 +101,8 @@ namespace OPSTest
             MyTopicInfoList.Add(new MyTopicInfo("PizzaDomain",      "TcpVessuvioTopic2",  "pizza.VessuvioData"));
             MyTopicInfoList.Add(new MyTopicInfo("PizzaDomain",      "UdpPizzaTopic",      "pizza.PizzaData"));
             MyTopicInfoList.Add(new MyTopicInfo("PizzaDomain",      "UdpVessuvioTopic",   "pizza.VessuvioData"));
+            MyTopicInfoList.Add(new MyTopicInfo("PizzaDomain",      "UdpPizzaTopic2",     "pizza.PizzaData"));
+            MyTopicInfoList.Add(new MyTopicInfo("PizzaDomain",      "UdpVessuvioTopic2",  "pizza.VessuvioData"));
             MyTopicInfoList.Add(new MyTopicInfo("OtherPizzaDomain", "OtherPizzaTopic",    "pizza.PizzaData"));
             MyTopicInfoList.Add(new MyTopicInfo("OtherPizzaDomain", "OtherVessuvioTopic", "pizza.VessuvioData"));
             MyTopicInfoList.Add(new MyTopicInfo("PizzaDomain",      "ExtraAlltTopic",     "pizza.special.ExtraAllt"));
@@ -589,7 +591,9 @@ namespace OPSTest
 
         private void test(string IP)
         {
-            Log("Test: Domain.DoSubnetTranslation(" + IP + ") = " + Domain.DoSubnetTranslation(IP));
+            Log("Test: InetAddress.DoSubnetTranslation(" + IP + ") = " + InetAddress.DoSubnetTranslation(IP));
+            Log("Test: InetAddress.IsValidNodeAddress(" + IP + ") = " + InetAddress.IsValidNodeAddress(IP));
+            Log("Test: InetAddress.IsMyNodeAddress(" + IP + ") = " + InetAddress.IsMyNodeAddress(IP));
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -630,7 +634,9 @@ namespace OPSTest
             test("192.168.0.0/255.255.255.0");
             test("192.168.0.0/24");
             test("192.168.0.24");
-
+            test("192.168.0.25");
+            test("192.168.0.26");
+            test("172.17.205.209");
 
             System.Net.NetworkInformation.IPGlobalProperties computerProperties = System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties();
             System.Net.NetworkInformation.NetworkInterface[] nics = System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces();
