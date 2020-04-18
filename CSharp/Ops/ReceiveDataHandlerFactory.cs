@@ -15,12 +15,12 @@ namespace Ops
         private Dictionary<string, ReceiveDataHandler> ReceiveDataHandlers = new Dictionary<string, ReceiveDataHandler>();
 
         // Since topics can use the same port for transports multicast & tcp, or 
-        // use transport udp which always use a single ReceiveDataHandler, 
+        // use transport udp which in most cases use a single ReceiveDataHandler, 
         // we need to return the same ReceiveDataHandler in these cases.
         // Make a key with the transport info that uniquely defines the receiver.
         private string MakeKey(Topic top)
         {
-            if (top.GetTransport().Equals(Topic.TRANSPORT_UDP))
+            if (top.GetTransport().Equals(Topic.TRANSPORT_UDP) && (!Ops.InetAddress.IsMyNodeAddress(top.GetDomainAddress())))
             {
                 return top.GetTransport();
             }
@@ -71,7 +71,10 @@ namespace Ops
                 IReceiver rec = ReceiverFactory.CreateReceiver(top, localIF);
                 ReceiveDataHandlers.Add(key, new ReceiveDataHandler(top, participant, rec));
 
-                participant.SetUdpTransportInfo(((UdpReceiver)rec).IP, ((UdpReceiver)rec).Port);
+                if (key.Equals(Topic.TRANSPORT_UDP))
+                {
+                    participant.SetUdpTransportInfo(((UdpReceiver)rec).IP, ((UdpReceiver)rec).Port);
+                }
 
                 return ReceiveDataHandlers[key];
             }

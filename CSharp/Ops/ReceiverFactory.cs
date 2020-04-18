@@ -26,7 +26,16 @@ namespace Ops
                 }
                 else if (topic.GetTransport().Equals(Topic.TRANSPORT_UDP))
                 {
-                    return new UdpReceiver(0, localInterface, topic.GetInSocketBufferSize());
+                    if (Ops.InetAddress.IsMyNodeAddress(topic.GetDomainAddress()))
+                    {
+                        // If UDP topic is configured with my node address, we use the configured port, otherwise
+                        // we use port 0 which will force the OS to create a unique port that we listen to.
+                        return new UdpReceiver(topic.GetPort(), topic.GetDomainAddress(), topic.GetInSocketBufferSize());
+                    }
+                    else
+                    {
+                        return new UdpReceiver(0, localInterface, topic.GetInSocketBufferSize());
+                    }
                 }
             }
             catch (System.IO.IOException ex)

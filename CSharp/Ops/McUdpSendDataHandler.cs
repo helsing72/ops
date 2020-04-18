@@ -12,8 +12,16 @@ namespace Ops
 {
 	public class McUdpSendDataHandler : SendDataHandler 
     {
-        //                 Topic              port
-        private Dictionary<string, Dictionary<string, IpPortPair> > topicSinkMap = new Dictionary<string,Dictionary<string,IpPortPair>>();
+        private class Entry_T
+        {
+            public bool staticRoute = false;
+            //                port
+            public Dictionary<string, IpPortPair> portMap = new Dictionary<string, IpPortPair>();
+            public Entry_T(bool staticRoute) { this.staticRoute = staticRoute; }
+        }
+
+        //                 Topic
+        private Dictionary<string, Entry_T > topicSinkMap = new Dictionary<string,Entry_T>();
         
 
         public McUdpSendDataHandler(int outSocketBufferSize, string localInterface) 
@@ -28,16 +36,16 @@ namespace Ops
 
             if (this.topicSinkMap.ContainsKey(t.GetName()))
             {
-                Dictionary<string, IpPortPair> dict = this.topicSinkMap[t.GetName()];
+                Entry_T dict = this.topicSinkMap[t.GetName()];
                 List<string> sinksToDelete = new List<string>();
 
                 // Loop over all sinks and send data, remove items that isn't "alive".
-                foreach (KeyValuePair<string, IpPortPair> kvp in dict)
+                foreach (KeyValuePair<string, IpPortPair> kvp in dict.portMap)
                 {
                     // Check if this sink is alive
                     if (kvp.Value.IsAlive())
                     {
-                        result &= SendData(bytes, size, InetAddress.GetByName(kvp.Value.ip), kvp.Value.port);
+                        result &= SendData(bytes, size, InetAddress.GetByName(kvp.Value.Ip), kvp.Value.Port);
                     }
                     else //Remove it.
                     {
@@ -46,66 +54,71 @@ namespace Ops
                 }
                 foreach (string key in sinksToDelete)
                 {
-                    dict.Remove(key);
+                    dict.portMap.Remove(key);
                 }
             }
             return result;
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void AddSink(string topic, string ip, int port)
+        public void AddSink(string topic, string ip, int port, bool staticRoute)
         {
-            IpPortPair ipp = new IpPortPair(ip, port);
+            IpPortPair ipp = new IpPortPair(ip, port, staticRoute);
 
             if (this.topicSinkMap.ContainsKey(topic))
             {
-                Dictionary<string, IpPortPair> dict = this.topicSinkMap[topic];
+                Entry_T dict = this.topicSinkMap[topic];
 
-                if (dict.ContainsKey(ipp.GetKey()))
+                //If created as static route, we only add sinks that are static
+                if ((!dict.staticRoute) || (dict.staticRoute && staticRoute))
                 {
-                    dict[ipp.GetKey()].FeedWatchdog();
-                }
-                else
-                {
-                    dict.Add(ipp.GetKey(), ipp);
+                    //Check if sink already exist
+                    if (dict.portMap.ContainsKey(ipp.Key))
+                    {
+                        dict.portMap[ipp.Key].FeedWatchdog(staticRoute);
+                    }
+                    else
+                    {
+                        dict.portMap.Add(ipp.Key, ipp);
+                    }
                 }
             }
             else
             {
-                Dictionary<string, IpPortPair> dict = new Dictionary<string,IpPortPair>();
-                dict.Add(ipp.GetKey(), ipp);
+                Entry_T dict = new Entry_T(staticRoute);
+                dict.portMap.Add(ipp.Key, ipp);
                 this.topicSinkMap.Add(topic, dict);
             }
         }
 
         private class IpPortPair
         {
-            public string ip {get; private set; }
-            public int port {get; private set; }
+            public string Ip {get; private set; }
+            public int Port {get; private set; }
+            public string Key { get; private set; }
+            private bool alwaysAlive = false;
 
             private System.DateTime lastTimeAlive;
             private System.TimeSpan ALIVE_TIMEOUT = System.TimeSpan.FromMilliseconds(3000.0);
 
-            public IpPortPair(string ip, int port)
+            public IpPortPair(string ip, int port, bool alwaysAlive)
             {
-                this.ip = ip;
-                this.port = port;
+                this.Ip = ip;
+                this.Port = port;
+                this.Key = Ip + ":" + Port.ToString();
+                this.alwaysAlive = alwaysAlive;
                 this.lastTimeAlive = System.DateTime.Now;
             }
 
             public bool IsAlive()
             {
-                return (System.DateTime.Now - this.lastTimeAlive) < ALIVE_TIMEOUT;
+                return this.alwaysAlive || ((System.DateTime.Now - this.lastTimeAlive) < ALIVE_TIMEOUT);
             }
 
-            public void FeedWatchdog()
+            public void FeedWatchdog(bool alwaysAlive)
             {
+                this.alwaysAlive |= alwaysAlive;
                 this.lastTimeAlive = System.DateTime.Now;
-            }
-
-            public string GetKey()
-            {
-                return port.ToString();
             }
         }
 	}

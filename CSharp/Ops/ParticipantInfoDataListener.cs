@@ -41,7 +41,7 @@ namespace Ops
                     // We are only interrested in topics with UDP as transport
 			        if ( (tid.transport.Equals(Topic.TRANSPORT_UDP)) && (participant.HasPublisherOn(tid.name)) )
 				    {
-					    udpSendDataHandler.AddSink(tid.name, partInfo.ip, partInfo.mc_udp_port);
+					    udpSendDataHandler.AddSink(tid.name, partInfo.ip, partInfo.mc_udp_port, false);
 					}
 				}
             }

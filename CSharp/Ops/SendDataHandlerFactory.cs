@@ -67,15 +67,26 @@ namespace Ops
                         udpSendDataHandler = new McUdpSendDataHandler(
                             participant.getDomain().GetOutSocketBufferSize(),
                             localIF);
-                                                                      
-                        // Setup a listener on the participant info data published by participants on our domain.
-                        // We use the information for topics with UDP as transport, to know the destination for UDP sends
-                        // ie. we extract ip and port from the information and add it to our McUdpSendDataHandler
-                        partInfoListener = new ParticipantInfoDataListener(participant, udpSendDataHandler);
+                    }
 
-                        partInfoSub = new Subscriber(participant.CreateParticipantInfoTopic());
-                        partInfoSub.newDataDefault += new NewDataDefaultEventHandler(partInfoListener.SubscriberNewData);
-                        partInfoSub.Start();
+                    // If topic specifies a valid node address, add that as a static destination address for topic
+                    if (Ops.InetAddress.IsValidNodeAddress(t.GetDomainAddress()))
+                    {
+                        udpSendDataHandler.AddSink(t.GetName(), t.GetDomainAddress(), t.GetPort(), true);
+                    }
+                    else
+                    {
+                        if (partInfoListener == null)
+                        {
+                            // Setup a listener on the participant info data published by participants on our domain.
+                            // We use the information for topics with UDP as transport, to know the destination for UDP sends
+                            // ie. we extract ip and port from the information and add it to our McUdpSendDataHandler
+                            partInfoListener = new ParticipantInfoDataListener(participant, udpSendDataHandler);
+
+                            partInfoSub = new Subscriber(participant.CreateParticipantInfoTopic());
+                            partInfoSub.newDataDefault += new NewDataDefaultEventHandler(partInfoListener.SubscriberNewData);
+                            partInfoSub.Start();
+                        }
                     }
                     return udpSendDataHandler;
                 }
