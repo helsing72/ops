@@ -1,6 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -40,26 +41,23 @@ public class ParticipantInfoDataListener
         ParticipantInfoData partInfo = (ParticipantInfoData)data;
 
         // Is it on our domain?
-	if (partInfo.domain.equals(participant.domainID)) {
+	      if (partInfo.domain.equals(participant.domainID)) {
 
             for (TopicInfoData tid : partInfo.subscribeTopics)
             {
                 // We are only interrested in topics with UDP as transport
-	        if ( (tid.transport.equals(Topic.TRANSPORT_UDP)) && (participant.hasPublisherOn(tid.name)) )
+	              if ( (tid.transport.equals(Topic.TRANSPORT_UDP)) && (participant.hasPublisherOn(tid.name)) )
                 {
-		    try
+		                try
                     {
-                        udpSendDataHandler.addSink(tid.name, partInfo.ip, partInfo.mc_udp_port);
+                        udpSendDataHandler.addSink(tid.name, partInfo.ip, partInfo.mc_udp_port, false);
                     }
                     catch (IOException e)
                     {
                     }
-		}
+		            }
             }
         }
     }
 
 }
-
-
-

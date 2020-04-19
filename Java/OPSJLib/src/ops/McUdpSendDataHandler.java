@@ -1,7 +1,23 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+/**
+*
+* Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2020 Lennart Andersson.
+*
+* This file is part of OPS (Open Publish Subscribe).
+*
+* OPS (Open Publish Subscribe) is free software: you can redistribute it and/or modify
+* it under the terms of the GNU Lesser General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+
+* OPS (Open Publish Subscribe) is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU Lesser General Public License for more details.
+*
+* You should have received a copy of the GNU Lesser General Public License
+* along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 package ops;
 
@@ -11,14 +27,17 @@ import java.net.InetAddress;
 import java.util.Vector;
 import java.util.HashMap;
 
-/**
- *
- * @author Lelle
- */
 public class McUdpSendDataHandler extends SendDataHandlerBase
 {
-    //              Topic           port
-    private HashMap<String, HashMap<String, IpPortPair> > topicSinkMap = new HashMap<String,HashMap<String,IpPortPair>>();
+    private class Entry_T
+    {
+        public boolean staticRoute = false;
+        public HashMap<String, IpPortPair> portMap = new HashMap<String, IpPortPair>();
+        public Entry_T(boolean staticRoute) { this.staticRoute = staticRoute; }
+    }
+
+    //              Topic
+    private HashMap<String, Entry_T> topicSinkMap = new HashMap<String,Entry_T>();
 
     public McUdpSendDataHandler(int outSocketBufferSize, String localInterface) throws IOException
     {
@@ -31,11 +50,11 @@ public class McUdpSendDataHandler extends SendDataHandlerBase
 
         if (this.topicSinkMap.containsKey(t.getName()))
         {
-            HashMap<String, IpPortPair> dict = this.topicSinkMap.get(t.getName());
+            Entry_T dict = this.topicSinkMap.get(t.getName());
             Vector<String> sinksToDelete = new Vector<String>();
 
             // Loop over all sinks and send data, remove items that isn't "alive".
-            for (IpPortPair ipp : dict.values())
+            for (IpPortPair ipp : dict.portMap.values())
             {
                 // Check if this sink is alive
                 if (ipp.IsAlive())
@@ -44,38 +63,42 @@ public class McUdpSendDataHandler extends SendDataHandlerBase
                 }
                 else //Remove it.
                 {
-                    sinksToDelete.add(ipp.GetKey());
+                    sinksToDelete.add(ipp.key);
                 }
             }
             for (String key : sinksToDelete)
             {
-                dict.remove(key);
+                dict.portMap.remove(key);
             }
         }
         return result;
     }
 
-    public synchronized void addSink(String topic, String ip, int port) throws IOException
+    public synchronized void addSink(String topic, String ip, int port, boolean staticRoute) throws IOException
     {
-        IpPortPair ipp = new IpPortPair(InetAddress.getByName(ip), port);
+        IpPortPair ipp = new IpPortPair(InetAddress.getByName(ip), port, staticRoute);
 
         if (this.topicSinkMap.containsKey(topic))
         {
-            HashMap<String, IpPortPair> dict = this.topicSinkMap.get(topic);
+            Entry_T dict = this.topicSinkMap.get(topic);
 
-            if (dict.containsKey(ipp.GetKey()))
+            //If created as static route, we only add sinks that are static
+            if ((!dict.staticRoute) || (dict.staticRoute && staticRoute))
             {
-                dict.get(ipp.GetKey()).FeedWatchdog();
-            }
-            else
-            {
-                dict.put(ipp.GetKey(), ipp);
+                if (dict.portMap.containsKey(ipp.key))
+                {
+                    dict.portMap.get(ipp.key).FeedWatchdog(staticRoute);
+                }
+                else
+                {
+                    dict.portMap.put(ipp.key, ipp);
+                }
             }
         }
         else
         {
-            HashMap<String, IpPortPair> dict = new HashMap<String,IpPortPair>();
-            dict.put(ipp.GetKey(), ipp);
+            Entry_T dict = new Entry_T(staticRoute);
+            dict.portMap.put(ipp.key, ipp);
             this.topicSinkMap.put(topic, dict);
         }
     }
@@ -84,32 +107,31 @@ public class McUdpSendDataHandler extends SendDataHandlerBase
     {
         public InetAddress ip;
         public int port;
+        public String key;
 
+        private boolean alwaysAlive = false;
         private long lastTimeAlive;
         private long ALIVE_TIMEOUT = 3000;  // [ms]
 
-        public IpPortPair(InetAddress ip, int port)
+        public IpPortPair(InetAddress ip, int port, boolean alwaysAlive)
         {
             this.ip = ip;
             this.port = port;
+            this.key = ip.toString() + ":" + port;
+            this.alwaysAlive = alwaysAlive;
             this.lastTimeAlive = System.currentTimeMillis();
         }
 
         public boolean IsAlive()
         {
-            return (System.currentTimeMillis() - this.lastTimeAlive) < ALIVE_TIMEOUT;
+            return this.alwaysAlive || ((System.currentTimeMillis() - this.lastTimeAlive) < ALIVE_TIMEOUT);
         }
 
-        public void FeedWatchdog()
+        public void FeedWatchdog(boolean alwaysAlive)
         {
+            this.alwaysAlive |= alwaysAlive;
             this.lastTimeAlive = System.currentTimeMillis();
         }
-
-        public String GetKey()
-        {
-            return "" + port;
-        }
     }
-    
-}
 
+}
