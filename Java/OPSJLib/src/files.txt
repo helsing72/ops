@@ -46,6 +46,7 @@ src\ops\MessageFilterSet.java
 src\ops\MulticastReceiver.java
 src\ops\MulticastSender.java
 src\ops\MulticastSocketCreator.java
+src\ops\NetworkSupport.java
 src\ops\Notifier.java
 src\ops\OPSConfig.java
 src\ops\OPSConfigRepository.java

@@ -24,10 +24,6 @@ package ops;
 import configlib.ArchiverInOut;
 import configlib.XMLArchiverIn;
 import java.io.IOException;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.util.Enumeration;
 import java.util.Vector;
 
 /**
@@ -237,66 +233,6 @@ public class Domain extends OPSObject
     public boolean getOptNonVirt()
     {
         return optNonVirt;
-    }
-
-    // If argument contains a "/" we assume it is on the form:  subnet-address/subnet-mask
-    // e.g "192.168.10.0/255.255.255.0" or "192.168.10.0/24"
-    // In that case we loop over all interfaces and take the first one that matches
-    // i.e. the one whos interface address is on the subnet
-    public static String DoSubnetTranslation(String ip)
-    {
-        int index = ip.indexOf('/');
-        if (index < 0) return ip;
-
-        String subnetIp = ip.substring(0, index);
-        String subnetMask = ip.substring(index + 1);
-
-        try
-        {
-            byte[] bip = InetAddress.getByName(subnetIp).getAddress();
-            byte[] bmask;
-
-            if (subnetMask.length() <= 2) {
-		            // Expand to the number of bits given
-                long bitmask = Integer.parseInt(subnetMask);
-		            bitmask = (((1 << bitmask)-1) << (32 - bitmask)) & 0xFFFFFFFF;
-                bmask = new byte[] {
-                  (byte)(bitmask >>> 24),
-                  (byte)(bitmask >>> 16),
-                  (byte)(bitmask >>> 8),
-                  (byte)bitmask};
-            } else {
-                InetAddress ipAddress = InetAddress.getByName(subnetMask);
-                bmask = ipAddress.getAddress();
-            }
-
-            for (int j = 0; j < bip.length; j++) bip[j] = (byte)((int)bip[j] & (int)bmask[j]);
-
-            Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
-            for (NetworkInterface netint : java.util.Collections.list(nets))
-            {
-                java.util.List<java.net.InterfaceAddress> ifAddresses = netint.getInterfaceAddresses();
-                for (java.net.InterfaceAddress ifAddress : ifAddresses) {
-                    if (ifAddress.getAddress() instanceof Inet4Address) {
-                        byte[] addr = ifAddress.getAddress().getAddress();
-                        for (int j = 0; j < addr.length; j++) addr[j] = (byte)((int)addr[j] & (int)bmask[j]);
-
-                        boolean eq = true;
-                        for (int j = 0; j < addr.length; j++) eq = eq & (addr[j] == bip[j]);
-
-                        if (eq) {
-                            // split "hostname/127.0.0.1/8 [0.255.255.255]"
-                            String s[] = ifAddress.toString().split("/");
-                            return s[1];
-                        }
-                    }
-                }
-            }
-        }
-        catch (Exception e)
-        {
-        }
-        return subnetIp;
     }
 
 }

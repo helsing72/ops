@@ -30,6 +30,7 @@ set(OPSJLIB_SRC
   ops/MulticastReceiver.java
   ops/MulticastSender.java
   ops/MulticastSocketCreator.java
+  ops/NetworkSupport.java
   ops/Notifier.java
   ops/OPSConfig.java
   ops/OPSConfigRepository.java
