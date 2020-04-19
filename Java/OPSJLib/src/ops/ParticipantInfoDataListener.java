@@ -22,19 +22,54 @@
 package ops;
 
 import java.io.IOException;
+import java.util.Observer;
+import java.util.Observable;
 
 public class ParticipantInfoDataListener
 {
     private Participant participant;
-    private McUdpSendDataHandler udpSendDataHandler;
+    private McUdpSendDataHandler udpSendDataHandler = null;
+    private Subscriber partInfoSub = null;
 
-    public ParticipantInfoDataListener(Participant part, McUdpSendDataHandler sendDataHandler)
+    public ParticipantInfoDataListener(Participant part)
     {
         this.participant = part;
-        this.udpSendDataHandler = sendDataHandler;
     }
 
-    public void SubscriberNewData(Subscriber sender, OPSObject data)
+    public void connectUdp(McUdpSendDataHandler udpSendDataHandler)
+    {
+        this.udpSendDataHandler = udpSendDataHandler;
+    }
+
+    public void start()
+    {
+        if (partInfoSub == null) {
+            try {
+                partInfoSub = new Subscriber(participant.createParticipantInfoTopic());
+                //Add a listener to the subscriber
+                partInfoSub.addObserver(new Observer() {
+                    public void update(Observable o, Object arg)
+                    {
+                        subscriberNewData(partInfoSub, partInfoSub.getMessage().getData());
+                    }
+                });
+                partInfoSub.start();
+            }
+            catch (ConfigurationException e)
+            {
+            }
+        }
+    }
+
+    public void stop()
+    {
+      if (partInfoSub != null) {
+          partInfoSub.stop();
+          partInfoSub = null;
+      }
+    }
+
+    private void subscriberNewData(Subscriber sender, OPSObject data)
     {
         if (!(data instanceof ParticipantInfoData)) return;
 
@@ -42,20 +77,16 @@ public class ParticipantInfoDataListener
 
         // Is it on our domain?
 	      if (partInfo.domain.equals(participant.domainID)) {
-
-            for (TopicInfoData tid : partInfo.subscribeTopics)
-            {
+            for (TopicInfoData tid : partInfo.subscribeTopics) {
                 // We are only interrested in topics with UDP as transport
-	              if ( (tid.transport.equals(Topic.TRANSPORT_UDP)) && (participant.hasPublisherOn(tid.name)) )
-                {
-		                try
-                    {
-                        udpSendDataHandler.addSink(tid.name, partInfo.ip, partInfo.mc_udp_port, false);
+                if ( (tid.transport.equals(Topic.TRANSPORT_UDP)) && (participant.hasPublisherOn(tid.name)) ) {
+                    try {
+                        if (udpSendDataHandler != null) udpSendDataHandler.addSink(tid.name, partInfo.ip, partInfo.mc_udp_port, false);
                     }
                     catch (IOException e)
                     {
                     }
-		            }
+                }
             }
         }
     }

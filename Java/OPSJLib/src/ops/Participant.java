@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2019 Lennart Andersson.
+ * Copyright (C) 2019-2020 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -49,6 +49,8 @@ public class Participant
     private InProcessTransport inProcessTransport = new InProcessTransport();
 
     private final ParticipantInfoData partInfoData = new ParticipantInfoData();
+    private ParticipantInfoDataListener partInfoListener = new ParticipantInfoDataListener(this);
+
     private Publisher partInfoPub = null;
     private boolean keepRunning = false;
 
@@ -185,6 +187,12 @@ public class Participant
             partInfoData.ip = ip;
             partInfoData.mc_udp_port = port;
         }
+    }
+
+    public void connectUdp(McUdpSendDataHandler udpSendDataHandler)
+    {
+        partInfoListener.connectUdp(udpSendDataHandler);
+        partInfoListener.start();
     }
 
     //
@@ -397,6 +405,7 @@ public class Participant
     {
         keepRunning = false;
         inProcessTransport.stopTransport();
+        partInfoListener.stop();
     }
 
 }

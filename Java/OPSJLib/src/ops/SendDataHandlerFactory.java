@@ -21,8 +21,6 @@
 
 package ops;
 
-import java.util.Observable;
-import java.util.Observer;
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -31,8 +29,6 @@ class SendDataHandlerFactory
     private HashMap<String, SendDataHandler> sendDataHandlers = new HashMap<String, SendDataHandler>();
 
     private McUdpSendDataHandler udpSendDataHandler = null;
-    private ParticipantInfoDataListener partInfoListener = null;
-    private Subscriber partInfoSub = null;
 
     SendDataHandler getSendDataHandler(Topic t, Participant participant) throws CommException
     {
@@ -80,28 +76,10 @@ class SendDataHandlerFactory
                 }
                 else
                 {
-                    if (partInfoListener == null)
-                    {
-                        // Setup a listener on the participant info data published by participants on our domain.
-                        // We use the information for topics with UDP as transport, to know the destination for UDP sends
-                        // ie. we extract ip and port from the information and add it to our McUdpSendDataHandler
-                        partInfoListener = new ParticipantInfoDataListener(participant, udpSendDataHandler);
-                        try
-                        {
-                            partInfoSub = new Subscriber(participant.createParticipantInfoTopic());
-                            //Add a listener to the subscriber
-                            partInfoSub.addObserver(new Observer() {
-                                public void update(Observable o, Object arg)
-                                {
-                                    if (partInfoListener != null) partInfoListener.SubscriberNewData(partInfoSub, partInfoSub.getMessage().getData());
-                                }
-                            });
-                            partInfoSub.start();
-                        }
-                        catch (ConfigurationException e)
-                        {
-                        }
-                    }
+                    // Setup a listener on the participant info data published by participants on our domain.
+                    // We use the information for topics with UDP as transport, to know the destination for UDP sends
+                    // ie. we extract ip and port from the information and add it to our McUdpSendDataHandler
+                    participant.connectUdp(udpSendDataHandler);
                 }
                 return udpSendDataHandler;
             }
