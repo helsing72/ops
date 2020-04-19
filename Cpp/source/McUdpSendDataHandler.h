@@ -63,7 +63,7 @@ namespace ops
                 else //Remove it.
                 {
                     //std::cout << topic.getName() << ", removing sink: " << it->second.getKey() << std::endl;
-                    sinksToDelete.push(it->second.getKey());
+                    sinksToDelete.push(it->second._key);
                 }
             }
             while (!sinksToDelete.empty()) {
@@ -87,7 +87,7 @@ namespace ops
                 ent.staticRoute = staticRoute;
 
                 //Add the new sink to the port map.
-                ent.portMap[ipPort.getKey()] = ipPort;
+                ent.portMap[ipPort._key] = ipPort;
 
                 //And add the port map to the sink map
                 topicSinkMap[topic] = ent;
@@ -101,17 +101,17 @@ namespace ops
 				//If created as static route, we only add sinks that are static
 				if ( (!topicSinks.staticRoute) || (topicSinks.staticRoute && staticRoute)) {
 					//Check if sink already exist
-					if (topicSinks.portMap.find(ipPort.getKey()) == topicSinks.portMap.end())
+					if (topicSinks.portMap.find(ipPort._key) == topicSinks.portMap.end())
 					{
 						//No, add the new sink to the map.
-						topicSinks.portMap[ipPort.getKey()] = ipPort;
+						topicSinks.portMap[ipPort._key] = ipPort;
 
 						//std::cout << topic << ", added next sink: " << ipPort.getKey() << std::endl;
 					}
 					else
 					{
 						//this sink is already registered with this topic, just update
-						topicSinks.portMap[ipPort.getKey()].feedWatchdog(staticRoute);
+						topicSinks.portMap[ipPort._key].feedWatchdog(staticRoute);
 						//std::cout << topic << ", feedWatchDog for sink: " << ipPort.getKey() << std::endl;
 					}
 				}
@@ -133,6 +133,9 @@ namespace ops
 				_ip(ip), _port(port), _alwaysAlive(alwaysAlive)
             {
                 _lastTimeAlive = TimeHelper::currentTimeMillis();
+                _key = _ip.c_str();
+                _key += ':';
+                _key += NumberToString(_port);
             }
 
             IpPortPair():
@@ -151,16 +154,9 @@ namespace ops
                 _lastTimeAlive = TimeHelper::currentTimeMillis();
             }
 
-			InternalKey_T getKey()
-            {
-				InternalKey_T key(_ip.c_str());
-				key += ':';
-				key += NumberToString(_port);
-                return key;
-            }
-
 			Address_T _ip;
             int _port;
+            InternalKey_T _key;
 			bool _alwaysAlive;
 			int64_t _lastTimeAlive;
             const static int ALIVE_TIMEOUT = 3000;
