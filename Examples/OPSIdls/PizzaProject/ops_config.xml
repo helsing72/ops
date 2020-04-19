@@ -139,6 +139,7 @@
           <element type = "Topic">
             <name>UdpPizzaTopic</name>
             <dataType>pizza.PizzaData</dataType>
+            <transport>udp</transport>
             <address>127.0.0.1</address>
             <port>6680</port>
           </element>
