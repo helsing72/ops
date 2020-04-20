@@ -101,7 +101,8 @@ namespace ops
 		} 
 		else if (top.getTransport() == Topic::TRANSPORT_UDP)
         {
-	        ReceiveDataHandler* udpReceiveDataHandler = new UDPReceiveDataHandler(top, participant);
+            bool commonReceiver = (key == Topic::TRANSPORT_UDP);
+	        ReceiveDataHandler* udpReceiveDataHandler = new UDPReceiveDataHandler(top, participant, commonReceiver);
 			receiveDataHandlerInstances[key] = udpReceiveDataHandler;
             return udpReceiveDataHandler;
         }

@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2019 Lennart Andersson.
+ * Copyright (C) 2018-2020 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -25,11 +25,11 @@
 
 namespace ops
 {
-    UDPReceiveDataHandler::UDPReceiveDataHandler(Topic top, Participant& part) :
+    UDPReceiveDataHandler::UDPReceiveDataHandler(Topic top, Participant& part, bool commonReceiver) :
 		ReceiveDataHandler(top, part,
 			new ReceiveDataChannel(top, part))
     {
-		if (top.getTransport() == Topic::TRANSPORT_UDP) {
+		if (commonReceiver) {
 			Receiver* recv = rdc[0]->getReceiver();
 			part.setUdpTransportInfo(recv->getLocalAddress(), recv->getLocalPort());
 		}
