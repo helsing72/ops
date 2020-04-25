@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -20,6 +21,8 @@
 #ifndef ops_IOService_h
 #define ops_IOService_h
 
+#include <memory>
+
 #include "OPSExport.h"
 
 namespace ops
@@ -32,7 +35,7 @@ namespace ops
 		virtual	void poll() = 0;
 		virtual ~IOService(){};
 
-		static IOService* create();
+		static std::unique_ptr<IOService> create();
 	};
 }
 

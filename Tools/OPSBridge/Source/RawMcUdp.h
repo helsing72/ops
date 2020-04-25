@@ -23,6 +23,7 @@
 #include <string>
 #include <map>
 #include <set>
+#include <memory>
 
 #include "IOService.h"
 #include "SingleThreadPool.h"
@@ -55,7 +56,7 @@ namespace opsbridge {
 		bool _keepRunning = true;
 		bool _started = false;
 		RawMcUdpListener* _client;
-		ops::IOService* _ioService = nullptr;
+		std::unique_ptr<ops::IOService> _ioService;
 		ops::ThreadPool* _threadPool = nullptr;
 		struct entry_t {
 			ops::Receiver* receiver = nullptr;

@@ -57,7 +57,7 @@ namespace opsbridge {
 		_threadPool = nullptr;
 
 		// All objects connected to this ioservice should now be deleted, so it should be safe to delete it
-		if (_ioService != nullptr) { delete _ioService; }
+		_ioService.reset();
 	}
 
 	// This will be called by our threadpool
@@ -82,10 +82,10 @@ namespace opsbridge {
 		uint32_t const addr = ops::IPString2Addr(ip);
 		if (addr >= 0xE0000000) {
 			// Multicast and above
-			_receivers[key].receiver = ops::Receiver::createMCReceiver(ip, port, _ioService, ifc);
+			_receivers[key].receiver = ops::Receiver::createMCReceiver(ip, port, _ioService.get(), ifc);
 		} else {
 			// Use UDP
-			_receivers[key].receiver = ops::Receiver::createUDPReceiver(port, _ioService, ip);
+			_receivers[key].receiver = ops::Receiver::createUDPReceiver(port, _ioService.get(), ip);
 		}
 		_receivers[key].receiver->addListener(this);
 
@@ -180,9 +180,9 @@ namespace opsbridge {
 
 			// Create MC or UDP sender
 			if (mess.DstMcIP >= 0xE0000000) {
-				_senders[key].sender = ops::Sender::create(_ioService, t.Ifc, t.ttl);
+				_senders[key].sender = ops::Sender::create(_ioService.get(), t.Ifc, t.ttl);
 			} else {
-				_senders[key].sender = ops::Sender::createUDPSender(_ioService);
+				_senders[key].sender = ops::Sender::createUDPSender(_ioService.get());
 			}
 
 			if (_senders[key].sender != nullptr) {

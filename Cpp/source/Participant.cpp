@@ -125,7 +125,6 @@ namespace ops
 		instances.erase(key);
 	}
 
-
 	Participant::Participant(ObjectName_T domainID_, ObjectName_T participantID_, FileName_T configFile_, execution_policy::Enum policy):
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 		debugHandler(*this),
@@ -148,7 +147,7 @@ namespace ops
 		aliveTimeout(1000),
 		objectFactory(nullptr)
 	{
-		ioService = IOService::create();
+        ioService = IOService::create();
 
 		if(!ioService)
 		{
@@ -210,7 +209,7 @@ namespace ops
 		//--------------------------------------------
 
 		//------------Create timer for periodic events-
-		aliveDeadlineTimer = DeadlineTimer::create(ioService);
+		aliveDeadlineTimer = DeadlineTimer::create(ioService.get());
 		aliveDeadlineTimer->addListener(this);
 		// Start our timer. Calls onNewEvent(Notifier<int>* sender, int message) on timeout
 		aliveDeadlineTimer->start(aliveTimeout);
@@ -298,8 +297,8 @@ namespace ops
 		if (objectFactory != nullptr) { delete objectFactory; }
 		if (errorService != nullptr) { delete errorService; }
 		if (ownsConfig && (config != nullptr)) { delete config; }
-		// All objects connected to this ioservice should now be deleted, so it should be safe to delete it
-		if (ioService != nullptr) { delete ioService; }
+		// All objects connected to our ioservice should now be deleted, so it should be safe to delete it
+        ioService.reset();
 
 		OPS_DES_TRACE("Part: Destructor() Finished");
 	}
