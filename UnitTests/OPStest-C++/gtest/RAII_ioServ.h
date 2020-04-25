@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018 Lennart Andersson.
+* Copyright (C) 2018-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -25,10 +25,10 @@
 class RAII_ioServ
 {
 public:
-	ops::IOService* ioServ;
+	std::unique_ptr<ops::IOService> ioServ;
 	RAII_ioServ() : ioServ(ops::IOService::create()) { }
-	~RAII_ioServ() { if (ioServ) delete ioServ; }
-	ops::IOService* operator()() { return ioServ; }
+	~RAII_ioServ() { }
+	ops::IOService* operator()() { return ioServ.get(); }
 	RAII_ioServ(RAII_ioServ const &) = delete;
 	RAII_ioServ(RAII_ioServ&&) = delete;
 	RAII_ioServ& operator=(RAII_ioServ&&) = delete;

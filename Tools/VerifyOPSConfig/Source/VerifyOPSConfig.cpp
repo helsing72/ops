@@ -133,7 +133,7 @@ public:
 		try {
 			// We have checked the xml-file.
 			// Now do further checks using the ops objects created from the xml-file
-			ops::OPSConfig* const cfg = ops::OPSConfig::getConfig(filename.c_str());
+			std::shared_ptr<ops::OPSConfig> const cfg = ops::OPSConfig::getConfig(filename.c_str());
 			if (cfg != nullptr) {
 				// Trick to get all topics fully initialized
 				std::vector<ops::Domain*> domains = cfg->getRefToDomains();
@@ -147,7 +147,7 @@ public:
 				if (bDebug) {
 					// Dump all domains and topics to standard out 
 					ops::PrintArchiverOut prt(std::cout);
-					prt.printObject("", cfg);
+					prt.printObject("", cfg.get());
 					std::cout << std::endl;
 				}
 			}

@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2019-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -23,6 +23,7 @@
 #define ops_OPSConfig_h
 
 #include <vector>
+#include <memory>
 
 #include "OPSTypeDefs.h"
 #include "Topic.h"
@@ -33,9 +34,9 @@ namespace ops
 	class OPS_EXPORT OPSConfig : public OPSObject
 	{
 	public:
-		static OPSConfig* getConfig();
-		static OPSConfig* getConfig(FileName_T configFile);
-		static OPSConfig* getConfig(std::istream& inStream);
+		static std::shared_ptr<OPSConfig> getConfig();
+		static std::shared_ptr<OPSConfig> getConfig(FileName_T configFile);
+		static std::shared_ptr<OPSConfig> getConfig(std::istream& inStream);
 
 		// Should be used with care, since the above methods may return a singleton
 		virtual ~OPSConfig();

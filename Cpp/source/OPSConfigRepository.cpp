@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016-2019 Lennart Andersson.
+* Copyright (C) 2016-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -41,14 +41,15 @@ OPSConfigRepository* OPSConfigRepository::Instance()
     return &repo;
 }
 
-OPSConfigRepository::OPSConfigRepository()
+OPSConfigRepository::OPSConfigRepository() :
+    m_config(new OPSConfig())
 {
 }
 
 bool OPSConfigRepository::domainExist(ObjectName_T domainID )
 {
     SafeLock lock(&repoLock);
-    std::vector<Domain*>& doms = m_config.getRefToDomains();
+    std::vector<Domain*>& doms = m_config->getRefToDomains();
     for (unsigned int i = 0; i < doms.size(); i++) {
         if (doms[i]->getDomainID() == domainID) return true;
     }
@@ -57,7 +58,7 @@ bool OPSConfigRepository::domainExist(ObjectName_T domainID )
 
 int OPSConfigRepository::numDomains()
 {
-	return (int)m_config.getRefToDomains().size();
+	return (int)m_config->getRefToDomains().size();
 }
 
 // Add domains from OPS configuration file "filename"
@@ -81,7 +82,7 @@ bool OPSConfigRepository::Add( FileName_T filename, ObjectName_T domain )
         }
     }
 
-    OPSConfig* config = nullptr;
+    std::shared_ptr<OPSConfig> config = nullptr;
 
     try {
         // Check if file already read
@@ -109,13 +110,13 @@ bool OPSConfigRepository::Add( FileName_T filename, ObjectName_T domain )
 // Add all domains from the given OPSConfig object. To be used in cases were the config
 // is constructed in some other way than directly from a file.
 // Note that the repository takes over ownership of the config object
-bool OPSConfigRepository::Add(OPSConfig* config)
+bool OPSConfigRepository::Add(std::shared_ptr<OPSConfig> config)
 {
 	bool retVal = false;
 
 	// Construct a new unique name to be used in the "file cache"
 	FileName_T name("Internal_");
-	name += NumberToString((size_t)config);
+	name += NumberToString((size_t)config.get());
 
 	SafeLock lock(&repoLock);
 
@@ -133,7 +134,7 @@ bool OPSConfigRepository::Add(OPSConfig* config)
 	return extractDomains(config);
 }
 
-bool OPSConfigRepository::extractDomains(OPSConfig* config, ObjectName_T domain)
+bool OPSConfigRepository::extractDomains(std::shared_ptr<OPSConfig>& config, ObjectName_T domain)
 {
 	bool retVal = false;
 
@@ -150,7 +151,7 @@ bool OPSConfigRepository::extractDomains(OPSConfig* config, ObjectName_T domain)
 				Participant::reportStaticError(&err);
 			} else {
 				// Add unique domains to our list
-				m_config.getRefToDomains().push_back(domains[i]);
+				m_config->getRefToDomains().push_back(domains[i]);
 				retVal = true;
 			}
 		}
@@ -164,30 +165,30 @@ void OPSConfigRepository::Clear()
     SafeLock lock(&repoLock);
     // Since we just borrow the references to domains (they are owned by file cache)
     // we can just clear the domain list in our OPSConfig object
-    m_config.getRefToDomains().clear();
+    m_config->getRefToDomains().clear();
 }
 
 // Remove all domains from repository and clears the file-cache
 void OPSConfigRepository::TotalClear()
 {
 	SafeLock lock(&repoLock);
-	m_config.getRefToDomains().clear();
+	m_config->getRefToDomains().clear();
 
-	for (std::map<FileName_T, OPSConfig*>::iterator it = m_configFiles.begin(); it != m_configFiles.end(); ++it) {
-		delete it->second;
+	for (auto it = m_configFiles.begin(); it != m_configFiles.end(); ++it) {
+		it->second.reset();
 	}
 	m_configFiles.clear();
 }
 
 // Get a reference to the OPSConfig object
 // if 'domainID' != "", the domain must exist otherwise nullptr is returned.
-OPSConfig* OPSConfigRepository::getConfig(ObjectName_T domainID )
+std::shared_ptr<OPSConfig> OPSConfigRepository::getConfig(ObjectName_T domainID )
 {
     SafeLock lock(&repoLock);
 
     // If no domain have been added, we try to add the default file
     // This is for backward compatibility
-    if (m_config.getRefToDomains().size() == 0) {
+    if (m_config->getRefToDomains().size() == 0) {
         if (!Add("ops_config.xml")) return nullptr;
     }
 
@@ -195,7 +196,7 @@ OPSConfig* OPSConfigRepository::getConfig(ObjectName_T domainID )
         if (!domainExist( domainID )) return nullptr;
     }
 
-    return &m_config;
+    return m_config;
 }
 
 }

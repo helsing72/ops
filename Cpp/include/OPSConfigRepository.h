@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016-2018 Lennart Andersson.
+* Copyright (C) 2016-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -43,7 +43,7 @@ namespace ops
 		// is constructed in some other way than directly from a file.
 		// Note that the repository takes over ownership of the config object
 		// Returns true if at least one domain was added
-		bool Add( OPSConfig* config );
+		bool Add( std::shared_ptr<OPSConfig> config );
 
         // Remove all domains from repository (Note does not clear the file-cache)
         void Clear();
@@ -54,7 +54,7 @@ namespace ops
 		// ======================================================
         // Get a reference to the internal OPSConfig object
         // if 'domainID' != "", the domain 'domainID' must exist otherwise nullptr is returned.
-        OPSConfig* getConfig(ObjectName_T domainID = "" );
+        std::shared_ptr<OPSConfig> getConfig(ObjectName_T domainID = "" );
 
         bool domainExist(ObjectName_T domainID );
 		int numDomains();
@@ -62,13 +62,13 @@ namespace ops
 	private:
         OPSConfigRepository();
 
-		bool extractDomains(OPSConfig* config, ObjectName_T domain = "");
+		bool extractDomains(std::shared_ptr<OPSConfig>& config, ObjectName_T domain = "");
 
         // Our OPSConfig object containing references to all selectivly added domains
-        OPSConfig m_config;
+        std::shared_ptr<OPSConfig> m_config;
 
         // File cache with all added config files and their domains
-        std::map<FileName_T, OPSConfig*> m_configFiles;
+        std::map<FileName_T, std::shared_ptr<OPSConfig>> m_configFiles;
     };
 
 }

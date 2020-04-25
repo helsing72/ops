@@ -610,7 +610,7 @@ TEST(Test_OPSConfigObjects, TestOPSConfig_File) {
 	// Try with an existing file
 	ASSERT_TRUE(CreateTempOpsConfigFile(ops_config));
 	remover.Add(ops_config);
-	OPSConfig* const cfg = OPSConfig::getConfig(ops_config);
+	std::shared_ptr<OPSConfig> const cfg = OPSConfig::getConfig(ops_config);
 	ASSERT_NE(cfg, nullptr);
 
 	EXPECT_EQ(cfg->getRefToDomains().size(), (size_t)2);
@@ -622,7 +622,5 @@ TEST(Test_OPSConfigObjects, TestOPSConfig_File) {
 	dom = cfg->getDomain("DummyDomain");
 	ASSERT_NE(dom, nullptr);
 	EXPECT_EQ(dom->getDebugMcPort(), 9991);
-
-	delete cfg;
 }
 

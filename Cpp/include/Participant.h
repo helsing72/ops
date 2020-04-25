@@ -142,9 +142,10 @@ namespace ops
 		{
 			return ioService.get();
 		}
-		OPSConfig* getConfig() const
+        // Note: Only valid while the participant exist
+        OPSConfig* getConfig() const
 		{
-			return config;
+			return config.get();
 		}
 		
 		ErrorService* getErrorService() const
@@ -201,8 +202,7 @@ namespace ops
 
 		///The IOService used for this participant, it handles communication and timers for all receivers, subscribers and member timers of this Participant.
 		std::unique_ptr<IOService> ioService;
-		OPSConfig* config;
-		bool ownsConfig;
+		std::shared_ptr<OPSConfig> config;
 
 		///The ErrorService
 		ErrorService* errorService;

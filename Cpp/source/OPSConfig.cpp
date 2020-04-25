@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2019-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -34,7 +35,7 @@ namespace ops
 {
 
 #ifndef REPLACE_OPS_CONFIG
-	OPSConfig* OPSConfig::getConfig(FileName_T configFile)
+    std::shared_ptr<OPSConfig> OPSConfig::getConfig(FileName_T configFile)
 	{
 		std::ifstream inStream(configFile.c_str());
 		if (inStream.is_open()) {
@@ -57,17 +58,17 @@ namespace ops
 	}
 #endif
 
-	OPSConfig* OPSConfig::getConfig()
+    std::shared_ptr<OPSConfig> OPSConfig::getConfig()
 	{
-		static OPSConfig* theConfiguration = OPSConfigRepository::Instance()->getConfig();
+		static std::shared_ptr<OPSConfig> theConfiguration = OPSConfigRepository::Instance()->getConfig();
 		return theConfiguration;
 	}
 
-	OPSConfig* OPSConfig::getConfig(std::istream& inStream)
+    std::shared_ptr<OPSConfig> OPSConfig::getConfig(std::istream& inStream)
 	{
 		XMLArchiverIn archiver(inStream, "root", OPSObjectFactory::getInstance());
 		OPSConfig* theConfig = nullptr;
-		return (OPSConfig*)archiver.inout("ops_config", theConfig);
+		return std::shared_ptr<OPSConfig>((OPSConfig*)archiver.inout("ops_config", theConfig));
 	}
 
 	OPSConfig::~OPSConfig()

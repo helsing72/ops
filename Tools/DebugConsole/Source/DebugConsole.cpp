@@ -136,7 +136,7 @@ private:
 
 void ListDomains()
 {
-	ops::OPSConfig* cfg = ops::OPSConfigRepository::Instance()->getConfig();
+	std::shared_ptr<ops::OPSConfig> cfg = ops::OPSConfigRepository::Instance()->getConfig();
 	if (cfg == nullptr) { return; }
 
 	std::vector<ops::Domain*>& domains = cfg->getRefToDomains();

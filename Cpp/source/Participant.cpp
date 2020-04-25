@@ -132,7 +132,6 @@ namespace ops
 		_policy(policy),
 		ioService(nullptr),
 		config(nullptr),
-		ownsConfig(false),
 		errorService(nullptr),
 		threadPool(nullptr),
 		aliveDeadlineTimer(nullptr),
@@ -158,15 +157,10 @@ namespace ops
 
 		//Should trow?
 		if (configFile_ == "") {
-			// This gets a reference to a singleton instance and should NOT be deleted.
-			// It may be shared between several Participants.
 			config = OPSConfig::getConfig();
 		} else {
-			// This gets a reference to a unique instance and should be deleted.
-			// Note however that the getDomain() call below returns a reference to an
-			// object internally in config.
+			// Note that the getDomain() call below returns a reference to an object internally in config.
 			config = OPSConfig::getConfig(configFile_);
-			ownsConfig = true;
 		}
 		if(!config)
 		{
@@ -296,7 +290,7 @@ namespace ops
 		if (partInfoListener != nullptr) { delete partInfoListener; }
 		if (objectFactory != nullptr) { delete objectFactory; }
 		if (errorService != nullptr) { delete errorService; }
-		if (ownsConfig && (config != nullptr)) { delete config; }
+		config.reset();
 		// All objects connected to our ioservice should now be deleted, so it should be safe to delete it
         ioService.reset();
 

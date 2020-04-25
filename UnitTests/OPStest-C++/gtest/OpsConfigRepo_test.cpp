@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -51,7 +51,7 @@ TEST(Test_OPSConfigRepo, Test) {
 		EXPECT_NE(repo->getConfig(""), nullptr);
 		EXPECT_EQ(repo->getConfig("Test"), nullptr);
 		EXPECT_TRUE(repo->domainExist("GTestDomain"));
-		OPSConfig* const cfg = repo->getConfig("GTestDomain");
+		OPSConfig* const cfg = repo->getConfig("GTestDomain").get();
 		ASSERT_NE(cfg, nullptr);
 	}
 	EXPECT_EQ(repo->numDomains(), 0);

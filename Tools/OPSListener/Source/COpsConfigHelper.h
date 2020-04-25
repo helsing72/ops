@@ -52,7 +52,7 @@ public:
 
 	void DomainMapAdd(ops::FileName_T cfgFile)
 	{
-		ops::OPSConfig* cfg = NULL;
+		std::shared_ptr<ops::OPSConfig> cfg;
 		try {
 			cfg = ops::OPSConfig::getConfig(cfgFile);
 			if (!cfg) {
@@ -67,7 +67,6 @@ public:
 		catch (...) {
 			if (pErrorLog) pErrorLog->Log("##### Error: Failed to read/use configuration file '%s'\n", cfgFile.c_str());
 		}
-		if (cfg) delete cfg;
 	}
 
 	void getAvailableDomains(std::vector<ops::ObjectName_T>& domains)

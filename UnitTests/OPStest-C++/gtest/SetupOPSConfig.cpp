@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018 Lennart Andersson.
+* Copyright (C) 2018-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -62,7 +62,7 @@ void SetupOPSConfig::InternalSetup()
 		"</root>"
 	);
 	std::istringstream iss(content);
-	OPSConfig* const config = OPSConfig::getConfig(iss);
+	std::shared_ptr<OPSConfig> const config = OPSConfig::getConfig(iss);
 	ASSERT_NE(config, nullptr);
 	ASSERT_TRUE(OPSConfigRepository::Instance()->Add(config));
 	ASSERT_FALSE(OPSConfigRepository::Instance()->Add(config));	// Duplicate test
