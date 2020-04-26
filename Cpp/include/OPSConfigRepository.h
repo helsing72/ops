@@ -61,6 +61,7 @@ namespace ops
 
 	private:
         OPSConfigRepository();
+        ~OPSConfigRepository();
 
 		bool extractDomains(std::shared_ptr<OPSConfig>& config, ObjectName_T domain = "");
 

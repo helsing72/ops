@@ -46,6 +46,13 @@ OPSConfigRepository::OPSConfigRepository() :
 {
 }
 
+OPSConfigRepository::~OPSConfigRepository()
+{
+    // Since we just borrow the references to domains (they are owned by file cache)
+    // we must clear the domain list in our OPSConfig object
+    Clear();
+}
+
 bool OPSConfigRepository::domainExist(ObjectName_T domainID )
 {
     SafeLock lock(&repoLock);
