@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2019 Lennart Andersson.
+ * Copyright (C) 2018-2020 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -75,9 +75,9 @@ namespace ops
 
 	void TCPReceiveDataHandler::topicUsage(Topic& top, bool used)
 	{
-		// Called with messageLock held
-		if (usingPartInfo) {
-			// We should only register unique topics
+        if (usingPartInfo) {
+            SafeLock lock(&topicsLock);
+            // We should only register unique topics
 			auto it = topics.find(top.getName());
 			int32_t count = 0;
 			if (it != topics.end()) {
@@ -87,12 +87,12 @@ namespace ops
 			if (used) {
 				++count;
 				if (count == 1) {
-					participant.registerTcpTopic(top.getName(), this);
+					participant.registerTcpTopic(top.getName(), shared_from_this());
 				}
 			} else {
 				--count;
 				if (count == 0) {
-					participant.unregisterTcpTopic(top.getName(), this);
+					participant.unregisterTcpTopic(top.getName(), shared_from_this());
 				}
 			}
 			topics[top.getName()] = count;

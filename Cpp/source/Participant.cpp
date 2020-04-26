@@ -420,14 +420,14 @@ namespace ops
 		partInfoData.mc_udp_port = port;
 	}
 
-	void Participant::registerTcpTopic(ObjectName_T topicName, ReceiveDataHandler* handler)
+	void Participant::registerTcpTopic(ObjectName_T topicName, std::shared_ptr<ReceiveDataHandler> handler)
 	{
 		if (partInfoListener != nullptr) {
 			partInfoListener->connectTcp(topicName, handler);
 		}
 	}
 
-	void Participant::unregisterTcpTopic(ObjectName_T topicName, ReceiveDataHandler* handler)
+	void Participant::unregisterTcpTopic(ObjectName_T topicName, std::shared_ptr<ReceiveDataHandler> handler)
 	{
 		if (partInfoListener != nullptr) {
 			partInfoListener->disconnectTcp(topicName, handler);
@@ -483,9 +483,9 @@ namespace ops
 		return false;
 	}
 
-	ReceiveDataHandler* Participant::getReceiveDataHandler(Topic top)
+    std::shared_ptr<ReceiveDataHandler> Participant::getReceiveDataHandler(Topic top)
 	{
-		ReceiveDataHandler* result = receiveDataHandlerFactory->getReceiveDataHandler(top, *this);
+        std::shared_ptr<ReceiveDataHandler> result = receiveDataHandlerFactory->getReceiveDataHandler(top, *this);
 		if (result != nullptr) {
 			SafeLock lock(&partInfoDataMutex);
 			//Need to add topic to partInfoData.subscribeTopics (TODO ref count if same topic??)

@@ -174,7 +174,7 @@ namespace ops
         Participant* participant = nullptr;
 
         ///ReceiveDataHandler delivering new data samples to this Subscriber
-        ReceiveDataHandler* receiveDataHandler = nullptr;
+        std::shared_ptr<ReceiveDataHandler> receiveDataHandler = nullptr;
 
         ///The Topic this Subscriber subscribes to.
         Topic topic;
@@ -199,7 +199,6 @@ namespace ops
 
         bool applyFilterQoSPolicies(OPSObject* o);
 
-        void registerForDeadlineTimeouts();
         void cancelDeadlineTimeouts();
 
         bool deadlineMissed = false;

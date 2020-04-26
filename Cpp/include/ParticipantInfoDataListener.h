@@ -48,8 +48,8 @@ namespace ops
 		void connectUdp(Topic& top, SendDataHandler* handler);
 		void disconnectUdp(Topic& top, SendDataHandler* handler);
 
-		void connectTcp(ObjectName_T& top, ReceiveDataHandler* handler);
-		void disconnectTcp(ObjectName_T& top, ReceiveDataHandler* handler);
+		void connectTcp(ObjectName_T& top, std::shared_ptr<ReceiveDataHandler> handler);
+		void disconnectTcp(ObjectName_T& top, std::shared_ptr<ReceiveDataHandler> handler);
 
 	private:
 		Participant& participant;
@@ -58,7 +58,7 @@ namespace ops
 		Subscriber* partInfoSub;
 		SendDataHandler* sendDataHandler;
 
-		std::map<ObjectName_T, ReceiveDataHandler*> rcvDataHandlers;
+		std::map<ObjectName_T, std::shared_ptr<ReceiveDataHandler>> rcvDataHandlers;
 
 		int numUdpTopics;
 

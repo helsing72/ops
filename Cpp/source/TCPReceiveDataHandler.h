@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -37,7 +37,8 @@ namespace ops
 
 	protected:
 		std::map<ObjectName_T, int32_t> topics;
-		bool usingPartInfo = true;
+        Lockable topicsLock;
+        bool usingPartInfo = true;
 
 		// Tell derived classes which topics that are active
 		void topicUsage(Topic& top, bool used) override;

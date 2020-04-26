@@ -81,7 +81,7 @@ namespace ops
         // when we return from the removeListener() call.
 		receiveDataHandler->Notifier<ConnectStatus>::removeListener(this);
 		receiveDataHandler->removeListener(this, topic);
-        receiveDataHandler = nullptr;
+        receiveDataHandler.reset();
         participant->releaseReceiveDataHandler(topic);
         deadlineTimer->removeListener(this);
         deadlineTimer->cancel();
@@ -282,11 +282,6 @@ namespace ops
             return deadlineMissed;
         }
         return false;
-    }
-
-    void Subscriber::registerForDeadlineTimeouts()
-    {
-        deadlineTimer->addListener(this);
     }
 
     void Subscriber::cancelDeadlineTimeouts()

@@ -223,8 +223,8 @@ namespace ops
 
 		//Visible to friends only
 		void setUdpTransportInfo(Address_T ip, int port);
-		void registerTcpTopic(ObjectName_T topicName, ReceiveDataHandler* handler);
-		void unregisterTcpTopic(ObjectName_T topicName, ReceiveDataHandler* handler);
+		void registerTcpTopic(ObjectName_T topicName, std::shared_ptr<ReceiveDataHandler> handler);
+		void unregisterTcpTopic(ObjectName_T topicName, std::shared_ptr<ReceiveDataHandler> handler);
 		bool hasPublisherOn(ObjectName_T topicName);
 		bool hasSubscriberOn(ObjectName_T topicName);
 
@@ -241,7 +241,7 @@ namespace ops
 
 		//Visible to friends only
 		//TODO: Deprecate and delegate to receiveDataHandlerFactory???
-		ReceiveDataHandler* getReceiveDataHandler(Topic top);
+        std::shared_ptr<ReceiveDataHandler> getReceiveDataHandler(Topic top);
 		void releaseReceiveDataHandler(Topic top);
 
 		///Visible to friends only

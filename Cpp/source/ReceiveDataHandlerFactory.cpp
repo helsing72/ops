@@ -57,7 +57,7 @@ namespace ops
 		return key;
 	}
 
-    ReceiveDataHandler* ReceiveDataHandlerFactory::getReceiveDataHandler(Topic& top, Participant& participant)
+    std::shared_ptr<ReceiveDataHandler> ReceiveDataHandlerFactory::getReceiveDataHandler(Topic& top, Participant& participant)
     {
 		// Make a key with the transport info that uniquely defines the receiver.
 		InternalKey_T key = makeKey(top, participant.getIOService());
@@ -66,7 +66,7 @@ namespace ops
         if (receiveDataHandlerInstances.find(key) != receiveDataHandlerInstances.end())
         {
             // If we already have a ReceiveDataHandler for this topic, use it.
-			ReceiveDataHandler* rdh = receiveDataHandlerInstances[key];
+            std::shared_ptr<ReceiveDataHandler> rdh = receiveDataHandlerInstances[key];
 
             // Check if any of the topics have a sample size larger than MAX_SEGMENT_SIZE
             // This will lead to a problem when using the same port or using UDP, if samples becomes > MAX_SEGMENT_SIZE
@@ -89,22 +89,22 @@ namespace ops
         }
         else if (top.getTransport() == Topic::TRANSPORT_MC)
         {
-            ReceiveDataHandler* newReceiveDataHandler = new MCReceiveDataHandler(top, participant);
-            receiveDataHandlerInstances[key] = newReceiveDataHandler;
-            return newReceiveDataHandler;
+            std::shared_ptr<ReceiveDataHandler> rdh = std::make_shared<MCReceiveDataHandler>(top, participant);
+            receiveDataHandlerInstances[key] = rdh;
+            return rdh;
         }
 		else if (top.getTransport() == Topic::TRANSPORT_TCP)
 		{
-			ReceiveDataHandler* newReceiveDataHandler = new TCPReceiveDataHandler(top, participant);
-			receiveDataHandlerInstances[key] = newReceiveDataHandler;
-			return newReceiveDataHandler;
-		} 
+            std::shared_ptr<ReceiveDataHandler> rdh = std::make_shared<TCPReceiveDataHandler>(top, participant);
+            receiveDataHandlerInstances[key] = rdh;
+            return rdh;
+        }
 		else if (top.getTransport() == Topic::TRANSPORT_UDP)
         {
             bool commonReceiver = (key == Topic::TRANSPORT_UDP);
-	        ReceiveDataHandler* udpReceiveDataHandler = new UDPReceiveDataHandler(top, participant, commonReceiver);
-			receiveDataHandlerInstances[key] = udpReceiveDataHandler;
-            return udpReceiveDataHandler;
+            std::shared_ptr<ReceiveDataHandler> rdh = std::make_shared<UDPReceiveDataHandler>(top, participant, commonReceiver);
+			receiveDataHandlerInstances[key] = rdh;
+            return rdh;
         }
         else //For now we can not handle more transports
         {
@@ -125,7 +125,7 @@ namespace ops
 		SafeLock lock(&garbageLock);
         if (receiveDataHandlerInstances.find(key) != receiveDataHandlerInstances.end())
         {
-            ReceiveDataHandler* rdh = receiveDataHandlerInstances[key];
+            std::shared_ptr<ReceiveDataHandler> rdh = receiveDataHandlerInstances[key];
             if (rdh->Notifier<OPSMessage*>::getNrOfListeners() == 0)
             {
                 //Time to mark this receiveDataHandler as garbage.
@@ -151,8 +151,8 @@ namespace ops
             if ((garbageReceiveDataHandlers[i]->numReservedMessages() == 0) &&
                 (garbageReceiveDataHandlers[i]->asyncFinished()))
             {
-                delete garbageReceiveDataHandlers[i];
-                std::vector<ReceiveDataHandler*>::iterator iter = garbageReceiveDataHandlers.begin() + i;
+                garbageReceiveDataHandlers[i].reset();
+                auto iter = garbageReceiveDataHandlers.begin() + i;
                 garbageReceiveDataHandlers.erase(iter);
             }
         }

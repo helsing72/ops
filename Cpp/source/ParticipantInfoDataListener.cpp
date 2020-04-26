@@ -62,7 +62,7 @@ namespace ops
 							// Lookup topic in map. If found call handler
 							auto result = rcvDataHandlers.find(x.name);
 							if (result != rcvDataHandlers.end()) {
-								dynamic_cast<TCPReceiveDataHandler*>(result->second)->AddReceiveChannel(x.name, x.address, x.port);
+								dynamic_cast<TCPReceiveDataHandler*>(result->second.get())->AddReceiveChannel(x.name, x.address, x.port);
 							}
 						}
 					}
@@ -156,7 +156,7 @@ namespace ops
 		}
 	}
 
-	void ParticipantInfoDataListener::connectTcp(ObjectName_T& top, ReceiveDataHandler* const handler)
+	void ParticipantInfoDataListener::connectTcp(ObjectName_T& top, std::shared_ptr<ReceiveDataHandler> handler)
 	{
 		SafeLock lock(&mutex);
 		if (partInfoSub == nullptr) {
@@ -174,8 +174,8 @@ namespace ops
 		
 		// Add to map if not already there
 		if (rcvDataHandlers.find(top) != rcvDataHandlers.end()) {
-			ReceiveDataHandler* rdh = rcvDataHandlers[top];
-			if (rdh != handler) {
+            std::shared_ptr<ReceiveDataHandler> rdh = rcvDataHandlers[top];
+			if (rdh.get() != handler.get()) {
 				ErrorMessage_T msg("TCP topic '");
 				msg += top;
 				msg += "' already registered for another RDH";
@@ -188,15 +188,15 @@ namespace ops
 		}
 	}
 
-	void ParticipantInfoDataListener::disconnectTcp(ObjectName_T& top, ReceiveDataHandler* const handler)
+	void ParticipantInfoDataListener::disconnectTcp(ObjectName_T& top, std::shared_ptr<ReceiveDataHandler> handler)
 	{
 		SafeLock lock(&mutex);
 
 		// Remove from map
 		auto result = rcvDataHandlers.find(top);
 		if (result != rcvDataHandlers.end()) {
-			ReceiveDataHandler* rdh = rcvDataHandlers[top];
-			if (rdh != handler) {
+            std::shared_ptr<ReceiveDataHandler> rdh = rcvDataHandlers[top];
+			if (rdh.get() != handler.get()) {
 				ErrorMessage_T msg("TCP topic '");
 				msg += top;
 				msg += "' atempt to remove topic for another RDH";

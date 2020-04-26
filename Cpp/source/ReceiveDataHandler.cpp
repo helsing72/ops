@@ -54,21 +54,24 @@ namespace ops
 	// Overridden from Notifier<OPSMessage*>
 	void ReceiveDataHandler::addListener(Listener<OPSMessage*>* listener, Topic& top)
     {
-        SafeLock lock(&messageLock);
-		Notifier<OPSMessage*>::addListener(listener);
-		if (Notifier<OPSMessage*>::getNrOfListeners() == 1) {
-			for (auto x : rdc) {
-				x->start();
-			}
-		}
+        {
+            SafeLock lock(&messageLock);
+            Notifier<OPSMessage*>::addListener(listener);
+            if (Notifier<OPSMessage*>::getNrOfListeners() == 1) {
+                for (auto x : rdc) {
+                    x->start();
+                }
+            }
+        }
 		topicUsage(top, true);
 	}
 
 	// Overridden from Notifier<OPSMessage*>
     void ReceiveDataHandler::removeListener(Listener<OPSMessage*>* listener, Topic& top)
     {
+        topicUsage(top, false);
+
         SafeLock lock(&messageLock);
-		topicUsage(top, false);
 		Notifier<OPSMessage*>::removeListener(listener);
 		if (Notifier<OPSMessage*>::getNrOfListeners() == 0) {
 			for (auto x : rdc) {

@@ -29,11 +29,11 @@
 #include "OPSTypeDefs.h"
 #include "Lockable.h"
 #include "IOService.h"
+#include "ReceiveDataHandler.h"
 
 namespace ops
 {
     //Forward declaration..
-    class ReceiveDataHandler;
 	class Participant;
 	class Topic;
 
@@ -41,17 +41,17 @@ namespace ops
     {
     private:
         ///By Singelton, one ReceiveDataHandler per Topic (name) on this Participant
-        std::map<InternalKey_T, ReceiveDataHandler*> receiveDataHandlerInstances;
+        std::map<InternalKey_T, std::shared_ptr<ReceiveDataHandler>> receiveDataHandlerInstances;
 
         ///Garbage vector for ReceiveDataHandlers, these can safely be deleted.
-        std::vector<ReceiveDataHandler*> garbageReceiveDataHandlers;
+        std::vector<std::shared_ptr<ReceiveDataHandler>> garbageReceiveDataHandlers;
         ops::Lockable garbageLock;
 
         inline InternalKey_T makeKey(Topic& top, IOService* ioServ);
 
     public:
         explicit ReceiveDataHandlerFactory();
-        ReceiveDataHandler* getReceiveDataHandler(Topic& top, Participant& participant);
+        std::shared_ptr<ReceiveDataHandler> getReceiveDataHandler(Topic& top, Participant& participant);
         void cleanUpReceiveDataHandlers();
         void releaseReceiveDataHandler(Topic& top, Participant& participant);
 		bool cleanUpDone();

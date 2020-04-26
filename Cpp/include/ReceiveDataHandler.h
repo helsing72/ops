@@ -23,14 +23,12 @@
 
 #include <map>
 #include <iostream>
+#include <memory>
 
 #include "Topic.h"
-#include "ByteBuffer.h"
-#include "Receiver.h"
 #include "OPSMessage.h"
 #include "Notifier.h"
 #include "Listener.h"
-#include "BytesSizePair.h"
 #include "ReferenceHandler.h"
 #include "ReceiveDataChannel.h"
 #include "OPSExport.h"
@@ -43,7 +41,8 @@ namespace ops
 	
 	class OPS_EXPORT ReceiveDataHandler : 
 		protected Notifier<OPSMessage*>, 
-		public Notifier<ConnectStatus>, public ReceiveDataChannelCallbacks
+		public Notifier<ConnectStatus>, public ReceiveDataChannelCallbacks,
+        public std::enable_shared_from_this<ReceiveDataHandler>
 	{
 		friend class ReceiveDataHandlerFactory;
 	public:
