@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -55,12 +55,10 @@ namespace ops
 		Participant& participant;
 
 		Lockable mutex;
-		Subscriber* partInfoSub;
-		SendDataHandler* sendDataHandler;
+		Subscriber* partInfoSub = nullptr;
 
+        std::map<ObjectName_T, SendDataHandler*> sendDataHandlers;
 		std::map<ObjectName_T, std::shared_ptr<ReceiveDataHandler>> rcvDataHandlers;
-
-		int numUdpTopics;
 
 		bool setupSubscriber();
 		void removeSubscriber();
