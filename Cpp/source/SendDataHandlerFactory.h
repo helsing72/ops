@@ -27,6 +27,7 @@
 #include "OPSTypeDefs.h"
 #include "Topic.h"
 #include "Lockable.h"
+#include "SendDataHandler.h"
 
 namespace ops
 {
@@ -36,17 +37,17 @@ namespace ops
     class SendDataHandlerFactory
     {
     private:
-        std::map<InternalKey_T, SendDataHandler*> sendDataHandlers;
+        std::map<InternalKey_T, std::shared_ptr<SendDataHandler>> sendDataHandlers;
         Lockable mutex;
 
-        void PostSetup(Topic& top, Participant& participant, SendDataHandler* sdh);
+        void PostSetup(Topic& top, Participant& participant, std::shared_ptr<SendDataHandler> sdh);
 
     public:
         explicit SendDataHandlerFactory();
 		// Make sure all SendDataHandlers are released before freeing the instance 
  	    ~SendDataHandlerFactory();
 
-        SendDataHandler* getSendDataHandler(Topic& top, Participant& participant);
+        std::shared_ptr<SendDataHandler> getSendDataHandler(Topic& top, Participant& participant);
         void releaseSendDataHandler(Topic& top, Participant& participant);
     };
 

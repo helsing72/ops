@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2019-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -50,7 +50,7 @@ namespace ops
                                 // Lookup topic in map. If found call handler
                                 auto result = sendDataHandlers.find(x.name);
                                 if (result != sendDataHandlers.end()) {
-                                    dynamic_cast<McUdpSendDataHandler*>(result->second)->addSink(x.name, partInfo->ip, partInfo->mc_udp_port);
+                                    dynamic_cast<McUdpSendDataHandler*>(result->second.get())->addSink(x.name, partInfo->ip, partInfo->mc_udp_port);
                                 }
                             }
                         }
@@ -113,7 +113,7 @@ namespace ops
 		partInfoSub = nullptr;
 	}
 
-	void ParticipantInfoDataListener::connectUdp(Topic& top, SendDataHandler* const handler)
+	void ParticipantInfoDataListener::connectUdp(Topic& top, std::shared_ptr<SendDataHandler> const handler)
 	{
         ObjectName_T key = top.getName();
         SafeLock lock(&mutex);
@@ -133,8 +133,8 @@ namespace ops
 
         // Add to map if not already there
         if (sendDataHandlers.find(key) != sendDataHandlers.end()) {
-            SendDataHandler* sdh = sendDataHandlers[key];
-            if (sdh != handler) {
+            std::shared_ptr<SendDataHandler> sdh = sendDataHandlers[key];
+            if (sdh.get() != handler.get()) {
                 ErrorMessage_T msg("UDP topic '");
                 msg += key;
                 msg += "' already registered for another SDH";
@@ -147,7 +147,7 @@ namespace ops
         }
     }
 
-	void ParticipantInfoDataListener::disconnectUdp(Topic& top, SendDataHandler* const handler)
+	void ParticipantInfoDataListener::disconnectUdp(Topic& top, std::shared_ptr<SendDataHandler> const handler)
 	{
 		SafeLock lock(&mutex);
 
@@ -155,8 +155,8 @@ namespace ops
         ObjectName_T key = top.getName();
         auto result = sendDataHandlers.find(key);
         if (result != sendDataHandlers.end()) {
-            SendDataHandler* sdh = sendDataHandlers[key];
-            if (sdh != handler) {
+            std::shared_ptr<SendDataHandler> sdh = sendDataHandlers[key];
+            if (sdh.get() != handler.get()) {
                 ErrorMessage_T msg("UDP topic '");
                 msg += key;
                 msg += "' atempt to remove topic for another SDH";

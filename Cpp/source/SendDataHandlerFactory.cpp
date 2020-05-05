@@ -43,10 +43,9 @@ namespace ops
 	{
 		// All SendDataHandlers should have been released before this instance is deleted,
 		// so it should be OK to delete all objects in the map.
-		for (std::map<InternalKey_T, SendDataHandler*>::iterator it = sendDataHandlers.begin();
-			it != sendDataHandlers.end(); ++it)
+		for (auto it = sendDataHandlers.begin(); it != sendDataHandlers.end(); ++it)
 		{
-			delete it->second;
+			it->second.reset();
 		}
 	}
 	
@@ -74,7 +73,7 @@ namespace ops
 		return key;
 	}
 
-    void SendDataHandlerFactory::PostSetup(Topic& top, Participant& participant, SendDataHandler* sdh)
+    void SendDataHandlerFactory::PostSetup(Topic& top, Participant& participant, std::shared_ptr<SendDataHandler> sdh)
     {
         if (top.getTransport() == Topic::TRANSPORT_UDP) {
             // If topic specifies a valid node address, add that as a static destination address for topic
@@ -82,7 +81,7 @@ namespace ops
                 ObjectName_T topName = top.getName();
                 Address_T destAddress = top.getDomainAddress();
                 int destPort = top.getPort();
-                ((McUdpSendDataHandler*)sdh)->addSink(topName, destAddress, destPort, true);
+                ((McUdpSendDataHandler*)sdh.get())->addSink(topName, destAddress, destPort, true);
             } else {
                 // Setup a listener on the participant info data published by participants on our domain.
                 // We use the information for topics with UDP as transport, to know the destination for UDP sends
@@ -93,7 +92,7 @@ namespace ops
         }
     }
 
-	SendDataHandler* SendDataHandlerFactory::getSendDataHandler(Topic& top, Participant& participant)
+    std::shared_ptr<SendDataHandler> SendDataHandlerFactory::getSendDataHandler(Topic& top, Participant& participant)
 	{
         Address_T localIf = doSubnetTranslation(top.getLocalInterface(), participant.getIOService());
         InternalKey_T key = getKey(top, localIf);
@@ -102,28 +101,28 @@ namespace ops
 
         // Check if a suitable SendDataHandler already exist
         if (sendDataHandlers.find(key) != sendDataHandlers.end()) {
-            SendDataHandler* sdh = sendDataHandlers[key];
+            std::shared_ptr<SendDataHandler> sdh = sendDataHandlers[key];
             PostSetup(top, participant, sdh);
             return sdh;
         }
 
 		int ttl = top.getTimeToLive();
-        SendDataHandler* sdh = nullptr;
+        std::shared_ptr<SendDataHandler> sdh = nullptr;
 
 		if (top.getTransport() == Topic::TRANSPORT_MC)
 		{
-			sdh = new McSendDataHandler(participant.getIOService(), top, localIf, ttl);
+			sdh = std::make_shared<McSendDataHandler>(participant.getIOService(), top, localIf, ttl);
 		}
 		else if (top.getTransport() == Topic::TRANSPORT_UDP)
 		{
             // We have only one sender for all topics on the same interface, so use the domain value for buffer size
-            sdh = new McUdpSendDataHandler(participant.getIOService(), localIf,
-                                           participant.getDomain()->getOutSocketBufferSize());
+            sdh = std::make_shared<McUdpSendDataHandler>(participant.getIOService(), localIf,
+                                                         participant.getDomain()->getOutSocketBufferSize());
             PostSetup(top, participant, sdh);
 		}
 		else if (top.getTransport() == Topic::TRANSPORT_TCP)
 		{
-			sdh = new TCPSendDataHandler(participant.getIOService(), top);
+			sdh = std::make_shared<TCPSendDataHandler>(participant.getIOService(), top);
 		}
         if (sdh != nullptr) {
             sendDataHandlers[key] = sdh;
@@ -140,7 +139,7 @@ namespace ops
 		
         if (top.getTransport() == Topic::TRANSPORT_UDP) {
             if (sendDataHandlers.find(key) != sendDataHandlers.end()) {
-                SendDataHandler* sdh = sendDataHandlers[key];
+                std::shared_ptr<SendDataHandler> sdh = sendDataHandlers[key];
                 if (!isValidNodeAddress(top.getDomainAddress())) {
                     participant.partInfoListener->disconnectUdp(top, sdh);
                 }

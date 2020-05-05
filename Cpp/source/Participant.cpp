@@ -509,9 +509,9 @@ namespace ops
 		}
 	}
 
-	SendDataHandler* Participant::getSendDataHandler(Topic top)
+	std::shared_ptr<SendDataHandler> Participant::getSendDataHandler(Topic top)
 	{
-		SendDataHandler* result = sendDataHandlerFactory->getSendDataHandler(top, *this);
+		std::shared_ptr<SendDataHandler> result = sendDataHandlerFactory->getSendDataHandler(top, *this);
 		// We can't update Participant Info here, delayed until updateSendPartInfo()
 		return result;
 	}

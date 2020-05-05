@@ -45,8 +45,8 @@ namespace ops
 
 		virtual void onNewData(DataNotifier* notifier) override;
 
-		void connectUdp(Topic& top, SendDataHandler* handler);
-		void disconnectUdp(Topic& top, SendDataHandler* handler);
+		void connectUdp(Topic& top, std::shared_ptr<SendDataHandler> handler);
+		void disconnectUdp(Topic& top, std::shared_ptr<SendDataHandler> handler);
 
 		void connectTcp(ObjectName_T& top, std::shared_ptr<ReceiveDataHandler> handler);
 		void disconnectTcp(ObjectName_T& top, std::shared_ptr<ReceiveDataHandler> handler);
@@ -57,7 +57,7 @@ namespace ops
 		Lockable mutex;
 		Subscriber* partInfoSub = nullptr;
 
-        std::map<ObjectName_T, SendDataHandler*> sendDataHandlers;
+        std::map<ObjectName_T, std::shared_ptr<SendDataHandler>> sendDataHandlers;
 		std::map<ObjectName_T, std::shared_ptr<ReceiveDataHandler>> rcvDataHandlers;
 
 		bool setupSubscriber();

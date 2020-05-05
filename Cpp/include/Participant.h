@@ -246,7 +246,7 @@ namespace ops
 
 		///Visible to friends only
 		//TODO: Deprecate and delegate to sendDataHandlerFactory???
-		SendDataHandler* getSendDataHandler(Topic top);
+		std::shared_ptr<SendDataHandler> getSendDataHandler(Topic top);
 		void releaseSendDataHandler(Topic top);		
 		void updateSendPartInfo(Topic top);
 
