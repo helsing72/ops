@@ -30,6 +30,7 @@
 #include "OPSUtilities.h"
 #include "PubIdChecker.h"
 #include "PrintArchiverOut.h"
+#include "ChecksumArchiver.h"
 
 #ifdef _WIN32
 #include "SdsSystemTime.h"
@@ -671,6 +672,17 @@ void printDomainInfo(const ops::Participant& part)
 		prt.printObject("ops_config", part.getDomain());
 	}
 	std::cout << std::endl << "Dump of configuration Finished " << std::endl;
+
+    ops::ChecksumArchiver<ops::example::calculator_xor_8> chk8;
+    ops::ChecksumArchiver<ops::example::calculator_xor_64> chk64;
+
+    chk8.calc.sum = 0;
+    top.serialize(&chk8);
+    std::cout << "Checksum byte xor: " << (int)chk8.calc.sum << "\n";
+
+    chk64.calc.sum = 0;
+    top.serialize(&chk64);
+    std::cout << "Checksum 64-bit xor: " << (uint64_t)chk64.calc.sum << "\n";
 }
 
 void menu()
