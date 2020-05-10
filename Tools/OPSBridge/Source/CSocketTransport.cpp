@@ -186,7 +186,7 @@ bool CSocketTransport::writeStatus(TStatusMessage& status)
 }
 
 // The .Head field in UdpMc will be overwritten
-bool CSocketTransport::writeUdpMcMessage(TUdpMcMessage& udpMc, const char* data)
+bool CSocketTransport::writeUdpMcMessage(TUdpMcMessage& udpMc, const char* const data)
 {
 	udpMc.Head.Type = mtUdpMc;
 	udpMc.Head.Length = sizeof(udpMc);

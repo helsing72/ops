@@ -736,7 +736,7 @@ void CBridge::onStatusMessage(CTransport* const sender, const TStatusMessage& st
 
 // =================================================================================
 // NOTE Called from transport thread
-void CBridge::onUdpMcMessage(CTransport* const sender, TUdpMcMessage& udpMc, const char* data)
+void CBridge::onUdpMcMessage(CTransport* const sender, TUdpMcMessage& udpMc, const char* const data)
 {
     UNUSED(sender);
     // We don't buffer Raw UDP/MC messages

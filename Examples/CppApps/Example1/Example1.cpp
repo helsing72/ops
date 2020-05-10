@@ -40,7 +40,7 @@ void PublisherExample()
 
 	// Create the topic to publish on, might throw ops::NoSuchTopicException
 	// The topic must exist in the used ops configuration file
-	ops::Topic topic = participant->createTopic("ChildTopic");
+	const ops::Topic topic = participant->createTopic("ChildTopic");
 
 	std::cout << "Publishing on " << topic.getName() <<
 		" [" << topic.getTransport() <<
@@ -96,7 +96,7 @@ void PollingSubscriberExample()
 
 	// Create the topic to subscribe to, might throw ops::NoSuchTopicException
 	// The topic must exist in the used ops configuration file
-	ops::Topic topic = participant->createTopic("ChildTopic");
+	const ops::Topic topic = participant->createTopic("ChildTopic");
 
 	std::cout << "Subscribing to " << topic.getName() <<
 		" [" << topic.getTransport() <<
@@ -117,7 +117,7 @@ void PollingSubscriberExample()
         if (sub.waitForNewData(100)) {
 			// Need to lock message while using it's data via the reference
 			sub.aquireMessageLock();
-			ChildData* data = sub.getTypedDataReference();
+			ChildData* const data = sub.getTypedDataReference();
 			std::cout << "New data found: Received ChildTopic with " << data->l << std::endl;
 			sub.releaseMessageLock();
         } else {
@@ -158,7 +158,7 @@ void CallbackSubscriberExample()
 
 	// Create the topic to subscribe to, might throw ops::NoSuchTopicException
 	// The topic must exist in the used ops configuration file
-	ops::Topic topic = participant->createTopic("ChildTopic");
+	const ops::Topic topic = participant->createTopic("ChildTopic");
 
 	std::cout << "Subscribing to " << topic.getName() <<
 		" [" << topic.getTransport() <<

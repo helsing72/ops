@@ -241,8 +241,11 @@ public:
         bool res = false;
         if (pub) {
             try {
-                //res = pub->writeOPSObject(&data);     // Write using pointer
-                res = pub->write(data);                 // Write using ref
+#ifdef NOT_USED_NOW
+                res = pub->writeOPSObject(&data);     // Write using pointer
+#else
+                res = pub->write(data);               // Write using ref
+#endif
                 if (!res) {
                     std::cout << "Write(): failed" << std::endl;
                 }
@@ -403,14 +406,16 @@ public:
 			// it is the same publisher sending us messages.
 			ops::OPSMessage* newMess = sub->getMessage();
 
-// Check is done with the OPS built-in PublicationIDChecker()
-//			if (expectedPubId >= 0) {
-//				if (expectedPubId != newMess->getPublicationID()) {
-//					std::cout << ">>>>> Lost message for topic " << sub->getTopic().getName() <<
-//						". Exp.pubid: " << expectedPubId << " got: " << newMess->getPublicationID() << std::endl;
-//				}
-//			}
-//			expectedPubId = newMess->getPublicationID() + 1;
+#ifdef NOT_USED_FOR_NOW
+            // Check is done with the OPS built-in PublicationIDChecker()
+			if (expectedPubId >= 0) {
+				if (expectedPubId != newMess->getPublicationID()) {
+					std::cout << ">>>>> Lost message for topic " << sub->getTopic().getName() <<
+						". Exp.pubid: " << expectedPubId << " got: " << newMess->getPublicationID() << std::endl;
+				}
+			}
+			expectedPubId = newMess->getPublicationID() + 1;
+#endif
 
 			client->onData(sub, dynamic_cast<DataType*>(newMess->getData()));
 		}
@@ -450,6 +455,7 @@ struct ItemInfo {
 		selected(false), helper(nullptr), part(nullptr)
 	{
 	}
+    ItemInfo() = delete;
 	ItemInfo(ItemInfo const&) = delete;
 	ItemInfo(ItemInfo&&) = delete;
 	ItemInfo& operator =(ItemInfo&&) = delete;
@@ -473,7 +479,7 @@ public:
 	MyListener& operator =(MyListener&&) = delete;
 	MyListener& operator =(MyListener const&) = delete;
 
-	virtual void onData(ops::Subscriber* sub, pizza::PizzaData* data) override
+	virtual void onData(ops::Subscriber* const sub, pizza::PizzaData* const data) override
 	{
 		// test for sending derived objects on same topic
 		if (dynamic_cast<pizza::VessuvioData*>(data) != nullptr) {
@@ -509,7 +515,7 @@ public:
 #endif
 	}
 
-	virtual void onData(ops::Subscriber* sub, pizza::VessuvioData* data) override
+	virtual void onData(ops::Subscriber* const sub, pizza::VessuvioData* const data) override
 	{
 		// test for sending derived objects on same topic
 		if (dynamic_cast<pizza::special::ExtraAllt*>(data) != nullptr) {
@@ -534,7 +540,7 @@ public:
         }
     }
 
-	virtual void onData(ops::Subscriber* sub, pizza::special::ExtraAllt* data) override
+	virtual void onData(ops::Subscriber* const sub, pizza::special::ExtraAllt* const data) override
 	{
 		ops::Address_T addr = "";
 		int port = 0;
@@ -942,7 +948,7 @@ int main(const int argc, const char* argv[])
 		// trim start
 		idx = line.find_first_not_of(" \t");
 		if (idx != std::string::npos) {
-			if (idx > 0) line.erase(0, idx);
+            if (idx > 0) { line.erase(0, idx); }
 		}
 
         ii = ItemInfoList[num];
@@ -1030,7 +1036,7 @@ int main(const int argc, const char* argv[])
 			case 'L':
 				{
 					num = atoi(line.c_str());
-					if (num >= 0) NumVessuvioBytes = num;
+                    if (num >= 0) { NumVessuvioBytes = num; }
 					if (FillerStr.size() > (unsigned int)num) { FillerStr.erase(num); }
 					while (FillerStr.size() < (unsigned int)num) { FillerStr += " "; }
 					std::cout << "Length: " << FillerStr.size() << std::endl;
@@ -1041,7 +1047,7 @@ int main(const int argc, const char* argv[])
 			case 'V':
 				{
 					num = atoi(line.c_str());
-					if (num >= 0) sendPeriod = num;
+                    if (num >= 0) { sendPeriod = num; }
 					std::cout << "sendPeriod: " << sendPeriod << std::endl;
 				}
 				break;
@@ -1074,7 +1080,7 @@ int main(const int argc, const char* argv[])
 
 	for (unsigned int idx = 0; idx < ItemInfoList.size(); idx++) {
         ii = ItemInfoList[idx];
-		if (ii->helper != nullptr) delete ii->helper;
+        if (ii->helper != nullptr) { delete ii->helper; }
 		ii->helper = nullptr;
 		ii->part = nullptr;
 		delete ItemInfoList[idx];
