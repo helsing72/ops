@@ -56,7 +56,7 @@ namespace ops
         // if 'domainID' != "", the domain 'domainID' must exist otherwise nullptr is returned.
         std::shared_ptr<OPSConfig> getConfig(ObjectName_T domainID = "" );
 
-        bool domainExist(ObjectName_T domainID );
+        bool domainExist(const ObjectName_T& domainID );
 		int numDomains();
 
 	private:

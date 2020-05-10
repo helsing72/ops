@@ -27,7 +27,7 @@ namespace ops
 {
     using namespace opsidls;
 
-	Topic::Topic(ObjectName_T namee, int portt, TypeId_T typeIDd, Address_T domainAddresss)
+	Topic::Topic(ObjectName_T namee, int const portt, TypeId_T typeIDd, Address_T domainAddresss)
 		: name(namee), 
 		port(portt), 
 		timeToLive(-1),
@@ -56,7 +56,7 @@ namespace ops
 		appendType(TypeId_T("Topic"));
 	}
 
-	void Topic::setParticipantID(ObjectName_T partID)
+	void Topic::setParticipantID(ObjectName_T const partID)
 	{
 		participantID = partID;
 	}
@@ -66,7 +66,7 @@ namespace ops
 		return participantID;
 	}
 
-	void Topic::setDomainID(ObjectName_T domID)
+	void Topic::setDomainID(ObjectName_T const domID)
 	{
 		domainID = domID;
 	}
@@ -82,11 +82,11 @@ namespace ops
 	{
 		return typeID;
 	}
-	void Topic::setDomainAddress(Address_T domainAddr)
+	void Topic::setDomainAddress(Address_T const domainAddr)
 	{
 		domainAddress = domainAddr;
 	}
-	void Topic::setTransport(Transport_T transp)
+	void Topic::setTransport(Transport_T const transp)
 	{
 		transport = transp;
 	}
@@ -94,7 +94,7 @@ namespace ops
 	{
 		return domainAddress;
 	}
-	void Topic::setLocalInterface(Address_T localIf)
+	void Topic::setLocalInterface(Address_T const localIf)
 	{
 		localInterface = localIf;
 	}

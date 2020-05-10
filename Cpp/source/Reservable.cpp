@@ -38,7 +38,7 @@ namespace ops
 		return *this;
 	}
 	
-	void Reservable::setReferenceHandler(ReferenceHandler* refHandler)
+	void Reservable::setReferenceHandler(ReferenceHandler* const refHandler)
 	{
 #ifndef OPS_REMOVE_ASSERT
 		// Referencehandler should not be changed if already reserved

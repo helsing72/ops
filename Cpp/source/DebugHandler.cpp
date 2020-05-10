@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -48,55 +48,61 @@ namespace ops {
 		InternalDebugListener(Participant& part) : _part(part), _sub(nullptr), _pub(nullptr), _appCallback(nullptr) {}
 		virtual ~InternalDebugListener() { remove(); }
 
+        InternalDebugListener() = delete;
+        InternalDebugListener(const InternalDebugListener& other) = delete;
+        InternalDebugListener(InternalDebugListener&& other) = delete;
+        InternalDebugListener& operator= (const InternalDebugListener& other) = delete;
+        InternalDebugListener& operator= (InternalDebugListener&& other) = delete;
+
 		// Used by application to set a handler for "Generic Command" (50)
 		void SetAppCallback(DebugNotifyInterface* client)
 		{
-			SafeLock lck(&_mapLock);
+			const SafeLock lck(&_mapLock);
 			_appCallback = client;
 		}
 
 		// Register/Unregister with the debug handler
-		void RegisterPub(DebugNotifyInterface* const client, ObjectName_T topicName)
+		void RegisterPub(DebugNotifyInterface* const client, const ObjectName_T& topicName)
 		{
-            SafeLock lck(&_mapLock);
+            const SafeLock lck(&_mapLock);
             if (_pubMap.find(topicName) == _pubMap.end()) {
 				_pubMap[topicName] = client;
 			}
 		}
 
-		void UnregisterPub(DebugNotifyInterface* const client, ObjectName_T topicName)
+		void UnregisterPub(DebugNotifyInterface* const client, const ObjectName_T& topicName)
 		{
-            SafeLock lck(&_mapLock);
-            std::map<ObjectName_T, DebugNotifyInterface*>::iterator it = _pubMap.find(topicName);
-			if (it == _pubMap.end()) return;
-			if (it->second != client) return;
+            const SafeLock lck(&_mapLock);
+            const std::map<ObjectName_T, DebugNotifyInterface*>::iterator it = _pubMap.find(topicName);
+            if (it == _pubMap.end()) { return; }
+            if (it->second != client) { return; }
 			_pubMap.erase(it);
 		}
 
-		void RegisterSub(DebugNotifyInterface* const client, ObjectName_T topicName)
+		void RegisterSub(DebugNotifyInterface* const client, const ObjectName_T& topicName)
 		{
-            SafeLock lck(&_mapLock);
+            const SafeLock lck(&_mapLock);
             if (_subMap.find(topicName) == _subMap.end()) {
 				_subMap[topicName] = client;
 			}
 		}
 
-		void UnregisterSub(DebugNotifyInterface* const client, ObjectName_T topicName)
+		void UnregisterSub(DebugNotifyInterface* const client, const ObjectName_T& topicName)
 		{
-            SafeLock lck(&_mapLock);
-            std::map<ObjectName_T, DebugNotifyInterface*>::iterator it = _subMap.find(topicName);
-			if (it == _subMap.end()) return;
-			if (it->second != client) return;
+            const SafeLock lck(&_mapLock);
+            const std::map<ObjectName_T, DebugNotifyInterface*>::iterator it = _subMap.find(topicName);
+            if (it == _subMap.end()) { return; }
+            if (it->second != client) { return; }
 			_subMap.erase(it);
 		}
 
 		void Start()
 		{
 			// We require the key to be set to enable the topics
-			if (gKey == "") return;
+            if (gKey == "") { return; }
 
 			// Check if already started
-			if (_sub) return;
+            if (_sub) { return; }
 
 			setup();
 		}
@@ -114,14 +120,14 @@ namespace ops {
 
 		virtual void onNewData(DataNotifier* const notifier) override
 		{
-			Subscriber* sub = dynamic_cast<Subscriber*> (notifier);
+			Subscriber* const sub = dynamic_cast<Subscriber*> (notifier);
 			if (sub != nullptr) {
-				opsidls::DebugRequestResponseData* req = dynamic_cast<opsidls::DebugRequestResponseData*>(sub->getMessage()->getData());
+				opsidls::DebugRequestResponseData* const req = dynamic_cast<opsidls::DebugRequestResponseData*>(sub->getMessage()->getData());
 				if (req != nullptr) {
-					if (req->Command == 0) return;  // We don't care about responses
+                    if (req->Command == 0) { return; }  // We don't care about responses
 
 					{
-                        SafeLock lck(&_mapLock);
+                        const SafeLock lck(&_mapLock);
 
 						switch (req->Entity) {
 						case 0: // Debug
@@ -129,21 +135,21 @@ namespace ops {
 							break;
 
 						case 1: // Participant
-							if (req->getKey() == "*") return;
+                            if (req->getKey() == "*") { return; }
 							// For now no response
 							return;
 
 						case 2: // Publisher
-							if (req->getKey() == "*") return;
+                            if (req->getKey() == "*") { return; }
 							// Don't respond on unknown topics
-							if (_pubMap.find(req->Name) == _pubMap.end()) return;
+                            if (_pubMap.find(req->Name) == _pubMap.end()) { return; }
 							_pubMap[req->Name]->onRequest(*req, _response);
 							break;
 
 						case 3: // Subscriber
-							if (req->getKey() == "*") return;
+                            if (req->getKey() == "*") { return; }
 							// Don't respond on unknown topics
-							if (_subMap.find(req->Name) == _subMap.end()) return;
+                            if (_subMap.find(req->Name) == _subMap.end()) { return; }
 							_subMap[req->Name]->onRequest(*req, _response);
 							break;
 						default: 
@@ -186,9 +192,9 @@ namespace ops {
 
 		void remove()
 		{
-			if (_sub != nullptr) delete _sub;
+            if (_sub != nullptr) { delete _sub; }
 			_sub = nullptr;
-			if (_pub != nullptr) delete _pub;
+            if (_pub != nullptr) { delete _pub; }
 			_pub = nullptr;
 		}
 
@@ -246,7 +252,7 @@ namespace ops {
 	
 	DebugHandler::~DebugHandler()
 	{
-		if (_pimpl != nullptr) delete _pimpl;
+        if (_pimpl != nullptr) { delete _pimpl; }
 	}
 
 	void DebugHandler::Start()
@@ -266,22 +272,22 @@ namespace ops {
 	}
 
 	// Register/Unregister with the debug handler
-	void DebugHandler::RegisterPub(DebugNotifyInterface* client, ObjectName_T topicName)
+	void DebugHandler::RegisterPub(DebugNotifyInterface* client, const ObjectName_T& topicName)
 	{
 		_pimpl->RegisterPub(client, topicName);
 	}
 	
-	void DebugHandler::UnregisterPub(DebugNotifyInterface* client, ObjectName_T topicName)
+	void DebugHandler::UnregisterPub(DebugNotifyInterface* client, const ObjectName_T& topicName)
 	{
 		_pimpl->UnregisterPub(client, topicName);
 	}
 
-	void DebugHandler::RegisterSub(DebugNotifyInterface* client, ObjectName_T topicName)
+	void DebugHandler::RegisterSub(DebugNotifyInterface* client, const ObjectName_T& topicName)
 	{
 		_pimpl->RegisterSub(client, topicName);
 	}
 	
-	void DebugHandler::UnregisterSub(DebugNotifyInterface* client, ObjectName_T topicName)
+	void DebugHandler::UnregisterSub(DebugNotifyInterface* client, const ObjectName_T& topicName)
 	{
 		_pimpl->UnregisterSub(client, topicName);
 	}

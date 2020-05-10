@@ -37,18 +37,18 @@ namespace ops
 	///Called when a new message is received. Running on the boost thread.
     void ParticipantInfoDataListener::onNewData(DataNotifier* const notifier)
     {
-        Subscriber* sub = dynamic_cast<Subscriber*> (notifier);
+        Subscriber* const sub = dynamic_cast<Subscriber*> (notifier);
         if (sub != nullptr) {
-            ParticipantInfoData* partInfo = dynamic_cast<ParticipantInfoData*> (sub->getMessage()->getData());
+            ParticipantInfoData* const partInfo = dynamic_cast<ParticipantInfoData*> (sub->getMessage()->getData());
             if (partInfo != nullptr) {
 				// Is it on our domain?
 				if (partInfo->domain == participant.domainID) {
-					SafeLock lock(&mutex);
+					const SafeLock lock(&mutex);
                     if (partInfo->mc_udp_port != 0) {
                         for (auto x : partInfo->subscribeTopics) {
                             if ((x.transport == Topic::TRANSPORT_UDP) && participant.hasPublisherOn(x.name)) {
                                 // Lookup topic in map. If found call handler
-                                auto result = sendDataHandlers.find(x.name);
+                                const auto result = sendDataHandlers.find(x.name);
                                 if (result != sendDataHandlers.end()) {
                                     dynamic_cast<McUdpSendDataHandler*>(result->second.get())->addSink(x.name, partInfo->ip, partInfo->mc_udp_port);
                                 }
@@ -58,7 +58,7 @@ namespace ops
                     for (auto& x : partInfo->publishTopics) {
 						if ((x.transport == Topic::TRANSPORT_TCP) && participant.hasSubscriberOn(x.name)) {
 							// Lookup topic in map. If found call handler
-							auto result = rcvDataHandlers.find(x.name);
+							const auto result = rcvDataHandlers.find(x.name);
 							if (result != rcvDataHandlers.end()) {
 								dynamic_cast<TCPReceiveDataHandler*>(result->second.get())->AddReceiveChannel(x.name, x.address, x.port);
 							}
@@ -85,7 +85,7 @@ namespace ops
 
 	void ParticipantInfoDataListener::prepareForDelete()
 	{
-		SafeLock lock(&mutex);
+		const SafeLock lock(&mutex);
 		// We can't remove the Subscriber in the destructor, since the delete of the Subscriber
 		// requires objects that already has been deleted when the participant delete us
 		// (for the case when user has subscribers left when deleting the participant. 
@@ -113,10 +113,10 @@ namespace ops
 		partInfoSub = nullptr;
 	}
 
-	void ParticipantInfoDataListener::connectUdp(Topic& top, std::shared_ptr<SendDataHandler> const handler)
+	void ParticipantInfoDataListener::connectUdp(const Topic& top, std::shared_ptr<SendDataHandler> const handler)
 	{
         ObjectName_T key = top.getName();
-        SafeLock lock(&mutex);
+        const SafeLock lock(&mutex);
 		if (partInfoSub == nullptr) {
 			if (!setupSubscriber()) {
 				if (!isValidNodeAddress(top.getDomainAddress())) {
@@ -133,7 +133,7 @@ namespace ops
 
         // Add to map if not already there
         if (sendDataHandlers.find(key) != sendDataHandlers.end()) {
-            std::shared_ptr<SendDataHandler> sdh = sendDataHandlers[key];
+            const std::shared_ptr<SendDataHandler> sdh = sendDataHandlers[key];
             if (sdh.get() != handler.get()) {
                 ErrorMessage_T msg("UDP topic '");
                 msg += key;
@@ -147,15 +147,15 @@ namespace ops
         }
     }
 
-	void ParticipantInfoDataListener::disconnectUdp(Topic& top, std::shared_ptr<SendDataHandler> const handler)
+	void ParticipantInfoDataListener::disconnectUdp(const Topic& top, std::shared_ptr<SendDataHandler> const handler)
 	{
-		SafeLock lock(&mutex);
+		const SafeLock lock(&mutex);
 
         // Remove from map
         ObjectName_T key = top.getName();
         auto result = sendDataHandlers.find(key);
         if (result != sendDataHandlers.end()) {
-            std::shared_ptr<SendDataHandler> sdh = sendDataHandlers[key];
+            const std::shared_ptr<SendDataHandler> sdh = sendDataHandlers[key];
             if (sdh.get() != handler.get()) {
                 ErrorMessage_T msg("UDP topic '");
                 msg += key;
@@ -174,9 +174,9 @@ namespace ops
         }
     }
 
-	void ParticipantInfoDataListener::connectTcp(ObjectName_T& top, std::shared_ptr<ReceiveDataHandler> handler)
+	void ParticipantInfoDataListener::connectTcp(ObjectName_T& top, std::shared_ptr<ReceiveDataHandler> const handler)
 	{
-		SafeLock lock(&mutex);
+		const SafeLock lock(&mutex);
 		if (partInfoSub == nullptr) {
 			if (!setupSubscriber()) {
 				// Generate an error message if we come here with domain->getMetaDataMcPort() == 0,
@@ -192,7 +192,7 @@ namespace ops
 		
 		// Add to map if not already there
 		if (rcvDataHandlers.find(top) != rcvDataHandlers.end()) {
-            std::shared_ptr<ReceiveDataHandler> rdh = rcvDataHandlers[top];
+            const std::shared_ptr<ReceiveDataHandler> rdh = rcvDataHandlers[top];
 			if (rdh.get() != handler.get()) {
 				ErrorMessage_T msg("TCP topic '");
 				msg += top;
@@ -206,14 +206,14 @@ namespace ops
 		}
 	}
 
-	void ParticipantInfoDataListener::disconnectTcp(ObjectName_T& top, std::shared_ptr<ReceiveDataHandler> handler)
+	void ParticipantInfoDataListener::disconnectTcp(ObjectName_T& top, std::shared_ptr<ReceiveDataHandler> const handler)
 	{
-		SafeLock lock(&mutex);
+		const SafeLock lock(&mutex);
 
 		// Remove from map
 		auto result = rcvDataHandlers.find(top);
 		if (result != rcvDataHandlers.end()) {
-            std::shared_ptr<ReceiveDataHandler> rdh = rcvDataHandlers[top];
+            const std::shared_ptr<ReceiveDataHandler> rdh = rcvDataHandlers[top];
 			if (rdh.get() != handler.get()) {
 				ErrorMessage_T msg("TCP topic '");
 				msg += top;

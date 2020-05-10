@@ -38,7 +38,7 @@ namespace ops
     {
     }
 
-	InternalKey_T ReceiveDataHandlerFactory::makeKey(Topic& top, IOService* ioServ)
+	InternalKey_T ReceiveDataHandlerFactory::makeKey(Topic& top, IOService* const ioServ)
 	{
 		// Since topics can use the same port for transports multicast & tcp, or 
 		// use transport udp which in most cases use a single ReceiveDataHandler, 
@@ -62,7 +62,7 @@ namespace ops
 		// Make a key with the transport info that uniquely defines the receiver.
 		InternalKey_T key = makeKey(top, participant.getIOService());
 
-        SafeLock lock(&garbageLock);
+        const SafeLock lock(&garbageLock);
         if (receiveDataHandlerInstances.find(key) != receiveDataHandlerInstances.end())
         {
             // If we already have a ReceiveDataHandler for this topic, use it.
@@ -122,10 +122,10 @@ namespace ops
 		// Make a key with the transport info that uniquely defines the receiver.
 		InternalKey_T key = makeKey(top, participant.getIOService());
 
-		SafeLock lock(&garbageLock);
+		const SafeLock lock(&garbageLock);
         if (receiveDataHandlerInstances.find(key) != receiveDataHandlerInstances.end())
         {
-            std::shared_ptr<ReceiveDataHandler> rdh = receiveDataHandlerInstances[key];
+            const std::shared_ptr<ReceiveDataHandler> rdh = receiveDataHandlerInstances[key];
             if (rdh->Notifier<OPSMessage*>::getNrOfListeners() == 0)
             {
                 //Time to mark this receiveDataHandler as garbage.
@@ -144,7 +144,7 @@ namespace ops
 
     void ReceiveDataHandlerFactory::cleanUpReceiveDataHandlers()
     {
-        SafeLock lock(&garbageLock);
+        const SafeLock lock(&garbageLock);
         
         for (int i = (int)garbageReceiveDataHandlers.size() - 1; i >= 0; i--)
         {
@@ -152,7 +152,7 @@ namespace ops
                 (garbageReceiveDataHandlers[i]->asyncFinished()))
             {
                 garbageReceiveDataHandlers[i].reset();
-                auto iter = garbageReceiveDataHandlers.begin() + i;
+                const auto iter = garbageReceiveDataHandlers.begin() + i;
                 garbageReceiveDataHandlers.erase(iter);
             }
         }
@@ -160,13 +160,13 @@ namespace ops
 
 	bool ReceiveDataHandlerFactory::cleanUpDone()
 	{
-        SafeLock lock(&garbageLock);
+        const SafeLock lock(&garbageLock);
 		return garbageReceiveDataHandlers.size() == 0;
 	}
 
     bool ReceiveDataHandlerFactory::dataAvailable()
     {
-        SafeLock lock(&garbageLock);
+        const SafeLock lock(&garbageLock);
         for (auto& rdh : receiveDataHandlerInstances) {
             if (rdh.second->dataAvailable()) return true;
         }

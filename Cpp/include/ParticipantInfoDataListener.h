@@ -45,8 +45,8 @@ namespace ops
 
 		virtual void onNewData(DataNotifier* notifier) override;
 
-		void connectUdp(Topic& top, std::shared_ptr<SendDataHandler> handler);
-		void disconnectUdp(Topic& top, std::shared_ptr<SendDataHandler> handler);
+		void connectUdp(const Topic& top, std::shared_ptr<SendDataHandler> handler);
+		void disconnectUdp(const Topic& top, std::shared_ptr<SendDataHandler> handler);
 
 		void connectTcp(ObjectName_T& top, std::shared_ptr<ReceiveDataHandler> handler);
 		void disconnectTcp(ObjectName_T& top, std::shared_ptr<ReceiveDataHandler> handler);

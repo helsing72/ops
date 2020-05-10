@@ -85,13 +85,13 @@ namespace ops
         return this->topic;
     }
 
-    void Publisher::setName(ObjectName_T name)
+    void Publisher::setName(ObjectName_T const name)
     {
         this->name = name;
 		message.setPublisherName(name);
 	}
 
-    void Publisher::setKey(ObjectKey_T key)
+    void Publisher::setKey(ObjectKey_T const key)
     {
         this->key = key;
     }
@@ -106,16 +106,16 @@ namespace ops
         return this->name;
     }
 
-    bool Publisher::writeOPSObject(OPSObject* obj)
+    bool Publisher::writeOPSObject(OPSObject* const obj)
     {
         return write(obj);
     }
 
-	bool Publisher::write(OPSObject* data)
+	bool Publisher::write(OPSObject* const data)
 	{
         bool sendOK = true;
 #ifdef OPS_ENABLE_DEBUG_HANDLER
-		SafeLock lck(&_dbgLock);
+		const SafeLock lck(&_dbgLock);
 		if (_dbgSkip > 0) {
 			_dbgSkip--;
 		} else {
@@ -130,7 +130,7 @@ namespace ops
         return sendOK;
 	}
 
-	bool Publisher::internalWrite(OPSObject* data)
+	bool Publisher::internalWrite(OPSObject* const data)
 	{
         bool sendOK = true;
 #endif
@@ -157,7 +157,7 @@ namespace ops
         buf.finish();
 
         for (int i = 0; i < buf.getNrOfSegments(); i++) {
-            int segSize = buf.getSegmentSize(i);
+            const int segSize = buf.getSegmentSize(i);
             // We need to continue even if a send fails, since it may work to some destinations
             sendOK &= sendDataHandler->sendData(buf.getSegment(i), segSize, topic);
             // Check if we should back off for a while to distribute large messages over time
@@ -173,7 +173,7 @@ namespace ops
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 	void Publisher::onRequest(opsidls::DebugRequestResponseData& req, opsidls::DebugRequestResponseData& resp)
 	{
-		SafeLock lck(&_dbgLock);
+		const SafeLock lck(&_dbgLock);
 		switch (req.Command) {
 		case 1: // Request status
 			break;
@@ -187,7 +187,7 @@ namespace ops
 			_dbgSkip = req.Param1;
 			break;
 		case 5: // Send directly
-			if (req.Objs.size() == 0) break;
+            if (req.Objs.size() == 0) { break; }
 			if (req.Objs[0] != nullptr) { internalWrite(req.Objs[0]); }
 			break;
 		case 6: // Send instead of next x ordinary

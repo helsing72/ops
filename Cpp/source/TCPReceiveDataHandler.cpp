@@ -31,14 +31,14 @@ namespace ops
     {
 		// Handle TCP channels specified with an address and port
 		if ((top.getTransport() == Topic::TRANSPORT_TCP) && (top.getPort() != 0)) {
-			ReceiveDataChannel* rdc_ = new TCPReceiveDataChannel(top, part);
+			ReceiveDataChannel* const rdc_ = new TCPReceiveDataChannel(top, part);
 			rdc_->connect(this);
 			rdc.push_back(rdc_);
 			usingPartInfo = false;
 		}
 	}
 
-	void TCPReceiveDataHandler::AddReceiveChannel(ObjectName_T& topicName, Address_T& ip, int port)
+	void TCPReceiveDataHandler::AddReceiveChannel(const ObjectName_T& topicName, Address_T& ip, int const port)
 	{
         UNUSED(topicName);
 		OPS_PIFO_TRACE("Partinfo: name: " << topicName << ", ip: " << ip << ", port: " << port << "\n");
@@ -60,11 +60,11 @@ namespace ops
 			OPS_PIFO_TRACE("Partinfo: CREATED name: " << topicName << ", ip: " << ip << ", port: " << port << "\n");
 			topic.setDomainAddress(ip);
 			topic.setPort(port);
-			ReceiveDataChannel* rdc_ = new TCPReceiveDataChannel(topic, participant);
+			ReceiveDataChannel* const rdc_ = new TCPReceiveDataChannel(topic, participant);
 			rdc_->key = key;
 			rdc_->connect(this);
 
-			SafeLock lock(&messageLock);
+			const SafeLock lock(&messageLock);
 			rdc.push_back(rdc_);
 
 			if (Notifier<OPSMessage*>::getNrOfListeners() > 0) {
@@ -73,12 +73,12 @@ namespace ops
 		}
 	}
 
-	void TCPReceiveDataHandler::topicUsage(Topic& top, bool used)
+	void TCPReceiveDataHandler::topicUsage(Topic& top, bool const used)
 	{
         if (usingPartInfo) {
-            SafeLock lock(&topicsLock);
+            const SafeLock lock(&topicsLock);
             // We should only register unique topics
-			auto it = topics.find(top.getName());
+			const auto it = topics.find(top.getName());
 			int32_t count = 0;
 			if (it != topics.end()) {
 				count = topics[top.getName()];

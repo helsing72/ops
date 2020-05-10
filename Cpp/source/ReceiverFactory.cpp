@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2019-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -31,7 +31,7 @@ namespace ops
     {
         Receiver* receiver = nullptr;
 
-        IOService* ioService = participant.getIOService();
+        IOService* const ioService = participant.getIOService();
 
         //This should never happen, log an internal error and return nullptr;
         if (ioService == nullptr)

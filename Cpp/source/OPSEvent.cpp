@@ -49,7 +49,7 @@ namespace ops {
 
         void signal()
         {
-            std::unique_lock<std::mutex> lock(mtx);
+            const std::unique_lock<std::mutex> lock(mtx);
             signaled = true;
             cv.notify_one();
         }

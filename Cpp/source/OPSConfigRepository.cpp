@@ -36,7 +36,7 @@ static Lockable repoLock;
 
 OPSConfigRepository* OPSConfigRepository::Instance()
 {
-    SafeLock lock(&repoLock);
+    const SafeLock lock(&repoLock);
     static OPSConfigRepository repo;
     return &repo;
 }
@@ -53,9 +53,9 @@ OPSConfigRepository::~OPSConfigRepository()
     Clear();
 }
 
-bool OPSConfigRepository::domainExist(ObjectName_T domainID )
+bool OPSConfigRepository::domainExist(const ObjectName_T& domainID )
 {
-    SafeLock lock(&repoLock);
+    const SafeLock lock(&repoLock);
     std::vector<Domain*>& doms = m_config->getRefToDomains();
     for (unsigned int i = 0; i < doms.size(); i++) {
         if (doms[i]->getDomainID() == domainID) return true;
@@ -73,9 +73,7 @@ int OPSConfigRepository::numDomains()
 // Returns true if at least one domain added
 bool OPSConfigRepository::Add( FileName_T filename, ObjectName_T domain )
 {
-    bool retVal = false;
-
-    SafeLock lock(&repoLock);
+    const SafeLock lock(&repoLock);
 
     if (domain != "") {
         // Check if domain already exist
@@ -85,7 +83,7 @@ bool OPSConfigRepository::Add( FileName_T filename, ObjectName_T domain )
 			msg += "' already exist";
     		BasicError err("OPSConfigRepository", "Add", msg );
             Participant::reportStaticError(&err);
-            return retVal;
+            return false;
         }
     }
 
@@ -99,7 +97,7 @@ bool OPSConfigRepository::Add( FileName_T filename, ObjectName_T domain )
         } else {
             // Need to read file
             config = OPSConfig::getConfig( filename );
-			if (config == nullptr) { return retVal; }
+			if (config == nullptr) { return false; }
             m_configFiles[filename] = config;
         }
     } catch (ops::ConfigException& ex)
@@ -108,7 +106,7 @@ bool OPSConfigRepository::Add( FileName_T filename, ObjectName_T domain )
 		msg += ex.what();
         BasicError err("OPSConfigRepository", "Add", msg);
         Participant::reportStaticError(&err);
-        return retVal;
+        return false;
     }
 
 	return extractDomains(config, domain);
@@ -119,20 +117,18 @@ bool OPSConfigRepository::Add( FileName_T filename, ObjectName_T domain )
 // Note that the repository takes over ownership of the config object
 bool OPSConfigRepository::Add(std::shared_ptr<OPSConfig> config)
 {
-	bool retVal = false;
-
 	// Construct a new unique name to be used in the "file cache"
 	FileName_T name("Internal_");
 	name += NumberToString((size_t)config.get());
 
-	SafeLock lock(&repoLock);
+	const SafeLock lock(&repoLock);
 
 	// Check if name already used
 	if (m_configFiles.find(name) != m_configFiles.end()) {
-		ErrorMessage_T msg("Failed to add OPSConfig to repository");
+		const ErrorMessage_T msg("Failed to add OPSConfig to repository");
 		BasicError err("OPSConfigRepository", "Add", msg);
 		Participant::reportStaticError(&err);
-		return retVal;
+		return false;
 
 	} else {
 		m_configFiles[name] = config;
@@ -178,7 +174,7 @@ void OPSConfigRepository::Clear()
 // Remove all domains from repository and clears the file-cache
 void OPSConfigRepository::TotalClear()
 {
-	SafeLock lock(&repoLock);
+	const SafeLock lock(&repoLock);
 	m_config->getRefToDomains().clear();
 
 	for (auto it = m_configFiles.begin(); it != m_configFiles.end(); ++it) {
@@ -191,16 +187,16 @@ void OPSConfigRepository::TotalClear()
 // if 'domainID' != "", the domain must exist otherwise nullptr is returned.
 std::shared_ptr<OPSConfig> OPSConfigRepository::getConfig(ObjectName_T domainID )
 {
-    SafeLock lock(&repoLock);
+    const SafeLock lock(&repoLock);
 
     // If no domain have been added, we try to add the default file
     // This is for backward compatibility
     if (m_config->getRefToDomains().size() == 0) {
-        if (!Add("ops_config.xml")) return nullptr;
+        if (!Add("ops_config.xml")) { return nullptr; }
     }
 
     if (domainID != "") {
-        if (!domainExist( domainID )) return nullptr;
+        if (!domainExist(domainID)) { return nullptr; }
     }
 
     return m_config;
