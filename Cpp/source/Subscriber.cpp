@@ -89,7 +89,7 @@ namespace ops
     }
 
     // Note that the receiveDataHandler messageLock is held while executing this method
-    void Subscriber::onNewEvent(Notifier<OPSMessage*>* , OPSMessage* message)
+    void Subscriber::onNewEvent(Notifier<OPSMessage*>* , OPSMessage* const message)
     {
         //Perform a number of checks on incomming data to be sure we want to deliver it to the application layer
         //Check that this message is delivered on the same topic as this Subscriber use

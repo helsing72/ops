@@ -64,7 +64,7 @@ namespace ops
 		unsigned long Ip = boost::asio::ip::address_v4::from_string(addr.c_str()).to_ulong();
 		//std::cout << "isValidNodeAddress(): " << std::hex << Ip << std::dec << std::endl;
         if (Ip == 0) { return false; }
-		if (Ip >= 0xE0000000) return false;  // Skip multicast and above
+        if (Ip >= 0xE0000000) { return false; }  // Skip multicast and above
 		return true;
 	}
 
@@ -76,7 +76,7 @@ namespace ops
 		//std::cout << "isMyNodeAddress(): " << std::hex << Ip << std::dec << std::endl;
         if (Ip == 0x7F000001) { return true; }  // localhost
 
-		boost::asio::io_service* ioService = dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService;
+		boost::asio::io_service* ioService = BoostIOServiceImpl::get(ioServ);
 
 		using boost::asio::ip::udp;
 
@@ -120,12 +120,12 @@ Address_T doSubnetTranslation(Address_T addr, IOService* const ioServ)
 	if (mask.length() <= 2) {
 		// Expand to the number of bits given
 		subnetMask = atoi(mask.c_str());
-		subnetMask = (((1 << subnetMask)-1) << (32 - subnetMask)) & 0xFFFFFFFF;
+		subnetMask = (((1u << subnetMask)-1u) << (32u - subnetMask)) & 0xFFFFFFFF;
 	} else {
 		subnetMask = boost::asio::ip::address_v4::from_string(mask.c_str()).to_ulong();
 	}
 
-	boost::asio::io_service* ioService = dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService;
+	boost::asio::io_service* ioService = BoostIOServiceImpl::get(ioServ);
 
 	// Note: The resolver requires that the hostname can be used to resolve to an ip
 	// e.g due to the hostname beeing listed with an ipv4 address in /etc/hosts.

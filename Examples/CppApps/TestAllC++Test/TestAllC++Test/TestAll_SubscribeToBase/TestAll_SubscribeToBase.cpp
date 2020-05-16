@@ -28,7 +28,7 @@ public:
     }
 
 	BaseTypeFactory() = default;
-	~BaseTypeFactory() = default;
+	virtual ~BaseTypeFactory() = default;
 	BaseTypeFactory(BaseTypeFactory const&) = delete;
 	BaseTypeFactory(BaseTypeFactory&&) = delete;
 	BaseTypeFactory& operator =(BaseTypeFactory&&) = delete;
@@ -71,9 +71,8 @@ public:
 
 	}
 	///Override from ops::DataListener, called whenever new data arrives.
-	virtual void onNewData(ops::DataNotifier* subscriber) override
+	virtual void onNewData(ops::DataNotifier* ) override
 	{
-		UNUSED(subscriber);
 		counter++;
 
 		/*TestAll::BaseData* data;
@@ -87,9 +86,8 @@ public:
 		//std::cout << ((ops::ParticipantInfoData*)baseSub->getMessage()->getData())->ips[0] << ":" <<((ops::ParticipantInfoData*)baseSub->getMessage()->getData())->mc_udp_port << std::endl;
 	}
 	///Override from ops::DeadlineMissedListener, called if no new data has arrived within deadlineQoS.
-	virtual void onDeadlineMissed(ops::DeadlineMissedEvent* evt) override
+	virtual void onDeadlineMissed(ops::DeadlineMissedEvent* ) override
 	{
-		UNUSED(evt);
 		std::cout << "Deadline Missed!" << std::endl;
 	}
 	~Main()

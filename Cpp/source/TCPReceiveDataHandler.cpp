@@ -50,7 +50,7 @@ namespace ops
 
 		// Look for it in rdc, if not there, create one
 		bool found = false;
-		for (auto x : rdc) {
+		for (auto const x : rdc) {
 			if (x->key == key) {
 				found = true;
 				break;

@@ -58,7 +58,7 @@ bool OPSConfigRepository::domainExist(const ObjectName_T& domainID )
     const SafeLock lock(&repoLock);
     std::vector<Domain*>& doms = m_config->getRefToDomains();
     for (unsigned int i = 0; i < doms.size(); i++) {
-        if (doms[i]->getDomainID() == domainID) return true;
+        if (doms[i]->getDomainID() == domainID) { return true; }
     }
     return false;
 }
@@ -71,7 +71,7 @@ int OPSConfigRepository::numDomains()
 // Add domains from OPS configuration file "filename"
 // if 'domain' == "", all domains will be added otherwise only the specified 'domain'
 // Returns true if at least one domain added
-bool OPSConfigRepository::Add( FileName_T filename, ObjectName_T domain )
+bool OPSConfigRepository::Add( FileName_T const filename, ObjectName_T const domain )
 {
     const SafeLock lock(&repoLock);
 
@@ -137,7 +137,7 @@ bool OPSConfigRepository::Add(std::shared_ptr<OPSConfig> config)
 	return extractDomains(config);
 }
 
-bool OPSConfigRepository::extractDomains(std::shared_ptr<OPSConfig>& config, ObjectName_T domain)
+bool OPSConfigRepository::extractDomains(std::shared_ptr<OPSConfig>& config, ObjectName_T const domain)
 {
 	bool retVal = false;
 
@@ -165,7 +165,7 @@ bool OPSConfigRepository::extractDomains(std::shared_ptr<OPSConfig>& config, Obj
 
 void OPSConfigRepository::Clear()
 {
-    SafeLock lock(&repoLock);
+    const SafeLock lock(&repoLock);
     // Since we just borrow the references to domains (they are owned by file cache)
     // we can just clear the domain list in our OPSConfig object
     m_config->getRefToDomains().clear();
@@ -185,7 +185,7 @@ void OPSConfigRepository::TotalClear()
 
 // Get a reference to the OPSConfig object
 // if 'domainID' != "", the domain must exist otherwise nullptr is returned.
-std::shared_ptr<OPSConfig> OPSConfigRepository::getConfig(ObjectName_T domainID )
+std::shared_ptr<OPSConfig> OPSConfigRepository::getConfig(ObjectName_T const domainID )
 {
     const SafeLock lock(&repoLock);
 

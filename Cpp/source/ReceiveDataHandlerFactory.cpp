@@ -167,8 +167,8 @@ namespace ops
     bool ReceiveDataHandlerFactory::dataAvailable()
     {
         const SafeLock lock(&garbageLock);
-        for (auto& rdh : receiveDataHandlerInstances) {
-            if (rdh.second->dataAvailable()) return true;
+        for (const auto& rdh : receiveDataHandlerInstances) {
+            if (rdh.second->dataAvailable()) { return true; }
         }
         return false;
     }

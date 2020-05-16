@@ -54,7 +54,7 @@ namespace ops
     public:
         UDPReceiver(uint16_t bindPort, IOService* ioServ, Address_T localInterface = "0.0.0.0", int inSocketBufferSizent = 16000000)
         {
-            boost::asio::io_service* ioService = dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService;
+            boost::asio::io_service* ioService = BoostIOServiceImpl::get(ioServ);
 
             if (localInterface == "0.0.0.0") {
                 udp::resolver resolver(*ioService);

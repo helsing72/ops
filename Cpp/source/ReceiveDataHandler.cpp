@@ -46,7 +46,7 @@ namespace ops
 
     ReceiveDataHandler::~ReceiveDataHandler()
     {
-		for (auto x : rdc) {
+		for (auto const x : rdc) {
 			delete x;
 		}
     }
@@ -58,7 +58,7 @@ namespace ops
             const SafeLock lock(&messageLock);
             Notifier<OPSMessage*>::addListener(listener);
             if (Notifier<OPSMessage*>::getNrOfListeners() == 1) {
-                for (auto x : rdc) {
+                for (auto const x : rdc) {
                     x->start();
                 }
             }
@@ -74,7 +74,7 @@ namespace ops
         const SafeLock lock(&messageLock);
 		Notifier<OPSMessage*>::removeListener(listener);
 		if (Notifier<OPSMessage*>::getNrOfListeners() == 0) {
-			for (auto x : rdc) {
+			for (auto const x : rdc) {
 				x->stop();
 			}
 		}
@@ -114,7 +114,7 @@ namespace ops
 	// Called when there are no more listeners and we are about to be put on the garbage-list for later removal
     void ReceiveDataHandler::clear()
     {
-		for (auto x : rdc) {
+		for (auto const x : rdc) {
 			x->clear();
 		}
 

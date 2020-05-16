@@ -136,7 +136,7 @@ namespace ops
 			TCPServerBase(client, ioServ),
 			_serverPort(serverPort), _serverIP(serverIP), _outSocketBufferSize(outSocketBufferSize)
 		{
-			_ioService = dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService;
+			_ioService = BoostIOServiceImpl::get(ioServ);
 			//boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(serverIP));
 			_endpoint = new boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), serverPort);
 		}

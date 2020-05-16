@@ -47,7 +47,7 @@ namespace ops
 	UDPSender::UDPSender(IOService* ioServ, Address_T localInterface, int ttl, int outSocketBufferSize, bool multicastSocket):
 		ipAddr(boost::asio::ip::address_v4::from_string(localInterface.c_str())),
 		localEndpoint(ipAddr, 0),
-		socket(nullptr), io_service(dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService),
+		socket(nullptr), io_service(BoostIOServiceImpl::get(ioServ)),
 		_localInterface(localInterface), _ttl(ttl), _outSocketBufferSize(outSocketBufferSize), _multicastSocket(multicastSocket)
     {
 		open();

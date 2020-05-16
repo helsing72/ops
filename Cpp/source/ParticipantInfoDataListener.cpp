@@ -153,7 +153,7 @@ namespace ops
 
         // Remove from map
         ObjectName_T key = top.getName();
-        auto result = sendDataHandlers.find(key);
+        const auto result = sendDataHandlers.find(key);
         if (result != sendDataHandlers.end()) {
             const std::shared_ptr<SendDataHandler> sdh = sendDataHandlers[key];
             if (sdh.get() != handler.get()) {
@@ -211,7 +211,7 @@ namespace ops
 		const SafeLock lock(&mutex);
 
 		// Remove from map
-		auto result = rcvDataHandlers.find(top);
+		const auto result = rcvDataHandlers.find(top);
 		if (result != rcvDataHandlers.end()) {
             const std::shared_ptr<ReceiveDataHandler> rdh = rcvDataHandlers[top];
 			if (rdh.get() != handler.get()) {

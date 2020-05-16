@@ -74,7 +74,7 @@ namespace ops
 
 	// --------------------------------------------------------------------------------
 
-	ParticipantKey_T getKey(ObjectName_T domainID_, ObjectName_T participantID)
+	ParticipantKey_T getKey(const ObjectName_T& domainID_, const ObjectName_T& participantID)
 	{
 		ParticipantKey_T key = domainID_;
 		key += "::";
@@ -125,7 +125,7 @@ namespace ops
 		instances.erase(key);
 	}
 
-	Participant::Participant(ObjectName_T domainID_, ObjectName_T participantID_, FileName_T configFile_, execution_policy::Enum policy):
+	Participant::Participant(ObjectName_T const domainID_, ObjectName_T const participantID_, FileName_T const configFile_, execution_policy::Enum const policy):
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 		debugHandler(*this),
 #endif
@@ -456,7 +456,7 @@ namespace ops
 		errorService->removeListener(listener);
 	}
 
-	bool Participant::hasPublisherOn(ObjectName_T const topicName)
+	bool Participant::hasPublisherOn(const ObjectName_T& topicName)
 	{
 		const SafeLock lock(&partInfoDataMutex);
 		// Check if topic exist in partInfoData.publishTopics
@@ -467,7 +467,7 @@ namespace ops
 		return false;
 	}
 
-	bool Participant::hasSubscriberOn(ObjectName_T topicName)
+	bool Participant::hasSubscriberOn(const ObjectName_T& topicName)
 	{
 		const SafeLock lock(&partInfoDataMutex);
 		// Check if topic exist in partInfoData.subscribeTopics

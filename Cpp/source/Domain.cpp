@@ -101,7 +101,7 @@ ObjectName_T Domain::getDomainID() const
 	return domainID;
 }
 
-void Domain::serialize(ArchiverInOut* archiver)
+void Domain::serialize(ArchiverInOut* const archiver)
 {
 	OPSObject::serialize(archiver);
 	archiver->inout("domainID", domainID);

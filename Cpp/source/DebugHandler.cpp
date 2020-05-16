@@ -102,7 +102,7 @@ namespace ops {
             if (gKey == "") { return; }
 
 			// Check if already started
-            if (_sub) { return; }
+            if (_sub != nullptr) { return; }
 
 			setup();
 		}
@@ -266,28 +266,28 @@ namespace ops {
 	}
 
 	// Used by application to set a handler for "Generic Command" (50)
-	void DebugHandler::SetAppCallback(DebugNotifyInterface* client)
+	void DebugHandler::SetAppCallback(DebugNotifyInterface* const client)
 	{
 		_pimpl->SetAppCallback(client);
 	}
 
 	// Register/Unregister with the debug handler
-	void DebugHandler::RegisterPub(DebugNotifyInterface* client, const ObjectName_T& topicName)
+	void DebugHandler::RegisterPub(DebugNotifyInterface* const client, const ObjectName_T& topicName)
 	{
 		_pimpl->RegisterPub(client, topicName);
 	}
 	
-	void DebugHandler::UnregisterPub(DebugNotifyInterface* client, const ObjectName_T& topicName)
+	void DebugHandler::UnregisterPub(DebugNotifyInterface* const client, const ObjectName_T& topicName)
 	{
 		_pimpl->UnregisterPub(client, topicName);
 	}
 
-	void DebugHandler::RegisterSub(DebugNotifyInterface* client, const ObjectName_T& topicName)
+	void DebugHandler::RegisterSub(DebugNotifyInterface* const client, const ObjectName_T& topicName)
 	{
 		_pimpl->RegisterSub(client, topicName);
 	}
 	
-	void DebugHandler::UnregisterSub(DebugNotifyInterface* client, const ObjectName_T& topicName)
+	void DebugHandler::UnregisterSub(DebugNotifyInterface* const client, const ObjectName_T& topicName)
 	{
 		_pimpl->UnregisterSub(client, topicName);
 	}

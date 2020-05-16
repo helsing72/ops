@@ -225,8 +225,8 @@ namespace ops
 		void setUdpTransportInfo(Address_T ip, int port);
 		void registerTcpTopic(ObjectName_T topicName, std::shared_ptr<ReceiveDataHandler> handler);
 		void unregisterTcpTopic(ObjectName_T topicName, std::shared_ptr<ReceiveDataHandler> handler);
-		bool hasPublisherOn(ObjectName_T topicName);
-		bool hasSubscriberOn(ObjectName_T topicName);
+		bool hasPublisherOn(const ObjectName_T& topicName);
+		bool hasSubscriberOn(const ObjectName_T&topicName);
 
 		Domain* domain;		
 

@@ -49,7 +49,7 @@ namespace ops
 		}
 	}
 	
-	InternalKey_T getKey(Topic& top, Address_T& localIf)
+	InternalKey_T getKey(const Topic& top, const Address_T& localIf)
 	{
 		// We need to store SendDataHandlers with more than just the name as key.
 		// Since topics can use the same port, we need to return the same SendDataHandler.
@@ -73,7 +73,7 @@ namespace ops
 		return key;
 	}
 
-    void SendDataHandlerFactory::PostSetup(Topic& top, Participant& participant, std::shared_ptr<SendDataHandler> sdh)
+    void SendDataHandlerFactory::PostSetup(Topic& top, Participant& participant, std::shared_ptr<SendDataHandler> const sdh)
     {
         if (top.getTransport() == Topic::TRANSPORT_UDP) {
             // If topic specifies a valid node address, add that as a static destination address for topic
@@ -139,7 +139,7 @@ namespace ops
 		
         if (top.getTransport() == Topic::TRANSPORT_UDP) {
             if (sendDataHandlers.find(key) != sendDataHandlers.end()) {
-                std::shared_ptr<SendDataHandler> sdh = sendDataHandlers[key];
+                const std::shared_ptr<SendDataHandler> sdh = sendDataHandlers[key];
                 if (!isValidNodeAddress(top.getDomainAddress())) {
                     participant.partInfoListener->disconnectUdp(top, sdh);
                 }

@@ -106,7 +106,7 @@ namespace ops
 	{
 		return sampleMaxSize;
 	}
-	void Topic::setSampleMaxSize(int size)
+	void Topic::setSampleMaxSize(int const size)
 	{
 		if(size < OPSConstants::PACKET_MAX_SIZE)
 		{
@@ -121,11 +121,11 @@ namespace ops
 	{
 		return port;
 	}
-	void Topic::setPort(int port)
+	void Topic::setPort(int const port)
 	{
 		this->port = port;
 	}
-	void Topic::setTimeToLive(int ttl)
+	void Topic::setTimeToLive(int const ttl)
 	{
 		timeToLive = ttl;
 	}
@@ -142,7 +142,7 @@ namespace ops
 	{
 		return outSocketBufferSize;
 	}
-	void Topic::setOutSocketBufferSize(int64_t size)
+	void Topic::setOutSocketBufferSize(int64_t const size)
 	{
 		outSocketBufferSize = size;
 	}
@@ -150,7 +150,7 @@ namespace ops
 	{
 		return inSocketBufferSize;
 	}
-	void Topic::setInSocketBufferSize(int64_t size)
+	void Topic::setInSocketBufferSize(int64_t const size)
 	{
 		inSocketBufferSize = size;
 	}
@@ -174,7 +174,7 @@ namespace ops
 		return channelID;
 	}
 
-	void Topic::serialize(ArchiverInOut* archiver)
+	void Topic::serialize(ArchiverInOut* const archiver)
 	{
 		OPSObject::serialize(archiver);
 		archiver->inout("name", name);

@@ -32,11 +32,15 @@ namespace ops {
         struct calculator_xor_8
         {
             uint8_t sum = 0;
+            size_t totalbytes = 0;
+            uint32_t totalfields = 0;
 
             // A simple byte wise xor
             void calc(InoutName_T , const void* ptr, size_t size)
             {
-                //std::cout << "chksum: " << name << "\n";
+                totalbytes += size;
+                totalfields++;
+                //std::cout << "chksum: " << name << ", size = " << size << "\n";
                 for (size_t i = 0; i < size; i++) {
                     sum = sum ^ ((const uint8_t*)ptr)[i];
                 }

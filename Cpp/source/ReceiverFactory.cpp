@@ -47,11 +47,7 @@ namespace ops
         {
             receiver = Receiver::createMCReceiver(top.getDomainAddress(), top.getPort(), ioService, localIf, top.getInSocketBufferSize());
         }
-//Moved into TCPReceiveDataHandler
-//        else if (top.getTransport() == Topic::TRANSPORT_TCP)
-//        {
-//            receiver = Receiver::createTCPClient(top.getDomainAddress(), top.getPort(), ioService, top.getInSocketBufferSize());
-//        }
+        //TRANSPORT_TCP creation moved into TCPReceiveDataHandler
         else if (top.getTransport() == Topic::TRANSPORT_UDP)
         {
             int port = 0;
