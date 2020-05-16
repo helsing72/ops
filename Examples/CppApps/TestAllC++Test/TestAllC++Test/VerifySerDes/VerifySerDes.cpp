@@ -26,6 +26,7 @@ char arr[TestAll::Definitions::const_b];
 #include <MemoryMap.h>
 #include <OPSConfigRepository.h>
 #include "PrintArchiverOut.h"
+#include "ChecksumArchiver.h"
 #include "OPSArchiverOut.h"
 
 #ifdef _WIN32
@@ -246,11 +247,11 @@ void checkObjects(const TestAll::ChildData& data, const TestAll::ChildData& exp)
 
 	AssertEQ<size_t>(data.ls.size(), exp.ls.size());
 	for (unsigned int i = 0; i < data.ls.size(); i++) { AssertEQ<int64_t>(data.ls[i], exp.ls[i]); }
-	for(int i = 0; i < 6; i++) AssertEQ<int64_t>(data.fls[i], exp.fls[i]);
+    for (int i = 0; i < 6; i++) { AssertEQ<int64_t>(data.fls[i], exp.fls[i]); }
 
 	AssertEQ<size_t>(data.fs.size(), exp.fs.size());
 	for (unsigned int i = 0; i < data.fs.size(); i++) { AssertEQ<float>(data.fs[i], exp.fs[i]); }
-	for(int i = 0; i < 77; i++) AssertEQ<float>(data.ffs[i], exp.ffs[i]);
+    for (int i = 0; i < 77; i++) { AssertEQ<float>(data.ffs[i], exp.ffs[i]); }
 
 	AssertEQ<size_t>(data.ds.size(), exp.ds.size());
 	for (unsigned int i = 0; i < data.ds.size(); i++) { AssertEQ<double>(data.ds[i], exp.ds[i]); }
@@ -495,7 +496,7 @@ int main(const int argc, const char* args[])
 		fillChildData(cd1);
 
 		std::cout << "Test copy constructor..." << std::endl;
-		TestAll::ChildData cd2c(cd1);
+		const TestAll::ChildData cd2c(cd1);
 		checkObjects(cd1, cd2c);
 		std::cout << "Finished " << std::endl;
 
@@ -529,6 +530,16 @@ int main(const int argc, const char* args[])
 			prt.printObject("data", &cd1);
 		}
 		std::cout << "Print Archiver Test Finished " << std::endl;
+
+        std::cout << "Test Checksum Archiver" << std::endl;
+        {
+            ops::ChecksumArchiver<ops::example::calculator_xor_8> chk;
+            chk.calc.sum = 0;
+            cd1.serialize(&chk);
+            std::cout << "Checksum Archiver # fields = " << chk.calc.totalfields << std::endl;
+            std::cout << "Checksum Archiver # bytes = " << chk.calc.totalbytes << std::endl;
+            std::cout << "Checksum Archiver 8-bit XOR = " << (int)chk.calc.sum << std::endl;
+        }
 
 #if defined(DEBUG_OPSOBJECT_COUNTER)
 		std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
@@ -646,7 +657,7 @@ int main(const int argc, const char* args[])
 
 			std::cout << "Waiting for more data during 60 seconds... (Press Ctrl-C to terminate)" << std::endl;
 			int64_t PubTime = ops::TimeHelper::currentTimeMillis() + 5000;
-			int64_t Limit = ops::TimeHelper::currentTimeMillis() + 60000;
+			const int64_t Limit = ops::TimeHelper::currentTimeMillis() + 60000;
 			while (!gTerminate) {
 				if (sub.waitForNewData(100)) {
 					sub.aquireMessageLock();
@@ -663,7 +674,7 @@ int main(const int argc, const char* args[])
 					PubTime = ops::TimeHelper::currentTimeMillis() + 5000;
 					pub.write(cd1);
 				}
-				if (Limit < ops::TimeHelper::currentTimeMillis()) break;
+                if (Limit < ops::TimeHelper::currentTimeMillis()) { break; }
 			}
 		}
 
