@@ -146,7 +146,7 @@ Topic* Domain::findTopic(ObjectName_T const id) const
 	return nullptr;
 }
 
-void Domain::checkTransports()
+void Domain::checkTransports() const
 {
 	// Now update topics with values from the transports and channels
 	// Loop over all transports and for each topic, see if it needs parameters from the channel

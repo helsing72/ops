@@ -74,7 +74,7 @@ namespace ops
 			return _protocol->sendData(buf, size);
 		}
 
-		bool isConnected()
+		bool isConnected() const
 		{
 			return _connected;
 		}

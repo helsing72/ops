@@ -63,7 +63,7 @@ bool OPSConfigRepository::domainExist(const ObjectName_T& domainID )
     return false;
 }
 
-int OPSConfigRepository::numDomains()
+int OPSConfigRepository::numDomains() const
 {
 	return (int)m_config->getRefToDomains().size();
 }

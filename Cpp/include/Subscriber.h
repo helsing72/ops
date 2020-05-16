@@ -110,7 +110,7 @@ namespace ops
         ///Returns the number of reserved messages in the underlying ReceiveDataHandler
         ///This value is the total nr for this topic on this participant not only
         ///for this subscriber.
-        int numReservedMessages()                                           // (CB)
+        int numReservedMessages() const                                     // (CB)
         {
             return receiveDataHandler->numReservedMessages();
         }

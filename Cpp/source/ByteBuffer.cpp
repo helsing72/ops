@@ -64,7 +64,7 @@ namespace ops
         }
     }
 
-    char* ByteBuffer::getSegment(int const i)
+    char* ByteBuffer::getSegment(int const i) const
     {
         return memMap.getSegment(i);
     }
@@ -149,7 +149,7 @@ namespace ops
         }
     }
 
-    void ByteBuffer::ByteSwap(unsigned char * b, int n)
+    void ByteBuffer::ByteSwap(unsigned char * b, int n) const
     {
         int i = 0;
         int j = n - 1;

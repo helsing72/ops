@@ -50,7 +50,7 @@ namespace ops
 		std::vector<Transport* > transports;
 
 		void checkTopicValues(Topic* top) const;
-		void checkTransports();
+		void checkTransports() const;
 		Channel* findChannel(ChannelId_T id) const;
 		Topic* findTopic(ObjectName_T id) const;
 

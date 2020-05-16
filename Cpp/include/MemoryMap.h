@@ -119,7 +119,7 @@ public:
 		return true;
 	}
 
-	char* getSegment(int i)
+	char* getSegment(int i) const
 	{
 		if (i >= no_of_segments) throw MemoryMapException("Allocated MemoryMap too small!!!");
 		return bytes[i];

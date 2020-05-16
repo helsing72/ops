@@ -18,15 +18,15 @@ namespace ops
 			_message += "(): ";
 			_message += mess;
 		}
-		virtual int getErrorCode()
+		virtual int getErrorCode() const override
 		{
 			return ERROR_CODE;
 		}
-		virtual ErrorMessage_T getMessage()
+		virtual ErrorMessage_T getMessage() const override
 		{
 			return _message;
 		}
-		virtual ~BasicError(){}
+		virtual ~BasicError() {}
 	private:
 		ErrorMessage_T _message;
 	};

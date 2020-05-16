@@ -181,7 +181,7 @@ namespace ops
 		// Method to "drive" the Participant when the execution_policy is "polling"
 		bool Poll();
 
-		execution_policy::Enum GetExecutionPolicy() { return _policy; }
+		execution_policy::Enum GetExecutionPolicy() const { return _policy; }
 
         // Check under laying transports if there is any data not processed
         bool dataAvailable();

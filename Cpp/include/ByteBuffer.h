@@ -68,7 +68,7 @@ namespace ops
 		void writeNewSegment();
 	private:
 		///Utility method for swaping byte order of basic types (int float etc.)
-        void ByteSwap(unsigned char * b, int n);
+        void ByteSwap(unsigned char * b, int n) const;
 
 		void readNewSegment();
 		void WriteBytes(std::vector<char>& out, int offset, int length);
@@ -103,7 +103,7 @@ namespace ops
 
 		int getNrOfSegments() const;
 		int getSegmentSize(int i) const;
-		char* getSegment(int i);
+		char* getSegment(int i) const;
 		void finish();
 
         ///Writes the 4 bytes making up f to the buffer and increments index by 4.

@@ -57,7 +57,7 @@ namespace ops
         std::shared_ptr<OPSConfig> getConfig(ObjectName_T domainID = "" );
 
         bool domainExist(const ObjectName_T& domainID );
-		int numDomains();
+		int numDomains() const;
 
 	private:
         OPSConfigRepository();
