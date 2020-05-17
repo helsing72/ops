@@ -329,7 +329,7 @@ public:
 		return nullptr;
 	}
 	ObjectFactory_SerDesObjects() = default;
-	~ObjectFactory_SerDesObjects() = default;
+	virtual ~ObjectFactory_SerDesObjects() = default;
 
 	ObjectFactory_SerDesObjects(const ObjectFactory_SerDesObjects& r) = delete;
 	ObjectFactory_SerDesObjects& operator= (const ObjectFactory_SerDesObjects& l) = delete;
@@ -352,17 +352,21 @@ public:
 		// otherwise fact tries to delete it at exit!!
 		EXPECT_TRUE(fact.remove(&fact1));
 	}
+
+    RAII_FactoryHelper(const RAII_FactoryHelper&) = delete;
+    RAII_FactoryHelper(RAII_FactoryHelper&&) = delete;
+    RAII_FactoryHelper& operator=(const RAII_FactoryHelper&) = delete;
+    RAII_FactoryHelper& operator=(RAII_FactoryHelper&&) = delete;
 };
 
 class SerDesObject_Serializables : public OPSObject
 {
 public:
 	static ops::TypeId_T getTypeName() { return ops::TypeId_T("SerDesObject_Serializables"); }
-	SerDesObject_Serializables() 
+	SerDesObject_Serializables() :
+        obj2(new SerDesObject_Core()), obj3(new SerDesObject_Core())
 	{ 
 		appendType(getTypeName()); 
-		obj2 = new SerDesObject_Core();
-		obj3 = new SerDesObject_Core();
 		fixarr2[0] = new SerDesObject_Core();
 		fixarr2[1] = new SerDesObject_Core();
 	}

@@ -113,7 +113,7 @@ public:
 	}
 
 	OpsObject_MessageTest_Factory() = default;
-	~OpsObject_MessageTest_Factory() = default;
+	virtual ~OpsObject_MessageTest_Factory() = default;
 
 	OpsObject_MessageTest_Factory(const OpsObject_MessageTest_Factory& r) = delete;
 	OpsObject_MessageTest_Factory& operator= (const OpsObject_MessageTest_Factory& l) = delete;
@@ -278,7 +278,7 @@ TEST(Test_OPSMessage, Test_CopyMove) {
 		EXPECT_EQ(obj2.getData(), nullptr);
 
 		// Create some data
-		OpsObject_MessageTest* data = new OpsObject_MessageTest();
+		OpsObject_MessageTest* const data = new OpsObject_MessageTest();
 		EXPECT_EQ(OpsObject_MessageTest_Cnt, 1);
 
 		obj1.setData(data);

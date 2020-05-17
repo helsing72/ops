@@ -34,16 +34,23 @@ using mytype = std::atomic<uint32_t>;
 
 class MyRunnable : public Runnable
 {
-    mytype& _state;
-    uint32_t _inc;
 public:
-    MyRunnable(mytype& state, uint32_t inc) : _state(state), _inc(inc) {}
+    MyRunnable(mytype& state, uint32_t const inc) : _state(state), _inc(inc) {}
+    MyRunnable(const MyRunnable&) = delete;
+    MyRunnable(MyRunnable&&) = delete;
+    MyRunnable& operator=(const MyRunnable&) = delete;
+    MyRunnable& operator=(MyRunnable&&) = delete;
+    virtual ~MyRunnable() = default;
+
     virtual void run() override 
     {
-        while (_state.load() != 0) std::this_thread::sleep_for(std::chrono::milliseconds(1));
-        if (_inc == 999) throw std::exception();
+        while (_state.load() != 0) { std::this_thread::sleep_for(std::chrono::milliseconds(1)); }
+        if (_inc == 999) { throw std::exception(); }
         _state += _inc;
     }
+private:
+    mytype& _state;
+    uint32_t _inc;
 };
 
 // ===============================
@@ -121,7 +128,7 @@ TEST(Test_ThreadPool, Test) {
     EXPECT_EQ(s3, 3u);
 }
 
-static void threadpool_worker(SingleThreadPool& pool, Runnable* r, bool add, mytype& state)
+static void threadpool_worker(SingleThreadPool& pool, Runnable* const r, bool const add, mytype& state)
 {
     state = 1;
     if (add) {

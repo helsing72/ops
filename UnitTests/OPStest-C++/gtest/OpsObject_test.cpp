@@ -35,7 +35,7 @@ public:
 	{ 
 		appendType("MyOpsObject"); 
 	}
-	~MyOpsObject() = default;
+	virtual ~MyOpsObject() = default;
 
 	MyOpsObject(const MyOpsObject& r) = delete;
 	MyOpsObject& operator= (const MyOpsObject& l) = delete;

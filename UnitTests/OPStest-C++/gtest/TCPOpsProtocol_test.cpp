@@ -34,7 +34,7 @@ public:
 	{
 		memset(sbuf, 0, sizeof(sbuf));
 	}
-	~MyTcpProtClient() = default;
+	virtual ~MyTcpProtClient() = default;
 
 	MyTcpProtClient() = delete;
 	MyTcpProtClient(const MyTcpProtClient& r) = delete;
