@@ -30,7 +30,7 @@ namespace ops
 	{
 	public:
 		std::string requestId;
-		bool requestAccepted;
+        bool requestAccepted{ false };
 		std::string message;
 
 		void serialize(ops::ArchiverInOut* archiver) override

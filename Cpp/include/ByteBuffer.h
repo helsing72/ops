@@ -49,12 +49,12 @@ namespace ops
         MemoryMap& memMap;
         ///index pointing out where in the buffer to do the next read or write.
         ///This variable is automatically incremented by the read and write operations.
-        int index;
+        int index{ 0 };
 
-		int totalSize;
+        int totalSize{ 0 };
 
 		int nextSegmentAt;
-		int currentSegment;
+        int currentSegment{ 0 };
 
 		///"Short" string optimization for ReadString()
 		static const int shortStringBufferLength = 255;
@@ -192,7 +192,7 @@ namespace ops
 		bool checkProtocol();
         
         //Destructor does not do anything buffer should be created and deleted by user of this class.
-        ~ByteBuffer(void);
+        ~ByteBuffer();
     };
     
 }

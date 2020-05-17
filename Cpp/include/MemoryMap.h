@@ -52,10 +52,7 @@ struct MemoryMapAllocator {
 class OPS_EXPORT MemoryMap
 {
 public:
-	MemoryMap() :
-		no_of_segments(0),
-		segment_size(0),
-		dataCreator(false)
+	MemoryMap()
 	{
 		bytes = small_width_vector;
 		bytes[0] = nullptr;
@@ -86,8 +83,7 @@ public:
 	}
 	MemoryMap(char* segment, int size):
 		  no_of_segments(1), 
-		  segment_size(size),
-		  dataCreator(false)
+		  segment_size(size)
 	{
 		bytes = small_width_vector;
 		bytes[0] = segment;
@@ -150,13 +146,13 @@ public:
 	}
 
 private:
-	MemoryMapAllocator* segment_allocator = nullptr;
-	int no_of_segments;
-	int segment_size;
-	bool dataCreator;
+    MemoryMapAllocator* segment_allocator{ nullptr };
+    int no_of_segments{ 0 };
+    int segment_size{ 0 };
+    bool dataCreator{ false };
 	char** bytes;
 	static const int smallWidthOpt = 4;
-	char* small_width_vector[smallWidthOpt];
+    char* small_width_vector[smallWidthOpt]{ nullptr };
 };
 
 }

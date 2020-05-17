@@ -39,9 +39,8 @@ namespace ops
 	{
 	public:
 		boost::asio::io_service* boostIOService;
-		BoostIOServiceImpl()
+		BoostIOServiceImpl() : boostIOService(new boost::asio::io_service())
 		{
-			boostIOService = new boost::asio::io_service();	
 		}
 	
 		virtual void run() override

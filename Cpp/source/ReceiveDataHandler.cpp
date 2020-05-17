@@ -35,8 +35,7 @@ namespace ops
     ReceiveDataHandler::ReceiveDataHandler(Topic const top, Participant& part, ReceiveDataChannel* const rdc_) :
 		topic(top),
 		participant(part),
-		sampleMaxSize(top.getSampleMaxSize()),
-		message(nullptr)
+		sampleMaxSize(top.getSampleMaxSize())
     {
 		if (rdc_ != nullptr) {
 			rdc.push_back(rdc_);

@@ -130,21 +130,8 @@ namespace ops
 		debugHandler(*this),
 #endif
 		_policy(policy),
-		ioService(nullptr),
-		config(nullptr),
-		errorService(nullptr),
-		threadPool(nullptr),
-		aliveDeadlineTimer(nullptr),
-		partInfoPub(nullptr),
-		domain(nullptr),
-		partInfoListener(nullptr),
-		receiveDataHandlerFactory(nullptr),
-		sendDataHandlerFactory(nullptr),
 		domainID(domainID_),
-		participantID(participantID_),
-		keepRunning(true),
-		aliveTimeout(1000),
-		objectFactory(nullptr)
+		participantID(participantID_)
 	{
         ioService = IOService::create();
 

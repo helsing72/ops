@@ -151,7 +151,7 @@ namespace ops
 
 		bool open() override
 		{
-			if (_server) close();
+			if (_server != nullptr) close();
 			_server = std::make_shared<impl>(this, _ioService);
 			_server->start_accept();
 
@@ -164,7 +164,7 @@ namespace ops
 
 		void close() override
 		{
-			if (_server) {
+			if (_server != nullptr) {
 				_server->cancel();
 				_server.reset();
 			}
@@ -173,7 +173,7 @@ namespace ops
 
 		uint16_t getLocalPort() override
 		{
-			if ((_serverPort == 0) && (_server)) {
+			if ((_serverPort == 0) && (_server != nullptr)) {
 				Address_T addr;
 				uint16_t port;
 				_server->getLocal(addr, port);

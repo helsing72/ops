@@ -30,7 +30,7 @@ namespace ops {
 			return mpm;
 		}
 
-		memory_pool_manager::memory_pool_manager() : _root(nullptr), _numPools(0), _client(nullptr)
+		memory_pool_manager::memory_pool_manager()
 		{
 			_root.next = &_root;
 			_root.prev = &_root;

@@ -26,10 +26,8 @@ namespace ops
 
     ByteBuffer::ByteBuffer(MemoryMap& mMap, bool const _preserveWrittenData):
         preserveWrittenData(_preserveWrittenData), memMap(mMap),
-		index(0), totalSize(0), currentSegment(0)
+        nextSegmentAt(memMap.getSegmentSize())
     {
-        nextSegmentAt = memMap.getSegmentSize();
-
 		// Check that each segment in map is larger than our needed segment header
 		//   protocolID                 4
 		//   version                    2

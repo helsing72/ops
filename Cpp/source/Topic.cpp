@@ -27,31 +27,19 @@ namespace ops
 {
     using namespace opsidls;
 
-	Topic::Topic(ObjectName_T namee, int const portt, TypeId_T typeIDd, Address_T domainAddresss)
-		: name(namee), 
+	Topic::Topic(ObjectName_T namee, int const portt, TypeId_T typeIDd, Address_T domainAddresss) :
+		name(namee), 
 		port(portt), 
-		timeToLive(-1),
 		typeID(typeIDd), 
 		domainAddress(domainAddresss),
 		participantID(OPSConstants::DEFAULT_PARTICIPANT_ID()),
-		sampleMaxSize(OPSConstants::PACKET_MAX_SIZE),
-		outSocketBufferSize(-1),
-		inSocketBufferSize(-1),
-		participant(nullptr)
+		sampleMaxSize(OPSConstants::PACKET_MAX_SIZE)
 	{
 		appendType(TypeId_T("Topic"));
 	}
-	Topic::Topic()
-		: name(""), 
-		port(0), 
-		timeToLive(-1),
-		typeID(""), 
-		domainAddress(""),
+	Topic::Topic() :
 		participantID(OPSConstants::DEFAULT_PARTICIPANT_ID()),
-		sampleMaxSize(OPSConstants::PACKET_MAX_SIZE),
-		outSocketBufferSize(-1),
-		inSocketBufferSize(-1),
-		participant(nullptr)
+		sampleMaxSize(OPSConstants::PACKET_MAX_SIZE)
 	{
 		appendType(TypeId_T("Topic"));
 	}

@@ -205,17 +205,17 @@ namespace ops
 		std::shared_ptr<OPSConfig> config;
 
 		///The ErrorService
-		ErrorService* errorService;
+        ErrorService* errorService{ nullptr };
 
 		///The threadPool drives ioService. By default Participant use a SingleThreadPool i.e. only one thread drives ioService.
-		ThreadPool* threadPool;
+        ThreadPool* threadPool{ nullptr };
 
 		///A timer that fires with a certain periodicity, it keeps this Participant alive in the system by publishing ParticipantInfoData
-		DeadlineTimer* aliveDeadlineTimer;
+        DeadlineTimer* aliveDeadlineTimer{ nullptr };
 
 		//------------------------------------------------------------------------
 		///A publisher of ParticipantInfoData
-		Publisher* partInfoPub;
+        Publisher* partInfoPub{ nullptr };
                 
 		///The ParticipantInfoData that partInfoPub will publish periodically
 		ParticipantInfoData partInfoData;
@@ -228,16 +228,16 @@ namespace ops
 		bool hasPublisherOn(const ObjectName_T& topicName);
 		bool hasSubscriberOn(const ObjectName_T&topicName);
 
-		Domain* domain;		
+        Domain* domain{ nullptr };
 
 		//------------------------------------------------------------------------
 		///A listener and handler for ParticipantInfoData
-        ParticipantInfoDataListener* partInfoListener;
+        ParticipantInfoDataListener* partInfoListener{ nullptr };
 
 		//------------------------------------------------------------------------
 		//
-		ReceiveDataHandlerFactory* receiveDataHandlerFactory;
-		SendDataHandlerFactory* sendDataHandlerFactory;
+        ReceiveDataHandlerFactory* receiveDataHandlerFactory{ nullptr };
+        SendDataHandlerFactory* sendDataHandlerFactory{ nullptr };
 
 		//Visible to friends only
 		//TODO: Deprecate and delegate to receiveDataHandlerFactory???
@@ -259,13 +259,13 @@ namespace ops
 		ObjectName_T participantID;
 
 		///As long this is true, we keep on running this participant
-		volatile bool keepRunning;
+        volatile bool keepRunning{ true };
 
 		///The interval with which this Participant publishes ParticipantInfoData
-		int64_t aliveTimeout;
+        int64_t aliveTimeout{ 1000 };
 
 		///The data type factory used in this Participant. 
-		OPSObjectFactory* objectFactory;
+        OPSObjectFactory* objectFactory{ nullptr };
 
 		///Static Mutex used by factory methods getInstance()
 		static Lockable creationMutex;

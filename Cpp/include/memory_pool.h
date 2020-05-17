@@ -96,9 +96,9 @@ namespace ops {
 			memory_pool_manager& operator=(memory_pool_manager&&) = default;
 
 			Lockable _mtx;
-			node<memory_pool_abs> _root;
-			int _numPools;
-			memory_pool_logger* _client;
+            node<memory_pool_abs> _root{ nullptr };
+            int _numPools{ 0 };
+            memory_pool_logger* _client{ nullptr };
 		};
 
 		// ====================================================================

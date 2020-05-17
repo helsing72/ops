@@ -28,16 +28,7 @@
 namespace ops
 {
 
-Domain::Domain() : 
-	timeToLive(1), 
-	localInterface("0.0.0.0"),
-	inSocketBufferSize(-1),		// Use OS default, Topics may override
-	outSocketBufferSize(-1),	// Use OS default, Topics may override
-	metaDataMcPort(9494),		// Default port 
-	debugMcPort(0),
-	optNonVirt(false), 
-	heartbeatPeriod(1000),
-	heartbeatTimeout(3000)
+Domain::Domain() 
 {
 	appendType(TypeId_T("Domain"));
 }

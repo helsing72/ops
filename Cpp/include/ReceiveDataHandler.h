@@ -117,7 +117,7 @@ namespace ops
 		int sampleMaxSize;
 
 		///Current OPSMessage, valid until next sample arrives.
-		OPSMessage* message;
+        OPSMessage* message{ nullptr };
 
 		///ReferenceHandler that keeps track of object created on reception and deletes them when no one is interested anymore.
 		ReferenceHandler messageReferenceHandler;

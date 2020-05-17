@@ -45,10 +45,10 @@ namespace ops {
 		} Entry_T;
 
 		std::map<InternalKey_T, Entry_T> _map;
-		Entry_T* _prev;
+        Entry_T* _prev{ nullptr };
 
 	public:
-		PublicationIdChecker() : _prev(nullptr) {}
+		PublicationIdChecker() {}
 
 		// Note: The Check() won't work if an application uses several publishers to publish on the same topic, since
 		// the PublicationID is unique for each publisher, but the underlaying transport can use the same IP & Port,

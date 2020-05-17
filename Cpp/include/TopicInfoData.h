@@ -30,7 +30,7 @@ namespace ops
 	class TopicInfoData : public OPSObject
 	{
 	public:
-		TopicInfoData() : port(0)
+		TopicInfoData()
 		{
 			appendType(TypeId_T("TopicInfoData"));
 		}
@@ -64,7 +64,7 @@ namespace ops
 		TypeId_T type;
 		Transport_T transport;
 		Address_T address;
-		int port;
+        int port{ 0 };
 		std::vector<ObjectKey_T> keys;		// Currently not used
 	};
 
