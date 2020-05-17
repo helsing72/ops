@@ -536,6 +536,8 @@ int main(const int argc, const char* args[])
             ops::ChecksumArchiver<ops::example::calculator_xor_8> chk;
             chk.calc.sum = 0;
             cd1.serialize(&chk);
+            AssertEQ((int)chk.calc.sum, 140, "Checksum error");
+
             std::cout << "Checksum Archiver # fields = " << chk.calc.totalfields << std::endl;
             std::cout << "Checksum Archiver # bytes = " << chk.calc.totalbytes << std::endl;
             std::cout << "Checksum Archiver 8-bit XOR = " << (int)chk.calc.sum << std::endl;

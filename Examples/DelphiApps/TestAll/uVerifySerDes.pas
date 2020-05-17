@@ -582,10 +582,14 @@ begin
   chkcalc := TCalculator_8bit_xor.Create;
   chksum := TChecksumArchiver.Create(chkcalc);
   cd1.Serialize(chksum);
+  AssertEQ(chkcalc.Sum, 140, 'Checksum error');
 
   Log('Checksum Archiver # fields = ' + IntToStr(chkcalc.TotalFields));
   Log('Checksum Archiver # bytes = ' + IntToStr(chkcalc.TotalBytes));
   Log('Checksum Archiver 8-bit XOR = ' + IntToStr(chkcalc.Sum));
+
+  FreeAndNil(chksum);
+  FreeAndNil(chkcalc);
 	Log('Finished');
 
 

@@ -445,6 +445,8 @@ print("Test Checksum Archiver...")
 calc = Checksum_Archiver.Checksum_Calc_8bit_xor()
 chk = Checksum_Archiver.Checksum_Archiver(4096,calc)
 cd1.serialize(chk)
+AssertEQ(calc.sum, 140)
+
 print ("Checksum Archiver # fields = " + str(calc.totalfields))
 print ("Checksum Archiver # bytes = " + str(calc.totalbytes))
 print ("Checksum Archiver 8-bit XOR = " + str(calc.sum))
