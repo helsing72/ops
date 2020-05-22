@@ -113,7 +113,7 @@ namespace ops
 		OPSObject* data{ nullptr };		// Serialized
 
 		// Hide these since we don't support Clone of an OPSMessage()
-		virtual OPSObject* clone() { return nullptr; }
+		virtual OPSMessage* clone() { return nullptr; }
 		void fillClone(OPSMessage* obj) const { UNUSED(obj); }
 	
 	public:

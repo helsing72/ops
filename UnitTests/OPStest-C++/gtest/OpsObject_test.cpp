@@ -37,7 +37,18 @@ public:
 	}
 	virtual ~MyOpsObject() = default;
 
-	MyOpsObject(const MyOpsObject& r) = delete;
+    virtual MyOpsObject* clone() override
+    {
+        MyOpsObject* obj = new MyOpsObject();
+        fillClone(obj);
+        return obj;
+    }
+    void fillClone(MyOpsObject* obj) const
+    {
+        ops::OPSObject::fillClone(obj);
+    }
+    
+    MyOpsObject(const MyOpsObject& r) = delete;
 	MyOpsObject& operator= (const MyOpsObject& l) = delete;
 	MyOpsObject(MyOpsObject&&) = delete;
 	MyOpsObject& operator =(MyOpsObject&&) = delete;
@@ -78,7 +89,26 @@ TEST(Test_OPSObject, Test) {
 	EXPECT_EQ(obj3->spareBytes.size(), (size_t)5);
 	EXPECT_STREQ((char*)&obj3->spareBytes[0], "abcd");
 
+    OPSObject* const obj4 = obj3->clone();
+    ASSERT_NE(obj4, nullptr);
+    EXPECT_STREQ(obj4->getTypeString().c_str(), "MyOpsObject ");
+    EXPECT_STREQ(obj4->getKey().c_str(), "Pelle");
+
+    EXPECT_EQ(obj4->spareBytes.size(), (size_t)5);
+    EXPECT_STREQ((char*)&obj4->spareBytes[0], "abcd");
+
+    delete obj4;
 	delete obj3;
+
+    MyOpsObject* const obj5 = obj2.clone();
+    ASSERT_NE(obj5, nullptr);
+    EXPECT_STREQ(obj5->getTypeString().c_str(), "MyOpsObject ");
+    EXPECT_STREQ(obj5->getKey().c_str(), "Pelle");
+
+    EXPECT_EQ(obj5->spareBytes.size(), (size_t)5);
+    EXPECT_STREQ((char*)&obj5->spareBytes[0], "abcd");
+
+    delete obj5;
 
 	// Test Serialize
 	// Note, Only key of OPSObject is serialized and MyOpsObject don't have any fields that is serialized

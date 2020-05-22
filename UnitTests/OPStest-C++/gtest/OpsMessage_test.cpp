@@ -85,7 +85,7 @@ public:
 		archive->inout("Message", Message);
 	}
 
-	virtual OPSObject* clone() override
+	virtual OpsObject_MessageTest* clone() override
 	{ 
 		OpsObject_MessageTest* obj = new OpsObject_MessageTest();
 		fillClone(obj);

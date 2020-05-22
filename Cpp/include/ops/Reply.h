@@ -41,7 +41,7 @@ namespace ops
 			archiver->inout("message", message);
 		}
 
-		OPSObject* clone() override
+		Reply* clone() override
 		{
 			Reply* obj = new Reply;
 			fillClone(obj);
