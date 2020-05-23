@@ -196,10 +196,10 @@ void CallbackFunc(ops::DataNotifier* const sender, void* const userData)
 	ops::OPSMessage* const newMess = sub->getMessage();
 
 	// Get the actual data object published
-	ChildData* const data = dynamic_cast<ChildData*>(newMess->getData());
+    ChildData* const data = sub->getTypedDataReference();
 
 	// Use the data
-	std::cout << "callback(" << user << "): Received ChildTopic with " << data->l << std::endl;
+	std::cout << "callback(" << user << "): Received ChildTopic from " << newMess->getPublisherName() << " with " << data->l << std::endl;
 
 	// NOTE that the OPSMessage instance and the data object, as default
 	// will be deleted when this callback returns.
@@ -293,10 +293,10 @@ public:
 			ops::OPSMessage* const newMess = sub->getMessage();
 
 			// Get the actual data object published
-			ChildData* const data = dynamic_cast<ChildData*>(newMess->getData());
+            ChildData* const data = sub->getTypedDataReference();
 
 			// Use the data
-			std::cout << "Received ChildTopic with " << data->l << std::endl;
+			std::cout << "Received ChildTopic from " << newMess->getPublisherName() << " with " << data->l << std::endl;
 
 			// NOTE that the OPSMessage instance and the data object, as default
 			// will be deleted when this callback returns.
@@ -305,18 +305,16 @@ public:
 			// When you are finished with the message, call "newMess->unreserve()".
 			// This will delete the message if the reserve count == 0 (ie. if the number
 			// of reserve() and unreserve() calls match.
-
 		}
 	}
 
 	// Override from ops::DeadlineMissedListener, called if no new data has arrived within deadlineQoS.
-	virtual void onDeadlineMissed(ops::DeadlineMissedEvent* const evt) override
+	virtual void onDeadlineMissed(ops::DeadlineMissedEvent* ) override
 	{
-		UNUSED(evt);
 		std::cout << "Deadline Missed!" << std::endl;
 	}
 private:
-	TestAll::ChildDataSubscriber* sub;
+    TestAll::ChildDataSubscriber* sub{ nullptr };
 };
 
 void ObjectSubscriberExample()

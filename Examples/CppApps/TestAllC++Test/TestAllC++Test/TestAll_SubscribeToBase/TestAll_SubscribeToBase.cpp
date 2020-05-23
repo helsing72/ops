@@ -60,30 +60,16 @@ public:
 
 		//Create a BaseSubscriber on that topic.
 		baseSub = new Subscriber(topic);
-		//baseSub->addFilterQoSPolicy(new KeyFilterQoSPolicy("key1"));
 		baseSub->setDeadlineQoS(10000);		
 		baseSub->addDataListener(this);
 		baseSub->deadlineMissedEvent.addDeadlineMissedListener(this);
 		baseSub->start();
-
-		//basePub = new BaseDataPublisher(topic);
-		//basePub->setName("BasePublisher");
-
 	}
 	///Override from ops::DataListener, called whenever new data arrives.
 	virtual void onNewData(ops::DataNotifier* ) override
 	{
 		counter++;
-
-		/*TestAll::BaseData* data;
-		data = (TestAll::BaseData*)baseSub->getMessage()->getData();
-		if(data == nullptr) return;
-		std::cout << data->baseText << " " << baseSub->getMessage()->getPublicationID() << " From: " << baseSub->getMessage()->getPublisherName() << std::endl;
-		data->setKey("relay");
-		basePub->write(data);*/
 		std::cout << "Data received! " << counter << std::endl;
-
-		//std::cout << ((ops::ParticipantInfoData*)baseSub->getMessage()->getData())->ips[0] << ":" <<((ops::ParticipantInfoData*)baseSub->getMessage()->getData())->mc_udp_port << std::endl;
 	}
 	///Override from ops::DeadlineMissedListener, called if no new data has arrived within deadlineQoS.
 	virtual void onDeadlineMissed(ops::DeadlineMissedEvent* ) override
@@ -108,27 +94,12 @@ int main(const int argc, const char* args[])
     
     setup_alt_config("Examples/OPSIdls/TestAll/ops_config.xml");
 
-    //Add support for our types from TestAll IDL project.
-	//ops::OPSObjectFactory::getInstance()->add(new TestAll::TestAllTypeFactory()); 
-
 	ops::FileName_T configFile = "";
 	if (argc > 1) { configFile = args[1]; }
 	
 	//Create an object that will listen to OPS events
 	Main const m(configFile);
 
-	//This is a way to create inline subscriber event handlers in c++
-	/*class DataCallback : ops::DataListener 
-	{ 
-		void onNewData(ops::DataNotifier* subscriber)
-		{
-			newData();
-		}
-	};*/
-	//DataCallback callBack;
-	
-	//Make sure the OPS ioService never runs out of work.
-	//Run it on main application thread only.
 	while(true) {
 		ops::TimeHelper::sleep(1000);
 	}
