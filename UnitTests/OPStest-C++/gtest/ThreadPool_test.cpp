@@ -36,6 +36,7 @@ class MyRunnable : public Runnable
 {
 public:
     MyRunnable(mytype& state, uint32_t const inc) : _state(state), _inc(inc) {}
+    MyRunnable() = delete;
     MyRunnable(const MyRunnable&) = delete;
     MyRunnable(MyRunnable&&) = delete;
     MyRunnable& operator=(const MyRunnable&) = delete;

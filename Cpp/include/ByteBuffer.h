@@ -61,9 +61,9 @@ namespace ops
 		char shortStringBuffer[shortStringBufferLength+1];
 	public:
         ///Writes the length first chars from chars to the buffer and increments index by length.
-        void WriteChars(const char* chars, int length);
+        void WriteChars(const char* chars, const int length);
         ///Reads length number of chars to the buffer and increments index by length.
-        void ReadChars(char* chars, int length);
+        void ReadChars(char* chars, const int length);
 
 		void writeNewSegment();
 	private:
@@ -71,8 +71,8 @@ namespace ops
         void ByteSwap(unsigned char * b, int n) const;
 
 		void readNewSegment();
-		void WriteBytes(std::vector<char>& out, int offset, int length);
-		void ReadBytes(std::vector<char>& out, int offset, int length);
+		void WriteBytes(std::vector<char>& out, const int offset, const int length);
+		void ReadBytes(std::vector<char>& out, const int offset, const int length);
      
     public:
 		struct illformed_memmap : public std::exception {

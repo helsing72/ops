@@ -201,15 +201,7 @@ TEST(Test_OPSObject, TestCopyMove) {
 		// From cplusplus.com reference:
 		// ... the value of the moved-from object should only be destroyed or assigned a new value; 
 		// accessing it otherwise yields an unspecified value.
-		// So skip these tests on obj3
-#ifdef USE_FIXED_LENGTH_STRINGS
-		//EXPECT_STREQ(obj3.getKey().c_str(), "Kalle");
-		//EXPECT_STREQ(obj3.getTypeString().c_str(), "MyOpsObject ");
-#else
-		//EXPECT_STREQ(obj3.getKey().c_str(), "");
-		//EXPECT_STREQ(obj3.getTypeString().c_str(), "");
-#endif
-		//EXPECT_EQ(obj3.spareBytes.size(), (size_t)0);
+		// So skip tests on obj3
 
 #if defined(DEBUG_OPSOBJECT_COUNTER)
 		EXPECT_EQ(ops::OPSObject::NumOpsObjects(), start_value + 5);

@@ -120,6 +120,7 @@ Address_T doSubnetTranslation(Address_T addr, IOService* const ioServ)
 	if (mask.length() <= 2) {
 		// Expand to the number of bits given
 		subnetMask = atoi(mask.c_str());
+        if ((subnetMask < 0) || (subnetMask > 31)) { return subnet; }
 		subnetMask = (((1u << subnetMask)-1u) << (32u - subnetMask)) & 0xFFFFFFFF;
 	} else {
 		subnetMask = boost::asio::ip::address_v4::from_string(mask.c_str()).to_ulong();

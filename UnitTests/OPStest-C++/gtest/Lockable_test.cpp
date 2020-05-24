@@ -35,7 +35,7 @@ using mytype = std::atomic<uint32_t>;
 
 static void wait_for(mytype& order, uint32_t value)
 {
-    while (order < value) std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    while (order < value) { std::this_thread::sleep_for(std::chrono::milliseconds(1)); }
 }
 
 static void lockable_worker(Lockable& lock, mytype& order, mytype& state)

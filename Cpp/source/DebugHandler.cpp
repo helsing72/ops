@@ -138,6 +138,7 @@ namespace ops {
                             if (req->getKey() == "*") { return; }
 							// For now no response
 							return;
+                            break;
 
 						case 2: // Publisher
                             if (req->getKey() == "*") { return; }
@@ -155,6 +156,7 @@ namespace ops {
 						default: 
 							// Unknown entity, don't send a response
 							return;
+                            break;
 						}
 					}
 					_response.Entity = req->Entity;
