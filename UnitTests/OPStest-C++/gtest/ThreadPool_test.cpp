@@ -151,6 +151,10 @@ TEST(Test_ThreadPool, TestRunning) {
         pool.addRunnable(&mr1);
         pool.start();
 
+        // Make sure the SingleThreadPool thread is running
+        // We can safely do this test since MyRunnable won't exit until we change s1
+        while (!pool.isRunning()) { std::this_thread::sleep_for(std::chrono::milliseconds(1)); }
+
         // Start a task that tries to add
         std::thread t2(threadpool_worker, std::ref(pool), &mr1, true, std::ref(s2));
 

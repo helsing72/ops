@@ -117,6 +117,8 @@ namespace ops
             Thread::join();
         }
         
+        bool isRunning() { return running.load(); }
+
     private:
         std::vector<Runnable*> runnables;
         Lockable mutex;
