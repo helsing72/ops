@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: debug
         run: env
-      - name: Boost
-        run: echo '::set-env name=BOOST_ROOT::$BOOST_ROOT_1_72_0' && echo $BOOST_ROOT
       - name: make
         run: make
+        env:
+          BOOST_ROOT: $BOOST_ROOT_1_72_0
