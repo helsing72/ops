@@ -12,10 +12,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: debug
-      run: env
-    - name: Boost
-      run: export BOOST_ROOT=$BOOST_ROOT_1_72_0
-    - name: make
-      run: make
+      - uses: actions/checkout@v2
+      - name: debug
+        run: env
+      - name: Boost
+        run: echo '::set-env name=BOOST_ROOT::{BOOST_ROOT_1_72_0}'
+      - name: make
+        run: make
