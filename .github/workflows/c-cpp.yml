@@ -20,4 +20,4 @@ jobs:
       - name: make
         run: make
         env:
-          BOOST_ROOT: Test
+          BOOST_HOME: $BOOST_ROOT_1_72_0

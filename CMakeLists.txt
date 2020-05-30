@@ -63,7 +63,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${warnings}")
 
 message ("c Flags: " ${CMAKE_C_FLAGS})
 message ("cxx Flags: " ${CMAKE_CXX_FLAGS})
-message ("BOOST_ROOT: " ${BOOST_ROOT})
+message ("BOOST_HOME: " $ENV{BOOST_HOME})
 
 # find Boost. If not found we can't build c++ libs
 option(Boost_DEBUG "Set to ON to debug Boost paths" OFF)
