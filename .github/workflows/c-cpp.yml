@@ -15,7 +15,9 @@ jobs:
       - uses: actions/checkout@v2
       - name: debug
         run: env
+      - name: debug
+        run: echo $BOOST_ROOT_1_72_0
       - name: make
         run: make
         env:
-          BOOST_ROOT: $BOOST_ROOT_1_72_0
+          BOOST_ROOT: Test
