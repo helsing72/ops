@@ -72,6 +72,8 @@ set(Boost_NO_BOOST_CMAKE ON)
 # if the Boost home environment var is set, use it to hint the FindBoost.cmake about Boost location
 set(BOOST_ROOT $ENV{BOOST_HOME})
 
+set(BOOST_ROOT $ENV{BOOST_ROOT_1_72_0})
+
 if(MSVC)
   set(Boost_USE_STATIC_LIBS ON)
   find_package(Boost MODULE COMPONENTS system thread date_time regex chrono)

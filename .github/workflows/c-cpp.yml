@@ -19,5 +19,3 @@ jobs:
         run: echo $BOOST_ROOT_1_72_0
       - name: make
         run: make
-        env:
-          BOOST_HOME: ${{BOOST_ROOT_1_72_0}}
