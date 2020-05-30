@@ -14,6 +14,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: debug
-      run: env 
+      run: env
+    - name: Boost
+      run: export BOOST_ROOT=$BOOST_ROOT_1_72_0
     - name: make
       run: make
