@@ -18,8 +18,8 @@ jobs:
       - name: cmake
         run: cmake --version
       - name: debug2
-        run: echo $BOOST_ROOT_1_69_0
+        run: echo $BOOST_ROOT_1_72_0
       - name: debug3
-        run: ls -al $BOOST_ROOT_1_69_0/lib
+        run: ls -al $BOOST_ROOT_1_72_0/lib/cmake
       - name: make
         run: make bootstrap
