@@ -72,7 +72,7 @@ private:
 
 	MemoryMap memMap;
 
-    SendDataHandler* sendDataHandler{ nullptr };
+    std::shared_ptr<SendDataHandler> sendDataHandler{ nullptr };
 
 	OPSMessage message;
  

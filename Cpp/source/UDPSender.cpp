@@ -47,7 +47,7 @@ namespace ops
 	UDPSender::UDPSender(IOService* ioServ, Address_T localInterface, int ttl, int outSocketBufferSize, bool multicastSocket):
 		ipAddr(boost::asio::ip::address_v4::from_string(localInterface.c_str())),
 		localEndpoint(ipAddr, 0),
-		socket(nullptr), io_service(dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService),
+		io_service(BoostIOServiceImpl::get(ioServ)),
 		_localInterface(localInterface), _ttl(ttl), _outSocketBufferSize(outSocketBufferSize), _multicastSocket(multicastSocket)
     {
 		open();
@@ -65,7 +65,7 @@ namespace ops
         boost::system::error_code ec;
         socket = new boost::asio::ip::udp::socket(*io_service);
         socket->open(localEndpoint.protocol(), ec);
-        if (ec) {
+        if (ec.value() != 0) {
             ErrorMessage_T msg("Open failed with error: ");
             msg += ec.message();
             msg += ", port: ";
@@ -79,10 +79,10 @@ namespace ops
 
         if (_outSocketBufferSize > 0) {
             boost::asio::socket_base::send_buffer_size option(_outSocketBufferSize);
-            boost::system::error_code ec, ec2;
-            ec = socket->set_option(option, ec);
+            boost::system::error_code ec1, ec2;
+            ec1 = socket->set_option(option, ec1);
             socket->get_option(option, ec2);
-            if (ec || ec2 || option.value() != _outSocketBufferSize)
+            if ((ec1.value() != 0) || (ec2.value() != 0) || option.value() != _outSocketBufferSize)
             {
                 ErrorMessage_T msg("Socket buffer size ");
                 msg += NumberToString(_outSocketBufferSize);
@@ -96,7 +96,7 @@ namespace ops
         if (_multicastSocket) {
             boost::asio::ip::multicast::hops ttlOption(_ttl);
             socket->set_option(ttlOption, ec);
-            if (ec) {
+            if (ec.value() != 0) {
                 ErrorMessage_T msg("Set TTL failed with error: ");
                 msg += ec.message();
                 ops::BasicWarning err("UDPSender", "Open", msg);
@@ -107,7 +107,7 @@ namespace ops
             boost::asio::ip::address_v4 local_interface = boost::asio::ip::address_v4::from_string(_localInterface.c_str());
             boost::asio::ip::multicast::outbound_interface ifOption(local_interface);
             socket->set_option(ifOption, ec);
-            if (ec) {
+            if (ec.value() != 0) {
                 ErrorMessage_T msg("Set MC Interface failed with error: ");
                 msg += ec.message();
                 ops::BasicWarning err("UDPSender", "Open", msg);
@@ -122,7 +122,7 @@ namespace ops
         boost::asio::socket_base::non_blocking_io command(true);
         socket->io_control(command, ec);
 #endif
-        if (ec) {
+        if (ec.value() != 0) {
             ErrorMessage_T msg("Set non-blocking failed with error: ");
             msg += ec.message();
             ops::BasicWarning err("UDPSender", "Open", msg);
@@ -131,7 +131,7 @@ namespace ops
         }
 
         socket->bind(localEndpoint, ec);
-        if (ec) {
+        if (ec.value() != 0) {
             ErrorMessage_T msg("Bind failed with error: ");
             msg += ec.message();
             ops::BasicError err("UDPSender", "Open", msg);

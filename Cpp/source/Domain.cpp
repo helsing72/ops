@@ -28,16 +28,7 @@
 namespace ops
 {
 
-Domain::Domain() : 
-	timeToLive(1), 
-	localInterface("0.0.0.0"),
-	inSocketBufferSize(-1),		// Use OS default, Topics may override
-	outSocketBufferSize(-1),	// Use OS default, Topics may override
-	metaDataMcPort(9494),		// Default port 
-	debugMcPort(0),
-	optNonVirt(false), 
-	heartbeatPeriod(1000),
-	heartbeatTimeout(3000)
+Domain::Domain() 
 {
 	appendType(TypeId_T("Domain"));
 }
@@ -101,7 +92,7 @@ ObjectName_T Domain::getDomainID() const
 	return domainID;
 }
 
-void Domain::serialize(ArchiverInOut* archiver)
+void Domain::serialize(ArchiverInOut* const archiver)
 {
 	OPSObject::serialize(archiver);
 	archiver->inout("domainID", domainID);
@@ -146,7 +137,7 @@ Topic* Domain::findTopic(ObjectName_T const id) const
 	return nullptr;
 }
 
-void Domain::checkTransports()
+void Domain::checkTransports() const
 {
 	// Now update topics with values from the transports and channels
 	// Loop over all transports and for each topic, see if it needs parameters from the channel

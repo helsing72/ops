@@ -76,7 +76,7 @@ namespace ops {
 
 			void setLogger(memory_pool_logger* client);
 
-			int numPools() { return _numPools; }
+			int numPools() const { return _numPools; }
 
 			// Print statistics from each memory_pool
 			void PrintStat(std::ostream& os, bool skip_header = false);
@@ -96,9 +96,9 @@ namespace ops {
 			memory_pool_manager& operator=(memory_pool_manager&&) = default;
 
 			Lockable _mtx;
-			node<memory_pool_abs> _root;
-			int _numPools;
-			memory_pool_logger* _client;
+            node<memory_pool_abs> _root{ nullptr };
+            int _numPools{ 0 };
+            memory_pool_logger* _client{ nullptr };
 		};
 
 		// ====================================================================
@@ -223,8 +223,8 @@ namespace ops {
 				delete[] _storage;
 			}
 
-			size_t capacity() { return _capacity; }
-			size_t size() { return _size; }
+			size_t capacity() const { return _capacity; }
+			size_t size() const { return _size; }
 
 		private:
 			memory_pool_base() = delete;
@@ -399,8 +399,8 @@ namespace ops {
 				ptr = nullptr;
 			}
 
-			size_t size() { return _blocks.size(); }
-			size_t capacity() { return _blocks.capacity(); }
+			size_t size() const { return _blocks.size(); }
+			size_t capacity() const { return _blocks.capacity(); }
 
 		private:
 			memory_pool_exp() = delete;

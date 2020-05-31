@@ -181,7 +181,7 @@ namespace ops
 		// Method to "drive" the Participant when the execution_policy is "polling"
 		bool Poll();
 
-		execution_policy::Enum GetExecutionPolicy() { return _policy; }
+		execution_policy::Enum GetExecutionPolicy() const { return _policy; }
 
         // Check under laying transports if there is any data not processed
         bool dataAvailable();
@@ -205,17 +205,17 @@ namespace ops
 		std::shared_ptr<OPSConfig> config;
 
 		///The ErrorService
-		ErrorService* errorService;
+        ErrorService* errorService{ nullptr };
 
 		///The threadPool drives ioService. By default Participant use a SingleThreadPool i.e. only one thread drives ioService.
-		ThreadPool* threadPool;
+        ThreadPool* threadPool{ nullptr };
 
 		///A timer that fires with a certain periodicity, it keeps this Participant alive in the system by publishing ParticipantInfoData
-		DeadlineTimer* aliveDeadlineTimer;
+        DeadlineTimer* aliveDeadlineTimer{ nullptr };
 
 		//------------------------------------------------------------------------
 		///A publisher of ParticipantInfoData
-		Publisher* partInfoPub;
+        Publisher* partInfoPub{ nullptr };
                 
 		///The ParticipantInfoData that partInfoPub will publish periodically
 		ParticipantInfoData partInfoData;
@@ -225,19 +225,19 @@ namespace ops
 		void setUdpTransportInfo(Address_T ip, int port);
 		void registerTcpTopic(ObjectName_T topicName, std::shared_ptr<ReceiveDataHandler> handler);
 		void unregisterTcpTopic(ObjectName_T topicName, std::shared_ptr<ReceiveDataHandler> handler);
-		bool hasPublisherOn(ObjectName_T topicName);
-		bool hasSubscriberOn(ObjectName_T topicName);
+		bool hasPublisherOn(const ObjectName_T& topicName);
+		bool hasSubscriberOn(const ObjectName_T&topicName);
 
-		Domain* domain;		
+        Domain* domain{ nullptr };
 
 		//------------------------------------------------------------------------
 		///A listener and handler for ParticipantInfoData
-        ParticipantInfoDataListener* partInfoListener;
+        ParticipantInfoDataListener* partInfoListener{ nullptr };
 
 		//------------------------------------------------------------------------
 		//
-		ReceiveDataHandlerFactory* receiveDataHandlerFactory;
-		SendDataHandlerFactory* sendDataHandlerFactory;
+        ReceiveDataHandlerFactory* receiveDataHandlerFactory{ nullptr };
+        SendDataHandlerFactory* sendDataHandlerFactory{ nullptr };
 
 		//Visible to friends only
 		//TODO: Deprecate and delegate to receiveDataHandlerFactory???
@@ -246,7 +246,7 @@ namespace ops
 
 		///Visible to friends only
 		//TODO: Deprecate and delegate to sendDataHandlerFactory???
-		SendDataHandler* getSendDataHandler(Topic top);
+		std::shared_ptr<SendDataHandler> getSendDataHandler(Topic top);
 		void releaseSendDataHandler(Topic top);		
 		void updateSendPartInfo(Topic top);
 
@@ -259,13 +259,13 @@ namespace ops
 		ObjectName_T participantID;
 
 		///As long this is true, we keep on running this participant
-		volatile bool keepRunning;
+        volatile bool keepRunning{ true };
 
 		///The interval with which this Participant publishes ParticipantInfoData
-		int64_t aliveTimeout;
+        int64_t aliveTimeout{ 1000 };
 
 		///The data type factory used in this Participant. 
-		OPSObjectFactory* objectFactory;
+        OPSObjectFactory* objectFactory{ nullptr };
 
 		///Static Mutex used by factory methods getInstance()
 		static Lockable creationMutex;

@@ -92,8 +92,8 @@ namespace ops
 	private:
         ObjectName_T name;					// Serialized
 
-		int port;							// Serialized
-		int timeToLive;
+        int port{ 0 };						// Serialized
+        int timeToLive{ -1 };
 		TypeId_T typeID;					// Serialized
 		Address_T domainAddress;			// Serialized
 		Address_T localInterface;
@@ -101,14 +101,14 @@ namespace ops
 		ObjectName_T domainID;
 		int sampleMaxSize;					// Serialized
 		Transport_T transport;				// Serialized
-		int64_t outSocketBufferSize;		// Serialized
-		int64_t inSocketBufferSize;			// Serialized
+        int64_t outSocketBufferSize{ -1 };	// Serialized
+        int64_t inSocketBufferSize{ -1 };	// Serialized
 
-		Participant* participant;
+        Participant* participant{ nullptr };
 	
-		bool optNonVirt = false;
-		int heartbeatPeriod = 0;
-		int heartbeatTimeout = 0;
+        bool optNonVirt{ false };
+        int heartbeatPeriod{ 0 };
+        int heartbeatTimeout{ 0 };
 		ChannelId_T channelID;
 	};
 }

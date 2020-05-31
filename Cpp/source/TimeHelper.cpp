@@ -50,7 +50,7 @@ namespace ops
 #endif
         std::time_t t = std::time(nullptr);
         char mbstr[100];
-        if (std::strftime(mbstr, sizeof(mbstr), "%Y-%m-%d %H-%M-%S", std::localtime(&t))) {
+        if (std::strftime(mbstr, sizeof(mbstr), "%Y-%m-%d %H-%M-%S", std::localtime(&t)) > 0) {
             return mbstr;
         }
 #if defined(_MSC_VER)

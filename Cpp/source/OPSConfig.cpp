@@ -60,14 +60,14 @@ namespace ops
 
     std::shared_ptr<OPSConfig> OPSConfig::getConfig()
 	{
-		static std::shared_ptr<OPSConfig> theConfiguration = OPSConfigRepository::Instance()->getConfig();
+		static const std::shared_ptr<OPSConfig> theConfiguration = OPSConfigRepository::Instance()->getConfig();
 		return theConfiguration;
 	}
 
     std::shared_ptr<OPSConfig> OPSConfig::getConfig(std::istream& inStream)
 	{
 		XMLArchiverIn archiver(inStream, "root", OPSObjectFactory::getInstance());
-		OPSConfig* theConfig = nullptr;
+		OPSConfig* const theConfig = nullptr;
 		return std::shared_ptr<OPSConfig>((OPSConfig*)archiver.inout("ops_config", theConfig));
 	}
 

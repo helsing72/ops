@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2019 Lennart Andersson.
+ * Copyright (C) 2018-2020 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -32,11 +32,10 @@
 
 namespace ops
 {
-    ReceiveDataHandler::ReceiveDataHandler(Topic top, Participant& part, ReceiveDataChannel* rdc_) :
+    ReceiveDataHandler::ReceiveDataHandler(Topic const top, Participant& part, ReceiveDataChannel* const rdc_) :
 		topic(top),
 		participant(part),
-		sampleMaxSize(top.getSampleMaxSize()),
-		message(nullptr)
+		sampleMaxSize(top.getSampleMaxSize())
     {
 		if (rdc_ != nullptr) {
 			rdc.push_back(rdc_);
@@ -46,19 +45,19 @@ namespace ops
 
     ReceiveDataHandler::~ReceiveDataHandler()
     {
-		for (auto x : rdc) {
+		for (auto const x : rdc) {
 			delete x;
 		}
     }
 
 	// Overridden from Notifier<OPSMessage*>
-	void ReceiveDataHandler::addListener(Listener<OPSMessage*>* listener, Topic& top)
+	void ReceiveDataHandler::addListener(Listener<OPSMessage*>* const listener, Topic& top)
     {
         {
-            SafeLock lock(&messageLock);
+            const SafeLock lock(&messageLock);
             Notifier<OPSMessage*>::addListener(listener);
             if (Notifier<OPSMessage*>::getNrOfListeners() == 1) {
-                for (auto x : rdc) {
+                for (auto const x : rdc) {
                     x->start();
                 }
             }
@@ -67,25 +66,25 @@ namespace ops
 	}
 
 	// Overridden from Notifier<OPSMessage*>
-    void ReceiveDataHandler::removeListener(Listener<OPSMessage*>* listener, Topic& top)
+    void ReceiveDataHandler::removeListener(Listener<OPSMessage*>* const listener, Topic& top)
     {
         topicUsage(top, false);
 
-        SafeLock lock(&messageLock);
+        const SafeLock lock(&messageLock);
 		Notifier<OPSMessage*>::removeListener(listener);
 		if (Notifier<OPSMessage*>::getNrOfListeners() == 0) {
-			for (auto x : rdc) {
+			for (auto const x : rdc) {
 				x->stop();
 			}
 		}
 	}
 
 	///Called whenever the receiver has new data.
-	void ReceiveDataHandler::onMessage(ReceiveDataChannel&, OPSMessage* mess)
+	void ReceiveDataHandler::onMessage(ReceiveDataChannel&, OPSMessage* const mess)
 	{
-		SafeLock lock(&messageLock);
+		const SafeLock lock(&messageLock);
 
-		OPSMessage* oldMessage = message;
+		OPSMessage* const oldMessage = message;
 		message = mess;
 
 		//Add message to a reference handler that will keep the message until it is no longer needed.
@@ -114,7 +113,7 @@ namespace ops
 	// Called when there are no more listeners and we are about to be put on the garbage-list for later removal
     void ReceiveDataHandler::clear()
     {
-		for (auto x : rdc) {
+		for (auto const x : rdc) {
 			x->clear();
 		}
 

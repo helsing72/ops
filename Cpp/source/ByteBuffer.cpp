@@ -26,10 +26,8 @@ namespace ops
 
     ByteBuffer::ByteBuffer(MemoryMap& mMap, bool const _preserveWrittenData):
         preserveWrittenData(_preserveWrittenData), memMap(mMap),
-		index(0), totalSize(0), currentSegment(0)
+        nextSegmentAt(memMap.getSegmentSize())
     {
-        nextSegmentAt = memMap.getSegmentSize();
-
 		// Check that each segment in map is larger than our needed segment header
 		//   protocolID                 4
 		//   version                    2
@@ -64,7 +62,7 @@ namespace ops
         }
     }
 
-    char* ByteBuffer::getSegment(int const i)
+    char* ByteBuffer::getSegment(int const i) const
     {
         return memMap.getSegment(i);
     }
@@ -90,9 +88,9 @@ namespace ops
     {
     }
 
-    void ByteBuffer::WriteChars(const char* const chars, int const length)
+    void ByteBuffer::WriteChars(const char* const chars, const int length)
     {
-        int bytesLeftInSegment = memMap.getSegmentSize() - index;
+        const int bytesLeftInSegment = memMap.getSegmentSize() - index;
         if (bytesLeftInSegment >= length)
         {
             memcpy((void*) (memMap.getSegment(currentSegment) + index), chars, length);
@@ -115,7 +113,7 @@ namespace ops
     {
         index = 0;
         writeProtocol();
-        int const tInt = 0;
+        const int tInt = 0;
         WriteInt(tInt); 
         WriteInt(currentSegment);
     }
@@ -129,7 +127,7 @@ namespace ops
         ReadInt();
     }
 
-    void ByteBuffer::ReadChars(char* chars, int length)
+    void ByteBuffer::ReadChars(char* chars, const int length)
     {
         int bytesLeftInSegment = memMap.getSegmentSize() - index;
         if (bytesLeftInSegment >= length)
@@ -149,7 +147,7 @@ namespace ops
         }
     }
 
-    void ByteBuffer::ByteSwap(unsigned char * b, int n)
+    void ByteBuffer::ByteSwap(unsigned char* const b, const int n) const
     {
         int i = 0;
         int j = n - 1;
@@ -341,7 +339,7 @@ namespace ops
         ReadBytes(out, 0, length);
     }
 
-    void ByteBuffer::ReadBytes(std::vector<char>& out, int offset, int length)
+    void ByteBuffer::ReadBytes(std::vector<char>& out, const int offset, const int length)
     {
         int bytesLeftInSegment = memMap.getSegmentSize() - index;
         std::vector<char>::iterator it = out.begin();
@@ -372,9 +370,9 @@ namespace ops
         WriteBytes(out, 0, size);
     }
 
-    void ByteBuffer::WriteBytes(std::vector<char>& out, int offset, int length)
+    void ByteBuffer::WriteBytes(std::vector<char>& out, const int offset, const int length)
     {
-        int bytesLeftInSegment = memMap.getSegmentSize() - index;
+        const int bytesLeftInSegment = memMap.getSegmentSize() - index;
         std::vector<char>::iterator it = out.begin();
         it += offset;
         if (bytesLeftInSegment >= length)

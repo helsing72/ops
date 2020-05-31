@@ -48,7 +48,7 @@ Elements of _Domain_ contains:
 Elements of _Topic_ contains:
   * **name**, name of the topic as a string, must be unique within the domain.
   * **dataType**, the data type that samples on this topic must have (samples must be of this type or extend this type).
-  * **port**, the ip port that shall be used to communicate on this topic. Only used for some transports mechanisms, see description of *Transport Mechanisms* below.
+  * **port**, the ip port that shall be used to communicate on this topic. Only used for some transports mechanisms, see description of *Transport Mechanisms* below. It will also not be used when using _Channel Configuration_ as described below.
 
 For more flexibility in the configuration, the elements have several optional tags that can be specified. A description of these follows below.
 
@@ -71,7 +71,7 @@ Optional elements of _Topic_:
   * **inSocketBufferSize**, changes the underlying sockets buffer size if possible. If this tag is omitted, the _Domain_ value is used.
   * **outSocketBufferSize**, changes the underlying sockets buffer size if possible. If this tag is omitted, the _Domain_ value is used.
   * **transport**, configures which transport mechanism to be used for this topic. Supported values are *multicast*, *udp* and *tcp*. If tag is omitted, *multicast* is used.
-  * **address**, usage depends on the used transport mechanism, see description of *Transport Mechanisms* below.
+  * **address**, usage depends on the used transport mechanism, see description of *Transport Mechanisms* below. Please note that if specified for an UDP transport, it must be on the same subnet as the specified localInterface for the _Domain_.
 
 ## Channel Configuration (advanced) ###
 In a scenario where a lot of topics are used that use the same transport mechanism, it can be easier to separate the transport information from the topic definition to remove/reduce redundant infomation.
@@ -81,7 +81,7 @@ A _Channel_ element defines the transport mechanism, a _Transport_ element defin
 Elements of _Channel_ contains:
   * **name**, name of the channel as a string, must be unique within the domain.
   * **linktype**, configures which transport mechanism to be used for this channel. Supported values are *multicast*, *udp* and *tcp*. If tag is omitted, *multicast* is used.
-  * **address**, usage depends on the used transport mechanism, see description of *Transport Mechanisms* below.
+  * **address**, usage depends on the used transport mechanism, see description of *Transport Mechanisms* below. Please note that if specified for an UDP transport, it must be on the same subnet as the specified localInterface for the _Domain_.
   * **port**, usage depends on the used transport mechanism, see description of *Transport Mechanisms* below.
   * **localInterface**, see _Domain_ above for a description.
   * **timeToLive**, see _Domain_ above for a description.

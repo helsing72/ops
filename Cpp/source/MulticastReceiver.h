@@ -56,7 +56,7 @@ namespace ops
 		  _localInterface(localInterface),
 		  _inSocketBufferSizent(inSocketBufferSizent)
 		{
-			boost::asio::io_service* ioService = dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService;
+			boost::asio::io_service* ioService = BoostIOServiceImpl::get(ioServ);
 			//udp::resolver resolver(*ioService);
 			//udp::resolver::query query(boost::asio::ip::host_name(),"");
 			//udp::resolver::iterator it=resolver.resolve(query);

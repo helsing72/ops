@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2019-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -49,10 +49,10 @@ namespace ops
 	bool isValidMCAddress(Address_T addr)
 	{
 		//std::cout << "isValidNodeAddress(): " << addr << std::endl;
-		if (addr == "") return false;
+        if (addr == "") { return false; }
 		unsigned long Ip = boost::asio::ip::address_v4::from_string(addr.c_str()).to_ulong();
 		//std::cout << "isValidNodeAddress(): " << std::hex << Ip << std::dec << std::endl;
-		if ((Ip >= 0xE0000000) && (Ip < 0xF0000000)) return true;
+        if ((Ip >= 0xE0000000) && (Ip < 0xF0000000)) { return true; }
 		return false;
 	}
 
@@ -60,23 +60,23 @@ namespace ops
 	bool isValidNodeAddress(Address_T addr)
 	{
 		//std::cout << "isValidNodeAddress(): " << addr << std::endl;
-		if (addr == "") return false;
+        if (addr == "") { return false; }
 		unsigned long Ip = boost::asio::ip::address_v4::from_string(addr.c_str()).to_ulong();
 		//std::cout << "isValidNodeAddress(): " << std::hex << Ip << std::dec << std::endl;
-		if (Ip == 0) return false;
-		if (Ip >= 0xE0000000) return false;  // Skip multicast and above
+        if (Ip == 0) { return false; }
+        if (Ip >= 0xE0000000) { return false; }  // Skip multicast and above
 		return true;
 	}
 
 	bool isMyNodeAddress(Address_T addr, IOService* const ioServ)
 	{
 		//std::cout << "isMyNodeAddress(): " << addr << std::endl;
-		if (addr == "") return false;
+        if (addr == "") { return false; }
 		unsigned long Ip = boost::asio::ip::address_v4::from_string(addr.c_str()).to_ulong();
 		//std::cout << "isMyNodeAddress(): " << std::hex << Ip << std::dec << std::endl;
-		if (Ip == 0x7F000001) return true;  // localhost
+        if (Ip == 0x7F000001) { return true; }  // localhost
 
-		boost::asio::io_service* ioService = dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService;
+		boost::asio::io_service* ioService = BoostIOServiceImpl::get(ioServ);
 
 		using boost::asio::ip::udp;
 
@@ -92,7 +92,7 @@ namespace ops
 			if (ipaddr.is_v4()) {
 				unsigned long myIp = ipaddr.to_v4().to_ulong();
 				//std::cout << "isMyNodeAddress() avail: " << std::hex << myIp << std::dec << std::endl;
-				if (myIp == Ip) return true;
+                if (myIp == Ip) { return true; }
 			}
 			++it;
 		}
@@ -110,7 +110,7 @@ Address_T doSubnetTranslation(Address_T addr, IOService* const ioServ)
 	Address_T::size_type index;
 
 	index = addr.find("/");
-	if (index == Address_T::npos) return addr;
+    if (index == Address_T::npos) { return addr; }
 
 	Address_T subnet = addr.substr(0, index);
 	Address_T mask = addr.substr(index+1);
@@ -120,12 +120,13 @@ Address_T doSubnetTranslation(Address_T addr, IOService* const ioServ)
 	if (mask.length() <= 2) {
 		// Expand to the number of bits given
 		subnetMask = atoi(mask.c_str());
-		subnetMask = (((1 << subnetMask)-1) << (32 - subnetMask)) & 0xFFFFFFFF;
+        if ((subnetMask < 0) || (subnetMask > 31)) { return subnet; }
+		subnetMask = (((1u << subnetMask)-1u) << (32u - subnetMask)) & 0xFFFFFFFF;
 	} else {
 		subnetMask = boost::asio::ip::address_v4::from_string(mask.c_str()).to_ulong();
 	}
 
-	boost::asio::io_service* ioService = dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService;
+	boost::asio::io_service* ioService = BoostIOServiceImpl::get(ioServ);
 
 	// Note: The resolver requires that the hostname can be used to resolve to an ip
 	// e.g due to the hostname beeing listed with an ipv4 address in /etc/hosts.

@@ -2,7 +2,7 @@
 
 /**
 *
-* Copyright (C) 2018 Lennart Andersson.
+* Copyright (C) 2018-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -61,11 +61,11 @@ namespace ops {
 		void Stop();
 
 		// Register/Unregister with the debug handler
-		void RegisterPub(DebugNotifyInterface* client, ObjectName_T topicName);
-		void UnregisterPub(DebugNotifyInterface* client, ObjectName_T topicName);
+		void RegisterPub(DebugNotifyInterface* client, const ObjectName_T& topicName);
+		void UnregisterPub(DebugNotifyInterface* client, const ObjectName_T& topicName);
 
-		void RegisterSub(DebugNotifyInterface* client, ObjectName_T topicName);
-		void UnregisterSub(DebugNotifyInterface* client, ObjectName_T topicName);
+		void RegisterSub(DebugNotifyInterface* client, const ObjectName_T& topicName);
+		void UnregisterSub(DebugNotifyInterface* client, const ObjectName_T& topicName);
 
 	private:
 		class InternalDebugListener;

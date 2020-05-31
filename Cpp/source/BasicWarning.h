@@ -17,12 +17,12 @@ namespace ops
 			_message += "(): ";
 			_message += mess;
 		}
-		virtual Severity_T getSeverity() { return Error::warning; }
-		virtual int getErrorCode()
+		virtual Severity_T getSeverity() const override { return Error::warning; }
+		virtual int getErrorCode() const override
 		{
 			return ERROR_CODE;
 		}
-		virtual ErrorMessage_T getMessage()
+		virtual ErrorMessage_T getMessage() const override
 		{
 			return _message;
 		}

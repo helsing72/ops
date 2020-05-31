@@ -60,7 +60,7 @@ namespace ops
     public:
 		ObjectKey_T getKey() const;
 		const TypeId_T& getTypeString() const;
-		void setKey(ObjectKey_T k);
+		void setKey(const ObjectKey_T& k);
 		virtual void serialize(ArchiverInOut* archive) override;
 
 		///Bytes that hold unserialized data for this object.

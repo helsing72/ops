@@ -35,10 +35,10 @@ namespace ops
         Transport_T linktype;
         Address_T localInterface;     // If multicast, this specifies interface to use
         Address_T domainAddress;
-        int timeToLive;                 // if multicast, this specifies the ttl parameter
-        int port;
-        int64_t outSocketBufferSize;
-        int64_t inSocketBufferSize;
+        int timeToLive{ -1 };         // if multicast, this specifies the ttl parameter
+        int port{ 0 };
+        int64_t outSocketBufferSize{ -1 };
+        int64_t inSocketBufferSize{ -1 };
 
         Channel();
 

@@ -34,23 +34,23 @@ namespace ops
 	class OPS_EXPORT Domain : public OPSObject
 	{
 		Address_T domainAddress;
-		int timeToLive;
-		Address_T localInterface;
-		int inSocketBufferSize;
-		int outSocketBufferSize;
+        int timeToLive{ 1 };
+        Address_T localInterface{ "0.0.0.0" };
+        int inSocketBufferSize{ -1 };		// Use OS default, Topics may override
+        int outSocketBufferSize{ -1 };		// Use OS default, Topics may override
 		std::vector<Topic* > topics;
 		ObjectName_T domainID;
-		int metaDataMcPort;
-		int debugMcPort;
-		bool optNonVirt;
-		int heartbeatPeriod;
-		int heartbeatTimeout;
+        int metaDataMcPort{ 9494 };         // Default port 
+        int debugMcPort{ 0 };
+        bool optNonVirt{ false };
+        int heartbeatPeriod{ 1000 };
+        int heartbeatTimeout{ 3000 };
 
 		std::vector<Channel* > channels;
 		std::vector<Transport* > transports;
 
 		void checkTopicValues(Topic* top) const;
-		void checkTransports();
+		void checkTransports() const;
 		Channel* findChannel(ChannelId_T id) const;
 		Topic* findTopic(ObjectName_T id) const;
 

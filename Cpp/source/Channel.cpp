@@ -25,14 +25,6 @@
 namespace ops
 {
     Channel::Channel()
-        : channelID(""), 
-        linktype(""),
-        localInterface(""),
-        domainAddress(""),
-        timeToLive(-1),
-        port(0), 
-        outSocketBufferSize(-1),
-        inSocketBufferSize(-1)
     {
         appendType(TypeId_T("Channel"));
     }

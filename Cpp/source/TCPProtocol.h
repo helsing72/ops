@@ -44,17 +44,17 @@ namespace ops
 	class TCPProtocol
 	{
 	protected:
-		TCPProtocolCallbacks* _client;
-		char* _data;
-		uint32_t _maxLength;
-		uint32_t _accumulatedSize;
-		uint32_t _expectedSize;
+        TCPProtocolCallbacks* _client{ nullptr };
+        char* _data{ nullptr };
+        uint32_t _maxLength{ 0 };
+        uint32_t _accumulatedSize{ 0 };
+        uint32_t _expectedSize{ 0 };
 		InternalString_T _debugId;
 
 		// Returns false on error
 		bool startAsyncRead(uint32_t size)
 		{
-			if (!_client) return false;
+            if (_client == nullptr) { return false; }
 			_accumulatedSize = 0;
 			_expectedSize = size;
 			_client->startAsyncRead(*this, _data, _expectedSize);
@@ -73,13 +73,11 @@ namespace ops
 	public:
 		TCPUserBase* userData = nullptr;
 
-		TCPProtocol() :
-			_client(nullptr), _data(nullptr), _maxLength(0), _accumulatedSize(0), _expectedSize(0)
-		{}
+		TCPProtocol() {}
 
 		virtual ~TCPProtocol()
 		{
-			if (userData) delete userData;
+            if (userData != nullptr) { delete userData; }
 		}
 
 		// Connect a client
