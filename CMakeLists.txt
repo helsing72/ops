@@ -68,11 +68,11 @@ message ("BOOST_HOME: " $ENV{BOOST_HOME})
 # find Boost. If not found we can't build c++ libs
 option(Boost_DEBUG "Set to ON to debug Boost paths" ON)
 # this prevents the FindBoost.cmake to search for cmake-built Boost
-#set(Boost_NO_BOOST_CMAKE ON)
+set(Boost_NO_BOOST_CMAKE ON)
 # if the Boost home environment var is set, use it to hint the FindBoost.cmake about Boost location
 ##set(BOOST_ROOT $ENV{BOOST_HOME})
 
-##set(BOOST_ROOT $ENV{BOOST_ROOT_1_72_0})
+set(BOOST_ROOT $ENV{BOOST_ROOT_1_72_0})
 
 message ("BOOST_ROOT: " ${BOOST_ROOT})
 
@@ -80,7 +80,8 @@ if(MSVC)
   set(Boost_USE_STATIC_LIBS ON)
   find_package(Boost MODULE COMPONENTS system thread date_time regex chrono)
 else()
-  find_package(Boost MODULE COMPONENTS system thread)
+#  find_package(Boost MODULE COMPONENTS system thread)
+  find_package(Boost )
 endif()
 
 
