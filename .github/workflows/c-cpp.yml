@@ -20,7 +20,7 @@ jobs:
       - name: GTest
         run: git clone https://github.com/google/googletest/ $HOME/gtest
       - name: Build GTest
-        run: pushd $HOME/gtest && mkdir mybuild && cd mybuild && cmake -DCMAKE_INSTALL_PREFIX=$HOME/gtest/deploy .. && make && popd
+        run: pushd $HOME/gtest && mkdir mybuild && cd mybuild && cmake -DCMAKE_INSTALL_PREFIX=$HOME/gtest/deploy .. && make install && popd
       - name: Set GTest HOME
         run: echo "::set-env name=GOOGLETEST_HOME::$HOME/gtest/deploy"
       - name: debug
