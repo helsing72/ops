@@ -18,6 +18,6 @@ jobs:
       - name: debug2
         run: echo $BOOST_ROOT_1_72_0
       - name: debug3
-        run: ls -alR $BOOST_ROOT_1_72_0
+        run: ls -al $BOOST_ROOT_1_72_0/lib
       - name: make
         run: make bootstrap
