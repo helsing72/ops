@@ -25,6 +25,8 @@ jobs:
         run: echo "::set-env name=GOOGLETEST_HOME::$HOME/gtest/deploy"
       #- name: debug
       #  run: ls -alR $GOOGLETEST_HOME
+      - name: CppCheck
+        run: sudo apt-get install cppcheck
       - name: Set BOOST HOME
         run: echo "::set-env name=BOOST_HOME::$BOOST_ROOT_1_72_0"
       - name: make
