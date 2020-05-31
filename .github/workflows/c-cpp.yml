@@ -13,16 +13,21 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: debug
+      - name: list environment
         run: env
-      - name: cmake
+      - name: cmake version
         run: cmake --version
+      - name: GTest
+        run: git clone https://github.com/google/googletest/ $HOME/gtest
+      - name: Build GTest
+        run: pushd $HOME/gtest && mkdir mybuild && cd mybuild && cmake .. && popd
+      - name: Set GTest HOME
+        run: echo "::set-env name=GOOGLETEST_HOME::$HOME/gtest"
       #- name: debug2
       #  run: echo $BOOST_ROOT_1_72_0
       #- name: debug3
       #  run: ls -al $BOOST_ROOT_1_72_0/lib/cmake
-      #- name: boost
-      #  run: sudo apt-get update && sudo apt-get install libboost-dev
-      #  run: sudo apt-get update && sudo apt-get install -yq libboost1.65-dev
       - name: make
-        run: make
+        run: make bootstrap
+      #  env:
+      #    MAKEFLAGS: "-j2"

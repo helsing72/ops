@@ -16,6 +16,8 @@ set (CMAKE_CXX_STANDARD 11)
 ################################################################################
 # Find external dependencies
 
+message ("GOOGLETEST_HOME: " $ENV{GOOGLETEST_HOME})
+
 # help the FindGtest script locate gtest
 if(DEFINED ENV{GOOGLETEST_HOME})
   set(GTEST_ROOT $ENV{GOOGLETEST_HOME})
