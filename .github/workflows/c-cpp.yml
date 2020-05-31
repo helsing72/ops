@@ -22,7 +22,7 @@ jobs:
       #- name: debug3
       #  run: ls -al $BOOST_ROOT_1_72_0/lib/cmake
       - name: boost
-        run: sudo apt-get update && sudo apt-get install libboost-dev-all
+        run: sudo apt-get update && sudo apt-get install libboost-dev
       #  run: sudo apt-get update && sudo apt-get install -yq libboost1.65-dev
       - name: make
         run: make
