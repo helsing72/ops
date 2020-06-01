@@ -17,21 +17,23 @@ jobs:
       #  run: env
       #- name: cmake version
       #  run: cmake --version
-      - name: GTest
+      - name: GTest Get
         run: git clone https://github.com/google/googletest/ $HOME/gtest
-      - name: Build GTest
+      - name: GTest Build
         run: pushd $HOME/gtest && mkdir mybuild && cd mybuild && cmake -DCMAKE_INSTALL_PREFIX=$HOME/gtest/deploy .. && make install && popd
-      - name: Set GTest HOME
+      - name: GTest Set GOOGLETEST_HOME
         run: echo "::set-env name=GOOGLETEST_HOME::$HOME/gtest/deploy"
       #- name: debug
       #  run: ls -alR $GOOGLETEST_HOME
-      - name: CppCheck
+      - name: CppCheck Install
         run: sudo apt-get install cppcheck
-      - name: Set BOOST HOME
+      - name: Set BOOST_HOME
         run: echo "::set-env name=BOOST_HOME::$BOOST_ROOT_1_72_0"
-      - name: make
+      - name: Build
         run: make
-      #  env:
-      #    MAKEFLAGS: "-j2"
-      - name: Run tests
+        env:
+          MAKEFLAGS: "-j2"
+      - name: Run C++ Tests
         run: make unittest-c++
+      - name: CppCheck Analysis
+        run: cppcheck --enable=all Cpp/source Cpp/include > /dev/null
