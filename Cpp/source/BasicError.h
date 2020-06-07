@@ -18,11 +18,11 @@ namespace ops
 			_message += "(): ";
 			_message += mess;
 		}
-		virtual int getErrorCode() const override
+		virtual int getErrorCode() const noexcept override
 		{
 			return ERROR_CODE;
 		}
-		virtual ErrorMessage_T getMessage() const override
+		virtual ErrorMessage_T getMessage() const noexcept override
 		{
 			return _message;
 		}

@@ -74,7 +74,7 @@ namespace ops
 			return _protocol->sendData(buf, size);
 		}
 
-		bool isConnected() const
+		bool isConnected() const noexcept
 		{
 			return _connected;
 		}
@@ -92,7 +92,7 @@ namespace ops
 			_protocol->connect(this);
 		}
 
-		TCPProtocol* getProtocol()
+		TCPProtocol* getProtocol() noexcept
 		{
 			return _protocol;
 		}
@@ -128,7 +128,7 @@ namespace ops
         TCPProtocol* _protocol{ nullptr };
 
 		// Needed by protocol
-		bool isConnected(TCPProtocol&) override
+		bool isConnected(TCPProtocol&) noexcept override
 		{
 			return _connected;
 		}

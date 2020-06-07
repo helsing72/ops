@@ -30,13 +30,13 @@ namespace ops {
 			return mpm;
 		}
 
-		memory_pool_manager::memory_pool_manager()
+		memory_pool_manager::memory_pool_manager() noexcept
 		{
 			_root.next = &_root;
 			_root.prev = &_root;
 		}
 
-		void memory_pool_manager::setLogger(memory_pool_logger* const client)
+		void memory_pool_manager::setLogger(memory_pool_logger* const client) noexcept
 		{
 			_client = client;
 		}

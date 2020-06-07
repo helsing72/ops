@@ -38,7 +38,7 @@ namespace ops
     {
     }
 
-	InternalKey_T ReceiveDataHandlerFactory::makeKey(Topic& top, IOService* const ioServ)
+	InternalKey_T ReceiveDataHandlerFactory::makeKey(const Topic& top, IOService* const ioServ)
 	{
 		// Since topics can use the same port for transports multicast & tcp, or 
 		// use transport udp which in most cases use a single ReceiveDataHandler, 
@@ -60,7 +60,7 @@ namespace ops
     std::shared_ptr<ReceiveDataHandler> ReceiveDataHandlerFactory::getReceiveDataHandler(Topic& top, Participant& participant)
     {
 		// Make a key with the transport info that uniquely defines the receiver.
-		InternalKey_T key = makeKey(top, participant.getIOService());
+		const InternalKey_T key = makeKey(top, participant.getIOService());
 
         const SafeLock lock(&garbageLock);
         if (receiveDataHandlerInstances.find(key) != receiveDataHandlerInstances.end())
@@ -120,7 +120,7 @@ namespace ops
     void ReceiveDataHandlerFactory::releaseReceiveDataHandler(Topic& top, Participant& participant)
     {
 		// Make a key with the transport info that uniquely defines the receiver.
-		InternalKey_T key = makeKey(top, participant.getIOService());
+		const InternalKey_T key = makeKey(top, participant.getIOService());
 
 		const SafeLock lock(&garbageLock);
         if (receiveDataHandlerInstances.find(key) != receiveDataHandlerInstances.end())

@@ -12,7 +12,7 @@ namespace ops
 		typedef enum { warning, error } Severity_T;
 		virtual int getErrorCode() const = 0;
 		virtual ErrorMessage_T getMessage() const = 0;
-		virtual Severity_T getSeverity() const { return error; }
+		virtual Severity_T getSeverity() const noexcept { return error; }
 		virtual ~Error(){}
 	};
 }

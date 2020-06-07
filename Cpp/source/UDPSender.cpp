@@ -156,8 +156,8 @@ namespace ops
 		if (socket == nullptr) { return false; }
         try
         {
-            boost::asio::ip::address ipaddress = boost::asio::ip::address::from_string(ip.c_str());
-            boost::asio::ip::udp::endpoint endpoint(ipaddress, port);
+            const boost::asio::ip::address ipaddress = boost::asio::ip::address::from_string(ip.c_str());
+            const boost::asio::ip::udp::endpoint endpoint(ipaddress, port);
             std::size_t res = socket->send_to(boost::asio::buffer(buf, size), endpoint);
 			if (res != (std::size_t)size) {
 				OPS_UDP_ERROR("UDPSender: sendTo(), Error: Failed to write message (" << size << "), res: " << res << "]\n");
@@ -165,7 +165,7 @@ namespace ops
 			}
             return true;
         }
-		catch (std::exception& ex)
+		catch (const std::exception& ex)
         {
 			ErrorMessage_T msg("Error when sending udp message: ");
 			msg += ex.what();

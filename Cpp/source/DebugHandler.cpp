@@ -37,7 +37,7 @@ namespace ops {
 	// Key used as filter when listening on the debug topic for DebugRequestResponseData messages
 	static ObjectKey_T gKey;
 
-	void DebugHandler::SetKey(const ObjectKey_T& key)
+	void DebugHandler::SetKey(const ObjectKey_T& key) noexcept
 	{
 		gKey = key;
 	}
@@ -70,7 +70,7 @@ namespace ops {
 			}
 		}
 
-		void UnregisterPub(DebugNotifyInterface* const client, const ObjectName_T& topicName)
+		void UnregisterPub(const DebugNotifyInterface* const client, const ObjectName_T& topicName)
 		{
             const SafeLock lck(&_mapLock);
             const std::map<ObjectName_T, DebugNotifyInterface*>::iterator it = _pubMap.find(topicName);
@@ -87,7 +87,7 @@ namespace ops {
 			}
 		}
 
-		void UnregisterSub(DebugNotifyInterface* const client, const ObjectName_T& topicName)
+		void UnregisterSub(const DebugNotifyInterface* const client, const ObjectName_T& topicName)
 		{
             const SafeLock lck(&_mapLock);
             const std::map<ObjectName_T, DebugNotifyInterface*>::iterator it = _subMap.find(topicName);
@@ -192,7 +192,7 @@ namespace ops {
 			_pub->start();
 		}
 
-		void remove()
+		void remove() noexcept
 		{
             if (_sub != nullptr) { delete _sub; }
 			_sub = nullptr;
@@ -279,7 +279,7 @@ namespace ops {
 		_pimpl->RegisterPub(client, topicName);
 	}
 	
-	void DebugHandler::UnregisterPub(DebugNotifyInterface* const client, const ObjectName_T& topicName)
+	void DebugHandler::UnregisterPub(const DebugNotifyInterface* const client, const ObjectName_T& topicName)
 	{
 		_pimpl->UnregisterPub(client, topicName);
 	}
@@ -289,7 +289,7 @@ namespace ops {
 		_pimpl->RegisterSub(client, topicName);
 	}
 	
-	void DebugHandler::UnregisterSub(DebugNotifyInterface* const client, const ObjectName_T& topicName)
+	void DebugHandler::UnregisterSub(const DebugNotifyInterface* const client, const ObjectName_T& topicName)
 	{
 		_pimpl->UnregisterSub(client, topicName);
 	}

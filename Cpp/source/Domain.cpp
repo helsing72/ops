@@ -87,7 +87,7 @@ bool Domain::existsTopic(ObjectName_T const name) const
 	return false;
 }
 
-ObjectName_T Domain::getDomainID() const
+ObjectName_T Domain::getDomainID() const noexcept
 {
 	return domainID;
 }
@@ -165,45 +165,45 @@ void Domain::checkTransports() const
 	}
 }
 
-int Domain::getTimeToLive() const
+int Domain::getTimeToLive() const noexcept
 {
 	return timeToLive;
 }
 
-Address_T Domain::getLocalInterface() const
+Address_T Domain::getLocalInterface() const noexcept
 {
 	return localInterface;
 }
 
-int Domain::getInSocketBufferSize() const
+int Domain::getInSocketBufferSize() const noexcept
 {
 	return inSocketBufferSize;
 }
 
-int Domain::getOutSocketBufferSize() const
+int Domain::getOutSocketBufferSize() const noexcept
 {
 	return outSocketBufferSize;
 }
 
-int Domain::getMetaDataMcPort() const
+int Domain::getMetaDataMcPort() const noexcept
 {
 	return metaDataMcPort;
 }
 
-int Domain::getDebugMcPort() const
+int Domain::getDebugMcPort() const noexcept
 {
 	return debugMcPort;
 }
 
-bool Domain::getOptNonVirt() const
+bool Domain::getOptNonVirt() const noexcept
 {
 	return optNonVirt;
 }
-int Domain::getHeartbeatPeriod() const
+int Domain::getHeartbeatPeriod() const noexcept
 {
 	return heartbeatPeriod;
 }
-int Domain::getHeartbeatTimeout() const
+int Domain::getHeartbeatTimeout() const noexcept
 {
 	return heartbeatTimeout;
 }

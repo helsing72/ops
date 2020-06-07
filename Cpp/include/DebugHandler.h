@@ -51,7 +51,7 @@ namespace ops {
 
 		// Key used as filter when listening on the debug topic for DebugRequestResponseData messages.
 		// Should be set by application to a unique key in the system
-		static void SetKey(const ObjectKey_T& key);
+		static void SetKey(const ObjectKey_T& key) noexcept;
 
 		// Used by application to set a handler for "Generic Command" (50)
 		void SetAppCallback(DebugNotifyInterface* client);
@@ -62,10 +62,10 @@ namespace ops {
 
 		// Register/Unregister with the debug handler
 		void RegisterPub(DebugNotifyInterface* client, const ObjectName_T& topicName);
-		void UnregisterPub(DebugNotifyInterface* client, const ObjectName_T& topicName);
+		void UnregisterPub(const DebugNotifyInterface* client, const ObjectName_T& topicName);
 
 		void RegisterSub(DebugNotifyInterface* client, const ObjectName_T& topicName);
-		void UnregisterSub(DebugNotifyInterface* client, const ObjectName_T& topicName);
+		void UnregisterSub(const DebugNotifyInterface* client, const ObjectName_T& topicName);
 
 	private:
 		class InternalDebugListener;

@@ -42,7 +42,7 @@ namespace ops
             sender = Sender::createUDPSender(ioService, localInterface, 1, outSocketBufferSize);
         }
 
-        bool sendData(char* buf, int bufSize, Topic& topic)
+        bool sendData(char* buf, int bufSize, Topic& topic) override
         {
             bool result = true;
             std::stack<InternalKey_T> sinksToDelete;
@@ -75,7 +75,7 @@ namespace ops
 		{
             SafeLock lock(&mutex);
 
-			IpPortPair ipPort(ip, port, staticRoute);
+			const IpPortPair ipPort(ip, port, staticRoute);
 
 			//Check if we already have any sinks for this topic
             if (topicSinkMap.find(topic) == topicSinkMap.end())
@@ -135,10 +135,7 @@ namespace ops
                 _key += NumberToString(_port);
             }
 
-            IpPortPair():
-				_port(0), _alwaysAlive(false), _lastTimeAlive(0)
-            {
-            }
+            IpPortPair() noexcept {}
 
             bool isAlive() const
             {
@@ -152,10 +149,10 @@ namespace ops
             }
 
 			Address_T _ip;
-            int _port;
+            int _port{ 0 };
             InternalKey_T _key;
-			bool _alwaysAlive;
-			int64_t _lastTimeAlive;
+            bool _alwaysAlive{ false };
+            int64_t _lastTimeAlive{ 0 };
             const static int ALIVE_TIMEOUT = 3000;
         };
 

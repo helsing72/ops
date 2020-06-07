@@ -81,14 +81,14 @@ namespace ops
 		}
 
 		// Connect a client
-		void connect(TCPProtocolCallbacks* client) { _client = client; }
+		void connect(TCPProtocolCallbacks* client) noexcept { _client = client; }
 
-		void setDebugId(const InternalString_T& dbgId) { _debugId = dbgId; }
-		const InternalString_T& getDebugId() { return _debugId; }
+		void setDebugId(const InternalString_T& dbgId) noexcept { _debugId = dbgId; }
+		const InternalString_T& getDebugId() noexcept { return _debugId; }
 
 		// Called to reset protocol internal state
 		// Normaly used at connect
-		virtual void resetProtocol() {}
+		virtual void resetProtocol() noexcept {}
 
 		// Returning false if unable to start
 		virtual bool startReceive(char* bytes, uint32_t size) = 0;

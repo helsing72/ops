@@ -50,7 +50,7 @@ namespace ops
 	{
 		//std::cout << "isValidNodeAddress(): " << addr << std::endl;
         if (addr == "") { return false; }
-		unsigned long Ip = boost::asio::ip::address_v4::from_string(addr.c_str()).to_ulong();
+		const unsigned long Ip = boost::asio::ip::address_v4::from_string(addr.c_str()).to_ulong();
 		//std::cout << "isValidNodeAddress(): " << std::hex << Ip << std::dec << std::endl;
         if ((Ip >= 0xE0000000) && (Ip < 0xF0000000)) { return true; }
 		return false;
@@ -61,7 +61,7 @@ namespace ops
 	{
 		//std::cout << "isValidNodeAddress(): " << addr << std::endl;
         if (addr == "") { return false; }
-		unsigned long Ip = boost::asio::ip::address_v4::from_string(addr.c_str()).to_ulong();
+		const unsigned long Ip = boost::asio::ip::address_v4::from_string(addr.c_str()).to_ulong();
 		//std::cout << "isValidNodeAddress(): " << std::hex << Ip << std::dec << std::endl;
         if (Ip == 0) { return false; }
         if (Ip >= 0xE0000000) { return false; }  // Skip multicast and above
@@ -72,7 +72,7 @@ namespace ops
 	{
 		//std::cout << "isMyNodeAddress(): " << addr << std::endl;
         if (addr == "") { return false; }
-		unsigned long Ip = boost::asio::ip::address_v4::from_string(addr.c_str()).to_ulong();
+		const unsigned long Ip = boost::asio::ip::address_v4::from_string(addr.c_str()).to_ulong();
 		//std::cout << "isMyNodeAddress(): " << std::hex << Ip << std::dec << std::endl;
         if (Ip == 0x7F000001) { return true; }  // localhost
 
@@ -88,9 +88,9 @@ namespace ops
 		udp::resolver::iterator it = resolver.resolve(query);
 		udp::resolver::iterator end;
 		while (it != end) {
-			boost::asio::ip::address ipaddr = it->endpoint().address();
+			const boost::asio::ip::address ipaddr = it->endpoint().address();
 			if (ipaddr.is_v4()) {
-				unsigned long myIp = ipaddr.to_v4().to_ulong();
+				const unsigned long myIp = ipaddr.to_v4().to_ulong();
 				//std::cout << "isMyNodeAddress() avail: " << std::hex << myIp << std::dec << std::endl;
                 if (myIp == Ip) { return true; }
 			}
@@ -113,9 +113,9 @@ Address_T doSubnetTranslation(Address_T addr, IOService* const ioServ)
     if (index == Address_T::npos) { return addr; }
 
 	Address_T subnet = addr.substr(0, index);
-	Address_T mask = addr.substr(index+1);
+	const Address_T mask = addr.substr(index+1);
 
-	unsigned long subnetIp = boost::asio::ip::address_v4::from_string(subnet.c_str()).to_ulong();
+	const unsigned long subnetIp = boost::asio::ip::address_v4::from_string(subnet.c_str()).to_ulong();
 	unsigned long subnetMask;
 	if (mask.length() <= 2) {
 		// Expand to the number of bits given
@@ -136,9 +136,9 @@ Address_T doSubnetTranslation(Address_T addr, IOService* const ioServ)
 	udp::resolver::iterator it = resolver.resolve(query);
 	udp::resolver::iterator end;
 	while (it != end) {
-		boost::asio::ip::address ipaddr = it->endpoint().address();
+		const boost::asio::ip::address ipaddr = it->endpoint().address();
 		if (ipaddr.is_v4()) {
-			unsigned long Ip = ipaddr.to_v4().to_ulong();
+			const unsigned long Ip = ipaddr.to_v4().to_ulong();
 			if ((Ip & subnetMask) == (subnetIp & subnetMask)) {
 				return ipaddr.to_string().c_str();
 			}

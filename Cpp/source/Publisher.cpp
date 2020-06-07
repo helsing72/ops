@@ -91,17 +91,17 @@ namespace ops
 		message.setPublisherName(name);
 	}
 
-    void Publisher::setKey(ObjectKey_T const key)
+    void Publisher::setKey(ObjectKey_T const key) noexcept
     {
         this->key = key;
     }
 
-    ObjectKey_T Publisher::getKey() const
+    ObjectKey_T Publisher::getKey() const noexcept
     {
         return this->key;
     }
 
-	ObjectName_T Publisher::getName() const
+	ObjectName_T Publisher::getName() const noexcept
     {
         return this->name;
     }

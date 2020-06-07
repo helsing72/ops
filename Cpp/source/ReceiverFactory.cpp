@@ -27,7 +27,7 @@
 
 namespace ops
 {
-    Receiver* ReceiverFactory::getReceiver(Topic& top, Participant& participant)
+    Receiver* ReceiverFactory::getReceiver(const Topic& top, Participant& participant)
     {
         Receiver* receiver = nullptr;
 

@@ -3,7 +3,7 @@
 #include "OPSObject.h"
 namespace ops
 {
-	KeyFilterQoSPolicy::KeyFilterQoSPolicy()
+	KeyFilterQoSPolicy::KeyFilterQoSPolicy() noexcept
 	{
 	}
 	KeyFilterQoSPolicy::KeyFilterQoSPolicy(ObjectKey_T const keyString)

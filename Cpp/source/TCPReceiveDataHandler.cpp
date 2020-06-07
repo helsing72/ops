@@ -38,7 +38,7 @@ namespace ops
 		}
 	}
 
-	void TCPReceiveDataHandler::AddReceiveChannel(const ObjectName_T& topicName, Address_T& ip, int const port)
+	void TCPReceiveDataHandler::AddReceiveChannel(const ObjectName_T& topicName, const Address_T& ip, int const port)
 	{
         UNUSED(topicName);
 		OPS_PIFO_TRACE("Partinfo: name: " << topicName << ", ip: " << ip << ", port: " << port << "\n");

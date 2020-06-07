@@ -23,7 +23,7 @@
 
 namespace ops
 {
-    Thread::Thread()
+    Thread::Thread() noexcept
     {
     }
     

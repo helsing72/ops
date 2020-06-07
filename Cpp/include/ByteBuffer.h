@@ -58,7 +58,7 @@ namespace ops
 
 		///"Short" string optimization for ReadString()
 		static const int shortStringBufferLength = 255;
-		char shortStringBuffer[shortStringBufferLength+1];
+        char shortStringBuffer[shortStringBufferLength + 1]{ 0 };
 	public:
         ///Writes the length first chars from chars to the buffer and increments index by length.
         void WriteChars(const char* chars, const int length);
@@ -68,7 +68,7 @@ namespace ops
 		void writeNewSegment();
 	private:
 		///Utility method for swaping byte order of basic types (int float etc.)
-        void ByteSwap(unsigned char * b, int n) const;
+        void ByteSwap(unsigned char * b, int n) const noexcept;
 
 		void readNewSegment();
 		void WriteBytes(std::vector<char>& out, const int offset, const int length);
@@ -76,13 +76,13 @@ namespace ops
      
     public:
 		struct illformed_memmap : public std::exception {
-			const char* what() const NOEXCEPT { return "ByteBuffer(): Given MemoryMap is to small"; }
+			const char* what() const noexcept { return "ByteBuffer(): Given MemoryMap is to small"; }
 		};
 		struct data_corrupted : public std::exception {
-			const char* what() const NOEXCEPT { return "ByteBuffer(): Data corrupted. Trying to read beyond buffer"; }
+			const char* what() const noexcept { return "ByteBuffer(): Data corrupted. Trying to read beyond buffer"; }
 		};
 		struct fixed_string_to_small : public std::exception {
-			const char* what() const NOEXCEPT { return "ByteBuffer(): Fixed string to small"; }
+			const char* what() const noexcept { return "ByteBuffer(): Fixed string to small"; }
 		};
 
         ///The Write Policy is default to preserve all written data (see description above).
@@ -90,18 +90,18 @@ namespace ops
         
         ///Only valid for a ByteBuffer instance used to write data.
         ///Returns the number of bytes containing valid data in the buffer so far.
-        int GetSize() const;
+        int GetSize() const noexcept;
 
 		///Resets the whole buffer to creation state
 		void Reset();
 
 		///Resets the internal offset pointer to 0 (zero)
-		void ResetIndex();
+		void ResetIndex() noexcept;
 
 		///Get the internal offset pointer
-		int GetIndex() const;
+		int GetIndex() const noexcept;
 
-		int getNrOfSegments() const;
+		int getNrOfSegments() const noexcept;
 		int getSegmentSize(int i) const;
 		char* getSegment(int i) const;
 		void finish();
@@ -124,12 +124,12 @@ namespace ops
         ///Writes c to the buffer and increments index by 1.
         void WriteChar(char c);
         ///Writes s.size() followed by s to the buffer as a c-string (8-bit chars) and increments the buffer by s.size() + 4.
-        void WriteString(std::string& s);
+        void WriteString(const std::string& s);
 		///Writes s.size() followed by s to the buffer as a c-string (8-bit chars) and increments the buffer by s.size() + 4.
 		template<size_t N>
-		void WriteString(strings::fixed_string<N>& s)
+		void WriteString(const strings::fixed_string<N>& s)
 		{
-			int siz = (int)s.size();
+			const int siz = (int)s.size();
 			WriteInt(siz);
 			WriteChars(s.c_str(), siz);
 		}

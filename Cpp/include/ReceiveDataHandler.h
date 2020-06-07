@@ -74,7 +74,7 @@ namespace ops
 			return finished;
 		}
 
-		int getSampleMaxSize() const
+		int getSampleMaxSize() const noexcept
         {
             return sampleMaxSize;
         }

@@ -46,7 +46,7 @@ namespace ops
 #endif
 		referenceHandler = refHandler;
 	}
-	ReferenceHandler* Reservable::getReferenceHandler() const
+	ReferenceHandler* Reservable::getReferenceHandler() const noexcept
 	{
 		return referenceHandler;
 	}
@@ -75,7 +75,7 @@ namespace ops
 			referenceHandler->onNewEvent(this, ReserveInfo(this, nrOfReservations));
 		}
 	}
-	int Reservable::getNrOfReservations() const
+	int Reservable::getNrOfReservations() const noexcept
 	{
 		return nrOfReservations;
 	}

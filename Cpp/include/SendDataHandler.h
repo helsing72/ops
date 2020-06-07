@@ -89,7 +89,7 @@ namespace ops
         Lockable mutex;
 
 		// Called from senders (TCPServer)
-		virtual void onNewEvent(Notifier<ConnectStatus>* sndr, ConnectStatus arg)
+		virtual void onNewEvent(Notifier<ConnectStatus>* sndr, ConnectStatus arg) override
 		{
 			UNUSED(sndr)
 			// Forward status to all connected publishers

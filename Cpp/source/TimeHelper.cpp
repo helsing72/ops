@@ -30,7 +30,7 @@
 namespace ops
 {
     ///Returns the current time as a number of milliseconds since Epoch 1970-01-01.
-    int64_t TimeHelper::currentTimeMillis()
+    int64_t TimeHelper::currentTimeMillis() noexcept
     {
         return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     }
@@ -48,7 +48,7 @@ namespace ops
 #pragma warning(push)
 #pragma warning(disable: 4996)
 #endif
-        std::time_t t = std::time(nullptr);
+        const std::time_t t = std::time(nullptr);
         char mbstr[100];
         if (std::strftime(mbstr, sizeof(mbstr), "%Y-%m-%d %H-%M-%S", std::localtime(&t)) > 0) {
             return mbstr;
@@ -60,7 +60,7 @@ namespace ops
     }
 
 	///Returns the current time as a number of milliseconds since Epoch 1970-01-01.
-    int64_t TimeHelper::getEpochTime()
+    int64_t TimeHelper::getEpochTime() noexcept
     {
         return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     }

@@ -89,17 +89,17 @@ namespace ops
 		if (len > 0) { memcpy((void*)&obj->spareBytes[0], &spareBytes[0], len); }
 	}
 
-	ObjectKey_T OPSObject::getKey() const
+	ObjectKey_T OPSObject::getKey() const noexcept
     {
          return key;
     }
 
-	const TypeId_T& OPSObject::getTypeString() const
+	const TypeId_T& OPSObject::getTypeString() const noexcept
 	{
 		return typesString;
 	}
 
-	void OPSObject::setKey(const ObjectKey_T& k)
+	void OPSObject::setKey(const ObjectKey_T& k) noexcept
 	{
 		key = k;
 	}

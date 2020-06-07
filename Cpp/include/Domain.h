@@ -60,20 +60,20 @@ namespace ops
 		virtual std::vector<Topic* > getTopics() const;
 		virtual Topic getTopic(ObjectName_T name) const;
 		bool existsTopic(ObjectName_T name) const;
-		ObjectName_T getDomainID() const;
-		int getMetaDataMcPort() const;
-		int getDebugMcPort() const;
-		bool getOptNonVirt() const;
-		int getHeartbeatPeriod() const;
-		int getHeartbeatTimeout() const;
+		ObjectName_T getDomainID() const noexcept;
+		int getMetaDataMcPort() const noexcept;
+		int getDebugMcPort() const noexcept;
+		bool getOptNonVirt() const noexcept;
+		int getHeartbeatPeriod() const noexcept;
+		int getHeartbeatTimeout() const noexcept;
 
 		void serialize(ArchiverInOut* archiver) override;
-		int getTimeToLive() const;
+		int getTimeToLive() const noexcept;
 
-		Address_T getLocalInterface() const;
+		Address_T getLocalInterface() const noexcept;
 
-		int getInSocketBufferSize() const;
-		int getOutSocketBufferSize() const;
+		int getInSocketBufferSize() const noexcept;
+		int getOutSocketBufferSize() const noexcept;
 		
 		virtual ~Domain();
 	};

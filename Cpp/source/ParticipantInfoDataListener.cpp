@@ -115,7 +115,7 @@ namespace ops
 
 	void ParticipantInfoDataListener::connectUdp(const Topic& top, std::shared_ptr<SendDataHandler> const handler)
 	{
-        ObjectName_T key = top.getName();
+        const ObjectName_T key = top.getName();
         const SafeLock lock(&mutex);
 		if (partInfoSub == nullptr) {
 			if (!setupSubscriber()) {
@@ -152,7 +152,7 @@ namespace ops
 		const SafeLock lock(&mutex);
 
         // Remove from map
-        ObjectName_T key = top.getName();
+        const ObjectName_T key = top.getName();
         const auto result = sendDataHandlers.find(key);
         if (result != sendDataHandlers.end()) {
             const std::shared_ptr<SendDataHandler> sdh = sendDataHandlers[key];
@@ -174,7 +174,7 @@ namespace ops
         }
     }
 
-	void ParticipantInfoDataListener::connectTcp(ObjectName_T& top, std::shared_ptr<ReceiveDataHandler> const handler)
+	void ParticipantInfoDataListener::connectTcp(const ObjectName_T& top, std::shared_ptr<ReceiveDataHandler> const handler)
 	{
 		const SafeLock lock(&mutex);
 		if (partInfoSub == nullptr) {
@@ -206,7 +206,7 @@ namespace ops
 		}
 	}
 
-	void ParticipantInfoDataListener::disconnectTcp(ObjectName_T& top, std::shared_ptr<ReceiveDataHandler> const handler)
+	void ParticipantInfoDataListener::disconnectTcp(const ObjectName_T& top, std::shared_ptr<ReceiveDataHandler> const handler)
 	{
 		const SafeLock lock(&mutex);
 

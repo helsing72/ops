@@ -43,12 +43,12 @@ namespace ops
         void PostSetup(Topic& top, Participant& participant, std::shared_ptr<SendDataHandler> sdh);
 
     public:
-        explicit SendDataHandlerFactory();
+        explicit SendDataHandlerFactory() noexcept;
 		// Make sure all SendDataHandlers are released before freeing the instance 
  	    ~SendDataHandlerFactory();
 
         std::shared_ptr<SendDataHandler> getSendDataHandler(Topic& top, Participant& participant);
-        void releaseSendDataHandler(Topic& top, Participant& participant);
+        void releaseSendDataHandler(const Topic& top, Participant& participant);
     };
 
 }

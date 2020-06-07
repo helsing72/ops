@@ -90,7 +90,7 @@ namespace ops
         }
 
         // Called by Thread. While we are running we don't allow changes to the runnables container.
-        void run()
+        void run() override
         {
             // Take mutex to make sure add/remove isn't in process of updating the runnables container
             {
@@ -117,7 +117,7 @@ namespace ops
             Thread::join();
         }
         
-        bool isRunning() { return running.load(); }
+        bool isRunning() const noexcept { return running.load(); }
 
     private:
         std::vector<Runnable*> runnables;

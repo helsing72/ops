@@ -48,8 +48,8 @@ namespace ops
 		void connectUdp(const Topic& top, std::shared_ptr<SendDataHandler> handler);
 		void disconnectUdp(const Topic& top, std::shared_ptr<SendDataHandler> handler);
 
-		void connectTcp(ObjectName_T& top, std::shared_ptr<ReceiveDataHandler> handler);
-		void disconnectTcp(ObjectName_T& top, std::shared_ptr<ReceiveDataHandler> handler);
+		void connectTcp(const ObjectName_T& top, std::shared_ptr<ReceiveDataHandler> handler);
+		void disconnectTcp(const ObjectName_T& top, std::shared_ptr<ReceiveDataHandler> handler);
 
 	private:
 		Participant& participant;

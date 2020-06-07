@@ -182,7 +182,7 @@ namespace ops
 			return _serverPort;
 		}
         
-		Address_T getLocalAddress() override
+		Address_T getLocalAddress() noexcept override
 		{
 			return _serverIP;
 		}

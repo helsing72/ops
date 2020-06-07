@@ -45,7 +45,7 @@ namespace ops
         nextSegmentAt = memMap.getSegmentSize();
 	}
 
-    int ByteBuffer::getNrOfSegments() const
+    int ByteBuffer::getNrOfSegments() const noexcept
     {
         return currentSegment + 1;
     }
@@ -147,7 +147,7 @@ namespace ops
         }
     }
 
-    void ByteBuffer::ByteSwap(unsigned char* const b, const int n) const
+    void ByteBuffer::ByteSwap(unsigned char* const b, const int n) const noexcept
     {
         int i = 0;
         int j = n - 1;
@@ -159,7 +159,7 @@ namespace ops
         }
     }
 
-    int ByteBuffer::GetSize() const
+    int ByteBuffer::GetSize() const noexcept
     {
         return totalSize; 
     }
@@ -211,9 +211,9 @@ namespace ops
         WriteChars((const char*)&c, 1);
     }
 
-    void ByteBuffer::WriteString(std::string& s)
+    void ByteBuffer::WriteString(const std::string& s)
     {
-        int const siz = (int) s.size();
+        const int siz = (int) s.size();
         WriteInt(siz);
         WriteChars(s.c_str(), siz);
     }
@@ -655,12 +655,12 @@ namespace ops
         WriteChar(versionHigh);
     }
 
-    int ByteBuffer::GetIndex() const
+    int ByteBuffer::GetIndex() const noexcept
     {
         return index;
     }
 
-    void ByteBuffer::ResetIndex()
+    void ByteBuffer::ResetIndex() noexcept
     {
         index = 0;
 		currentSegment = 0;

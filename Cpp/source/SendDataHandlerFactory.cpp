@@ -34,7 +34,7 @@
 namespace ops
 {
 
-	SendDataHandlerFactory::SendDataHandlerFactory()
+	SendDataHandlerFactory::SendDataHandlerFactory() noexcept
 	{
 		// There is only one McUdpSendDataHandler for each participant
 	}
@@ -95,7 +95,7 @@ namespace ops
     std::shared_ptr<SendDataHandler> SendDataHandlerFactory::getSendDataHandler(Topic& top, Participant& participant)
 	{
         Address_T localIf = doSubnetTranslation(top.getLocalInterface(), participant.getIOService());
-        InternalKey_T key = getKey(top, localIf);
+        const InternalKey_T key = getKey(top, localIf);
 
 		const SafeLock lock(&mutex);
 
@@ -130,10 +130,10 @@ namespace ops
         return sdh;
     }
 
-	void SendDataHandlerFactory::releaseSendDataHandler(Topic& top, Participant& participant)
+	void SendDataHandlerFactory::releaseSendDataHandler(const Topic& top, Participant& participant)
 	{
-        Address_T localIf = doSubnetTranslation(top.getLocalInterface(), participant.getIOService());
-        InternalKey_T key = getKey(top, localIf);
+        const Address_T localIf = doSubnetTranslation(top.getLocalInterface(), participant.getIOService());
+        const InternalKey_T key = getKey(top, localIf);
 
 		const SafeLock lock(&mutex);
 		

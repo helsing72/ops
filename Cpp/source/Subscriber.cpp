@@ -167,7 +167,7 @@ namespace ops
         }
     }
 
-    void Subscriber::setHistoryMaxSize(int const s)
+    void Subscriber::setHistoryMaxSize(int const s) noexcept
     {
         messageBufferMaxSize = s;
     }
@@ -177,7 +177,7 @@ namespace ops
         return messageBuffer;
     }
 
-    OPSObject* Subscriber::getData()
+    OPSObject* Subscriber::getData() noexcept
     {
         hasUnreadData = false;
         return data;
@@ -229,7 +229,7 @@ namespace ops
 		cancelDeadlineTimeouts();	// Restart with new timeout
     }
 
-    int64_t Subscriber::getDeadlineQoS() const
+    int64_t Subscriber::getDeadlineQoS() const noexcept
     {
         return deadlineTimeout;
     }
@@ -244,12 +244,12 @@ namespace ops
         }
     }
 
-    int64_t Subscriber::getTimeBasedFilterQoS() const
+    int64_t Subscriber::getTimeBasedFilterQoS() const noexcept
     {
         return timeBaseMinSeparationTime;
     }
 
-    void Subscriber::setTimeBasedFilterQoS(int64_t const timeBaseMinSeparationMillis)
+    void Subscriber::setTimeBasedFilterQoS(int64_t const timeBaseMinSeparationMillis) noexcept
     {
         timeBaseMinSeparationTime = timeBaseMinSeparationMillis;
     }
@@ -262,12 +262,12 @@ namespace ops
         return newDataEvent.waitFor(std::chrono::milliseconds(timeoutMs));
     }
 
-	ObjectName_T Subscriber::getName() const
+	ObjectName_T Subscriber::getName() const noexcept
     {
         return name;
     }
 
-    void Subscriber::setName(ObjectName_T const name)
+    void Subscriber::setName(ObjectName_T const name) noexcept
     {
         this->name = name;
     }
@@ -304,7 +304,7 @@ namespace ops
         receiveDataHandler->releaseMessageLock();
     }
 
-    OPSMessage* Subscriber::getMessage()
+    OPSMessage* Subscriber::getMessage() noexcept
     {
         hasUnreadData = false;
         return message;

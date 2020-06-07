@@ -40,13 +40,14 @@ public:
 		message = "MemoryMapException: ";
 		message += m;
 	}
-	const char* what() const NOEXCEPT { return message.c_str(); }
+	const char* what() const noexcept { return message.c_str(); }
 };
 
 // TODO: Replace this with a C++ allocator??
 struct MemoryMapAllocator {
 	virtual char* Allocate(unsigned int size) = 0;
 	virtual void Deallocate(char*& ptr) = 0;
+    virtual ~MemoryMapAllocator() {}
 };
 
 class OPS_EXPORT MemoryMap
@@ -81,7 +82,7 @@ public:
 			bytes[i] = bytes[i-1] + segment_size;
 		}
 	}
-	MemoryMap(char* segment, int size):
+	MemoryMap(char* segment, int size) noexcept :
 		  no_of_segments(1), 
 		  segment_size(size)
 	{
@@ -106,7 +107,7 @@ public:
 
 	// Method to initialize/re-initialize object
 	// Fails if object is created as a data owner
-	bool set(char* segment, int size)
+	bool set(char* segment, int size) noexcept
 	{
 		if ((no_of_segments > 1) || dataCreator) return false;
 		no_of_segments = 1;
@@ -120,15 +121,15 @@ public:
 		if (i >= no_of_segments) throw MemoryMapException("Allocated MemoryMap too small!!!");
 		return bytes[i];
 	}
-	int getSegmentSize() const
+	int getSegmentSize() const noexcept
 	{
 		return segment_size;
 	}
-	int getNrOfSegments() const
+	int getNrOfSegments() const noexcept
 	{
 		return no_of_segments;
 	}
-	int getTotalSize() const
+	int getTotalSize() const noexcept
 	{
 		return no_of_segments*segment_size;
 	}
@@ -136,7 +137,7 @@ public:
 	///Makes a copy of the content of this memory to dest. startIndex and endIndex are memory map relative. 
 	bool copyToBytes(char* dest, int startIndex, int endIndex) const
 	{
-		int bytesToCopy = endIndex - startIndex + 1;
+		const int bytesToCopy = endIndex - startIndex + 1;
 
 		if ( (startIndex < 0) || (endIndex >= getTotalSize()) || (bytesToCopy <= 0) ) return false;
 

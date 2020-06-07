@@ -50,9 +50,9 @@ public:
     Topic getTopic() const;
 
     void setName(ObjectName_T name);
-    void setKey(ObjectKey_T key);
-    ObjectKey_T getKey() const;
-	ObjectName_T getName() const;
+    void setKey(ObjectKey_T key) noexcept;
+    ObjectKey_T getKey() const noexcept;
+	ObjectName_T getName() const noexcept;
 
 	bool writeOPSObject(OPSObject* obj);
 

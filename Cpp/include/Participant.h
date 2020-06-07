@@ -75,7 +75,7 @@ namespace ops
 		// -------------------------------------------------------------------
 		// Mismatched header and library detection
 		struct mismatched_headers_and_library : public std::exception {
-			const char* what() const NOEXCEPT { return "Mismatched headers and compiled library"; }
+			const char* what() const noexcept { return "Mismatched headers and compiled library"; }
 		};
 		static InternalString_T LibraryCompileSignature();
 		static InternalString_T HeaderCompileSignature() { return InternalString_T(OPS_COMPILESIGNATURE) + NumberToString(fixed_string_length_check_value); }
@@ -125,7 +125,7 @@ namespace ops
 		//Create a From the ops config. See config below.
 		Topic createTopic(ObjectName_T name);
 
-		void run();
+		void run() override;
 
 		//Make this participant report an Error, which will be delivered to all ErrorService listeners
 		void reportError(Error* err);
@@ -181,7 +181,7 @@ namespace ops
 		// Method to "drive" the Participant when the execution_policy is "polling"
 		bool Poll();
 
-		execution_policy::Enum GetExecutionPolicy() const { return _policy; }
+		execution_policy::Enum GetExecutionPolicy() const noexcept { return _policy; }
 
         // Check under laying transports if there is any data not processed
         bool dataAvailable();

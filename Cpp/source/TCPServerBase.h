@@ -155,7 +155,7 @@ namespace ops
 		}
 		
 		// Called from periodic timer
-		void onNewEvent(Notifier<int>*, int)
+		void onNewEvent(Notifier<int>*, int) override
 		{
             _doPeriodic = true;
             SafeTryLock lck(&_mtx);
