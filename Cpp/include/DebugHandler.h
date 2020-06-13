@@ -24,6 +24,8 @@
 
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 
+#include <memory>
+
 #include "opsidls/DebugRequestResponseData.h"
 
 namespace ops {
@@ -69,7 +71,7 @@ namespace ops {
 
 	private:
 		class InternalDebugListener;
-		InternalDebugListener* _pimpl;
+		std::unique_ptr<InternalDebugListener> _pimpl;
 	};
 }
 #endif

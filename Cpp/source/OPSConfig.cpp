@@ -42,9 +42,8 @@ namespace ops
 			return getConfig(inStream);
 		} else {
 #ifdef _WIN32
-			char* buffer = nullptr;
-			buffer = _getcwd(nullptr, 0);
-			if (buffer) {
+			char* buffer = _getcwd(nullptr, 0);
+			if (buffer != nullptr) {
 				ErrorMessage_T msg("Failed to open ");
 				msg += configFile;
 				msg += ". Working Dir: ";

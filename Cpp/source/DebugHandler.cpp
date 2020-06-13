@@ -45,7 +45,7 @@ namespace ops {
 	class DebugHandler::InternalDebugListener : public DataListener
 	{
 	public:
-		InternalDebugListener(Participant& part) : _part(part), _sub(nullptr), _pub(nullptr), _appCallback(nullptr) {}
+		explicit InternalDebugListener(Participant& part) : _part(part), _sub(nullptr), _pub(nullptr), _appCallback(nullptr) {}
 		virtual ~InternalDebugListener() { remove(); }
 
         InternalDebugListener() = delete;
@@ -248,13 +248,17 @@ namespace ops {
 		DebugNotifyInterface* _appCallback;
 	};
 
-	DebugHandler::DebugHandler(Participant& part) : _pimpl(new InternalDebugListener(part))
+	DebugHandler::DebugHandler(Participant& part) :
+#ifdef OPS_C14_DETECTED
+        _pimpl(std::make_unique<InternalDebugListener>(part))
+#else
+        _pimpl(new InternalDebugListener(part))
+#endif
 	{
 	}
 	
 	DebugHandler::~DebugHandler()
 	{
-        if (_pimpl != nullptr) { delete _pimpl; }
 	}
 
 	void DebugHandler::Start()

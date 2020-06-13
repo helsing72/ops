@@ -41,7 +41,7 @@ namespace ops
 		uint16_t _remotePort = 0;
 
 		// Used for a connection created by TCPClient
-		TCPBoostConnection(TCPConnectionCallbacks* client) :
+		explicit TCPBoostConnection(TCPConnectionCallbacks* client) :
 			TCPConnection(client),
 			_sock(nullptr)
 		{
