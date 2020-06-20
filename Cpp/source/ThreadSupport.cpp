@@ -51,7 +51,7 @@ namespace thread_support {
 #endif
 
 	// Called from within the thread to be named
-	void SetThreadName(const char* name)
+	void SetThreadName(const char* const name)
 	{
 #ifdef _WIN32
 		THREADNAME_INFO info;

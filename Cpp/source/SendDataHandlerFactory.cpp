@@ -73,7 +73,7 @@ namespace ops
 		return key;
 	}
 
-    void SendDataHandlerFactory::PostSetup(Topic& top, Participant& participant, std::shared_ptr<SendDataHandler> const sdh)
+    void SendDataHandlerFactory::PostSetup(const Topic& top, const Participant& participant, std::shared_ptr<SendDataHandler> const sdh)
     {
         if (top.getTransport() == Topic::TRANSPORT_UDP) {
             // If topic specifies a valid node address, add that as a static destination address for topic

@@ -79,7 +79,7 @@ void PollingSubscriberExample(const ops::Topic& topic)
 #ifndef zzz
         if (sub.waitForNewData(100)) {
 			// Need to lock message while using it's data via the reference
-            ops::MessageLock lck(sub);
+            const ops::MessageLock lck(sub);
 			ChildData* const data = sub.getTypedDataReference();
 			std::cout << "New data found: Received ChildTopic with " << data->l << std::endl;
         } else {
@@ -185,6 +185,7 @@ public:
 #endif
 	}
 
+    SubscriptionHandler() = delete;
 	SubscriptionHandler(SubscriptionHandler const&) = delete;
 	SubscriptionHandler(SubscriptionHandler&&) = delete;
 	SubscriptionHandler& operator =(SubscriptionHandler&&) = delete;
@@ -279,7 +280,7 @@ int main(const int argc, const char* argv[])
 
     // Create the topic to use, might throw ops::NoSuchTopicException
     // The topic must exist in the used ops configuration file
-    ops::Topic topic = participant->createTopic("ChildTopic");
+    const ops::Topic topic = participant->createTopic("ChildTopic");
 
     if (argc > 1) {
 		std::string const arg(argv[1]);

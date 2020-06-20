@@ -39,11 +39,11 @@ public:
 
     virtual MyOpsObject* clone() override
     {
-        MyOpsObject* obj = new MyOpsObject();
+        MyOpsObject* const obj = new MyOpsObject();
         fillClone(obj);
         return obj;
     }
-    void fillClone(MyOpsObject* obj) const
+    void fillClone(MyOpsObject* const obj) const
     {
         ops::OPSObject::fillClone(obj);
     }

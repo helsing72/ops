@@ -35,7 +35,7 @@ namespace ops
 			appendType(TypeId_T("TopicInfoData"));
 		}
 
-		TopicInfoData(Topic& topic)
+		explicit TopicInfoData(const Topic& topic)
 		{
 			appendType(TypeId_T("TopicInfoData"));
 			name = topic.getName();

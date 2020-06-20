@@ -74,6 +74,8 @@ namespace ops
         void setDeadlineQoS(int64_t deadlineT);
         int64_t getDeadlineQoS() const noexcept;
 
+        // Note that the subscriber just borrows the reference. The caller still owns it and 
+        // need to keep it around at least as long as the subscriber use it.
         void addFilterQoSPolicy(FilterQoSPolicy* fqos);
         void removeFilterQoSPolicy(FilterQoSPolicy* fqos);
 

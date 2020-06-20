@@ -87,11 +87,11 @@ public:
 
 	virtual OpsObject_MessageTest* clone() override
 	{ 
-		OpsObject_MessageTest* obj = new OpsObject_MessageTest();
+		OpsObject_MessageTest* const obj = new OpsObject_MessageTest();
 		fillClone(obj);
 		return obj; 
 	}
-	void fillClone(OpsObject_MessageTest* obj) const
+	void fillClone(OpsObject_MessageTest* const obj) const
 	{ 
 		ops::OPSObject::fillClone(obj);
 		obj->Message = Message;

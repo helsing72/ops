@@ -33,7 +33,7 @@ using namespace ops;
 
 using mytype = std::atomic<uint32_t>;
 
-static void wait_for(mytype& order, uint32_t value)
+static void wait_for(mytype& order, const uint32_t value)
 {
     while (order < value) { std::this_thread::sleep_for(std::chrono::milliseconds(1)); }
 }

@@ -30,7 +30,7 @@ class MyTcpProtClient : public ops::TCPProtocolCallbacks
 public:
 	ops::TCPProtocol* _prot;
 
-	MyTcpProtClient(ops::TCPProtocol* prot) : _prot(prot) 
+	MyTcpProtClient(ops::TCPProtocol* const prot) : _prot(prot) 
 	{
 		memset(sbuf, 0, sizeof(sbuf));
 	}

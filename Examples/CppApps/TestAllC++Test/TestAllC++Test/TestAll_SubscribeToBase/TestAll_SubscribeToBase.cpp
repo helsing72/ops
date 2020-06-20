@@ -13,6 +13,7 @@
 #include "TestAll/BaseDataPublisher.h"
 #include <iostream>
 #include <vector>
+#include <memory>
 
 #include "../../../ConfigFileHelper.h"
 
@@ -39,8 +40,7 @@ public:
 class Main : ops::DataListener, ops::DeadlineMissedListener
 {
 public:
-	ops::Subscriber* baseSub = nullptr;
-	TestAll::BaseDataPublisher* basePub = nullptr;
+	std::unique_ptr<ops::Subscriber> baseSub;
 	long counter = 0;
 
 public:
@@ -59,7 +59,7 @@ public:
 		Topic topic = participant->createParticipantInfoTopic();
 
 		//Create a BaseSubscriber on that topic.
-		baseSub = new Subscriber(topic);
+		baseSub.reset(new Subscriber(topic));
 		baseSub->setDeadlineQoS(10000);		
 		baseSub->addDataListener(this);
 		baseSub->deadlineMissedEvent.addDeadlineMissedListener(this);

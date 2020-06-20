@@ -97,9 +97,9 @@ bool CSocketTransport::write(const char* const buffer, uint32_t const length)
 }
 
 bool CSocketTransport::writeOpsMessage(ops::OPSObject* const mess, 
-									   ops::ObjectName_T publisherName,
-									   ops::ObjectName_T topicName,
-									   uint64_t const ackCounter)
+									   const ops::ObjectName_T publisherName,
+									   const ops::ObjectName_T topicName,
+									   const uint64_t ackCounter)
 {
 	ops::MemoryMap memMap(1, 65536);
 	ops::ByteBuffer buf(memMap);
@@ -384,6 +384,7 @@ void CSocketTransport::HandleData()
 			// This is an error so return from this routine
 			BL_ERROR("# [ SocketTransport ] HandleData() UNKNOWN DATA received\n");
 			return;
+            break;
 		}
 	}
 }

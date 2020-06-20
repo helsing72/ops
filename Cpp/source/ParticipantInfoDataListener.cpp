@@ -34,6 +34,31 @@ namespace ops
     {
     }
 
+    void ParticipantInfoDataListener::handle(ParticipantInfoData* partInfo)
+    {
+        const SafeLock lock(&mutex);
+        if (partInfo->mc_udp_port != 0) {
+            for (auto x : partInfo->subscribeTopics) {
+                if ((x.transport == Topic::TRANSPORT_UDP) && participant.hasPublisherOn(x.name)) {
+                    // Lookup topic in map. If found call handler
+                    const auto result = sendDataHandlers.find(x.name);
+                    if (result != sendDataHandlers.end()) {
+                        dynamic_cast<McUdpSendDataHandler*>(result->second.get())->addSink(x.name, partInfo->ip, partInfo->mc_udp_port);
+                    }
+                }
+            }
+        }
+        for (const auto& x : partInfo->publishTopics) {
+            if ((x.transport == Topic::TRANSPORT_TCP) && participant.hasSubscriberOn(x.name)) {
+                // Lookup topic in map. If found call handler
+                const auto result = rcvDataHandlers.find(x.name);
+                if (result != rcvDataHandlers.end()) {
+                    dynamic_cast<TCPReceiveDataHandler*>(result->second.get())->AddReceiveChannel(x.name, x.address, x.port);
+                }
+            }
+        }
+    }
+
 	///Called when a new message is received. Running on the boost thread.
     void ParticipantInfoDataListener::onNewData(DataNotifier* const notifier)
     {
@@ -43,37 +68,13 @@ namespace ops
             if (partInfo != nullptr) {
 				// Is it on our domain?
 				if (partInfo->domain == participant.domainID) {
-					const SafeLock lock(&mutex);
-                    if (partInfo->mc_udp_port != 0) {
-                        for (auto x : partInfo->subscribeTopics) {
-                            if ((x.transport == Topic::TRANSPORT_UDP) && participant.hasPublisherOn(x.name)) {
-                                // Lookup topic in map. If found call handler
-                                const auto result = sendDataHandlers.find(x.name);
-                                if (result != sendDataHandlers.end()) {
-                                    dynamic_cast<McUdpSendDataHandler*>(result->second.get())->addSink(x.name, partInfo->ip, partInfo->mc_udp_port);
-                                }
-                            }
-                        }
-                    }
-                    for (auto& x : partInfo->publishTopics) {
-						if ((x.transport == Topic::TRANSPORT_TCP) && participant.hasSubscriberOn(x.name)) {
-							// Lookup topic in map. If found call handler
-							const auto result = rcvDataHandlers.find(x.name);
-							if (result != rcvDataHandlers.end()) {
-								dynamic_cast<TCPReceiveDataHandler*>(result->second.get())->AddReceiveChannel(x.name, x.address, x.port);
-							}
-						}
-					}
+                    handle(partInfo);
 				}
-            }
-            else
-            {
+            } else {
 				BasicError err("ParticipantInfoDataListener", "onNewData", "Data could not be cast as expected.");
                 participant.reportError(&err);
             }
-        }
-        else
-        {
+        } else {
 			BasicError err("ParticipantInfoDataListener", "onNewData", "Subscriber could not be cast as expected.");
             participant.reportError(&err);
         }

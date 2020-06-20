@@ -36,12 +36,6 @@ namespace ops
 
     class SendDataHandlerFactory
     {
-    private:
-        std::map<InternalKey_T, std::shared_ptr<SendDataHandler>> sendDataHandlers;
-        Lockable mutex;
-
-        void PostSetup(Topic& top, Participant& participant, std::shared_ptr<SendDataHandler> sdh);
-
     public:
         explicit SendDataHandlerFactory() noexcept;
 		// Make sure all SendDataHandlers are released before freeing the instance 
@@ -49,6 +43,12 @@ namespace ops
 
         std::shared_ptr<SendDataHandler> getSendDataHandler(Topic& top, Participant& participant);
         void releaseSendDataHandler(const Topic& top, Participant& participant);
+
+    private:
+        std::map<InternalKey_T, std::shared_ptr<SendDataHandler>> sendDataHandlers;
+        Lockable mutex;
+
+        void PostSetup(const Topic& top, const Participant& participant, std::shared_ptr<SendDataHandler> sdh);
     };
 
 }

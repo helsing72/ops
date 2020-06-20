@@ -36,7 +36,7 @@ namespace ops
     }
 
     ///Sleeps the given number of milliseconds (millis).
-    void TimeHelper::sleep(int64_t millis)
+    void TimeHelper::sleep(const int64_t millis)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(millis));
     }

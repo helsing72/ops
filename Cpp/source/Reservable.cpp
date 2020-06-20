@@ -32,9 +32,11 @@ namespace ops
 	{
 		// Should not copy our data
 	}
-	Reservable& Reservable::operator= (const Reservable&)
+	Reservable& Reservable::operator= (const Reservable& l)
 	{
-		// Should not copy our data
+        if (this != &l) {
+            // Should not copy our data
+        }
 		return *this;
 	}
 	

@@ -44,7 +44,7 @@
 namespace ops
 {
     using boost::asio::ip::udp;
-	UDPSender::UDPSender(IOService* ioServ, Address_T localInterface, int ttl, int outSocketBufferSize, bool multicastSocket):
+	UDPSender::UDPSender(IOService* ioServ, const Address_T localInterface, const int ttl, const int outSocketBufferSize, const bool multicastSocket):
 		ipAddr(boost::asio::ip::address_v4::from_string(localInterface.c_str())),
 		localEndpoint(ipAddr, 0),
 		io_service(BoostIOServiceImpl::get(ioServ)),
@@ -94,7 +94,7 @@ namespace ops
         }
 
         if (_multicastSocket) {
-            boost::asio::ip::multicast::hops ttlOption(_ttl);
+            const boost::asio::ip::multicast::hops ttlOption(_ttl);
             socket->set_option(ttlOption, ec);
             if (ec.value() != 0) {
                 ErrorMessage_T msg("Set TTL failed with error: ");
@@ -104,8 +104,8 @@ namespace ops
                 ec.clear();
             }
 
-            boost::asio::ip::address_v4 local_interface = boost::asio::ip::address_v4::from_string(_localInterface.c_str());
-            boost::asio::ip::multicast::outbound_interface ifOption(local_interface);
+            const boost::asio::ip::address_v4 local_interface = boost::asio::ip::address_v4::from_string(_localInterface.c_str());
+            const boost::asio::ip::multicast::outbound_interface ifOption(local_interface);
             socket->set_option(ifOption, ec);
             if (ec.value() != 0) {
                 ErrorMessage_T msg("Set MC Interface failed with error: ");
@@ -151,14 +151,14 @@ namespace ops
 		}
 	}
 
-    bool UDPSender::sendTo(const char* buf, const int size, const Address_T& ip, const uint16_t port)
+    bool UDPSender::sendTo(const char* const buf, const int size, const Address_T& ip, const uint16_t port)
     {
 		if (socket == nullptr) { return false; }
         try
         {
             const boost::asio::ip::address ipaddress = boost::asio::ip::address::from_string(ip.c_str());
             const boost::asio::ip::udp::endpoint endpoint(ipaddress, port);
-            std::size_t res = socket->send_to(boost::asio::buffer(buf, size), endpoint);
+            const std::size_t res = socket->send_to(boost::asio::buffer(buf, size), endpoint);
 			if (res != (std::size_t)size) {
 				OPS_UDP_ERROR("UDPSender: sendTo(), Error: Failed to write message (" << size << "), res: " << res << "]\n");
 				return false;

@@ -617,10 +617,9 @@ private:
 	std::map<ops::Subscriber*, ops::PublicationIdChecker*> pubIdMap;
 
 	typedef struct _entry {
-		int64_t time;
-		ops::Subscriber* sub;
-		ops::OPSMessage* mess;
-		_entry(): time(0), sub(nullptr), mess(nullptr) {}
+        int64_t time{ 0 };
+        ops::Subscriber* sub{ nullptr };
+        ops::OPSMessage* mess{ nullptr };
 	} TEntry;
 	std::deque<TEntry> List;
 	ops::Lockable ListLock;
@@ -705,7 +704,7 @@ public:
 				args.topicNames[i] = "";
 			}
 		}
-		for (auto& x : vec) {
+		for (const auto& x : vec) {
 			updateVector(args.topicNames, x);
 		}
 		vec.clear();
@@ -716,7 +715,7 @@ public:
 				args.skipTopicNames[i] = "";
 			}
 		}
-		for (auto& x : vec) {
+		for (const auto& x : vec) {
 			updateVector(args.skipTopicNames, x);
 		}
 		vec.clear();
@@ -1210,7 +1209,7 @@ public:
         if (val > 0x7F) { return '.'; }
         return (char)val;
     }
-    void dumpHex(const char* ptr, size_t numbytes)
+    void dumpHex(const char* const ptr, size_t numbytes) const
     {
         int offset = 0;
         if (numbytes > maxDumpBytes) { numbytes = maxDumpBytes; }
@@ -1280,7 +1279,7 @@ public:
                 dumpHex(&opsData->spareBytes[0], opsData->spareBytes.size());
                 if (MsgDump.Any()) {
                     std::string tname = opsData->getTypeString().c_str();
-                    auto pos = tname.find(' ');
+                    const auto pos = tname.find(' ');
                     if (pos != tname.npos) {
                         tname = tname.substr(0, pos);
                     }

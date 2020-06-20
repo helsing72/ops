@@ -67,7 +67,7 @@ namespace ops
         virtual ~KeyFilterQoSPolicy();
 
         //Overides applyFilter(OPSObject* o) in FilterQoSPolicy
-        bool applyFilter(OPSObject* o) override;
+        bool applyFilter(const OPSObject* const o) override;
 
     private:
         std::vector<ObjectKey_T> keyStrings;

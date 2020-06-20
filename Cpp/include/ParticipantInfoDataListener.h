@@ -38,7 +38,7 @@ namespace ops
 	class OPS_EXPORT ParticipantInfoDataListener : public DataListener
 	{
 	public:
-		ParticipantInfoDataListener(Participant& part);
+		explicit ParticipantInfoDataListener(Participant& part);
 
 		void prepareForDelete();
 		virtual ~ParticipantInfoDataListener();
@@ -62,6 +62,8 @@ namespace ops
 
 		bool setupSubscriber();
 		void removeSubscriber();
+
+        void handle(ParticipantInfoData* partInfo);
 	};
 }
 #endif

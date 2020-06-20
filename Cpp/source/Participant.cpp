@@ -402,14 +402,14 @@ namespace ops
 		partInfoData.mc_udp_port = port;
 	}
 
-	void Participant::registerTcpTopic(ObjectName_T topicName, std::shared_ptr<ReceiveDataHandler> const handler)
+	void Participant::registerTcpTopic(const ObjectName_T topicName, std::shared_ptr<ReceiveDataHandler> const handler)
 	{
 		if (partInfoListener != nullptr) {
 			partInfoListener->connectTcp(topicName, handler);
 		}
 	}
 
-	void Participant::unregisterTcpTopic(ObjectName_T topicName, std::shared_ptr<ReceiveDataHandler> const handler)
+	void Participant::unregisterTcpTopic(const ObjectName_T topicName, std::shared_ptr<ReceiveDataHandler> const handler)
 	{
 		if (partInfoListener != nullptr) {
 			partInfoListener->disconnectTcp(topicName, handler);
@@ -498,14 +498,14 @@ namespace ops
 		return result;
 	}
 
-	void Participant::updateSendPartInfo(Topic top)
+	void Participant::updateSendPartInfo(const Topic top)
 	{
 		const SafeLock lock(&partInfoDataMutex);
 		//Need to add topic to partInfoData.subscribeTopics (TODO ref count if same topic??)
 		partInfoData.publishTopics.push_back(TopicInfoData(top));
 	}
 
-	void Participant::releaseSendDataHandler(Topic top)
+	void Participant::releaseSendDataHandler(const Topic top)
 	{
 		sendDataHandlerFactory->releaseSendDataHandler(top, *this);
 

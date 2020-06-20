@@ -635,7 +635,7 @@ private:
 };
 #endif
 
-void WriteToAllSelected(ops::OPSObject* other = nullptr)
+void WriteToAllSelected(ops::OPSObject* const other = nullptr)
 {
 	static int64_t Counter = 0;
 

@@ -223,8 +223,8 @@ namespace ops
 
 		//Visible to friends only
 		void setUdpTransportInfo(Address_T ip, int port);
-		void registerTcpTopic(ObjectName_T topicName, std::shared_ptr<ReceiveDataHandler> handler);
-		void unregisterTcpTopic(ObjectName_T topicName, std::shared_ptr<ReceiveDataHandler> handler);
+		void registerTcpTopic(const ObjectName_T topicName, std::shared_ptr<ReceiveDataHandler> handler);
+		void unregisterTcpTopic(const ObjectName_T topicName, std::shared_ptr<ReceiveDataHandler> handler);
 		bool hasPublisherOn(const ObjectName_T& topicName);
 		bool hasSubscriberOn(const ObjectName_T&topicName);
 
@@ -247,8 +247,8 @@ namespace ops
 		///Visible to friends only
 		//TODO: Deprecate and delegate to sendDataHandlerFactory???
 		std::shared_ptr<SendDataHandler> getSendDataHandler(Topic top);
-		void releaseSendDataHandler(Topic top);		
-		void updateSendPartInfo(Topic top);
+		void releaseSendDataHandler(const Topic top);		
+		void updateSendPartInfo(const Topic top);
 
 		///Mutex for ioService, used to shutdown safely
 		Lockable serviceMutex;

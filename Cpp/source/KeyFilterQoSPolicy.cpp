@@ -38,7 +38,7 @@ namespace ops
     {
     }
     
-    bool KeyFilterQoSPolicy::applyFilter(OPSObject* const o)
+    bool KeyFilterQoSPolicy::applyFilter(const OPSObject* const o)
 	{
 		const SafeLock lock(this);
 
