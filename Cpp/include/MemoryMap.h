@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2019-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -58,10 +58,10 @@ public:
 		bytes = small_width_vector;
 		bytes[0] = nullptr;
 	}
-	MemoryMap(int width, int height, MemoryMapAllocator* mma = nullptr): 
+	MemoryMap(int no_segs, int seg_size, MemoryMapAllocator* mma = nullptr):
 		segment_allocator(mma),
-		no_of_segments(width),
-		segment_size(height),
+		no_of_segments(no_segs),
+		segment_size(seg_size),
 		dataCreator(true)
 	{
 		if (no_of_segments <= smallWidthOpt) {
