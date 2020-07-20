@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016-2019 Lennart Andersson.
+* Copyright (C) 2016-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -39,6 +39,7 @@ namespace ops
         int port{ 0 };
         int64_t outSocketBufferSize{ -1 };
         int64_t inSocketBufferSize{ -1 };
+        int sampleMaxSize{ -1 };
 
         Channel();
 

@@ -89,6 +89,8 @@ namespace ops
 
         void onNewEvent(Notifier<ConnectStatus>*, ConnectStatus arg) override;
 
+        int sampleMaxSize = 0;
+
         ///Preallocated MemoryMap for receiving data
         MemoryMap memMap;
         int expectedSegment = 0;
@@ -101,8 +103,6 @@ namespace ops
 
 		///The receiver used for this topic. 
 		Receiver* receiver = nullptr;
-
-		int sampleMaxSize = 0;
 
 		///The accumulated size in bytes of the current message
 		int currentMessageSize = 0;

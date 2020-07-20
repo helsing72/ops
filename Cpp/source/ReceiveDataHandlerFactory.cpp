@@ -85,6 +85,14 @@ namespace ops
 				BasicError err("ReceiveDataHandlerFactory", "getReceiveDataHandler", msg);
 				participant.reportError(&err);
             }
+
+            if (top.getSampleMaxSize() > rdh->getSampleMaxSize()) {
+                ErrorMessage_T msg("Error: Topic '");
+                msg += top.getName();
+                msg += "' has larger 'sampleMaxSize' than previous topics using same transport and port";
+                BasicError err("ReceiveDataHandlerFactory", "getReceiveDataHandler", msg);
+                participant.reportError(&err);
+            }
             return rdh;
         }
         else if (top.getTransport() == Topic::TRANSPORT_MC)

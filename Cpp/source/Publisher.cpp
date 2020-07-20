@@ -31,9 +31,13 @@ namespace ops
 {
     using namespace opsidls;
 
+    constexpr int UsableSize = OPSConstants::PACKET_MAX_SIZE - OPSConstants::SEGMENT_HEADER_SIZE;
+
     Publisher::Publisher(Topic t) :
     topic(t),
-    memMap(t.getSampleMaxSize() / OPSConstants::PACKET_MAX_SIZE + 1, OPSConstants::PACKET_MAX_SIZE, &DataSegmentAllocator::Instance())
+    memMap(1 + (t.getSampleMaxSize() / UsableSize),
+        (t.getSampleMaxSize() >= UsableSize) ? OPSConstants::PACKET_MAX_SIZE : t.getSampleMaxSize() + OPSConstants::SEGMENT_HEADER_SIZE,
+        &DataSegmentAllocator::Instance())
     {
         participant = Participant::getInstance(topic.getDomainID(), topic.getParticipantID());
         sendDataHandler = participant->getSendDataHandler(topic);

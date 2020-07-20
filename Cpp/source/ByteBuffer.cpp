@@ -19,6 +19,7 @@
  * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "OPSTypeDefs.h"
+#include "opsidls/OPSConstants.h"
 #include "ByteBuffer.h"
 
 namespace ops
@@ -29,11 +30,7 @@ namespace ops
         nextSegmentAt(memMap.getSegmentSize())
     {
 		// Check that each segment in map is larger than our needed segment header
-		//   protocolID                 4
-		//   version                    2
-		//   total number of segments   4
-		//   current segment number     4
-		if (memMap.getSegmentSize() <= 14) { throw illformed_memmap(); }
+		if (memMap.getSegmentSize() <= opsidls::OPSConstants::SEGMENT_HEADER_SIZE) { throw illformed_memmap(); }
     }
 
 	///Resets the whole buffer to creation state

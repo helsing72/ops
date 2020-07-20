@@ -32,12 +32,11 @@
 
 namespace ops
 {
-    ReceiveDataHandler::ReceiveDataHandler(Topic const top, Participant& part, ReceiveDataChannel* const rdc_) :
-		topic(top),
-		participant(part),
-		sampleMaxSize(top.getSampleMaxSize())
+    ReceiveDataHandler::ReceiveDataHandler(Participant& part, ReceiveDataChannel* const rdc_) :
+		participant(part)
     {
 		if (rdc_ != nullptr) {
+            sampleMaxSize = rdc_->getSampleMaxSize();
 			rdc.push_back(rdc_);
 			rdc_->connect(this);
 		}

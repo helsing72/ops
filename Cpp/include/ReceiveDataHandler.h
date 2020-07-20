@@ -46,7 +46,7 @@ namespace ops
 	{
 		friend class ReceiveDataHandlerFactory;
 	public:
-		ReceiveDataHandler(Topic top, Participant& part, ReceiveDataChannel* rdc_ = nullptr);
+		ReceiveDataHandler(Participant& part, ReceiveDataChannel* rdc_ = nullptr);
 		virtual ~ReceiveDataHandler();
 
 		bool aquireMessageLock();
@@ -89,8 +89,6 @@ namespace ops
         }
 
     protected:
-		Topic topic;
-
 		Lockable messageLock;
 
 		//The receiver channel(s) used for this transport channel. 
@@ -113,9 +111,9 @@ namespace ops
 			Notifier<ConnectStatus>::notifyNewEvent(status);
 		}
 
-	private:
-		int sampleMaxSize;
+        int sampleMaxSize{ 0 };
 
+    private:
 		///Current OPSMessage, valid until next sample arrives.
         OPSMessage* message{ nullptr };
 

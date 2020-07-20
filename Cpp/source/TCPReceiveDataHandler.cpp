@@ -27,13 +27,15 @@
 namespace ops
 {
     TCPReceiveDataHandler::TCPReceiveDataHandler(Topic top, Participant& part) :
-		ReceiveDataHandler(top, part, nullptr)
+		ReceiveDataHandler(part, nullptr),
+        topic(top)
     {
 		// Handle TCP channels specified with an address and port
 		if ((top.getTransport() == Topic::TRANSPORT_TCP) && (top.getPort() != 0)) {
 			ReceiveDataChannel* const rdc_ = new TCPReceiveDataChannel(top, part);
-			rdc_->connect(this);
-			rdc.push_back(rdc_);
+            rdc_->connect(this);
+            sampleMaxSize = rdc_->getSampleMaxSize();
+            rdc.push_back(rdc_);
 			usingPartInfo = false;
 		}
 	}
@@ -65,7 +67,8 @@ namespace ops
 			rdc_->connect(this);
 
 			const SafeLock lock(&messageLock);
-			rdc.push_back(rdc_);
+            sampleMaxSize = rdc_->getSampleMaxSize();   // Since topic params always is the same the size won't change
+            rdc.push_back(rdc_);
 
 			if (Notifier<OPSMessage*>::getNrOfListeners() > 0) {
 				rdc_->start();

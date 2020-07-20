@@ -36,7 +36,9 @@ namespace ops
 		void AddReceiveChannel(const ObjectName_T& topicName, const Address_T& ip, int port);
 
 	protected:
-		std::map<ObjectName_T, int32_t> topics;
+        Topic topic;
+
+        std::map<ObjectName_T, int32_t> topics;
         Lockable topicsLock;
         bool usingPartInfo = true;
 

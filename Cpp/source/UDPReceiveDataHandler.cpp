@@ -26,7 +26,7 @@
 namespace ops
 {
     UDPReceiveDataHandler::UDPReceiveDataHandler(Topic top, Participant& part, bool const commonReceiver) :
-		ReceiveDataHandler(top, part,
+		ReceiveDataHandler(part,
 			new ReceiveDataChannel(top, part))
     {
 		if (commonReceiver) {

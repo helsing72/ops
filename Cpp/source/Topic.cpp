@@ -96,14 +96,7 @@ namespace ops
 	}
 	void Topic::setSampleMaxSize(int const size) noexcept
 	{
-		if(size < OPSConstants::PACKET_MAX_SIZE)
-		{
-			sampleMaxSize = OPSConstants::PACKET_MAX_SIZE;
-		}
-		else
-		{
-			sampleMaxSize = size;
-		}
+		sampleMaxSize = size;
 	}
 	int Topic::getPort() const noexcept
 	{
@@ -173,11 +166,7 @@ namespace ops
 		archiver->inout("outSocketBufferSize", outSocketBufferSize);
 		archiver->inout("inSocketBufferSize", inSocketBufferSize);
 	
-
-		//Limit this value 
-		int tSampleMaxSize = getSampleMaxSize();
-		archiver->inout("sampleMaxSize", tSampleMaxSize);
-		setSampleMaxSize(tSampleMaxSize);
+		archiver->inout("sampleMaxSize", sampleMaxSize);
 
 		archiver->inout("transport", transport);
 		if(transport == "")
