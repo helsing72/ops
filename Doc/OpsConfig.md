@@ -67,7 +67,7 @@ Optional elements of _Domain_:
   * **heartbeatTimeout**, sets the TCP monitoring timeout in [ms], which defines the longest silent period on TCP before the socket is disconnected. Default value is 3000 [ms].
 
 Optional elements of _Topic_:
-  * **sampleMaxSize**, defines the maximum size of the data type when used in this topic. The value is used for reserving memory to be able to buffer data during reception. If this tag is omitted or is specified with a value < 60000, a value of 60000 is used. If a value > 60000 is specified, this topic MUST use its own port, see also [Sending Large Messages](LargeMessages.md).
+  * **sampleMaxSize**, defines the maximum size of the data type when used in this topic. The value is used for reserving memory to be able to buffer data during reception. The value is also used for a buffer in each publisher for a serialized version of the data type during sending. If this tag is omitted a value of 60000 is used. If a value < 60000 is specified, 60000 is still used for reception. If a value > 60000 is specified, this topic MUST use its own port, see also [Sending Large Messages](LargeMessages.md).
   * **inSocketBufferSize**, changes the underlying sockets buffer size if possible. If this tag is omitted, the _Domain_ value is used.
   * **outSocketBufferSize**, changes the underlying sockets buffer size if possible. If this tag is omitted, the _Domain_ value is used.
   * **transport**, configures which transport mechanism to be used for this topic. Supported values are *multicast*, *udp* and *tcp*. If tag is omitted, *multicast* is used.
@@ -87,6 +87,7 @@ Elements of _Channel_ contains:
   * **timeToLive**, see _Domain_ above for a description.
   * **inSocketBufferSize**, changes the underlying sockets buffer size if possible. If this tag is omitted, the _Domain_ value is used.
   * **outSocketBufferSize**, changes the underlying sockets buffer size if possible. If this tag is omitted, the _Domain_ value is used.
+  * **sampleMaxSize**, see _Topic_ above for a description. If this tag is specified, this value will be used instead of eventual values specified for the topics used on this _Channel_.
 
 Elements of _Transport_ contains:
   * **channelID**, name of the channel as a string, must be defined in a _Channel_ element.
